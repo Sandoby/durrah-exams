@@ -1,0 +1,264 @@
+import { useEffect, useState } from 'react';
+import { FileDown, Loader2, AlertTriangle } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabase';
+import * as XLSX from 'xlsx';
+import { ViolationListModal } from './ViolationListModal';
+
+interface ExamResultsProps {
+    examId: string;
+    examTitle: string;
+}
+
+interface Submission {
+    id: string;
+    student_name: string;
+    student_email: string;
+    score: number;
+    max_score: number;
+    created_at: string;
+    violations: any[];
+    browser_info?: {
+        student_data?: Record<string, string>;
+    };
+}
+
+export function ExamResults({ examId, examTitle }: ExamResultsProps) {
+    const [submissions, setSubmissions] = useState<Submission[]>([]);
+    const [requiredFields, setRequiredFields] = useState<string[]>(['name', 'email']);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isExporting, setIsExporting] = useState(false);
+    const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+    const [isViolationModalOpen, setIsViolationModalOpen] = useState(false);
+
+    const fieldLabels: Record<string, string> = {
+        name: 'Name',
+        email: 'Email',
+        student_id: 'Student ID',
+        phone: 'Phone'
+    };
+
+    useEffect(() => {
+        fetchExamAndSubmissions();
+    }, [examId]);
+
+    const fetchExamAndSubmissions = async () => {
+        try {
+            // Fetch exam to get required_fields
+            const { data: examData, error: examError } = await supabase
+                .from('exams')
+                .select('required_fields')
+                .eq('id', examId)
+                .single();
+
+            if (examError) throw examError;
+            setRequiredFields(examData.required_fields || ['name', 'email']);
+
+            // Fetch submissions
+            const { data, error } = await supabase
+                .from('submissions')
+                .select('*')
+                .eq('exam_id', examId)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setSubmissions(data || []);
+        } catch (error: any) {
+            console.error('Error fetching data:', error);
+            toast.error('Failed to load submissions');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const getStudentFieldValue = (submission: Submission, field: string): string => {
+        // Try to get from browser_info.student_data first
+        if (submission.browser_info?.student_data?.[field]) {
+            return submission.browser_info.student_data[field];
+        }
+        // Fallback to direct fields
+        if (field === 'name') return submission.student_name;
+        if (field === 'email') return submission.student_email;
+        return '-';
+    };
+
+    const exportToExcel = async () => {
+        if (submissions.length === 0) {
+            toast.error('No submissions to export');
+            return;
+        }
+
+        setIsExporting(true);
+        try {
+            // Prepare data for Excel with dynamic columns
+            const excelData = submissions.map((sub, index) => {
+                const row: Record<string, any> = {
+                    '#': index + 1,
+                };
+
+                // Add dynamic student fields
+                requiredFields.forEach(field => {
+                    row[fieldLabels[field] || field] = getStudentFieldValue(sub, field);
+                });
+
+                // Add score columns
+                row['Score'] = sub.score;
+                row['Max Score'] = sub.max_score;
+                row['Percentage'] = sub.max_score > 0 ? ((sub.score / sub.max_score) * 100).toFixed(2) + '%' : '0%';
+                row['Violations'] = sub.violations?.length || 0;
+                row['Submitted At'] = new Date(sub.created_at).toLocaleString();
+
+                return row;
+            });
+
+            // Create workbook and worksheet
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(excelData);
+
+            // Set column widths dynamically
+            const colWidths = [
+                { wch: 5 },  // #
+                ...requiredFields.map(() => ({ wch: 20 })), // Dynamic fields
+                { wch: 8 },  // Score
+                { wch: 10 }, // Max Score
+                { wch: 12 }, // Percentage
+                { wch: 12 }, // Violations
+                { wch: 20 }, // Submitted At
+            ];
+            ws['!cols'] = colWidths;
+
+            // Add worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, ws, 'Results');
+
+            // Generate filename
+            const filename = `${examTitle.replace(/[^a-z0-9]/gi, '_')}_results_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+            // Download
+            XLSX.writeFile(wb, filename);
+
+            toast.success('Results exported successfully!');
+        } catch (error: any) {
+            console.error('Error exporting to Excel:', error);
+            toast.error('Failed to export results');
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    const handleViewViolations = (submission: Submission) => {
+        setSelectedSubmission(submission);
+        setIsViolationModalOpen(true);
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center p-8">
+                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                    Exam Results ({submissions.length} submission{submissions.length !== 1 ? 's' : ''})
+                </h3>
+                <button
+                    onClick={exportToExcel}
+                    disabled={isExporting || submissions.length === 0}
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                >
+                    {isExporting ? (
+                        <>
+                            <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                            Exporting...
+                        </>
+                    ) : (
+                        <>
+                            <FileDown className="h-4 w-4 mr-2" />
+                            Export to Excel
+                        </>
+                    )}
+                </button>
+            </div>
+
+            {submissions.length === 0 ? (
+                <div className="text-center py-12">
+                    <p className="text-gray-500 dark:text-gray-400">No submissions yet</p>
+                </div>
+            ) : (
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-900">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">#</th>
+                                {requiredFields.map(field => (
+                                    <th key={field} className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        {fieldLabels[field] || field}
+                                    </th>
+                                ))}
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Score</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Percentage</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Violations</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Submitted</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            {submissions.map((submission, index) => (
+                                <tr key={submission.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{index + 1}</td>
+                                    {requiredFields.map(field => (
+                                        <td key={field} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                            {getStudentFieldValue(submission, field)}
+                                        </td>
+                                    ))}
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                        {submission.score} / {submission.max_score}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${(submission.score / submission.max_score) >= 0.7
+                                            ? 'bg-green-100 text-green-800'
+                                            : (submission.score / submission.max_score) >= 0.5
+                                                ? 'bg-yellow-100 text-yellow-800'
+                                                : 'bg-red-100 text-red-800'
+                                            }`}>
+                                            {submission.max_score > 0 ? ((submission.score / submission.max_score) * 100).toFixed(1) : 0}%
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                        {submission.violations && submission.violations.length > 0 ? (
+                                            <button
+                                                onClick={() => handleViewViolations(submission)}
+                                                className="flex items-center text-red-600 hover:text-red-800 font-medium"
+                                            >
+                                                <AlertTriangle className="h-4 w-4 mr-1" />
+                                                {submission.violations.length} (View)
+                                            </button>
+                                        ) : (
+                                            <span className="text-green-600 flex items-center">
+                                                0
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        {new Date(submission.created_at).toLocaleDateString()}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {selectedSubmission && (
+                <ViolationListModal
+                    isOpen={isViolationModalOpen}
+                    onClose={() => setIsViolationModalOpen(false)}
+                    violations={selectedSubmission.violations || []}
+                    studentName={selectedSubmission.student_name}
+                />
+            )}
+        </div>
+    );
+}
