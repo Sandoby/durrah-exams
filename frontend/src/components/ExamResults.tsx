@@ -35,7 +35,6 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
     const [questionMap, setQuestionMap] = useState<Record<string, any>>({});
     const [grading, setGrading] = useState<Record<string, number>>({});
     const [isGradingSaving, setIsGradingSaving] = useState(false);
-    const [autoScores, setAutoScores] = useState<Record<string, number>>({});
     const [autoTotal, setAutoTotal] = useState<number>(0);
     const [isViolationModalOpen, setIsViolationModalOpen] = useState(false);
 
@@ -252,7 +251,6 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
             setDetailedAnswers(shortAnswers);
             setQuestionMap(qMap);
             setGrading(gradeState);
-            setAutoScores(autoScoreMap);
             setAutoTotal(autoSum);
         } catch (err: any) {
             console.error('Failed to load submission details', err);

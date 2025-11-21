@@ -52,7 +52,7 @@ export default function ExamEditor() {
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(!!id);
 
-    const { register, control, handleSubmit, reset, watch, setValue, getValues } = useForm<ExamForm>({
+    const { register, control, handleSubmit, reset, watch, setValue } = useForm<ExamForm>({
         defaultValues: {
             title: '',
             description: '',
