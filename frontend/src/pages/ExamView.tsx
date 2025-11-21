@@ -30,6 +30,11 @@ interface Exam {
         time_limit_minutes: number | null;
         randomize_questions?: boolean;
         show_results_immediately?: boolean;
+        // optional scheduling fields (back-end and editor may use either naming)
+        start_time?: string | null;
+        end_time?: string | null;
+        start_date?: string | null;
+        end_date?: string | null;
     };
 }
 
@@ -165,7 +170,7 @@ export default function ExamView() {
     useEffect(() => {
         if (!started || !exam) return;
         if (timeLeft !== null && timeLeft > 0) {
-            const timer = setInterval(() => setTimeLeft((p) => (p && p > 0 ? p - 1 : 0)), 1000);
+            const timer = setInterval(() => setTimeLeft((p: number | null) => (p && p > 0 ? p - 1 : 0)), 1000);
             return () => clearInterval(timer);
         } else if (timeLeft === 0 && !submitted && !isSubmitting) {
             handleSubmit();
@@ -174,7 +179,7 @@ export default function ExamView() {
 
     const logViolation = (type: string) => {
         const violation = { type, timestamp: new Date().toISOString() };
-        setViolations((prev) => {
+        setViolations((prev: any[]) => {
             const newViolations = [...prev, violation];
             const violationCount = newViolations.length;
             const maxViolations = exam?.settings.max_violations || 3;
@@ -285,7 +290,7 @@ export default function ExamView() {
 
     const startExam = async () => {
         const required = exam?.required_fields || ['name', 'email'];
-        const missing = required.filter((f) => !studentData[f]);
+        const missing = required.filter((f: string) => !studentData[f]);
         if (missing.length) {
             toast.error('Please fill required fields');
             return;
@@ -296,7 +301,7 @@ export default function ExamView() {
             return;
         }
         if (exam?.settings.require_fullscreen) {
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && typeof (window as any).MSStream === 'undefined';
             if (isIOS) {
                 toast('iOS Safari does not support the Fullscreen API. Exam will start without fullscreen.', { icon: 'ℹ️' });
             } else {
@@ -315,7 +320,7 @@ export default function ExamView() {
         if (!exam) return { score: 0, max_score: 0, percentage: 0 };
         let total = 0;
         let earned = 0;
-        exam.questions.forEach((q) => {
+        exam.questions.forEach((q: Question) => {
             total += q.points || 0;
             if (answers[q.id] && answers[q.id] === q.correct_answer) earned += q.points || 0;
         });
