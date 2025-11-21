@@ -10,6 +10,7 @@ import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional, Dict, Any
+import json
 import uuid
 from datetime import datetime, timezone, timedelta
 import bcrypt
@@ -338,13 +339,41 @@ async def submit_exam(exam_id: str, submission: ExamSubmission):
     # Calculate score
     score = 0
     max_score = 0
-    
+
     for question in exam['questions']:
-        max_score += question['points']
+        # Only count auto-graded questions (those with a correct_answer present)
+        q_correct = question.get('correct_answer', None)
+        if q_correct is None or q_correct == '':
+            # skip open-ended questions from auto-grading
+            continue
+
+        max_score += question.get('points', 0)
+
         # Find student's answer
         student_answer = next((a for a in submission.answers if a.question_id == question['id']), None)
-        if student_answer and student_answer.answer.strip().lower() == question['correct_answer'].strip().lower():
-            score += question['points']
+        if not student_answer:
+            continue
+
+        # Handle list correct answers (multiple_select)
+        if isinstance(q_correct, list):
+            # student's answer may be a JSON string representing a list
+            student_val = student_answer.answer
+            try:
+                parsed = json.loads(student_val) if isinstance(student_val, str) else student_val
+            except Exception:
+                parsed = None
+            if isinstance(parsed, list):
+                # compare as sets (after trimming)
+                a = sorted([str(x).strip() for x in q_correct])
+                b = sorted([str(x).strip() for x in parsed])
+                if a == b:
+                    score += question.get('points', 0)
+        else:
+            try:
+                if str(student_answer.answer).strip().lower() == str(q_correct).strip().lower():
+                    score += question.get('points', 0)
+            except Exception:
+                pass
     
     percentage = (score / max_score * 100) if max_score > 0 else 0
     

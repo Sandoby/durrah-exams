@@ -11,7 +11,7 @@ interface Question {
     type: string;
     question_text: string;
     options: string[];
-    correct_answer: string;
+    correct_answer?: string | string[];
     points: number;
     randomize_options: boolean;
 }
@@ -195,15 +195,21 @@ export default function ExamEditor() {
             const existingQuestionsToUpdate = data.questions.filter(q => q.id);
 
             if (newQuestions.length > 0) {
-                const questionsToInsert = newQuestions.map(q => ({
-                    exam_id: examId,
-                    type: q.type,
-                    question_text: q.question_text,
-                    options: q.type === 'multiple_choice' ? q.options : [],
-                    correct_answer: q.correct_answer,
-                    points: q.points,
-                    randomize_options: q.randomize_options
-                }));
+                const questionsToInsert = newQuestions.map(q => {
+                    const base: any = {
+                        exam_id: examId,
+                        type: q.type,
+                        question_text: q.question_text,
+                        options: q.type === 'multiple_choice' || q.type === 'multiple_select' ? q.options : [],
+                        points: q.points,
+                        randomize_options: q.randomize_options
+                    };
+                    // only include correct_answer for auto-graded types
+                    if (q.type === 'multiple_choice' || q.type === 'true_false' || q.type === 'multiple_select') {
+                        base.correct_answer = q.correct_answer || null;
+                    }
+                    return base;
+                });
 
                 const { error: insertError } = await supabase
                     .from('questions')
@@ -214,16 +220,20 @@ export default function ExamEditor() {
 
             if (existingQuestionsToUpdate.length > 0) {
                 for (const q of existingQuestionsToUpdate) {
+                    const updatePayload: any = {
+                        type: q.type,
+                        question_text: q.question_text,
+                        options: q.type === 'multiple_choice' || q.type === 'multiple_select' ? q.options : [],
+                        points: q.points,
+                        randomize_options: q.randomize_options
+                    };
+                    if (q.type === 'multiple_choice' || q.type === 'true_false' || q.type === 'multiple_select') {
+                        updatePayload.correct_answer = q.correct_answer || null;
+                    }
+
                     const { error: updateError } = await supabase
                         .from('questions')
-                        .update({
-                            type: q.type,
-                            question_text: q.question_text,
-                            options: q.type === 'multiple_choice' ? q.options : [],
-                            correct_answer: q.correct_answer,
-                            points: q.points,
-                            randomize_options: q.randomize_options
-                        })
+                        .update(updatePayload)
                         .eq('id', q.id);
 
                     if (updateError) throw updateError;
@@ -493,6 +503,7 @@ export default function ExamEditor() {
                                                     {...register(`questions.${index}.type`)}
                                                 >
                                                     <option value="multiple_choice">Multiple Choice</option>
+                                                    <option value="multiple_select">Multiple Select (choose multiple)</option>
                                                     <option value="true_false">True/False</option>
                                                     <option value="short_answer">Short Answer</option>
                                                 </select>
@@ -542,6 +553,51 @@ export default function ExamEditor() {
                                             </div>
                                         )}
 
+                                        {watch(`questions.${index}.type`) === 'multiple_select' && (
+                                            <div className="space-y-2">
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Options (select one or more correct answers)</label>
+                                                {[0, 1, 2, 3].map((optionIndex) => {
+                                                    const optPath = `questions.${index}.options.${optionIndex}`;
+                                                    const optValue = watch(optPath) || '';
+                                                    const currentCorrect: string[] = watch(`questions.${index}.correct_answer`) || [];
+                                                    const checked = currentCorrect.includes(optValue);
+                                                    return (
+                                                        <div key={optionIndex} className="flex items-center">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={checked}
+                                                                onChange={(e) => {
+                                                                    const val = optValue;
+                                                                    const arr = [...currentCorrect];
+                                                                    if (e.target.checked) {
+                                                                        if (val && !arr.includes(val)) arr.push(val);
+                                                                    } else {
+                                                                        const idx = arr.indexOf(val);
+                                                                        if (idx !== -1) arr.splice(idx, 1);
+                                                                    }
+                                                                    setValue(`questions.${index}.correct_answer`, arr);
+                                                                }}
+                                                                className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                            />
+                                                            <input
+                                                                type="text"
+                                                                required
+                                                                placeholder={`Option ${optionIndex + 1}`}
+                                                                className="ml-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                                {...register(optPath)}
+                                                                onBlur={() => {
+                                                                    // ensure correct_answer entries reflect updated option values
+                                                                    const arr = (watch(`questions.${index}.correct_answer`) || []) as string[];
+                                                                    const updated = arr.map(a => a === optValue ? watch(optPath) : a).filter(Boolean);
+                                                                    setValue(`questions.${index}.correct_answer`, updated);
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+
                                         {watch(`questions.${index}.type`) === 'true_false' && (
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Correct Answer</label>
@@ -570,13 +626,8 @@ export default function ExamEditor() {
 
                                         {watch(`questions.${index}.type`) === 'short_answer' && (
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Correct Answer</label>
-                                                <input
-                                                    type="text"
-                                                    required
-                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                    {...register(`questions.${index}.correct_answer`)}
-                                                />
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Short answer (students will type their response). This will not be auto-graded.</label>
+                                                <p className="text-xs text-gray-500 mt-1">Tutors will review student responses manually; no correct answer required.</p>
                                             </div>
                                         )}
                                     </div>

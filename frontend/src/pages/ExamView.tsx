@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { AlertTriangle, CheckCircle, Clock, Loader2, Save } from 'lucide-react';
@@ -12,7 +12,7 @@ interface Question {
     question_text: string;
     options?: string[];
     points: number;
-    correct_answer?: string;
+    correct_answer?: string | string[] | null;
 }
 
 interface Exam {
@@ -44,7 +44,7 @@ export default function ExamView() {
     const [exam, setExam] = useState<Exam | null>(null);
     const [studentData, setStudentData] = useState<Record<string, string>>({});
     const [started, setStarted] = useState(false);
-    const [answers, setAnswers] = useState<Record<string, string>>({});
+    const [answers, setAnswers] = useState<Record<string, any>>({});
     const [violations, setViolations] = useState<any[]>([]);
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -321,8 +321,29 @@ export default function ExamView() {
         let total = 0;
         let earned = 0;
         exam.questions.forEach((q: Question) => {
+            // skip auto-scoring for open-ended short_answer questions
+            if (q.type === 'short_answer') return;
             total += q.points || 0;
-            if (answers[q.id] && answers[q.id] === q.correct_answer) earned += q.points || 0;
+            const studentAnswer = answers[q.id];
+            if (!studentAnswer) return;
+
+            // multiple_select: correct_answer is expected to be an array
+            if (Array.isArray(q.correct_answer)) {
+                let studentArr: string[] = [];
+                if (Array.isArray(studentAnswer)) studentArr = studentAnswer as string[];
+                else {
+                    try { studentArr = JSON.parse(studentAnswer); } catch { studentArr = (String(studentAnswer)).split('||').filter(Boolean); }
+                }
+                const a = (q.correct_answer as string[]).map(s => String(s).trim()).sort();
+                const b = studentArr.map(s => String(s).trim()).sort();
+                if (a.length === b.length && a.every((val, idx) => val === b[idx])) {
+                    earned += q.points || 0;
+                }
+            } else {
+                if (String(studentAnswer).trim().toLowerCase() === String(q.correct_answer || '').trim().toLowerCase()) {
+                    earned += q.points || 0;
+                }
+            }
         });
         return { score: earned, max_score: total, percentage: total ? (earned / total) * 100 : 0 };
     };
@@ -386,7 +407,11 @@ export default function ExamView() {
 
             if (error) throw error;
 
-            const answersPayload = Object.entries(answers).map(([question_id, answer]) => ({ submission_id: submission.id, question_id, answer }));
+            const answersPayload = Object.entries(answers).map(([question_id, answer]) => {
+                let toSend: any = answer;
+                if (Array.isArray(answer)) toSend = JSON.stringify(answer);
+                return ({ submission_id: submission.id, question_id, answer: toSend });
+            });
             if (answersPayload.length) await supabase.from('submission_answers').insert(answersPayload);
 
             setScore(grading);
@@ -556,15 +581,36 @@ export default function ExamView() {
                                 </label>
                             ))}
 
-                            {q.type === 'short_answer' && (
-                                <input
-                                    type="text"
-                                    className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    placeholder="Type your answer here..."
-                                    value={answers[q.id] || ''}
-                                    onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                />
-                            )}
+                                            {q.type === 'short_answer' && (
+                                                <textarea
+                                                    rows={4}
+                                                    className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                    placeholder="Type your answer here..."
+                                                    value={answers[q.id] || ''}
+                                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                                />
+                                            )}
+
+                                            {q.type === 'multiple_select' && q.options?.map((opt: string) => (
+                                                <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={Array.isArray(answers[q.id]) ? (answers[q.id] as string[]).includes(opt) : false}
+                                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                            const current: string[] = Array.isArray(answers[q.id]) ? [...answers[q.id]] : [];
+                                                            if (e.target.checked) {
+                                                                current.push(opt);
+                                                            } else {
+                                                                const idx = current.indexOf(opt);
+                                                                if (idx !== -1) current.splice(idx, 1);
+                                                            }
+                                                            setAnswers({ ...answers, [q.id]: current });
+                                                        }}
+                                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                                    />
+                                                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
+                                                </label>
+                                            ))}
                         </div>
                     ))}
                 </div>
