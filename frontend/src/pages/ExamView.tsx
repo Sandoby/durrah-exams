@@ -11,7 +11,9 @@ async function getUserOrAnonymous() {
 
     if (!session && isBlockedBrowser) {
         // Sign in anonymously for Safari/iOS only
-        const { data, error } = await supabase.auth.signInWithIdToken({ provider: 'anon' });
+            const anonEmail = 'anon_student@durrah-exams.com';
+            const anonPassword = 'anon_student_pw';
+            const { data, error } = await supabase.auth.signInWithPassword({ email: anonEmail, password: anonPassword });
         if (error) throw error;
         return data?.user;
     }
@@ -376,7 +378,7 @@ export default function ExamView() {
         ua.includes('ipod') ||
         (ua.includes('safari') && !ua.includes('chrome'))
       );
-    }
+        // Removed unused isIphoneOrSafari
 
     const handleSubmit = async () => {
         // Prevent duplicate submissions
