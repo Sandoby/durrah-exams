@@ -1,3 +1,23 @@
+import { supabase } from '../lib/supabase'
+
+async function getUserOrAnonymous() {
+    let { data: { session } } = await supabase.auth.getSession();
+
+    // Detect iOS/Safari that blocks session storage
+    const isBlockedBrowser =
+        typeof navigator !== 'undefined' &&
+        /iphone|ipad|ipod|safari/i.test(navigator.userAgent) &&
+        !/chrome/i.test(navigator.userAgent);
+
+    if (!session && isBlockedBrowser) {
+        // Sign in anonymously for Safari/iOS only
+        const { data, error } = await supabase.auth.signInWithOAuth({ provider: 'anonymous' });
+        if (error) throw error;
+        return data.session.user;
+    }
+
+    return session?.user; // normal user for other browsers
+}
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -403,29 +423,8 @@ export default function ExamView() {
         isSubmittingRef.current = true;
         setIsSubmitting(true);
 
-        // iPhone/Safari session refresh logic
-        let currentUser = null;
-        if (isIphoneOrSafari()) {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (!session) {
-            const { data: refreshed } = await supabase.auth.refreshSession();
-            if (!refreshed?.session) {
-              alert(
-                "Unable to verify that you are signed in. Safari sometimes blocks session storage. Please log in again."
-              );
-              setIsSubmitting(false);
-              isSubmittingRef.current = false;
-              return;
-            }
-            currentUser = refreshed.session.user;
-          } else {
-            currentUser = session.user;
-          }
-        } else {
-          // For other devices, get user from supabase.auth
-          const au = await supabase.auth.getUser();
-          currentUser = au?.data?.user || null;
-        }
+                // Use anonymous sign-in for iOS/Safari if session is blocked
+                const currentUser = await getUserOrAnonymous();
 
         try {
             const grading = calculateScore();
