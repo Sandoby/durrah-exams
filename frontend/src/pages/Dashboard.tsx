@@ -40,41 +40,17 @@ export default function Dashboard() {
             setExams(data || []);
         } catch (error: any) {
             toast.error('Failed to fetch exams');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+                                        <hr />
 
-    const handleDelete = async (id: string) => {
-        if (!window.confirm('Are you sure you want to delete this exam?')) return;
-
-        try {
-            const { error } = await supabase
-                .from('exams')
-                .delete()
-                .eq('id', id)
-                .eq('tutor_id', user?.id);
-
-            if (error) throw error;
-
-            toast.success('Exam deleted successfully');
-            setExams(exams.filter(exam => exam.id !== id));
-        } catch (error: any) {
-            toast.error('Failed to delete exam');
-        }
-    };
-
-    const copyExamLink = (examId: string) => {
-        const examUrl = `${window.location.origin}/exam/${examId}`;
-        navigator.clipboard.writeText(examUrl);
-        toast.success('Exam link copied to clipboard!');
-    };
-
-                const downloadExamPDF = async (examId: string) => {
-                        try {
-                                const { data: exam, error: examError } = await supabase.from('exams').select('*').eq('id', examId).single();
-                                if (examError || !exam) throw examError || new Error('Exam not found');
-                                const { data: questions, error: qErr } = await supabase.from('questions').select('*').eq('exam_id', examId).order('created_at', { ascending: true });
+                                        <div style="margin-bottom:18px">
+                                            <strong>Student Info (fill before starting):</strong>
+                                            <div style="margin-left:14px;margin-top:8px">
+                                                ${(exam.required_fields || ['name', 'email']).map((f: string) => {
+                                                        const labels: Record<string,string> = { name: 'Full Name', email: 'Email', student_id: 'Student ID', phone: 'Phone' };
+                                                        return `<div style="margin-top:12px"><strong>${labels[f] || f}:</strong> ____________________________________________</div>`;
+                                                }).join('')}
+                                            </div>
+                                        </div>
                                 if (qErr) throw qErr;
 
                                 const tutorName = user?.user_metadata?.full_name || user?.email || '';
