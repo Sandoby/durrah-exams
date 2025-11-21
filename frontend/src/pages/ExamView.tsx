@@ -1,25 +1,4 @@
-// import { supabase } from '../lib/supabase' // (remove duplicate)
-
-async function getUserOrAnonymous() {
-    let { data: { session } } = await supabase.auth.getSession();
-
-    // Detect iOS/Safari that blocks session storage
-    const isBlockedBrowser =
-        typeof navigator !== 'undefined' &&
-        /iphone|ipad|ipod|safari/i.test(navigator.userAgent) &&
-        !/chrome/i.test(navigator.userAgent);
-
-    if (!session && isBlockedBrowser) {
-        // Sign in anonymously for Safari/iOS only
-            const anonEmail = 'anon_student@durrah-exams.com';
-            const anonPassword = 'anon_student_pw';
-            const { data, error } = await supabase.auth.signInWithPassword({ email: anonEmail, password: anonPassword });
-        if (error) throw error;
-        return data?.user;
-    }
-
-    return session?.user; // normal user for other browsers
-}
+// helper: get user session or attempt background anonymous sign-in (non-blocking)
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -37,6 +16,42 @@ async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit, ti
         return res;
     } finally {
         clearTimeout(id);
+    }
+}
+
+async function getUserOrAnonymous() {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        // Detect iOS/Safari that blocks session storage
+        const isBlockedBrowser =
+            typeof navigator !== 'undefined' &&
+            /iphone|ipad|ipod|safari/i.test(navigator.userAgent) &&
+            !/chrome/i.test(navigator.userAgent);
+
+        if (!session && isBlockedBrowser) {
+            // Attempt to sign in with the dedicated anonymous account for iOS/Safari
+            // (this account must exist in Supabase Auth). This only runs on
+            // detected iOS/Safari browsers and when there's no existing session.
+            const anonEmail = 'anonymous@durrahsystem.tech';
+            const anonPassword = 'durrah-2352206';
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({ email: anonEmail, password: anonPassword });
+                if (error) {
+                    console.warn('Anonymous signin failed', error);
+                    return null;
+                }
+                return data?.user ?? null;
+            } catch (e) {
+                console.warn('Anonymous signin error', e);
+                return null;
+            }
+        }
+
+        return session?.user ?? null;
+    } catch (e) {
+        console.warn('getUserOrAnonymous outer error', e);
+        return null;
     }
 }
 
@@ -135,6 +150,18 @@ export default function ExamView() {
             }
         }
     }, [id]);
+
+    // On mount, attempt a background anonymous signin on iOS/Safari so session is available before submit
+    useEffect(() => {
+        (async () => {
+            try {
+                await getUserOrAnonymous();
+            } catch (e) {
+                // ignore — this is best-effort
+            }
+        })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Save state to localStorage whenever it changes
     useEffect(() => {
@@ -436,8 +463,8 @@ export default function ExamView() {
             };
 
             // Prefer server-side submission first to avoid client-side auth/RLS issues (common on iOS/Safari)
-            const apiBase = import.meta.env.VITE_API_BASE || '';
-            const backendUrl = `${apiBase}/api/exams/${id}/submit`;
+            const apiBase = import.meta.env.VITE_API_BASE || window.location.origin;
+            const backendUrl = `${apiBase.replace(/\/$/, '')}/api/exams/${id}/submit`;
 
             const backendBody = {
                 exam_id: id,
@@ -449,30 +476,45 @@ export default function ExamView() {
             };
 
             // Try server-side submit first (more reliable on constrained mobile browsers)
-            try {
-                const resp = await fetchWithTimeout(backendUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(backendBody)
-                }, 12000);
-                if (resp.ok) {
-                    const json = await resp.json();
-                    setScore({ score: json.score, max_score: json.max_score, percentage: json.percentage });
-                    setSubmitted(true);
-                    localStorage.setItem(`durrah_exam_${id}_submitted`, 'true');
-                    localStorage.setItem(`durrah_exam_${id}_score`, JSON.stringify({ score: json.score, max_score: json.max_score, percentage: json.percentage }));
-                    localStorage.removeItem(`durrah_exam_${id}_state`);
-                    if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
-                    return;
-                } else {
-                    const txt = await resp.text();
-                    console.warn('Backend submit responded with non-OK', resp.status, txt);
+            let backendSucceeded = false;
+            let backendLastError: any = null;
+            const maxAttempts = 2;
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    const resp = await fetchWithTimeout(backendUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(backendBody)
+                    }, 15000);
+                    if (resp.ok) {
+                        const json = await resp.json();
+                        setScore({ score: json.score, max_score: json.max_score, percentage: json.percentage });
+                        setSubmitted(true);
+                        localStorage.setItem(`durrah_exam_${id}_submitted`, 'true');
+                        localStorage.setItem(`durrah_exam_${id}_score`, JSON.stringify({ score: json.score, max_score: json.max_score, percentage: json.percentage }));
+                        localStorage.removeItem(`durrah_exam_${id}_state`);
+                        if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
+                        backendSucceeded = true;
+                        break;
+                    } else {
+                        const txt = await resp.text();
+                        backendLastError = `Status ${resp.status}: ${txt}`;
+                        console.warn('Backend submit responded with non-OK', resp.status, txt);
+                    }
+                } catch (e) {
+                    backendLastError = e;
+                    console.warn('Backend submit failed (network/CORS?)', e);
                 }
-            } catch (e) {
-                console.warn('Backend submit failed (network/CORS?)', e);
+
+                // Exponential backoff before retrying
+                if (attempt < maxAttempts) await new Promise(r => setTimeout(r, 1000 * attempt));
             }
 
-            // If backend not available or failed, fall back to Supabase client-side insertion
+            // If backend not available or failed after retries, fall back to Supabase client-side insertion
+            if (!backendSucceeded) {
+                console.warn('Backend did not accept submission, falling back to Supabase. Last backend error:', backendLastError);
+            }
+
             const { data: submission, error } = await supabase.from('submissions').insert({
                 exam_id: id,
                 student_id: currentUser?.id,
@@ -487,10 +529,9 @@ export default function ExamView() {
             if (error) {
                 const errMsg = String(error.message || JSON.stringify(error)).toLowerCase();
                 console.warn('Supabase insert failed', error);
-                // If Supabase failed due to RLS/permission, save pending locally
-                if (errMsg.includes('row-level') || errMsg.includes('violates') || errMsg.includes('permission denied')) {
-                    throw error; // outer catch handles pending save
-                }
+                // If Supabase failed due to RLS/permission, fall through to pending save handling below
+                // Otherwise also fall through so we can attempt to persist locally rather than losing the submission
+                // We don't throw here; outer catch will handle saving pending submissions locally
                 throw error;
             }
 
@@ -518,9 +559,8 @@ export default function ExamView() {
             // Handle common RLS error message specially
             const msg = err?.message || (err && JSON.stringify(err)) || 'Failed to submit';
             const lower = String(msg).toLowerCase();
-            if (lower.includes('violates row-level security') || lower.includes('row-level security') || lower.includes('permission denied')) {
-                // Save pending submission to localStorage for later retry
-                try {
+            // Save pending submission to localStorage for later retry if backend+Supabase both failed
+            try {
                     const pendingRaw = localStorage.getItem('durrah_pending_submissions');
                     const pending = pendingRaw ? JSON.parse(pendingRaw) : [];
                     const grading = calculateScore();
@@ -547,14 +587,11 @@ export default function ExamView() {
                     const answersPayload = Object.entries(answers).map(([question_id, answer]) => ({ submission_id: null, question_id, answer: Array.isArray(answer) ? JSON.stringify(answer) : answer }));
                     pending.push({ submissionPayload, answersPayload });
                     localStorage.setItem('durrah_pending_submissions', JSON.stringify(pending));
-                    toast.success('Submission saved locally and will be retried when possible. Please try again from desktop if problems persist.');
+                    toast.success('Submission saved locally and will be retried when possible. If this keeps happening, please try from desktop and share console logs.');
                 } catch (e) {
                     console.error('Failed to persist pending submission locally', e);
                     toast.error('Submission failed and could not be saved locally');
                 }
-            } else {
-                toast.error(msg);
-            }
             setIsSubmitting(false);
             isSubmittingRef.current = false;
         }
