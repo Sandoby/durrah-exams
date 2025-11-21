@@ -174,8 +174,49 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
             const qMap: Record<string, any> = {};
             (qData || []).forEach((q: any) => { qMap[q.id] = q; });
 
-            // Prepare read-only view: show all answers but do not attempt any writes or auto-grading
-            setDetailedAnswers(answers || []);
+            // Prepare read-only view: compute awarded_score in-memory for display if not persisted
+            const computedAnswers = (answers || []).map((a: any) => {
+                const q = qMap[a.question_id];
+                let awarded = a.awarded_score;
+                try {
+                    if (awarded === null || awarded === undefined) {
+                        // compute based on question type and correct_answer
+                        if (!q) {
+                            awarded = 0;
+                        } else if (q.type === 'short_answer') {
+                            awarded = a.awarded_score ?? null;
+                        } else {
+                            const qCorrect = q.correct_answer;
+                            const studentVal = a.answer;
+                            if (Array.isArray(qCorrect)) {
+                                let parsed: any = studentVal;
+                                if (typeof studentVal === 'string') {
+                                    try { parsed = JSON.parse(studentVal); } catch { parsed = String(studentVal).split('||').filter(Boolean); }
+                                }
+                                if (Array.isArray(parsed)) {
+                                    const a1 = (qCorrect as any[]).map((s: any) => String(s).trim()).sort();
+                                    const b1 = parsed.map((s: any) => String(s).trim()).sort();
+                                    awarded = (a1.length === b1.length && a1.every((v: any, i: number) => v === b1[i])) ? (q.points || 0) : 0;
+                                } else awarded = 0;
+                            } else {
+                                if (q.type === 'numeric') {
+                                    const s = parseFloat(String(studentVal));
+                                    const c = parseFloat(String(qCorrect || ''));
+                                    awarded = (!isNaN(s) && !isNaN(c) && s === c) ? (q.points || 0) : 0;
+                                } else {
+                                    awarded = (String(studentVal).trim().toLowerCase() === String(qCorrect || '').trim().toLowerCase()) ? (q.points || 0) : 0;
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Error computing awarded score', e);
+                    if (awarded === null || awarded === undefined) awarded = 0;
+                }
+                return { ...a, awarded_score: awarded };
+            });
+
+            setDetailedAnswers(computedAnswers);
             setQuestionMap(qMap);
         } catch (err: any) {
             console.error('Failed to load submission details', err);

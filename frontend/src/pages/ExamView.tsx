@@ -418,6 +418,7 @@ export default function ExamView() {
                 language: navigator.language
             };
 
+            // First, try inserting into Supabase (primary path)
             const { data: submission, error } = await supabase.from('submissions').insert({
                 exam_id: id,
                 student_name: studentName,
@@ -428,8 +429,46 @@ export default function ExamView() {
                 browser_info: browserInfo
             }).select().single();
 
-            if (error) throw error;
+            if (error) {
+                // If Supabase insert fails due to RLS or permission issues (seen on some mobile Safari setups),
+                // fall back to sending the submission to the backend API (if available) so the attempt is recorded.
+                const errMsg = String(error.message || JSON.stringify(error)).toLowerCase();
+                if (errMsg.includes('row-level') || errMsg.includes('violates') || errMsg.includes('permission denied')) {
+                    console.warn('Supabase insert failed with RLS; attempting backend fallback', error);
+                    try {
+                        const apiBase = import.meta.env.VITE_API_BASE || '';
+                        const resp = await fetch(`${apiBase}/api/exams/${id}/submit`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                exam_id: id,
+                                student_data: studentData,
+                                answers: Object.entries(answers).map(([question_id, answer]) => ({ question_id, answer: Array.isArray(answer) ? JSON.stringify(answer) : answer, time_spent_seconds: 0 })),
+                                violations,
+                                browser_info: browserInfo
+                            })
+                        });
+                        if (resp.ok) {
+                            const json = await resp.json();
+                            setScore({ score: json.score, max_score: json.max_score, percentage: json.percentage });
+                            setSubmitted(true);
+                            localStorage.setItem(`durrah_exam_${id}_submitted`, 'true');
+                            localStorage.setItem(`durrah_exam_${id}_score`, JSON.stringify({ score: json.score, max_score: json.max_score, percentage: json.percentage }));
+                            localStorage.removeItem(`durrah_exam_${id}_state`);
+                            if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
+                            return;
+                        } else {
+                            console.warn('Backend fallback failed', await resp.text());
+                        }
+                    } catch (e) {
+                        console.error('Backend fallback error', e);
+                    }
+                }
+                // If we get here, rethrow original Supabase error to be handled by outer catch
+                throw error;
+            }
 
+            // Supabase insert succeeded; store answers in submission_answers
             const answersPayload = Object.entries(answers).map(([question_id, answer]) => {
                 let toSend: any = answer;
                 if (Array.isArray(answer)) toSend = JSON.stringify(answer);
