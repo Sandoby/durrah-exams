@@ -7,18 +7,16 @@ if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables');
 }
 
-
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 function isIphoneOrSafari() {
     if (typeof navigator === 'undefined') return false;
     const ua = navigator.userAgent.toLowerCase();
-    return (
-        ua.includes('iphone') ||
-        ua.includes('ipad') ||
-        ua.includes('ipod') ||
-        (ua.includes('safari') && !ua.includes('chrome'))
-    );
+    // Only treat as iPhone/Safari if NOT in standalone/PWA mode
+    const isIOS = ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod');
+    const isSafari = ua.includes('safari') && !ua.includes('chrome');
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+    return (isIOS || isSafari) && !isStandalone;
 }
 
 import { supabase_iPhone } from './supabase_iphone';
