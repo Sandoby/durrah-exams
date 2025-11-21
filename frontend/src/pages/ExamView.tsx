@@ -28,6 +28,18 @@ import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
 
+// Helper to avoid hanging fetches (useful for mobile network/CORS issues)
+async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit, timeout = 10000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+        const res = await fetch(input, { ...(init || {}), signal: controller.signal });
+        return res;
+    } finally {
+        clearTimeout(id);
+    }
+}
+
 interface Question {
     id: string;
     type: string;
@@ -402,10 +414,15 @@ export default function ExamView() {
         isSubmittingRef.current = true;
         setIsSubmitting(true);
 
-                // Use anonymous sign-in for iOS/Safari if session is blocked
-                const currentUser = await getUserOrAnonymous();
-
+        let currentUser: any = null;
         try {
+            // Resolve current user, but don't let failures here block submission flow
+            try {
+                currentUser = await getUserOrAnonymous();
+            } catch (e) {
+                console.warn('getUserOrAnonymous failed, proceeding without user id', e);
+                // continue without currentUser; backend will accept submissions without student_id
+            }
             const grading = calculateScore();
             const studentName = studentData.name || studentData.student_id || 'Anonymous';
             const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
@@ -433,11 +450,11 @@ export default function ExamView() {
 
             // Try server-side submit first (more reliable on constrained mobile browsers)
             try {
-                const resp = await fetch(backendUrl, {
+                const resp = await fetchWithTimeout(backendUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(backendBody)
-                });
+                }, 12000);
                 if (resp.ok) {
                     const json = await resp.json();
                     setScore({ score: json.score, max_score: json.max_score, percentage: json.percentage });
@@ -568,7 +585,7 @@ export default function ExamView() {
                             violations: submissionPayload.violations || [],
                             browser_info: submissionPayload.browser_info || {}
                         };
-                        const resp = await fetch(backendUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                        const resp = await fetchWithTimeout(backendUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }, 12000);
                         if (resp.ok) {
                             flushed = true;
                         } else {
