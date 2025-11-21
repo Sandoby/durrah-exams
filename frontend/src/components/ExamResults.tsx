@@ -277,20 +277,34 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
             const errors: string[] = [];
             for (const ans of detailedAnswers) {
                 const awarded = grading[ans.question_id] ?? 0;
-                // Try updating by id first, fallback to match by submission_id + question_id
-                let res = await supabase.from('submission_answers').update({ awarded_score: awarded }).eq('id', ans.id);
-                if (res.error) {
-                    // fallback
-                    const res2 = await supabase.from('submission_answers').update({ awarded_score: awarded }).match({ submission_id: selectedSubmission.id, question_id: ans.question_id });
-                    if (res2.error) {
-                        console.error('Failed to update submission_answer', ans, res2.error);
-                        errors.push(res2.error.message || 'Failed to update answer ' + ans.question_id);
+
+                // prefer update by id when available
+                if (ans.id) {
+                    const res = await supabase.from('submission_answers').update({ awarded_score: awarded }).eq('id', ans.id);
+                    if (res.error) {
+                        // try fallback by matching submission_id + question_id
+                        const res2 = await supabase.from('submission_answers').update({ awarded_score: awarded }).match({ submission_id: selectedSubmission.id, question_id: ans.question_id });
+                        if (res2.error) {
+                            const msg = (res2.error && res2.error.message) ? res2.error.message : JSON.stringify(res2.error);
+                            console.error('Failed to update submission_answer by id then by match', { ans, res: res.error, res2 });
+                            errors.push(`Answer ${ans.question_id}: ${msg}`);
+                        }
+                    }
+                } else {
+                    // no id, try match directly
+                    const res = await supabase.from('submission_answers').update({ awarded_score: awarded }).match({ submission_id: selectedSubmission.id, question_id: ans.question_id });
+                    if (res.error) {
+                        const msg = (res.error && res.error.message) ? res.error.message : JSON.stringify(res.error);
+                        console.error('Failed to update submission_answer by match', { ans, res });
+                        errors.push(`Answer ${ans.question_id}: ${msg}`);
                     }
                 }
             }
 
             if (errors.length) {
-                throw new Error(errors.join('; '));
+                // include a short actionable hint for common permission/schema issues
+                const hint = 'Check Supabase RLS permissions and that `submission_answers.awarded_score` exists.';
+                throw new Error(errors.join('; ') + ' — ' + hint);
             }
 
             // recompute totals: include auto-graded points (autoTotal) + manual grading
