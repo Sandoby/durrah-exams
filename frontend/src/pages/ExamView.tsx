@@ -55,7 +55,7 @@ export default function ExamView() {
     const [hasPreviousSession, setHasPreviousSession] = useState(false);
     const [isAvailable, setIsAvailable] = useState(true);
     const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
-    const [warnedUnauth, setWarnedUnauth] = useState(false);
+    // Removed unused warnedUnauth state
 
     const containerRef = useRef<HTMLDivElement>(null);
     const isSubmittingRef = useRef(false);
@@ -406,9 +406,9 @@ export default function ExamView() {
         // iPhone/Safari session refresh logic
         let currentUser = null;
         if (isIphoneOrSafari()) {
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          const { data: { session } } = await supabase.auth.getSession();
           if (!session) {
-            const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
+            const { data: refreshed } = await supabase.auth.refreshSession();
             if (!refreshed?.session) {
               alert(
                 "Unable to verify that you are signed in. Safari sometimes blocks session storage. Please log in again."
