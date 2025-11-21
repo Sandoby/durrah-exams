@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, ChangeEvent } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -51,7 +51,7 @@ export default function ExamEditor() {
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(!!id);
 
-    const { register, control, handleSubmit, reset, watch, setValue } = useForm<ExamForm>({
+    const { register, control, handleSubmit, reset, watch, setValue, getValues } = useForm<ExamForm>({
         defaultValues: {
             title: '',
             description: '',
@@ -534,20 +534,30 @@ export default function ExamEditor() {
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Options</label>
                                                 {[0, 1, 2, 3].map((optionIndex) => (
                                                     <div key={optionIndex} className="flex items-center">
-                                                        <input
-                                                            type="radio"
-                                                            value={watch(`questions.${index}.options.${optionIndex}`)}
-                                                            checked={watch(`questions.${index}.correct_answer`) === watch(`questions.${index}.options.${optionIndex}`) && watch(`questions.${index}.options.${optionIndex}`) !== ''}
-                                                            onChange={() => setValue(`questions.${index}.correct_answer`, watch(`questions.${index}.options.${optionIndex}`))}
-                                                            className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                                                        />
-                                                        <input
-                                                            type="text"
-                                                            required
-                                                            placeholder={`Option ${optionIndex + 1}`}
-                                                            className="ml-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                            {...register(`questions.${index}.options.${optionIndex}`)}
-                                                        />
+                                                        {(() => {
+                                                            const values = getValues();
+                                                            const optValue = ((values.questions?.[index]?.options?.[optionIndex]) ?? '') as string;
+                                                            const correct = (values.questions?.[index]?.correct_answer ?? '') as string;
+                                                            const checked = correct === optValue && optValue !== '';
+                                                            return (
+                                                                <>
+                                                                    <input
+                                                                        type="radio"
+                                                                        value={optValue}
+                                                                        checked={checked}
+                                                                        onChange={() => setValue(`questions.${index}.correct_answer`, optValue)}
+                                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                                    />
+                                                                    <input
+                                                                        type="text"
+                                                                        required
+                                                                        placeholder={`Option ${optionIndex + 1}`}
+                                                                        className="ml-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                                        {...register(`questions.${index}.options.${optionIndex}`)}
+                                                                    />
+                                                                </>
+                                                            );
+                                                        })()}
                                                     </div>
                                                 ))}
                                             </div>
@@ -557,43 +567,51 @@ export default function ExamEditor() {
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Options (select one or more correct answers)</label>
                                                 {[0, 1, 2, 3].map((optionIndex) => {
-                                                    const optPath = `questions.${index}.options.${optionIndex}`;
-                                                    const optValue = watch(optPath) || '';
-                                                    const currentCorrect: string[] = watch(`questions.${index}.correct_answer`) || [];
-                                                    const checked = currentCorrect.includes(optValue);
-                                                    return (
-                                                        <div key={optionIndex} className="flex items-center">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={checked}
-                                                                onChange={(e) => {
-                                                                    const val = optValue;
-                                                                    const arr = [...currentCorrect];
-                                                                    if (e.target.checked) {
-                                                                        if (val && !arr.includes(val)) arr.push(val);
-                                                                    } else {
-                                                                        const idx = arr.indexOf(val);
-                                                                        if (idx !== -1) arr.splice(idx, 1);
-                                                                    }
-                                                                    setValue(`questions.${index}.correct_answer`, arr);
-                                                                }}
-                                                                className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                                                            />
-                                                            <input
-                                                                type="text"
-                                                                required
-                                                                placeholder={`Option ${optionIndex + 1}`}
-                                                                className="ml-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                                {...register(optPath)}
-                                                                onBlur={() => {
-                                                                    // ensure correct_answer entries reflect updated option values
-                                                                    const arr = (watch(`questions.${index}.correct_answer`) || []) as string[];
-                                                                    const updated = arr.map(a => a === optValue ? watch(optPath) : a).filter(Boolean);
-                                                                    setValue(`questions.${index}.correct_answer`, updated);
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    );
+                                                    return (() => {
+                                                        const values = getValues();
+                                                        const optValue = ((values.questions?.[index]?.options?.[optionIndex]) ?? '') as string;
+                                                        const currentCorrect = (values.questions?.[index]?.correct_answer as string[]) ?? [];
+                                                        const checked = optValue ? currentCorrect.includes(optValue) : false;
+
+                                                        const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+                                                            const val = optValue;
+                                                            const arr = [...currentCorrect];
+                                                            if (e.target.checked) {
+                                                                if (val && !arr.includes(val)) arr.push(val);
+                                                            } else {
+                                                                const idx = arr.indexOf(val);
+                                                                if (idx !== -1) arr.splice(idx, 1);
+                                                            }
+                                                            setValue(`questions.${index}.correct_answer`, arr);
+                                                        };
+
+                                                        const handleBlur = () => {
+                                                            const vals = getValues();
+                                                            const newOpt = ((vals.questions?.[index]?.options?.[optionIndex]) ?? '') as string;
+                                                            const arr = (vals.questions?.[index]?.correct_answer as string[]) ?? [];
+                                                            const updated = arr.map(a => (a === optValue ? newOpt : a)).filter(Boolean);
+                                                            setValue(`questions.${index}.correct_answer`, updated);
+                                                        };
+
+                                                        return (
+                                                            <div key={optionIndex} className="flex items-center">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={checked}
+                                                                    onChange={handleChange}
+                                                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                                />
+                                                                <input
+                                                                    type="text"
+                                                                    required
+                                                                    placeholder={`Option ${optionIndex + 1}`}
+                                                                    className="ml-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                                    {...register(`questions.${index}.options.${optionIndex}`)}
+                                                                    onBlur={handleBlur}
+                                                                />
+                                                            </div>
+                                                        );
+                                                    })();
                                                 })}
                                             </div>
                                         )}
