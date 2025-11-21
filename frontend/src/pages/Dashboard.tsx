@@ -172,6 +172,42 @@ export default function Dashboard() {
             }
         };
 
+    const copyExamLink = (examId: string) => {
+        const examUrl = `${window.location.origin}/exam/${examId}`;
+        try {
+            navigator.clipboard.writeText(examUrl);
+            toast.success('Exam link copied to clipboard!');
+        } catch (e) {
+            // fallback
+            const input = document.createElement('textarea');
+            input.value = examUrl;
+            document.body.appendChild(input);
+            input.select();
+            try { document.execCommand('copy'); toast.success('Exam link copied to clipboard!'); } catch { toast.error('Failed to copy link'); }
+            document.body.removeChild(input);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!window.confirm('Are you sure you want to delete this exam?')) return;
+
+        try {
+            const { error } = await supabase
+                .from('exams')
+                .delete()
+                .eq('id', id)
+                .eq('tutor_id', user?.id);
+
+            if (error) throw error;
+
+            toast.success('Exam deleted successfully');
+            setExams(prev => prev.filter(exam => exam.id !== id));
+        } catch (error: any) {
+            console.error(error);
+            toast.error('Failed to delete exam');
+        }
+    };
+
     const handleLogout = async () => {
         await signOut();
         navigate('/login');
