@@ -557,7 +557,7 @@ export default function ExamView() {
         } catch (err: any) {
             console.error('Submission error', err);
             // Handle common RLS error message specially
-            const msg = err?.message || (err && JSON.stringify(err)) || 'Failed to submit';
+            // error message is logged above; no need to assign msg
             // error message is logged above; no need to assign lower
             // Save pending submission to localStorage for later retry if backend+Supabase both failed
             try {
