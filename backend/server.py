@@ -15,6 +15,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 import bcrypt
 import jwt
+import requests
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from io import BytesIO
@@ -27,6 +28,10 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+# Optional Supabase service role (server-side) to mirror submissions into Postgres
+SUPABASE_URL = os.environ.get('SUPABASE_URL')
+SUPABASE_SERVICE_ROLE = os.environ.get('SUPABASE_SERVICE_ROLE')
 
 # JWT Configuration
 JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production')
@@ -406,6 +411,86 @@ async def submit_exam(exam_id: str, submission: ExamSubmission):
     
     doc = attempt.model_dump()
     await db.exam_attempts.insert_one(doc)
+
+    # Mirror to Supabase (Postgres) if service role is configured. This lets
+    # iOS/Safari clients submit via backend even when client auth/session is
+    # blocked. Use REST API with the service role key so this runs server-side
+    # and does not expose credentials to browsers.
+    if SUPABASE_URL and SUPABASE_SERVICE_ROLE:
+        try:
+            # Prepare submission row
+            student_name = submission.student_data.get('name') or submission.student_data.get('student_name') or ''
+            student_email = submission.student_data.get('email') or submission.student_data.get('student_email') or ''
+
+            submissions_url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/submissions"
+            headers = {
+                'apikey': SUPABASE_SERVICE_ROLE,
+                'Authorization': f'Bearer {SUPABASE_SERVICE_ROLE}',
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            }
+
+            submission_payload = {
+                'id': attempt.id,
+                'exam_id': exam_id,
+                'student_name': student_name,
+                'student_email': student_email,
+                'score': int(score),
+                'max_score': int(max_score),
+                'percentage': float(percentage),
+                'violations': submission.violations or [],
+                'browser_info': submission.browser_info or {}
+            }
+
+            r = requests.post(submissions_url, json=submission_payload, headers=headers, timeout=10)
+            if not (200 <= r.status_code < 300):
+                logger.warning(f"Failed to mirror submission to Supabase: {r.status_code} {r.text}")
+
+            # Prepare submission_answers bulk insert
+            answers_payload = []
+            # We recompute per-answer correctness using the same logic as above
+            # so that submission_answers.is_correct is accurate.
+            for ans in submission.answers:
+                is_correct = False
+                # find matching question
+                q = next((q for q in exam['questions'] if q['id'] == ans.question_id), None)
+                if q and q.get('correct_answer') not in (None, ''):
+                    q_correct = q.get('correct_answer')
+                    try:
+                        if isinstance(q_correct, list):
+                            parsed = json.loads(ans.answer) if isinstance(ans.answer, str) else ans.answer
+                            if isinstance(parsed, list):
+                                a = sorted([str(x).strip() for x in q_correct])
+                                b = sorted([str(x).strip() for x in parsed])
+                                is_correct = (a == b)
+                        else:
+                            if q.get('type') == 'numeric':
+                                try:
+                                    s = float(ans.answer)
+                                    c = float(q_correct)
+                                    is_correct = (s == c)
+                                except Exception:
+                                    is_correct = False
+                            else:
+                                is_correct = (str(ans.answer).strip().lower() == str(q_correct).strip().lower())
+                    except Exception:
+                        is_correct = False
+
+                answers_payload.append({
+                    'submission_id': attempt.id,
+                    'question_id': ans.question_id,
+                    'answer': ans.answer,
+                    'is_correct': is_correct
+                })
+
+            if answers_payload:
+                answers_url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/submission_answers"
+                r2 = requests.post(answers_url, json=answers_payload, headers=headers, timeout=10)
+                if not (200 <= r2.status_code < 300):
+                    logger.warning(f"Failed to mirror submission_answers to Supabase: {r2.status_code} {r2.text}")
+
+        except Exception as e:
+            logger.exception(f"Error while mirroring submission to Supabase: {e}")
     
     return {
         "attempt_id": attempt.id,
