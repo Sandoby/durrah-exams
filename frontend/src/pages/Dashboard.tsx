@@ -70,50 +70,169 @@ export default function Dashboard() {
         toast.success('Exam link copied to clipboard!');
     };
 
-        const downloadExamPDF = async (examId: string) => {
-                try {
-                        const { data: exam, error: examError } = await supabase.from('exams').select('*').eq('id', examId).single();
-                        if (examError || !exam) throw examError || new Error('Exam not found');
-                        const { data: questions, error: qErr } = await supabase.from('questions').select('*').eq('exam_id', examId).order('created_at', { ascending: true });
-                        if (qErr) throw qErr;
+                const downloadExamPDF = async (examId: string) => {
+                        try {
+                                const { data: exam, error: examError } = await supabase.from('exams').select('*').eq('id', examId).single();
+                                if (examError || !exam) throw examError || new Error('Exam not found');
+                                const { data: questions, error: qErr } = await supabase.from('questions').select('*').eq('exam_id', examId).order('created_at', { ascending: true });
+                                if (qErr) throw qErr;
 
-                        const html = `
+                                const tutorName = user?.user_metadata?.full_name || user?.email || '';
+
+                                const escapeHtml = (str: any) => {
+                                        if (str === null || str === undefined) return '';
+                                        return String(str)
+                                                .replace(/&/g, '&amp;')
+                                                .replace(/</g, '&lt;')
+                                                .replace(/>/g, '&gt;')
+                                                .replace(/\"/g, '&quot;')
+                                                .replace(/'/g, '&#039;');
+                                };
+
+                                const optionLetter = (n: number) => String.fromCharCode(65 + n);
+
+                                const totalPoints = (questions || []).reduce((s: number, q: any) => s + (q.points || 0), 0);
+
+                                const html = `
+                                <!doctype html>
                                 <html>
                                 <head>
-                                    <title>${exam.title}</title>
-                                    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                                    <style>body{font-family:Arial,Helvetica,sans-serif;padding:20px;color:#111} h1{font-size:20px} .q{margin-bottom:16px} .opts{margin-left:18px}</style>
+                                    <meta charset="utf-8" />
+                                    <meta name="viewport" content="width=device-width,initial-scale=1" />
+                                    <title>${escapeHtml(exam.title)}</title>
+                                    <style>
+                                        @page { size: A4; margin: 20mm }
+                                        html,body{height:100%;}
+                                        body{font-family: 'Times New Roman', Times, serif; color:#111; line-height:1.45;}
+                                        .container{max-width:800px;margin:0 auto;color:#111}
+                                        .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+                                        .title{font-size:26px;font-weight:700}
+                                        .meta{font-size:12px;text-align:right}
+                                        .desc{margin:12px 0 18px;font-size:14px}
+                                        hr{border:none;border-top:1px solid #ddd;margin:12px 0}
+                                        .question{page-break-inside:avoid;margin-bottom:18px}
+                                        .q-title{font-size:15px;margin-bottom:8px}
+                                        .points{font-size:12px;color:#333;margin-left:8px}
+                                        .options{margin-left:22px;margin-top:6px}
+                                        .option{margin:6px 0;display:flex;align-items:flex-start}
+                                        .opt-box{width:22px;height:18px;border:1px solid #333;border-radius:3px;display:inline-block;margin-right:10px;flex:0 0 22px}
+                                        .opt-letter{width:22px;display:inline-block;text-align:center;margin-right:8px;font-weight:600}
+                                        .opt-text{flex:1}
+                                        .answer-lines{margin-left:22px;margin-top:8px}
+                                        .answer-line{border-bottom:1px dashed #444;height:28px;margin:10px 0}
+                                        .long-answer{height:120px;border:1px solid #ddd;padding:8px;margin-top:8px}
+                                        .footer-note{font-size:12px;color:#666;margin-top:16px}
+                                        /* Print tweaks */
+                                        @media print{
+                                            body{font-size:12pt}
+                                            .no-print{display:none}
+                                            .container{max-width:100%;margin:0}
+                                        }
+                                    </style>
                                 </head>
                                 <body>
-                                    <h1>${exam.title}</h1>
-                                    <p>${exam.description || ''}</p>
-                                    <hr />
-                                    ${questions.map((q: any, i: number) => `
-                                        <div class="q">
-                                            <div><strong>${i+1}. ${q.question_text}</strong> <small>(${q.points || 0} pts)</small></div>
-                                            ${Array.isArray(q.options) && q.options.length ? `<div class="opts">${q.options.map((o: string) => `<div>- ${o}</div>`).join('')}</div>` : ''}
-                                            ${q.type === 'short_answer' ? '<div class="opts"><em>Short answer (manual review)</em></div>' : ''}
+                                    <div class="container">
+                                        <div class="header">
+                                            <div>
+                                                <div class="title">${escapeHtml(exam.title)}</div>
+                                                <div style="font-size:13px;margin-top:6px">${escapeHtml(exam.description || '')}</div>
+                                            </div>
+                                            <div class="meta">
+                                                <div>Tutor: ${escapeHtml(tutorName)}</div>
+                                                <div>Date: ${new Date().toLocaleDateString()}</div>
+                                            </div>
                                         </div>
-                                    `).join('')}
+                                        <hr />
+
+                                        <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+                                            <div style="font-size:13px">
+                                                <strong>Duration:</strong> ${escapeHtml((exam.settings?.time_limit_minutes ? `${exam.settings.time_limit_minutes} minutes` : 'No limit'))}<br/>
+                                                <strong>Total Points:</strong> ${totalPoints}
+                                            </div>
+                                            <div style="font-size:13px;text-align:right">
+                                                <strong>Start:</strong> ${escapeHtml(exam.settings?.start_time || exam.settings?.start_date || '—')}<br/>
+                                                <strong>End:</strong> ${escapeHtml(exam.settings?.end_time || exam.settings?.end_date || '—')}
+                                            </div>
+                                        </div>
+
+                                        <div style="margin-bottom:12px">
+                                            <strong>Security / Options:</strong>
+                                            <div style="margin-left:14px;margin-top:6px;font-size:13px">
+                                                ${exam.settings?.require_fullscreen ? '<div>• Fullscreen required</div>' : ''}
+                                                ${exam.settings?.detect_tab_switch ? '<div>• Tab switch detection enabled</div>' : ''}
+                                                ${exam.settings?.disable_copy_paste ? '<div>• Copy/Paste disabled</div>' : ''}
+                                                ${exam.settings?.disable_right_click ? '<div>• Right-click disabled</div>' : ''}
+                                                <div>• Max violations: ${escapeHtml(String(exam.settings?.max_violations || 3))}</div>
+                                                ${exam.settings?.randomize_questions ? '<div>• Questions randomized</div>' : ''}
+                                                ${exam.settings?.show_results_immediately ? '<div>• Show results immediately</div>' : ''}
+                                            </div>
+                                        </div>
+
+                                        <div style="margin-bottom:18px">
+                                            <strong>Student Info (fill before starting):</strong>
+                                            <div style="margin-left:14px;margin-top:8px">
+                                                ${(exam.required_fields || ['name', 'email']).map((f: string) => {
+                                                        const labels: Record<string,string> = { name: 'Full Name', email: 'Email', student_id: 'Student ID', phone: 'Phone' };
+                                                        return `<div style=\"margin-top:8px\"><strong>${labels[f] || f}:</strong> ____________________________________________</div>`;
+                                                }).join('')}
+                                            </div>
+                                        </div>
+
+                                        ${questions.map((q: any, i: number) => {
+                                                const qText = escapeHtml(q.question_text || '');
+                                                const pts = q.points || 0;
+                                                let bodyHtml = '';
+                                                if (Array.isArray(q.options) && q.options.length) {
+                                                        bodyHtml += `<div class="options">`;
+                                                        q.options.forEach((opt: string, oi: number) => {
+                                                                bodyHtml += `<div class="option"><div class="opt-letter">${optionLetter(oi)}</div><div class="opt-text">${escapeHtml(opt)}</div></div>`;
+                                                        });
+                                                        bodyHtml += `</div>`;
+                                                }
+
+                                                if (q.type === 'short_answer') {
+                                                        bodyHtml += `<div class="answer-lines">${Array.from({length:6}).map(()=>'<div class="answer-line"></div>').join('')}</div>`;
+                                                } else if (q.type === 'numeric') {
+                                                        bodyHtml += `<div class="answer-lines"><div class="answer-line" style="width:40%"></div></div>`;
+                                                } else if (q.type === 'multiple_select') {
+                                                        if (!(Array.isArray(q.options) && q.options.length)) {
+                                                                bodyHtml += `<div class="answer-lines"><div class="answer-line"></div></div>`;
+                                                        }
+                                                } else {
+                                                        if (!Array.isArray(q.options) || !q.options.length) {
+                                                                bodyHtml += `<div class="answer-lines"><div class="answer-line"></div></div>`;
+                                                        }
+                                                }
+
+                                                return `
+                                                    <div class="question">
+                                                        <div class="q-title"><strong>${i + 1}. ${qText}</strong> <span class="points">(${pts} pts)</span></div>
+                                                        ${bodyHtml}
+                                                    </div>
+                                                `;
+                                        }).join('')}
+
+                                        <div class="footer-note">This printout is for administering the exam on paper. Students should write legibly and include their name on each page.</div>
+                                    </div>
                                 </body>
                                 </html>
-                        `;
+                                `;
 
-                        const w = window.open('', '_blank');
-                        if (!w) {
-                                toast.error('Popup blocked. Allow popups to download PDF.');
-                                return;
+                                const w = window.open('', '_blank');
+                                if (!w) {
+                                        toast.error('Popup blocked. Allow popups to download PDF.');
+                                        return;
+                                }
+                                w.document.open();
+                                w.document.write(html);
+                                w.document.close();
+                                w.focus();
+                                setTimeout(() => w.print(), 600);
+                        } catch (err: any) {
+                                console.error(err);
+                                toast.error('Failed to prepare printable exam');
                         }
-                        w.document.write(html);
-                        w.document.close();
-                        w.focus();
-                        // Give browser a moment to render then open print dialog
-                        setTimeout(() => w.print(), 500);
-                } catch (err: any) {
-                        console.error(err);
-                        toast.error('Failed to prepare printable exam');
-                }
-        };
+                };
 
     const handleLogout = async () => {
         await signOut();

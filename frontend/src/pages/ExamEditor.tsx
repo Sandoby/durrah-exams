@@ -201,7 +201,7 @@ export default function ExamEditor() {
                         exam_id: examId,
                         type: q.type,
                         question_text: q.question_text,
-                        options: q.type === 'multiple_choice' || q.type === 'multiple_select' ? q.options : [],
+                        options: q.type === 'multiple_choice' || q.type === 'multiple_select' || q.type === 'dropdown' ? q.options : [],
                         points: q.points,
                         randomize_options: q.randomize_options
                     };
@@ -224,7 +224,7 @@ export default function ExamEditor() {
                     const updatePayload: any = {
                         type: q.type,
                         question_text: q.question_text,
-                        options: q.type === 'multiple_choice' || q.type === 'multiple_select' ? q.options : [],
+                        options: q.type === 'multiple_choice' || q.type === 'multiple_select' || q.type === 'dropdown' ? q.options : [],
                         points: q.points,
                         randomize_options: q.randomize_options
                     };
