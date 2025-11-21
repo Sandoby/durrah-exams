@@ -1,4 +1,5 @@
-import React, { useEffect, useState, ChangeEvent } from 'react';
+import { useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
