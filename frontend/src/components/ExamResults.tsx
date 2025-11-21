@@ -35,6 +35,8 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
     const [questionMap, setQuestionMap] = useState<Record<string, any>>({});
     const [grading, setGrading] = useState<Record<string, number>>({});
     const [isGradingSaving, setIsGradingSaving] = useState(false);
+    const [autoScores, setAutoScores] = useState<Record<string, number>>({});
+    const [autoTotal, setAutoTotal] = useState<number>(0);
     const [isViolationModalOpen, setIsViolationModalOpen] = useState(false);
 
     const fieldLabels: Record<string, string> = {
@@ -176,15 +178,82 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
             const qMap: Record<string, any> = {};
             (qData || []).forEach((q: any) => { qMap[q.id] = q; });
 
-            // prepare grading defaults: keep existing awarded_score if present else 0
+            // auto-grade non-short-answer questions and prepare manual grading state for short answers
             const gradeState: Record<string, number> = {};
-            (answers || []).forEach((a: any) => {
-                gradeState[a.question_id] = a.awarded_score ?? 0;
-            });
+            const autoScoreMap: Record<string, number> = {};
+            let autoSum = 0;
 
-            setDetailedAnswers(answers || []);
+            // iterate answers and compute auto awards for non-short-answer questions
+            for (const a of (answers || [])) {
+                const q = qMap[a.question_id];
+                if (!q) continue;
+
+                // if question is short_answer -> manual grading
+                if (q.type === 'short_answer') {
+                    gradeState[a.question_id] = a.awarded_score ?? 0;
+                } else {
+                    // auto-grade according to question.correct_answer
+                    let awarded = 0;
+                    const qCorrect = q.correct_answer;
+                    const studentVal = a.answer;
+                    try {
+                        if (Array.isArray(qCorrect)) {
+                            let parsed: any = studentVal;
+                            if (typeof studentVal === 'string') {
+                                try { parsed = JSON.parse(studentVal); } catch { parsed = String(studentVal).split('||').filter(Boolean); }
+                            }
+                            if (Array.isArray(parsed)) {
+                                const a1 = (qCorrect as any[]).map((s: any) => String(s).trim()).sort();
+                                const b1 = parsed.map((s: any) => String(s).trim()).sort();
+                                if (a1.length === b1.length && a1.every((v: any, i: number) => v === b1[i])) awarded = q.points || 0;
+                            }
+                        } else {
+                            if (q.type === 'numeric') {
+                                const s = parseFloat(String(studentVal));
+                                const c = parseFloat(String(qCorrect || ''));
+                                if (!isNaN(s) && !isNaN(c) && s === c) awarded = q.points || 0;
+                            } else {
+                                if (String(studentVal).trim().toLowerCase() === String(qCorrect || '').trim().toLowerCase()) awarded = q.points || 0;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Auto-grade error', e);
+                    }
+
+                    autoScoreMap[a.question_id] = awarded;
+                    autoSum += awarded;
+
+                    // persist auto-awarded score if not already set
+                    try {
+                        // update awarded_score on the answer row (best-effort)
+                        const upd = await supabase.from('submission_answers').update({ awarded_score: awarded }).eq('id', a.id);
+                        if (upd.error) {
+                            // fallback by matching submission_id + question_id
+                            await supabase.from('submission_answers').update({ awarded_score: awarded }).match({ submission_id: submission.id, question_id: a.question_id });
+                        }
+                    } catch (e) {
+                        console.warn('Failed to persist auto-award', e);
+                    }
+                }
+            }
+
+            // update submission totals to include auto-awarded now (manual will be added later)
+            try {
+                const existingManualTotal = Object.values(gradeState).reduce((s, v) => s + (Number(v) || 0), 0);
+                const totalNow = autoSum + existingManualTotal;
+                await supabase.from('submissions').update({ score: totalNow }).eq('id', submission.id);
+            } catch (e) {
+                console.warn('Failed to update submission total with auto scores', e);
+            }
+
+            // prepare UI: only show manual (short answer) answers for grading
+            const shortAnswers = (answers || []).filter((a: any) => qMap[a.question_id] && qMap[a.question_id].type === 'short_answer');
+
+            setDetailedAnswers(shortAnswers);
             setQuestionMap(qMap);
             setGrading(gradeState);
+            setAutoScores(autoScoreMap);
+            setAutoTotal(autoSum);
         } catch (err: any) {
             console.error('Failed to load submission details', err);
             toast.error('Failed to load submission details');
@@ -226,8 +295,9 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
                 throw new Error(errors.join('; '));
             }
 
-            // recompute total
-            const totalAwarded = Object.values(grading).reduce((s, v) => s + (Number(v) || 0), 0);
+            // recompute totals: include auto-graded points (autoTotal) + manual grading
+            const manualTotal = Object.values(grading).reduce((s, v) => s + (Number(v) || 0), 0);
+            const totalAwarded = manualTotal + (autoTotal || 0);
             const maxScore = selectedSubmission.max_score || 0;
             const percentage = maxScore > 0 ? (totalAwarded / maxScore) * 100 : 0;
 

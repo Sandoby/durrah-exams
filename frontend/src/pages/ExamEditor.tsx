@@ -84,6 +84,9 @@ export default function ExamEditor() {
         }
     }, [id, user]);
 
+    // Keep a reactive watch of questions so options and correct answers update immediately
+    const questionsWatch = watch('questions');
+
     const fetchExam = async () => {
         try {
             // Fetch exam details
@@ -532,13 +535,12 @@ export default function ExamEditor() {
                                             />
                                         </div>
 
-                                        {['multiple_choice','dropdown'].includes(watch(`questions.${index}.type`)) && (
+                                        {['multiple_choice','dropdown'].includes(questionsWatch?.[index]?.type) && (
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Options</label>
                                                 {(() => {
-                                                    const values = getValues();
-                                                    const opts = (values.questions?.[index]?.options ?? []) as string[];
-                                                    const corr = (values.questions?.[index]?.correct_answer ?? '') as string;
+                                                    const opts = (questionsWatch?.[index]?.options ?? []) as string[];
+                                                    const corr = (questionsWatch?.[index]?.correct_answer ?? '') as string;
                                                     return (
                                                         <>
                                                             {opts.map((optValue: string, optionIndex: number) => (
@@ -558,18 +560,16 @@ export default function ExamEditor() {
                                                                         {...register(`questions.${index}.options.${optionIndex}`)}
                                                                     />
                                                                     <button type="button" className="ml-2 text-sm text-red-600" onClick={() => {
-                                                                        const v = getValues();
-                                                                        const arr = (v.questions?.[index]?.options ?? []) as string[];
+                                                                        const arr = [...(questionsWatch?.[index]?.options ?? [])];
                                                                         const removed = arr.splice(optionIndex, 1);
                                                                         setValue(`questions.${index}.options`, arr);
-                                                                        if ((v.questions?.[index]?.correct_answer ?? '') === removed[0]) setValue(`questions.${index}.correct_answer`, '');
+                                                                        if ((questionsWatch?.[index]?.correct_answer ?? '') === removed[0]) setValue(`questions.${index}.correct_answer`, '');
                                                                     }}>Remove</button>
                                                                 </div>
                                                             ))}
                                                             <div className="mt-2">
                                                                 <button type="button" onClick={() => {
-                                                                    const v = getValues();
-                                                                    const arr = (v.questions?.[index]?.options ?? []) as string[];
+                                                                    const arr = [...(questionsWatch?.[index]?.options ?? [])];
                                                                     arr.push('');
                                                                     setValue(`questions.${index}.options`, arr);
                                                                 }} className="inline-flex items-center px-2 py-1 border rounded text-sm bg-white hover:bg-gray-50">Add Option</button>
@@ -580,13 +580,12 @@ export default function ExamEditor() {
                                             </div>
                                         )}
 
-                                        {watch(`questions.${index}.type`) === 'multiple_select' && (
+                                        {questionsWatch?.[index]?.type === 'multiple_select' && (
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Options (select one or more correct answers)</label>
                                                 {(() => {
-                                                    const v = getValues();
-                                                    const opts = (v.questions?.[index]?.options ?? []) as string[];
-                                                    const currentCorrect = (v.questions?.[index]?.correct_answer as string[]) ?? [];
+                                                    const opts = (questionsWatch?.[index]?.options ?? []) as string[];
+                                                    const currentCorrect = (questionsWatch?.[index]?.correct_answer as string[]) ?? [];
                                                     return (
                                                         <>
                                                             {opts.map((optValue: string, optionIndex: number) => (
@@ -613,20 +612,18 @@ export default function ExamEditor() {
                                                                         className="ml-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
                                                                         {...register(`questions.${index}.options.${optionIndex}`)}
                                                                         onBlur={() => {
-                                                                            const vals = getValues();
-                                                                            const optsNow = (vals.questions?.[index]?.options ?? []) as string[];
+                                                                            const optsNow = (questionsWatch?.[index]?.options ?? []) as string[];
                                                                             const newOpt = optsNow[optionIndex] ?? '';
-                                                                            const corr = (vals.questions?.[index]?.correct_answer as string[]) ?? [];
+                                                                            const corr = (questionsWatch?.[index]?.correct_answer as string[]) ?? [];
                                                                             const updated = corr.map(a => (a === optValue ? newOpt : a)).filter(Boolean);
                                                                             setValue(`questions.${index}.correct_answer`, updated);
                                                                         }}
                                                                     />
                                                                     <button type="button" className="ml-2 text-sm text-red-600" onClick={() => {
-                                                                        const vals2 = getValues();
-                                                                        const arrOpts = (vals2.questions?.[index]?.options ?? []) as string[];
+                                                                        const arrOpts = [...(questionsWatch?.[index]?.options ?? [])] as string[];
                                                                         const removed = arrOpts.splice(optionIndex, 1);
                                                                         setValue(`questions.${index}.options`, arrOpts);
-                                                                        const corr = (vals2.questions?.[index]?.correct_answer as string[]) ?? [];
+                                                                        const corr = (questionsWatch?.[index]?.correct_answer as string[]) ?? [];
                                                                         const updatedCorr = corr.filter(c => !removed.includes(c));
                                                                         setValue(`questions.${index}.correct_answer`, updatedCorr);
                                                                     }}>Remove</button>
@@ -634,8 +631,7 @@ export default function ExamEditor() {
                                                             ))}
                                                             <div className="mt-2">
                                                                 <button type="button" onClick={() => {
-                                                                    const vals = getValues();
-                                                                    const arr = (vals.questions?.[index]?.options ?? []) as string[];
+                                                                    const arr = [...(questionsWatch?.[index]?.options ?? [])];
                                                                     arr.push('');
                                                                     setValue(`questions.${index}.options`, arr);
                                                                 }} className="inline-flex items-center px-2 py-1 border rounded text-sm bg-white hover:bg-gray-50">Add Option</button>
