@@ -357,6 +357,18 @@ export default function ExamView() {
         return { score: earned, max_score: total, percentage: total ? (earned / total) * 100 : 0 };
     };
 
+    // Detect if the user is on iPhone/Safari
+    function isIphoneOrSafari() {
+      if (typeof navigator === 'undefined') return false;
+      const ua = navigator.userAgent.toLowerCase();
+      return (
+        ua.includes('iphone') ||
+        ua.includes('ipad') ||
+        ua.includes('ipod') ||
+        (ua.includes('safari') && !ua.includes('chrome'))
+      );
+    }
+
     const handleSubmit = async () => {
         // Prevent duplicate submissions
         if (!exam || isSubmittingRef.current || submitted) return;
@@ -391,21 +403,31 @@ export default function ExamView() {
         isSubmittingRef.current = true;
         setIsSubmitting(true);
 
-        try {
-            // Log current supabase auth user to help diagnose RLS/auth issues (esp. on iOS/Safari)
-            try {
-                const au = await supabase.auth.getUser();
-                console.log('Supabase auth user before submission:', au?.data?.user, au?.error);
-                if (!au?.data?.user) {
-                    console.warn('No authenticated user detected before submission. This can cause RLS failures on some browsers (e.g., iOS Safari).');
-                    if (!warnedUnauth) {
-                        toast('You appear not to be signed in — this can cause submission to be blocked on some mobile browsers. Please sign in or try on desktop.', { icon: '⚠️' });
-                        setWarnedUnauth(true);
-                    }
-                }
-            } catch (e) {
-                console.warn('Failed to get supabase auth user', e);
+        // iPhone/Safari session refresh logic
+        let currentUser = null;
+        if (isIphoneOrSafari()) {
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          if (!session) {
+            const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
+            if (!refreshed?.session) {
+              alert(
+                "Unable to verify that you are signed in. Safari sometimes blocks session storage. Please log in again."
+              );
+              setIsSubmitting(false);
+              isSubmittingRef.current = false;
+              return;
             }
+            currentUser = refreshed.session.user;
+          } else {
+            currentUser = session.user;
+          }
+        } else {
+          // For other devices, get user from supabase.auth
+          const au = await supabase.auth.getUser();
+          currentUser = au?.data?.user || null;
+        }
+
+        try {
             const grading = calculateScore();
             const studentName = studentData.name || studentData.student_id || 'Anonymous';
             const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
@@ -424,6 +446,7 @@ export default function ExamView() {
 
             const backendBody = {
                 exam_id: id,
+                student_id: currentUser?.id,
                 student_data: studentData,
                 answers: Object.entries(answers).map(([question_id, answer]) => ({ question_id, answer: Array.isArray(answer) ? JSON.stringify(answer) : answer, time_spent_seconds: 0 })),
                 violations,
@@ -457,6 +480,7 @@ export default function ExamView() {
             // If backend not available or failed, fall back to Supabase client-side insertion
             const { data: submission, error } = await supabase.from('submissions').insert({
                 exam_id: id,
+                student_id: currentUser?.id,
                 student_name: studentName,
                 student_email: studentEmail,
                 score: grading.score,
@@ -516,6 +540,7 @@ export default function ExamView() {
                     };
                     const submissionPayload = {
                         exam_id: id,
+                        student_id: currentUser?.id,
                         student_name: studentName,
                         student_email: studentEmail,
                         score: grading.score,
