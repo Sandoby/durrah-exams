@@ -207,9 +207,23 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
         setIsGradingSaving(true);
         try {
             // update each submission_answers row with awarded_score
+            const errors: string[] = [];
             for (const ans of detailedAnswers) {
                 const awarded = grading[ans.question_id] ?? 0;
-                await supabase.from('submission_answers').update({ awarded_score: awarded }).eq('id', ans.id);
+                // Try updating by id first, fallback to match by submission_id + question_id
+                let res = await supabase.from('submission_answers').update({ awarded_score: awarded }).eq('id', ans.id);
+                if (res.error) {
+                    // fallback
+                    const res2 = await supabase.from('submission_answers').update({ awarded_score: awarded }).match({ submission_id: selectedSubmission.id, question_id: ans.question_id });
+                    if (res2.error) {
+                        console.error('Failed to update submission_answer', ans, res2.error);
+                        errors.push(res2.error.message || 'Failed to update answer ' + ans.question_id);
+                    }
+                }
+            }
+
+            if (errors.length) {
+                throw new Error(errors.join('; '));
             }
 
             // recompute total
@@ -217,8 +231,17 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
             const maxScore = selectedSubmission.max_score || 0;
             const percentage = maxScore > 0 ? (totalAwarded / maxScore) * 100 : 0;
 
-            // update submissions row
-            await supabase.from('submissions').update({ score: totalAwarded, percentage }).eq('id', selectedSubmission.id);
+
+            // update submissions row (update score and try percentage; if percentage column missing this may return an error)
+            const upd = await supabase.from('submissions').update({ score: totalAwarded, percentage }).eq('id', selectedSubmission.id);
+            if (upd.error) {
+                // try updating just score if percentage column missing
+                console.warn('Failed to update submissions with percentage, retrying score only', upd.error);
+                const upd2 = await supabase.from('submissions').update({ score: totalAwarded }).eq('id', selectedSubmission.id);
+                if (upd2.error) {
+                    throw upd2.error;
+                }
+            }
 
             toast.success('Grading saved');
             // refresh list
