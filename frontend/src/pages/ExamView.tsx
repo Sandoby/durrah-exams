@@ -683,6 +683,24 @@ export default function ExamView() {
                     </div>
                 </div>
 
+                {/* iPhone/Safari help modal or instructions */}
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-md mb-6">
+                    <div className="flex">
+                        <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+                        <div className="ml-3">
+                            <h3 className="text-sm font-bold text-yellow-900 dark:text-yellow-200">iPhone/Safari Submission Help</h3>
+                            <ul className="mt-2 text-xs text-yellow-800 dark:text-yellow-300 list-disc list-inside space-y-1">
+                                <li>Make sure Safari is <b>not</b> in Private Browsing mode.</li>
+                                <li>Enable cookies: Settings &gt; Safari &gt; Block All Cookies (<b>disable</b>).</li>
+                                <li>Disable “Prevent Cross-Site Tracking”: Settings &gt; Safari &gt; Prevent Cross-Site Tracking (<b>disable</b>).</li>
+                                <li>Use “Add to Home Screen” for best reliability (Share &gt; Add to Home Screen).</li>
+                                <li>If you see a submission error, try logging out and logging in again before submitting.</li>
+                                <li>If it still fails, <b>take screenshots</b> of your answers before submitting and contact support/tutor.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
                 <button
                     onClick={startExam}
                     className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
