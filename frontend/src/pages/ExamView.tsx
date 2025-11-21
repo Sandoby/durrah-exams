@@ -368,19 +368,7 @@ export default function ExamView() {
         return { score: earned, max_score: total, percentage: total ? (earned / total) * 100 : 0 };
     };
 
-    // Detect if the user is on iPhone/Safari
-    function isIphoneOrSafari() {
-      if (typeof navigator === 'undefined') return false;
-      const ua = navigator.userAgent.toLowerCase();
-      return (
-        ua.includes('iphone') ||
-        ua.includes('ipad') ||
-        ua.includes('ipod') ||
-        (ua.includes('safari') && !ua.includes('chrome'))
-      );
-        // Removed unused isIphoneOrSafari
-
-    const handleSubmit = async () => {
+        const handleSubmit = async () => {
         // Prevent duplicate submissions
         if (!exam || isSubmittingRef.current || submitted) return;
 
