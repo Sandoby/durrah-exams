@@ -43,8 +43,9 @@ export default function Dashboard() {
         } finally {
             setIsLoading(false);
         }
+    };
 
-        const downloadExamPDF = async (examId: string) => {
+    const downloadExamPDF = async (examId: string) => {
             try {
                 const { data: exam, error: examError } = await supabase.from('exams').select('*').eq('id', examId).single();
                 if (examError || !exam) throw examError || new Error('Exam not found');
