@@ -33,9 +33,6 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
     const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
     const [detailedAnswers, setDetailedAnswers] = useState<any[]>([]);
     const [questionMap, setQuestionMap] = useState<Record<string, any>>({});
-    const [grading, setGrading] = useState<Record<string, number>>({});
-    const [isGradingSaving, setIsGradingSaving] = useState(false);
-    const [autoTotal, setAutoTotal] = useState<number>(0);
     const [isViolationModalOpen, setIsViolationModalOpen] = useState(false);
 
     const fieldLabels: Record<string, string> = {
@@ -180,8 +177,6 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
             // Prepare read-only view: show all answers but do not attempt any writes or auto-grading
             setDetailedAnswers(answers || []);
             setQuestionMap(qMap);
-            setGrading({});
-            setAutoTotal(0);
         } catch (err: any) {
             console.error('Failed to load submission details', err);
             toast.error('Failed to load submission details');
@@ -192,7 +187,6 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
         setSelectedSubmission(null);
         setDetailedAnswers([]);
         setQuestionMap({});
-        setGrading({});
     };
 
     // Manual grading disabled; no handler required
