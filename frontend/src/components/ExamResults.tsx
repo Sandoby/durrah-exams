@@ -177,79 +177,11 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
             const qMap: Record<string, any> = {};
             (qData || []).forEach((q: any) => { qMap[q.id] = q; });
 
-            // auto-grade non-short-answer questions and prepare manual grading state for short answers
-            const gradeState: Record<string, number> = {};
-            const autoScoreMap: Record<string, number> = {};
-            let autoSum = 0;
-
-            // iterate answers and compute auto awards for non-short-answer questions
-            for (const a of (answers || [])) {
-                const q = qMap[a.question_id];
-                if (!q) continue;
-
-                // if question is short_answer -> manual grading
-                if (q.type === 'short_answer') {
-                    gradeState[a.question_id] = a.awarded_score ?? 0;
-                } else {
-                    // auto-grade according to question.correct_answer
-                    let awarded = 0;
-                    const qCorrect = q.correct_answer;
-                    const studentVal = a.answer;
-                    try {
-                        if (Array.isArray(qCorrect)) {
-                            let parsed: any = studentVal;
-                            if (typeof studentVal === 'string') {
-                                try { parsed = JSON.parse(studentVal); } catch { parsed = String(studentVal).split('||').filter(Boolean); }
-                            }
-                            if (Array.isArray(parsed)) {
-                                const a1 = (qCorrect as any[]).map((s: any) => String(s).trim()).sort();
-                                const b1 = parsed.map((s: any) => String(s).trim()).sort();
-                                if (a1.length === b1.length && a1.every((v: any, i: number) => v === b1[i])) awarded = q.points || 0;
-                            }
-                        } else {
-                            if (q.type === 'numeric') {
-                                const s = parseFloat(String(studentVal));
-                                const c = parseFloat(String(qCorrect || ''));
-                                if (!isNaN(s) && !isNaN(c) && s === c) awarded = q.points || 0;
-                            } else {
-                                if (String(studentVal).trim().toLowerCase() === String(qCorrect || '').trim().toLowerCase()) awarded = q.points || 0;
-                            }
-                        }
-                    } catch (e) {
-                        console.warn('Auto-grade error', e);
-                    }
-
-                    autoScoreMap[a.question_id] = awarded;
-                    autoSum += awarded;
-
-                    // persist auto-awarded score if not already set
-                    try {
-                        // update awarded_score on the answer row (best-effort)
-                        const upd = await supabase.from('submission_answers').update({ awarded_score: awarded }).eq('id', a.id);
-                        if (upd.error) {
-                            // fallback by matching submission_id + question_id
-                            await supabase.from('submission_answers').update({ awarded_score: awarded }).match({ submission_id: submission.id, question_id: a.question_id });
-                        }
-                    } catch (e) {
-                        console.warn('Failed to persist auto-award', e);
-                    }
-                }
-            }
-
-            // update submission totals to include auto-awarded now (manual will be added later)
-            try {
-                const existingManualTotal = Object.values(gradeState).reduce((s, v) => s + (Number(v) || 0), 0);
-                const totalNow = autoSum + existingManualTotal;
-                await supabase.from('submissions').update({ score: totalNow }).eq('id', submission.id);
-            } catch (e) {
-                console.warn('Failed to update submission total with auto scores', e);
-            }
-
-            // Manual grading is disabled: do not populate detailedAnswers for tutor editing
-            setDetailedAnswers([]);
+            // Prepare read-only view: show all answers but do not attempt any writes or auto-grading
+            setDetailedAnswers(answers || []);
             setQuestionMap(qMap);
-            setGrading(gradeState);
-            setAutoTotal(autoSum);
+            setGrading({});
+            setAutoTotal(0);
         } catch (err: any) {
             console.error('Failed to load submission details', err);
             toast.error('Failed to load submission details');
@@ -263,78 +195,9 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
         setGrading({});
     };
 
-    const handleGradingChange = (questionId: string, value: number) => {
-        setGrading(prev => ({ ...prev, [questionId]: value }));
-    };
+    // Manual grading disabled; no handler required
 
-    const saveGrading = async () => {
-        if (!selectedSubmission) return;
-        setIsGradingSaving(true);
-        try {
-            // update each submission_answers row with awarded_score
-            const errors: string[] = [];
-            for (const ans of detailedAnswers) {
-                const awarded = grading[ans.question_id] ?? 0;
-
-                // prefer update by id when available
-                if (ans.id) {
-                    const res = await supabase.from('submission_answers').update({ awarded_score: awarded }).eq('id', ans.id);
-                    if (res.error) {
-                        // try fallback by matching submission_id + question_id
-                        const res2 = await supabase.from('submission_answers').update({ awarded_score: awarded }).match({ submission_id: selectedSubmission.id, question_id: ans.question_id });
-                        if (res2.error) {
-                            const msg = (res2.error && res2.error.message) ? res2.error.message : JSON.stringify(res2.error);
-                            console.error('Failed to update submission_answer by id then by match', { ans, res: res.error, res2 });
-                            errors.push(`Answer ${ans.question_id}: ${msg}`);
-                        }
-                    }
-                } else {
-                    // no id, try match directly
-                    const res = await supabase.from('submission_answers').update({ awarded_score: awarded }).match({ submission_id: selectedSubmission.id, question_id: ans.question_id });
-                    if (res.error) {
-                        const msg = (res.error && res.error.message) ? res.error.message : JSON.stringify(res.error);
-                        console.error('Failed to update submission_answer by match', { ans, res });
-                        errors.push(`Answer ${ans.question_id}: ${msg}`);
-                    }
-                }
-            }
-
-            if (errors.length) {
-                // include a short actionable hint for common permission/schema issues
-                const hint = 'Check Supabase RLS permissions and that `submission_answers.awarded_score` exists.';
-                throw new Error(errors.join('; ') + ' — ' + hint);
-            }
-
-            // recompute totals: include auto-graded points (autoTotal) + manual grading
-            const manualTotal = Object.values(grading).reduce((s, v) => s + (Number(v) || 0), 0);
-            const totalAwarded = manualTotal + (autoTotal || 0);
-            const maxScore = selectedSubmission.max_score || 0;
-            const percentage = maxScore > 0 ? (totalAwarded / maxScore) * 100 : 0;
-
-
-            // update submissions row (update score and try percentage; if percentage column missing this may return an error)
-            const upd = await supabase.from('submissions').update({ score: totalAwarded, percentage }).eq('id', selectedSubmission.id);
-            if (upd.error) {
-                // try updating just score if percentage column missing
-                console.warn('Failed to update submissions with percentage, retrying score only', upd.error);
-                const upd2 = await supabase.from('submissions').update({ score: totalAwarded }).eq('id', selectedSubmission.id);
-                if (upd2.error) {
-                    throw upd2.error;
-                }
-            }
-
-            toast.success('Grading saved');
-            // refresh list
-            await fetchExamAndSubmissions();
-            closeSubmissionDetail();
-        } catch (err: any) {
-            console.error('Failed to save grading', err);
-            const msg = err?.message || (err && JSON.stringify(err)) || 'Failed to save grading';
-            toast.error('Failed to save grading: ' + msg);
-        } finally {
-            setIsGradingSaving(false);
-        }
-    };
+    // Manual grading has been disabled; no saveGrading implementation
 
     if (isLoading) {
         return (
@@ -403,7 +266,7 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
                                         <div className="flex items-center space-x-2">
                                             <div>{submission.score} / {submission.max_score}</div>
                                             <button
-                                                onClick={() => toast('Manual grading is disabled. Scores are auto-calculated.', { icon: 'ℹ️' })}
+                                                onClick={() => openSubmissionDetail(submission)}
                                                 className="text-sm text-indigo-600 hover:text-indigo-800"
                                             >
                                                 View
@@ -461,9 +324,6 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
                                 <h3 className="text-lg font-semibold">Grade: {selectedSubmission.student_name}</h3>
                                 <div className="space-x-2">
                                     <button onClick={closeSubmissionDetail} className="text-sm text-gray-500 hover:text-gray-700">Close</button>
-                                    <button onClick={saveGrading} disabled={isGradingSaving} className="ml-2 inline-flex items-center px-3 py-1 bg-indigo-600 text-white rounded-md text-sm">
-                                        {isGradingSaving ? 'Saving...' : 'Save Grades'}
-                                    </button>
                                 </div>
                             </div>
 
@@ -485,16 +345,9 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
                                                         <div className="font-medium text-gray-900 dark:text-white">{q.question_text}</div>
                                                         <div className="text-sm text-gray-500 mt-1">Answer: {typeof ans.answer === 'string' ? ans.answer : JSON.stringify(ans.answer)}</div>
                                                     </div>
-                                                    <div className="ml-4 w-32 text-right">
+                                                    <div className="ml-4 w-36 text-right">
                                                         <div className="text-sm text-gray-500">Max: {q.points}</div>
-                                                        <input
-                                                            type="number"
-                                                            min={0}
-                                                            max={q.points}
-                                                            value={grading[ans.question_id] ?? 0}
-                                                            onChange={(e) => handleGradingChange(ans.question_id, Number(e.target.value))}
-                                                            className="mt-1 w-full rounded-md border px-2 py-1 text-sm"
-                                                        />
+                                                        <div className="mt-1 text-sm font-medium text-gray-900 dark:text-white">{ans.awarded_score ?? '-'} pts</div>
                                                     </div>
                                                 </div>
                                             </div>
