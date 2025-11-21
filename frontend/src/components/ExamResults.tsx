@@ -31,6 +31,10 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [isExporting, setIsExporting] = useState(false);
     const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+    const [detailedAnswers, setDetailedAnswers] = useState<any[]>([]);
+    const [questionMap, setQuestionMap] = useState<Record<string, any>>({});
+    const [grading, setGrading] = useState<Record<string, number>>({});
+    const [isGradingSaving, setIsGradingSaving] = useState(false);
     const [isViolationModalOpen, setIsViolationModalOpen] = useState(false);
 
     const fieldLabels: Record<string, string> = {
@@ -153,6 +157,81 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
         setIsViolationModalOpen(true);
     };
 
+    const openSubmissionDetail = async (submission: Submission) => {
+        setSelectedSubmission(submission);
+        // fetch answers and questions
+        try {
+            const { data: answers, error: answersErr } = await supabase
+                .from('submission_answers')
+                .select('*')
+                .eq('submission_id', submission.id);
+            if (answersErr) throw answersErr;
+
+            const { data: qData, error: qErr } = await supabase
+                .from('questions')
+                .select('*')
+                .eq('exam_id', examId);
+            if (qErr) throw qErr;
+
+            const qMap: Record<string, any> = {};
+            (qData || []).forEach((q: any) => { qMap[q.id] = q; });
+
+            // prepare grading defaults: keep existing awarded_score if present else 0
+            const gradeState: Record<string, number> = {};
+            (answers || []).forEach((a: any) => {
+                gradeState[a.question_id] = a.awarded_score ?? 0;
+            });
+
+            setDetailedAnswers(answers || []);
+            setQuestionMap(qMap);
+            setGrading(gradeState);
+        } catch (err: any) {
+            console.error('Failed to load submission details', err);
+            toast.error('Failed to load submission details');
+        }
+    };
+
+    const closeSubmissionDetail = () => {
+        setSelectedSubmission(null);
+        setDetailedAnswers([]);
+        setQuestionMap({});
+        setGrading({});
+    };
+
+    const handleGradingChange = (questionId: string, value: number) => {
+        setGrading(prev => ({ ...prev, [questionId]: value }));
+    };
+
+    const saveGrading = async () => {
+        if (!selectedSubmission) return;
+        setIsGradingSaving(true);
+        try {
+            // update each submission_answers row with awarded_score
+            for (const ans of detailedAnswers) {
+                const awarded = grading[ans.question_id] ?? 0;
+                await supabase.from('submission_answers').update({ awarded_score: awarded }).eq('id', ans.id);
+            }
+
+            // recompute total
+            const totalAwarded = Object.values(grading).reduce((s, v) => s + (Number(v) || 0), 0);
+            const maxScore = selectedSubmission.max_score || 0;
+            const percentage = maxScore > 0 ? (totalAwarded / maxScore) * 100 : 0;
+
+            // update submissions row
+            await supabase.from('submissions').update({ score: totalAwarded, percentage }).eq('id', selectedSubmission.id);
+
+            toast.success('Grading saved');
+            // refresh list
+            await fetchExamAndSubmissions();
+            closeSubmissionDetail();
+        } catch (err: any) {
+            console.error('Failed to save grading', err);
+            toast.error('Failed to save grading');
+        } finally {
+            setIsGradingSaving(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="flex items-center justify-center p-8">
@@ -217,7 +296,15 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
                                         </td>
                                     ))}
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                        {submission.score} / {submission.max_score}
+                                        <div className="flex items-center space-x-2">
+                                            <div>{submission.score} / {submission.max_score}</div>
+                                            <button
+                                                onClick={() => openSubmissionDetail(submission)}
+                                                className="text-sm text-indigo-600 hover:text-indigo-800"
+                                            >
+                                                Grade
+                                            </button>
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${(submission.score / submission.max_score) >= 0.7
@@ -255,12 +342,65 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
             )}
 
             {selectedSubmission && (
-                <ViolationListModal
-                    isOpen={isViolationModalOpen}
-                    onClose={() => setIsViolationModalOpen(false)}
-                    violations={selectedSubmission.violations || []}
-                    studentName={selectedSubmission.student_name}
-                />
+                <>
+                    <ViolationListModal
+                        isOpen={isViolationModalOpen}
+                        onClose={() => setIsViolationModalOpen(false)}
+                        violations={selectedSubmission.violations || []}
+                        studentName={selectedSubmission.student_name}
+                    />
+
+                    {/* Grading Modal */}
+                    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 ${selectedSubmission ? '' : 'hidden'}`}>
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold">Grade: {selectedSubmission.student_name}</h3>
+                                <div className="space-x-2">
+                                    <button onClick={closeSubmissionDetail} className="text-sm text-gray-500 hover:text-gray-700">Close</button>
+                                    <button onClick={saveGrading} disabled={isGradingSaving} className="ml-2 inline-flex items-center px-3 py-1 bg-indigo-600 text-white rounded-md text-sm">
+                                        {isGradingSaving ? 'Saving...' : 'Save Grades'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="mb-4">
+                                <div className="text-sm text-gray-600">Submitted: {new Date(selectedSubmission.created_at).toLocaleString()}</div>
+                                <div className="text-sm text-gray-600">Violations: {selectedSubmission.violations?.length || 0}</div>
+                            </div>
+
+                            <div className="space-y-4">
+                                {detailedAnswers.length === 0 ? (
+                                    <div className="text-center py-8 text-sm text-gray-500">Loading answers...</div>
+                                ) : (
+                                    detailedAnswers.map((ans) => {
+                                        const q = questionMap[ans.question_id] || { question_text: 'Question not found', points: 0, type: '' };
+                                        return (
+                                            <div key={ans.id} className="p-3 border rounded-md bg-gray-50 dark:bg-gray-900">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <div className="font-medium text-gray-900 dark:text-white">{q.question_text}</div>
+                                                        <div className="text-sm text-gray-500 mt-1">Answer: {typeof ans.answer === 'string' ? ans.answer : JSON.stringify(ans.answer)}</div>
+                                                    </div>
+                                                    <div className="ml-4 w-32 text-right">
+                                                        <div className="text-sm text-gray-500">Max: {q.points}</div>
+                                                        <input
+                                                            type="number"
+                                                            min={0}
+                                                            max={q.points}
+                                                            value={grading[ans.question_id] ?? 0}
+                                                            onChange={(e) => handleGradingChange(ans.question_id, Number(e.target.value))}
+                                                            className="mt-1 w-full rounded-md border px-2 py-1 text-sm"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </>
             )}
         </div>
     );
