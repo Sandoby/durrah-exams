@@ -206,7 +206,7 @@ export default function ExamEditor() {
                         randomize_options: q.randomize_options
                     };
                     // only include correct_answer for auto-graded types
-                    if (q.type === 'multiple_choice' || q.type === 'true_false' || q.type === 'multiple_select') {
+                    if (['multiple_choice','true_false','multiple_select','dropdown','numeric'].includes(q.type)) {
                         base.correct_answer = q.correct_answer || null;
                     }
                     return base;
@@ -228,7 +228,7 @@ export default function ExamEditor() {
                         points: q.points,
                         randomize_options: q.randomize_options
                     };
-                    if (q.type === 'multiple_choice' || q.type === 'true_false' || q.type === 'multiple_select') {
+                    if (['multiple_choice','true_false','multiple_select','dropdown','numeric'].includes(q.type)) {
                         updatePayload.correct_answer = q.correct_answer || null;
                     }
 
@@ -504,7 +504,9 @@ export default function ExamEditor() {
                                                     {...register(`questions.${index}.type`)}
                                                 >
                                                     <option value="multiple_choice">Multiple Choice</option>
-                                                    <option value="multiple_select">Multiple Select (choose multiple)</option>
+                                                                            <option value="multiple_select">Multiple Select (choose multiple)</option>
+                                                                            <option value="dropdown">Dropdown (single choice)</option>
+                                                                            <option value="numeric">Numeric (numeric answer)</option>
                                                     <option value="true_false">True/False</option>
                                                     <option value="short_answer">Short Answer</option>
                                                 </select>
@@ -530,22 +532,21 @@ export default function ExamEditor() {
                                             />
                                         </div>
 
-                                        {watch(`questions.${index}.type`) === 'multiple_choice' && (
+                                        {['multiple_choice','dropdown'].includes(watch(`questions.${index}.type`)) && (
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Options</label>
-                                                {[0, 1, 2, 3].map((optionIndex) => (
-                                                    <div key={optionIndex} className="flex items-center">
-                                                        {(() => {
-                                                            const values = getValues();
-                                                            const optValue = ((values.questions?.[index]?.options?.[optionIndex]) ?? '') as string;
-                                                            const correct = (values.questions?.[index]?.correct_answer ?? '') as string;
-                                                            const checked = correct === optValue && optValue !== '';
-                                                            return (
-                                                                <>
+                                                {(() => {
+                                                    const values = getValues();
+                                                    const opts = (values.questions?.[index]?.options ?? []) as string[];
+                                                    const corr = (values.questions?.[index]?.correct_answer ?? '') as string;
+                                                    return (
+                                                        <>
+                                                            {opts.map((optValue: string, optionIndex: number) => (
+                                                                <div key={optionIndex} className="flex items-center space-x-2">
                                                                     <input
                                                                         type="radio"
                                                                         value={optValue}
-                                                                        checked={checked}
+                                                                        checked={corr === optValue && optValue !== ''}
                                                                         onChange={() => setValue(`questions.${index}.correct_answer`, optValue)}
                                                                         className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                                                                     />
@@ -556,64 +557,92 @@ export default function ExamEditor() {
                                                                         className="ml-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
                                                                         {...register(`questions.${index}.options.${optionIndex}`)}
                                                                     />
-                                                                </>
-                                                            );
-                                                        })()}
-                                                    </div>
-                                                ))}
+                                                                    <button type="button" className="ml-2 text-sm text-red-600" onClick={() => {
+                                                                        const v = getValues();
+                                                                        const arr = (v.questions?.[index]?.options ?? []) as string[];
+                                                                        const removed = arr.splice(optionIndex, 1);
+                                                                        setValue(`questions.${index}.options`, arr);
+                                                                        if ((v.questions?.[index]?.correct_answer ?? '') === removed[0]) setValue(`questions.${index}.correct_answer`, '');
+                                                                    }}>Remove</button>
+                                                                </div>
+                                                            ))}
+                                                            <div className="mt-2">
+                                                                <button type="button" onClick={() => {
+                                                                    const v = getValues();
+                                                                    const arr = (v.questions?.[index]?.options ?? []) as string[];
+                                                                    arr.push('');
+                                                                    setValue(`questions.${index}.options`, arr);
+                                                                }} className="inline-flex items-center px-2 py-1 border rounded text-sm bg-white hover:bg-gray-50">Add Option</button>
+                                                            </div>
+                                                        </>
+                                                    );
+                                                })()}
                                             </div>
                                         )}
 
                                         {watch(`questions.${index}.type`) === 'multiple_select' && (
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Options (select one or more correct answers)</label>
-                                                {[0, 1, 2, 3].map((optionIndex) => {
-                                                    return (() => {
-                                                        const values = getValues();
-                                                        const optValue = ((values.questions?.[index]?.options?.[optionIndex]) ?? '') as string;
-                                                        const currentCorrect = (values.questions?.[index]?.correct_answer as string[]) ?? [];
-                                                        const checked = optValue ? currentCorrect.includes(optValue) : false;
-
-                                                        const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-                                                            const val = optValue;
-                                                            const arr = [...currentCorrect];
-                                                            if (e.target.checked) {
-                                                                if (val && !arr.includes(val)) arr.push(val);
-                                                            } else {
-                                                                const idx = arr.indexOf(val);
-                                                                if (idx !== -1) arr.splice(idx, 1);
-                                                            }
-                                                            setValue(`questions.${index}.correct_answer`, arr);
-                                                        };
-
-                                                        const handleBlur = () => {
-                                                            const vals = getValues();
-                                                            const newOpt = ((vals.questions?.[index]?.options?.[optionIndex]) ?? '') as string;
-                                                            const arr = (vals.questions?.[index]?.correct_answer as string[]) ?? [];
-                                                            const updated = arr.map(a => (a === optValue ? newOpt : a)).filter(Boolean);
-                                                            setValue(`questions.${index}.correct_answer`, updated);
-                                                        };
-
-                                                        return (
-                                                            <div key={optionIndex} className="flex items-center">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={checked}
-                                                                    onChange={handleChange}
-                                                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                                                                />
-                                                                <input
-                                                                    type="text"
-                                                                    required
-                                                                    placeholder={`Option ${optionIndex + 1}`}
-                                                                    className="ml-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                                    {...register(`questions.${index}.options.${optionIndex}`)}
-                                                                    onBlur={handleBlur}
-                                                                />
+                                                {(() => {
+                                                    const v = getValues();
+                                                    const opts = (v.questions?.[index]?.options ?? []) as string[];
+                                                    const currentCorrect = (v.questions?.[index]?.correct_answer as string[]) ?? [];
+                                                    return (
+                                                        <>
+                                                            {opts.map((optValue: string, optionIndex: number) => (
+                                                                <div key={optionIndex} className="flex items-center space-x-2">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={optValue ? currentCorrect.includes(optValue) : false}
+                                                                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                                                            const arr = [...currentCorrect];
+                                                                            if (e.target.checked) {
+                                                                                if (optValue && !arr.includes(optValue)) arr.push(optValue);
+                                                                            } else {
+                                                                                const idx = arr.indexOf(optValue);
+                                                                                if (idx !== -1) arr.splice(idx, 1);
+                                                                            }
+                                                                            setValue(`questions.${index}.correct_answer`, arr);
+                                                                        }}
+                                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                                    />
+                                                                    <input
+                                                                        type="text"
+                                                                        required
+                                                                        placeholder={`Option ${optionIndex + 1}`}
+                                                                        className="ml-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                                        {...register(`questions.${index}.options.${optionIndex}`)}
+                                                                        onBlur={() => {
+                                                                            const vals = getValues();
+                                                                            const optsNow = (vals.questions?.[index]?.options ?? []) as string[];
+                                                                            const newOpt = optsNow[optionIndex] ?? '';
+                                                                            const corr = (vals.questions?.[index]?.correct_answer as string[]) ?? [];
+                                                                            const updated = corr.map(a => (a === optValue ? newOpt : a)).filter(Boolean);
+                                                                            setValue(`questions.${index}.correct_answer`, updated);
+                                                                        }}
+                                                                    />
+                                                                    <button type="button" className="ml-2 text-sm text-red-600" onClick={() => {
+                                                                        const vals2 = getValues();
+                                                                        const arrOpts = (vals2.questions?.[index]?.options ?? []) as string[];
+                                                                        const removed = arrOpts.splice(optionIndex, 1);
+                                                                        setValue(`questions.${index}.options`, arrOpts);
+                                                                        const corr = (vals2.questions?.[index]?.correct_answer as string[]) ?? [];
+                                                                        const updatedCorr = corr.filter(c => !removed.includes(c));
+                                                                        setValue(`questions.${index}.correct_answer`, updatedCorr);
+                                                                    }}>Remove</button>
+                                                                </div>
+                                                            ))}
+                                                            <div className="mt-2">
+                                                                <button type="button" onClick={() => {
+                                                                    const vals = getValues();
+                                                                    const arr = (vals.questions?.[index]?.options ?? []) as string[];
+                                                                    arr.push('');
+                                                                    setValue(`questions.${index}.options`, arr);
+                                                                }} className="inline-flex items-center px-2 py-1 border rounded text-sm bg-white hover:bg-gray-50">Add Option</button>
                                                             </div>
-                                                        );
-                                                    })();
-                                                })}
+                                                        </>
+                                                    );
+                                                })()}
                                             </div>
                                         )}
 
@@ -640,6 +669,19 @@ export default function ExamEditor() {
                                                         <span className="ml-2">False</span>
                                                     </label>
                                                 </div>
+                                            </div>
+                                        )}
+
+                                        {watch(`questions.${index}.type`) === 'numeric' && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Correct Numeric Answer (optional)</label>
+                                                <input
+                                                    type="number"
+                                                    step="any"
+                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                    {...register(`questions.${index}.correct_answer`)}
+                                                />
+                                                <p className="text-xs text-gray-500 mt-1">Exact numeric match will be used for auto-grading.</p>
                                             </div>
                                         )}
 

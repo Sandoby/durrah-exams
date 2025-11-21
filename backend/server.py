@@ -370,8 +370,18 @@ async def submit_exam(exam_id: str, submission: ExamSubmission):
                     score += question.get('points', 0)
         else:
             try:
-                if str(student_answer.answer).strip().lower() == str(q_correct).strip().lower():
-                    score += question.get('points', 0)
+                # numeric questions: compare numerically
+                if question.get('type') == 'numeric':
+                    try:
+                        s = float(student_answer.answer)
+                        c = float(q_correct)
+                        if s == c:
+                            score += question.get('points', 0)
+                    except Exception:
+                        pass
+                else:
+                    if str(student_answer.answer).strip().lower() == str(q_correct).strip().lower():
+                        score += question.get('points', 0)
             except Exception:
                 pass
     

@@ -340,8 +340,16 @@ export default function ExamView() {
                     earned += q.points || 0;
                 }
             } else {
-                if (String(studentAnswer).trim().toLowerCase() === String(q.correct_answer || '').trim().toLowerCase()) {
-                    earned += q.points || 0;
+                if (q.type === 'numeric') {
+                    const s = parseFloat(String(studentAnswer));
+                    const c = parseFloat(String(q.correct_answer || ''));
+                    if (!isNaN(s) && !isNaN(c) && s === c) {
+                        earned += q.points || 0;
+                    }
+                } else {
+                    if (String(studentAnswer).trim().toLowerCase() === String(q.correct_answer || '').trim().toLowerCase()) {
+                        earned += q.points || 0;
+                    }
                 }
             }
         });
@@ -566,6 +574,32 @@ export default function ExamView() {
                                     <span className="text-gray-700 dark:text-gray-300">{opt}</span>
                                 </label>
                             ))}
+
+                            {q.type === 'dropdown' && (
+                                <div>
+                                    <select
+                                        className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        value={answers[q.id] || ''}
+                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                    >
+                                        <option value="">Select...</option>
+                                        {q.options?.map((opt) => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            {q.type === 'numeric' && (
+                                <div>
+                                    <input
+                                        type="number"
+                                        className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        value={answers[q.id] ?? ''}
+                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                    />
+                                </div>
+                            )}
 
                             {q.type === 'true_false' && ['True', 'False'].map((opt) => (
                                 <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">

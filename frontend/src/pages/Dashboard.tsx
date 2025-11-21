@@ -70,6 +70,51 @@ export default function Dashboard() {
         toast.success('Exam link copied to clipboard!');
     };
 
+        const downloadExamPDF = async (examId: string) => {
+                try {
+                        const { data: exam, error: examError } = await supabase.from('exams').select('*').eq('id', examId).single();
+                        if (examError || !exam) throw examError || new Error('Exam not found');
+                        const { data: questions, error: qErr } = await supabase.from('questions').select('*').eq('exam_id', examId).order('created_at', { ascending: true });
+                        if (qErr) throw qErr;
+
+                        const html = `
+                                <html>
+                                <head>
+                                    <title>${exam.title}</title>
+                                    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                                    <style>body{font-family:Arial,Helvetica,sans-serif;padding:20px;color:#111} h1{font-size:20px} .q{margin-bottom:16px} .opts{margin-left:18px}</style>
+                                </head>
+                                <body>
+                                    <h1>${exam.title}</h1>
+                                    <p>${exam.description || ''}</p>
+                                    <hr />
+                                    ${questions.map((q: any, i: number) => `
+                                        <div class="q">
+                                            <div><strong>${i+1}. ${q.question_text}</strong> <small>(${q.points || 0} pts)</small></div>
+                                            ${Array.isArray(q.options) && q.options.length ? `<div class="opts">${q.options.map((o: string) => `<div>- ${o}</div>`).join('')}</div>` : ''}
+                                            ${q.type === 'short_answer' ? '<div class="opts"><em>Short answer (manual review)</em></div>' : ''}
+                                        </div>
+                                    `).join('')}
+                                </body>
+                                </html>
+                        `;
+
+                        const w = window.open('', '_blank');
+                        if (!w) {
+                                toast.error('Popup blocked. Allow popups to download PDF.');
+                                return;
+                        }
+                        w.document.write(html);
+                        w.document.close();
+                        w.focus();
+                        // Give browser a moment to render then open print dialog
+                        setTimeout(() => w.print(), 500);
+                } catch (err: any) {
+                        console.error(err);
+                        toast.error('Failed to prepare printable exam');
+                }
+        };
+
     const handleLogout = async () => {
         await signOut();
         navigate('/login');
@@ -164,6 +209,13 @@ export default function Dashboard() {
                                                     title="Copy Link"
                                                 >
                                                     <Share2 className="h-5 w-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => downloadExamPDF(exam.id)}
+                                                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                                                    title="Print / Save as PDF"
+                                                >
+                                                    <FileText className="h-5 w-5" />
                                                 </button>
                                                 <button
                                                     onClick={() => setSelectedExamForResults(exam)}
