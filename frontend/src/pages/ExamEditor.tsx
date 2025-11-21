@@ -78,10 +78,10 @@ export default function ExamEditor() {
     });
 
     useEffect(() => {
-        if (id) {
+        if (id && user) {
             fetchExam();
         }
-    }, [id]);
+    }, [id, user]);
 
     const fetchExam = async () => {
         try {
@@ -90,6 +90,7 @@ export default function ExamEditor() {
                 .from('exams')
                 .select('*')
                 .eq('id', id)
+                .eq('tutor_id', user?.id)
                 .single();
 
             if (examError) throw examError;
@@ -158,7 +159,8 @@ export default function ExamEditor() {
                 const { error } = await supabase
                     .from('exams')
                     .update(examData)
-                    .eq('id', id);
+                    .eq('id', id)
+                    .eq('tutor_id', user.id);
                 if (error) throw error;
             } else {
                 const { data: newExam, error } = await supabase

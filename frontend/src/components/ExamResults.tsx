@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { FileDown, Loader2, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
@@ -24,6 +25,7 @@ interface Submission {
 }
 
 export function ExamResults({ examId, examTitle }: ExamResultsProps) {
+    const { user } = useAuth();
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [requiredFields, setRequiredFields] = useState<string[]>(['name', 'email']);
     const [isLoading, setIsLoading] = useState(true);
@@ -39,8 +41,8 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
     };
 
     useEffect(() => {
-        fetchExamAndSubmissions();
-    }, [examId]);
+        if (user) fetchExamAndSubmissions();
+    }, [examId, user]);
 
     const fetchExamAndSubmissions = async () => {
         try {
@@ -49,6 +51,7 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
                 .from('exams')
                 .select('required_fields')
                 .eq('id', examId)
+                .eq('tutor_id', user?.id)
                 .single();
 
             if (examError) throw examError;

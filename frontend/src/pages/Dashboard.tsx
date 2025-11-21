@@ -33,6 +33,7 @@ export default function Dashboard() {
             const { data, error } = await supabase
                 .from('exams')
                 .select('*')
+                .eq('tutor_id', user?.id)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -51,7 +52,8 @@ export default function Dashboard() {
             const { error } = await supabase
                 .from('exams')
                 .delete()
-                .eq('id', id);
+                .eq('id', id)
+                .eq('tutor_id', user?.id);
 
             if (error) throw error;
 

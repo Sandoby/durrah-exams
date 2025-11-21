@@ -1,0 +1,522 @@
+import { useEffect, useState, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { AlertTriangle, CheckCircle, Clock, Loader2, Save } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { ViolationModal } from '../components/ViolationModal';
+import { Logo } from '../components/Logo';
+
+interface Question {
+    id: string;
+    type: string;
+    question_text: string;
+    options?: string[];
+    points: number;
+    correct_answer?: string;
+}
+
+interface Exam {
+    id: string;
+    title: string;
+    description: string;
+    questions: Question[];
+    required_fields?: string[];
+    settings: {
+        require_fullscreen: boolean;
+        detect_tab_switch: boolean;
+        disable_copy_paste: boolean;
+        disable_right_click: boolean;
+        max_violations: number;
+        time_limit_minutes: number | null;
+        randomize_questions?: boolean;
+        show_results_immediately?: boolean;
+    };
+}
+
+export default function ExamView() {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [exam, setExam] = useState<Exam | null>(null);
+    const [studentData, setStudentData] = useState<Record<string, string>>({});
+    const [started, setStarted] = useState(false);
+    const [answers, setAnswers] = useState<Record<string, string>>({});
+    const [violations, setViolations] = useState<any[]>([]);
+    const [timeLeft, setTimeLeft] = useState<number | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [score, setScore] = useState<{ score: number; max_score: number; percentage: number } | null>(null);
+    const [showViolationModal, setShowViolationModal] = useState(false);
+    const [violationMessage, setViolationMessage] = useState({ title: '', message: '' });
+    const [hasPreviousSession, setHasPreviousSession] = useState(false);
+
+    const containerRef = useRef<HTMLDivElement>(null);
+    const isSubmittingRef = useRef(false);
+
+    // Load exam data
+    useEffect(() => {
+        if (id) fetchExam();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]);
+
+    // Check for existing session and submitted status on mount
+    useEffect(() => {
+        if (!id) return;
+
+        // Check if already submitted on this device
+        const submittedFlag = localStorage.getItem(`durrah_exam_${id}_submitted`);
+        if (submittedFlag) {
+            setSubmitted(true);
+            // Optionally try to load the score if we saved it, or just show a generic "Already Submitted" message
+            const savedScore = localStorage.getItem(`durrah_exam_${id}_score`);
+            if (savedScore) {
+                setScore(JSON.parse(savedScore));
+            }
+            return;
+        }
+
+        // Check for active session to restore
+        const savedState = localStorage.getItem(`durrah_exam_${id}_state`);
+        if (savedState) {
+            try {
+                const parsed = JSON.parse(savedState);
+                setStudentData(parsed.studentData || {});
+                setAnswers(parsed.answers || {});
+                setViolations(parsed.violations || []);
+                setStarted(parsed.started || false);
+                if (parsed.timeLeft !== null && parsed.timeLeft !== undefined) {
+                    setTimeLeft(parsed.timeLeft);
+                }
+                setHasPreviousSession(true);
+                toast.success('Previous session restored');
+            } catch (e) {
+                console.error('Failed to restore session', e);
+            }
+        }
+    }, [id]);
+
+    // Save state to localStorage whenever it changes
+    useEffect(() => {
+        if (!id || submitted) return;
+
+        // Only save if we have started or have entered some data
+        if (started || Object.keys(studentData).length > 0) {
+            const stateToSave = {
+                studentData,
+                answers,
+                violations,
+                timeLeft,
+                started,
+                lastUpdated: Date.now()
+            };
+            localStorage.setItem(`durrah_exam_${id}_state`, JSON.stringify(stateToSave));
+        }
+    }, [id, studentData, answers, violations, timeLeft, started, submitted]);
+
+    const fetchExam = async () => {
+        try {
+            const { data: examData, error } = await supabase.from('exams').select('*').eq('id', id).single();
+            if (error) throw error;
+            const { data: qData } = await supabase.from('questions').select('*').eq('exam_id', id);
+            setExam({ ...examData, questions: qData || [], settings: examData.settings || {} });
+
+            // Only set initial time if not restored from session
+            if (!localStorage.getItem(`durrah_exam_${id}_state`) && examData.settings?.time_limit_minutes) {
+                setTimeLeft(examData.settings.time_limit_minutes * 60);
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to load exam');
+            navigate('/dashboard');
+        }
+    };
+
+    useEffect(() => {
+        if (!started || !exam) return;
+        if (timeLeft !== null && timeLeft > 0) {
+            const timer = setInterval(() => setTimeLeft((p) => (p && p > 0 ? p - 1 : 0)), 1000);
+            return () => clearInterval(timer);
+        } else if (timeLeft === 0 && !submitted && !isSubmitting) {
+            handleSubmit();
+        }
+    }, [started, timeLeft, exam, submitted, isSubmitting]);
+
+    const logViolation = (type: string) => {
+        const violation = { type, timestamp: new Date().toISOString() };
+        setViolations((prev) => {
+            const newViolations = [...prev, violation];
+            const violationCount = newViolations.length;
+            const maxViolations = exam?.settings.max_violations || 3;
+            const remaining = maxViolations - violationCount;
+
+            if (remaining > 0) {
+                if (remaining <= 1) {
+                    // Critical warning
+                    setViolationMessage({
+                        title: 'Final Warning',
+                        message: `You have ${remaining} violation${remaining !== 1 ? 's' : ''} remaining before automatic submission.`
+                    });
+                    setShowViolationModal(true);
+                } else {
+                    // Standard warning via toast
+                    toast.error(`Violation recorded! ${remaining} remaining.`, {
+                        icon: '⚠️',
+                        style: {
+                            borderRadius: '10px',
+                            background: '#333',
+                            color: '#fff',
+                        },
+                    });
+                }
+            } else {
+                // Max violations reached
+                setViolationMessage({
+                    title: 'Maximum Violations Reached',
+                    message: 'Your exam will now be submitted automatically due to excessive violations.'
+                });
+                setShowViolationModal(true);
+                handleSubmit();
+            }
+
+            return newViolations;
+        });
+    };
+
+    useEffect(() => {
+        if (!started || !exam) return;
+
+        const handleVisibilityChange = () => {
+            if (document.hidden && exam.settings.detect_tab_switch) {
+                logViolation('tab_switch');
+                if (violations.length < (exam.settings.max_violations || 3) - 1) {
+                    setViolationMessage({ title: 'Tab Switch Detected', message: 'You switched away from the exam.' });
+                    setShowViolationModal(true);
+                }
+            }
+        };
+
+        const handleContextMenu = (e: MouseEvent) => {
+            if (exam.settings.disable_right_click) {
+                e.preventDefault();
+                logViolation('right_click');
+            }
+        };
+
+        const handleCopy = (e: ClipboardEvent) => {
+            if (exam.settings.disable_copy_paste) {
+                e.preventDefault();
+                logViolation('copy_attempt');
+            }
+        };
+
+        const handlePaste = (e: ClipboardEvent) => {
+            if (exam.settings.disable_copy_paste) {
+                e.preventDefault();
+                logViolation('paste_attempt');
+            }
+        };
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (exam.settings.disable_copy_paste) {
+                if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'a'].includes(e.key.toLowerCase())) {
+                    e.preventDefault();
+                    logViolation('keyboard_shortcut');
+                }
+            }
+        };
+
+        const handleFullscreenChange = () => {
+            if (exam.settings.require_fullscreen && !document.fullscreenElement && started && !submitted) {
+                logViolation('exit_fullscreen');
+                if (violations.length < (exam.settings.max_violations || 3) - 1) {
+                    setViolationMessage({ title: 'Fullscreen Exit Detected', message: 'Return to fullscreen immediately.' });
+                    setShowViolationModal(true);
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        document.addEventListener('contextmenu', handleContextMenu);
+        document.addEventListener('copy', handleCopy);
+        document.addEventListener('paste', handlePaste);
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            document.removeEventListener('contextmenu', handleContextMenu);
+            document.removeEventListener('copy', handleCopy);
+            document.removeEventListener('paste', handlePaste);
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        };
+    }, [started, exam, violations.length, submitted]);
+
+    const startExam = async () => {
+        const required = exam?.required_fields || ['name', 'email'];
+        const missing = required.filter((f) => !studentData[f]);
+        if (missing.length) {
+            toast.error('Please fill required fields');
+            return;
+        }
+        if (exam?.settings.require_fullscreen) {
+            try {
+                await document.documentElement.requestFullscreen();
+            } catch (e) {
+                toast.error('Fullscreen required to start exam');
+                return;
+            }
+        }
+        setStarted(true);
+    };
+
+    const calculateScore = () => {
+        if (!exam) return { score: 0, max_score: 0, percentage: 0 };
+        let total = 0;
+        let earned = 0;
+        exam.questions.forEach((q) => {
+            total += q.points || 0;
+            if (answers[q.id] && answers[q.id] === q.correct_answer) earned += q.points || 0;
+        });
+        return { score: earned, max_score: total, percentage: total ? (earned / total) * 100 : 0 };
+    };
+
+    const handleSubmit = async () => {
+        // Prevent duplicate submissions
+        if (!exam || isSubmittingRef.current || submitted) return;
+
+        // Double check local storage to prevent race conditions or reload exploits
+        if (localStorage.getItem(`durrah_exam_${id}_submitted`)) {
+            toast.error('Exam already submitted from this device.');
+            setSubmitted(true);
+            return;
+        }
+
+        isSubmittingRef.current = true;
+        setIsSubmitting(true);
+
+        try {
+            const grading = calculateScore();
+            const studentName = studentData.name || studentData.student_id || 'Anonymous';
+            const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
+
+            const browserInfo = {
+                user_agent: navigator.userAgent,
+                student_data: studentData,
+                screen_width: window.screen.width,
+                screen_height: window.screen.height,
+                language: navigator.language
+            };
+
+            const { data: submission, error } = await supabase.from('submissions').insert({
+                exam_id: id,
+                student_name: studentName,
+                student_email: studentEmail,
+                score: grading.score,
+                max_score: grading.max_score,
+                violations,
+                browser_info: browserInfo
+            }).select().single();
+
+            if (error) throw error;
+
+            const answersPayload = Object.entries(answers).map(([question_id, answer]) => ({ submission_id: submission.id, question_id, answer }));
+            if (answersPayload.length) await supabase.from('submission_answers').insert(answersPayload);
+
+            setScore(grading);
+            setSubmitted(true);
+
+            // Mark as submitted in local storage to prevent retakes
+            localStorage.setItem(`durrah_exam_${id}_submitted`, 'true');
+            localStorage.setItem(`durrah_exam_${id}_score`, JSON.stringify(grading));
+
+            // Clear temporary state
+            localStorage.removeItem(`durrah_exam_${id}_state`);
+
+            if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
+        } catch (err: any) {
+            console.error(err);
+            toast.error(err?.message || 'Failed to submit');
+            setIsSubmitting(false);
+            isSubmittingRef.current = false;
+        }
+    };
+
+    if (!exam) return (
+        <div className="min-h-screen flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        </div>
+    );
+
+    if (submitted) return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+            <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
+                <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
+                <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white">Exam Submitted</h2>
+                {score && (
+                    <div className="mt-4">
+                        <p className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">{score.percentage.toFixed(1)}%</p>
+                        <p className="text-gray-500 dark:text-gray-400 mt-1">{score.score} / {score.max_score} points</p>
+                    </div>
+                )}
+                <p className="mt-4 text-sm text-gray-500">Your submission has been recorded.</p>
+            </div>
+        </div>
+    );
+
+    if (!started) return (
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
+            <div className="max-w-md w-full bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+                <div className="flex justify-center mb-6">
+                    <Logo size="md" />
+                </div>
+                <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{exam.title}</h1>
+                <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">{exam.description}</p>
+
+                {hasPreviousSession && (
+                    <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-md text-sm flex items-center">
+                        <Save className="h-4 w-4 mr-2" />
+                        Previous session found. Your progress has been restored.
+                    </div>
+                )}
+
+                <div className="space-y-4 mb-6">
+                    {(exam.required_fields || ['name', 'email']).map((field) => {
+                        const fieldLabels: Record<string, string> = { name: 'Full Name', email: 'Email Address', student_id: 'Student ID', phone: 'Phone Number' };
+                        const fieldTypes: Record<string, string> = { name: 'text', email: 'email', student_id: 'text', phone: 'tel' };
+                        return (
+                            <div key={field}>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{fieldLabels[field] || field}</label>
+                                <input
+                                    type={fieldTypes[field] || 'text'}
+                                    value={studentData[field] || ''}
+                                    onChange={(e) => setStudentData({ ...studentData, [field]: e.target.value })}
+                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    placeholder={`Enter your ${fieldLabels[field] || field}`}
+                                />
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-md mb-6">
+                    <div className="flex">
+                        <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                        <div className="ml-3">
+                            <h3 className="text-sm font-bold text-red-900 dark:text-red-200">Exam Security Rules</h3>
+                            <ul className="mt-2 text-xs text-red-800 dark:text-red-300 list-disc list-inside space-y-1">
+                                {exam.settings.require_fullscreen && <li>Fullscreen mode required</li>}
+                                {exam.settings.detect_tab_switch && <li>Tab switching is monitored</li>}
+                                {exam.settings.disable_copy_paste && <li>Copy/Paste disabled</li>}
+                                <li>Max violations: {exam.settings.max_violations || 3}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <button
+                    onClick={startExam}
+                    className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                    {hasPreviousSession ? 'Resume Exam' : 'Start Exam'}
+                </button>
+            </div>
+        </div>
+    );
+
+    return (
+        <div ref={containerRef} className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
+            <div className="max-w-3xl mx-auto">
+                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6 sticky top-4 z-10">
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-lg font-bold text-gray-900 dark:text-white truncate max-w-xs">{exam.title}</h1>
+                        <div className="flex items-center space-x-3">
+                            {timeLeft !== null && (
+                                <div className={`flex items-center px-3 py-1 rounded-full ${timeLeft < 60 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
+                                    <Clock className="h-4 w-4 mr-2" />
+                                    <span className="font-mono font-bold">{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</span>
+                                </div>
+                            )}
+                            <div className={`flex items-center px-3 py-1 rounded-full ${violations.length > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+                                <AlertTriangle className="h-4 w-4 mr-2" />
+                                <span className="font-bold text-sm">Violations: {violations.length}/{exam.settings.max_violations || 3}</span>
+                            </div>
+                            <button
+                                onClick={handleSubmit}
+                                disabled={isSubmitting}
+                                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 text-sm font-medium flex items-center"
+                            >
+                                {isSubmitting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
+                                {isSubmitting ? 'Submitting...' : 'Submit'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="space-y-6">
+                    {exam.questions.map((q, i) => (
+                        <div key={q.id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                            <div className="font-medium text-gray-900 dark:text-white mb-4 flex">
+                                <span className="mr-2">{i + 1}.</span>
+                                <span>{q.question_text}</span>
+                                <span className="ml-auto text-sm text-gray-500">({q.points} pts)</span>
+                            </div>
+
+                            {q.type === 'multiple_choice' && q.options?.map((opt) => (
+                                <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
+                                    <input
+                                        type="radio"
+                                        name={q.id}
+                                        value={opt}
+                                        checked={answers[q.id] === opt}
+                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                    />
+                                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
+                                </label>
+                            ))}
+
+                            {q.type === 'true_false' && ['True', 'False'].map((opt) => (
+                                <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
+                                    <input
+                                        type="radio"
+                                        name={q.id}
+                                        value={opt}
+                                        checked={answers[q.id] === opt}
+                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                    />
+                                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
+                                </label>
+                            ))}
+
+                            {q.type === 'short_answer' && (
+                                <input
+                                    type="text"
+                                    className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    placeholder="Type your answer here..."
+                                    value={answers[q.id] || ''}
+                                    onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                />
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                <ViolationModal
+                    isOpen={showViolationModal}
+                    onClose={() => setShowViolationModal(false)}
+                    title={violationMessage.title}
+                    message={violationMessage.message}
+                    severity={violationMessage.title.includes('Final') || violationMessage.title.includes('Maximum') ? 'critical' : 'warning'}
+                />
+
+                <div className="mt-8 text-center pb-8">
+                    <div className="inline-flex items-center justify-center space-x-2 text-gray-400 dark:text-gray-500">
+                        <span className="text-sm">Powered by</span>
+                        <Logo size="sm" showText={true} className="opacity-75 grayscale hover:grayscale-0 transition-all duration-300" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
