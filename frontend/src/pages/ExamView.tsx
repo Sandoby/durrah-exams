@@ -48,6 +48,8 @@ export default function ExamView() {
     const [showViolationModal, setShowViolationModal] = useState(false);
     const [violationMessage, setViolationMessage] = useState({ title: '', message: '' });
     const [hasPreviousSession, setHasPreviousSession] = useState(false);
+    const [isAvailable, setIsAvailable] = useState(true);
+    const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const isSubmittingRef = useRef(false);
@@ -117,7 +119,37 @@ export default function ExamView() {
             const { data: examData, error } = await supabase.from('exams').select('*').eq('id', id).single();
             if (error) throw error;
             const { data: qData } = await supabase.from('questions').select('*').eq('exam_id', id);
-            setExam({ ...examData, questions: qData || [], settings: examData.settings || {} });
+            const settings = examData.settings || {};
+            const normalizedSettings: any = { ...settings };
+            // support both naming conventions
+            if (!normalizedSettings.start_time && settings.start_date) normalizedSettings.start_time = settings.start_date;
+            if (!normalizedSettings.end_time && settings.end_date) normalizedSettings.end_time = settings.end_date;
+
+            setExam({ ...examData, questions: qData || [], settings: normalizedSettings });
+
+            // Availability checks
+            const now = new Date();
+            let start: Date | null = null;
+            let end: Date | null = null;
+            if (normalizedSettings.start_time) {
+                const d = new Date(normalizedSettings.start_time);
+                if (!isNaN(d.getTime())) start = d;
+            }
+            if (normalizedSettings.end_time) {
+                const d = new Date(normalizedSettings.end_time);
+                if (!isNaN(d.getTime())) end = d;
+            }
+
+            if (start && now < start) {
+                setIsAvailable(false);
+                setAvailabilityMessage(`Exam starts at ${start.toLocaleString()}`);
+            } else if (end && now > end) {
+                setIsAvailable(false);
+                setAvailabilityMessage(`Exam ended at ${end.toLocaleString()}`);
+            } else {
+                setIsAvailable(true);
+                setAvailabilityMessage(null);
+            }
 
             // Only set initial time if not restored from session
             if (!localStorage.getItem(`durrah_exam_${id}_state`) && examData.settings?.time_limit_minutes) {
@@ -258,12 +290,22 @@ export default function ExamView() {
             toast.error('Please fill required fields');
             return;
         }
+        // Prevent starting if exam not available
+        if (!isAvailable) {
+            toast.error(availabilityMessage || 'Exam is not available right now');
+            return;
+        }
         if (exam?.settings.require_fullscreen) {
-            try {
-                await document.documentElement.requestFullscreen();
-            } catch (e) {
-                toast.error('Fullscreen required to start exam');
-                return;
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (isIOS) {
+                toast('iOS Safari does not support the Fullscreen API. Exam will start without fullscreen.', { icon: 'ℹ️' });
+            } else {
+                try {
+                    await document.documentElement.requestFullscreen();
+                } catch (e) {
+                    toast.error('Fullscreen required to start exam');
+                    return;
+                }
             }
         }
         setStarted(true);
@@ -283,6 +325,26 @@ export default function ExamView() {
     const handleSubmit = async () => {
         // Prevent duplicate submissions
         if (!exam || isSubmittingRef.current || submitted) return;
+
+        // Prevent submission if outside allowed window
+        const settings = exam.settings || {};
+        const startStr = settings.start_time || settings.start_date;
+        const endStr = settings.end_time || settings.end_date;
+        const now = new Date();
+        if (startStr) {
+            const startD = new Date(startStr);
+            if (!isNaN(startD.getTime()) && now < startD) {
+                toast.error(`Exam is not open yet. Starts at ${startD.toLocaleString()}`);
+                return;
+            }
+        }
+        if (endStr) {
+            const endD = new Date(endStr);
+            if (!isNaN(endD.getTime()) && now > endD) {
+                toast.error('Exam has already ended');
+                return;
+            }
+        }
 
         // Double check local storage to prevent race conditions or reload exploits
         if (localStorage.getItem(`durrah_exam_${id}_submitted`)) {
