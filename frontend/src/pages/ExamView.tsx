@@ -86,6 +86,7 @@ interface Exam {
         end_date?: string | null;
     };
 }
+
 export default function ExamView() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -179,7 +180,8 @@ export default function ExamView() {
             localStorage.setItem(`durrah_exam_${id}_state`, JSON.stringify(stateToSave));
         }
     }, [id, studentData, answers, violations, timeLeft, started, submitted]);
-  const fetchExam = async () => {
+
+    const fetchExam = async () => {
         try {
             const { data: examData, error } = await supabase.from('exams').select('*').eq('id', id).single();
             if (error) throw error;
@@ -244,12 +246,13 @@ export default function ExamView() {
             const violationCount = newViolations.length;
             const maxViolations = exam?.settings.max_violations || 3;
             const remaining = maxViolations - violationCount;
-          if (remaining > 0) {
+
+            if (remaining > 0) {
                 if (remaining <= 1) {
                     // Critical warning
                     setViolationMessage({
                         title: 'Final Warning',
-                        message: You have ${remaining} violation${remaining !== 1 ? 's' : ''} remaining before automatic submission.
+                        message: `You have ${remaining} violation${remaining !== 1 ? 's' : ''} remaining before automatic submission.`
                     });
                     setShowViolationModal(true);
                 } else {
@@ -336,7 +339,8 @@ export default function ExamView() {
         document.addEventListener('paste', handlePaste);
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('fullscreenchange', handleFullscreenChange);
-      return () => {
+
+        return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
             document.removeEventListener('contextmenu', handleContextMenu);
             document.removeEventListener('copy', handleCopy);
@@ -405,7 +409,7 @@ export default function ExamView() {
 
         const handleSubmit = async () => {
         // Prevent duplicate submissions
-        if (!exam  isSubmittingRef.current  submitted) return;
+        if (!exam || isSubmittingRef.current || submitted) return;
 
         // Prevent submission if outside allowed window
         const settings = exam.settings || {};
@@ -426,7 +430,8 @@ export default function ExamView() {
                 return;
             }
         }
-          // Double check local storage to prevent race conditions or reload exploits
+
+        // Double check local storage to prevent race conditions or reload exploits
         if (localStorage.getItem(`durrah_exam_${id}_submitted`)) {
             toast.error('Exam already submitted from this device.');
             setSubmitted(true);
@@ -446,8 +451,8 @@ export default function ExamView() {
                 // continue without currentUser; backend will accept submissions without student_id
             }
             const grading = calculateScore();
-            const studentName = studentData.name  studentData.student_id  'Anonymous';
-            const studentEmail = studentData.email  `${studentData.student_id  'student'}@example.com`;
+            const studentName = studentData.name || studentData.student_id || 'Anonymous';
+            const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
 
             const browserInfo = {
                 user_agent: navigator.userAgent,
@@ -459,7 +464,7 @@ export default function ExamView() {
 
             // Prefer server-side submission first to avoid client-side auth/RLS issues (common on iOS/Safari)
             const apiBase = import.meta.env.VITE_API_BASE || window.location.origin;
-            const backendUrl = ${apiBase.replace(/\/$/, '')}/api/exams/${id}/submit;
+            const backendUrl = `${apiBase.replace(/\/$/, '')}/api/exams/${id}/submit`;
 
             const backendBody = {
                 exam_id: id,
@@ -493,7 +498,7 @@ export default function ExamView() {
                         break;
                     } else {
                         const txt = await resp.text();
-                        backendLastError = Status ${resp.status}: ${txt};
+                        backendLastError = `Status ${resp.status}: ${txt}`;
                         console.warn('Backend submit responded with non-OK', resp.status, txt);
                     }
                 } catch (e) {
@@ -504,7 +509,8 @@ export default function ExamView() {
                 // Exponential backoff before retrying
                 if (attempt < maxAttempts) await new Promise(r => setTimeout(r, 1000 * attempt));
             }
-          // If backend not available or failed after retries, fall back to Supabase client-side insertion
+
+            // If backend not available or failed after retries, fall back to Supabase client-side insertion
             if (!backendSucceeded) {
                 console.warn('Backend did not accept submission, falling back to Supabase. Last backend error:', backendLastError);
             }
@@ -546,7 +552,8 @@ export default function ExamView() {
 
             // Clear temporary state
             localStorage.removeItem(`durrah_exam_${id}_state`);
-          if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
+
+            if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
         } catch (err: any) {
             console.error('Submission error', err);
             // Handle common RLS error message specially
@@ -557,8 +564,8 @@ export default function ExamView() {
                     const pendingRaw = localStorage.getItem('durrah_pending_submissions');
                     const pending = pendingRaw ? JSON.parse(pendingRaw) : [];
                     const grading = calculateScore();
-                    const studentName = studentData.name  studentData.student_id  'Anonymous';
-                    const studentEmail = studentData.email  `${studentData.student_id  'student'}@example.com`;
+                    const studentName = studentData.name || studentData.student_id || 'Anonymous';
+                    const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
                     const browserInfo = {
                         user_agent: navigator.userAgent,
                         student_data: studentData,
@@ -590,20 +597,21 @@ export default function ExamView() {
         }
     };
 
-    // Attempt to flush pending submissions saved locally (best-effort). Called on online event and on mount.
+    // Attempt to flush pending submissions saved locally (best-effort). Called on `online` event and on mount.
     const flushPendingSubmissions = async () => {
         try {
             const pendingRaw = localStorage.getItem('durrah_pending_submissions');
             if (!pendingRaw) return;
             const pending = JSON.parse(pendingRaw) as any[];
             if (!Array.isArray(pending) || pending.length === 0) return;
-          const remaining: any[] = [];
+
+            const remaining: any[] = [];
             for (const item of pending) {
                 try {
                     const { submissionPayload, answersPayload } = item;
                     // Try backend submit first
                     const apiBase = import.meta.env.VITE_API_BASE || '';
-                    const backendUrl = ${apiBase}/api/exams/${submissionPayload.exam_id}/submit;
+                    const backendUrl = `${apiBase}/api/exams/${submissionPayload.exam_id}/submit`;
                     let flushed = false;
                     try {
                         const student_data = submissionPayload.browser_info?.student_data || { name: submissionPayload.student_name, email: submissionPayload.student_email };
@@ -665,7 +673,8 @@ export default function ExamView() {
             <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
         </div>
     );
-if (submitted) return (
+
+    if (submitted) return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
             <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
                 <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
@@ -715,7 +724,8 @@ if (submitted) return (
                         );
                     })}
                 </div>
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-md mb-6">
+
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-md mb-6">
                     <div className="flex">
                         <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
                         <div className="ml-3">
@@ -757,7 +767,8 @@ if (submitted) return (
             </div>
         </div>
     );
-return (
+
+    return (
         <div ref={containerRef} className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
             <div className="max-w-3xl mx-auto">
                 <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6 sticky top-4 z-10">
@@ -808,7 +819,8 @@ return (
                                     <span className="text-gray-700 dark:text-gray-300">{opt}</span>
                                 </label>
                             ))}
-                          {q.type === 'dropdown' && (
+
+                            {q.type === 'dropdown' && (
                                 <div>
                                     <select
                                         className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -857,7 +869,8 @@ return (
                                                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAnswers({ ...answers, [q.id]: e.target.value })}
                                                 />
                                             )}
-                          {q.type === 'multiple_select' && q.options?.map((opt: string) => (
+
+                                            {q.type === 'multiple_select' && q.options?.map((opt: string) => (
                                                 <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
                                                     <input
                                                         type="checkbox"
