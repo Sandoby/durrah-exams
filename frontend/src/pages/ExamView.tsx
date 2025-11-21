@@ -527,7 +527,7 @@ export default function ExamView() {
             }).select().single();
 
             if (error) {
-                const errMsg = String(error.message || JSON.stringify(error)).toLowerCase();
+                // error message is logged above; no need to assign errMsg
                 console.warn('Supabase insert failed', error);
                 // If Supabase failed due to RLS/permission, fall through to pending save handling below
                 // Otherwise also fall through so we can attempt to persist locally rather than losing the submission
@@ -558,7 +558,7 @@ export default function ExamView() {
             console.error('Submission error', err);
             // Handle common RLS error message specially
             const msg = err?.message || (err && JSON.stringify(err)) || 'Failed to submit';
-            const lower = String(msg).toLowerCase();
+            // error message is logged above; no need to assign lower
             // Save pending submission to localStorage for later retry if backend+Supabase both failed
             try {
                     const pendingRaw = localStorage.getItem('durrah_pending_submissions');
