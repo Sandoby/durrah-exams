@@ -331,7 +331,8 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
             closeSubmissionDetail();
         } catch (err: any) {
             console.error('Failed to save grading', err);
-            toast.error('Failed to save grading');
+            const msg = err?.message || (err && JSON.stringify(err)) || 'Failed to save grading';
+            toast.error('Failed to save grading: ' + msg);
         } finally {
             setIsGradingSaving(false);
         }

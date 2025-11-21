@@ -55,6 +55,7 @@ export default function ExamView() {
     const [hasPreviousSession, setHasPreviousSession] = useState(false);
     const [isAvailable, setIsAvailable] = useState(true);
     const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
+    const [warnedUnauth, setWarnedUnauth] = useState(false);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const isSubmittingRef = useRef(false);
@@ -391,6 +392,20 @@ export default function ExamView() {
         setIsSubmitting(true);
 
         try {
+            // Log current supabase auth user to help diagnose RLS/auth issues (esp. on iOS/Safari)
+            try {
+                const au = await supabase.auth.getUser();
+                console.log('Supabase auth user before submission:', au?.data?.user, au?.error);
+                if (!au?.data?.user) {
+                    console.warn('No authenticated user detected before submission. This can cause RLS failures on some browsers (e.g., iOS Safari).');
+                    if (!warnedUnauth) {
+                        toast('You appear not to be signed in — this can cause submission to be blocked on some mobile browsers. Please sign in or try on desktop.', { icon: '⚠️' });
+                        setWarnedUnauth(true);
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed to get supabase auth user', e);
+            }
             const grading = calculateScore();
             const studentName = studentData.name || studentData.student_id || 'Anonymous';
             const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
@@ -434,8 +449,15 @@ export default function ExamView() {
 
             if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
         } catch (err: any) {
-            console.error(err);
-            toast.error(err?.message || 'Failed to submit');
+            console.error('Submission error', err);
+            // Handle common RLS error message specially
+            const msg = err?.message || (err && JSON.stringify(err)) || 'Failed to submit';
+            if (String(msg).toLowerCase().includes('violates row-level security')) {
+                // iOS Safari often drops auth cookies or blocks storage which makes requests unauthenticated
+                toast.error('Submission blocked by Row-Level Security. On some iPhones/browsers this means the session/auth token is missing — try signing in or use desktop.');
+            } else {
+                toast.error(msg);
+            }
             setIsSubmitting(false);
             isSubmittingRef.current = false;
         }
