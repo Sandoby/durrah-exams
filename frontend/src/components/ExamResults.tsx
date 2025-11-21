@@ -245,10 +245,8 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
                 console.warn('Failed to update submission total with auto scores', e);
             }
 
-            // prepare UI: only show manual (short answer) answers for grading
-            const shortAnswers = (answers || []).filter((a: any) => qMap[a.question_id] && qMap[a.question_id].type === 'short_answer');
-
-            setDetailedAnswers(shortAnswers);
+            // Manual grading is disabled: do not populate detailedAnswers for tutor editing
+            setDetailedAnswers([]);
             setQuestionMap(qMap);
             setGrading(gradeState);
             setAutoTotal(autoSum);
@@ -405,10 +403,10 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
                                         <div className="flex items-center space-x-2">
                                             <div>{submission.score} / {submission.max_score}</div>
                                             <button
-                                                onClick={() => openSubmissionDetail(submission)}
+                                                onClick={() => toast('Manual grading is disabled. Scores are auto-calculated.', { icon: 'ℹ️' })}
                                                 className="text-sm text-indigo-600 hover:text-indigo-800"
                                             >
-                                                Grade
+                                                View
                                             </button>
                                         </div>
                                     </td>

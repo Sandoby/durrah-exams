@@ -452,9 +452,40 @@ export default function ExamView() {
             console.error('Submission error', err);
             // Handle common RLS error message specially
             const msg = err?.message || (err && JSON.stringify(err)) || 'Failed to submit';
-            if (String(msg).toLowerCase().includes('violates row-level security')) {
-                // iOS Safari often drops auth cookies or blocks storage which makes requests unauthenticated
-                toast.error('Submission blocked by Row-Level Security. On some iPhones/browsers this means the session/auth token is missing — try signing in or use desktop.');
+            const lower = String(msg).toLowerCase();
+            if (lower.includes('violates row-level security') || lower.includes('row-level security') || lower.includes('permission denied')) {
+                // Save pending submission to localStorage for later retry
+                try {
+                    const pendingRaw = localStorage.getItem('durrah_pending_submissions');
+                    const pending = pendingRaw ? JSON.parse(pendingRaw) : [];
+                    const grading = calculateScore();
+                    const studentName = studentData.name || studentData.student_id || 'Anonymous';
+                    const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
+                    const browserInfo = {
+                        user_agent: navigator.userAgent,
+                        student_data: studentData,
+                        screen_width: window.screen.width,
+                        screen_height: window.screen.height,
+                        language: navigator.language
+                    };
+                    const submissionPayload = {
+                        exam_id: id,
+                        student_name: studentName,
+                        student_email: studentEmail,
+                        score: grading.score,
+                        max_score: grading.max_score,
+                        violations,
+                        browser_info: browserInfo,
+                        created_at: new Date().toISOString()
+                    };
+                    const answersPayload = Object.entries(answers).map(([question_id, answer]) => ({ submission_id: null, question_id, answer: Array.isArray(answer) ? JSON.stringify(answer) : answer }));
+                    pending.push({ submissionPayload, answersPayload });
+                    localStorage.setItem('durrah_pending_submissions', JSON.stringify(pending));
+                    toast.success('Submission saved locally and will be retried when possible. Please try again from desktop if problems persist.');
+                } catch (e) {
+                    console.error('Failed to persist pending submission locally', e);
+                    toast.error('Submission failed and could not be saved locally');
+                }
             } else {
                 toast.error(msg);
             }
@@ -462,6 +493,51 @@ export default function ExamView() {
             isSubmittingRef.current = false;
         }
     };
+
+    // Attempt to flush pending submissions saved locally (best-effort). Called on `online` event and on mount.
+    const flushPendingSubmissions = async () => {
+        try {
+            const pendingRaw = localStorage.getItem('durrah_pending_submissions');
+            if (!pendingRaw) return;
+            const pending = JSON.parse(pendingRaw) as any[];
+            if (!Array.isArray(pending) || pending.length === 0) return;
+
+            const remaining: any[] = [];
+            for (const item of pending) {
+                try {
+                    const { submissionPayload, answersPayload } = item;
+                    const { data: submission, error } = await supabase.from('submissions').insert(submissionPayload).select().single();
+                    if (error || !submission) {
+                        console.warn('Failed to flush pending submission', error);
+                        remaining.push(item);
+                        continue;
+                    }
+                    if (answersPayload && answersPayload.length) {
+                        const toInsert = answersPayload.map((a: any) => ({ ...a, submission_id: submission.id }));
+                        const { error: ansErr } = await supabase.from('submission_answers').insert(toInsert);
+                        if (ansErr) {
+                            console.warn('Failed to insert answers for flushed submission', ansErr);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error flushing pending submission', e);
+                    remaining.push(item);
+                }
+            }
+            if (remaining.length > 0) localStorage.setItem('durrah_pending_submissions', JSON.stringify(remaining));
+            else localStorage.removeItem('durrah_pending_submissions');
+        } catch (e) {
+            console.error('Failed to process pending submissions', e);
+        }
+    };
+
+    useEffect(() => {
+        // try flushing pending submissions when back online or when component mounts
+        flushPendingSubmissions();
+        window.addEventListener('online', flushPendingSubmissions);
+        return () => window.removeEventListener('online', flushPendingSubmissions);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     if (!exam) return (
         <div className="min-h-screen flex items-center justify-center">

@@ -511,7 +511,6 @@ export default function ExamEditor() {
                                                                             <option value="dropdown">Dropdown (single choice)</option>
                                                                             <option value="numeric">Numeric (numeric answer)</option>
                                                     <option value="true_false">True/False</option>
-                                                    <option value="short_answer">Short Answer</option>
                                                 </select>
                                             </div>
                                             <div>
@@ -681,12 +680,7 @@ export default function ExamEditor() {
                                             </div>
                                         )}
 
-                                        {watch(`questions.${index}.type`) === 'short_answer' && (
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Short answer (students will type their response). This will not be auto-graded.</label>
-                                                <p className="text-xs text-gray-500 mt-1">Tutors will review student responses manually; no correct answer required.</p>
-                                            </div>
-                                        )}
+                                        {/* short_answer removed from supported types */}
                                     </div>
                                 </div>
                             </div>
