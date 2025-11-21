@@ -418,7 +418,43 @@ export default function ExamView() {
                 language: navigator.language
             };
 
-            // First, try inserting into Supabase (primary path)
+            // Prefer server-side submission first to avoid client-side auth/RLS issues (common on iOS/Safari)
+            const apiBase = import.meta.env.VITE_API_BASE || '';
+            const backendUrl = `${apiBase}/api/exams/${id}/submit`;
+
+            const backendBody = {
+                exam_id: id,
+                student_data: studentData,
+                answers: Object.entries(answers).map(([question_id, answer]) => ({ question_id, answer: Array.isArray(answer) ? JSON.stringify(answer) : answer, time_spent_seconds: 0 })),
+                violations,
+                browser_info: browserInfo
+            };
+
+            // Try server-side submit first (more reliable on constrained mobile browsers)
+            try {
+                const resp = await fetch(backendUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(backendBody)
+                });
+                if (resp.ok) {
+                    const json = await resp.json();
+                    setScore({ score: json.score, max_score: json.max_score, percentage: json.percentage });
+                    setSubmitted(true);
+                    localStorage.setItem(`durrah_exam_${id}_submitted`, 'true');
+                    localStorage.setItem(`durrah_exam_${id}_score`, JSON.stringify({ score: json.score, max_score: json.max_score, percentage: json.percentage }));
+                    localStorage.removeItem(`durrah_exam_${id}_state`);
+                    if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
+                    return;
+                } else {
+                    const txt = await resp.text();
+                    console.warn('Backend submit responded with non-OK', resp.status, txt);
+                }
+            } catch (e) {
+                console.warn('Backend submit failed (network/CORS?)', e);
+            }
+
+            // If backend not available or failed, fall back to Supabase client-side insertion
             const { data: submission, error } = await supabase.from('submissions').insert({
                 exam_id: id,
                 student_name: studentName,
@@ -430,41 +466,12 @@ export default function ExamView() {
             }).select().single();
 
             if (error) {
-                // If Supabase insert fails due to RLS or permission issues (seen on some mobile Safari setups),
-                // fall back to sending the submission to the backend API (if available) so the attempt is recorded.
                 const errMsg = String(error.message || JSON.stringify(error)).toLowerCase();
+                console.warn('Supabase insert failed', error);
+                // If Supabase failed due to RLS/permission, save pending locally
                 if (errMsg.includes('row-level') || errMsg.includes('violates') || errMsg.includes('permission denied')) {
-                    console.warn('Supabase insert failed with RLS; attempting backend fallback', error);
-                    try {
-                        const apiBase = import.meta.env.VITE_API_BASE || '';
-                        const resp = await fetch(`${apiBase}/api/exams/${id}/submit`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                exam_id: id,
-                                student_data: studentData,
-                                answers: Object.entries(answers).map(([question_id, answer]) => ({ question_id, answer: Array.isArray(answer) ? JSON.stringify(answer) : answer, time_spent_seconds: 0 })),
-                                violations,
-                                browser_info: browserInfo
-                            })
-                        });
-                        if (resp.ok) {
-                            const json = await resp.json();
-                            setScore({ score: json.score, max_score: json.max_score, percentage: json.percentage });
-                            setSubmitted(true);
-                            localStorage.setItem(`durrah_exam_${id}_submitted`, 'true');
-                            localStorage.setItem(`durrah_exam_${id}_score`, JSON.stringify({ score: json.score, max_score: json.max_score, percentage: json.percentage }));
-                            localStorage.removeItem(`durrah_exam_${id}_state`);
-                            if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
-                            return;
-                        } else {
-                            console.warn('Backend fallback failed', await resp.text());
-                        }
-                    } catch (e) {
-                        console.error('Backend fallback error', e);
-                    }
+                    throw error; // outer catch handles pending save
                 }
-                // If we get here, rethrow original Supabase error to be handled by outer catch
                 throw error;
             }
 
@@ -545,17 +552,43 @@ export default function ExamView() {
             for (const item of pending) {
                 try {
                     const { submissionPayload, answersPayload } = item;
-                    const { data: submission, error } = await supabase.from('submissions').insert(submissionPayload).select().single();
-                    if (error || !submission) {
-                        console.warn('Failed to flush pending submission', error);
-                        remaining.push(item);
-                        continue;
+                    // Try backend submit first
+                    const apiBase = import.meta.env.VITE_API_BASE || '';
+                    const backendUrl = `${apiBase}/api/exams/${submissionPayload.exam_id}/submit`;
+                    let flushed = false;
+                    try {
+                        const student_data = submissionPayload.browser_info?.student_data || { name: submissionPayload.student_name, email: submissionPayload.student_email };
+                        const body = {
+                            exam_id: submissionPayload.exam_id,
+                            student_data,
+                            answers: (answersPayload || []).map((a: any) => ({ question_id: a.question_id, answer: a.answer })),
+                            violations: submissionPayload.violations || [],
+                            browser_info: submissionPayload.browser_info || {}
+                        };
+                        const resp = await fetch(backendUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                        if (resp.ok) {
+                            flushed = true;
+                        } else {
+                            console.warn('Backend flush responded non-OK', resp.status, await resp.text());
+                        }
+                    } catch (e) {
+                        console.warn('Backend flush failed', e);
                     }
-                    if (answersPayload && answersPayload.length) {
-                        const toInsert = answersPayload.map((a: any) => ({ ...a, submission_id: submission.id }));
-                        const { error: ansErr } = await supabase.from('submission_answers').insert(toInsert);
-                        if (ansErr) {
-                            console.warn('Failed to insert answers for flushed submission', ansErr);
+
+                    if (!flushed) {
+                        // Fallback: try writing to Supabase directly
+                        const { data: submission, error } = await supabase.from('submissions').insert(submissionPayload).select().single();
+                        if (error || !submission) {
+                            console.warn('Failed to flush pending submission to Supabase', error);
+                            remaining.push(item);
+                            continue;
+                        }
+                        if (answersPayload && answersPayload.length) {
+                            const toInsert = answersPayload.map((a: any) => ({ ...a, submission_id: submission.id }));
+                            const { error: ansErr } = await supabase.from('submission_answers').insert(toInsert);
+                            if (ansErr) {
+                                console.warn('Failed to insert answers for flushed submission', ansErr);
+                            }
                         }
                     }
                 } catch (e) {
