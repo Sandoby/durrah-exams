@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+// import { supabase } from '../lib/supabase' // (remove duplicate)
 
 async function getUserOrAnonymous() {
     let { data: { session } } = await supabase.auth.getSession();
@@ -11,9 +11,9 @@ async function getUserOrAnonymous() {
 
     if (!session && isBlockedBrowser) {
         // Sign in anonymously for Safari/iOS only
-        const { data, error } = await supabase.auth.signInWithOAuth({ provider: 'anonymous' });
+        const { data, error } = await supabase.auth.signInWithIdToken({ provider: 'anon' });
         if (error) throw error;
-        return data.session.user;
+        return data?.user;
     }
 
     return session?.user; // normal user for other browsers
@@ -361,17 +361,6 @@ export default function ExamView() {
                     earned += q.points || 0;
                 }
             } else {
-                if (q.type === 'numeric') {
-                    const s = parseFloat(String(studentAnswer));
-                    const c = parseFloat(String(q.correct_answer || ''));
-                    if (!isNaN(s) && !isNaN(c) && s === c) {
-                        earned += q.points || 0;
-                    }
-                } else {
-                    if (String(studentAnswer).trim().toLowerCase() === String(q.correct_answer || '').trim().toLowerCase()) {
-                        earned += q.points || 0;
-                    }
-                }
             }
         });
         return { score: earned, max_score: total, percentage: total ? (earned / total) * 100 : 0 };
