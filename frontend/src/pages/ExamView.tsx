@@ -405,7 +405,7 @@ export default function ExamView() {
                 // Handle single-answer questions (multiple_choice, true_false, numeric, dropdown)
                 const correctAnswer = String(q.correct_answer).trim().toLowerCase();
                 const studentAnswerStr = String(studentAnswer).trim().toLowerCase();
-                
+
                 if (q.type === 'numeric') {
                     // For numeric questions, compare as numbers
                     try {
@@ -431,7 +431,7 @@ export default function ExamView() {
         return { score: earned, max_score: total, percentage: total ? (earned / total) * 100 : 0 };
     };
 
-        const handleSubmit = async () => {
+    const handleSubmit = async () => {
         // Prevent duplicate submissions
         if (!exam || isSubmittingRef.current || submitted) return;
 
@@ -492,7 +492,6 @@ export default function ExamView() {
 
             const backendBody = {
                 exam_id: id,
-                student_id: currentUser?.id,
                 student_data: studentData,
                 answers: Object.entries(answers).map(([question_id, answer]) => ({ question_id, answer: Array.isArray(answer) ? JSON.stringify(answer) : answer, time_spent_seconds: 0 })),
                 violations,
@@ -541,7 +540,6 @@ export default function ExamView() {
 
             const { data: submission, error } = await supabase.from('submissions').insert({
                 exam_id: id,
-                student_id: currentUser?.id,
                 student_name: studentName,
                 student_email: studentEmail,
                 score: grading.score,
@@ -585,37 +583,36 @@ export default function ExamView() {
             // error message is logged above; no need to assign lower
             // Save pending submission to localStorage for later retry if backend+Supabase both failed
             try {
-                    const pendingRaw = localStorage.getItem('durrah_pending_submissions');
-                    const pending = pendingRaw ? JSON.parse(pendingRaw) : [];
-                    const grading = calculateScore();
-                    const studentName = studentData.name || studentData.student_id || 'Anonymous';
-                    const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
-                    const browserInfo = {
-                        user_agent: navigator.userAgent,
-                        student_data: studentData,
-                        screen_width: window.screen.width,
-                        screen_height: window.screen.height,
-                        language: navigator.language
-                    };
-                    const submissionPayload = {
-                        exam_id: id,
-                        student_id: currentUser?.id,
-                        student_name: studentName,
-                        student_email: studentEmail,
-                        score: grading.score,
-                        max_score: grading.max_score,
-                        violations,
-                        browser_info: browserInfo,
-                        created_at: new Date().toISOString()
-                    };
-                    const answersPayload = Object.entries(answers).map(([question_id, answer]) => ({ submission_id: null, question_id, answer: Array.isArray(answer) ? JSON.stringify(answer) : answer }));
-                    pending.push({ submissionPayload, answersPayload });
-                    localStorage.setItem('durrah_pending_submissions', JSON.stringify(pending));
-                    toast.success('Submission saved locally and will be retried when possible. If this keeps happening, please try from desktop and share console logs.');
-                } catch (e) {
-                    console.error('Failed to persist pending submission locally', e);
-                    toast.error('Submission failed and could not be saved locally');
-                }
+                const pendingRaw = localStorage.getItem('durrah_pending_submissions');
+                const pending = pendingRaw ? JSON.parse(pendingRaw) : [];
+                const grading = calculateScore();
+                const studentName = studentData.name || studentData.student_id || 'Anonymous';
+                const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
+                const browserInfo = {
+                    user_agent: navigator.userAgent,
+                    student_data: studentData,
+                    screen_width: window.screen.width,
+                    screen_height: window.screen.height,
+                    language: navigator.language
+                };
+                const submissionPayload = {
+                    exam_id: id,
+                    student_name: studentName,
+                    student_email: studentEmail,
+                    score: grading.score,
+                    max_score: grading.max_score,
+                    violations,
+                    browser_info: browserInfo,
+                    created_at: new Date().toISOString()
+                };
+                const answersPayload = Object.entries(answers).map(([question_id, answer]) => ({ submission_id: null, question_id, answer: Array.isArray(answer) ? JSON.stringify(answer) : answer }));
+                pending.push({ submissionPayload, answersPayload });
+                localStorage.setItem('durrah_pending_submissions', JSON.stringify(pending));
+                toast.success('Submission saved locally and will be retried when possible. If this keeps happening, please try from desktop and share console logs.');
+            } catch (e) {
+                console.error('Failed to persist pending submission locally', e);
+                toast.error('Submission failed and could not be saved locally');
+            }
             setIsSubmitting(false);
             isSubmittingRef.current = false;
         }
@@ -884,36 +881,36 @@ export default function ExamView() {
                                 </label>
                             ))}
 
-                                            {q.type === 'short_answer' && (
-                                                <textarea
-                                                    rows={4}
-                                                    className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                                    placeholder="Type your answer here..."
-                                                    value={answers[q.id] || ''}
-                                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                                />
-                                            )}
+                            {q.type === 'short_answer' && (
+                                <textarea
+                                    rows={4}
+                                    className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    placeholder="Type your answer here..."
+                                    value={answers[q.id] || ''}
+                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                />
+                            )}
 
-                                            {q.type === 'multiple_select' && q.options?.map((opt: string) => (
-                                                <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={Array.isArray(answers[q.id]) ? (answers[q.id] as string[]).includes(opt) : false}
-                                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                            const current: string[] = Array.isArray(answers[q.id]) ? [...answers[q.id]] : [];
-                                                            if (e.target.checked) {
-                                                                current.push(opt);
-                                                            } else {
-                                                                const idx = current.indexOf(opt);
-                                                                if (idx !== -1) current.splice(idx, 1);
-                                                            }
-                                                            setAnswers({ ...answers, [q.id]: current });
-                                                        }}
-                                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                                    />
-                                                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                                                </label>
-                                            ))}
+                            {q.type === 'multiple_select' && q.options?.map((opt: string) => (
+                                <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={Array.isArray(answers[q.id]) ? (answers[q.id] as string[]).includes(opt) : false}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                            const current: string[] = Array.isArray(answers[q.id]) ? [...answers[q.id]] : [];
+                                            if (e.target.checked) {
+                                                current.push(opt);
+                                            } else {
+                                                const idx = current.indexOf(opt);
+                                                if (idx !== -1) current.splice(idx, 1);
+                                            }
+                                            setAnswers({ ...answers, [q.id]: current });
+                                        }}
+                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                    />
+                                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
+                                </label>
+                            ))}
                         </div>
                     ))}
                 </div>
