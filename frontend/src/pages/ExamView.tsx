@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { AlertTriangle, CheckCircle, Clock, Loader2, Save, Wifi, WifiOff, Copy, ChevronDown, ChevronUp, Activity, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Loader2, Save } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
@@ -57,43 +57,14 @@ export default function ExamView() {
     const [isAvailable, setIsAvailable] = useState(true);
     const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
 
-    // Debugging State
-    const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error'>('checking');
-    const [debugLogs, setDebugLogs] = useState<string[]>([]);
-    const [showDebug, setShowDebug] = useState(false);
-    const [submissionError, setSubmissionError] = useState<string | null>(null);
-
     const containerRef = useRef<HTMLDivElement>(null);
     const isSubmittingRef = useRef(false);
 
-    // Load exam data and check connection
+    // Load exam data
     useEffect(() => {
-        checkConnection();
-        if (id) {
-            addLog(`Initializing exam view for ID: ${id}`);
-            fetchExam();
-        }
+        if (id) fetchExam();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
-
-    const addLog = (msg: string) => {
-        const timestamp = new Date().toLocaleTimeString();
-        setDebugLogs(prev => [`[${timestamp}] ${msg}`, ...prev]);
-    };
-
-    const checkConnection = async () => {
-        try {
-            setConnectionStatus('checking');
-            const { error } = await supabase.from('exams').select('*', { count: 'exact', head: true });
-            if (error) throw error;
-            setConnectionStatus('connected');
-            addLog('System connection verified ✅');
-        } catch (e: any) {
-            console.error('Connection check failed', e);
-            setConnectionStatus('error');
-            addLog(`Connection failed ❌: ${e.message || 'Unknown error'}`);
-        }
-    };
 
     // Check for existing session and submitted status on mount
     useEffect(() => {
@@ -190,10 +161,8 @@ export default function ExamView() {
             if (!localStorage.getItem(`durrah_exam_${id}_state`) && examData.settings?.time_limit_minutes) {
                 setTimeLeft(examData.settings.time_limit_minutes * 60);
             }
-            addLog('Exam data loaded successfully');
         } catch (err: any) {
             console.error(err);
-            addLog(`Failed to load exam: ${err.message}`);
             toast.error('Failed to load exam');
             navigate('/dashboard');
         }
@@ -324,12 +293,10 @@ export default function ExamView() {
     }, [started, exam, violations.length, submitted]);
 
     const startExam = async () => {
-        addLog('Attempting to start exam...');
         const required = exam?.required_fields || ['name', 'email'];
         const missing = required.filter((f: string) => !studentData[f]);
         if (missing.length) {
             toast.error('Please fill required fields');
-            addLog(`Start failed: Missing fields ${missing.join(', ')}`);
             return;
         }
         // Prevent starting if exam not available
@@ -338,27 +305,15 @@ export default function ExamView() {
             return;
         }
         if (exam?.settings.require_fullscreen) {
-            // Mobile detection: check for touch capability and small screen or specific UA strings
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
-
-            if (isMobile) {
-                // Relax fullscreen for mobile - just warn but allow start
-                toast('Mobile device detected. Fullscreen mode is optional for better compatibility.', { icon: '📱' });
-                addLog('Mobile detected, skipping strict fullscreen');
-            } else {
-                // Desktop: enforce fullscreen
-                try {
-                    await document.documentElement.requestFullscreen();
-                    addLog('Fullscreen entered successfully');
-                } catch (e) {
-                    toast.error('Fullscreen required to start exam');
-                    addLog('Fullscreen request failed');
-                    return;
-                }
+            // Attempt fullscreen for all devices, but don't block if it fails
+            try {
+                await document.documentElement.requestFullscreen();
+            } catch (e) {
+                // Silently fail or just log warning, but allow exam to start
+                console.warn('Fullscreen request failed or not supported', e);
             }
         }
         setStarted(true);
-        addLog('Exam started');
     };
 
     const calculateScore = () => {
@@ -415,10 +370,8 @@ export default function ExamView() {
     };
 
     const handleSubmit = async () => {
-        addLog('Submit button clicked');
         // Prevent duplicate submissions
         if (!exam || isSubmittingRef.current || submitted) {
-            addLog('Submission blocked: already submitting or submitted');
             return;
         }
 
@@ -446,17 +399,14 @@ export default function ExamView() {
         if (localStorage.getItem(`durrah_exam_${id}_submitted`)) {
             toast.error('Exam already submitted from this device.');
             setSubmitted(true);
-            addLog('Submission blocked: found local submission flag');
             return;
         }
 
         isSubmittingRef.current = true;
         setIsSubmitting(true);
-        addLog('Starting submission process...');
 
         try {
             const grading = calculateScore();
-            addLog(`Score calculated: ${grading.score}/${grading.max_score}`);
 
             const studentName = studentData.name || studentData.student_id || 'Anonymous';
             const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
@@ -468,8 +418,6 @@ export default function ExamView() {
                 screen_height: window.screen.height,
                 language: navigator.language
             };
-
-            addLog('Sending data to Supabase...');
 
             const { data: submission, error } = await supabase.from('submissions').insert({
                 exam_id: id,
@@ -483,11 +431,8 @@ export default function ExamView() {
 
             if (error) {
                 console.error('Supabase insert failed', error);
-                addLog(`Supabase insert error: ${error.message} (${error.code})`);
                 throw error;
             }
-
-            addLog(`Submission record created: ${submission.id}`);
 
             if (submission && Object.keys(answers).length > 0) {
                 const answersPayload = Object.entries(answers).map(([question_id, answer]) => {
@@ -499,9 +444,6 @@ export default function ExamView() {
                 const { error: answersError } = await supabase.from('submission_answers').insert(answersPayload);
                 if (answersError) {
                     console.warn('Failed to insert answers', answersError);
-                    addLog(`Answer insert warning: ${answersError.message}`);
-                } else {
-                    addLog('Answers saved successfully');
                 }
             }
 
@@ -515,15 +457,11 @@ export default function ExamView() {
             if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
 
             toast.success('Exam submitted successfully!');
-            addLog('Submission process completed successfully');
 
         } catch (err: any) {
             console.error('Submission error', err);
-            addLog(`CRITICAL SUBMISSION ERROR: ${err.message || JSON.stringify(err)}`);
-            setSubmissionError(err.message || 'Unknown error occurred during submission');
 
             try {
-                addLog('Attempting local backup save...');
                 const pendingRaw = localStorage.getItem('durrah_pending_submissions');
                 const pending = pendingRaw ? JSON.parse(pendingRaw) : [];
                 const grading = calculateScore();
@@ -549,12 +487,10 @@ export default function ExamView() {
                 const answersPayload = Object.entries(answers).map(([question_id, answer]) => ({ submission_id: null, question_id, answer: Array.isArray(answer) ? JSON.stringify(answer) : answer }));
                 pending.push({ submissionPayload, answersPayload });
                 localStorage.setItem('durrah_pending_submissions', JSON.stringify(pending));
-                toast.success('Submission saved locally and will be retried when possible. If this keeps happening, please try from desktop and share console logs.');
-                addLog('Local backup saved successfully');
+                toast.success('Submission saved locally. Retry later.');
             } catch (e: any) {
                 console.error('Failed to persist pending submission locally', e);
-                toast.error('Submission failed and could not be saved locally');
-                addLog(`Local backup FAILED: ${e.message}`);
+                toast.error('Submission failed.');
             }
             setIsSubmitting(false);
             isSubmittingRef.current = false;
@@ -637,19 +573,6 @@ export default function ExamView() {
             <div className="max-w-md w-full bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
                 <div className="flex justify-center mb-6">
                     <Logo size="md" />
-                </div>
-
-                {/* Connection Status Badge */}
-                <div className="flex justify-center mb-4">
-                    <div className={`flex items-center px-3 py-1 rounded-full text-xs font-medium ${connectionStatus === 'connected' ? 'bg-green-100 text-green-800' :
-                        connectionStatus === 'error' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
-                        {connectionStatus === 'connected' ? <Wifi className="h-3 w-3 mr-1" /> :
-                            connectionStatus === 'error' ? <WifiOff className="h-3 w-3 mr-1" /> :
-                                <Activity className="h-3 w-3 mr-1 animate-pulse" />}
-                        {connectionStatus === 'connected' ? 'System Ready' :
-                            connectionStatus === 'error' ? 'Connection Error' : 'Checking Connection...'}
-                    </div>
                 </div>
 
                 <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{exam.title}</h1>
@@ -877,95 +800,6 @@ export default function ExamView() {
                     {isSubmitting ? 'Submitting Exam...' : 'Submit Exam'}
                 </button>
             </div>
-
-            {/* Debug Console */}
-            <div className="fixed bottom-20 left-4 right-4 z-30 sm:left-auto sm:right-4 sm:w-96">
-                <div className="bg-black/80 backdrop-blur-md rounded-lg shadow-xl border border-gray-700 overflow-hidden">
-                    <button
-                        onClick={() => setShowDebug(!showDebug)}
-                        className="w-full px-4 py-2 flex items-center justify-between text-xs font-mono text-gray-300 hover:bg-white/5"
-                    >
-                        <span className="flex items-center">
-                            <Activity className="h-3 w-3 mr-2 text-blue-400" />
-                            Troubleshoot Log ({debugLogs.length})
-                        </span>
-                        {showDebug ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
-                    </button>
-
-                    {showDebug && (
-                        <div className="p-2 border-t border-gray-700 max-h-60 overflow-y-auto">
-                            {debugLogs.length === 0 ? (
-                                <p className="text-xs text-gray-500 italic p-2">No logs yet...</p>
-                            ) : (
-                                <div className="space-y-1">
-                                    {debugLogs.map((log, i) => (
-                                        <div key={i} className="text-[10px] font-mono text-gray-300 border-b border-gray-800/50 pb-1 last:border-0">
-                                            {log}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                            <div className="mt-2 pt-2 border-t border-gray-700 flex justify-end">
-                                <button
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(debugLogs.join('\n'));
-                                        toast.success('Logs copied!');
-                                    }}
-                                    className="text-[10px] text-blue-400 hover:text-blue-300 flex items-center"
-                                >
-                                    <Copy className="h-3 w-3 mr-1" /> Copy Logs
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Submission Error Modal */}
-            {submissionError && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full p-6 border-2 border-red-500 animate-in fade-in zoom-in duration-200">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center text-red-600 dark:text-red-400">
-                                <XCircle className="h-6 w-6 mr-2" />
-                                <h3 className="text-lg font-bold">Submission Failed</h3>
-                            </div>
-                            <button onClick={() => setSubmissionError(null)} className="text-gray-400 hover:text-gray-500">
-                                <XCircle className="h-5 w-5" />
-                            </button>
-                        </div>
-
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                            We encountered an error while submitting your exam. Please copy the error details below and send them to your instructor.
-                        </p>
-
-                        <div className="bg-gray-100 dark:bg-gray-900 p-3 rounded-md mb-4 overflow-x-auto">
-                            <code className="text-xs font-mono text-red-600 dark:text-red-400 break-all">
-                                {submissionError}
-                            </code>
-                        </div>
-
-                        <div className="flex space-x-3">
-                            <button
-                                onClick={() => {
-                                    navigator.clipboard.writeText(submissionError);
-                                    toast.success('Error copied to clipboard');
-                                }}
-                                className="flex-1 flex items-center justify-center px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-medium transition-colors"
-                            >
-                                <Copy className="h-4 w-4 mr-2" />
-                                Copy Error
-                            </button>
-                            <button
-                                onClick={handleSubmit}
-                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium transition-colors"
-                            >
-                                Try Again
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

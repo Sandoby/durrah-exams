@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FileDown, Loader2, AlertTriangle } from 'lucide-react';
+import { FileDown, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import * as XLSX from 'xlsx';
-import { ViolationListModal } from './ViolationListModal';
+
 
 interface ExamResultsProps {
     examId: string;
@@ -33,7 +33,7 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
     const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
     const [detailedAnswers, setDetailedAnswers] = useState<any[]>([]);
     const [questionMap, setQuestionMap] = useState<Record<string, any>>({});
-    const [isViolationModalOpen, setIsViolationModalOpen] = useState(false);
+
 
     const fieldLabels: Record<string, string> = {
         name: 'Name',
@@ -67,7 +67,21 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            setSubmissions(data || []);
+
+            // Filter duplicates: keep the latest submission for each student (by email or name)
+            const uniqueSubmissions: Submission[] = [];
+            const seen = new Set();
+
+            (data || []).forEach((sub: Submission) => {
+                // Key can be email or name if email is missing
+                const key = sub.student_email || sub.student_name;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    uniqueSubmissions.push(sub);
+                }
+            });
+
+            setSubmissions(uniqueSubmissions);
         } catch (error: any) {
             console.error('Error fetching data:', error);
             toast.error('Failed to load submissions');
@@ -110,7 +124,6 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
                 row['Score'] = sub.score;
                 row['Max Score'] = sub.max_score;
                 row['Percentage'] = sub.max_score > 0 ? ((sub.score / sub.max_score) * 100).toFixed(2) + '%' : '0%';
-                row['Violations'] = sub.violations?.length || 0;
                 row['Submitted At'] = new Date(sub.created_at).toLocaleString();
 
                 return row;
@@ -127,7 +140,6 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
                 { wch: 8 },  // Score
                 { wch: 10 }, // Max Score
                 { wch: 12 }, // Percentage
-                { wch: 12 }, // Violations
                 { wch: 20 }, // Submitted At
             ];
             ws['!cols'] = colWidths;
@@ -150,10 +162,7 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
         }
     };
 
-    const handleViewViolations = (submission: Submission) => {
-        setSelectedSubmission(submission);
-        setIsViolationModalOpen(true);
-    };
+
 
     const openSubmissionDetail = async (submission: Submission) => {
         setSelectedSubmission(submission);
@@ -284,7 +293,6 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
                                 ))}
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Score</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Percentage</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Violations</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Submitted</th>
                             </tr>
                         </thead>
@@ -318,21 +326,6 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
                                             {submission.max_score > 0 ? ((submission.score / submission.max_score) * 100).toFixed(1) : 0}%
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                        {submission.violations && submission.violations.length > 0 ? (
-                                            <button
-                                                onClick={() => handleViewViolations(submission)}
-                                                className="flex items-center text-red-600 hover:text-red-800 font-medium"
-                                            >
-                                                <AlertTriangle className="h-4 w-4 mr-1" />
-                                                {submission.violations.length} (View)
-                                            </button>
-                                        ) : (
-                                            <span className="text-green-600 flex items-center">
-                                                0
-                                            </span>
-                                        )}
-                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                         {new Date(submission.created_at).toLocaleDateString()}
                                     </td>
@@ -345,12 +338,7 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
 
             {selectedSubmission && (
                 <>
-                    <ViolationListModal
-                        isOpen={isViolationModalOpen}
-                        onClose={() => setIsViolationModalOpen(false)}
-                        violations={selectedSubmission.violations || []}
-                        studentName={selectedSubmission.student_name}
-                    />
+
 
                     {/* Grading Modal */}
                     <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 ${selectedSubmission ? '' : 'hidden'}`}>
@@ -364,7 +352,7 @@ export function ExamResults({ examId, examTitle }: ExamResultsProps) {
 
                             <div className="mb-4">
                                 <div className="text-sm text-gray-600">Submitted: {new Date(selectedSubmission.created_at).toLocaleString()}</div>
-                                <div className="text-sm text-gray-600">Violations: {selectedSubmission.violations?.length || 0}</div>
+
                             </div>
 
                             <div className="space-y-4">
