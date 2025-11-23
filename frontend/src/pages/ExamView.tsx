@@ -1,11 +1,11 @@
 // ExamView.tsx – cleaned up imports, added missing state, typed callbacks, and fixed submission handling
-import React, { useEffect, useState, useRef, ChangeEvent } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import type { ChangeEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { CheckCircle, Clock, Loader2, Save } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
-// import { Logo } from '../components/Logo'; // not used currently
 
 // Utility: Fisher‑Yates shuffle for randomizing arrays
 function shuffleArray<T>(array: T[]): T[] {
@@ -63,12 +63,7 @@ export default function ExamView() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAvailable, setIsAvailable] = useState(true);
     const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [violations, setViolations] = useState<any[]>([]);
     const [showViolationModal, setShowViolationModal] = useState(false);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [violationMessage, setViolationMessage] = useState({ title: '', message: '' });
 
     const isSubmittingRef = useRef(false);
 
@@ -187,7 +182,7 @@ export default function ExamView() {
             };
             const { data: subData, error: subErr } = await supabase.from('submissions').insert(submissionPayload).single();
             if (subErr) throw subErr;
-            const submissionId = (subData as any)?.id; // currently unused but kept for future reference
+            const submissionId = (subData as any)?.id;
 
             const answersPayload = Object.entries(answers).map(([question_id, answer]) => ({
                 submission_id: submissionId,
@@ -399,20 +394,19 @@ export default function ExamView() {
                     <button
                         onClick={handleSubmit}
                         disabled={isSubmitting}
-                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center"
                     >
-                        {isSubmitting ? <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" /> : <Save className="h-4 w-4 mr-1" />}
+                        {isSubmitting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Save className="h-4 w-4 mr-2" />}
                         Submit Exam
                     </button>
                 </div>
             </div>
-            {/* Violation modal (kept simple) */}
             {showViolationModal && (
                 <ViolationModal
                     isOpen={showViolationModal}
                     onClose={() => setShowViolationModal(false)}
-                    title={violationMessage.title}
-                    message={violationMessage.message}
+                    title="Violation Detected"
+                    message="Please follow exam rules"
                 />
             )}
         </div>
