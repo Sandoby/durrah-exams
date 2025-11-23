@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FileDown, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import * as XLSX from 'xlsx';
@@ -24,7 +25,7 @@ interface Submission {
     };
 }
 
-export function ExamResults({ examId, examTitle }: ExamResultsProps) {
+export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) => {
     const { user } = useAuth();
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [requiredFields, setRequiredFields] = useState<string[]>(['name', 'email']);
