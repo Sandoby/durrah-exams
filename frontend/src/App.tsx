@@ -9,6 +9,7 @@ import UpdatePassword from './pages/UpdatePassword';
 import Dashboard from './pages/Dashboard';
 import ExamEditor from './pages/ExamEditor';
 import ExamView from './pages/ExamView';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/update-password" element={<UpdatePassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="/exam/new" element={<ExamEditor />} />
             <Route path="/exam/:id/edit" element={<ExamEditor />} />
             <Route path="/exam/:id" element={<ExamView />} />

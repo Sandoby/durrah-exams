@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Loader2, Share2, BarChart3, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Loader2, Share2, BarChart3, FileText, Settings } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -46,23 +46,23 @@ export default function Dashboard() {
     };
 
     const downloadExamPDF = async (examId: string) => {
-            try {
-                const { data: exam, error: examError } = await supabase.from('exams').select('*').eq('id', examId).single();
-                if (examError || !exam) throw examError || new Error('Exam not found');
-                const { data: questions, error: qErr } = await supabase.from('questions').select('*').eq('exam_id', examId).order('created_at', { ascending: true });
-                if (qErr) throw qErr;
+        try {
+            const { data: exam, error: examError } = await supabase.from('exams').select('*').eq('id', examId).single();
+            if (examError || !exam) throw examError || new Error('Exam not found');
+            const { data: questions, error: qErr } = await supabase.from('questions').select('*').eq('exam_id', examId).order('created_at', { ascending: true });
+            if (qErr) throw qErr;
 
-                const escapeHtml = (str: any) => {
-                    if (str === null || str === undefined) return '';
-                    return String(str)
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/\"/g, '&quot;')
-                        .replace(/'/g, '&#039;');
-                };
+            const escapeHtml = (str: any) => {
+                if (str === null || str === undefined) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/\"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            };
 
-                const html = `
+            const html = `
                 <!doctype html>
                 <html>
                 <head>
@@ -110,45 +110,45 @@ export default function Dashboard() {
                       <strong>Student Info (fill before starting):</strong>
                       <div style="margin-left:14px;margin-top:8px">
                         ${(exam.required_fields || ['name', 'email']).map((f: string) => {
-                            const labels: Record<string,string> = { name: 'Full Name', email: 'Email', student_id: 'Student ID', phone: 'Phone' };
-                            return `<div style="margin-top:12px"><strong>${labels[f] || f}:</strong> ____________________________________________</div>`;
-                        }).join('')}
+                const labels: Record<string, string> = { name: 'Full Name', email: 'Email', student_id: 'Student ID', phone: 'Phone' };
+                return `<div style="margin-top:12px"><strong>${labels[f] || f}:</strong> ____________________________________________</div>`;
+            }).join('')}
                       </div>
                     </div>
 
                     ${questions.map((q: any, i: number) => {
-                        const qText = escapeHtml(q.question_text || '');
-                        const pts = q.points || 0;
-                        let bodyHtml = '';
-                        if (Array.isArray(q.options) && q.options.length) {
-                            bodyHtml += `<div class="options">`;
-                            q.options.forEach((opt: string, oi: number) => {
-                                bodyHtml += `<div class="option"><div class="opt-letter">${String.fromCharCode(65 + oi)}</div><div class="opt-text">${escapeHtml(opt)}</div></div>`;
-                            });
-                            bodyHtml += `</div>`;
-                        }
+                const qText = escapeHtml(q.question_text || '');
+                const pts = q.points || 0;
+                let bodyHtml = '';
+                if (Array.isArray(q.options) && q.options.length) {
+                    bodyHtml += `<div class="options">`;
+                    q.options.forEach((opt: string, oi: number) => {
+                        bodyHtml += `<div class="option"><div class="opt-letter">${String.fromCharCode(65 + oi)}</div><div class="opt-text">${escapeHtml(opt)}</div></div>`;
+                    });
+                    bodyHtml += `</div>`;
+                }
 
-                        if (q.type === 'short_answer') {
-                            bodyHtml += `<div class="answer-lines">${Array.from({length:6}).map(()=>'<div class="answer-line"></div>').join('')}</div>`;
-                        } else if (q.type === 'numeric') {
-                            bodyHtml += `<div class="answer-lines"><div class="answer-line" style="width:40%"></div></div>`;
-                        } else if (q.type === 'multiple_select') {
-                            if (!(Array.isArray(q.options) && q.options.length)) {
-                                bodyHtml += `<div class="answer-lines"><div class="answer-line"></div></div>`;
-                            }
-                        } else {
-                            if (!Array.isArray(q.options) || !q.options.length) {
-                                bodyHtml += `<div class="answer-lines"><div class="answer-line"></div></div>`;
-                            }
-                        }
+                if (q.type === 'short_answer') {
+                    bodyHtml += `<div class="answer-lines">${Array.from({ length: 6 }).map(() => '<div class="answer-line"></div>').join('')}</div>`;
+                } else if (q.type === 'numeric') {
+                    bodyHtml += `<div class="answer-lines"><div class="answer-line" style="width:40%"></div></div>`;
+                } else if (q.type === 'multiple_select') {
+                    if (!(Array.isArray(q.options) && q.options.length)) {
+                        bodyHtml += `<div class="answer-lines"><div class="answer-line"></div></div>`;
+                    }
+                } else {
+                    if (!Array.isArray(q.options) || !q.options.length) {
+                        bodyHtml += `<div class="answer-lines"><div class="answer-line"></div></div>`;
+                    }
+                }
 
-                        return `
+                return `
                           <div class="question">
                             <div class="q-title"><strong>${i + 1}. ${qText}</strong> <span class="points">(${pts} pts)</span></div>
                             ${bodyHtml}
                           </div>
                         `;
-                    }).join('')}
+            }).join('')}
 
                     <div class="footer-note">This printout is for administering the exam on paper. Students should write legibly and include their name on each page.</div>
                   </div>
@@ -156,21 +156,21 @@ export default function Dashboard() {
                 </html>
                 `;
 
-                const w = window.open('', '_blank');
-                if (!w) {
-                    toast.error('Popup blocked. Allow popups to download PDF.');
-                    return;
-                }
-                w.document.open();
-                w.document.write(html);
-                w.document.close();
-                w.focus();
-                setTimeout(() => w.print(), 600);
-            } catch (err: any) {
-                console.error(err);
-                toast.error('Failed to prepare printable exam');
+            const w = window.open('', '_blank');
+            if (!w) {
+                toast.error('Popup blocked. Allow popups to download PDF.');
+                return;
             }
-        };
+            w.document.open();
+            w.document.write(html);
+            w.document.close();
+            w.focus();
+            setTimeout(() => w.print(), 600);
+        } catch (err: any) {
+            console.error(err);
+            toast.error('Failed to prepare printable exam');
+        }
+    };
 
     const copyExamLink = (examId: string) => {
         const examUrl = `${window.location.origin}/exam/${examId}`;
@@ -233,6 +233,13 @@ export default function Dashboard() {
                             <span className="text-sm text-gray-700 dark:text-gray-300">
                                 Welcome, {user?.user_metadata?.full_name || user?.email}
                             </span>
+                            <Link
+                                to="/settings"
+                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition"
+                            >
+                                <Settings className="h-4 w-4 mr-2" />
+                                Settings
+                            </Link>
                             <button
                                 onClick={handleLogout}
                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition"
