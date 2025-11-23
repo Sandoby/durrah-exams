@@ -6,14 +6,21 @@
 import toast from 'react-hot-toast';
 
 export class AppError extends Error {
+    code: string;
+    statusCode: number;
+    details?: any;
+
     constructor(
         message: string,
-        public code: string,
-        public statusCode: number = 500,
-        public details?: any
+        code: string,
+        statusCode: number = 500,
+        details?: any
     ) {
         super(message);
         this.name = 'AppError';
+        this.code = code;
+        this.statusCode = statusCode;
+        this.details = details;
     }
 }
 
@@ -52,7 +59,6 @@ export function handleError(error: unknown, context?: string): void {
     console.error(`Error in ${context || 'application'}:`, error);
 
     if (error instanceof AppError) {
-        // Custom app errors
         toast.error(error.message, {
             duration: 5000,
             icon: '❌',
@@ -61,7 +67,6 @@ export function handleError(error: unknown, context?: string): void {
     }
 
     if (error instanceof Error) {
-        // Standard JavaScript errors
         if (error.message.includes('fetch')) {
             toast.error('Network error. Please check your connection.', {
                 duration: 5000,
@@ -85,7 +90,6 @@ export function handleError(error: unknown, context?: string): void {
         return;
     }
 
-    // Unknown error
     toast.error('An unexpected error occurred. Please try again.', {
         duration: 4000,
         icon: '❌',
@@ -270,7 +274,6 @@ export function getUserFriendlyMessage(error: unknown): string {
  * Log error to monitoring service (placeholder)
  */
 export function logErrorToService(error: unknown, context?: string): void {
-    // In production, send to error monitoring service like Sentry
     const errorData = formatErrorForLogging(error);
 
     console.error('Error logged:', {
@@ -278,11 +281,4 @@ export function logErrorToService(error: unknown, context?: string): void {
         timestamp: new Date().toISOString(),
         ...errorData,
     });
-
-    // Example: Send to Sentry
-    // if (window.Sentry) {
-    //   window.Sentry.captureException(error, {
-    //     tags: { context },
-    //   });
-    // }
 }
