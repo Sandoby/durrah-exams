@@ -442,411 +442,530 @@ export default function ExamView() {
             }
         }
 
-        // Attempt to flush pending submissions saved locally (best-effort). Called on `online` event and on mount.
-        const flushPendingSubmissions = async () => {
-            try {
-                const pendingRaw = localStorage.getItem('durrah_pending_submissions');
-                if (!pendingRaw) return;
-                const pending = JSON.parse(pendingRaw) as any[];
-                if (!Array.isArray(pending) || pending.length === 0) return;
+        // Double check local storage to prevent race conditions or reload exploits
+        if (localStorage.getItem(`durrah_exam_${id}_submitted`)) {
+            toast.error('Exam already submitted from this device.');
+            setSubmitted(true);
+            addLog('Submission blocked: found local submission flag');
+            return;
+        }
 
-                const remaining: any[] = [];
-                for (const item of pending) {
-                    try {
-                        const { submissionPayload, answersPayload } = item;
+        isSubmittingRef.current = true;
+        setIsSubmitting(true);
+        addLog('Starting submission process...');
 
-                        // Direct Supabase flush (backend removed)
-                        const { data: submission, error } = await supabase.from('submissions').insert(submissionPayload).select().single();
+        try {
+            const grading = calculateScore();
+            addLog(`Score calculated: ${grading.score}/${grading.max_score}`);
 
-                        if (error || !submission) {
-                            console.warn('Failed to flush pending submission to Supabase', error);
-                            remaining.push(item);
-                            continue;
-                        }
+            const studentName = studentData.name || studentData.student_id || 'Anonymous';
+            const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
 
-                        if (answersPayload && answersPayload.length) {
-                            const toInsert = answersPayload.map((a: any) => ({ ...a, submission_id: submission.id }));
-                            const { error: ansErr } = await supabase.from('submission_answers').insert(toInsert);
-                            if (ansErr) {
-                                console.warn('Failed to insert answers for flushed submission', ansErr);
-                            }
-                        }
-                    } catch (e) {
-                        console.error('Error flushing pending submission', e);
-                        remaining.push(item);
-                    }
-                }
-                if (remaining.length > 0) localStorage.setItem('durrah_pending_submissions', JSON.stringify(remaining));
-                else localStorage.removeItem('durrah_pending_submissions');
-            } catch (e) {
-                console.error('Failed to process pending submissions', e);
+            const browserInfo = {
+                user_agent: navigator.userAgent,
+                student_data: studentData,
+                screen_width: window.screen.width,
+                screen_height: window.screen.height,
+                language: navigator.language
+            };
+
+            addLog('Sending data to Supabase...');
+
+            const { data: submission, error } = await supabase.from('submissions').insert({
+                exam_id: id,
+                student_name: studentName,
+                student_email: studentEmail,
+                score: grading.score,
+                max_score: grading.max_score,
+                violations,
+                browser_info: browserInfo
+            }).select().single();
+
+            if (error) {
+                console.error('Supabase insert failed', error);
+                addLog(`Supabase insert error: ${error.message} (${error.code})`);
+                throw error;
             }
-        };
 
-        useEffect(() => {
-            // try flushing pending submissions when back online or when component mounts
-            flushPendingSubmissions();
-            window.addEventListener('online', flushPendingSubmissions);
-            return () => window.removeEventListener('online', flushPendingSubmissions);
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, []);
+            addLog(`Submission record created: ${submission.id}`);
 
-        if (!exam) return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-            </div>
-        );
+            if (submission && Object.keys(answers).length > 0) {
+                const answersPayload = Object.entries(answers).map(([question_id, answer]) => {
+                    let toSend: any = answer;
+                    if (Array.isArray(answer)) toSend = JSON.stringify(answer);
+                    return ({ submission_id: submission.id, question_id, answer: toSend });
+                });
 
-        if (submitted) return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-                <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
-                    <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
-                    <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white">Exam Submitted</h2>
-                    {score && (
-                        <div className="mt-4">
-                            <p className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">{score.percentage.toFixed(1)}%</p>
-                            <p className="text-gray-500 dark:text-gray-400 mt-1">{score.score} / {score.max_score} points</p>
-                        </div>
-                    )}
-                    <p className="mt-4 text-sm text-gray-500">Your submission has been recorded.</p>
-                </div>
-            </div>
-        );
+                const { error: answersError } = await supabase.from('submission_answers').insert(answersPayload);
+                if (answersError) {
+                    console.warn('Failed to insert answers', answersError);
+                    addLog(`Answer insert warning: ${answersError.message}`);
+                } else {
+                    addLog('Answers saved successfully');
+                }
+            }
 
-        if (!started) return (
-            <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
-                <div className="max-w-md w-full bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-                    <div className="flex justify-center mb-6">
-                        <Logo size="md" />
-                    </div>
+            setScore(grading);
+            setSubmitted(true);
 
-                    {/* Connection Status Badge */}
-                    <div className="flex justify-center mb-4">
-                        <div className={`flex items-center px-3 py-1 rounded-full text-xs font-medium ${connectionStatus === 'connected' ? 'bg-green-100 text-green-800' :
-                                connectionStatus === 'error' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
-                            }`}>
-                            {connectionStatus === 'connected' ? <Wifi className="h-3 w-3 mr-1" /> :
-                                connectionStatus === 'error' ? <WifiOff className="h-3 w-3 mr-1" /> :
-                                    <Activity className="h-3 w-3 mr-1 animate-pulse" />}
-                            {connectionStatus === 'connected' ? 'System Ready' :
-                                connectionStatus === 'error' ? 'Connection Error' : 'Checking Connection...'}
-                        </div>
-                    </div>
+            localStorage.setItem(`durrah_exam_${id}_submitted`, 'true');
+            localStorage.setItem(`durrah_exam_${id}_score`, JSON.stringify(grading));
+            localStorage.removeItem(`durrah_exam_${id}_state`);
 
-                    <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{exam.title}</h1>
-                    <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">{exam.description}</p>
+            if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
 
-                    {hasPreviousSession && (
-                        <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-md text-sm flex items-center">
-                            <Save className="h-4 w-4 mr-2" />
-                            Previous session found. Your progress has been restored.
-                        </div>
-                    )}
+            toast.success('Exam submitted successfully!');
+            addLog('Submission process completed successfully');
 
-                    <div className="space-y-4 mb-6">
-                        {(exam.required_fields || ['name', 'email']).map((field) => {
-                            const fieldLabels: Record<string, string> = { name: 'Full Name', email: 'Email Address', student_id: 'Student ID', phone: 'Phone Number' };
-                            const fieldTypes: Record<string, string> = { name: 'text', email: 'email', student_id: 'text', phone: 'tel' };
-                            return (
-                                <div key={field}>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{fieldLabels[field] || field}</label>
-                                    <input
-                                        type={fieldTypes[field] || 'text'}
-                                        value={studentData[field] || ''}
-                                        onChange={(e) => setStudentData({ ...studentData, [field]: e.target.value })}
-                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                        placeholder={`Enter your ${fieldLabels[field] || field}`}
-                                    />
-                                </div>
-                            );
-                        })}
-                    </div>
+        } catch (err: any) {
+            console.error('Submission error', err);
+            addLog(`CRITICAL SUBMISSION ERROR: ${err.message || JSON.stringify(err)}`);
+            setSubmissionError(err.message || 'Unknown error occurred during submission');
 
-                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-md mb-6">
-                        <div className="flex">
-                            <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                            <div className="ml-3">
-                                <h3 className="text-sm font-bold text-red-900 dark:text-red-200">Exam Security Rules</h3>
-                                <ul className="mt-2 text-xs text-red-800 dark:text-red-300 list-disc list-inside space-y-1">
-                                    {exam.settings.require_fullscreen && <li>Fullscreen mode required</li>}
-                                    {exam.settings.detect_tab_switch && <li>Tab switching is monitored</li>}
-                                    {exam.settings.disable_copy_paste && <li>Copy/Paste disabled</li>}
-                                    <li>Max violations: {exam.settings.max_violations || 3}</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+            try {
+                addLog('Attempting local backup save...');
+                const pendingRaw = localStorage.getItem('durrah_pending_submissions');
+                const pending = pendingRaw ? JSON.parse(pendingRaw) : [];
+                const grading = calculateScore();
+                const studentName = studentData.name || studentData.student_id || 'Anonymous';
+                const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
+                const browserInfo = {
+                    user_agent: navigator.userAgent,
+                    student_data: studentData,
+                    screen_width: window.screen.width,
+                    screen_height: window.screen.height,
+                    language: navigator.language
+                };
+                const submissionPayload = {
+                    exam_id: id,
+                    student_name: studentName,
+                    student_email: studentEmail,
+                    score: grading.score,
+                    max_score: grading.max_score,
+                    violations,
+                    browser_info: browserInfo,
+                    created_at: new Date().toISOString()
+                };
+                const answersPayload = Object.entries(answers).map(([question_id, answer]) => ({ submission_id: null, question_id, answer: Array.isArray(answer) ? JSON.stringify(answer) : answer }));
+                pending.push({ submissionPayload, answersPayload });
+                localStorage.setItem('durrah_pending_submissions', JSON.stringify(pending));
+                toast.success('Submission saved locally and will be retried when possible. If this keeps happening, please try from desktop and share console logs.');
+                addLog('Local backup saved successfully');
+            } catch (e: any) {
+                console.error('Failed to persist pending submission locally', e);
+                toast.error('Submission failed and could not be saved locally');
+                addLog(`Local backup FAILED: ${e.message}`);
+            }
+            setIsSubmitting(false);
+            isSubmittingRef.current = false;
+        }
+    };
 
-                    {/* iPhone/Safari help modal or instructions */}
-                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-md mb-6">
-                        <div className="flex">
-                            <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
-                            <div className="ml-3">
-                                <h3 className="text-sm font-bold text-yellow-900 dark:text-yellow-200">iPhone/Safari Submission Help</h3>
-                                <ul className="mt-2 text-xs text-yellow-800 dark:text-yellow-300 list-disc list-inside space-y-1">
-                                    <li>Make sure Safari is <b>not</b> in Private Browsing mode.</li>
-                                    <li>Enable cookies: Settings &gt; Safari &gt; Block All Cookies (<b>disable</b>).</li>
-                                    <li>Disable “Prevent Cross-Site Tracking”: Settings &gt; Safari &gt; Prevent Cross-Site Tracking (<b>disable</b>).</li>
-                                    <li>Use “Add to Home Screen” for best reliability (Share &gt; Add to Home Screen).</li>
-                                    <li>If you see a submission error, try logging out and logging in again before submitting.</li>
-                                    <li>If it still fails, <b>take screenshots</b> of your answers before submitting and contact support/tutor.</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+    // Attempt to flush pending submissions saved locally (best-effort). Called on `online` event and on mount.
+    const flushPendingSubmissions = async () => {
+        try {
+            const pendingRaw = localStorage.getItem('durrah_pending_submissions');
+            if (!pendingRaw) return;
+            const pending = JSON.parse(pendingRaw) as any[];
+            if (!Array.isArray(pending) || pending.length === 0) return;
 
-                    <button
-                        onClick={startExam}
-                        className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        {hasPreviousSession ? 'Resume Exam' : 'Start Exam'}
-                    </button>
-                </div>
-            </div>
-        );
+            const remaining: any[] = [];
+            for (const item of pending) {
+                try {
+                    const { submissionPayload, answersPayload } = item;
 
-        return (
-            <div ref={containerRef} className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
-                <div className="max-w-3xl mx-auto">
-                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6 sticky top-4 z-10">
-                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                            <h1 className="text-lg font-bold text-gray-900 dark:text-white truncate max-w-xs">{exam.title}</h1>
-                            <div className="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
-                                {timeLeft !== null && (
-                                    <div className={`flex items-center px-3 py-1 rounded-full ${timeLeft < 60 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
-                                        <Clock className="h-4 w-4 mr-2" />
-                                        <span className="font-mono font-bold">{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</span>
-                                    </div>
-                                )}
-                                <div className={`flex items-center px-3 py-1 rounded-full ${violations.length > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                                    <AlertTriangle className="h-4 w-4 mr-2" />
-                                    <span className="font-bold text-sm">Violations: {violations.length}/{exam.settings.max_violations || 3}</span>
-                                </div>
-                                <button
-                                    onClick={handleSubmit}
-                                    disabled={isSubmitting}
-                                    className="hidden sm:flex px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 text-sm font-medium items-center"
-                                >
-                                    {isSubmitting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
-                                    {isSubmitting ? 'Submitting...' : 'Submit'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    // Direct Supabase flush (backend removed)
+                    const { data: submission, error } = await supabase.from('submissions').insert(submissionPayload).select().single();
 
-                    <div className="space-y-6">
-                        {exam.questions.map((q, i) => (
-                            <div key={q.id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                                <div className="font-medium text-gray-900 dark:text-white mb-4 flex">
-                                    <span className="mr-2">{i + 1}.</span>
-                                    <span>{q.question_text}</span>
-                                    <span className="ml-auto text-sm text-gray-500">({q.points} pts)</span>
-                                </div>
+                    if (error || !submission) {
+                        console.warn('Failed to flush pending submission to Supabase', error);
+                        remaining.push(item);
+                        continue;
+                    }
 
-                                {q.type === 'multiple_choice' && q.options?.map((opt) => (
-                                    <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
-                                        <input
-                                            type="radio"
-                                            name={q.id}
-                                            value={opt}
-                                            checked={answers[q.id] === opt}
-                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                        />
-                                        <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                                    </label>
-                                ))}
+                    if (answersPayload && answersPayload.length) {
+                        const toInsert = answersPayload.map((a: any) => ({ ...a, submission_id: submission.id }));
+                        const { error: ansErr } = await supabase.from('submission_answers').insert(toInsert);
+                        if (ansErr) {
+                            console.warn('Failed to insert answers for flushed submission', ansErr);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error flushing pending submission', e);
+                    remaining.push(item);
+                }
+            }
+            if (remaining.length > 0) localStorage.setItem('durrah_pending_submissions', JSON.stringify(remaining));
+            else localStorage.removeItem('durrah_pending_submissions');
+        } catch (e) {
+            console.error('Failed to process pending submissions', e);
+        }
+    };
 
-                                {q.type === 'dropdown' && (
-                                    <div>
-                                        <select
-                                            className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            value={answers[q.id] || ''}
-                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                        >
-                                            <option value="">Select...</option>
-                                            {q.options?.map((opt) => (
-                                                <option key={opt} value={opt}>{opt}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
+    useEffect(() => {
+        // try flushing pending submissions when back online or when component mounts
+        flushPendingSubmissions();
+        window.addEventListener('online', flushPendingSubmissions);
+        return () => window.removeEventListener('online', flushPendingSubmissions);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-                                {q.type === 'numeric' && (
-                                    <div>
-                                        <input
-                                            type="number"
-                                            className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            value={answers[q.id] ?? ''}
-                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                        />
-                                    </div>
-                                )}
+    if (!exam) return (
+        <div className="min-h-screen flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        </div>
+    );
 
-                                {q.type === 'true_false' && ['True', 'False'].map((opt) => (
-                                    <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
-                                        <input
-                                            type="radio"
-                                            name={q.id}
-                                            value={opt}
-                                            checked={answers[q.id] === opt}
-                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                        />
-                                        <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                                    </label>
-                                ))}
-
-                                {q.type === 'short_answer' && (
-                                    <textarea
-                                        rows={4}
-                                        className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                        placeholder="Type your answer here..."
-                                        value={answers[q.id] || ''}
-                                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                    />
-                                )}
-
-                                {q.type === 'multiple_select' && q.options?.map((opt: string) => (
-                                    <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
-                                        <input
-                                            type="checkbox"
-                                            checked={Array.isArray(answers[q.id]) ? (answers[q.id] as string[]).includes(opt) : false}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                const current: string[] = Array.isArray(answers[q.id]) ? [...answers[q.id]] : [];
-                                                if (e.target.checked) {
-                                                    current.push(opt);
-                                                } else {
-                                                    const idx = current.indexOf(opt);
-                                                    if (idx !== -1) current.splice(idx, 1);
-                                                }
-                                                setAnswers({ ...answers, [q.id]: current });
-                                            }}
-                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                        />
-                                        <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
-
-                    <ViolationModal
-                        isOpen={showViolationModal}
-                        onClose={() => setShowViolationModal(false)}
-                        title={violationMessage.title}
-                        message={violationMessage.message}
-                        severity={violationMessage.title.includes('Final') || violationMessage.title.includes('Maximum') ? 'critical' : 'warning'}
-                    />
-
-                    <div className="mt-8 text-center pb-8">
-                        <div className="inline-flex items-center justify-center space-x-2 text-gray-400 dark:text-gray-500">
-                            <span className="text-sm">Powered by</span>
-                            <Logo size="sm" showText={true} className="opacity-75 grayscale hover:grayscale-0 transition-all duration-300" />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Mobile Sticky Submit Button */}
-                <div className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
-                    <button
-                        onClick={handleSubmit}
-                        disabled={isSubmitting}
-                        className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-lg font-bold flex justify-center items-center shadow-md"
-                    >
-                        {isSubmitting ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : null}
-                        {isSubmitting ? 'Submitting Exam...' : 'Submit Exam'}
-                    </button>
-                </div>
-
-                {/* Debug Console */}
-                <div className="fixed bottom-20 left-4 right-4 z-30 sm:left-auto sm:right-4 sm:w-96">
-                    <div className="bg-black/80 backdrop-blur-md rounded-lg shadow-xl border border-gray-700 overflow-hidden">
-                        <button
-                            onClick={() => setShowDebug(!showDebug)}
-                            className="w-full px-4 py-2 flex items-center justify-between text-xs font-mono text-gray-300 hover:bg-white/5"
-                        >
-                            <span className="flex items-center">
-                                <Activity className="h-3 w-3 mr-2 text-blue-400" />
-                                Troubleshoot Log ({debugLogs.length})
-                            </span>
-                            {showDebug ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
-                        </button>
-
-                        {showDebug && (
-                            <div className="p-2 border-t border-gray-700 max-h-60 overflow-y-auto">
-                                {debugLogs.length === 0 ? (
-                                    <p className="text-xs text-gray-500 italic p-2">No logs yet...</p>
-                                ) : (
-                                    <div className="space-y-1">
-                                        {debugLogs.map((log, i) => (
-                                            <div key={i} className="text-[10px] font-mono text-gray-300 border-b border-gray-800/50 pb-1 last:border-0">
-                                                {log}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                <div className="mt-2 pt-2 border-t border-gray-700 flex justify-end">
-                                    <button
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(debugLogs.join('\n'));
-                                            toast.success('Logs copied!');
-                                        }}
-                                        className="text-[10px] text-blue-400 hover:text-blue-300 flex items-center"
-                                    >
-                                        <Copy className="h-3 w-3 mr-1" /> Copy Logs
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Submission Error Modal */}
-                {submissionError && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full p-6 border-2 border-red-500 animate-in fade-in zoom-in duration-200">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center text-red-600 dark:text-red-400">
-                                    <XCircle className="h-6 w-6 mr-2" />
-                                    <h3 className="text-lg font-bold">Submission Failed</h3>
-                                </div>
-                                <button onClick={() => setSubmissionError(null)} className="text-gray-400 hover:text-gray-500">
-                                    <XCircle className="h-5 w-5" />
-                                </button>
-                            </div>
-
-                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                                We encountered an error while submitting your exam. Please copy the error details below and send them to your instructor.
-                            </p>
-
-                            <div className="bg-gray-100 dark:bg-gray-900 p-3 rounded-md mb-4 overflow-x-auto">
-                                <code className="text-xs font-mono text-red-600 dark:text-red-400 break-all">
-                                    {submissionError}
-                                </code>
-                            </div>
-
-                            <div className="flex space-x-3">
-                                <button
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(submissionError);
-                                        toast.success('Error copied to clipboard');
-                                    }}
-                                    className="flex-1 flex items-center justify-center px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-medium transition-colors"
-                                >
-                                    <Copy className="h-4 w-4 mr-2" />
-                                    Copy Error
-                                </button>
-                                <button
-                                    onClick={handleSubmit}
-                                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium transition-colors"
-                                >
-                                    Try Again
-                                </button>
-                            </div>
-                        </div>
+    if (submitted) return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+            <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
+                <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
+                <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white">Exam Submitted</h2>
+                {score && (
+                    <div className="mt-4">
+                        <p className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">{score.percentage.toFixed(1)}%</p>
+                        <p className="text-gray-500 dark:text-gray-400 mt-1">{score.score} / {score.max_score} points</p>
                     </div>
                 )}
+                <p className="mt-4 text-sm text-gray-500">Your submission has been recorded.</p>
             </div>
-        );
-    }
+        </div>
+    );
+
+    if (!started) return (
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
+            <div className="max-w-md w-full bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+                <div className="flex justify-center mb-6">
+                    <Logo size="md" />
+                </div>
+
+                {/* Connection Status Badge */}
+                <div className="flex justify-center mb-4">
+                    <div className={`flex items-center px-3 py-1 rounded-full text-xs font-medium ${connectionStatus === 'connected' ? 'bg-green-100 text-green-800' :
+                        connectionStatus === 'error' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                        {connectionStatus === 'connected' ? <Wifi className="h-3 w-3 mr-1" /> :
+                            connectionStatus === 'error' ? <WifiOff className="h-3 w-3 mr-1" /> :
+                                <Activity className="h-3 w-3 mr-1 animate-pulse" />}
+                        {connectionStatus === 'connected' ? 'System Ready' :
+                            connectionStatus === 'error' ? 'Connection Error' : 'Checking Connection...'}
+                    </div>
+                </div>
+
+                <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{exam.title}</h1>
+                <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">{exam.description}</p>
+
+                {hasPreviousSession && (
+                    <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-md text-sm flex items-center">
+                        <Save className="h-4 w-4 mr-2" />
+                        Previous session found. Your progress has been restored.
+                    </div>
+                )}
+
+                <div className="space-y-4 mb-6">
+                    {(exam.required_fields || ['name', 'email']).map((field) => {
+                        const fieldLabels: Record<string, string> = { name: 'Full Name', email: 'Email Address', student_id: 'Student ID', phone: 'Phone Number' };
+                        const fieldTypes: Record<string, string> = { name: 'text', email: 'email', student_id: 'text', phone: 'tel' };
+                        return (
+                            <div key={field}>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{fieldLabels[field] || field}</label>
+                                <input
+                                    type={fieldTypes[field] || 'text'}
+                                    value={studentData[field] || ''}
+                                    onChange={(e) => setStudentData({ ...studentData, [field]: e.target.value })}
+                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    placeholder={`Enter your ${fieldLabels[field] || field}`}
+                                />
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-md mb-6">
+                    <div className="flex">
+                        <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                        <div className="ml-3">
+                            <h3 className="text-sm font-bold text-red-900 dark:text-red-200">Exam Security Rules</h3>
+                            <ul className="mt-2 text-xs text-red-800 dark:text-red-300 list-disc list-inside space-y-1">
+                                {exam.settings.require_fullscreen && <li>Fullscreen mode required</li>}
+                                {exam.settings.detect_tab_switch && <li>Tab switching is monitored</li>}
+                                {exam.settings.disable_copy_paste && <li>Copy/Paste disabled</li>}
+                                <li>Max violations: {exam.settings.max_violations || 3}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                {/* iPhone/Safari help modal or instructions */}
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-md mb-6">
+                    <div className="flex">
+                        <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+                        <div className="ml-3">
+                            <h3 className="text-sm font-bold text-yellow-900 dark:text-yellow-200">iPhone/Safari Submission Help</h3>
+                            <ul className="mt-2 text-xs text-yellow-800 dark:text-yellow-300 list-disc list-inside space-y-1">
+                                <li>Make sure Safari is <b>not</b> in Private Browsing mode.</li>
+                                <li>Enable cookies: Settings &gt; Safari &gt; Block All Cookies (<b>disable</b>).</li>
+                                <li>Disable “Prevent Cross-Site Tracking”: Settings &gt; Safari &gt; Prevent Cross-Site Tracking (<b>disable</b>).</li>
+                                <li>Use “Add to Home Screen” for best reliability (Share &gt; Add to Home Screen).</li>
+                                <li>If you see a submission error, try logging out and logging in again before submitting.</li>
+                                <li>If it still fails, <b>take screenshots</b> of your answers before submitting and contact support/tutor.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <button
+                    onClick={startExam}
+                    className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                    {hasPreviousSession ? 'Resume Exam' : 'Start Exam'}
+                </button>
+            </div>
+        </div>
+    );
+
+    return (
+        <div ref={containerRef} className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
+            <div className="max-w-3xl mx-auto">
+                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6 sticky top-4 z-10">
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <h1 className="text-lg font-bold text-gray-900 dark:text-white truncate max-w-xs">{exam.title}</h1>
+                        <div className="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
+                            {timeLeft !== null && (
+                                <div className={`flex items-center px-3 py-1 rounded-full ${timeLeft < 60 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
+                                    <Clock className="h-4 w-4 mr-2" />
+                                    <span className="font-mono font-bold">{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</span>
+                                </div>
+                            )}
+                            <div className={`flex items-center px-3 py-1 rounded-full ${violations.length > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+                                <AlertTriangle className="h-4 w-4 mr-2" />
+                                <span className="font-bold text-sm">Violations: {violations.length}/{exam.settings.max_violations || 3}</span>
+                            </div>
+                            <button
+                                onClick={handleSubmit}
+                                disabled={isSubmitting}
+                                className="hidden sm:flex px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 text-sm font-medium items-center"
+                            >
+                                {isSubmitting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
+                                {isSubmitting ? 'Submitting...' : 'Submit'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="space-y-6">
+                    {exam.questions.map((q, i) => (
+                        <div key={q.id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                            <div className="font-medium text-gray-900 dark:text-white mb-4 flex">
+                                <span className="mr-2">{i + 1}.</span>
+                                <span>{q.question_text}</span>
+                                <span className="ml-auto text-sm text-gray-500">({q.points} pts)</span>
+                            </div>
+
+                            {q.type === 'multiple_choice' && q.options?.map((opt) => (
+                                <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
+                                    <input
+                                        type="radio"
+                                        name={q.id}
+                                        value={opt}
+                                        checked={answers[q.id] === opt}
+                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                    />
+                                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
+                                </label>
+                            ))}
+
+                            {q.type === 'dropdown' && (
+                                <div>
+                                    <select
+                                        className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        value={answers[q.id] || ''}
+                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                    >
+                                        <option value="">Select...</option>
+                                        {q.options?.map((opt) => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            {q.type === 'numeric' && (
+                                <div>
+                                    <input
+                                        type="number"
+                                        className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        value={answers[q.id] ?? ''}
+                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                    />
+                                </div>
+                            )}
+
+                            {q.type === 'true_false' && ['True', 'False'].map((opt) => (
+                                <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
+                                    <input
+                                        type="radio"
+                                        name={q.id}
+                                        value={opt}
+                                        checked={answers[q.id] === opt}
+                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                    />
+                                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
+                                </label>
+                            ))}
+
+                            {q.type === 'short_answer' && (
+                                <textarea
+                                    rows={4}
+                                    className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    placeholder="Type your answer here..."
+                                    value={answers[q.id] || ''}
+                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                />
+                            )}
+
+                            {q.type === 'multiple_select' && q.options?.map((opt: string) => (
+                                <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={Array.isArray(answers[q.id]) ? (answers[q.id] as string[]).includes(opt) : false}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                            const current: string[] = Array.isArray(answers[q.id]) ? [...answers[q.id]] : [];
+                                            if (e.target.checked) {
+                                                current.push(opt);
+                                            } else {
+                                                const idx = current.indexOf(opt);
+                                                if (idx !== -1) current.splice(idx, 1);
+                                            }
+                                            setAnswers({ ...answers, [q.id]: current });
+                                        }}
+                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                    />
+                                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
+                                </label>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+
+                <ViolationModal
+                    isOpen={showViolationModal}
+                    onClose={() => setShowViolationModal(false)}
+                    title={violationMessage.title}
+                    message={violationMessage.message}
+                    severity={violationMessage.title.includes('Final') || violationMessage.title.includes('Maximum') ? 'critical' : 'warning'}
+                />
+
+                <div className="mt-8 text-center pb-8">
+                    <div className="inline-flex items-center justify-center space-x-2 text-gray-400 dark:text-gray-500">
+                        <span className="text-sm">Powered by</span>
+                        <Logo size="sm" showText={true} className="opacity-75 grayscale hover:grayscale-0 transition-all duration-300" />
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Sticky Submit Button */}
+            <div className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
+                <button
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-lg font-bold flex justify-center items-center shadow-md"
+                >
+                    {isSubmitting ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : null}
+                    {isSubmitting ? 'Submitting Exam...' : 'Submit Exam'}
+                </button>
+            </div>
+
+            {/* Debug Console */}
+            <div className="fixed bottom-20 left-4 right-4 z-30 sm:left-auto sm:right-4 sm:w-96">
+                <div className="bg-black/80 backdrop-blur-md rounded-lg shadow-xl border border-gray-700 overflow-hidden">
+                    <button
+                        onClick={() => setShowDebug(!showDebug)}
+                        className="w-full px-4 py-2 flex items-center justify-between text-xs font-mono text-gray-300 hover:bg-white/5"
+                    >
+                        <span className="flex items-center">
+                            <Activity className="h-3 w-3 mr-2 text-blue-400" />
+                            Troubleshoot Log ({debugLogs.length})
+                        </span>
+                        {showDebug ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
+                    </button>
+
+                    {showDebug && (
+                        <div className="p-2 border-t border-gray-700 max-h-60 overflow-y-auto">
+                            {debugLogs.length === 0 ? (
+                                <p className="text-xs text-gray-500 italic p-2">No logs yet...</p>
+                            ) : (
+                                <div className="space-y-1">
+                                    {debugLogs.map((log, i) => (
+                                        <div key={i} className="text-[10px] font-mono text-gray-300 border-b border-gray-800/50 pb-1 last:border-0">
+                                            {log}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <div className="mt-2 pt-2 border-t border-gray-700 flex justify-end">
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(debugLogs.join('\n'));
+                                        toast.success('Logs copied!');
+                                    }}
+                                    className="text-[10px] text-blue-400 hover:text-blue-300 flex items-center"
+                                >
+                                    <Copy className="h-3 w-3 mr-1" /> Copy Logs
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Submission Error Modal */}
+            {submissionError && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full p-6 border-2 border-red-500 animate-in fade-in zoom-in duration-200">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center text-red-600 dark:text-red-400">
+                                <XCircle className="h-6 w-6 mr-2" />
+                                <h3 className="text-lg font-bold">Submission Failed</h3>
+                            </div>
+                            <button onClick={() => setSubmissionError(null)} className="text-gray-400 hover:text-gray-500">
+                                <XCircle className="h-5 w-5" />
+                            </button>
+                        </div>
+
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                            We encountered an error while submitting your exam. Please copy the error details below and send them to your instructor.
+                        </p>
+
+                        <div className="bg-gray-100 dark:bg-gray-900 p-3 rounded-md mb-4 overflow-x-auto">
+                            <code className="text-xs font-mono text-red-600 dark:text-red-400 break-all">
+                                {submissionError}
+                            </code>
+                        </div>
+
+                        <div className="flex space-x-3">
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(submissionError);
+                                    toast.success('Error copied to clipboard');
+                                }}
+                                className="flex-1 flex items-center justify-center px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-medium transition-colors"
+                            >
+                                <Copy className="h-4 w-4 mr-2" />
+                                Copy Error
+                            </button>
+                            <button
+                                onClick={handleSubmit}
+                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium transition-colors"
+                            >
+                                Try Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
