@@ -36,6 +36,9 @@ interface Exam {
         end_time?: string | null;
         start_date?: string | null;
         end_date?: string | null;
+        // email whitelist
+        restrict_by_email?: boolean;
+        allowed_emails?: string[];
     };
 }
 
@@ -155,6 +158,16 @@ export default function ExamView() {
             } else {
                 setIsAvailable(true);
                 setAvailabilityMessage(null);
+            }
+
+            // Check email whitelist restriction
+            if (normalizedSettings.restrict_by_email && normalizedSettings.allowed_emails) {
+                const allowedEmails = normalizedSettings.allowed_emails || [];
+                // We'll validate the email when student enters it
+                // For now, just ensure email is required
+                if (!examData.required_fields?.includes('email')) {
+                    examData.required_fields = [...(examData.required_fields || []), 'email'];
+                }
             }
 
             // Only set initial time if not restored from session
@@ -299,6 +312,18 @@ export default function ExamView() {
             toast.error('Please fill required fields');
             return;
         }
+
+        // Check email whitelist if enabled
+        if (exam?.settings.restrict_by_email && exam?.settings.allowed_emails) {
+            const studentEmail = studentData.email?.toLowerCase().trim();
+            const allowedEmails = exam.settings.allowed_emails.map(e => e.toLowerCase().trim());
+
+            if (!studentEmail || !allowedEmails.includes(studentEmail)) {
+                toast.error('Access denied: Your email is not authorized to take this exam');
+                return;
+            }
+        }
+
         // Prevent starting if exam not available
         if (!isAvailable) {
             toast.error(availabilityMessage || 'Exam is not available right now');

@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { Plus, Trash2, Save, ArrowLeft, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { EmailWhitelist } from '../components/EmailWhitelist';
 
 interface Question {
     id?: string;
@@ -33,6 +34,8 @@ interface ExamForm {
         time_limit_minutes: number | null;
         start_time: string | null;
         end_time: string | null;
+        restrict_by_email: boolean;
+        allowed_emails: string[];
     };
 }
 
@@ -69,6 +72,8 @@ export default function ExamEditor() {
                 time_limit_minutes: null,
                 start_time: null,
                 end_time: null,
+                restrict_by_email: false,
+                allowed_emails: [],
             },
         },
     });
@@ -120,6 +125,8 @@ export default function ExamEditor() {
                 time_limit_minutes: null,
                 start_time: null,
                 end_time: null,
+                restrict_by_email: false,
+                allowed_emails: [],
             };
 
             const mergedSettings = {
@@ -209,7 +216,7 @@ export default function ExamEditor() {
                         randomize_options: q.randomize_options
                     };
                     // only include correct_answer for auto-graded types
-                    if (['multiple_choice','true_false','multiple_select','dropdown','numeric'].includes(q.type)) {
+                    if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'numeric'].includes(q.type)) {
                         base.correct_answer = q.correct_answer || null;
                     }
                     return base;
@@ -231,7 +238,7 @@ export default function ExamEditor() {
                         points: q.points,
                         randomize_options: q.randomize_options
                     };
-                    if (['multiple_choice','true_false','multiple_select','dropdown','numeric'].includes(q.type)) {
+                    if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'numeric'].includes(q.type)) {
                         updatePayload.correct_answer = q.correct_answer || null;
                     }
 
@@ -391,6 +398,45 @@ export default function ExamEditor() {
                     </div>
                 </div>
 
+                {/* Email Access Control */}
+                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Email Access Control</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                    Restrict exam access to specific email addresses
+                                </p>
+                            </div>
+                            <div className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    checked={watch('settings.restrict_by_email')}
+                                    onChange={(e) => {
+                                        setValue('settings.restrict_by_email', e.target.checked);
+                                        if (e.target.checked && !watch('required_fields')?.includes('email')) {
+                                            // Automatically add email to required fields
+                                            const current = watch('required_fields') || [];
+                                            setValue('required_fields', [...current, 'email']);
+                                        }
+                                    }}
+                                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                />
+                                <label className="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-300">
+                                    Enable Email Restriction
+                                </label>
+                            </div>
+                        </div>
+
+                        {watch('settings.restrict_by_email') && (
+                            <EmailWhitelist
+                                emails={watch('settings.allowed_emails') || []}
+                                onChange={(emails) => setValue('settings.allowed_emails', emails)}
+                            />
+                        )}
+                    </div>
+                </div>
+
                 {/* Settings */}
                 <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Exam Settings</h3>
@@ -507,9 +553,9 @@ export default function ExamEditor() {
                                                     {...register(`questions.${index}.type`)}
                                                 >
                                                     <option value="multiple_choice">Multiple Choice</option>
-                                                                            <option value="multiple_select">Multiple Select (choose multiple)</option>
-                                                                            <option value="dropdown">Dropdown (single choice)</option>
-                                                                            <option value="numeric">Numeric (numeric answer)</option>
+                                                    <option value="multiple_select">Multiple Select (choose multiple)</option>
+                                                    <option value="dropdown">Dropdown (single choice)</option>
+                                                    <option value="numeric">Numeric (numeric answer)</option>
                                                     <option value="true_false">True/False</option>
                                                 </select>
                                             </div>
@@ -534,7 +580,7 @@ export default function ExamEditor() {
                                             />
                                         </div>
 
-                                        {['multiple_choice','dropdown'].includes(questionsWatch?.[index]?.type) && (
+                                        {['multiple_choice', 'dropdown'].includes(questionsWatch?.[index]?.type) && (
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Options</label>
                                                 {(() => {
