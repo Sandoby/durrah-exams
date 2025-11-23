@@ -1,11 +1,11 @@
-// ExamView.tsx – rewritten to include proper imports, question randomization, and optional answer review
-import React, { useEffect, useState, useRef } from 'react';
+// ExamView.tsx – cleaned up imports, added missing state, typed callbacks, and fixed submission handling
+import React, { useEffect, useState, useRef, ChangeEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { AlertTriangle, CheckCircle, Clock, Loader2, Save } from 'lucide-react';
+import { CheckCircle, Clock, Loader2, Save } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
-import { Logo } from '../components/Logo';
+// import { Logo } from '../components/Logo'; // not used currently
 
 // Utility: Fisher‑Yates shuffle for randomizing arrays
 function shuffleArray<T>(array: T[]): T[] {
@@ -19,9 +19,9 @@ function shuffleArray<T>(array: T[]): T[] {
 
 interface Question {
     id: string;
-    type: string; // e.g., 'multiple_choice', 'multiple_select', 'short_answer', etc.
+    type: string;
     question_text: string;
-    options?: string[]; // for choice based questions
+    options?: string[];
     points: number;
     correct_answer?: string | string[] | null;
 }
@@ -40,9 +40,8 @@ interface Exam {
         max_violations: number;
         time_limit_minutes: number | null;
         randomize_questions?: boolean;
-        show_student_answers?: boolean; // new flag to show answers after submission
+        show_student_answers?: boolean;
         show_results_immediately?: boolean;
-        // optional scheduling fields (back‑end may use either naming)
         start_time?: string | null;
         end_time?: string | null;
         start_date?: string | null;
@@ -61,11 +60,15 @@ export default function ExamView() {
     const [submitted, setSubmitted] = useState(false);
     const [score, setScore] = useState<{ score: number; max_score: number; percentage: number } | null>(null);
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
-    const [violations, setViolations] = useState<any[]>([]);
-    const [showViolationModal, setShowViolationModal] = useState(false);
-    const [violationMessage, setViolationMessage] = useState({ title: '', message: '' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAvailable, setIsAvailable] = useState(true);
     const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [violations, setViolations] = useState<any[]>([]);
+    const [showViolationModal, setShowViolationModal] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [violationMessage, setViolationMessage] = useState({ title: '', message: '' });
 
     const isSubmittingRef = useRef(false);
 
@@ -81,11 +84,10 @@ export default function ExamView() {
 
             const settings = examData.settings || {};
             const normalized: any = { ...settings };
-            // support both naming conventions
             if (!normalized.start_time && settings.start_date) normalized.start_time = settings.start_date;
             if (!normalized.end_time && settings.end_date) normalized.end_time = settings.end_date;
 
-            // Randomize questions & options if flag is set
+            // Randomize if flag is set
             let questions: Question[] = qData || [];
             if (normalized.randomize_questions) {
                 questions = shuffleArray(questions);
@@ -99,7 +101,7 @@ export default function ExamView() {
 
             setExam({ ...examData, questions, settings: normalized });
 
-            // Availability checks (start/end windows)
+            // Availability checks
             const now = new Date();
             let start: Date | null = null;
             let end: Date | null = null;
@@ -122,7 +124,7 @@ export default function ExamView() {
                 setAvailabilityMessage(null);
             }
 
-            // Initialise timer if time limit is set and we are not restoring a saved state
+            // Initialise timer if needed and no saved state
             if (normalized.time_limit_minutes && !localStorage.getItem(`durrah_exam_${id}_state`)) {
                 setTimeLeft(normalized.time_limit_minutes * 60);
             }
@@ -144,7 +146,7 @@ export default function ExamView() {
     useEffect(() => {
         if (!started || timeLeft === null) return;
         if (timeLeft > 0) {
-            const timer = setInterval(() => setTimeLeft((t) => (t && t > 0 ? t - 1 : 0)), 1000);
+            const timer = setInterval(() => setTimeLeft((t: number | null) => (t && t > 0 ? t - 1 : 0)), 1000);
             return () => clearInterval(timer);
         } else if (timeLeft === 0 && !submitted && !isSubmittingRef.current) {
             handleSubmit();
@@ -159,16 +161,13 @@ export default function ExamView() {
         let total = 0;
         let earned = 0;
         exam.questions.forEach((q) => {
-            if (q.type === 'short_answer') return; // not auto‑scored
+            if (q.type === 'short_answer') return;
             total += q.points || 0;
             const studentAns = answers[q.id];
             if (studentAns === undefined || studentAns === null) return;
             const correct = q.correct_answer;
-            // Normalise both sides to strings for comparison
             const norm = (v: any) => (Array.isArray(v) ? v.map(String).sort().join('|') : String(v).trim().toLowerCase());
-            if (norm(studentAns) === norm(correct)) {
-                earned += q.points || 0;
-            }
+            if (norm(studentAns) === norm(correct)) earned += q.points || 0;
         });
         const perc = total ? (earned / total) * 100 : 0;
         return { score: earned, max_score: total, percentage: perc };
@@ -182,17 +181,16 @@ export default function ExamView() {
         isSubmittingRef.current = true;
         setIsSubmitting(true);
         try {
-            // Build payloads
             const submissionPayload = {
                 exam_id: exam.id,
                 student_data: studentData,
-                // other fields as needed
             };
             const { data: subData, error: subErr } = await supabase.from('submissions').insert(submissionPayload).single();
             if (subErr) throw subErr;
+            const submissionId = (subData as any)?.id; // currently unused but kept for future reference
 
             const answersPayload = Object.entries(answers).map(([question_id, answer]) => ({
-                submission_id: subData.id,
+                submission_id: submissionId,
                 question_id,
                 answer: Array.isArray(answer) ? JSON.stringify(answer) : answer,
             }));
@@ -208,7 +206,6 @@ export default function ExamView() {
         } catch (e: any) {
             console.error(e);
             toast.error('Submission failed, will retry later');
-            // Optionally store pending submission locally for later retry (omitted for brevity)
         } finally {
             setIsSubmitting(false);
             isSubmittingRef.current = false;
@@ -246,9 +243,7 @@ export default function ExamView() {
         );
     }
 
-    // ---------------------------------------------------
-    // After submission – either detailed review or summary
-    // ---------------------------------------------------
+    // After submission – detailed review if enabled
     if (submitted) {
         if (exam.settings.show_student_answers) {
             return (
@@ -304,9 +299,7 @@ export default function ExamView() {
         );
     }
 
-    // ---------------------------------------------------
-    // Exam not started – show start screen / required fields
-    // ---------------------------------------------------
+    // Not started – show start screen
     if (!started) {
         const required = exam.required_fields || ['name', 'email'];
         return (
@@ -337,9 +330,7 @@ export default function ExamView() {
         );
     }
 
-    // ---------------------------------------------------
-    // Exam in progress – render questions (simplified UI)
-    // ---------------------------------------------------
+    // Exam in progress – render questions
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
             <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow rounded-lg p-6">
@@ -350,7 +341,7 @@ export default function ExamView() {
                         <span>Time left: {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</span>
                     </div>
                 )}
-                {exam.questions.map((q, idx) => (
+                {exam.questions.map((q: Question, idx: number) => (
                     <div key={q.id} className="mb-6">
                         <p className="font-medium text-gray-900 dark:text-white mb-2">{idx + 1}. {q.question_text}</p>
                         {q.type === 'multiple_choice' && q.options && (
@@ -379,12 +370,12 @@ export default function ExamView() {
                                             name={q.id}
                                             value={opt}
                                             checked={Array.isArray(answers[q.id]) && answers[q.id].includes(opt)}
-                                            onChange={(e) => {
+                                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
                                                 const prev = Array.isArray(answers[q.id]) ? answers[q.id] : [];
                                                 if (e.target.checked) {
                                                     setAnswers({ ...answers, [q.id]: [...prev, opt] });
                                                 } else {
-                                                    setAnswers({ ...answers, [q.id]: prev.filter((v) => v !== opt) });
+                                                    setAnswers({ ...answers, [q.id]: prev.filter((v: string) => v !== opt) });
                                                 }
                                             }}
                                             className="mr-2"
