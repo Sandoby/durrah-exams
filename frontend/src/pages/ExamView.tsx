@@ -16,6 +16,11 @@ interface Question {
     correct_answer?: string | string[] | null;
 }
 
+interface Violation {
+    type: string;
+    timestamp: string;
+}
+
 interface Exam {
     id: string;
     title: string;
@@ -49,7 +54,7 @@ export default function ExamView() {
     const [studentData, setStudentData] = useState<Record<string, string>>({});
     const [started, setStarted] = useState(false);
     const [answers, setAnswers] = useState<Record<string, any>>({});
-    const [violations, setViolations] = useState<any[]>([]);
+    const [violations, setViolations] = useState<Violation[]>([]);
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
