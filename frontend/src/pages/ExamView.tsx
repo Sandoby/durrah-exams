@@ -162,7 +162,6 @@ export default function ExamView() {
 
             // Check email whitelist restriction
             if (normalizedSettings.restrict_by_email && normalizedSettings.allowed_emails) {
-                const allowedEmails = normalizedSettings.allowed_emails || [];
                 // We'll validate the email when student enters it
                 // For now, just ensure email is required
                 if (!examData.required_fields?.includes('email')) {
@@ -192,8 +191,8 @@ export default function ExamView() {
     }, [started, timeLeft, exam, submitted, isSubmitting]);
 
     const logViolation = (type: string) => {
-        const violation = { type, timestamp: new Date().toISOString() };
-        setViolations((prev: any[]) => {
+        const violation: Violation = { type, timestamp: new Date().toISOString() };
+        setViolations((prev) => {
             const newViolations = [...prev, violation];
             const violationCount = newViolations.length;
             const maxViolations = exam?.settings.max_violations || 3;

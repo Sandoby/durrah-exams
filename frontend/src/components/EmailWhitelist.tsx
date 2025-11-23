@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Upload, X, Loader2, Mail, FileText } from 'lucide-react';
+import { Upload, X, Loader2, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface EmailWhitelistProps {
@@ -7,7 +7,8 @@ interface EmailWhitelistProps {
     onChange: (emails: string[]) => void;
 }
 
-const GROQ_API_KEY = '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';
+const env = (import.meta as ImportMeta).env as Record<string, string | undefined>;
+const GROQ_API_KEY = env['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'];
 
 export function EmailWhitelist({ emails, onChange }: EmailWhitelistProps) {
     const [newEmail, setNewEmail] = useState('');
@@ -42,6 +43,10 @@ export function EmailWhitelist({ emails, onChange }: EmailWhitelistProps) {
 
     const extractEmailsWithAI = async (text: string): Promise<string[]> => {
         try {
+            if (!GROQ_API_KEY) {
+                throw new Error('Groq API key missing');
+            }
+
             const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -74,18 +79,18 @@ export function EmailWhitelist({ emails, onChange }: EmailWhitelistProps) {
 
             // Try to parse the JSON response
             try {
-                const extractedEmails = JSON.parse(content);
+                const extractedEmails = JSON.parse(content) as unknown;
                 if (Array.isArray(extractedEmails)) {
-                    return extractedEmails.map((e: string) => e.toLowerCase().trim()).filter((e: string) => {
+                    return (extractedEmails as string[]).map((email) => email.toLowerCase().trim()).filter((email) => {
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                        return emailRegex.test(e);
+                        return emailRegex.test(email);
                     });
                 }
             } catch {
                 // If JSON parsing fails, try regex extraction as fallback
                 const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-                const matches = content.match(emailRegex) || [];
-                return [...new Set(matches.map(e => e.toLowerCase()))];
+                const matches = (content.match(emailRegex) ?? []) as string[];
+                return [...new Set(matches.map((email) => email.toLowerCase()))];
             }
 
             return [];
@@ -93,8 +98,8 @@ export function EmailWhitelist({ emails, onChange }: EmailWhitelistProps) {
             console.error('AI extraction error:', error);
             // Fallback to regex extraction
             const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-            const matches = text.match(emailRegex) || [];
-            return [...new Set(matches.map(e => e.toLowerCase()))];
+            const matches = (text.match(emailRegex) ?? []) as string[];
+            return [...new Set(matches.map((email) => email.toLowerCase()))];
         }
     };
 
@@ -118,7 +123,7 @@ export function EmailWhitelist({ emails, onChange }: EmailWhitelistProps) {
             const newEmails = extractedEmails.filter(email => !emails.includes(email));
 
             if (newEmails.length === 0) {
-                toast.info('All emails from the file are already in the list');
+                toast('All emails from the file are already in the list', { icon: 'ℹ️' });
                 return;
             }
 
