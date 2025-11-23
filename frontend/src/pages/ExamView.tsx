@@ -84,7 +84,7 @@ export default function ExamView() {
     const checkConnection = async () => {
         try {
             setConnectionStatus('checking');
-            const { count, error } = await supabase.from('exams').select('*', { count: 'exact', head: true });
+            const { error } = await supabase.from('exams').select('*', { count: 'exact', head: true });
             if (error) throw error;
             setConnectionStatus('connected');
             addLog('System connection verified ✅');
