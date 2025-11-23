@@ -25,7 +25,6 @@ export default function Settings() {
         institution: '',
     });
     const [passwordData, setPasswordData] = useState({
-        currentPassword: '',
         newPassword: '',
         confirmPassword: '',
     });
@@ -38,19 +37,23 @@ export default function Settings() {
     const fetchProfile = async () => {
         if (!user) return;
         try {
-            const { data, error } = await supabase
-                .from('tutors')
+            // Fetch from profiles table
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
                 .select('*')
                 .eq('id', user.id)
                 .single();
 
-            if (error) throw error;
+            if (profileError && profileError.code !== 'PGRST116') {
+                console.error('Error fetching profile:', profileError);
+            }
 
+            // Set profile data from database or fallback to user metadata
             setProfile({
-                full_name: data.full_name || '',
-                email: data.email || user.email || '',
-                phone: data.phone || '',
-                institution: data.institution || '',
+                full_name: profileData?.full_name || user.user_metadata?.full_name || '',
+                email: profileData?.email || user.email || '',
+                phone: profileData?.phone || user.user_metadata?.phone || '',
+                institution: profileData?.institution || user.user_metadata?.institution || '',
             });
         } catch (error: any) {
             console.error('Error fetching profile:', error);
@@ -64,16 +67,30 @@ export default function Settings() {
         e.preventDefault();
         setIsSaving(true);
         try {
+            // Upsert to profiles table (insert or update)
             const { error } = await supabase
-                .from('tutors')
-                .update({
+                .from('profiles')
+                .upsert({
+                    id: user?.id,
+                    email: profile.email,
                     full_name: profile.full_name,
                     phone: profile.phone,
                     institution: profile.institution,
-                })
-                .eq('id', user?.id);
+                }, {
+                    onConflict: 'id'
+                });
 
             if (error) throw error;
+
+            // Also update user metadata
+            await supabase.auth.updateUser({
+                data: {
+                    full_name: profile.full_name,
+                    phone: profile.phone,
+                    institution: profile.institution,
+                }
+            });
+
             toast.success('Profile updated successfully');
         } catch (error: any) {
             console.error('Error updating profile:', error);
@@ -106,7 +123,6 @@ export default function Settings() {
 
             toast.success('Password updated successfully');
             setPasswordData({
-                currentPassword: '',
                 newPassword: '',
                 confirmPassword: '',
             });
