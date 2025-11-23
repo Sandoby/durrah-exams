@@ -263,7 +263,10 @@ export default function ExamView() {
         };
 
         const handleFullscreenChange = () => {
-            if (exam.settings.require_fullscreen && !document.fullscreenElement && started && !submitted) {
+            // Only enforce fullscreen exit logging on desktop
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+
+            if (!isMobile && exam.settings.require_fullscreen && !document.fullscreenElement && started && !submitted) {
                 logViolation('exit_fullscreen');
                 if (violations.length < (exam.settings.max_violations || 3) - 1) {
                     setViolationMessage({ title: 'Fullscreen Exit Detected', message: 'Return to fullscreen immediately.' });
@@ -302,10 +305,14 @@ export default function ExamView() {
             return;
         }
         if (exam?.settings.require_fullscreen) {
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && typeof (window as any).MSStream === 'undefined';
-            if (isIOS) {
-                toast('iOS Safari does not support the Fullscreen API. Exam will start without fullscreen.', { icon: 'ℹ️' });
+            // Mobile detection: check for touch capability and small screen or specific UA strings
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+
+            if (isMobile) {
+                // Relax fullscreen for mobile - just warn but allow start
+                toast('Mobile device detected. Fullscreen mode is optional for better compatibility.', { icon: '📱' });
             } else {
+                // Desktop: enforce fullscreen
                 try {
                     await document.documentElement.requestFullscreen();
                 } catch (e) {
@@ -658,9 +665,9 @@ export default function ExamView() {
         <div ref={containerRef} className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
             <div className="max-w-3xl mx-auto">
                 <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6 sticky top-4 z-10">
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                         <h1 className="text-lg font-bold text-gray-900 dark:text-white truncate max-w-xs">{exam.title}</h1>
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
                             {timeLeft !== null && (
                                 <div className={`flex items-center px-3 py-1 rounded-full ${timeLeft < 60 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
                                     <Clock className="h-4 w-4 mr-2" />
@@ -674,7 +681,7 @@ export default function ExamView() {
                             <button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
-                                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 text-sm font-medium flex items-center"
+                                className="hidden sm:flex px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 text-sm font-medium items-center"
                             >
                                 {isSubmitting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
                                 {isSubmitting ? 'Submitting...' : 'Submit'}
@@ -794,6 +801,18 @@ export default function ExamView() {
                         <Logo size="sm" showText={true} className="opacity-75 grayscale hover:grayscale-0 transition-all duration-300" />
                     </div>
                 </div>
+            </div>
+
+            {/* Mobile Sticky Submit Button */}
+            <div className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
+                <button
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-lg font-bold flex justify-center items-center shadow-md"
+                >
+                    {isSubmitting ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : null}
+                    {isSubmitting ? 'Submitting Exam...' : 'Submit Exam'}
+                </button>
             </div>
         </div>
     );
