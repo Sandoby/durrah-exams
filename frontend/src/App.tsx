@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import ExamEditor from './pages/ExamEditor';
 import ExamView from './pages/ExamView';
 import Settings from './pages/Settings';
+import AdminPanel from './pages/AdminPanel';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/exam/new" element={<ExamEditor />} />
             <Route path="/exam/:id/edit" element={<ExamEditor />} />
             <Route path="/exam/:id" element={<ExamView />} />
+            <Route path="/admin" element={<AdminPanel />} />
             <Route path="/" element={<Navigate to="/login" replace />} />
           </Routes>
           <Toaster position="top-right" />

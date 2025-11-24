@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { ExamResults } from '../components/ExamResults';
+import { ChatWidget } from '../components/ChatWidget';
 
 interface Exam {
     id: string;
@@ -406,6 +407,7 @@ export default function Dashboard() {
                     </div>
                 </div>
             )}
+            <ChatWidget />
         </div>
     );
 }

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Check, CreditCard, Shield, Zap, Layout } from 'lucide-react';
+import { Check, CreditCard, Shield, Zap, Layout, X, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
 import { paySkyIntegration } from '../lib/paysky';
 import toast from 'react-hot-toast';
-import { Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export default function Checkout() {
     const navigate = useNavigate();
@@ -13,6 +13,9 @@ export default function Checkout() {
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [couponCode, setCouponCode] = useState('');
+    const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+    const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
     const handlePayment = async () => {
         if (!selectedPlan || !user?.email) {
@@ -50,6 +53,70 @@ export default function Checkout() {
         }
     };
 
+    const validateCoupon = async () => {
+        if (!couponCode.trim()) {
+            toast.error('Please enter a coupon code');
+            return;
+        }
+
+        setIsValidatingCoupon(true);
+        try {
+            const { data, error } = await supabase
+                .from('coupons')
+                .select('*')
+                .eq('code', couponCode.toUpperCase())
+                .eq('is_active', true)
+                .single();
+
+            if (error || !data) {
+                toast.error('Invalid coupon code');
+                setIsValidatingCoupon(false);
+                return;
+            }
+
+            // Check if coupon is still valid
+            if (new Date(data.valid_until) < new Date()) {
+                toast.error('This coupon has expired');
+                setIsValidatingCoupon(false);
+                return;
+            }
+
+            // Check if max uses reached
+            if (data.used_count >= data.max_uses) {
+                toast.error('This coupon has reached its maximum uses');
+                setIsValidatingCoupon(false);
+                return;
+            }
+
+            setAppliedCoupon(data);
+            toast.success('Coupon applied successfully!');
+        } catch (error) {
+            console.error('Error validating coupon:', error);
+            toast.error('Failed to validate coupon');
+        } finally {
+            setIsValidatingCoupon(false);
+        }
+    };
+
+    const removeCoupon = () => {
+        setAppliedCoupon(null);
+        setCouponCode('');
+        toast.success('Coupon removed');
+    };
+
+    const calculateFinalPrice = (basePrice: number) => {
+        if (!appliedCoupon) return basePrice;
+
+        if (appliedCoupon.discount_type === 'free') {
+            return 0;
+        } else if (appliedCoupon.discount_type === 'percentage') {
+            return basePrice - (basePrice * appliedCoupon.discount_value / 100);
+        } else if (appliedCoupon.discount_type === 'fixed') {
+            return Math.max(0, basePrice - appliedCoupon.discount_value);
+        }
+        return basePrice;
+    };
+
     const plans = [
         {
             id: 'basic',
@@ -73,9 +140,7 @@ export default function Checkout() {
                 'Unlimited exams',
                 'Advanced analytics & Insights',
                 'Priority support',
-                'Unlimited students',
-                'AI Question Generation',
-                'Email Access Control'
+                'Unlimited students'
             ],
             recommended: true
         }
@@ -230,6 +295,85 @@ export default function Checkout() {
                                     <br />
                                     Selected Plan: <span className="font-semibold text-indigo-600">{plans.find(p => p.id === selectedPlan)?.name}</span> ({billingCycle})
                                 </p>
+
+                                {/* Coupon Code Section */}
+                                <div className="mb-6 max-w-md mx-auto">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Have a coupon code?
+                                    </label>
+                                    {appliedCoupon ? (
+                                        <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                                            <div className="flex items-center">
+                                                <Check className="h-5 w-5 text-green-600 mr-2" />
+                                                <span className="font-mono font-semibold text-green-700 dark:text-green-400">
+                                                    {appliedCoupon.code}
+                                                </span>
+                                                <span className="ml-2 text-sm text-green-600 dark:text-green-400">
+                                                    {appliedCoupon.discount_type === 'free'
+                                                        ? 'Free Subscription!'
+                                                        : appliedCoupon.discount_type === 'percentage'
+                                                            ? `${appliedCoupon.discount_value}% off`
+                                                            : `${appliedCoupon.discount_value} EGP off`
+                                                    }
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={removeCoupon}
+                                                className="text-red-600 hover:text-red-800 dark:text-red-400"
+                                            >
+                                                <X className="h-5 w-5" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex space-x-2">
+                                            <input
+                                                type="text"
+                                                value={couponCode}
+                                                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                                placeholder="Enter code"
+                                                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white uppercase"
+                                            />
+                                            <button
+                                                onClick={validateCoupon}
+                                                disabled={isValidatingCoupon}
+                                                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                                            >
+                                                {isValidatingCoupon ? (
+                                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                                ) : (
+                                                    'Apply'
+                                                )}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Price Summary */}
+                                {appliedCoupon && (
+                                    <div className="mb-6 max-w-md mx-auto space-y-2 text-sm">
+                                        <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                                            <span>Original Price:</span>
+                                            <span>EGP {plans.find(p => p.id === selectedPlan)?.price}</span>
+                                        </div>
+                                        <div className="flex justify-between text-green-600 dark:text-green-400">
+                                            <span>Discount:</span>
+                                            <span>
+                                                - EGP {(plans.find(p => p.id === selectedPlan)?.price || 0) - calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between font-bold text-lg text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-700 pt-2">
+                                            <span>Final Price:</span>
+                                            <span>
+                                                {calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0) === 0
+                                                    ? 'FREE'
+                                                    : `EGP ${calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}`
+                                                }
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+
+
                                 <button
                                     onClick={handlePayment}
                                     disabled={isProcessing}
