@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Loader2, Share2, BarChart3, FileText, Settings } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Loader2, Share2, BarChart3, FileText, Settings, Crown } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -233,6 +233,13 @@ export default function Dashboard() {
                             <span className="text-sm text-gray-700 dark:text-gray-300">
                                 Welcome, {user?.user_metadata?.full_name || user?.email}
                             </span>
+                            <Link
+                                to="/checkout"
+                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 focus:outline-none transition"
+                            >
+                                <Crown className="h-4 w-4 mr-2" />
+                                Upgrade
+                            </Link>
                             <Link
                                 to="/settings"
                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition"
