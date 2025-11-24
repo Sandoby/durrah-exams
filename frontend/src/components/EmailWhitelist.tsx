@@ -57,7 +57,7 @@ export function EmailWhitelist({ emails, onChange }: EmailWhitelistProps) {
                     messages: [
                         {
                             role: 'system',
-                            content: 'You are an email extraction expert. Extract all valid email addresses from the given text. Return ONLY a JSON array of unique email addresses in lowercase, nothing else. Example: ["email1@example.com","email2@example.com"]'
+                            content: 'You are an email extraction expert. Extract all valid email addresses from the given text. Return ONLY a JSON array of unique email addresses in lowercase, nothing else. If no emails are found, return an empty array []. Example: ["email1@example.com","email2@example.com"]'
                         },
                         {
                             role: 'user',
@@ -78,27 +78,26 @@ export function EmailWhitelist({ emails, onChange }: EmailWhitelistProps) {
 
             // Try to parse the JSON response
             try {
-                const extractedEmails = JSON.parse(content) as unknown;
+                // Find the JSON array in the response content if there's extra text
+                const jsonMatch = content.match(/\[.*\]/s);
+                const jsonString = jsonMatch ? jsonMatch[0] : content;
+
+                const extractedEmails = JSON.parse(jsonString) as unknown;
                 if (Array.isArray(extractedEmails)) {
                     return (extractedEmails as string[]).map((email) => email.toLowerCase().trim()).filter((email) => {
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                         return emailRegex.test(email);
                     });
                 }
-            } catch {
-                // If JSON parsing fails, try regex extraction as fallback
-                const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-                const matches = (content.match(emailRegex) ?? []) as string[];
-                return [...new Set(matches.map((email) => email.toLowerCase()))];
+            } catch (e) {
+                console.error('Failed to parse AI response:', e);
+                throw new Error('Failed to parse AI response');
             }
 
             return [];
         } catch (error) {
             console.error('AI extraction error:', error);
-            // Fallback to regex extraction
-            const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-            const matches = (text.match(emailRegex) ?? []) as string[];
-            return [...new Set(matches.map((email) => email.toLowerCase()))];
+            throw error; // Propagate error instead of returning empty array or fallback
         }
     };
 
@@ -130,9 +129,10 @@ export function EmailWhitelist({ emails, onChange }: EmailWhitelistProps) {
             toast.success(`Added ${newEmails.length} email(s) from ${file.name}`);
         } catch (error) {
             console.error('File processing error:', error);
-            toast.error('Failed to process file');
+            toast.error('Failed to extract emails. Please check the file format.');
         } finally {
             setIsProcessing(false);
+            setUploadedFileName('');
             // Reset file input
             event.target.value = '';
         }
@@ -201,9 +201,14 @@ export function EmailWhitelist({ emails, onChange }: EmailWhitelistProps) {
                         {isProcessing ? (
                             <>
                                 <Loader2 className="h-8 w-8 text-indigo-600 animate-spin" />
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    Processing {uploadedFileName}...
-                                </p>
+                                <div className="text-center">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        AI Analyzing {uploadedFileName}...
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        Extracting emails from file content
+                                    </p>
+                                </div>
                             </>
                         ) : (
                             <>
