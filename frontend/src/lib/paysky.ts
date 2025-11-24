@@ -110,7 +110,7 @@ export class PaySkyIntegration {
             // The sample code uses Math.round(amountInEGP * 100).
             const amount = Math.round(amountInEGP * 100);
             const merchantRef = `DURRAH_${Date.now()}`;
-            const trxDateTime = new Date().toGMTString();
+            const trxDateTime = new Date().toUTCString();
             const secureHash = this.generateSecureHash(amount, merchantRef, trxDateTime);
 
             // Define global variables that PAYSKY Lightbox expects

@@ -29,14 +29,14 @@ export default function Checkout() {
                 plan.name,
                 plan.price,
                 user.email,
-                (data) => {
+                (_data) => {
                     toast.success('Payment successful!');
                     setIsProcessing(false);
                     // Here you would typically update the user's subscription status in the DB
                     // and maybe redirect to dashboard
                     setTimeout(() => navigate('/dashboard'), 2000);
                 },
-                (error) => {
+                (_error) => {
                     toast.error('Payment failed');
                     setIsProcessing(false);
                 }
