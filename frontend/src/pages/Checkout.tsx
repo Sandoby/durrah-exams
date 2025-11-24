@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Check, CreditCard, Shield, Zap, Star, Layout } from 'lucide-react';
+import { useState } from 'react';
+import { Check, CreditCard, Shield, Zap, Layout } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
 
@@ -91,8 +91,8 @@ export default function Checkout() {
                         <button
                             onClick={() => setBillingCycle('monthly')}
                             className={`relative z-10 px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${billingCycle === 'monthly'
-                                    ? 'bg-indigo-600 text-white shadow-md'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                ? 'bg-indigo-600 text-white shadow-md'
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                         >
                             Monthly
@@ -100,8 +100,8 @@ export default function Checkout() {
                         <button
                             onClick={() => setBillingCycle('yearly')}
                             className={`relative z-10 px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${billingCycle === 'yearly'
-                                    ? 'bg-indigo-600 text-white shadow-md'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                ? 'bg-indigo-600 text-white shadow-md'
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                         >
                             Yearly
@@ -118,10 +118,10 @@ export default function Checkout() {
                         <div
                             key={plan.id}
                             className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border ${selectedPlan === plan.id
-                                    ? 'border-indigo-600 ring-2 ring-indigo-600 ring-opacity-50'
-                                    : plan.recommended
-                                        ? 'border-indigo-200 dark:border-indigo-900'
-                                        : 'border-gray-200 dark:border-gray-700'
+                                ? 'border-indigo-600 ring-2 ring-indigo-600 ring-opacity-50'
+                                : plan.recommended
+                                    ? 'border-indigo-200 dark:border-indigo-900'
+                                    : 'border-gray-200 dark:border-gray-700'
                                 } flex flex-col`}
                             onClick={() => setSelectedPlan(plan.id)}
                         >
@@ -159,10 +159,10 @@ export default function Checkout() {
                             <div className="p-8 pt-0 mt-auto">
                                 <button
                                     className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-colors duration-200 ${selectedPlan === plan.id
-                                            ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200 dark:shadow-none'
-                                            : plan.recommended
-                                                ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50'
-                                                : 'bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600'
+                                        ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200 dark:shadow-none'
+                                        : plan.recommended
+                                            ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50'
+                                            : 'bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600'
                                         }`}
                                 >
                                     {selectedPlan === plan.id ? 'Selected' : 'Choose ' + plan.name}
