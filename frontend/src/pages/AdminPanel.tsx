@@ -41,6 +41,18 @@ interface ChatMessage {
     created_at: string;
 }
 
+interface UserInfo {
+    id: string;
+    email: string;
+    full_name?: string;
+    phone?: string;
+    institution?: string;
+    subscription_status?: string;
+    subscription_plan?: string;
+    subscription_end_date?: string;
+    created_at?: string;
+}
+
 export default function AdminPanel() {
     const navigate = useNavigate();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -68,6 +80,7 @@ export default function AdminPanel() {
     const [selectedChatUser, setSelectedChatUser] = useState<string | null>(null);
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const [newChatMessage, setNewChatMessage] = useState('');
+    const [selectedUserInfo, setSelectedUserInfo] = useState<UserInfo | null>(null);
     const chatMessagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -105,6 +118,7 @@ export default function AdminPanel() {
     useEffect(() => {
         if (selectedChatUser) {
             fetchChatMessages(selectedChatUser);
+            fetchUserInfo(selectedChatUser);
 
             // Subscribe to new messages with unique channel
             const channel = supabase
@@ -326,6 +340,22 @@ export default function AdminPanel() {
             setChatUsers(uniqueUsers);
         } catch (error) {
             console.error('Error fetching chat users:', error);
+        }
+    };
+
+    const fetchUserInfo = async (userId: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single();
+
+            if (error) throw error;
+            setSelectedUserInfo(data);
+        } catch (error) {
+            console.error('Error fetching user info:', error);
+            setSelectedUserInfo(null);
         }
     };
 
@@ -800,10 +830,56 @@ export default function AdminPanel() {
                         <div className="col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow flex flex-col">
                             {selectedChatUser ? (
                                 <>
-                                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                                        <h3 className="font-semibold text-gray-900 dark:text-white">
-                                            {chatMessages[0]?.user_email || 'User Chat'}
-                                        </h3>
+                                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
+                                                    {selectedUserInfo?.full_name || chatMessages[0]?.user_email || 'User Chat'}
+                                                </h3>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                    {selectedUserInfo?.email || chatMessages[0]?.user_email}
+                                                </p>
+
+                                                {/* User Details Grid */}
+                                                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                                    {selectedUserInfo?.phone && (
+                                                        <div>
+                                                            <span className="text-gray-500 dark:text-gray-400">Phone:</span>
+                                                            <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.phone}</span>
+                                                        </div>
+                                                    )}
+                                                    {selectedUserInfo?.institution && (
+                                                        <div>
+                                                            <span className="text-gray-500 dark:text-gray-400">Institution:</span>
+                                                            <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.institution}</span>
+                                                        </div>
+                                                    )}
+                                                    <div>
+                                                        <span className="text-gray-500 dark:text-gray-400">Status:</span>
+                                                        <span className={`ml-1 font-medium ${selectedUserInfo?.subscription_status === 'active'
+                                                                ? 'text-green-600 dark:text-green-400'
+                                                                : 'text-gray-600 dark:text-gray-400'
+                                                            }`}>
+                                                            {selectedUserInfo?.subscription_status === 'active' ? 'Subscribed' : 'Free'}
+                                                        </span>
+                                                    </div>
+                                                    {selectedUserInfo?.subscription_plan && (
+                                                        <div>
+                                                            <span className="text-gray-500 dark:text-gray-400">Plan:</span>
+                                                            <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.subscription_plan}</span>
+                                                        </div>
+                                                    )}
+                                                    {selectedUserInfo?.created_at && (
+                                                        <div className="col-span-2">
+                                                            <span className="text-gray-500 dark:text-gray-400">Member since:</span>
+                                                            <span className="ml-1 text-gray-900 dark:text-white">
+                                                                {new Date(selectedUserInfo.created_at).toLocaleDateString()}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="flex-1 overflow-y-auto p-4 space-y-3">
                                         {chatMessages.map((msg) => (
