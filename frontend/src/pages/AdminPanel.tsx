@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Users, MessageCircle, Tag, Lock, LogOut,
@@ -68,12 +68,36 @@ export default function AdminPanel() {
     const [selectedChatUser, setSelectedChatUser] = useState<string | null>(null);
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const [newChatMessage, setNewChatMessage] = useState('');
+    const chatMessagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (isAuthenticated) {
             fetchUsers();
             fetchCoupons();
             fetchChatUsers();
+        }
+    }, [isAuthenticated]);
+
+    // Subscribe to new chat messages globally to update user list
+    useEffect(() => {
+        if (isAuthenticated) {
+            const subscription = supabase
+                .channel('admin_chat_users')
+                .on('postgres_changes',
+                    {
+                        event: 'INSERT',
+                        schema: 'public',
+                        table: 'chat_messages'
+                    },
+                    () => {
+                        fetchChatUsers();
+                    }
+                )
+                .subscribe();
+
+            return () => {
+                subscription.unsubscribe();
+            };
         }
     }, [isAuthenticated]);
 
@@ -93,6 +117,7 @@ export default function AdminPanel() {
                     },
                     (payload) => {
                         setChatMessages(prev => [...prev, payload.new as ChatMessage]);
+                        scrollToBottom();
                     }
                 )
                 .subscribe();
@@ -102,6 +127,12 @@ export default function AdminPanel() {
             };
         }
     }, [selectedChatUser]);
+
+    const scrollToBottom = () => {
+        setTimeout(() => {
+            chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    };
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
@@ -295,6 +326,7 @@ export default function AdminPanel() {
 
             if (error) throw error;
             setChatMessages(data || []);
+            scrollToBottom();
         } catch (error) {
             console.error('Error fetching chat messages:', error);
         }
@@ -318,6 +350,7 @@ export default function AdminPanel() {
 
             if (error) throw error;
             setNewChatMessage('');
+            scrollToBottom();
         } catch (error) {
             console.error('Error sending message:', error);
             toast.error('Failed to send message');
@@ -778,6 +811,7 @@ export default function AdminPanel() {
                                                 </div>
                                             </div>
                                         ))}
+                                        <div ref={chatMessagesEndRef} />
                                     </div>
                                     <form onSubmit={sendChatMessage} className="p-4 border-t border-gray-200 dark:border-gray-700">
                                         <div className="flex space-x-2">

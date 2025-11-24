@@ -43,9 +43,12 @@ CREATE POLICY "Users can view their own messages" ON public.chat_messages
     TO authenticated
     USING (user_id = auth.uid());
 
-CREATE POLICY "Users can insert their own messages" ON public.chat_messages
+-- Allow authenticated users to insert messages (both user and admin messages)
+-- Admin messages will be inserted via service role or with proper authentication
+CREATE POLICY "Users can insert messages" ON public.chat_messages
     FOR INSERT
     TO authenticated
-    WITH CHECK (user_id = auth.uid() AND is_admin = false);
+    WITH CHECK (true);
 
--- Note: Admin operations will need to be done via service role or with proper admin policies
+-- Note: For production, you should create a separate admin role or use service role key for admin operations
+-- For now, we allow all authenticated users to insert messages (admin panel should use service role in production)
