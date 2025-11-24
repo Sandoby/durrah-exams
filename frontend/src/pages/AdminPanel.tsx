@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Users, Crown, MessageCircle, Tag, Lock, LogOut,
-    Check, X, Loader2, Plus, Trash2, Send
+    Users, MessageCircle, Tag, Lock, LogOut,
+    Loader2, Plus, Send
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
@@ -391,8 +391,8 @@ export default function AdminPanel() {
                         <button
                             onClick={() => setActiveTab('users')}
                             className={`${activeTab === 'users'
-                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
                         >
                             <Users className="h-5 w-5 mr-2" />
@@ -401,8 +401,8 @@ export default function AdminPanel() {
                         <button
                             onClick={() => setActiveTab('coupons')}
                             className={`${activeTab === 'coupons'
-                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
                         >
                             <Tag className="h-5 w-5 mr-2" />
@@ -411,8 +411,8 @@ export default function AdminPanel() {
                         <button
                             onClick={() => setActiveTab('chat')}
                             className={`${activeTab === 'chat'
-                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
                         >
                             <MessageCircle className="h-5 w-5 mr-2" />
@@ -767,8 +767,8 @@ export default function AdminPanel() {
                                             >
                                                 <div
                                                     className={`max-w-[70%] rounded-lg p-3 ${msg.is_admin
-                                                            ? 'bg-indigo-600 text-white'
-                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                                                        ? 'bg-indigo-600 text-white'
+                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                                                         }`}
                                                 >
                                                     <p className="text-sm">{msg.message}</p>
