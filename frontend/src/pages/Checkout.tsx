@@ -29,6 +29,8 @@ export default function Checkout() {
                 plan.name,
                 plan.price,
                 user.email,
+                user.id,
+                billingCycle,
                 (_data) => {
                     toast.success('Payment successful!');
                     setIsProcessing(false);
@@ -221,10 +223,10 @@ export default function Checkout() {
                                     <Shield className="h-8 w-8 text-indigo-600" />
                                 </div>
                                 <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                                    Payment Portal Integration
+                                    Secure Payment
                                 </h4>
                                 <p className="text-gray-500 dark:text-gray-400 mb-6">
-                                    This is where the payment form (Stripe/PayPal) will be integrated.
+                                    Proceed to pay securely with PaySky.
                                     <br />
                                     Selected Plan: <span className="font-semibold text-indigo-600">{plans.find(p => p.id === selectedPlan)?.name}</span> ({billingCycle})
                                 </p>

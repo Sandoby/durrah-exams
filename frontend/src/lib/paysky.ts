@@ -95,7 +95,15 @@ export class PaySkyIntegration {
         }
     }
 
-    async processPayment(plan: string, amountInEGP: number, userEmail: string, onSuccess: (data: any) => void, onError: (error: any) => void) {
+    async processPayment(
+        plan: string,
+        amountInEGP: number,
+        userEmail: string,
+        userId: string,
+        billingCycle: 'monthly' | 'yearly',
+        onSuccess: (data: any) => void,
+        onError: (error: any) => void
+    ) {
         try {
             console.log('🚀 Starting PAYSKY payment process...', { plan, amountInEGP });
 
@@ -106,8 +114,6 @@ export class PaySkyIntegration {
             }
 
             // Convert EGP to piasters (1 EGP = 100 piasters)
-            // PaySky expects amount in piasters as an integer string usually, or just the number. 
-            // The sample code uses Math.round(amountInEGP * 100).
             const amount = Math.round(amountInEGP * 100);
             const merchantRef = `DURRAH_${Date.now()}`;
             const trxDateTime = new Date().toUTCString();
@@ -131,6 +137,7 @@ export class PaySkyIntegration {
                 completeCallback: async (data: any) => {
                     console.log('🎉 Payment successful!', data);
                     await this.updatePaymentRecord(merchantRef, 'completed', data);
+                    await this.updateUserProfile(userId, plan, billingCycle);
                     onSuccess(data);
                 },
                 errorCallback: async (error: any) => {
@@ -154,6 +161,34 @@ export class PaySkyIntegration {
         }
     }
 
+    async updateUserProfile(userId: string, planName: string, billingCycle: 'monthly' | 'yearly') {
+        try {
+            const endDate = new Date();
+            if (billingCycle === 'monthly') {
+                endDate.setMonth(endDate.getMonth() + 1);
+            } else {
+                endDate.setFullYear(endDate.getFullYear() + 1);
+            }
+
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    subscription_plan: planName,
+                    subscription_status: 'active',
+                    subscription_end_date: endDate.toISOString()
+                })
+                .eq('id', userId);
+
+            if (error) {
+                console.error('Error updating profile subscription:', error);
+            } else {
+                console.log('✅ User profile subscription updated');
+            }
+        } catch (error) {
+            console.error('Error updating profile subscription:', error);
+        }
+    }
+
     async createPaymentRecord(plan: string, amount: number, merchantRef: string, userEmail: string) {
         try {
             const { error } = await supabase
@@ -171,8 +206,6 @@ export class PaySkyIntegration {
 
             if (error) {
                 console.error('Error creating payment record:', error);
-                // We don't throw here to allow payment to proceed even if DB log fails (optional decision)
-                // But better to log it.
             }
         } catch (error) {
             console.error('Error creating payment record:', error);

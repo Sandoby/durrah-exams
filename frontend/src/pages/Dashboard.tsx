@@ -21,12 +21,27 @@ export default function Dashboard() {
     const [exams, setExams] = useState<Exam[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedExamForResults, setSelectedExamForResults] = useState<Exam | null>(null);
+    const [profile, setProfile] = useState<any>(null);
 
     useEffect(() => {
         if (user) {
             fetchExams();
+            fetchProfile();
         }
     }, [user]);
+
+    const fetchProfile = async () => {
+        try {
+            const { data } = await supabase
+                .from('profiles')
+                .select('subscription_status, subscription_plan, subscription_end_date')
+                .eq('id', user?.id)
+                .single();
+            setProfile(data);
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+        }
+    };
 
     const fetchExams = async () => {
         try {
@@ -43,6 +58,17 @@ export default function Dashboard() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleCreateExam = (e: React.MouseEvent) => {
+        // Check if user is on free plan and has reached limit
+        if (profile?.subscription_status !== 'active' && exams.length >= 3) {
+            e.preventDefault();
+            toast.error('Free plan is limited to 3 exams. Upgrade to Professional for unlimited exams!');
+            return;
+        }
+        // If check passes, navigate
+        navigate('/exam/new');
     };
 
     const downloadExamPDF = async (examId: string) => {
@@ -233,13 +259,15 @@ export default function Dashboard() {
                             <span className="text-sm text-gray-700 dark:text-gray-300">
                                 Welcome, {user?.user_metadata?.full_name || user?.email}
                             </span>
-                            <Link
-                                to="/checkout"
-                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 focus:outline-none transition"
-                            >
-                                <Crown className="h-4 w-4 mr-2" />
-                                Upgrade
-                            </Link>
+                            {profile?.subscription_status !== 'active' && (
+                                <Link
+                                    to="/checkout"
+                                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 focus:outline-none transition"
+                                >
+                                    <Crown className="h-4 w-4 mr-2" />
+                                    Upgrade
+                                </Link>
+                            )}
                             <Link
                                 to="/settings"
                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition"
@@ -263,13 +291,13 @@ export default function Dashboard() {
                 <div className="px-4 py-6 sm:px-0">
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">My Exams</h1>
-                        <Link
-                            to="/exam/new"
+                        <button
+                            onClick={handleCreateExam}
                             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                             <Plus className="h-4 w-4 mr-2" />
                             Create New Exam
-                        </Link>
+                        </button>
                     </div>
 
                     {exams.length === 0 ? (
@@ -278,13 +306,13 @@ export default function Dashboard() {
                             <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No exams</h3>
                             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new exam.</p>
                             <div className="mt-6">
-                                <Link
-                                    to="/exam/new"
+                                <button
+                                    onClick={handleCreateExam}
                                     className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                 >
                                     <Plus className="h-4 w-4 mr-2" />
                                     Create New Exam
-                                </Link>
+                                </button>
                             </div>
                         </div>
                     ) : (

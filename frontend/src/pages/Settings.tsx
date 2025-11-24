@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Mail, Lock, Save, Loader2 } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, User, Mail, Lock, Save, Loader2, Crown } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -11,6 +11,9 @@ interface TutorProfile {
     email: string;
     phone?: string;
     institution?: string;
+    subscription_status?: string;
+    subscription_plan?: string;
+    subscription_end_date?: string;
 }
 
 export default function Settings() {
@@ -54,6 +57,9 @@ export default function Settings() {
                 email: profileData?.email || user.email || '',
                 phone: profileData?.phone || user.user_metadata?.phone || '',
                 institution: profileData?.institution || user.user_metadata?.institution || '',
+                subscription_status: profileData?.subscription_status,
+                subscription_plan: profileData?.subscription_plan,
+                subscription_end_date: profileData?.subscription_end_date,
             });
         } catch (error: any) {
             console.error('Error fetching profile:', error);
@@ -308,6 +314,55 @@ export default function Settings() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+
+                    {/* Subscription Status */}
+                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <div className="flex items-center space-x-2">
+                                <Crown className="h-5 w-5 text-indigo-600" />
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Subscription Status</h2>
+                            </div>
+                        </div>
+                        <div className="p-6">
+                            {profile.subscription_status === 'active' ? (
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                            Active
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Plan:</span>
+                                        <span className="text-sm text-gray-900 dark:text-white font-semibold">
+                                            {profile.subscription_plan || 'Professional'}
+                                        </span>
+                                    </div>
+                                    {profile.subscription_end_date && (
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Valid Until:</span>
+                                            <span className="text-sm text-gray-900 dark:text-white">
+                                                {new Date(profile.subscription_end_date).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="text-center py-4">
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                                        You are currently on the free plan
+                                    </p>
+                                    <Link
+                                        to="/checkout"
+                                        className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                    >
+                                        <Crown className="h-4 w-4 mr-2" />
+                                        Upgrade to Professional
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Account Info */}
