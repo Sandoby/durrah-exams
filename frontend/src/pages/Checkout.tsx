@@ -2,11 +2,51 @@ import { useState } from 'react';
 import { Check, CreditCard, Shield, Zap, Layout } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
+import { useAuth } from '../context/AuthContext';
+import { paySkyIntegration } from '../lib/paysky';
+import toast from 'react-hot-toast';
+import { Loader2 } from 'lucide-react';
 
 export default function Checkout() {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const handlePayment = async () => {
+        if (!selectedPlan || !user?.email) {
+            toast.error('Please log in to proceed');
+            return;
+        }
+
+        const plan = plans.find(p => p.id === selectedPlan);
+        if (!plan) return;
+
+        setIsProcessing(true);
+        try {
+            await paySkyIntegration.processPayment(
+                plan.name,
+                plan.price,
+                user.email,
+                (data) => {
+                    toast.success('Payment successful!');
+                    setIsProcessing(false);
+                    // Here you would typically update the user's subscription status in the DB
+                    // and maybe redirect to dashboard
+                    setTimeout(() => navigate('/dashboard'), 2000);
+                },
+                (error) => {
+                    toast.error('Payment failed');
+                    setIsProcessing(false);
+                }
+            );
+        } catch (error) {
+            console.error(error);
+            setIsProcessing(false);
+            toast.error('Something went wrong');
+        }
+    };
 
     const plans = [
         {
@@ -45,7 +85,7 @@ export default function Checkout() {
             <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
-                        <Logo className="h-8 w-8 text-indigo-600" />
+                        <Logo className="h-8 w-8 text-indigo-600" showText={false} />
                         <div className="ml-2 flex items-baseline">
                             <span className="text-2xl font-bold text-indigo-600">Durrah</span>
                             <span className="ml-1.5 text-2xl font-light text-gray-500 dark:text-gray-300">for Tutors</span>
@@ -188,8 +228,19 @@ export default function Checkout() {
                                     <br />
                                     Selected Plan: <span className="font-semibold text-indigo-600">{plans.find(p => p.id === selectedPlan)?.name}</span> ({billingCycle})
                                 </p>
-                                <button className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 dark:shadow-none">
-                                    Proceed to Payment
+                                <button
+                                    onClick={handlePayment}
+                                    disabled={isProcessing}
+                                    className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto"
+                                >
+                                    {isProcessing ? (
+                                        <>
+                                            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        'Proceed to Payment'
+                                    )}
                                 </button>
                             </div>
                         </div>
