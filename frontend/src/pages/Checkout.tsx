@@ -13,7 +13,7 @@ export default function Checkout() {
             id: 'basic',
             name: 'Starter',
             price: billingCycle === 'monthly' ? 0 : 0,
-            description: 'Perfect for trying out Durrah Exams',
+            description: 'Perfect for trying out Durrah for Tutors',
             features: [
                 'Up to 3 exams',
                 'Basic analytics',
@@ -25,7 +25,7 @@ export default function Checkout() {
         {
             id: 'pro',
             name: 'Professional',
-            price: billingCycle === 'monthly' ? 29 : 290,
+            price: billingCycle === 'monthly' ? 200 : 2000,
             description: 'For serious tutors and small institutions',
             features: [
                 'Unlimited exams',
@@ -36,21 +36,6 @@ export default function Checkout() {
                 'Email Access Control'
             ],
             recommended: true
-        },
-        {
-            id: 'enterprise',
-            name: 'Institution',
-            price: billingCycle === 'monthly' ? 99 : 990,
-            description: 'Full control for large organizations',
-            features: [
-                'Everything in Professional',
-                'Custom branding',
-                'SSO Integration',
-                'Dedicated account manager',
-                'API Access',
-                '99.9% SLA'
-            ],
-            recommended: false
         }
     ];
 
@@ -61,7 +46,10 @@ export default function Checkout() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
                         <Logo className="h-8 w-8 text-indigo-600" />
-                        <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">Durrah Exams</span>
+                        <div className="ml-2 flex items-baseline">
+                            <span className="text-2xl font-bold text-indigo-600">Durrah</span>
+                            <span className="ml-1.5 text-2xl font-light text-gray-500 dark:text-gray-300">for Tutors</span>
+                        </div>
                     </div>
                     <button
                         onClick={() => navigate('/dashboard')}
@@ -113,7 +101,7 @@ export default function Checkout() {
                 </div>
 
                 {/* Pricing Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 max-w-4xl mx-auto">
                     {plans.map((plan) => (
                         <div
                             key={plan.id}
@@ -139,7 +127,7 @@ export default function Checkout() {
 
                                 <div className="flex items-baseline mb-6">
                                     <span className="text-4xl font-extrabold text-gray-900 dark:text-white">
-                                        ${plan.price}
+                                        {plan.price === 0 ? 'Free' : `EGP ${plan.price}`}
                                     </span>
                                     <span className="ml-2 text-gray-500 dark:text-gray-400">
                                         /{billingCycle === 'monthly' ? 'mo' : 'yr'}
