@@ -11,6 +11,20 @@ declare global {
     }
 }
 
+interface PayParams {
+    amount: number;
+    planId: string;
+    userId: string;
+    userEmail: string;
+    billingCycle: 'monthly' | 'yearly';
+}
+
+interface PayResult {
+    success: boolean;
+    data?: any;
+    error?: any;
+}
+
 export class PaySkyIntegration {
     private MID = '10527302281';
     private TID = '14261833';
@@ -95,70 +109,69 @@ export class PaySkyIntegration {
         }
     }
 
-    async processPayment(
-        plan: string,
-        amountInEGP: number,
-        userEmail: string,
-        userId: string,
-        billingCycle: 'monthly' | 'yearly',
-        onSuccess: (data: any) => void,
-        onError: (error: any) => void
-    ) {
-        try {
-            console.log('🚀 Starting PAYSKY payment process...', { plan, amountInEGP });
+    /**
+     * Main payment method returning a Promise
+     */
+    async pay({ amount, planId, userId, userEmail, billingCycle }: PayParams): Promise<PayResult> {
+        return new Promise(async (resolve) => {
+            try {
+                console.log('🚀 Starting PAYSKY payment process...', { planId, amount });
 
-            await this.initialize();
+                await this.initialize();
 
-            if (!window.Lightbox || !window.Lightbox.Checkout) {
-                throw new Error('PAYSKY Lightbox not available after initialization');
-            }
-
-            // Convert EGP to piasters (1 EGP = 100 piasters)
-            const amount = Math.round(amountInEGP * 100);
-            const merchantRef = `DURRAH_${Date.now()}`;
-            const trxDateTime = new Date().toUTCString();
-            const secureHash = this.generateSecureHash(amount, merchantRef, trxDateTime);
-
-            // Define global variables that PAYSKY Lightbox expects
-            window.isPayOnDelivery = false;
-            window.TransactionType = 'SALE';
-
-            // Create payment record in Supabase
-            await this.createPaymentRecord(plan, amountInEGP, merchantRef, userEmail);
-
-            // Configure PAYSKY Lightbox
-            window.Lightbox.Checkout.configure = {
-                MID: this.MID,
-                TID: this.TID,
-                AmountTrxn: amount,
-                SecureHash: secureHash,
-                MerchantReference: merchantRef,
-                TrxDateTime: trxDateTime,
-                completeCallback: async (data: any) => {
-                    console.log('🎉 Payment successful!', data);
-                    await this.updatePaymentRecord(merchantRef, 'completed', data);
-                    await this.updateUserProfile(userId, plan, billingCycle);
-                    onSuccess(data);
-                },
-                errorCallback: async (error: any) => {
-                    console.error('❌ Payment error:', error);
-                    await this.updatePaymentRecord(merchantRef, 'failed', { error });
-                    onError(error);
-                },
-                cancelCallback: async () => {
-                    console.log('⚠️ Payment cancelled by user');
-                    await this.updatePaymentRecord(merchantRef, 'cancelled', { reason: 'user_cancelled' });
-                    toast('Payment cancelled');
+                if (!window.Lightbox || !window.Lightbox.Checkout) {
+                    throw new Error('PAYSKY Lightbox not available after initialization');
                 }
-            };
 
-            console.log('🎨 Showing PAYSKY Lightbox...');
-            window.Lightbox.Checkout.showLightbox();
+                // Convert EGP to piasters (1 EGP = 100 piasters)
+                // Ensure amount is treated as the final discounted price
+                const amountInPiasters = Math.round(amount * 100);
+                const merchantRef = `DURRAH_${Date.now()}`;
+                const trxDateTime = new Date().toUTCString();
+                const secureHash = this.generateSecureHash(amountInPiasters, merchantRef, trxDateTime);
 
-        } catch (error: any) {
-            console.error('❌ PAYSKY payment error:', error);
-            toast.error('Payment initialization failed: ' + error.message);
-        }
+                // Define global variables that PAYSKY Lightbox expects
+                window.isPayOnDelivery = false;
+                window.TransactionType = 'SALE';
+
+                // Create payment record in Supabase
+                await this.createPaymentRecord(planId, amount, merchantRef, userEmail);
+
+                // Configure PAYSKY Lightbox
+                window.Lightbox.Checkout.configure = {
+                    MID: this.MID,
+                    TID: this.TID,
+                    AmountTrxn: amountInPiasters,
+                    SecureHash: secureHash,
+                    MerchantReference: merchantRef,
+                    TrxDateTime: trxDateTime,
+                    completeCallback: async (data: any) => {
+                        console.log('🎉 Payment successful!', data);
+                        await this.updatePaymentRecord(merchantRef, 'completed', data);
+                        await this.updateUserProfile(userId, planId, billingCycle);
+                        resolve({ success: true, data });
+                    },
+                    errorCallback: async (error: any) => {
+                        console.error('❌ Payment error:', error);
+                        await this.updatePaymentRecord(merchantRef, 'failed', { error });
+                        resolve({ success: false, error });
+                    },
+                    cancelCallback: async () => {
+                        console.log('⚠️ Payment cancelled by user');
+                        await this.updatePaymentRecord(merchantRef, 'cancelled', { reason: 'user_cancelled' });
+                        resolve({ success: false, error: 'Cancelled by user' });
+                    }
+                };
+
+                console.log('🎨 Showing PAYSKY Lightbox...');
+                window.Lightbox.Checkout.showLightbox();
+
+            } catch (error: any) {
+                console.error('❌ PAYSKY payment error:', error);
+                toast.error('Payment initialization failed: ' + error.message);
+                resolve({ success: false, error });
+            }
+        });
     }
 
     async updateUserProfile(userId: string, planName: string, billingCycle: 'monthly' | 'yearly') {
@@ -173,7 +186,7 @@ export class PaySkyIntegration {
             const { error } = await supabase
                 .from('profiles')
                 .update({
-                    subscription_plan: planName,
+                    subscription_plan: planName === 'pro' ? 'Professional' : 'Starter', // Map ID to name if needed
                     subscription_status: 'active',
                     subscription_end_date: endDate.toISOString()
                 })

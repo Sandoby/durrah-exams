@@ -30,6 +30,7 @@ interface Coupon {
     valid_until: string;
     is_active: boolean;
     created_at: string;
+    duration?: 'monthly' | 'annual';
 }
 
 interface ChatMessage {
@@ -62,6 +63,7 @@ export default function AdminPanel() {
     // Users
     const [users, setUsers] = useState<User[]>([]);
     const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Coupons
     const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -72,7 +74,8 @@ export default function AdminPanel() {
         discount_type: 'percentage' as 'percentage' | 'fixed' | 'free',
         discount_value: 0,
         max_uses: 1,
-        valid_until: ''
+        valid_until: '',
+        duration: 'monthly' as 'monthly' | 'annual'
     });
 
     // Chat
@@ -272,7 +275,9 @@ export default function AdminPanel() {
                     max_uses: newCoupon.max_uses,
                     used_count: 0,
                     valid_until: newCoupon.valid_until,
-                    is_active: true
+                    valid_until: newCoupon.valid_until,
+                    is_active: true,
+                    duration: newCoupon.discount_type === 'free' ? newCoupon.duration : null
                 });
 
             if (error) throw error;
@@ -283,7 +288,9 @@ export default function AdminPanel() {
                 discount_type: 'percentage',
                 discount_value: 0,
                 max_uses: 1,
-                valid_until: ''
+                max_uses: 1,
+                valid_until: '',
+                duration: 'monthly'
             });
             fetchCoupons();
         } catch (error: any) {
@@ -400,6 +407,32 @@ export default function AdminPanel() {
         }
     };
 
+    const closeChat = async () => {
+        if (!selectedChatUser) return;
+        if (!confirm('Are you sure you want to close this chat? This will prompt the user for a rating.')) return;
+
+        try {
+            // Send a system message indicating chat closure
+            const { error } = await supabase
+                .from('chat_messages')
+                .insert({
+                    user_id: selectedChatUser,
+                    user_email: 'system',
+                    message: 'CHAT_CLOSED_BY_ADMIN',
+                    is_admin: true
+                });
+
+            if (error) throw error;
+            toast.success('Chat closed and rating requested');
+
+            // Optionally clear selected user or show a "Closed" status
+            // setSelectedChatUser(null);
+        } catch (error) {
+            console.error('Error closing chat:', error);
+            toast.error('Failed to close chat');
+        }
+    };
+
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -504,6 +537,15 @@ export default function AdminPanel() {
                             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                                 User Management
                             </h2>
+                            <div className="mt-4">
+                                <input
+                                    type="text"
+                                    placeholder="Search by name or email..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
                         </div>
                         <div className="overflow-x-auto">
                             {isLoadingUsers ? (
@@ -532,7 +574,10 @@ export default function AdminPanel() {
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {users.map((user) => (
+                                        {users.filter(user =>
+                                            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                            (user.full_name && user.full_name.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        ).map((user) => (
                                             <tr key={user.id}>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -646,6 +691,21 @@ export default function AdminPanel() {
                                                 <option value="free">Free Subscription</option>
                                             </select>
                                         </div>
+                                        {newCoupon.discount_type === 'free' && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Duration
+                                                </label>
+                                                <select
+                                                    value={newCoupon.duration}
+                                                    onChange={(e) => setNewCoupon({ ...newCoupon, duration: e.target.value as 'monthly' | 'annual' })}
+                                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                >
+                                                    <option value="monthly">Monthly</option>
+                                                    <option value="annual">Annual</option>
+                                                </select>
+                                            </div>
+                                        )}
                                         {newCoupon.discount_type !== 'free' && (
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -755,6 +815,11 @@ export default function AdminPanel() {
                                                             ? `${coupon.discount_value}%`
                                                             : `${coupon.discount_value} EGP`
                                                     }
+                                                    {coupon.discount_type === 'free' && coupon.duration && (
+                                                        <span className="ml-2 text-xs text-gray-500">
+                                                            ({coupon.duration})
+                                                        </span>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                                     {coupon.used_count} / {coupon.max_uses}
@@ -857,8 +922,8 @@ export default function AdminPanel() {
                                                     <div>
                                                         <span className="text-gray-500 dark:text-gray-400">Status:</span>
                                                         <span className={`ml-1 font-medium ${selectedUserInfo?.subscription_status === 'active'
-                                                                ? 'text-green-600 dark:text-green-400'
-                                                                : 'text-gray-600 dark:text-gray-400'
+                                                            ? 'text-green-600 dark:text-green-400'
+                                                            : 'text-gray-600 dark:text-gray-400'
                                                             }`}>
                                                             {selectedUserInfo?.subscription_status === 'active' ? 'Subscribed' : 'Free'}
                                                         </span>
@@ -880,6 +945,14 @@ export default function AdminPanel() {
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex justify-end">
+                                        <button
+                                            onClick={closeChat}
+                                            className="text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 px-3 py-1 rounded-full transition-colors"
+                                        >
+                                            Close Chat & Request Rating
+                                        </button>
                                     </div>
                                     <div className="flex-1 overflow-y-auto p-4 space-y-3">
                                         {chatMessages.map((msg) => (

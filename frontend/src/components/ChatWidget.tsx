@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, X, MessageCircle, Loader2 } from 'lucide-react';
+import { Send, X, MessageCircle, Loader2, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -20,6 +20,10 @@ export function ChatWidget() {
     const [newMessage, setNewMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSending, setIsSending] = useState(false);
+    const [showRating, setShowRating] = useState(false);
+    const [rating, setRating] = useState(0);
+    const [ratingComment, setRatingComment] = useState('');
+    const [isSubmittingRating, setIsSubmittingRating] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -40,14 +44,20 @@ export function ChatWidget() {
                     (payload) => {
                         console.log('New message received:', payload);
                         const newMsg = payload.new as Message;
-                        setMessages(prev => {
-                            // Avoid duplicates
-                            if (prev.some(m => m.id === newMsg.id)) {
-                                return prev;
-                            }
-                            return [...prev, newMsg];
-                        });
-                        scrollToBottom();
+
+                        // Check for chat closure message
+                        if (newMsg.message === 'CHAT_CLOSED_BY_ADMIN' && newMsg.is_admin) {
+                            setShowRating(true);
+                        } else {
+                            setMessages(prev => {
+                                // Avoid duplicates
+                                if (prev.some(m => m.id === newMsg.id)) {
+                                    return prev;
+                                }
+                                return [...prev, newMsg];
+                            });
+                            scrollToBottom();
+                        }
                     }
                 )
                 .subscribe((status) => {
@@ -72,7 +82,10 @@ export function ChatWidget() {
                 .order('created_at', { ascending: true });
 
             if (error) throw error;
-            setMessages(data || []);
+
+            // Filter out system messages from display
+            const displayMessages = (data || []).filter(m => m.message !== 'CHAT_CLOSED_BY_ADMIN');
+            setMessages(displayMessages);
             scrollToBottom();
         } catch (error) {
             console.error('Error fetching messages:', error);
@@ -104,6 +117,36 @@ export function ChatWidget() {
             toast.error('Failed to send message');
         } finally {
             setIsSending(false);
+        }
+    };
+
+    const submitRating = async () => {
+        if (rating === 0 || !user) {
+            toast.error('Please select a rating');
+            return;
+        }
+
+        setIsSubmittingRating(true);
+        try {
+            const { error } = await supabase
+                .from('chat_ratings')
+                .insert({
+                    user_id: user.id,
+                    rating,
+                    comment: ratingComment
+                });
+
+            if (error) throw error;
+            toast.success('Thank you for your feedback!');
+            setShowRating(false);
+            setRating(0);
+            setRatingComment('');
+            setIsOpen(false); // Close chat after rating
+        } catch (error) {
+            console.error('Error submitting rating:', error);
+            toast.error('Failed to submit rating');
+        } finally {
+            setIsSubmittingRating(false);
         }
     };
 
@@ -144,68 +187,113 @@ export function ChatWidget() {
                         </button>
                     </div>
 
-                    {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                        {isLoading ? (
-                            <div className="flex items-center justify-center h-full">
-                                <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
-                            </div>
-                        ) : messages.length === 0 ? (
-                            <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400 text-sm">
-                                No messages yet. Start a conversation!
-                            </div>
-                        ) : (
-                            messages.map((msg) => (
-                                <div
-                                    key={msg.id}
-                                    className={`flex ${msg.is_admin ? 'justify-start' : 'justify-end'}`}
-                                >
-                                    <div
-                                        className={`max-w-[80%] rounded-lg p-3 ${msg.is_admin
-                                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                                                : 'bg-indigo-600 text-white'
-                                            }`}
-                                    >
-                                        {msg.is_admin && (
-                                            <p className="text-xs font-semibold mb-1 text-indigo-600 dark:text-indigo-400">
-                                                Support Team
-                                            </p>
-                                        )}
-                                        <p className="text-sm">{msg.message}</p>
-                                        <p className={`text-xs mt-1 ${msg.is_admin ? 'text-gray-500 dark:text-gray-400' : 'text-indigo-200'}`}>
-                                            {new Date(msg.created_at).toLocaleTimeString()}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                        <div ref={messagesEndRef} />
-                    </div>
+                    {showRating ? (
+                        <div className="flex-1 p-6 flex flex-col items-center justify-center text-center">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                                How was your chat?
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                                Please rate your experience with our support team.
+                            </p>
 
-                    {/* Input */}
-                    <form onSubmit={sendMessage} className="p-4 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex space-x-2">
-                            <input
-                                type="text"
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                placeholder="Type your message..."
-                                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
-                                disabled={isSending}
+                            <div className="flex space-x-2 mb-6">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                        key={star}
+                                        onClick={() => setRating(star)}
+                                        className={`transition-colors ${rating >= star ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`}
+                                    >
+                                        <Star className="h-8 w-8 fill-current" />
+                                    </button>
+                                ))}
+                            </div>
+
+                            <textarea
+                                value={ratingComment}
+                                onChange={(e) => setRatingComment(e.target.value)}
+                                placeholder="Optional feedback..."
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-6 text-sm dark:bg-gray-700 dark:text-white"
+                                rows={3}
                             />
+
                             <button
-                                type="submit"
-                                disabled={isSending || !newMessage.trim()}
-                                className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={submitRating}
+                                disabled={isSubmittingRating || rating === 0}
+                                className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
                             >
-                                {isSending ? (
-                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                {isSubmittingRating ? (
+                                    <Loader2 className="h-5 w-5 animate-spin mx-auto" />
                                 ) : (
-                                    <Send className="h-5 w-5" />
+                                    'Submit Feedback'
                                 )}
                             </button>
                         </div>
-                    </form>
+                    ) : (
+                        <>
+                            {/* Messages */}
+                            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                {isLoading ? (
+                                    <div className="flex items-center justify-center h-full">
+                                        <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+                                    </div>
+                                ) : messages.length === 0 ? (
+                                    <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400 text-sm">
+                                        No messages yet. Start a conversation!
+                                    </div>
+                                ) : (
+                                    messages.map((msg) => (
+                                        <div
+                                            key={msg.id}
+                                            className={`flex ${msg.is_admin ? 'justify-start' : 'justify-end'}`}
+                                        >
+                                            <div
+                                                className={`max-w-[80%] rounded-lg p-3 ${msg.is_admin
+                                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                                                    : 'bg-indigo-600 text-white'
+                                                    }`}
+                                            >
+                                                {msg.is_admin && (
+                                                    <p className="text-xs font-semibold mb-1 text-indigo-600 dark:text-indigo-400">
+                                                        Support Team
+                                                    </p>
+                                                )}
+                                                <p className="text-sm">{msg.message}</p>
+                                                <p className={`text-xs mt-1 ${msg.is_admin ? 'text-gray-500 dark:text-gray-400' : 'text-indigo-200'}`}>
+                                                    {new Date(msg.created_at).toLocaleTimeString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                                <div ref={messagesEndRef} />
+                            </div>
+
+                            {/* Input */}
+                            <form onSubmit={sendMessage} className="p-4 border-t border-gray-200 dark:border-gray-700">
+                                <div className="flex space-x-2">
+                                    <input
+                                        type="text"
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        placeholder="Type your message..."
+                                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
+                                        disabled={isSending}
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={isSending || !newMessage.trim()}
+                                        className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isSending ? (
+                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                        ) : (
+                                            <Send className="h-5 w-5" />
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
+                        </>
+                    )}
                 </div>
             )}
         </>

@@ -16,107 +16,9 @@ export default function Checkout() {
     const [couponCode, setCouponCode] = useState('');
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
     const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+    const [freeCouponApplied, setFreeCouponApplied] = useState(false);
 
-    const handlePayment = async () => {
-        if (!selectedPlan || !user?.email) {
-            toast.error('Please log in to proceed');
-            return;
-        }
-
-        const plan = plans.find(p => p.id === selectedPlan);
-        if (!plan) return;
-
-        setIsProcessing(true);
-        try {
-            await paySkyIntegration.processPayment(
-                plan.name,
-                plan.price,
-                user.email,
-                user.id,
-                billingCycle,
-                (_data) => {
-                    toast.success('Payment successful!');
-                    setIsProcessing(false);
-                    // Here you would typically update the user's subscription status in the DB
-                    // and maybe redirect to dashboard
-                    setTimeout(() => navigate('/dashboard'), 2000);
-                },
-                (_error) => {
-                    toast.error('Payment failed');
-                    setIsProcessing(false);
-                }
-            );
-        } catch (error) {
-            console.error(error);
-            setIsProcessing(false);
-            toast.error('Something went wrong');
-        }
-    };
-
-    const validateCoupon = async () => {
-        if (!couponCode.trim()) {
-            toast.error('Please enter a coupon code');
-            return;
-        }
-
-        setIsValidatingCoupon(true);
-        try {
-            const { data, error } = await supabase
-                .from('coupons')
-                .select('*')
-                .eq('code', couponCode.toUpperCase())
-                .eq('is_active', true)
-                .single();
-
-            if (error || !data) {
-                toast.error('Invalid coupon code');
-                setIsValidatingCoupon(false);
-                return;
-            }
-
-            // Check if coupon is still valid
-            if (new Date(data.valid_until) < new Date()) {
-                toast.error('This coupon has expired');
-                setIsValidatingCoupon(false);
-                return;
-            }
-
-            // Check if max uses reached
-            if (data.used_count >= data.max_uses) {
-                toast.error('This coupon has reached its maximum uses');
-                setIsValidatingCoupon(false);
-                return;
-            }
-
-            setAppliedCoupon(data);
-            toast.success('Coupon applied successfully!');
-        } catch (error) {
-            console.error('Error validating coupon:', error);
-            toast.error('Failed to validate coupon');
-        } finally {
-            setIsValidatingCoupon(false);
-        }
-    };
-
-    const removeCoupon = () => {
-        setAppliedCoupon(null);
-        setCouponCode('');
-        toast.success('Coupon removed');
-    };
-
-    const calculateFinalPrice = (basePrice: number) => {
-        if (!appliedCoupon) return basePrice;
-
-        if (appliedCoupon.discount_type === 'free') {
-            return 0;
-        } else if (appliedCoupon.discount_type === 'percentage') {
-            return basePrice - (basePrice * appliedCoupon.discount_value / 100);
-        } else if (appliedCoupon.discount_type === 'fixed') {
-            return Math.max(0, basePrice - appliedCoupon.discount_value);
-        }
-        return basePrice;
-    };
-
+    // ---------- Plans ----------
     const plans = [
         {
             id: 'basic',
@@ -127,9 +29,9 @@ export default function Checkout() {
                 'Up to 3 exams',
                 'Basic analytics',
                 'Email support',
-                '100 students per exam'
+                '100 students per exam',
             ],
-            recommended: false
+            recommended: false,
         },
         {
             id: 'pro',
@@ -140,12 +42,114 @@ export default function Checkout() {
                 'Unlimited exams',
                 'Advanced analytics & Insights',
                 'Priority support',
-                'Unlimited students'
+                'Unlimited students',
             ],
-            recommended: true
-        }
+            recommended: true,
+        },
     ];
 
+    // ---------- Coupon handling ----------
+    const validateCoupon = async () => {
+        if (!couponCode) return;
+        setIsValidatingCoupon(true);
+        try {
+            const { data, error } = await supabase
+                .from('coupons')
+                .select('*')
+                .eq('code', couponCode.toUpperCase())
+                .single();
+            if (error || !data) throw new Error('Coupon not found');
+            // validity checks
+            if (new Date(data.valid_until) < new Date()) throw new Error('Coupon expired');
+            if (data.used_count >= data.max_uses) throw new Error('Coupon max uses reached');
+            if (!data.is_active) throw new Error('Coupon inactive');
+            setAppliedCoupon(data);
+            toast.success('Coupon applied');
+            if (data.discount_type === 'free') setFreeCouponApplied(true);
+        } catch (e) {
+            console.error(e);
+            toast.error((e as Error).message || 'Invalid coupon');
+        } finally {
+            setIsValidatingCoupon(false);
+        }
+    };
+
+    const removeCoupon = () => {
+        setAppliedCoupon(null);
+        setCouponCode('');
+        setFreeCouponApplied(false);
+        toast.success('Coupon removed');
+    };
+
+    const calculateFinalPrice = (basePrice: number) => {
+        if (!appliedCoupon) return basePrice;
+        if (appliedCoupon.discount_type === 'free') return 0;
+        if (appliedCoupon.discount_type === 'percentage') {
+            return Math.max(0, basePrice - (basePrice * appliedCoupon.discount_value) / 100);
+        }
+        if (appliedCoupon.discount_type === 'fixed') {
+            return Math.max(0, basePrice - appliedCoupon.discount_value);
+        }
+        return basePrice;
+    };
+
+    // ---------- Payment / Activation ----------
+    const handlePayment = async () => {
+        if (!selectedPlan) return toast.error('Select a plan first');
+        const plan = plans.find(p => p.id === selectedPlan);
+        if (!plan) return;
+        const finalPrice = calculateFinalPrice(plan.price);
+
+        // Free subscription – activate instantly
+        if (finalPrice === 0) {
+            try {
+                const endDate = new Date();
+                // default to monthly, can be extended later
+                endDate.setMonth(endDate.getMonth() + (billingCycle === 'monthly' ? 1 : 12));
+                const { error } = await supabase
+                    .from('profiles')
+                    .update({
+                        subscription_status: 'active',
+                        subscription_plan: plan.name,
+                        subscription_end_date: endDate.toISOString(),
+                    })
+                    .eq('id', user?.id);
+                if (error) throw error;
+                toast.success('Subscription activated instantly!');
+                navigate('/dashboard');
+            } catch (e) {
+                console.error(e);
+                toast.error('Failed to activate subscription');
+            }
+            return;
+        }
+
+        // Paid flow – use PaySky integration with discounted amount
+        setIsProcessing(true);
+        try {
+            const result = await paySkyIntegration.pay({
+                amount: finalPrice,
+                planId: plan.id,
+                userId: user?.id || '',
+                userEmail: user?.email || '',
+                billingCycle,
+            });
+
+            if (result.success) {
+                toast.success('Payment successful!');
+                navigate('/dashboard');
+            } else {
+                toast.error(result.error?.message || 'Payment failed');
+            }
+        } catch (e) {
+            console.error(e);
+            toast.error('Payment error');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    // ---------- UI ----------
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans">
             {/* Header */}
@@ -177,18 +181,14 @@ export default function Checkout() {
                     </p>
                 </div>
 
-                {/* Billing Toggle */}
+                {/* Billing toggle */}
                 <div className="flex justify-center mb-12">
                     <div className="bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 inline-flex relative">
-                        <div className="w-full h-full absolute inset-0 flex items-center justify-center pointer-events-none">
-                            {/* Animated background could go here */}
-                        </div>
                         <button
                             onClick={() => setBillingCycle('monthly')}
                             className={`relative z-10 px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${billingCycle === 'monthly'
                                 ? 'bg-indigo-600 text-white shadow-md'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                                }`}
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                         >
                             Monthly
                         </button>
@@ -196,8 +196,7 @@ export default function Checkout() {
                             onClick={() => setBillingCycle('yearly')}
                             className={`relative z-10 px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${billingCycle === 'yearly'
                                 ? 'bg-indigo-600 text-white shadow-md'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                                }`}
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                         >
                             Yearly
                             <span className="ml-2 bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
@@ -207,17 +206,16 @@ export default function Checkout() {
                     </div>
                 </div>
 
-                {/* Pricing Cards */}
+                {/* Pricing cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 max-w-4xl mx-auto">
-                    {plans.map((plan) => (
+                    {plans.map(plan => (
                         <div
                             key={plan.id}
                             className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border ${selectedPlan === plan.id
                                 ? 'border-indigo-600 ring-2 ring-indigo-600 ring-opacity-50'
                                 : plan.recommended
                                     ? 'border-indigo-200 dark:border-indigo-900'
-                                    : 'border-gray-200 dark:border-gray-700'
-                                } flex flex-col`}
+                                    : 'border-gray-200 dark:border-gray-700'} flex flex-col`}
                             onClick={() => setSelectedPlan(plan.id)}
                         >
                             {plan.recommended && (
@@ -227,38 +225,31 @@ export default function Checkout() {
                                     </span>
                                 </div>
                             )}
-
                             <div className="p-8 flex-1">
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{plan.description}</p>
-
                                 <div className="flex items-baseline mb-6">
                                     <span className="text-4xl font-extrabold text-gray-900 dark:text-white">
                                         {plan.price === 0 ? 'Free' : `EGP ${plan.price}`}
                                     </span>
-                                    <span className="ml-2 text-gray-500 dark:text-gray-400">
-                                        /{billingCycle === 'monthly' ? 'mo' : 'yr'}
-                                    </span>
+                                    <span className="ml-2 text-gray-500 dark:text-gray-400">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                                 </div>
-
                                 <ul className="space-y-4 mb-8">
-                                    {plan.features.map((feature, idx) => (
-                                        <li key={idx} className="flex items-start">
+                                    {plan.features.map((f, i) => (
+                                        <li key={i} className="flex items-start">
                                             <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                                            <span className="text-sm text-gray-600 dark:text-gray-300">{feature}</span>
+                                            <span className="text-sm text-gray-600 dark:text-gray-300">{f}</span>
                                         </li>
                                     ))}
                                 </ul>
                             </div>
-
                             <div className="p-8 pt-0 mt-auto">
                                 <button
                                     className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-colors duration-200 ${selectedPlan === plan.id
                                         ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200 dark:shadow-none'
                                         : plan.recommended
                                             ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50'
-                                            : 'bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600'
-                                        }`}
+                                            : 'bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600'}`}
                                 >
                                     {selectedPlan === plan.id ? 'Selected' : 'Choose ' + plan.name}
                                 </button>
@@ -267,7 +258,7 @@ export default function Checkout() {
                     ))}
                 </div>
 
-                {/* Checkout Section (Placeholder for now) */}
+                {/* Checkout section */}
                 {selectedPlan && selectedPlan !== 'basic' && (
                     <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in-up">
                         <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex justify-between items-center">
@@ -276,10 +267,9 @@ export default function Checkout() {
                                 Secure Checkout
                             </h3>
                             <div className="flex space-x-2">
-                                {/* Payment Icons Placeholder */}
-                                <div className="h-6 w-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                                <div className="h-6 w-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                                <div className="h-6 w-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                <div className="h-6 w-10 bg-gray-200 dark:bg-gray-700 rounded" />
+                                <div className="h-6 w-10 bg-gray-200 dark:bg-gray-700 rounded" />
+                                <div className="h-6 w-10 bg-gray-200 dark:bg-gray-700 rounded" />
                             </div>
                         </div>
                         <div className="p-8">
@@ -287,117 +277,86 @@ export default function Checkout() {
                                 <div className="bg-indigo-50 dark:bg-indigo-900/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <Shield className="h-8 w-8 text-indigo-600" />
                                 </div>
-                                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                                    Secure Payment
-                                </h4>
+                                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Secure Payment</h4>
                                 <p className="text-gray-500 dark:text-gray-400 mb-6">
-                                    Proceed to pay securely with PaySky.
-                                    <br />
+                                    Proceed to pay securely with PaySky.<br />
                                     Selected Plan: <span className="font-semibold text-indigo-600">{plans.find(p => p.id === selectedPlan)?.name}</span> ({billingCycle})
                                 </p>
+                            </div>
 
-                                {/* Coupon Code Section */}
-                                <div className="mb-6 max-w-md mx-auto">
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Have a coupon code?
-                                    </label>
-                                    {appliedCoupon ? (
-                                        <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                                            <div className="flex items-center">
-                                                <Check className="h-5 w-5 text-green-600 mr-2" />
-                                                <span className="font-mono font-semibold text-green-700 dark:text-green-400">
-                                                    {appliedCoupon.code}
-                                                </span>
-                                                <span className="ml-2 text-sm text-green-600 dark:text-green-400">
-                                                    {appliedCoupon.discount_type === 'free'
-                                                        ? 'Free Subscription!'
-                                                        : appliedCoupon.discount_type === 'percentage'
-                                                            ? `${appliedCoupon.discount_value}% off`
-                                                            : `${appliedCoupon.discount_value} EGP off`
-                                                    }
-                                                </span>
-                                            </div>
-                                            <button
-                                                onClick={removeCoupon}
-                                                className="text-red-600 hover:text-red-800 dark:text-red-400"
-                                            >
-                                                <X className="h-5 w-5" />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="flex space-x-2">
-                                            <input
-                                                type="text"
-                                                value={couponCode}
-                                                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                                                placeholder="Enter code"
-                                                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white uppercase"
-                                            />
-                                            <button
-                                                onClick={validateCoupon}
-                                                disabled={isValidatingCoupon}
-                                                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
-                                            >
-                                                {isValidatingCoupon ? (
-                                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                                ) : (
-                                                    'Apply'
-                                                )}
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Price Summary */}
-                                {appliedCoupon && (
-                                    <div className="mb-6 max-w-md mx-auto space-y-2 text-sm">
-                                        <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                                            <span>Original Price:</span>
-                                            <span>EGP {plans.find(p => p.id === selectedPlan)?.price}</span>
-                                        </div>
-                                        <div className="flex justify-between text-green-600 dark:text-green-400">
-                                            <span>Discount:</span>
-                                            <span>
-                                                - EGP {(plans.find(p => p.id === selectedPlan)?.price || 0) - calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}
+                            {/* Coupon section */}
+                            <div className="mb-6 max-w-md mx-auto">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Have a coupon code?</label>
+                                {appliedCoupon ? (
+                                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                                        <div className="flex items-center">
+                                            <Check className="h-5 w-5 text-green-600 mr-2" />
+                                            <span className="font-mono font-semibold text-green-700 dark:text-green-400">{appliedCoupon.code}</span>
+                                            <span className="ml-2 text-sm text-green-600 dark:text-green-400">
+                                                {appliedCoupon.discount_type === 'free'
+                                                    ? 'Free Subscription!'
+                                                    : appliedCoupon.discount_type === 'percentage'
+                                                        ? `${appliedCoupon.discount_value}% off`
+                                                        : `${appliedCoupon.discount_value} EGP off`}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between font-bold text-lg text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-700 pt-2">
-                                            <span>Final Price:</span>
-                                            <span>
-                                                {calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0) === 0
-                                                    ? 'FREE'
-                                                    : `EGP ${calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}`
-                                                }
-                                            </span>
-                                        </div>
+                                        <button onClick={removeCoupon} className="text-red-600 hover:text-red-800 dark:text-red-400">
+                                            <X className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex space-x-2">
+                                        <input
+                                            type="text"
+                                            value={couponCode}
+                                            onChange={e => setCouponCode(e.target.value)}
+                                            placeholder="Enter code"
+                                            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white uppercase"
+                                        />
+                                        <button
+                                            onClick={validateCoupon}
+                                            disabled={isValidatingCoupon}
+                                            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                                        >
+                                            {isValidatingCoupon ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Apply'}
+                                        </button>
                                     </div>
                                 )}
-
-
-                                <button
-                                    onClick={handlePayment}
-                                    disabled={isProcessing}
-                                    className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto"
-                                >
-                                    {isProcessing ? (
-                                        <>
-                                            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                                            Processing...
-                                        </>
-                                    ) : (
-                                        'Proceed to Payment'
-                                    )}
-                                </button>
                             </div>
+
+                            {/* Price summary */}
+                            {appliedCoupon && (
+                                <div className="mb-6 max-w-md mx-auto space-y-2 text-sm">
+                                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                                        <span>Original Price:</span>
+                                        <span>EGP {plans.find(p => p.id === selectedPlan)?.price}</span>
+                                    </div>
+                                    <div className="flex justify-between text-green-600 dark:text-green-400">
+                                        <span>Discount:</span>
+                                        <span>- EGP {(plans.find(p => p.id === selectedPlan)?.price || 0) - calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}</span>
+                                    </div>
+                                    <div className="flex justify-between font-bold text-lg text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-700 pt-2">
+                                        <span>Final Price:</span>
+                                        <span>{calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0) === 0 ? 'FREE' : `EGP ${calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}`}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Action button */}
+                            <button
+                                onClick={handlePayment}
+                                disabled={isProcessing}
+                                className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 flex items-center justify-center"
+                            >
+                                {isProcessing ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Processing...</> : 'Proceed to Payment'}
+                            </button>
                         </div>
                     </div>
                 )}
 
-                {/* Features Grid */}
+                {/* Features grid */}
                 <div className="mt-24">
-                    <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-                        Why top educators choose Durrah
-                    </h2>
+                    <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">Why top educators choose Durrah</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                             <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
