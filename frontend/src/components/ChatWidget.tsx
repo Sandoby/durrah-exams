@@ -25,10 +25,12 @@ export function ChatWidget() {
     useEffect(() => {
         if (isOpen && user) {
             fetchMessages();
-            // Subscribe to new messages
-            const subscription = supabase
-                .channel('chat_messages')
-                .on('postgres_changes',
+
+            // Subscribe to new messages with a unique channel
+            const channel = supabase
+                .channel(`chat:${user.id}`)
+                .on(
+                    'postgres_changes',
                     {
                         event: 'INSERT',
                         schema: 'public',
@@ -36,14 +38,25 @@ export function ChatWidget() {
                         filter: `user_id=eq.${user.id}`
                     },
                     (payload) => {
-                        setMessages(prev => [...prev, payload.new as Message]);
+                        console.log('New message received:', payload);
+                        const newMsg = payload.new as Message;
+                        setMessages(prev => {
+                            // Avoid duplicates
+                            if (prev.some(m => m.id === newMsg.id)) {
+                                return prev;
+                            }
+                            return [...prev, newMsg];
+                        });
                         scrollToBottom();
                     }
                 )
-                .subscribe();
+                .subscribe((status) => {
+                    console.log('Subscription status:', status);
+                });
 
             return () => {
-                subscription.unsubscribe();
+                console.log('Unsubscribing from chat');
+                supabase.removeChannel(channel);
             };
         }
     }, [isOpen, user]);

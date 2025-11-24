@@ -81,9 +81,10 @@ export default function AdminPanel() {
     // Subscribe to new chat messages globally to update user list
     useEffect(() => {
         if (isAuthenticated) {
-            const subscription = supabase
-                .channel('admin_chat_users')
-                .on('postgres_changes',
+            const channel = supabase
+                .channel('admin_chat_users_global')
+                .on(
+                    'postgres_changes',
                     {
                         event: 'INSERT',
                         schema: 'public',
@@ -96,7 +97,7 @@ export default function AdminPanel() {
                 .subscribe();
 
             return () => {
-                subscription.unsubscribe();
+                supabase.removeChannel(channel);
             };
         }
     }, [isAuthenticated]);
@@ -105,10 +106,11 @@ export default function AdminPanel() {
         if (selectedChatUser) {
             fetchChatMessages(selectedChatUser);
 
-            // Subscribe to new messages
-            const subscription = supabase
-                .channel('admin_chat')
-                .on('postgres_changes',
+            // Subscribe to new messages with unique channel
+            const channel = supabase
+                .channel(`admin_chat:${selectedChatUser}`)
+                .on(
+                    'postgres_changes',
                     {
                         event: 'INSERT',
                         schema: 'public',
@@ -116,14 +118,25 @@ export default function AdminPanel() {
                         filter: `user_id=eq.${selectedChatUser}`
                     },
                     (payload) => {
-                        setChatMessages(prev => [...prev, payload.new as ChatMessage]);
+                        console.log('Admin received message:', payload);
+                        const newMsg = payload.new as ChatMessage;
+                        setChatMessages(prev => {
+                            // Avoid duplicates
+                            if (prev.some(m => m.id === newMsg.id)) {
+                                return prev;
+                            }
+                            return [...prev, newMsg];
+                        });
                         scrollToBottom();
                     }
                 )
-                .subscribe();
+                .subscribe((status) => {
+                    console.log('Admin subscription status:', status);
+                });
 
             return () => {
-                subscription.unsubscribe();
+                console.log('Admin unsubscribing from chat');
+                supabase.removeChannel(channel);
             };
         }
     }, [selectedChatUser]);
