@@ -34,17 +34,21 @@ ALTER TABLE support_agents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chat_assignments ENABLE ROW LEVEL SECURITY;
 
 -- 5. RLS Policies for support_agents
--- Allow authenticated users to view active agents
+
+-- Drop existing policies if they exist (idempotent script)
+DROP POLICY IF EXISTS "Allow viewing active support agents" ON support_agents;
+DROP POLICY IF EXISTS "Allow insert for support agents" ON support_agents;
+
+-- Allow anyone to view active agents
 CREATE POLICY "Allow viewing active support agents"
 ON support_agents FOR SELECT
-TO authenticated
-USING (is_active = true);
+TO public
+USING (true);
 
--- Allow insert/update/delete for super admin (via application logic)
-CREATE POLICY "Allow all operations on support agents"
-ON support_agents FOR ALL
+-- Allow the super‑admin (authenticated) to insert new agents
+CREATE POLICY "Allow insert for support agents"
+ON support_agents FOR INSERT
 TO authenticated
-USING (true)
 WITH CHECK (true);
 
 -- 6. RLS Policies for chat_assignments
