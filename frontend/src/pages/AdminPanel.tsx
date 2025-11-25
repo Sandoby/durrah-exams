@@ -2,13 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Users, MessageCircle, Tag, Lock, LogOut,
-    Loader2, Plus, Send
+    Loader2, Plus, Send, UserPlus
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 
-const ADMIN_PASSWORD = '2352206';
+const SUPER_ADMIN_PASSWORD = '2352206';
 
 interface User {
     id: string;
@@ -42,6 +42,24 @@ interface ChatMessage {
     created_at: string;
 }
 
+interface SupportAgent {
+    id: string;
+    name: string;
+    email: string;
+    access_code: string;
+    is_active: boolean;
+    created_at: string;
+}
+
+interface ChatAssignment {
+    id: string;
+    user_id: string;
+    assigned_agent_id: string | null;
+    status: 'open' | 'closed';
+    assigned_at: string;
+    closed_at: string | null;
+}
+
 interface UserInfo {
     id: string;
     email: string;
@@ -58,7 +76,10 @@ export default function AdminPanel() {
     const navigate = useNavigate();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState('');
-    const [activeTab, setActiveTab] = useState<'users' | 'coupons' | 'chat'>('users');
+    const [accessCode, setAccessCode] = useState('');
+    const [userRole, setUserRole] = useState<'super_admin' | 'support_agent' | null>(null);
+    const [, setCurrentAgentId] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'users' | 'coupons' | 'chat' | 'agents'>('users');
 
     // Users
     const [users, setUsers] = useState<User[]>([]);
@@ -78,12 +99,25 @@ export default function AdminPanel() {
         duration: 'monthly' as 'monthly' | 'annual'
     });
 
+    // Support Agents (Super Admin only)
+    const [supportAgents, setSupportAgents] = useState<SupportAgent[]>([]);
+    const [showAgentForm, setShowAgentForm] = useState(false);
+    const [newAgent, setNewAgent] = useState({
+        name: '',
+        email: ''
+    });
+    const [generatedCode, setGeneratedCode] = useState<string | null>(null);
+
     // Chat
     const [chatUsers, setChatUsers] = useState<string[]>([]);
     const [selectedChatUser, setSelectedChatUser] = useState<string | null>(null);
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const [newChatMessage, setNewChatMessage] = useState('');
     const [selectedUserInfo, setSelectedUserInfo] = useState<UserInfo | null>(null);
+    const [, setChatAssignments] = useState<ChatAssignment[]>([]);
+    const [_chatFilter, _setChatFilter] = useState<'open' | 'closed'>('open');
+    const [_showForwardModal, _setShowForwardModal] = useState(false);
+    const [_forwardToAgentId, _setForwardToAgentId] = useState<string>('');
     const chatMessagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -91,8 +125,12 @@ export default function AdminPanel() {
             fetchUsers();
             fetchCoupons();
             fetchChatUsers();
+            fetchChatAssignments();
+            if (userRole === 'super_admin') {
+                fetchSupportAgents();
+            }
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, userRole]);
 
     // Subscribe to new chat messages globally to update user list
     useEffect(() => {
@@ -164,19 +202,51 @@ export default function AdminPanel() {
         }, 100);
     };
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (password === ADMIN_PASSWORD) {
+
+        // Check if it's super admin login
+        if (password === SUPER_ADMIN_PASSWORD) {
             setIsAuthenticated(true);
-            toast.success('Welcome, Admin!');
+            setUserRole('super_admin');
+            toast.success('Welcome, Super Admin!');
+            return;
+        }
+
+        // Check if it's support agent login with access code
+        if (accessCode) {
+            try {
+                const { data, error } = await supabase
+                    .from('support_agents')
+                    .select('*')
+                    .eq('access_code', accessCode)
+                    .eq('is_active', true)
+                    .single();
+
+                if (error || !data) {
+                    toast.error('Invalid access code');
+                    return;
+                }
+
+                setIsAuthenticated(true);
+                setUserRole('support_agent');
+                setCurrentAgentId(data.id);
+                toast.success(`Welcome, ${data.name}!`);
+            } catch (error) {
+                console.error('Login error:', error);
+                toast.error('Login failed');
+            }
         } else {
-            toast.error('Incorrect password');
+            toast.error('Please enter password or access code');
         }
     };
 
     const handleLogout = () => {
         setIsAuthenticated(false);
         setPassword('');
+        setAccessCode('');
+        setUserRole(null);
+        setCurrentAgentId(null);
         navigate('/dashboard');
     };
 
@@ -331,6 +401,161 @@ export default function AdminPanel() {
         }
     };
 
+    // ========== Support Agent Management (Super Admin Only) ==========
+    const fetchSupportAgents = async () => {
+        if (userRole !== 'super_admin') return;
+
+        try {
+            const { data, error } = await supabase
+                .from('support_agents')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setSupportAgents(data || []);
+        } catch (error) {
+            console.error('Error fetching support agents:', error);
+            toast.error('Failed to fetch support agents');
+        }
+    };
+
+    const createSupportAgent = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (userRole !== 'super_admin') {
+            toast.error('Only Super Admin can add support agents');
+            return;
+        }
+
+        try {
+            // Call the database function to generate access code
+            const { data: codeData, error: codeError } = await supabase
+                .rpc('generate_access_code');
+
+            if (codeError) throw codeError;
+            const accessCode = codeData;
+
+            // Insert the new agent
+            const { error } = await supabase
+                .from('support_agents')
+                .insert({
+                    name: newAgent.name,
+                    email: newAgent.email,
+                    access_code: accessCode,
+                    is_active: true
+                });
+
+            if (error) throw error;
+
+            setGeneratedCode(accessCode);
+            toast.success('Support agent created successfully!');
+            setNewAgent({ name: '', email: '' });
+            fetchSupportAgents();
+        } catch (error: any) {
+            console.error('Error creating support agent:', error);
+            toast.error(error.message || 'Failed to create support agent');
+        }
+    };
+
+    const deleteSupportAgent = async (id: string) => {
+        if (userRole !== 'super_admin') {
+            toast.error('Only Super Admin can remove support agents');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to remove this support agent?')) return;
+
+        try {
+            const { error } = await supabase
+                .from('support_agents')
+                .update({ is_active: false })
+                .eq('id', id);
+
+            if (error) throw error;
+            toast.success('Support agent removed');
+            fetchSupportAgents();
+        } catch (error) {
+            console.error('Error removing support agent:', error);
+            toast.error('Failed to remove support agent');
+        }
+    };
+
+    // ========== Chat Assignment Functions ==========
+    const fetchChatAssignments = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('chat_assignments')
+                .select('*');
+
+            if (error) throw error;
+            setChatAssignments(data || []);
+        } catch (error) {
+            console.error('Error fetching chat assignments:', error);
+        }
+    };
+
+    const _assignChatToAgent = async (userId: string, agentId: string) => {
+        try {
+            const { error } = await supabase
+                .from('chat_assignments')
+                .upsert({
+                    user_id: userId,
+                    assigned_agent_id: agentId,
+                    status: 'open'
+                });
+
+            if (error) throw error;
+            fetchChatAssignments();
+        } catch (error) {
+            console.error('Error assigning chat:', error);
+            toast.error('Failed to assign chat');
+        }
+    };
+
+    // Forward chat function (for future use with forward modal UI)
+    // const forwardChat = async () => {
+    //     if (!selectedChatUser || !forwardToAgentId) return;
+    //     try {
+    //         await assignChatToAgent(selectedChatUser, forwardToAgentId);
+    //         toast.success('Chat forwarded successfully');
+    //         setShowForwardModal(false);
+    //         setForwardToAgentId('');
+    //     } catch (error) {
+    //         console.error('Error forwarding chat:', error);
+    //         toast.error('Failed to forward chat');
+    //     }
+    // };
+
+    const closeChat = async () => {
+        if (!selectedChatUser) return;
+
+        try {
+            const { error } = await supabase
+                .from('chat_assignments')
+                .update({
+                    status: 'closed',
+                    closed_at: new Date().toISOString()
+                })
+                .eq('user_id', selectedChatUser);
+
+            if (error) throw error;
+
+            // Send system message
+            await supabase.from('chat_messages').insert({
+                user_id: selectedChatUser,
+                user_email: selectedUserInfo?.email || '',
+                message: 'CHAT_CLOSED_BY_ADMIN',
+                is_admin: true
+            });
+
+            toast.success('Chat closed');
+            fetchChatAssignments();
+            setSelectedChatUser(null);
+        } catch (error) {
+            console.error('Error closing chat:', error);
+            toast.error('Failed to close chat');
+        }
+    };
+
     const fetchChatUsers = async () => {
         try {
             const { data, error } = await supabase
@@ -405,32 +630,6 @@ export default function AdminPanel() {
         }
     };
 
-    const closeChat = async () => {
-        if (!selectedChatUser) return;
-        if (!confirm('Are you sure you want to close this chat? This will prompt the user for a rating.')) return;
-
-        try {
-            // Send a system message indicating chat closure
-            const { error } = await supabase
-                .from('chat_messages')
-                .insert({
-                    user_id: selectedChatUser,
-                    user_email: 'system',
-                    message: 'CHAT_CLOSED_BY_ADMIN',
-                    is_admin: true
-                });
-
-            if (error) throw error;
-            toast.success('Chat closed and rating requested');
-
-            // Optionally clear selected user or show a "Closed" status
-            // setSelectedChatUser(null);
-        } catch (error) {
-            console.error('Error closing chat:', error);
-            toast.error('Failed to close chat');
-        }
-    };
-
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -444,7 +643,7 @@ export default function AdminPanel() {
                     <form onSubmit={handleLogin} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Password
+                                Super Admin Password
                             </label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -453,11 +652,37 @@ export default function AdminPanel() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                                    placeholder="Enter admin password"
-                                    required
+                                    placeholder="Enter super admin password"
                                 />
                             </div>
                         </div>
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">OR</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Support Agent Access Code
+                            </label>
+                            <div className="relative">
+                                <UserPlus className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                <input
+                                    type="text"
+                                    value={accessCode}
+                                    onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white uppercase"
+                                    placeholder="Enter access code"
+                                    maxLength={8}
+                                />
+                            </div>
+                        </div>
+
                         <button
                             type="submit"
                             className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
@@ -525,6 +750,18 @@ export default function AdminPanel() {
                             <MessageCircle className="h-5 w-5 mr-2" />
                             Customer Chat
                         </button>
+                        {userRole === 'super_admin' && (
+                            <button
+                                onClick={() => setActiveTab('agents')}
+                                className={`${activeTab === 'agents'
+                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                            >
+                                <UserPlus className="h-5 w-5 mr-2" />
+                                Support Agents
+                            </button>
+                        )}
                     </nav>
                 </div>
 
@@ -996,6 +1233,158 @@ export default function AdminPanel() {
                                     Select a conversation to start chatting
                                 </div>
                             )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Agents Tab (Super Admin Only) */}
+                {activeTab === 'agents' && userRole === 'super_admin' && (
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                Support Agents
+                            </h2>
+                            <button
+                                onClick={() => {
+                                    setShowAgentForm(!showAgentForm);
+                                    setGeneratedCode(null);
+                                }}
+                                className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                            >
+                                <UserPlus className="h-4 w-4 mr-2" />
+                                Add Support Agent
+                            </button>
+                        </div>
+
+                        {showAgentForm && (
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                    New Support Agent
+                                </h3>
+                                {generatedCode ? (
+                                    <div className="space-y-4">
+                                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                                            <p className="text-sm text-green-800 dark:text-green-200 mb-2">
+                                                Support agent created successfully!
+                                            </p>
+                                            <p className="text-xs text-green-700 dark:text-green-300 mb-3">
+                                                Share this access code with the agent. They can use it to login.
+                                            </p>
+                                            <div className="bg-white dark:bg-gray-900 p-3 rounded border border-green-300 dark:border-green-700">
+                                                <p className="text-2xl font-mono font-bold text-center text-gray-900 dark:text-white tracking-wider">
+                                                    {generatedCode}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                setShowAgentForm(false);
+                                                setGeneratedCode(null);
+                                                setNewAgent({ name: '', email: '' });
+                                            }}
+                                            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                        >
+                                            Done
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <form onSubmit={createSupportAgent} className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Agent Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={newAgent.name}
+                                                onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
+                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                placeholder="John Doe"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Email
+                                            </label>
+                                            <input
+                                                type="email"
+                                                value={newAgent.email}
+                                                onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })}
+                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                placeholder="agent@example.com"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="flex justify-end space-x-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowAgentForm(false)}
+                                                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                            >
+                                                Create Agent
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
+                        )}
+
+                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-700">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                            Name
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                            Email
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                            Access Code
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                            Created
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                    {supportAgents.map((agent) => (
+                                        <tr key={agent.id}>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                                {agent.name}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                {agent.email}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className="font-mono text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                                    {agent.access_code}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                {new Date(agent.created_at).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                <button
+                                                    onClick={() => deleteSupportAgent(agent.id)}
+                                                    className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 )}
