@@ -601,12 +601,6 @@ export default function ExamView() {
                         </div>
                     )}
                     <p className="mt-4 text-sm text-gray-500">Your submission has been recorded.</p>
-                    <button
-                        onClick={() => navigate('/dashboard')}
-                        className="mt-6 w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition"
-                    >
-                        Return to Dashboard
-                    </button>
                 </div>
             </div>
         );
