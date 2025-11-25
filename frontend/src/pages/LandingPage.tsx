@@ -3,6 +3,8 @@ import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star } fro
 import { Logo } from '../components/Logo';
 
 export default function LandingPage() {
+    const registrationUrl = 'https://tutors.durrahsystem.tech/register';
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-violet-200 dark:from-indigo-950 dark:to-violet-900">
             {/* Navigation */}
@@ -10,7 +12,7 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center space-x-2">
-                            <Logo className="h-8 w-8" />
+                            <Logo className="h-8 w-8" showText={false} />
                             <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
                                 Durrah
                             </span>
@@ -43,10 +45,10 @@ export default function LandingPage() {
                             The modern exam platform trusted by tutors worldwide. Create, distribute, and grade exams with powerful anti‑cheating features.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                            <Link to="/register" className="group bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-200 flex items-center">
+                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="group bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-200 flex items-center">
                                 Start Free Trial
                                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                            </Link>
+                            </a>
                             <a href="#features" className="px-8 py-4 rounded-full text-lg font-semibold text-indigo-600 border-2 border-indigo-600 hover:bg-indigo-50 transition-all duration-200">
                                 Watch Demo
                             </a>
@@ -149,7 +151,7 @@ export default function LandingPage() {
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Simple, Transparent Pricing</h2>
                         <p className="text-xl text-gray-600 dark:text-gray-300">Start free, upgrade when you're ready</p>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border-2 border-gray-200 dark:border-gray-700">
                             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Starter</h3>
                             <div className="mb-6"><span className="text-5xl font-bold text-gray-900 dark:text-white">Free</span></div>
@@ -172,7 +174,19 @@ export default function LandingPage() {
                                 <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-violet-50">Priority support</span></li>
                                 <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-violet-50">All anti‑cheating features</span></li>
                             </ul>
-                            <Link to="/checkout" className="block w-full text-center bg-white text-violet-600 py-3 rounded-xl font-semibold hover:bg-violet-50 transition shadow-lg">Start Free Trial</Link>
+                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-white text-violet-600 py-3 rounded-xl font-semibold hover:bg-violet-50 transition shadow-lg">Start Free Trial</a>
+                        </div>
+                        <div className="bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-700 rounded-2xl shadow-2xl p-8 relative overflow-hidden transform hover:scale-105 transition-transform">
+                            <div className="absolute top-0 right-0 bg-white/90 text-indigo-700 px-4 py-1 rounded-bl-xl font-bold text-sm">BEST VALUE</div>
+                            <h3 className="text-2xl font-bold text-white mb-2">Professional Yearly</h3>
+                            <div className="mb-6"><span className="text-5xl font-bold text-white">2000 EGP</span><span className="text-indigo-100">/year</span></div>
+                            <ul className="space-y-4 mb-8">
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-indigo-50">All professional features</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-indigo-50">Dedicated account support</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-indigo-50">Priority roadmap feedback</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-indigo-50">2 months free vs. monthly</span></li>
+                            </ul>
+                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-white text-indigo-700 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition shadow-lg">Start Free Trial</a>
                         </div>
                     </div>
                 </div>
@@ -228,17 +242,17 @@ export default function LandingPage() {
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 transition-all duration-500 ease-in-out hover:scale-105">Ready to Transform Your Teaching?</h2>
                     <p className="text-xl text-indigo-100 mb-8">Join thousands of tutors who trust Durrah for their exam needs</p>
-                    <Link to="/register" className="inline-flex items-center bg-white text-indigo-600 px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-200">
+                    <a href={registrationUrl} target="_blank" rel="noreferrer" className="inline-flex items-center bg-white text-indigo-600 px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-200">
                         Start Your Free Trial
                         <ArrowRight className="ml-2 h-5 w-5" />
-                    </Link>
+                    </a>
                 </div>
             </section>
 
             {/* Footer */}
             <footer className="bg-gray-900 text-gray-300 py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid md:grid-cols-4 gap-8 mb-8">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
                         <div>
                             <div className="flex items-center space-x-2 mb-4">
                                 <Logo className="h-8 w-8" />
@@ -250,23 +264,7 @@ export default function LandingPage() {
                             <h3 className="font-bold text-white mb-4">Product</h3>
                             <ul className="space-y-2">
                                 <li><a href="#features" className="hover:text-white transition">Features</a></li>
-                                <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
                                 <li><Link to="/register" className="hover:text-white transition">Sign Up</Link></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-white mb-4">Support</h3>
-                            <ul className="space-y-2">
-                                <li><a href="#" className="hover:text-white transition">Help Center</a></li>
-                                <li><a href="#" className="hover:text-white transition">Contact Us</a></li>
-                                <li><a href="#" className="hover:text-white transition">Documentation</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-white mb-4">Legal</h3>
-                            <ul className="space-y-2">
-                                <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-                                <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
                             </ul>
                         </div>
                     </div>
