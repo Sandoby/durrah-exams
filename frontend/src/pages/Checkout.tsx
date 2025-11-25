@@ -58,15 +58,23 @@ export default function Checkout() {
                 .eq('code', couponCode.toUpperCase())
                 .single();
             if (error || !data) throw new Error('Coupon not found');
+
             // validity checks
             if (new Date(data.valid_until) < new Date()) throw new Error('Coupon expired');
             if (data.used_count >= data.max_uses) throw new Error('Coupon max uses reached');
             if (!data.is_active) throw new Error('Coupon inactive');
+
+            // Duration check
+            if (data.duration && data.duration !== billingCycle) {
+                throw new Error(`This coupon is only valid for ${data.duration} plans`);
+            }
+
             setAppliedCoupon(data);
             toast.success('Coupon applied');
         } catch (e) {
             console.error(e);
             toast.error((e as Error).message || 'Invalid coupon');
+            setAppliedCoupon(null); // Clear invalid coupon
         } finally {
             setIsValidatingCoupon(false);
         }
@@ -76,6 +84,16 @@ export default function Checkout() {
         setAppliedCoupon(null);
         setCouponCode('');
         toast.success('Coupon removed');
+    };
+
+    const handleBillingCycleChange = (cycle: 'monthly' | 'yearly') => {
+        setBillingCycle(cycle);
+        // If a coupon is applied with a specific duration that doesn't match the new cycle, remove it
+        if (appliedCoupon && appliedCoupon.duration && appliedCoupon.duration !== cycle) {
+            setAppliedCoupon(null);
+            setCouponCode('');
+            toast.error(`Coupon removed: only valid for ${appliedCoupon.duration} plans`);
+        }
     };
 
     const calculateFinalPrice = (basePrice: number) => {
@@ -182,7 +200,7 @@ export default function Checkout() {
                 <div className="flex justify-center mb-12">
                     <div className="bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 inline-flex relative">
                         <button
-                            onClick={() => setBillingCycle('monthly')}
+                            onClick={() => handleBillingCycleChange('monthly')}
                             className={`relative z-10 px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${billingCycle === 'monthly'
                                 ? 'bg-indigo-600 text-white shadow-md'
                                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
@@ -190,7 +208,7 @@ export default function Checkout() {
                             Monthly
                         </button>
                         <button
-                            onClick={() => setBillingCycle('yearly')}
+                            onClick={() => handleBillingCycleChange('yearly')}
                             className={`relative z-10 px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${billingCycle === 'yearly'
                                 ? 'bg-indigo-600 text-white shadow-md'
                                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
