@@ -22,44 +22,55 @@ CREATE TABLE IF NOT EXISTS chat_assignments (
     UNIQUE(user_id)
 );
 
--- 3. Add indexes for performance
+-- 3. Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_chat_assignments_agent ON chat_assignments(assigned_agent_id);
 CREATE INDEX IF NOT EXISTS idx_chat_assignments_status ON chat_assignments(status);
 CREATE INDEX IF NOT EXISTS idx_chat_assignments_user ON chat_assignments(user_id);
 CREATE INDEX IF NOT EXISTS idx_support_agents_active ON support_agents(is_active);
 CREATE INDEX IF NOT EXISTS idx_support_agents_code ON support_agents(access_code);
 
--- 4. Enable RLS
+-- 4. Enable Row Level Security
 ALTER TABLE support_agents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chat_assignments ENABLE ROW LEVEL SECURITY;
 
 -- 5. RLS Policies for support_agents
 
--- Drop existing policies if they exist (idempotent script)
+-- Drop potential old policies to clean up
 DROP POLICY IF EXISTS "Allow viewing active support agents" ON support_agents;
 DROP POLICY IF EXISTS "Allow insert for support agents" ON support_agents;
+-- Drop new policy names if they exist (idempotent)
+DROP POLICY IF EXISTS "policy_view_active_support_agents" ON support_agents;
+DROP POLICY IF EXISTS "policy_insert_support_agents" ON support_agents;
 
--- Allow anyone to view active agents
-CREATE POLICY "Allow viewing active support agents"
+-- Allow authenticated users to view active agents
+CREATE POLICY "policy_view_active_support_agents"
 ON support_agents FOR SELECT
-TO public
-USING (true);
+TO authenticated
+USING (is_active = true);
 
--- Allow the super‑admin (authenticated) to insert new agents
-CREATE POLICY "Allow insert for support agents"
+-- Allow authenticated users (super admin) to insert new agents
+CREATE POLICY "policy_insert_support_agents"
 ON support_agents FOR INSERT
 TO authenticated
 WITH CHECK (true);
 
 -- 6. RLS Policies for chat_assignments
+
+-- Drop potential old policies
+DROP POLICY IF EXISTS "Users can view their own chat assignments" ON chat_assignments;
+DROP POLICY IF EXISTS "Allow managing chat assignments" ON chat_assignments;
+-- Drop new policy names
+DROP POLICY IF EXISTS "policy_view_own_chat_assignments" ON chat_assignments;
+DROP POLICY IF EXISTS "policy_manage_chat_assignments" ON chat_assignments;
+
 -- Allow users to view their own chat assignments
-CREATE POLICY "Users can view their own chat assignments"
+CREATE POLICY "policy_view_own_chat_assignments"
 ON chat_assignments FOR SELECT
 TO authenticated
 USING (auth.uid() = user_id);
 
--- Allow authenticated users to manage chat assignments
-CREATE POLICY "Allow managing chat assignments"
+-- Allow authenticated users to manage chat assignments (insert, update, delete)
+CREATE POLICY "policy_manage_chat_assignments"
 ON chat_assignments FOR ALL
 TO authenticated
 USING (true)
@@ -74,14 +85,10 @@ DECLARE
 BEGIN
     LOOP
         -- Generate 8-character alphanumeric code
-        code := upper(substring(md5(random()::text) from 1 for 8));
-        
-        -- Check if code already exists
-        SELECT EXISTS(SELECT 1 FROM support_agents WHERE access_code = code) INTO exists;
-        
+        code := upper(substring(md5(random()::text) FROM 1 FOR 8));
+        SELECT EXISTS (SELECT 1 FROM support_agents WHERE access_code = code) INTO exists;
         EXIT WHEN NOT exists;
     END LOOP;
-    
     RETURN code;
 END;
 $$ LANGUAGE plpgsql;
@@ -90,18 +97,16 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION auto_assign_chat()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- If this is an admin message and no assignment exists, create one
     IF NEW.is_admin = true THEN
         INSERT INTO chat_assignments (user_id, assigned_agent_id, status)
         VALUES (NEW.user_id, NULL, 'open')
         ON CONFLICT (user_id) DO NOTHING;
     END IF;
-    
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
--- 9. Create trigger for auto-assignment
+-- 9. Trigger for auto-assignment
 DROP TRIGGER IF EXISTS trigger_auto_assign_chat ON chat_messages;
 CREATE TRIGGER trigger_auto_assign_chat
     AFTER INSERT ON chat_messages
