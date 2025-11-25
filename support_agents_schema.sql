@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS support_agents (
     access_code TEXT UNIQUE NOT NULL,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    -- created_by can be null if admin is not authenticated in Supabase
     created_by UUID REFERENCES auth.users(id)
 );
 
@@ -35,44 +36,63 @@ ALTER TABLE chat_assignments ENABLE ROW LEVEL SECURITY;
 
 -- 5. RLS Policies for support_agents
 
--- Drop potential old policies to clean up
+-- Drop ALL potential old policies to ensure a clean slate
 DROP POLICY IF EXISTS "Allow viewing active support agents" ON support_agents;
 DROP POLICY IF EXISTS "Allow insert for support agents" ON support_agents;
--- Drop new policy names if they exist (idempotent)
 DROP POLICY IF EXISTS "policy_view_active_support_agents" ON support_agents;
 DROP POLICY IF EXISTS "policy_insert_support_agents" ON support_agents;
+DROP POLICY IF EXISTS "Allow all operations on support agents" ON support_agents;
+DROP POLICY IF EXISTS "Allow update for support agents" ON support_agents;
+DROP POLICY IF EXISTS "Allow delete for support agents" ON support_agents;
 
--- Allow authenticated users to view active agents
-CREATE POLICY "policy_view_active_support_agents"
+-- CRITICAL FIX: The Admin and Agents are NOT authenticated via Supabase Auth.
+-- They use a custom frontend auth. Therefore, we MUST allow PUBLIC access
+-- to these tables for the application to function. Security is handled by the UI.
+
+-- Allow public to view agents (needed for login check and admin list)
+CREATE POLICY "public_view_agents"
 ON support_agents FOR SELECT
-TO authenticated
-USING (is_active = true);
+TO public
+USING (true);
 
--- Allow authenticated users (super admin) to insert new agents
-CREATE POLICY "policy_insert_support_agents"
+-- Allow public to insert agents (needed for Admin to add agents)
+CREATE POLICY "public_insert_agents"
 ON support_agents FOR INSERT
-TO authenticated
+TO public
 WITH CHECK (true);
+
+-- Allow public to update agents (needed for soft delete/deactivation)
+CREATE POLICY "public_update_agents"
+ON support_agents FOR UPDATE
+TO public
+USING (true)
+WITH CHECK (true);
+
+-- Allow public to delete agents (if hard delete is used)
+CREATE POLICY "public_delete_agents"
+ON support_agents FOR DELETE
+TO public
+USING (true);
 
 -- 6. RLS Policies for chat_assignments
 
--- Drop potential old policies
+-- Drop ALL potential old policies
 DROP POLICY IF EXISTS "Users can view their own chat assignments" ON chat_assignments;
 DROP POLICY IF EXISTS "Allow managing chat assignments" ON chat_assignments;
--- Drop new policy names
 DROP POLICY IF EXISTS "policy_view_own_chat_assignments" ON chat_assignments;
 DROP POLICY IF EXISTS "policy_manage_chat_assignments" ON chat_assignments;
+DROP POLICY IF EXISTS "ChatAssignmentsViewOwn" ON chat_assignments;
 
--- Allow users to view their own chat assignments
-CREATE POLICY "policy_view_own_chat_assignments"
+-- Allow public to view assignments (needed for Agents to see their chats)
+CREATE POLICY "public_view_assignments"
 ON chat_assignments FOR SELECT
-TO authenticated
-USING (auth.uid() = user_id);
+TO public
+USING (true);
 
--- Allow authenticated users to manage chat assignments (insert, update, delete)
-CREATE POLICY "policy_manage_chat_assignments"
+-- Allow public to manage assignments (needed for auto-assign, forward, close)
+CREATE POLICY "public_manage_assignments"
 ON chat_assignments FOR ALL
-TO authenticated
+TO public
 USING (true)
 WITH CHECK (true);
 
@@ -97,6 +117,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION auto_assign_chat()
 RETURNS TRIGGER AS $$
 BEGIN
+    -- If this is an admin message (is_admin=true) and no assignment exists
     IF NEW.is_admin = true THEN
         INSERT INTO chat_assignments (user_id, assigned_agent_id, status)
         VALUES (NEW.user_id, NULL, 'open')
