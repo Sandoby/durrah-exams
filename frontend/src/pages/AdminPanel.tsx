@@ -114,8 +114,8 @@ export default function AdminPanel() {
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const [newChatMessage, setNewChatMessage] = useState('');
     const [selectedUserInfo, setSelectedUserInfo] = useState<UserInfo | null>(null);
-    const [, setChatAssignments] = useState<ChatAssignment[]>([]);
-    const [_chatFilter, _setChatFilter] = useState<'open' | 'closed'>('open');
+    const [chatAssignments, setChatAssignments] = useState<ChatAssignment[]>([]);
+    const [chatFilter, setChatFilter] = useState<'new' | 'current' | 'ended'>('new');
     const [_showForwardModal, _setShowForwardModal] = useState(false);
     const [_forwardToAgentId, _setForwardToAgentId] = useState<string>('');
     const chatMessagesEndRef = useRef<HTMLDivElement>(null);
@@ -571,6 +571,24 @@ export default function AdminPanel() {
         } catch (error) {
             console.error('Error fetching chat users:', error);
         }
+    };
+
+    // Get filtered chat users based on assignment status
+    const getFilteredChatUsers = () => {
+        return chatUsers.filter(userId => {
+            const assignment = chatAssignments.find(a => a.user_id === userId);
+
+            if (chatFilter === 'new') {
+                // New chats: no assignment or unassigned
+                return !assignment || assignment.assigned_agent_id === null;
+            } else if (chatFilter === 'current') {
+                // Current chats: assigned and open
+                return assignment && assignment.assigned_agent_id !== null && assignment.status === 'open';
+            } else {
+                // Ended chats: closed status
+                return assignment && assignment.status === 'closed';
+            }
+        });
     };
 
     const fetchUserInfo = async (userId: string) => {
@@ -1098,297 +1116,359 @@ export default function AdminPanel() {
 
                 {/* Chat Tab */}
                 {activeTab === 'chat' && (
-                    <div className="grid grid-cols-3 gap-6 h-[600px]">
-                        {/* Users List */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-                            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                                <h3 className="font-semibold text-gray-900 dark:text-white">Conversations</h3>
-                            </div>
-                            <div className="overflow-y-auto h-full">
-                                {chatUsers.length === 0 ? (
-                                    <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
-                                        No conversations yet
-                                    </div>
-                                ) : (
-                                    chatUsers.map((userId) => (
-                                        <button
-                                            key={userId}
-                                            onClick={() => setSelectedChatUser(userId)}
-                                            className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-700 ${selectedChatUser === userId ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
-                                                }`}
-                                        >
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                                {userId.substring(0, 8)}...
-                                            </p>
-                                        </button>
-                                    ))
-                                )}
+                    <div className="space-y-4">
+                        {/* Chat Filter Tabs */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+                            <div className="border-b border-gray-200 dark:border-gray-700">
+                                <nav className="-mb-px flex space-x-8 px-6" aria-label="Chat Filters">
+                                    <button
+                                        onClick={() => setChatFilter('new')}
+                                        className={`${chatFilter === 'new'
+                                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                            : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                                    >
+                                        <span className="mr-2">🆕</span>
+                                        New Chat Orders
+                                        <span className="ml-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 py-0.5 px-2 rounded-full text-xs font-semibold">
+                                            {chatUsers.filter(userId => {
+                                                const assignment = chatAssignments.find(a => a.user_id === userId);
+                                                return !assignment || assignment.assigned_agent_id === null;
+                                            }).length}
+                                        </span>
+                                    </button>
+                                    <button
+                                        onClick={() => setChatFilter('current')}
+                                        className={`${chatFilter === 'current'
+                                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                            : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                                    >
+                                        <span className="mr-2">💬</span>
+                                        Current Chats
+                                        <span className="ml-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 py-0.5 px-2 rounded-full text-xs font-semibold">
+                                            {chatUsers.filter(userId => {
+                                                const assignment = chatAssignments.find(a => a.user_id === userId);
+                                                return assignment && assignment.assigned_agent_id !== null && assignment.status === 'open';
+                                            }).length}
+                                        </span>
+                                    </button>
+                                    <button
+                                        onClick={() => setChatFilter('ended')}
+                                        className={`${chatFilter === 'ended'
+                                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                            : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                                    >
+                                        <span className="mr-2">✅</span>
+                                        Ended Chats
+                                        <span className="ml-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 py-0.5 px-2 rounded-full text-xs font-semibold">
+                                            {chatUsers.filter(userId => {
+                                                const assignment = chatAssignments.find(a => a.user_id === userId);
+                                                return assignment && assignment.status === 'closed';
+                                            }).length}
+                                        </span>
+                                    </button>
+                                </nav>
                             </div>
                         </div>
 
-                        {/* Chat Messages */}
-                        <div className="col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow flex flex-col">
-                            {selectedChatUser ? (
-                                <>
-                                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
-                                                    {selectedUserInfo?.full_name || chatMessages[0]?.user_email || 'User Chat'}
-                                                </h3>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                    {selectedUserInfo?.email || chatMessages[0]?.user_email}
+                        {/* Chat Interface */}
+                        <div className="grid grid-cols-3 gap-6 h-[600px]">
+                            {/* Users List */}
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                                        {chatFilter === 'new' && 'New Conversations'}
+                                        {chatFilter === 'current' && 'Active Conversations'}
+                                        {chatFilter === 'ended' && 'Closed Conversations'}
+                                    </h3>
+                                </div>
+                                <div className="overflow-y-auto h-full">
+                                    {getFilteredChatUsers().length === 0 ? (
+                                        <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
+                                            No {chatFilter} conversations
+                                        </div>
+                                    ) : (
+                                        getFilteredChatUsers().map((userId) => (
+                                            <button
+                                                key={userId}
+                                                onClick={() => setSelectedChatUser(userId)}
+                                                className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-700 ${selectedChatUser === userId ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
+                                                    }`}
+                                            >
+                                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                    {userId.substring(0, 8)}...
                                                 </p>
+                                            </button>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
 
-                                                {/* User Details Grid */}
-                                                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                                                    {selectedUserInfo?.phone && (
+                            {/* Chat Messages */}
+                            <div className="col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow flex flex-col">
+                                {selectedChatUser ? (
+                                    <>
+                                        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                    <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
+                                                        {selectedUserInfo?.full_name || chatMessages[0]?.user_email || 'User Chat'}
+                                                    </h3>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                        {selectedUserInfo?.email || chatMessages[0]?.user_email}
+                                                    </p>
+
+                                                    {/* User Details Grid */}
+                                                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                                        {selectedUserInfo?.phone && (
+                                                            <div>
+                                                                <span className="text-gray-500 dark:text-gray-400">Phone:</span>
+                                                                <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.phone}</span>
+                                                            </div>
+                                                        )}
+                                                        {selectedUserInfo?.institution && (
+                                                            <div>
+                                                                <span className="text-gray-500 dark:text-gray-400">Institution:</span>
+                                                                <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.institution}</span>
+                                                            </div>
+                                                        )}
                                                         <div>
-                                                            <span className="text-gray-500 dark:text-gray-400">Phone:</span>
-                                                            <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.phone}</span>
-                                                        </div>
-                                                    )}
-                                                    {selectedUserInfo?.institution && (
-                                                        <div>
-                                                            <span className="text-gray-500 dark:text-gray-400">Institution:</span>
-                                                            <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.institution}</span>
-                                                        </div>
-                                                    )}
-                                                    <div>
-                                                        <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                                                        <span className={`ml-1 font-medium ${selectedUserInfo?.subscription_status === 'active'
-                                                            ? 'text-green-600 dark:text-green-400'
-                                                            : 'text-gray-600 dark:text-gray-400'
-                                                            }`}>
-                                                            {selectedUserInfo?.subscription_status === 'active' ? 'Subscribed' : 'Free'}
-                                                        </span>
-                                                    </div>
-                                                    {selectedUserInfo?.subscription_plan && (
-                                                        <div>
-                                                            <span className="text-gray-500 dark:text-gray-400">Plan:</span>
-                                                            <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.subscription_plan}</span>
-                                                        </div>
-                                                    )}
-                                                    {selectedUserInfo?.created_at && (
-                                                        <div className="col-span-2">
-                                                            <span className="text-gray-500 dark:text-gray-400">Member since:</span>
-                                                            <span className="ml-1 text-gray-900 dark:text-white">
-                                                                {new Date(selectedUserInfo.created_at).toLocaleDateString()}
+                                                            <span className="text-gray-500 dark:text-gray-400">Status:</span>
+                                                            <span className={`ml-1 font-medium ${selectedUserInfo?.subscription_status === 'active'
+                                                                ? 'text-green-600 dark:text-green-400'
+                                                                : 'text-gray-600 dark:text-gray-400'
+                                                                }`}>
+                                                                {selectedUserInfo?.subscription_status === 'active' ? 'Subscribed' : 'Free'}
                                                             </span>
                                                         </div>
-                                                    )}
+                                                        {selectedUserInfo?.subscription_plan && (
+                                                            <div>
+                                                                <span className="text-gray-500 dark:text-gray-400">Plan:</span>
+                                                                <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.subscription_plan}</span>
+                                                            </div>
+                                                        )}
+                                                        {selectedUserInfo?.created_at && (
+                                                            <div className="col-span-2">
+                                                                <span className="text-gray-500 dark:text-gray-400">Member since:</span>
+                                                                <span className="ml-1 text-gray-900 dark:text-white">
+                                                                    {new Date(selectedUserInfo.created_at).toLocaleDateString()}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex justify-end">
-                                        <button
-                                            onClick={closeChat}
-                                            className="text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 px-3 py-1 rounded-full transition-colors"
-                                        >
-                                            Close Chat & Request Rating
-                                        </button>
-                                    </div>
-                                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                                        {chatMessages.map((msg) => (
-                                            <div
-                                                key={msg.id}
-                                                className={`flex ${msg.is_admin ? 'justify-end' : 'justify-start'}`}
+                                        <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex justify-end">
+                                            <button
+                                                onClick={closeChat}
+                                                className="text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 px-3 py-1 rounded-full transition-colors"
                                             >
+                                                Close Chat & Request Rating
+                                            </button>
+                                        </div>
+                                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                            {chatMessages.map((msg) => (
                                                 <div
-                                                    className={`max-w-[70%] rounded-lg p-3 ${msg.is_admin
-                                                        ? 'bg-indigo-600 text-white'
-                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                                                        }`}
+                                                    key={msg.id}
+                                                    className={`flex ${msg.is_admin ? 'justify-end' : 'justify-start'}`}
                                                 >
-                                                    <p className="text-sm">{msg.message}</p>
-                                                    <p className={`text-xs mt-1 ${msg.is_admin ? 'text-indigo-200' : 'text-gray-500'}`}>
-                                                        {new Date(msg.created_at).toLocaleTimeString()}
-                                                    </p>
+                                                    <div
+                                                        className={`max-w-[70%] rounded-lg p-3 ${msg.is_admin
+                                                            ? 'bg-indigo-600 text-white'
+                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                                                            }`}
+                                                    >
+                                                        <p className="text-sm">{msg.message}</p>
+                                                        <p className={`text-xs mt-1 ${msg.is_admin ? 'text-indigo-200' : 'text-gray-500'}`}>
+                                                            {new Date(msg.created_at).toLocaleTimeString()}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                        <div ref={chatMessagesEndRef} />
-                                    </div>
-                                    <form onSubmit={sendChatMessage} className="p-4 border-t border-gray-200 dark:border-gray-700">
-                                        <div className="flex space-x-2">
-                                            <input
-                                                type="text"
-                                                value={newChatMessage}
-                                                onChange={(e) => setNewChatMessage(e.target.value)}
-                                                placeholder="Type your response..."
-                                                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                            />
-                                            <button
-                                                type="submit"
-                                                className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700"
-                                            >
-                                                <Send className="h-5 w-5" />
-                                            </button>
+                                            ))}
+                                            <div ref={chatMessagesEndRef} />
                                         </div>
-                                    </form>
-                                </>
-                            ) : (
-                                <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
-                                    Select a conversation to start chatting
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* Agents Tab (Super Admin Only) */}
-                {activeTab === 'agents' && userRole === 'super_admin' && (
-                    <div className="space-y-6">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                Support Agents
-                            </h2>
-                            <button
-                                onClick={() => {
-                                    setShowAgentForm(!showAgentForm);
-                                    setGeneratedCode(null);
-                                }}
-                                className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                            >
-                                <UserPlus className="h-4 w-4 mr-2" />
-                                Add Support Agent
-                            </button>
-                        </div>
-
-                        {showAgentForm && (
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                    New Support Agent
-                                </h3>
-                                {generatedCode ? (
-                                    <div className="space-y-4">
-                                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                                            <p className="text-sm text-green-800 dark:text-green-200 mb-2">
-                                                Support agent created successfully!
-                                            </p>
-                                            <p className="text-xs text-green-700 dark:text-green-300 mb-3">
-                                                Share this access code with the agent. They can use it to login.
-                                            </p>
-                                            <div className="bg-white dark:bg-gray-900 p-3 rounded border border-green-300 dark:border-green-700">
-                                                <p className="text-2xl font-mono font-bold text-center text-gray-900 dark:text-white tracking-wider">
-                                                    {generatedCode}
-                                                </p>
+                                        <form onSubmit={sendChatMessage} className="p-4 border-t border-gray-200 dark:border-gray-700">
+                                            <div className="flex space-x-2">
+                                                <input
+                                                    type="text"
+                                                    value={newChatMessage}
+                                                    onChange={(e) => setNewChatMessage(e.target.value)}
+                                                    placeholder="Type your response..."
+                                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                />
+                                                <button
+                                                    type="submit"
+                                                    className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700"
+                                                >
+                                                    <Send className="h-5 w-5" />
+                                                </button>
                                             </div>
-                                        </div>
-                                        <button
-                                            onClick={() => {
-                                                setShowAgentForm(false);
-                                                setGeneratedCode(null);
-                                                setNewAgent({ name: '', email: '' });
-                                            }}
-                                            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                                        >
-                                            Done
-                                        </button>
-                                    </div>
+                                        </form>
+                                    </>
                                 ) : (
-                                    <form onSubmit={createSupportAgent} className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Agent Name
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={newAgent.name}
-                                                onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                                placeholder="John Doe"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Email
-                                            </label>
-                                            <input
-                                                type="email"
-                                                value={newAgent.email}
-                                                onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                                placeholder="agent@example.com"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="flex justify-end space-x-3">
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowAgentForm(false)}
-                                                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                                            >
-                                                Create Agent
-                                            </button>
-                                        </div>
-                                    </form>
+                                    <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                                        Select a conversation to start chatting
+                                    </div>
                                 )}
                             </div>
-                        )}
-
-                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead className="bg-gray-50 dark:bg-gray-700">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                            Name
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                            Email
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                            Access Code
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                            Created
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                    {supportAgents.map((agent) => (
-                                        <tr key={agent.id}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                                {agent.name}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                {agent.email}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="font-mono text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                                                    {agent.access_code}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                {new Date(agent.created_at).toLocaleDateString()}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                <button
-                                                    onClick={() => deleteSupportAgent(agent.id)}
-                                                    className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                >
-                                                    Remove
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
                         </div>
-                    </div>
                 )}
-            </div>
+
+                        {/* Agents Tab (Super Admin Only) */}
+                        {activeTab === 'agents' && userRole === 'super_admin' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center">
+                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                        Support Agents
+                                    </h2>
+                                    <button
+                                        onClick={() => {
+                                            setShowAgentForm(!showAgentForm);
+                                            setGeneratedCode(null);
+                                        }}
+                                        className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                    >
+                                        <UserPlus className="h-4 w-4 mr-2" />
+                                        Add Support Agent
+                                    </button>
+                                </div>
+
+                                {showAgentForm && (
+                                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                            New Support Agent
+                                        </h3>
+                                        {generatedCode ? (
+                                            <div className="space-y-4">
+                                                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                                                    <p className="text-sm text-green-800 dark:text-green-200 mb-2">
+                                                        Support agent created successfully!
+                                                    </p>
+                                                    <p className="text-xs text-green-700 dark:text-green-300 mb-3">
+                                                        Share this access code with the agent. They can use it to login.
+                                                    </p>
+                                                    <div className="bg-white dark:bg-gray-900 p-3 rounded border border-green-300 dark:border-green-700">
+                                                        <p className="text-2xl font-mono font-bold text-center text-gray-900 dark:text-white tracking-wider">
+                                                            {generatedCode}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        setShowAgentForm(false);
+                                                        setGeneratedCode(null);
+                                                        setNewAgent({ name: '', email: '' });
+                                                    }}
+                                                    className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                                >
+                                                    Done
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <form onSubmit={createSupportAgent} className="space-y-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                        Agent Name
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={newAgent.name}
+                                                        onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
+                                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                        placeholder="John Doe"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                        Email
+                                                    </label>
+                                                    <input
+                                                        type="email"
+                                                        value={newAgent.email}
+                                                        onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })}
+                                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                        placeholder="agent@example.com"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="flex justify-end space-x-3">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowAgentForm(false)}
+                                                        className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        type="submit"
+                                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                                    >
+                                                        Create Agent
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+                                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                        <thead className="bg-gray-50 dark:bg-gray-700">
+                                            <tr>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                    Name
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                    Email
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                    Access Code
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                    Created
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                            {supportAgents.map((agent) => (
+                                                <tr key={agent.id}>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                                        {agent.name}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                        {agent.email}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <span className="font-mono text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                                            {agent.access_code}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                        {new Date(agent.created_at).toLocaleDateString()}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                        <button
+                                                            onClick={() => deleteSupportAgent(agent.id)}
+                                                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+                    </div>
         </div>
-    );
+            );
 }
