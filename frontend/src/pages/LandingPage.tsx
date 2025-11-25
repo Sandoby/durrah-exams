@@ -49,9 +49,6 @@ export default function LandingPage() {
                                 Start Free Trial
                                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                             </a>
-                            <a href="#features" className="px-8 py-4 rounded-full text-lg font-semibold text-indigo-600 border-2 border-indigo-600 hover:bg-indigo-50 transition-all duration-200">
-                                Watch Demo
-                            </a>
                         </div>
                         <div className="mt-12 flex flex-wrap justify-center gap-8 text-sm text-gray-600 dark:text-gray-400">
                             <div className="flex items-center">
@@ -63,30 +60,6 @@ export default function LandingPage() {
                             <div className="flex items-center">
                                 <Check className="h-5 w-5 text-indigo-500 mr-2" /> Cancel anytime
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Stats Section */}
-            <section className="py-16 bg-gradient-to-r from-indigo-600 to-violet-600">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
-                        <div>
-                            <div className="text-4xl md:text-5xl font-bold mb-2">10K+</div>
-                            <div className="text-indigo-100">Active Tutors</div>
-                        </div>
-                        <div>
-                            <div className="text-4xl md:text-5xl font-bold mb-2">500K+</div>
-                            <div className="text-indigo-100">Exams Created</div>
-                        </div>
-                        <div>
-                            <div className="text-4xl md:text-5xl font-bold mb-2">2M+</div>
-                            <div className="text-indigo-100">Students Tested</div>
-                        </div>
-                        <div>
-                            <div className="text-4xl md:text-5xl font-bold mb-2">150+</div>
-                            <div className="text-indigo-100">Countries</div>
                         </div>
                     </div>
                 </div>
@@ -255,8 +228,9 @@ export default function LandingPage() {
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
                         <div>
                             <div className="flex items-center space-x-2 mb-4">
-                                <Logo className="h-8 w-8" />
+                                <Logo className="h-8 w-8" showText={false} />
                                 <span className="text-xl font-bold text-white">Durrah</span>
+                                <span className="text-lg text-gray-400">for Tutors</span>
                             </div>
                             <p className="text-gray-400">The modern exam platform for tutors worldwide.</p>
                         </div>
