@@ -1,27 +1,27 @@
 import { Link } from 'react-router-dom';
-import { Check, Zap, BarChart3, Shield, Globe, Users, ArrowRight, Star, MessageCircle } from 'lucide-react';
+import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star } from 'lucide-react';
 import { Logo } from '../components/Logo';
 
 export default function LandingPage() {
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+        <div className="min-h-screen bg-gradient-to-b from-teal-100 to-cyan-200 dark:from-teal-900 dark:to-cyan-800">
             {/* Navigation */}
             <nav className="fixed top-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-50 border-b border-gray-200 dark:border-gray-800">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center space-x-2">
                             <Logo className="h-8 w-8" />
-                            <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            <span className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
                                 Durrah
                             </span>
                             <span className="text-lg text-gray-600 dark:text-gray-400">for Tutors</span>
                         </div>
                         <div className="hidden md:flex items-center space-x-8">
-                            <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition">Features</a>
-                            <a href="#pricing" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition">Pricing</a>
-                            <a href="#testimonials" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition">Testimonials</a>
-                            <Link to="/login" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition">Login</Link>
-                            <Link to="/register" className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-200">
+                            <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition">Features</a>
+                            <a href="#pricing" className="text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition">Pricing</a>
+                            <a href="#testimonials" className="text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition">Testimonials</a>
+                            <Link to="/login" className="text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition">Login</Link>
+                            <Link to="/register" className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-6 py-2 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-200">
                                 Get Started Free
                             </Link>
                         </div>
@@ -33,36 +33,33 @@ export default function LandingPage() {
             <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center">
-                        <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
+                        <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight transition-all duration-500 ease-in-out hover:scale-105">
                             Create Exams That
-                            <span className="block bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            <span className="block bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
                                 Inspire Excellence
                             </span>
                         </h1>
                         <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-                            The modern exam platform trusted by tutors worldwide. Create, distribute, and grade exams with powerful analytics and anti-cheating features.
+                            The modern exam platform trusted by tutors worldwide. Create, distribute, and grade exams with powerful anti‑cheating features.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                            <Link to="/register" className="group bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-200 flex items-center">
+                            <Link to="/register" className="group bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-200 flex items-center">
                                 Start Free Trial
                                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
-                            <a href="#features" className="px-8 py-4 rounded-full text-lg font-semibold text-indigo-600 dark:text-indigo-400 border-2 border-indigo-600 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all duration-200">
+                            <a href="#features" className="px-8 py-4 rounded-full text-lg font-semibold text-teal-600 border-2 border-teal-600 hover:bg-teal-50 transition-all duration-200">
                                 Watch Demo
                             </a>
                         </div>
                         <div className="mt-12 flex flex-wrap justify-center gap-8 text-sm text-gray-600 dark:text-gray-400">
                             <div className="flex items-center">
-                                <Check className="h-5 w-5 text-green-500 mr-2" />
-                                No credit card required
+                                <Check className="h-5 w-5 text-green-500 mr-2" /> No credit card required
                             </div>
                             <div className="flex items-center">
-                                <Check className="h-5 w-5 text-green-500 mr-2" />
-                                Free for up to 3 exams
+                                <Check className="h-5 w-5 text-green-500 mr-2" /> Free for up to 3 exams
                             </div>
                             <div className="flex items-center">
-                                <Check className="h-5 w-5 text-green-500 mr-2" />
-                                Cancel anytime
+                                <Check className="h-5 w-5 text-green-500 mr-2" /> Cancel anytime
                             </div>
                         </div>
                     </div>
@@ -70,24 +67,24 @@ export default function LandingPage() {
             </section>
 
             {/* Stats Section */}
-            <section className="py-16 bg-gradient-to-r from-indigo-600 to-purple-600">
+            <section className="py-16 bg-gradient-to-r from-teal-600 to-cyan-600">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
                         <div>
                             <div className="text-4xl md:text-5xl font-bold mb-2">10K+</div>
-                            <div className="text-indigo-100">Active Tutors</div>
+                            <div className="text-teal-100">Active Tutors</div>
                         </div>
                         <div>
                             <div className="text-4xl md:text-5xl font-bold mb-2">500K+</div>
-                            <div className="text-indigo-100">Exams Created</div>
+                            <div className="text-teal-100">Exams Created</div>
                         </div>
                         <div>
                             <div className="text-4xl md:text-5xl font-bold mb-2">2M+</div>
-                            <div className="text-indigo-100">Students Tested</div>
+                            <div className="text-teal-100">Students Tested</div>
                         </div>
                         <div>
                             <div className="text-4xl md:text-5xl font-bold mb-2">150+</div>
-                            <div className="text-indigo-100">Countries</div>
+                            <div className="text-teal-100">Countries</div>
                         </div>
                     </div>
                 </div>
@@ -97,14 +94,9 @@ export default function LandingPage() {
             <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-                            Everything You Need to Excel
-                        </h2>
-                        <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                            Powerful features designed specifically for modern educators
-                        </p>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Everything You Need to Excel</h2>
+                        <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">Powerful features designed specifically for modern educators</p>
                     </div>
-
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[
                             {
@@ -115,15 +107,9 @@ export default function LandingPage() {
                             },
                             {
                                 icon: Shield,
-                                title: 'Advanced Anti-Cheating',
-                                description: 'Fullscreen mode, tab switching detection, copy-paste prevention, and violation tracking.',
+                                title: 'Advanced Anti‑Cheating',
+                                description: 'Fullscreen mode, tab switching detection, copy‑paste prevention, and violation tracking.',
                                 gradient: 'from-green-400 to-emerald-500'
-                            },
-                            {
-                                icon: BarChart3,
-                                title: 'Powerful Analytics',
-                                description: 'Deep insights into student performance with detailed analytics and exportable reports.',
-                                gradient: 'from-blue-400 to-indigo-500'
                             },
                             {
                                 icon: Globe,
@@ -160,77 +146,33 @@ export default function LandingPage() {
             <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-                            Simple, Transparent Pricing
-                        </h2>
-                        <p className="text-xl text-gray-600 dark:text-gray-300">
-                            Start free, upgrade when you're ready
-                        </p>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Simple, Transparent Pricing</h2>
+                        <p className="text-xl text-gray-600 dark:text-gray-300">Start free, upgrade when you're ready</p>
                     </div>
-
                     <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border-2 border-gray-200 dark:border-gray-700">
                             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Starter</h3>
-                            <div className="mb-6">
-                                <span className="text-5xl font-bold text-gray-900 dark:text-white">Free</span>
-                            </div>
+                            <div className="mb-6"><span className="text-5xl font-bold text-gray-900 dark:text-white">Free</span></div>
                             <ul className="space-y-4 mb-8">
-                                <li className="flex items-start">
-                                    <Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" />
-                                    <span className="text-gray-600 dark:text-gray-300">Up to 3 exams</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" />
-                                    <span className="text-gray-600 dark:text-gray-300">100 students per exam</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" />
-                                    <span className="text-gray-600 dark:text-gray-300">Basic analytics</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" />
-                                    <span className="text-gray-600 dark:text-gray-300">Email support</span>
-                                </li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">Up to 3 exams</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">100 students per exam</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">Basic anti‑cheating</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">Email support</span></li>
                             </ul>
-                            <Link to="/register" className="block w-full text-center bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition">
-                                Get Started
-                            </Link>
+                            <Link to="/register" className="block w-full text-center bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition">Get Started</Link>
                         </div>
-
-                        <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl shadow-2xl p-8 relative overflow-hidden transform hover:scale-105 transition-transform">
-                            <div className="absolute top-0 right-0 bg-yellow-400 text-gray-900 px-4 py-1 rounded-bl-xl font-bold text-sm">
-                                POPULAR
-                            </div>
+                        <div className="bg-gradient-to-br from-teal-600 to-cyan-600 rounded-2xl shadow-2xl p-8 relative overflow-hidden transform hover:scale-105 transition-transform">
+                            <div className="absolute top-0 right-0 bg-yellow-400 text-gray-900 px-4 py-1 rounded-bl-xl font-bold text-sm">POPULAR</div>
                             <h3 className="text-2xl font-bold text-white mb-2">Professional</h3>
-                            <div className="mb-6">
-                                <span className="text-5xl font-bold text-white">200 EGP</span>
-                                <span className="text-indigo-100">/month</span>
-                            </div>
+                            <div className="mb-6"><span className="text-5xl font-bold text-white">200 EGP</span><span className="text-teal-100">/month</span></div>
                             <ul className="space-y-4 mb-8">
-                                <li className="flex items-start">
-                                    <Check className="h-6 w-6 text-white mr-3 flex-shrink-0" />
-                                    <span className="text-indigo-50">Unlimited exams</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <Check className="h-6 w-6 text-white mr-3 flex-shrink-0" />
-                                    <span className="text-indigo-50">Unlimited students</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <Check className="h-6 w-6 text-white mr-3 flex-shrink-0" />
-                                    <span className="text-indigo-50">Advanced analytics & insights</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <Check className="h-6 w-6 text-white mr-3 flex-shrink-0" />
-                                    <span className="text-indigo-50">Priority support</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <Check className="h-6 w-6 text-white mr-3 flex-shrink-0" />
-                                    <span className="text-indigo-50">All anti-cheating features</span>
-                                </li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-teal-50">Unlimited exams</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-teal-50">Unlimited students</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-teal-50">Advanced analytics &amp; insights</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-teal-50">Priority support</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-teal-50">All anti‑cheating features</span></li>
                             </ul>
-                            <Link to="/checkout" className="block w-full text-center bg-white text-indigo-600 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition shadow-lg">
-                                Start Free Trial
-                            </Link>
+                            <Link to="/checkout" className="block w-full text-center bg-white text-teal-600 py-3 rounded-xl font-semibold hover:bg-teal-50 transition shadow-lg">Start Free Trial</Link>
                         </div>
                     </div>
                 </div>
@@ -240,26 +182,21 @@ export default function LandingPage() {
             <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-                            Loved by Tutors Worldwide
-                        </h2>
-                        <p className="text-xl text-gray-600 dark:text-gray-300">
-                            See what educators are saying about Durrah
-                        </p>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Loved by Tutors Worldwide</h2>
+                        <p className="text-xl text-gray-600 dark:text-gray-300">See what educators are saying about Durrah</p>
                     </div>
-
                     <div className="grid md:grid-cols-3 gap-8">
                         {[
                             {
                                 name: 'Sarah Johnson',
                                 role: 'Math Tutor, USA',
-                                content: 'Durrah has transformed how I create and grade exams. The analytics help me understand exactly where my students need help.',
+                                content: 'Durrah has transformed how I create and grade exams. The platform helps me understand exactly where my students need help.',
                                 rating: 5
                             },
                             {
                                 name: 'Ahmed Hassan',
                                 role: 'Physics Teacher, Egypt',
-                                content: 'The anti-cheating features give me peace of mind. I can trust that my students are doing their own work.',
+                                content: 'The anti‑cheating features give me peace of mind. I can trust that my students are doing their own work.',
                                 rating: 5
                             },
                             {
@@ -287,15 +224,11 @@ export default function LandingPage() {
             </section>
 
             {/* CTA Section */}
-            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 to-purple-600">
+            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-teal-600 to-cyan-600">
                 <div className="max-w-4xl mx-auto text-center">
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                        Ready to Transform Your Teaching?
-                    </h2>
-                    <p className="text-xl text-indigo-100 mb-8">
-                        Join thousands of tutors who trust Durrah for their exam needs
-                    </p>
-                    <Link to="/register" className="inline-flex items-center bg-white text-indigo-600 px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-200">
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 transition-all duration-500 ease-in-out hover:scale-105">Ready to Transform Your Teaching?</h2>
+                    <p className="text-xl text-teal-100 mb-8">Join thousands of tutors who trust Durrah for their exam needs</p>
+                    <Link to="/register" className="inline-flex items-center bg-white text-teal-600 px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-200">
                         Start Your Free Trial
                         <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
@@ -311,9 +244,7 @@ export default function LandingPage() {
                                 <Logo className="h-8 w-8" />
                                 <span className="text-xl font-bold text-white">Durrah</span>
                             </div>
-                            <p className="text-gray-400">
-                                The modern exam platform for tutors worldwide.
-                            </p>
+                            <p className="text-gray-400">The modern exam platform for tutors worldwide.</p>
                         </div>
                         <div>
                             <h3 className="font-bold text-white mb-4">Product</h3>
