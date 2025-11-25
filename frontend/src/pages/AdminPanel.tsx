@@ -1315,160 +1315,161 @@ export default function AdminPanel() {
                                 )}
                             </div>
                         </div>
+                    </div>
                 )}
 
-                        {/* Agents Tab (Super Admin Only) */}
-                        {activeTab === 'agents' && userRole === 'super_admin' && (
-                            <div className="space-y-6">
-                                <div className="flex justify-between items-center">
-                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                        Support Agents
-                                    </h2>
-                                    <button
-                                        onClick={() => {
-                                            setShowAgentForm(!showAgentForm);
-                                            setGeneratedCode(null);
-                                        }}
-                                        className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                                    >
-                                        <UserPlus className="h-4 w-4 mr-2" />
-                                        Add Support Agent
-                                    </button>
-                                </div>
+                {/* Agents Tab (Super Admin Only) */}
+                {activeTab === 'agents' && userRole === 'super_admin' && (
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                Support Agents
+                            </h2>
+                            <button
+                                onClick={() => {
+                                    setShowAgentForm(!showAgentForm);
+                                    setGeneratedCode(null);
+                                }}
+                                className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                            >
+                                <UserPlus className="h-4 w-4 mr-2" />
+                                Add Support Agent
+                            </button>
+                        </div>
 
-                                {showAgentForm && (
-                                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                            New Support Agent
-                                        </h3>
-                                        {generatedCode ? (
-                                            <div className="space-y-4">
-                                                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                                                    <p className="text-sm text-green-800 dark:text-green-200 mb-2">
-                                                        Support agent created successfully!
-                                                    </p>
-                                                    <p className="text-xs text-green-700 dark:text-green-300 mb-3">
-                                                        Share this access code with the agent. They can use it to login.
-                                                    </p>
-                                                    <div className="bg-white dark:bg-gray-900 p-3 rounded border border-green-300 dark:border-green-700">
-                                                        <p className="text-2xl font-mono font-bold text-center text-gray-900 dark:text-white tracking-wider">
-                                                            {generatedCode}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    onClick={() => {
-                                                        setShowAgentForm(false);
-                                                        setGeneratedCode(null);
-                                                        setNewAgent({ name: '', email: '' });
-                                                    }}
-                                                    className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                                                >
-                                                    Done
-                                                </button>
+                        {showAgentForm && (
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                    New Support Agent
+                                </h3>
+                                {generatedCode ? (
+                                    <div className="space-y-4">
+                                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                                            <p className="text-sm text-green-800 dark:text-green-200 mb-2">
+                                                Support agent created successfully!
+                                            </p>
+                                            <p className="text-xs text-green-700 dark:text-green-300 mb-3">
+                                                Share this access code with the agent. They can use it to login.
+                                            </p>
+                                            <div className="bg-white dark:bg-gray-900 p-3 rounded border border-green-300 dark:border-green-700">
+                                                <p className="text-2xl font-mono font-bold text-center text-gray-900 dark:text-white tracking-wider">
+                                                    {generatedCode}
+                                                </p>
                                             </div>
-                                        ) : (
-                                            <form onSubmit={createSupportAgent} className="space-y-4">
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                        Agent Name
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        value={newAgent.name}
-                                                        onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
-                                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                                        placeholder="John Doe"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                        Email
-                                                    </label>
-                                                    <input
-                                                        type="email"
-                                                        value={newAgent.email}
-                                                        onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })}
-                                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                                        placeholder="agent@example.com"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div className="flex justify-end space-x-3">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setShowAgentForm(false)}
-                                                        className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                    <button
-                                                        type="submit"
-                                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                                                    >
-                                                        Create Agent
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        )}
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                setShowAgentForm(false);
+                                                setGeneratedCode(null);
+                                                setNewAgent({ name: '', email: '' });
+                                            }}
+                                            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                        >
+                                            Done
+                                        </button>
                                     </div>
+                                ) : (
+                                    <form onSubmit={createSupportAgent} className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Agent Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={newAgent.name}
+                                                onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
+                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                placeholder="John Doe"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Email
+                                            </label>
+                                            <input
+                                                type="email"
+                                                value={newAgent.email}
+                                                onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })}
+                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                placeholder="agent@example.com"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="flex justify-end space-x-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowAgentForm(false)}
+                                                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                            >
+                                                Create Agent
+                                            </button>
+                                        </div>
+                                    </form>
                                 )}
-
-                                <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                        <thead className="bg-gray-50 dark:bg-gray-700">
-                                            <tr>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                                    Name
-                                                </th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                                    Email
-                                                </th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                                    Access Code
-                                                </th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                                    Created
-                                                </th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                                    Actions
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                            {supportAgents.map((agent) => (
-                                                <tr key={agent.id}>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                                        {agent.name}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                        {agent.email}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className="font-mono text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                                                            {agent.access_code}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                        {new Date(agent.created_at).toLocaleDateString()}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                        <button
-                                                            onClick={() => deleteSupportAgent(agent.id)}
-                                                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                        >
-                                                            Remove
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
                             </div>
                         )}
+
+                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-700">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                            Name
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                            Email
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                            Access Code
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                            Created
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                    {supportAgents.map((agent) => (
+                                        <tr key={agent.id}>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                                {agent.name}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                {agent.email}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className="font-mono text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                                    {agent.access_code}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                {new Date(agent.created_at).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                <button
+                                                    onClick={() => deleteSupportAgent(agent.id)}
+                                                    className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+                )}
+            </div>
         </div>
-            );
+    );
 }
