@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Loader2, Share2, BarChart3, FileText, Settings, Crown } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Loader2, Share2, BarChart3, FileText, Settings, Crown, Menu, X } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -23,6 +23,7 @@ export default function Dashboard() {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedExamForResults, setSelectedExamForResults] = useState<Exam | null>(null);
     const [profile, setProfile] = useState<any>(null);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -250,53 +251,105 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            <nav className="bg-white dark:bg-gray-800 shadow-sm">
+            <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <Logo />
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <span className="text-sm text-gray-700 dark:text-gray-300">
-                                Welcome, {user?.user_metadata?.full_name || user?.email}
+
+                        {/* Desktop Navigation */}
+                        <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
+                            <span className="hidden lg:inline text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
+                                {user?.user_metadata?.full_name || user?.email}
                             </span>
                             {profile?.subscription_status !== 'active' && (
                                 <Link
                                     to="/checkout"
                                     className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 focus:outline-none transition"
                                 >
-                                    <Crown className="h-4 w-4 mr-2" />
-                                    Upgrade
+                                    <Crown className="h-4 w-4 lg:mr-2" />
+                                    <span className="hidden lg:inline">Upgrade</span>
                                 </Link>
                             )}
                             <Link
                                 to="/settings"
                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition"
                             >
-                                <Settings className="h-4 w-4 mr-2" />
-                                Settings
+                                <Settings className="h-4 w-4 lg:mr-2" />
+                                <span className="hidden lg:inline">Settings</span>
                             </Link>
                             <button
                                 onClick={handleLogout}
                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition"
                             >
-                                <LogOut className="h-4 w-4 mr-2" />
-                                Logout
+                                <LogOut className="h-4 w-4 lg:mr-2" />
+                                <span className="hidden lg:inline">Logout</span>
+                            </button>
+                        </div>
+
+                        {/* Mobile menu button */}
+                        <div className="flex items-center md:hidden">
+                            <button
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+                            >
+                                {isMobileMenuOpen ? (
+                                    <X className="h-6 w-6" />
+                                ) : (
+                                    <Menu className="h-6 w-6" />
+                                )}
                             </button>
                         </div>
                     </div>
                 </div>
+
+                {/* Mobile menu */}
+                {isMobileMenuOpen && (
+                    <div className="md:hidden border-t border-gray-200 dark:border-gray-700">
+                        <div className="px-2 pt-2 pb-3 space-y-1">
+                            <div className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                                {user?.user_metadata?.full_name || user?.email}
+                            </div>
+                            {profile?.subscription_status !== 'active' && (
+                                <Link
+                                    to="/checkout"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center px-3 py-2 rounded-md text-base font-medium text-indigo-600 dark:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                >
+                                    <Crown className="h-5 w-5 mr-3" />
+                                    Upgrade to Pro
+                                </Link>
+                            )}
+                            <Link
+                                to="/settings"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                                <Settings className="h-5 w-5 mr-3" />
+                                Settings
+                            </Link>
+                            <button
+                                onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
+                                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                                <LogOut className="h-5 w-5 mr-3" />
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                )}
             </nav>
 
-            <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                <div className="px-4 py-6 sm:px-0">
-                    <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">My Exams</h1>
+            <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+                <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white">My Exams</h1>
                         <button
                             onClick={handleCreateExam}
-                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            className="inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full sm:w-auto min-h-[44px]"
                         >
-                            <Plus className="h-4 w-4 mr-2" />
+                            <Plus className="h-5 w-5 mr-2" />
                             Create New Exam
                         </button>
                     </div>
@@ -317,7 +370,7 @@ export default function Dashboard() {
                             </div>
                         </div>
                     ) : (
-                        <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-3">
+                        <div className="grid gap-4 sm:gap-6 mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                             {exams.map((exam) => (
                                 <div key={exam.id} className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow duration-200">
                                     <div className="p-6">

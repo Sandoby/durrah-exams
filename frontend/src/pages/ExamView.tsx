@@ -620,215 +620,217 @@ export default function ExamView() {
                         const fieldTypes: Record<string, string> = { name: 'text', email: 'email', student_id: 'text', phone: 'tel' };
                         return (
                             <div key={field}>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{fieldLabels[field] || field}</label>
-                                <input
-                                    type={fieldTypes[field] || 'text'}
-                                    value={studentData[field] || ''}
-                                    onChange={(e) => setStudentData({ ...studentData, [field]: e.target.value })}
-                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    placeholder={`Enter your ${fieldLabels[field] || field}`}
-                                />
-                            </div>
-                        );
-                    })}
-                </div>
+                                <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6">
+                                    <div className="max-w-3xl mx-auto">
+                                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-4">
+                                            <div className="text-center">
+                                                <Logo className="mx-auto mb-4" />
+                                                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">{exam.title}</h1>
+                                                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4">{exam.description}</p>
+                                            </div>
 
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-md mb-6">
-                    <div className="flex">
-                        <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                        <div className="ml-3">
-                            <h3 className="text-sm font-bold text-red-900 dark:text-red-200">Exam Security Rules</h3>
-                            <ul className="mt-2 text-xs text-red-800 dark:text-red-300 list-disc list-inside space-y-1">
-                                {exam.settings.require_fullscreen && <li>Fullscreen mode required</li>}
-                                {exam.settings.detect_tab_switch && <li>Tab switching is monitored</li>}
-                                {exam.settings.disable_copy_paste && <li>Copy/Paste disabled</li>}
-                                <li>Max violations: {exam.settings.max_violations || 3}</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                                            {/* Required fields form */}
+                                            {exam.required_fields && exam.required_fields.length > 0 && (
+                                                <div className="space-y-3 sm:space-y-4 mb-6">
+                                                    {exam.required_fields.map((field) => (
+                                                        <div key={field}>
+                                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                                {field.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                                                            </label>
+                                                            <input
+                                                                type={field === 'email' ? 'email' : 'text'}
+                                                                value={studentData[field] || ''}
+                                                                onChange={(e) => setStudentData({ ...studentData, [field]: e.target.value })}
+                                                                className="w-full px-3 py-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white text-base"
+                                                                required
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
 
-                {/* iPhone/Safari help modal or instructions */}
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-md mb-6">
-                    <div className="flex">
-                        <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
-                        <div className="ml-3">
-                            <h3 className="text-sm font-bold text-yellow-900 dark:text-yellow-200">iPhone/Safari Submission Help</h3>
-                            <ul className="mt-2 text-xs text-yellow-800 dark:text-yellow-300 list-disc list-inside space-y-1">
-                                <li>Make sure Safari is <b>not</b> in Private Browsing mode.</li>
-                                <li>Enable cookies: Settings &gt; Safari &gt; Block All Cookies (<b>disable</b>).</li>
-                                <li>Disable “Prevent Cross-Site Tracking”: Settings &gt; Safari &gt; Prevent Cross-Site Tracking (<b>disable</b>).</li>
-                                <li>Use “Add to Home Screen” for best reliability (Share &gt; Add to Home Screen).</li>
-                                <li>If you see a submission error, try logging out and logging in again before submitting.</li>
-                                <li>If it still fails, <b>take screenshots</b> of your answers before submitting and contact support/tutor.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                                            {/* iPhone/Safari help modal or instructions */}
+                                            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3 sm:p-4 rounded-md mb-4 sm:mb-6">
+                                                <div className="flex">
+                                                    <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+                                                    <div className="ml-3">
+                                                        <h3 className="text-sm font-bold text-yellow-900 dark:text-yellow-200">iPhone/Safari Submission Help</h3>
+                                                        <ul className="mt-2 text-xs text-yellow-800 dark:text-yellow-300 list-disc list-inside space-y-1">
+                                                            <li>Make sure Safari is <b>not</b> in Private Browsing mode.</li>
+                                                            <li>Enable cookies: Settings &gt; Safari &gt; Block All Cookies (<b>disable</b>).</li>
+                                                            <li>Disable "Prevent Cross-Site Tracking": Settings &gt; Safari &gt; Prevent Cross-Site Tracking (<b>disable</b>).</li>
+                                                            <li>Use "Add to Home Screen" for best reliability (Share &gt; Add to Home Screen).</li>
+                                                            <li>If you see a submission error, try logging out and logging in again before submitting.</li>
+                                                            <li>If it still fails, <b>take screenshots</b> of your answers before submitting and contact support/tutor.</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                <button
-                    onClick={startExam}
-                    className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                    {hasPreviousSession ? 'Resume Exam' : 'Start Exam'}
-                </button>
-            </div>
-        </div>
-    );
-
-    return (
-        <div ref={containerRef} className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
-            <div className="max-w-3xl mx-auto">
-                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6 sticky top-4 z-10">
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <h1 className="text-lg font-bold text-gray-900 dark:text-white truncate max-w-xs">{exam.title}</h1>
-                        <div className="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
-                            {timeLeft !== null && (
-                                <div className={`flex items-center px-3 py-1 rounded-full ${timeLeft < 60 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
-                                    <Clock className="h-4 w-4 mr-2" />
-                                    <span className="font-mono font-bold">{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</span>
+                                            <button
+                                                onClick={startExam}
+                                                className="w-full py-3 sm:py-2 px-4 border border-transparent rounded-md shadow-sm text-base sm:text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 min-h-[44px]"
+                                            >
+                                                {hasPreviousSession ? 'Resume Exam' : 'Start Exam'}
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                            )}
-                            <div className={`flex items-center px-3 py-1 rounded-full ${violations.length > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                                <AlertTriangle className="h-4 w-4 mr-2" />
-                                <span className="font-bold text-sm">Violations: {violations.length}/{exam.settings.max_violations || 3}</span>
-                            </div>
-                            <button
-                                onClick={handleSubmit}
-                                disabled={isSubmitting}
-                                className="hidden sm:flex px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 text-sm font-medium items-center"
-                            >
-                                {isSubmitting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
-                                {isSubmitting ? 'Submitting...' : 'Submit'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                                );
 
-                <div className="space-y-6">
-                    {exam.questions.map((q, i) => (
-                        <div key={q.id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                            <div className="font-medium text-gray-900 dark:text-white mb-4 flex">
-                                <span className="mr-2">{i + 1}.</span>
-                                <span>{q.question_text}</span>
-                                <span className="ml-auto text-sm text-gray-500">({q.points} pts)</span>
-                            </div>
+                                return (
+                                <div ref={containerRef} className="min-h-screen p-3 sm:p-6 bg-gray-50 dark:bg-gray-900">
+                                    <div className="max-w-3xl mx-auto">
+                                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 sticky top-0 z-10">
+                                            <div className="flex flex-col gap-3">
+                                                <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">{exam.title}</h1>
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    {timeLeft !== null && (
+                                                        <div className={`flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${timeLeft < 60 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
+                                                            <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                                                            <span className="font-mono font-bold">{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</span>
+                                                        </div>
+                                                    )}
+                                                    <div className={`flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${violations.length > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+                                                        <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                                                        <span className="font-bold">Violations: {violations.length}/{exam.settings.max_violations || 3}</span>
+                                                    </div>
+                                                    <button
+                                                        onClick={handleSubmit}
+                                                        disabled={isSubmitting}
+                                                        className="ml-auto px-3 sm:px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 text-xs sm:text-sm font-medium flex items-center min-h-[36px] sm:min-h-[40px]"
+                                                    >
+                                                        {isSubmitting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
+                                                        {isSubmitting ? 'Submitting...' : 'Submit'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            {q.type === 'multiple_choice' && q.options?.map((opt) => (
-                                <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
-                                    <input
-                                        type="radio"
-                                        name={q.id}
-                                        value={opt}
-                                        checked={answers[q.id] === opt}
-                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                    />
-                                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                                </label>
-                            ))}
+                                        <div className="space-y-4 sm:space-y-6">
+                                            {exam.questions.map((q, i) => (
+                                                <div key={q.id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
+                                                    <div className="font-medium text-gray-900 dark:text-white mb-4 flex flex-col sm:flex-row">
+                                                        <span className="mr-2">{i + 1}.</span>
+                                                        <span className="flex-1">{q.question_text}</span>
+                                                        <span className="text-sm text-gray-500 mt-2 sm:mt-0 sm:ml-auto">({q.points} pts)</span>
+                                                    </div>
 
-                            {q.type === 'dropdown' && (
-                                <div>
-                                    <select
-                                        className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                        value={answers[q.id] || ''}
-                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                    >
-                                        <option value="">Select...</option>
-                                        {q.options?.map((opt) => (
-                                            <option key={opt} value={opt}>{opt}</option>
-                                        ))}
-                                    </select>
+                                                    {q.type === 'multiple_choice' && q.options?.map((opt) => (
+                                                        <label key={opt} className="flex items-start space-x-3 p-3 sm:p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2 min-h-[44px]">
+                                                            <input
+                                                                type="radio"
+                                                                name={q.id}
+                                                                value={opt}
+                                                                checked={answers[q.id] === opt}
+                                                                onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                                                className="h-5 w-5 sm:h-4 sm:w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 mt-0.5 flex-shrink-0"
+                                                            />
+                                                            <span className="text-gray-700 dark:text-gray-300 text-base sm:text-sm">{opt}</span>
+                                                        </label>
+                                                    ))}
+
+                                                    {q.type === 'dropdown' && (
+                                                        <div>
+                                                            <select
+                                                                className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                                value={answers[q.id] || ''}
+                                                                onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                                            >
+                                                                <option value="">Select...</option>
+                                                                {q.options?.map((opt) => (
+                                                                    <option key={opt} value={opt}>{opt}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    )}
+
+                                                    {q.type === 'numeric' && (
+                                                        <div>
+                                                            <input
+                                                                type="number"
+                                                                className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                                value={answers[q.id] ?? ''}
+                                                                onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                                            />
+                                                        </div>
+                                                    )}
+
+                                                    {q.type === 'true_false' && ['True', 'False'].map((opt) => (
+                                                        <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
+                                                            <input
+                                                                type="radio"
+                                                                name={q.id}
+                                                                value={opt}
+                                                                checked={answers[q.id] === opt}
+                                                                onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                                            />
+                                                            <span className="text-gray-700 dark:text-gray-300">{opt}</span>
+                                                        </label>
+                                                    ))}
+
+                                                    {q.type === 'short_answer' && (
+                                                        <textarea
+                                                            rows={4}
+                                                            className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                            placeholder="Type your answer here..."
+                                                            value={answers[q.id] || ''}
+                                                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                                        />
+                                                    )}
+
+                                                    {q.type === 'multiple_select' && q.options?.map((opt: string) => (
+                                                        <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={Array.isArray(answers[q.id]) ? (answers[q.id] as string[]).includes(opt) : false}
+                                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                                    const current: string[] = Array.isArray(answers[q.id]) ? [...answers[q.id]] : [];
+                                                                    if (e.target.checked) {
+                                                                        current.push(opt);
+                                                                    } else {
+                                                                        const idx = current.indexOf(opt);
+                                                                        if (idx !== -1) current.splice(idx, 1);
+                                                                    }
+                                                                    setAnswers({ ...answers, [q.id]: current });
+                                                                }}
+                                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                                            />
+                                                            <span className="text-gray-700 dark:text-gray-300">{opt}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <ViolationModal
+                                            isOpen={showViolationModal}
+                                            onClose={() => setShowViolationModal(false)}
+                                            title={violationMessage.title}
+                                            message={violationMessage.message}
+                                            severity={violationMessage.title.includes('Final') || violationMessage.title.includes('Maximum') ? 'critical' : 'warning'}
+                                        />
+
+                                        <div className="mt-8 text-center pb-8">
+                                            <div className="inline-flex items-center justify-center space-x-2 text-gray-400 dark:text-gray-500">
+                                                <span className="text-sm">Powered by</span>
+                                                <Logo size="sm" showText={true} className="opacity-75 grayscale hover:grayscale-0 transition-all duration-300" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Mobile Sticky Submit Button */}
+                                    <div className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
+                                        <button
+                                            onClick={handleSubmit}
+                                            disabled={isSubmitting}
+                                            className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-lg font-bold flex justify-center items-center shadow-md"
+                                        >
+                                            {isSubmitting ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : null}
+                                            {isSubmitting ? 'Submitting Exam...' : 'Submit Exam'}
+                                        </button>
+                                    </div>
                                 </div>
-                            )}
-
-                            {q.type === 'numeric' && (
-                                <div>
-                                    <input
-                                        type="number"
-                                        className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                        value={answers[q.id] ?? ''}
-                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                    />
-                                </div>
-                            )}
-
-                            {q.type === 'true_false' && ['True', 'False'].map((opt) => (
-                                <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
-                                    <input
-                                        type="radio"
-                                        name={q.id}
-                                        value={opt}
-                                        checked={answers[q.id] === opt}
-                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                    />
-                                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                                </label>
-                            ))}
-
-                            {q.type === 'short_answer' && (
-                                <textarea
-                                    rows={4}
-                                    className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    placeholder="Type your answer here..."
-                                    value={answers[q.id] || ''}
-                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                />
-                            )}
-
-                            {q.type === 'multiple_select' && q.options?.map((opt: string) => (
-                                <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={Array.isArray(answers[q.id]) ? (answers[q.id] as string[]).includes(opt) : false}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                            const current: string[] = Array.isArray(answers[q.id]) ? [...answers[q.id]] : [];
-                                            if (e.target.checked) {
-                                                current.push(opt);
-                                            } else {
-                                                const idx = current.indexOf(opt);
-                                                if (idx !== -1) current.splice(idx, 1);
-                                            }
-                                            setAnswers({ ...answers, [q.id]: current });
-                                        }}
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                    />
-                                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                                </label>
-                            ))}
-                        </div>
-                    ))}
-                </div>
-
-                <ViolationModal
-                    isOpen={showViolationModal}
-                    onClose={() => setShowViolationModal(false)}
-                    title={violationMessage.title}
-                    message={violationMessage.message}
-                    severity={violationMessage.title.includes('Final') || violationMessage.title.includes('Maximum') ? 'critical' : 'warning'}
-                />
-
-                <div className="mt-8 text-center pb-8">
-                    <div className="inline-flex items-center justify-center space-x-2 text-gray-400 dark:text-gray-500">
-                        <span className="text-sm">Powered by</span>
-                        <Logo size="sm" showText={true} className="opacity-75 grayscale hover:grayscale-0 transition-all duration-300" />
-                    </div>
-                </div>
-            </div>
-
-            {/* Mobile Sticky Submit Button */}
-            <div className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
-                <button
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-lg font-bold flex justify-center items-center shadow-md"
-                >
-                    {isSubmitting ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : null}
-                    {isSubmitting ? 'Submitting Exam...' : 'Submit Exam'}
-                </button>
-            </div>
-        </div>
-    );
+                                );
 }
