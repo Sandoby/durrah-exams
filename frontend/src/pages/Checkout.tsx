@@ -64,7 +64,6 @@ export default function Checkout() {
             if (!data.is_active) throw new Error('Coupon inactive');
             setAppliedCoupon(data);
             toast.success('Coupon applied');
-            if (data.discount_type === 'free') setFreeCouponApplied(true);
         } catch (e) {
             console.error(e);
             toast.error((e as Error).message || 'Invalid coupon');
@@ -76,7 +75,6 @@ export default function Checkout() {
     const removeCoupon = () => {
         setAppliedCoupon(null);
         setCouponCode('');
-        setFreeCouponApplied(false);
         toast.success('Coupon removed');
     };
 
