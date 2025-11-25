@@ -152,6 +152,23 @@ export default function ExamEditor() {
 
     const onSubmit = async (data: ExamForm) => {
         if (!user) return;
+
+        // Validation: Ensure all auto-graded questions have a correct answer
+        const missingAnswers = data.questions.some(q => {
+            if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'numeric'].includes(q.type)) {
+                if (Array.isArray(q.correct_answer)) {
+                    return q.correct_answer.length === 0;
+                }
+                return !q.correct_answer;
+            }
+            return false;
+        });
+
+        if (missingAnswers) {
+            toast.error('Please select a correct answer for all questions before saving.');
+            return;
+        }
+
         setIsLoading(true);
         try {
             let examId = id;

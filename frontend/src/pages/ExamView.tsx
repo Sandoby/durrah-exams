@@ -581,21 +581,36 @@ export default function ExamView() {
         </div>
     );
 
-    if (submitted) return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-            <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
-                <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
-                <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white">Exam Submitted</h2>
-                {score && (
-                    <div className="mt-4">
-                        <p className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">{score.percentage.toFixed(1)}%</p>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">{score.score} / {score.max_score} points</p>
-                    </div>
-                )}
-                <p className="mt-4 text-sm text-gray-500">Your submission has been recorded.</p>
+    if (submitted) {
+        const showResults = exam?.settings.show_results_immediately !== false;
+
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
+                    <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
+                    <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white">Exam Submitted</h2>
+                    {showResults && score ? (
+                        <div className="mt-4">
+                            <p className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">{score.percentage.toFixed(1)}%</p>
+                            <p className="text-gray-500 dark:text-gray-400 mt-1">{score.score} / {score.max_score} points</p>
+                        </div>
+                    ) : (
+                        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-md">
+                            <p>Thank you! Your answers have been submitted securely.</p>
+                            <p className="text-sm mt-2">Results will be released by your tutor.</p>
+                        </div>
+                    )}
+                    <p className="mt-4 text-sm text-gray-500">Your submission has been recorded.</p>
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        className="mt-6 w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                    >
+                        Return to Dashboard
+                    </button>
+                </div>
             </div>
-        </div>
-    );
+        );
+    }
 
     if (!started) return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
