@@ -78,7 +78,7 @@ export default function AdminPanel() {
     const [password, setPassword] = useState('');
     const [accessCode, setAccessCode] = useState('');
     const [userRole, setUserRole] = useState<'super_admin' | 'support_agent' | null>(null);
-    const [, setCurrentAgentId] = useState<string | null>(null);
+    const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'users' | 'coupons' | 'chat' | 'agents'>('users');
 
     // Users
@@ -630,6 +630,34 @@ export default function AdminPanel() {
         try {
             const userEmail = chatMessages[0]?.user_email || '';
 
+            // Check if this chat needs to be assigned (new chat)
+            const existingAssignment = chatAssignments.find(a => a.user_id === selectedChatUser);
+
+            // If no assignment or unassigned, create/update assignment
+            if (!existingAssignment || existingAssignment.assigned_agent_id === null) {
+                if (currentAgentId) {
+                    // Create or update chat assignment
+                    const { error: assignError } = await supabase
+                        .from('chat_assignments')
+                        .upsert({
+                            user_id: selectedChatUser,
+                            assigned_agent_id: currentAgentId,
+                            status: 'open',
+                            assigned_at: new Date().toISOString()
+                        }, {
+                            onConflict: 'user_id'
+                        });
+
+                    if (assignError) {
+                        console.error('Error assigning chat:', assignError);
+                    } else {
+                        // Refresh assignments to update UI
+                        fetchChatAssignments();
+                    }
+                }
+            }
+
+            // Send the message
             const { error } = await supabase
                 .from('chat_messages')
                 .insert({
