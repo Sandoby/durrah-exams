@@ -493,23 +493,23 @@ export default function AdminPanel() {
         }
     };
 
-    const _assignChatToAgent = async (userId: string, agentId: string) => {
-        try {
-            const { error } = await supabase
-                .from('chat_assignments')
-                .upsert({
-                    user_id: userId,
-                    assigned_agent_id: agentId,
-                    status: 'open'
-                });
-
-            if (error) throw error;
-            fetchChatAssignments();
-        } catch (error) {
-            console.error('Error assigning chat:', error);
-            toast.error('Failed to assign chat');
-        }
-    };
+    // Chat assignment helper (currently unused, reserved for future forwarding feature)
+    // const assignChatToAgent = async (userId: string, agentId: string) => {
+    //     try {
+    //         const { error } = await supabase
+    //             .from('chat_assignments')
+    //             .upsert({
+    //                 user_id: userId,
+    //                 assigned_agent_id: agentId,
+    //                 status: 'open'
+    //             });
+    //         if (error) throw error;
+    //         fetchChatAssignments();
+    //     } catch (error) {
+    //         console.error('Error assigning chat:', error);
+    //         toast.error('Failed to assign chat');
+    //     }
+    // };
 
     // Forward chat function (for future use with forward modal UI)
     // const forwardChat = async () => {
