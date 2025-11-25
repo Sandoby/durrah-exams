@@ -16,7 +16,6 @@ export default function Checkout() {
     const [couponCode, setCouponCode] = useState('');
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
     const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
-    const [freeCouponApplied, setFreeCouponApplied] = useState(false);
 
     // ---------- Plans ----------
     const plans = [

@@ -275,7 +275,6 @@ export default function AdminPanel() {
                     max_uses: newCoupon.max_uses,
                     used_count: 0,
                     valid_until: newCoupon.valid_until,
-                    valid_until: newCoupon.valid_until,
                     is_active: true,
                     duration: newCoupon.discount_type === 'free' ? newCoupon.duration : null
                 });
@@ -287,7 +286,6 @@ export default function AdminPanel() {
                 code: '',
                 discount_type: 'percentage',
                 discount_value: 0,
-                max_uses: 1,
                 max_uses: 1,
                 valid_until: '',
                 duration: 'monthly'
