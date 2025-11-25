@@ -247,7 +247,7 @@ export default function AdminPanel() {
         setAccessCode('');
         setUserRole(null);
         setCurrentAgentId(null);
-        navigate('/dashboard');
+        navigate('/login');
     };
 
     const fetchUsers = async () => {
