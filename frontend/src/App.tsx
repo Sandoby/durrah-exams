@@ -13,10 +13,12 @@ import ExamEditor from './pages/ExamEditor';
 import ExamView from './pages/ExamView';
 import Settings from './pages/Settings';
 import AdminPanel from './pages/AdminPanel';
+import { SubmissionSync } from './components/SubmissionSync';
 
 function App() {
   return (
     <AuthProvider>
+      <SubmissionSync />
       <Router>
         <div className="min-h-screen bg-background text-foreground font-sans antialiased">
           <Routes>

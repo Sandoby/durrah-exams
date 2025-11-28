@@ -69,20 +69,7 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
 
             if (error) throw error;
 
-            // Filter duplicates: keep the latest submission for each student (by email or name)
-            const uniqueSubmissions: Submission[] = [];
-            const seen = new Set();
-
-            (data || []).forEach((sub: Submission) => {
-                // Key can be email or name if email is missing
-                const key = sub.student_email || sub.student_name;
-                if (!seen.has(key)) {
-                    seen.add(key);
-                    uniqueSubmissions.push(sub);
-                }
-            });
-
-            setSubmissions(uniqueSubmissions);
+            setSubmissions(data || []);
         } catch (error: any) {
             console.error('Error fetching data:', error);
             toast.error('Failed to load submissions');

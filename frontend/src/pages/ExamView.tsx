@@ -130,9 +130,18 @@ export default function ExamView() {
 
     const fetchExam = async () => {
         try {
+            // Securely fetch exam data (exclude correct_answer for security)
             const { data: examData, error } = await supabase.from('exams').select('*').eq('id', id).single();
             if (error) throw error;
-            const { data: qData } = await supabase.from('questions').select('*').eq('exam_id', id);
+
+            // Fetch questions WITHOUT correct_answer column
+            const { data: qData, error: qError } = await supabase
+                .from('questions')
+                .select('id, type, question_text, options, points, randomize_options, exam_id, created_at')
+                .eq('exam_id', id);
+
+            if (qError) throw qError;
+
             const settings = examData.settings || {};
             const normalizedSettings: any = { ...settings };
             // support both naming conventions
@@ -345,70 +354,18 @@ export default function ExamView() {
         setStarted(true);
     };
 
-    const calculateScore = () => {
-        if (!exam) return { score: 0, max_score: 0, percentage: 0 };
-        let total = 0;
-        let earned = 0;
-        exam.questions.forEach((q: Question) => {
-            // skip auto-scoring for open-ended short_answer questions
-            if (q.type === 'short_answer') return;
-            total += q.points || 0;
-            const studentAnswer = answers[q.id];
-            if (!studentAnswer) return;
 
-            // multiple_select: correct_answer is expected to be an array
-            if (Array.isArray(q.correct_answer)) {
-                let studentArr: string[] = [];
-                if (Array.isArray(studentAnswer)) studentArr = studentAnswer as string[];
-                else {
-                    try { studentArr = JSON.parse(studentAnswer); } catch { studentArr = (String(studentAnswer)).split('||').filter(Boolean); }
-                }
-                const a = (q.correct_answer as string[]).map(s => String(s).trim()).sort();
-                const b = studentArr.map(s => String(s).trim()).sort();
-                if (a.length === b.length && a.every((val, idx) => val === b[idx])) {
-                    earned += q.points || 0;
-                }
-            } else {
-                // Handle single-answer questions (multiple_choice, true_false, numeric, dropdown)
-                const correctAnswer = String(q.correct_answer).trim().toLowerCase();
-                const studentAnswerStr = String(studentAnswer).trim().toLowerCase();
-
-                if (q.type === 'numeric') {
-                    // For numeric questions, compare as numbers
-                    try {
-                        const correctNum = parseFloat(q.correct_answer as string);
-                        const studentNum = parseFloat(studentAnswer);
-                        if (!isNaN(correctNum) && !isNaN(studentNum) && correctNum === studentNum) {
-                            earned += q.points || 0;
-                        }
-                    } catch {
-                        // If parsing fails, fall back to string comparison
-                        if (correctAnswer === studentAnswerStr) {
-                            earned += q.points || 0;
-                        }
-                    }
-                } else {
-                    // For text-based questions (multiple_choice, true_false, dropdown)
-                    if (correctAnswer === studentAnswerStr) {
-                        earned += q.points || 0;
-                    }
-                }
-            }
-        });
-        return { score: earned, max_score: total, percentage: total ? (earned / total) * 100 : 0 };
-    };
 
     const handleSubmit = async () => {
         // Prevent duplicate submissions
-        if (!exam || isSubmittingRef.current || submitted) {
-            return;
-        }
+        if (!exam || isSubmittingRef.current || submitted) return;
 
         // Prevent submission if outside allowed window
         const settings = exam.settings || {};
         const startStr = settings.start_time || settings.start_date;
         const endStr = settings.end_time || settings.end_date;
         const now = new Date();
+
         if (startStr) {
             const startD = new Date(startStr);
             if (!isNaN(startD.getTime()) && now < startD) {
@@ -416,6 +373,7 @@ export default function ExamView() {
                 return;
             }
         }
+
         if (endStr) {
             const endD = new Date(endStr);
             if (!isNaN(endD.getTime()) && now > endD) {
@@ -424,7 +382,7 @@ export default function ExamView() {
             }
         }
 
-        // Double check local storage to prevent race conditions or reload exploits
+        // Double check local storage to prevent race conditions
         if (localStorage.getItem(`durrah_exam_${id}_submitted`)) {
             toast.error('Exam already submitted from this device.');
             setSubmitted(true);
@@ -435,8 +393,7 @@ export default function ExamView() {
         setIsSubmitting(true);
 
         try {
-            const grading = calculateScore();
-
+            // Prepare student info
             const studentName = studentData.name || studentData.student_id || 'Anonymous';
             const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
 
@@ -448,79 +405,133 @@ export default function ExamView() {
                 language: navigator.language
             };
 
-            const { data: submission, error } = await supabase.from('submissions').insert({
-                exam_id: id,
-                student_name: studentName,
-                student_email: studentEmail,
-                score: grading.score,
-                max_score: grading.max_score,
-                violations,
-                browser_info: browserInfo
-            }).select().single();
+            // Prepare answers for submission
+            const answersPayload = Object.entries(answers).map(([question_id, answer]) => ({
+                question_id,
+                answer: Array.isArray(answer) ? answer : answer
+            }));
 
-            if (error) {
-                console.error('Supabase insert failed', error);
-                throw error;
+            // Get Supabase credentials from environment
+            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+            const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+            if (!supabaseUrl || !supabaseAnonKey) {
+                throw new Error('Supabase configuration missing');
             }
 
-            if (submission && Object.keys(answers).length > 0) {
-                const answersPayload = Object.entries(answers).map(([question_id, answer]) => {
-                    let toSend: any = answer;
-                    if (Array.isArray(answer)) toSend = JSON.stringify(answer);
-                    return ({ submission_id: submission.id, question_id, answer: toSend });
+            // Call the Edge Function for server-side grading
+            const edgeFunctionUrl = `${supabaseUrl}/functions/v1/grade-exam`;
+
+            console.log('Submitting to Edge Function:', edgeFunctionUrl);
+
+            const response = await fetch(edgeFunctionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${supabaseAnonKey}`
+                },
+                body: JSON.stringify({
+                    exam_id: id,
+                    student_data: {
+                        name: studentName,
+                        email: studentEmail,
+                        ...studentData
+                    },
+                    answers: answersPayload,
+                    violations: violations,
+                    browser_info: browserInfo
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                throw new Error(errorData.error || `Server returned ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Set the score from server response
+                setScore({
+                    score: result.score,
+                    max_score: result.max_score,
+                    percentage: result.percentage
                 });
 
-                const { error: answersError } = await supabase.from('submission_answers').insert(answersPayload);
-                if (answersError) {
-                    console.warn('Failed to insert answers', answersError);
+                setSubmitted(true);
+
+                // Mark as submitted in local storage
+                localStorage.setItem(`durrah_exam_${id}_submitted`, 'true');
+                localStorage.setItem(`durrah_exam_${id}_score`, JSON.stringify({
+                    score: result.score,
+                    max_score: result.max_score,
+                    percentage: result.percentage
+                }));
+
+                // Clear temporary state
+                localStorage.removeItem(`durrah_exam_${id}_state`);
+
+                // Exit fullscreen if active
+                if (document.fullscreenElement) {
+                    document.exitFullscreen().catch(() => { });
                 }
+
+                toast.success('Exam submitted successfully!', {
+                    duration: 5000,
+                    icon: '✅'
+                });
+            } else {
+                throw new Error(result.error || 'Submission failed');
             }
 
-            setScore(grading);
-            setSubmitted(true);
-
-            localStorage.setItem(`durrah_exam_${id}_submitted`, 'true');
-            localStorage.setItem(`durrah_exam_${id}_score`, JSON.stringify(grading));
-            localStorage.removeItem(`durrah_exam_${id}_state`);
-
-            if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
-
-            toast.success('Exam submitted successfully!');
-
         } catch (err: any) {
-            console.error('Submission error', err);
+            console.error('Submission error:', err);
 
+            // Show user-friendly error message
+            const errorMessage = err.message || 'Failed to submit exam';
+            toast.error(`Submission failed: ${errorMessage}`, {
+                duration: 7000,
+                icon: '❌'
+            });
+
+            // Save to pending submissions for retry
             try {
                 const pendingRaw = localStorage.getItem('durrah_pending_submissions');
                 const pending = pendingRaw ? JSON.parse(pendingRaw) : [];
-                const grading = calculateScore();
+
                 const studentName = studentData.name || studentData.student_id || 'Anonymous';
                 const studentEmail = studentData.email || `${studentData.student_id || 'student'}@example.com`;
-                const browserInfo = {
-                    user_agent: navigator.userAgent,
-                    student_data: studentData,
-                    screen_width: window.screen.width,
-                    screen_height: window.screen.height,
-                    language: navigator.language
-                };
+
                 const submissionPayload = {
                     exam_id: id,
-                    student_name: studentName,
-                    student_email: studentEmail,
-                    score: grading.score,
-                    max_score: grading.max_score,
+                    student_data: {
+                        name: studentName,
+                        email: studentEmail,
+                        ...studentData
+                    },
+                    answers: Object.entries(answers).map(([question_id, answer]) => ({
+                        question_id,
+                        answer
+                    })),
                     violations,
-                    browser_info: browserInfo,
+                    browser_info: {
+                        user_agent: navigator.userAgent,
+                        student_data: studentData
+                    },
                     created_at: new Date().toISOString()
                 };
-                const answersPayload = Object.entries(answers).map(([question_id, answer]) => ({ submission_id: null, question_id, answer: Array.isArray(answer) ? JSON.stringify(answer) : answer }));
-                pending.push({ submissionPayload, answersPayload });
+
+                pending.push(submissionPayload);
                 localStorage.setItem('durrah_pending_submissions', JSON.stringify(pending));
-                toast.success('Submission saved locally. Retry later.');
-            } catch (e: any) {
-                console.error('Failed to persist pending submission locally', e);
-                toast.error('Submission failed.');
+
+                toast('Submission saved locally and will be retried automatically.', {
+                    duration: 5000,
+                    icon: '💾'
+                });
+            } catch (e) {
+                console.error('Failed to save pending submission:', e);
             }
+        } finally {
             setIsSubmitting(false);
             isSubmittingRef.current = false;
         }
