@@ -69,6 +69,18 @@ export default function Checkout() {
                 throw new Error(`This coupon is only valid for ${data.duration} plans`);
             }
 
+            // Check if user has already used this coupon
+            const { data: usageData, error: usageError } = await supabase
+                .from('coupon_usage')
+                .select('*')
+                .eq('coupon_id', data.id)
+                .eq('user_id', user?.id)
+                .single();
+
+            if (usageData && !usageError) {
+                throw new Error('You have already used this coupon');
+            }
+
             setAppliedCoupon(data);
             toast.success('Coupon applied');
         } catch (e) {
@@ -130,6 +142,32 @@ export default function Checkout() {
                     })
                     .eq('id', user?.id);
                 if (error) throw error;
+
+                // Record coupon usage if a coupon was applied
+                if (appliedCoupon) {
+                    // Insert into coupon_usage table
+                    const { error: usageError } = await supabase
+                        .from('coupon_usage')
+                        .insert({
+                            coupon_id: appliedCoupon.id,
+                            user_id: user?.id
+                        });
+
+                    if (usageError) {
+                        console.error('Failed to record coupon usage:', usageError);
+                    }
+
+                    // Increment the coupon's used_count
+                    const { error: updateError } = await supabase
+                        .from('coupons')
+                        .update({ used_count: appliedCoupon.used_count + 1 })
+                        .eq('id', appliedCoupon.id);
+
+                    if (updateError) {
+                        console.error('Failed to increment coupon usage:', updateError);
+                    }
+                }
+
                 toast.success('Subscription activated instantly!');
                 navigate('/dashboard');
             } catch (e) {
@@ -151,6 +189,31 @@ export default function Checkout() {
             });
 
             if (result.success) {
+                // Record coupon usage if a coupon was applied
+                if (appliedCoupon) {
+                    // Insert into coupon_usage table
+                    const { error: usageError } = await supabase
+                        .from('coupon_usage')
+                        .insert({
+                            coupon_id: appliedCoupon.id,
+                            user_id: user?.id
+                        });
+
+                    if (usageError) {
+                        console.error('Failed to record coupon usage:', usageError);
+                    }
+
+                    // Increment the coupon's used_count
+                    const { error: updateError } = await supabase
+                        .from('coupons')
+                        .update({ used_count: appliedCoupon.used_count + 1 })
+                        .eq('id', appliedCoupon.id);
+
+                    if (updateError) {
+                        console.error('Failed to increment coupon usage:', updateError);
+                    }
+                }
+
                 toast.success('Payment successful!');
                 navigate('/dashboard');
             } else {
