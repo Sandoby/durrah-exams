@@ -1109,15 +1109,36 @@ export default function AdminPanel() {
                                                     {new Date(coupon.valid_until).toLocaleDateString()}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    {coupon.is_active ? (
-                                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                            Active
-                                                        </span>
-                                                    ) : (
-                                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                                            Inactive
-                                                        </span>
-                                                    )}
+                                                    {(() => {
+                                                        const isExpired = new Date(coupon.valid_until) < new Date();
+                                                        const isMaxedOut = coupon.used_count >= coupon.max_uses;
+
+                                                        if (isExpired) {
+                                                            return (
+                                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                                    Expired
+                                                                </span>
+                                                            );
+                                                        } else if (isMaxedOut) {
+                                                            return (
+                                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                                    Max Uses Reached
+                                                                </span>
+                                                            );
+                                                        } else if (coupon.is_active) {
+                                                            return (
+                                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                                    Active
+                                                                </span>
+                                                            );
+                                                        } else {
+                                                            return (
+                                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                                    Inactive
+                                                                </span>
+                                                            );
+                                                        }
+                                                    })()}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm space-x-3">
                                                     <button
