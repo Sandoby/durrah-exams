@@ -1,5 +1,5 @@
---Supabase Edge Function for server - side exam grading
---Deploy this using: supabase functions deploy grade - exam
+// Supabase Edge Function for server-side exam grading
+// Deploy this using: supabase functions deploy grade-exam
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
