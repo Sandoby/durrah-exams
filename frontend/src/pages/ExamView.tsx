@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { AlertTriangle, CheckCircle, Clock, Loader2, Save, Flag, LayoutGrid, Settings, Type, Sun, Moon, Calculator as CalcIcon } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Loader2, Save, Flag, LayoutGrid, Settings, Sun, Moon, Calculator as CalcIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
