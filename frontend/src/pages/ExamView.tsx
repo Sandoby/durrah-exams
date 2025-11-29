@@ -165,6 +165,32 @@ export default function ExamView() {
 
             setExam({ ...examData, questions: qData || [], settings: normalizedSettings });
 
+            // Apply Randomization if enabled
+            let processedQuestions = [...(qData || [])];
+
+            // 1. Randomize Questions Order
+            if (normalizedSettings.randomize_questions) {
+                for (let i = processedQuestions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [processedQuestions[i], processedQuestions[j]] = [processedQuestions[j], processedQuestions[i]];
+                }
+            }
+
+            // 2. Randomize Options for each question
+            processedQuestions = processedQuestions.map(q => {
+                if (q.randomize_options && q.options && q.options.length > 0) {
+                    const shuffledOptions = [...q.options];
+                    for (let i = shuffledOptions.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+                    }
+                    return { ...q, options: shuffledOptions };
+                }
+                return q;
+            });
+
+            setExam({ ...examData, questions: processedQuestions, settings: normalizedSettings });
+
             // Availability checks
             const now = new Date();
             let start: Date | null = null;
@@ -748,342 +774,355 @@ export default function ExamView() {
     );
 
     return (
-        <div ref={containerRef} className={`min-h-screen p-3 sm:p-6 bg-gray-50 dark:bg-gray-900 ${highContrast ? 'contrast-125 saturate-150' : ''} ${fontSize === 'large' ? 'text-lg' : fontSize === 'xlarge' ? 'text-xl' : ''}`}>
-            <div className="max-w-3xl mx-auto">
-                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 sticky top-0 z-10">
-                    <div className="flex flex-col gap-3">
-                        <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">{exam.title}</h1>
-                        <div className="flex flex-wrap items-center gap-2">
-                            {timeLeft !== null && (
-                                <div className={`flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${timeLeft < 60 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
-                                    <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                                    <span className="font-mono font-bold">{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</span>
-                                </div>
-                            )}
-                            <div className={`flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${violations.length > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                                <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                                <span className="font-bold">Violations: {violations.length}/{exam.settings.max_violations || 3}</span>
-                            </div>
-
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowSettings(!showSettings)}
-                                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                    title="Accessibility Settings"
-                                >
-                                    <Settings className="h-5 w-5" />
-                                </button>
-
-                                {showSettings && (
-                                    <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-50">
-                                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Accessibility</h3>
-
-                                        <div className="mb-4">
-                                            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">Font Size</label>
-                                            <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                                                <button
-                                                    onClick={() => setFontSize('normal')}
-                                                    className={`flex-1 py-1 text-xs rounded-md ${fontSize === 'normal' ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}
-                                                >
-                                                    A
-                                                </button>
-                                                <button
-                                                    onClick={() => setFontSize('large')}
-                                                    className={`flex-1 py-1 text-sm rounded-md ${fontSize === 'large' ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}
-                                                >
-                                                    A+
-                                                </button>
-                                                <button
-                                                    onClick={() => setFontSize('xlarge')}
-                                                    className={`flex-1 py-1 text-base rounded-md ${fontSize === 'xlarge' ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}
-                                                >
-                                                    A++
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">Contrast</label>
-                                            <button
-                                                onClick={() => setHighContrast(!highContrast)}
-                                                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border ${highContrast ? 'bg-yellow-50 border-yellow-300 text-yellow-900' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600'}`}
-                                            >
-                                                <span className="text-sm">High Contrast</span>
-                                                {highContrast ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            <button
-                                onClick={() => setShowCalculator(!showCalculator)}
-                                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                title="Calculator"
-                            >
-                                <CalcIcon className="h-5 w-5" />
-                            </button>
-
-                            <button
-                                onClick={handleSubmit}
-                                disabled={isSubmitting}
-                                className="ml-auto px-3 sm:px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 text-xs sm:text-sm font-medium flex items-center min-h-[36px] sm:min-h-[40px]"
-                            >
-                                {isSubmitting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
-                                {isSubmitting ? 'Submitting...' : 'Submit'}
-                            </button>
-                        </div>
-                        <button
-                            onClick={() => setShowQuestionGrid(!showQuestionGrid)}
-                            className="w-full mt-2 flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium"
-                        >
-                            <LayoutGrid className="h-4 w-4 mr-2" />
-                            {showQuestionGrid ? 'Hide Question Navigator' : 'Show Question Navigator'}
-                        </button>
-
-                        {showQuestionGrid && (
-                            <div className="mt-3 grid grid-cols-5 sm:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-1">
-                                {exam.questions.map((q, i) => {
-                                    const isAnswered = answers[q.id] !== undefined && answers[q.id] !== '';
-                                    const isFlagged = flaggedQuestions.has(q.id);
-                                    let bgClass = 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400';
-                                    if (isFlagged) bgClass = 'bg-yellow-100 text-yellow-800 border border-yellow-300';
-                                    else if (isAnswered) bgClass = 'bg-green-100 text-green-800 border border-green-300';
-
-                                    return (
-                                        <button
-                                            key={q.id}
-                                            onClick={() => {
-                                                document.getElementById(`question-${q.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                                setShowQuestionGrid(false);
-                                            }}
-                                            className={`p-2 rounded text-xs font-bold ${bgClass}`}
-                                        >
-                                            {i + 1}
-                                            {isFlagged && <Flag className="h-2 w-2 ml-1 inline" />}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div className="space-y-4 sm:space-y-6">
-                    {exam.questions.map((q, i) => (
-                        <div key={q.id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
-                            <div id={`question-${q.id}`} className="font-medium text-gray-900 dark:text-white mb-4 flex flex-col sm:flex-row">
-                                <span className="mr-2">{i + 1}.</span>
-                                <span className="flex-1">{q.question_text}</span>
-                                <div className="flex items-center mt-2 sm:mt-0 sm:ml-auto space-x-3">
-                                    <button
-                                        onClick={() => {
-                                            const newFlags = new Set(flaggedQuestions);
-                                            if (newFlags.has(q.id)) {
-                                                newFlags.delete(q.id);
-                                            } else {
-                                                newFlags.add(q.id);
-                                            }
-                                            setFlaggedQuestions(newFlags);
-                                        }}
-                                        className={`p-1 rounded-full transition-colors ${flaggedQuestions.has(q.id) ? 'text-yellow-500 bg-yellow-50' : 'text-gray-400 hover:text-gray-600'}`}
-                                        title={flaggedQuestions.has(q.id) ? "Unflag" : "Flag for review"}
-                                    >
-                                        <Flag className={`h-5 w-5 ${flaggedQuestions.has(q.id) ? 'fill-current' : ''}`} />
-                                    </button>
-                                    <span className="text-sm text-gray-500">({q.points} pts)</span>
-                                </div>
-                            </div>
-
-                            {q.media_url && (
-                                <div className="mb-4 flex justify-center">
-                                    {q.media_type === 'image' && (
-                                        <img src={q.media_url} alt="Question Media" className="max-w-full max-h-96 rounded-lg object-contain" />
-                                    )}
-                                    {q.media_type === 'audio' && (
-                                        <audio controls src={q.media_url} className="w-full max-w-md" />
-                                    )}
-                                    {q.media_type === 'video' && (
-                                        <video controls src={q.media_url} className="max-w-full max-h-96 rounded-lg" />
-                                    )}
-                                </div>
-                            )}
-
-                            {q.type === 'multiple_choice' && q.options?.map((opt) => (
-                                <label key={opt} className="flex items-start space-x-3 p-3 sm:p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2 min-h-[44px]">
-                                    <input
-                                        type="radio"
-                                        name={q.id}
-                                        value={opt}
-                                        checked={answers[q.id] === opt}
-                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                        className="h-5 w-5 sm:h-4 sm:w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 mt-0.5 flex-shrink-0"
-                                    />
-                                    <span className="text-gray-700 dark:text-gray-300 text-base sm:text-sm">{opt}</span>
-                                </label>
-                            ))}
-
-                            {q.type === 'dropdown' && (
-                                <div>
-                                    <select
-                                        className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                        value={answers[q.id] || ''}
-                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                    >
-                                        <option value="">Select...</option>
-                                        {q.options?.map((opt) => (
-                                            <option key={opt} value={opt}>{opt}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-
-                            {q.type === 'numeric' && (
-                                <div>
-                                    <input
-                                        type="number"
-                                        className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                        value={answers[q.id] ?? ''}
-                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                    />
-                                </div>
-                            )}
-
-                            {q.type === 'true_false' && ['True', 'False'].map((opt) => (
-                                <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
-                                    <input
-                                        type="radio"
-                                        name={q.id}
-                                        value={opt}
-                                        checked={answers[q.id] === opt}
-                                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                    />
-                                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                                </label>
-                            ))}
-
-                            {q.type === 'short_answer' && (
-                                <textarea
-                                    rows={4}
-                                    className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    placeholder="Type your answer here..."
-                                    value={answers[q.id] || ''}
-                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                />
-                            )}
-
-                            {q.type === 'multiple_select' && q.options?.map((opt: string) => (
-                                <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={Array.isArray(answers[q.id]) ? (answers[q.id] as string[]).includes(opt) : false}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                            const current: string[] = Array.isArray(answers[q.id]) ? [...answers[q.id]] : [];
-                                            if (e.target.checked) {
-                                                current.push(opt);
-                                            } else {
-                                                const idx = current.indexOf(opt);
-                                                if (idx !== -1) current.splice(idx, 1);
-                                            }
-                                            setAnswers({ ...answers, [q.id]: current });
-                                        }}
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                    />
-                                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                                </label>
-                            ))}
+        <div ref={containerRef} className={`min-h-screen p-3 sm:p-6 bg-gray-50 dark:bg-gray-900`}>
+            {/* Watermark Overlay */}
+            {started && (
+                <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden opacity-[0.03] select-none flex flex-wrap content-center justify-center gap-24 rotate-[-15deg]">
+                    {Array.from({ length: 20 }).map((_, i) => (
+                        <div key={i} className="text-4xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                            {studentData.name || 'Student'} <br />
+                            <span className="text-xl">{studentData.email || studentData.student_id || ''}</span>
                         </div>
                     ))}
                 </div>
+            )}
 
-                {showCalculator && <Calculator onClose={() => setShowCalculator(false)} />}
-
-                {/* Debug Panel */}
-                {showDebugPanel && debugInfo && (
-                    <div className="fixed bottom-4 right-4 w-96 max-h-96 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-2xl border-2 border-indigo-500 z-50">
-                        <div className="sticky top-0 bg-indigo-600 text-white p-3 flex items-center justify-between">
-                            <h3 className="font-bold">🐛 Debug Info</h3>
-                            <button
-                                onClick={() => setShowDebugPanel(false)}
-                                className="text-white hover:text-gray-200"
-                            >
-                                ✕
-                            </button>
-                        </div>
-                        <div className="p-4 text-xs font-mono">
-                            <div className="mb-3">
-                                <div className={`inline-block px-2 py-1 rounded ${debugInfo.status === 'success' ? 'bg-green-100 text-green-800' :
-                                    debugInfo.status === 'error' ? 'bg-red-100 text-red-800' :
-                                        'bg-yellow-100 text-yellow-800'
-                                    }`}>
-                                    Status: {debugInfo.status}
+            <div className={`max-w-4xl mx-auto ${highContrast ? 'contrast-125 saturate-150' : ''} ${fontSize === 'large' ? 'text-lg' : fontSize === 'xlarge' ? 'text-xl' : ''}`}>
+                <div className="max-w-3xl mx-auto">
+                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 sticky top-0 z-10">
+                        <div className="flex flex-col gap-3">
+                            <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">{exam.title}</h1>
+                            <div className="flex flex-wrap items-center gap-2">
+                                {timeLeft !== null && (
+                                    <div className={`flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${timeLeft < 60 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
+                                        <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                                        <span className="font-mono font-bold">{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</span>
+                                    </div>
+                                )}
+                                <div className={`flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${violations.length > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+                                    <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                                    <span className="font-bold">Violations: {violations.length}/{exam.settings.max_violations || 3}</span>
                                 </div>
-                            </div>
 
-                            <div className="mb-3">
-                                <strong className="text-gray-700 dark:text-gray-300">Timestamp:</strong>
-                                <div className="text-gray-600 dark:text-gray-400">{debugInfo.timestamp}</div>
-                            </div>
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowSettings(!showSettings)}
+                                        className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                        title="Accessibility Settings"
+                                    >
+                                        <Settings className="h-5 w-5" />
+                                    </button>
 
-                            <div className="mb-3">
-                                <strong className="text-gray-700 dark:text-gray-300">Answers Count:</strong>
-                                <div className="text-gray-600 dark:text-gray-400">{debugInfo.answersCount}</div>
-                            </div>
+                                    {showSettings && (
+                                        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-50">
+                                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Accessibility</h3>
 
-                            {debugInfo.responseStatus && (
-                                <div className="mb-3">
-                                    <strong className="text-gray-700 dark:text-gray-300">Response Status:</strong>
-                                    <div className="text-gray-600 dark:text-gray-400">{debugInfo.responseStatus}</div>
+                                            <div className="mb-4">
+                                                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">Font Size</label>
+                                                <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                                                    <button
+                                                        onClick={() => setFontSize('normal')}
+                                                        className={`flex-1 py-1 text-xs rounded-md ${fontSize === 'normal' ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}
+                                                    >
+                                                        A
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setFontSize('large')}
+                                                        className={`flex-1 py-1 text-sm rounded-md ${fontSize === 'large' ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}
+                                                    >
+                                                        A+
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setFontSize('xlarge')}
+                                                        className={`flex-1 py-1 text-base rounded-md ${fontSize === 'xlarge' ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}
+                                                    >
+                                                        A++
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">Contrast</label>
+                                                <button
+                                                    onClick={() => setHighContrast(!highContrast)}
+                                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border ${highContrast ? 'bg-yellow-50 border-yellow-300 text-yellow-900' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600'}`}
+                                                >
+                                                    <span className="text-sm">High Contrast</span>
+                                                    {highContrast ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <button
+                                    onClick={() => setShowCalculator(!showCalculator)}
+                                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                    title="Calculator"
+                                >
+                                    <CalcIcon className="h-5 w-5" />
+                                </button>
+
+                                <button
+                                    onClick={handleSubmit}
+                                    disabled={isSubmitting}
+                                    className="ml-auto px-3 sm:px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 text-xs sm:text-sm font-medium flex items-center min-h-[36px] sm:min-h-[40px]"
+                                >
+                                    {isSubmitting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
+                                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                                </button>
+                            </div>
+                            <button
+                                onClick={() => setShowQuestionGrid(!showQuestionGrid)}
+                                className="w-full mt-2 flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium"
+                            >
+                                <LayoutGrid className="h-4 w-4 mr-2" />
+                                {showQuestionGrid ? 'Hide Question Navigator' : 'Show Question Navigator'}
+                            </button>
+
+                            {showQuestionGrid && (
+                                <div className="mt-3 grid grid-cols-5 sm:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-1">
+                                    {exam.questions.map((q, i) => {
+                                        const isAnswered = answers[q.id] !== undefined && answers[q.id] !== '';
+                                        const isFlagged = flaggedQuestions.has(q.id);
+                                        let bgClass = 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400';
+                                        if (isFlagged) bgClass = 'bg-yellow-100 text-yellow-800 border border-yellow-300';
+                                        else if (isAnswered) bgClass = 'bg-green-100 text-green-800 border border-green-300';
+
+                                        return (
+                                            <button
+                                                key={q.id}
+                                                onClick={() => {
+                                                    document.getElementById(`question-${q.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                    setShowQuestionGrid(false);
+                                                }}
+                                                className={`p-2 rounded text-xs font-bold ${bgClass}`}
+                                            >
+                                                {i + 1}
+                                                {isFlagged && <Flag className="h-2 w-2 ml-1 inline" />}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             )}
+                        </div>
+                    </div>
 
-                            {debugInfo.errorData && (
+                    <div className="space-y-4 sm:space-y-6">
+                        {exam.questions.map((q, i) => (
+                            <div key={q.id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
+                                <div id={`question-${q.id}`} className="font-medium text-gray-900 dark:text-white mb-4 flex flex-col sm:flex-row">
+                                    <span className="mr-2">{i + 1}.</span>
+                                    <span className="flex-1">{q.question_text}</span>
+                                    <div className="flex items-center mt-2 sm:mt-0 sm:ml-auto space-x-3">
+                                        <button
+                                            onClick={() => {
+                                                const newFlags = new Set(flaggedQuestions);
+                                                if (newFlags.has(q.id)) {
+                                                    newFlags.delete(q.id);
+                                                } else {
+                                                    newFlags.add(q.id);
+                                                }
+                                                setFlaggedQuestions(newFlags);
+                                            }}
+                                            className={`p-1 rounded-full transition-colors ${flaggedQuestions.has(q.id) ? 'text-yellow-500 bg-yellow-50' : 'text-gray-400 hover:text-gray-600'}`}
+                                            title={flaggedQuestions.has(q.id) ? "Unflag" : "Flag for review"}
+                                        >
+                                            <Flag className={`h-5 w-5 ${flaggedQuestions.has(q.id) ? 'fill-current' : ''}`} />
+                                        </button>
+                                        <span className="text-sm text-gray-500">({q.points} pts)</span>
+                                    </div>
+                                </div>
+
+                                {q.media_url && (
+                                    <div className="mb-4 flex justify-center">
+                                        {q.media_type === 'image' && (
+                                            <img src={q.media_url} alt="Question Media" className="max-w-full max-h-96 rounded-lg object-contain" />
+                                        )}
+                                        {q.media_type === 'audio' && (
+                                            <audio controls src={q.media_url} className="w-full max-w-md" />
+                                        )}
+                                        {q.media_type === 'video' && (
+                                            <video controls src={q.media_url} className="max-w-full max-h-96 rounded-lg" />
+                                        )}
+                                    </div>
+                                )}
+
+                                {q.type === 'multiple_choice' && q.options?.map((opt) => (
+                                    <label key={opt} className="flex items-start space-x-3 p-3 sm:p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2 min-h-[44px]">
+                                        <input
+                                            type="radio"
+                                            name={q.id}
+                                            value={opt}
+                                            checked={answers[q.id] === opt}
+                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                            className="h-5 w-5 sm:h-4 sm:w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 mt-0.5 flex-shrink-0"
+                                        />
+                                        <span className="text-gray-700 dark:text-gray-300 text-base sm:text-sm">{opt}</span>
+                                    </label>
+                                ))}
+
+                                {q.type === 'dropdown' && (
+                                    <div>
+                                        <select
+                                            className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            value={answers[q.id] || ''}
+                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                        >
+                                            <option value="">Select...</option>
+                                            {q.options?.map((opt) => (
+                                                <option key={opt} value={opt}>{opt}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                {q.type === 'numeric' && (
+                                    <div>
+                                        <input
+                                            type="number"
+                                            className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            value={answers[q.id] ?? ''}
+                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                        />
+                                    </div>
+                                )}
+
+                                {q.type === 'true_false' && ['True', 'False'].map((opt) => (
+                                    <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
+                                        <input
+                                            type="radio"
+                                            name={q.id}
+                                            value={opt}
+                                            checked={answers[q.id] === opt}
+                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                        />
+                                        <span className="text-gray-700 dark:text-gray-300">{opt}</span>
+                                    </label>
+                                ))}
+
+                                {q.type === 'short_answer' && (
+                                    <textarea
+                                        rows={4}
+                                        className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        placeholder="Type your answer here..."
+                                        value={answers[q.id] || ''}
+                                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                                    />
+                                )}
+
+                                {q.type === 'multiple_select' && q.options?.map((opt: string) => (
+                                    <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={Array.isArray(answers[q.id]) ? (answers[q.id] as string[]).includes(opt) : false}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                const current: string[] = Array.isArray(answers[q.id]) ? [...answers[q.id]] : [];
+                                                if (e.target.checked) {
+                                                    current.push(opt);
+                                                } else {
+                                                    const idx = current.indexOf(opt);
+                                                    if (idx !== -1) current.splice(idx, 1);
+                                                }
+                                                setAnswers({ ...answers, [q.id]: current });
+                                            }}
+                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                        />
+                                        <span className="text-gray-700 dark:text-gray-300">{opt}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+
+                    {showCalculator && <Calculator onClose={() => setShowCalculator(false)} />}
+
+                    {/* Debug Panel */}
+                    {showDebugPanel && debugInfo && (
+                        <div className="fixed bottom-4 right-4 w-96 max-h-96 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-2xl border-2 border-indigo-500 z-50">
+                            <div className="sticky top-0 bg-indigo-600 text-white p-3 flex items-center justify-between">
+                                <h3 className="font-bold">🐛 Debug Info</h3>
+                                <button
+                                    onClick={() => setShowDebugPanel(false)}
+                                    className="text-white hover:text-gray-200"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <div className="p-4 text-xs font-mono">
                                 <div className="mb-3">
-                                    <strong className="text-red-600">Error Details:</strong>
-                                    <pre className="bg-red-50 dark:bg-red-900/20 p-2 rounded mt-1 overflow-auto text-red-800 dark:text-red-200">
-                                        {JSON.stringify(debugInfo.errorData, null, 2)}
+                                    <div className={`inline-block px-2 py-1 rounded ${debugInfo.status === 'success' ? 'bg-green-100 text-green-800' :
+                                        debugInfo.status === 'error' ? 'bg-red-100 text-red-800' :
+                                            'bg-yellow-100 text-yellow-800'
+                                        }`}>
+                                        Status: {debugInfo.status}
+                                    </div>
+                                </div>
+
+                                <div className="mb-3">
+                                    <strong className="text-gray-700 dark:text-gray-300">Timestamp:</strong>
+                                    <div className="text-gray-600 dark:text-gray-400">{debugInfo.timestamp}</div>
+                                </div>
+
+                                <div className="mb-3">
+                                    <strong className="text-gray-700 dark:text-gray-300">Answers Count:</strong>
+                                    <div className="text-gray-600 dark:text-gray-400">{debugInfo.answersCount}</div>
+                                </div>
+
+                                {debugInfo.responseStatus && (
+                                    <div className="mb-3">
+                                        <strong className="text-gray-700 dark:text-gray-300">Response Status:</strong>
+                                        <div className="text-gray-600 dark:text-gray-400">{debugInfo.responseStatus}</div>
+                                    </div>
+                                )}
+
+                                {debugInfo.errorData && (
+                                    <div className="mb-3">
+                                        <strong className="text-red-600">Error Details:</strong>
+                                        <pre className="bg-red-50 dark:bg-red-900/20 p-2 rounded mt-1 overflow-auto text-red-800 dark:text-red-200">
+                                            {JSON.stringify(debugInfo.errorData, null, 2)}
+                                        </pre>
+                                    </div>
+                                )}
+
+                                <div className="mb-3">
+                                    <strong className="text-gray-700 dark:text-gray-300">Submission Data:</strong>
+                                    <pre className="bg-gray-100 dark:bg-gray-700 p-2 rounded mt-1 overflow-auto text-gray-800 dark:text-gray-200">
+                                        {JSON.stringify(debugInfo.submissionData, null, 2)}
                                     </pre>
                                 </div>
-                            )}
-
-                            <div className="mb-3">
-                                <strong className="text-gray-700 dark:text-gray-300">Submission Data:</strong>
-                                <pre className="bg-gray-100 dark:bg-gray-700 p-2 rounded mt-1 overflow-auto text-gray-800 dark:text-gray-200">
-                                    {JSON.stringify(debugInfo.submissionData, null, 2)}
-                                </pre>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                <ViolationModal
-                    isOpen={showViolationModal}
-                    onClose={() => setShowViolationModal(false)}
-                    title={violationMessage.title}
-                    message={violationMessage.message}
-                    severity={violationMessage.title.includes('Final') || violationMessage.title.includes('Maximum') ? 'critical' : 'warning'}
-                />
+                    <ViolationModal
+                        isOpen={showViolationModal}
+                        onClose={() => setShowViolationModal(false)}
+                        title={violationMessage.title}
+                        message={violationMessage.message}
+                        severity={violationMessage.title.includes('Final') || violationMessage.title.includes('Maximum') ? 'critical' : 'warning'}
+                    />
 
-                <div className="mt-8 text-center pb-8">
-                    <div className="inline-flex items-center justify-center space-x-2 text-gray-400 dark:text-gray-500">
-                        <span className="text-sm">Powered by</span>
-                        <Logo size="sm" showText={true} className="opacity-75 grayscale hover:grayscale-0 transition-all duration-300" />
+                    <div className="mt-8 text-center pb-8">
+                        <div className="inline-flex items-center justify-center space-x-2 text-gray-400 dark:text-gray-500">
+                            <span className="text-sm">Powered by</span>
+                            <Logo size="sm" showText={true} className="opacity-75 grayscale hover:grayscale-0 transition-all duration-300" />
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Mobile Sticky Submit Button */}
-            <div className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
-                <button
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-lg font-bold flex justify-center items-center shadow-md"
-                >
-                    {isSubmitting ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : null}
-                    {isSubmitting ? 'Submitting Exam...' : 'Submit Exam'}
-                </button>
+                {/* Mobile Sticky Submit Button */}
+                <div className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
+                    <button
+                        onClick={handleSubmit}
+                        disabled={isSubmitting}
+                        className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-lg font-bold flex justify-center items-center shadow-md"
+                    >
+                        {isSubmitting ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : null}
+                        {isSubmitting ? 'Submitting Exam...' : 'Submit Exam'}
+                    </button>
+                </div>
             </div>
-        </div>
-    );
+            );
 }
