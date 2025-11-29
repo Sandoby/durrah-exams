@@ -13,7 +13,10 @@ const corsHeaders = {
 serve(async (req) => {
     // Handle CORS preflight requests
     if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders })
+        return new Response('ok', {
+            status: 200,
+            headers: corsHeaders
+        })
     }
 
     try {
@@ -33,9 +36,17 @@ serve(async (req) => {
         const { exam_id, student_data, answers, violations, browser_info } = await req.json()
 
         // Validate required fields
-        if (!exam_id || !student_data || !answers) {
+        if (!exam_id || !student_data || !Array.isArray(answers)) {
+            console.error('Validation failed:', { exam_id, student_data, answers })
             return new Response(
-                JSON.stringify({ error: 'Missing required fields' }),
+                JSON.stringify({
+                    error: 'Missing required fields',
+                    details: {
+                        has_exam_id: !!exam_id,
+                        has_student_data: !!student_data,
+                        has_answers: Array.isArray(answers)
+                    }
+                }),
                 { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
             )
         }
