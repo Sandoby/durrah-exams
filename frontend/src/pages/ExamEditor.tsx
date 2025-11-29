@@ -153,20 +153,53 @@ export default function ExamEditor() {
     const onSubmit = async (data: ExamForm) => {
         if (!user) return;
 
-        // Validation: Ensure all auto-graded questions have a correct answer
-        const missingAnswers = data.questions.some(q => {
+        // Validation: Basic Info
+        if (!data.title?.trim()) {
+            toast.error('Please enter an exam title.');
+            return;
+        }
+        if (!data.description?.trim()) {
+            toast.error('Please enter an exam description.');
+            return;
+        }
+
+        if (data.questions.length === 0) {
+            toast.error('Please add at least one question.');
+            return;
+        }
+
+        // Validation: Question Content
+        for (const [index, q] of data.questions.entries()) {
+            const qNum = index + 1;
+
+            if (!q.question_text?.trim()) {
+                toast.error(`Question ${qNum} is missing text.`);
+                return;
+            }
+
+            if (['multiple_choice', 'multiple_select', 'dropdown'].includes(q.type)) {
+                if (!q.options || q.options.length < 2) {
+                    toast.error(`Question ${qNum} must have at least 2 options.`);
+                    return;
+                }
+                if (q.options.some(opt => !opt?.trim())) {
+                    toast.error(`Question ${qNum} has empty options.`);
+                    return;
+                }
+            }
+
+            // Validation: Correct Answers
             if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'numeric'].includes(q.type)) {
                 if (Array.isArray(q.correct_answer)) {
-                    return q.correct_answer.length === 0;
+                    if (q.correct_answer.length === 0) {
+                        toast.error(`Question ${qNum} needs a correct answer.`);
+                        return;
+                    }
+                } else if (!q.correct_answer) {
+                    toast.error(`Question ${qNum} needs a correct answer.`);
+                    return;
                 }
-                return !q.correct_answer;
             }
-            return false;
-        });
-
-        if (missingAnswers) {
-            toast.error('Please select a correct answer for all questions before saving.');
-            return;
         }
 
         setIsLoading(true);
