@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { BarChart } from '../charts';
-import { ArrowLeft, TrendingUp, TrendingDown, Users, Target, Clock, AlertTriangle, Download } from 'lucide-react';
+import { ArrowLeft, Users, Target, Clock, AlertTriangle, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface QuestionAnalytics {
@@ -54,10 +54,10 @@ export const AnalyticsDashboard = () => {
             if (examError) throw examError;
             setExamAnalytics(examData);
 
-            // Fetch questions
+            // Fetch questions with correct answers for re-grading
             const { data: questions, error: questionsError } = await supabase
                 .from('questions')
-                .select('id, question_text')
+                .select('id, question_text, type, correct_answer, options')
                 .eq('exam_id', examId)
                 .order('created_at', { ascending: true });
 
@@ -71,6 +71,7 @@ export const AnalyticsDashboard = () => {
                     max_score,
                     submission_answers (
                         question_id,
+                        answer,
                         is_correct
                     )
                 `)
@@ -78,21 +79,71 @@ export const AnalyticsDashboard = () => {
 
             if (submissionsError) throw submissionsError;
 
+            // Helper to check correctness
+            const checkAnswer = (question: any, studentAnswer: string) => {
+                if (!studentAnswer) return false;
+
+                try {
+                    if (question.type === 'multiple_select') {
+                        let studentArr: string[] = [];
+                        try {
+                            studentArr = JSON.parse(studentAnswer);
+                        } catch {
+                            studentArr = studentAnswer.split('||').filter(Boolean);
+                        }
+
+                        if (!Array.isArray(question.correct_answer)) {
+                            try {
+                                const parsed = JSON.parse(question.correct_answer);
+                                if (Array.isArray(parsed)) question.correct_answer = parsed;
+                                else question.correct_answer = [question.correct_answer];
+                            } catch {
+                                question.correct_answer = [question.correct_answer];
+                            }
+                        }
+
+                        const correctSorted = (question.correct_answer || []).map((s: string) => String(s).trim().toLowerCase()).sort();
+                        const studentSorted = studentArr.map((s: string) => String(s).trim().toLowerCase()).sort();
+
+                        return correctSorted.length === studentSorted.length &&
+                            correctSorted.every((val: string, idx: number) => val === studentSorted[idx]);
+                    } else if (question.type === 'numeric') {
+                        const correctNum = parseFloat(question.correct_answer);
+                        const studentNum = parseFloat(studentAnswer);
+                        return !isNaN(correctNum) && !isNaN(studentNum) && correctNum === studentNum;
+                    } else {
+                        return String(question.correct_answer).trim().toLowerCase() === String(studentAnswer).trim().toLowerCase();
+                    }
+                } catch (e) {
+                    console.error('Grading error', e);
+                    return false;
+                }
+            };
+
             // Calculate Question Analytics Client-Side
             const questionStats: Record<string, { total: number; correct: number }> = {};
+            const questionMap = new Map(questions.map(q => [q.id, q]));
 
-            // Initialize stats for all questions
             questions.forEach(q => {
                 questionStats[q.id] = { total: 0, correct: 0 };
             });
 
-            // Process all submissions
             submissions.forEach((sub: any) => {
                 if (sub.submission_answers) {
                     sub.submission_answers.forEach((ans: any) => {
                         if (questionStats[ans.question_id]) {
                             questionStats[ans.question_id].total++;
-                            if (ans.is_correct) {
+
+                            const question = questionMap.get(ans.question_id);
+                            let isCorrect = false;
+
+                            if (ans.is_correct === true) {
+                                isCorrect = true;
+                            } else if (question) {
+                                isCorrect = checkAnswer(question, ans.answer);
+                            }
+
+                            if (isCorrect) {
                                 questionStats[ans.question_id].correct++;
                             }
                         }
@@ -115,7 +166,6 @@ export const AnalyticsDashboard = () => {
 
             setQuestionAnalytics(formattedQuestions);
 
-            // Create score distribution (0-10, 11-20, 21-30, etc.)
             const distribution: { [key: string]: number } = {};
             submissions.forEach((sub: any) => {
                 const percentage = sub.max_score > 0 ? (sub.score / sub.max_score) * 100 : 0;
@@ -195,12 +245,6 @@ export const AnalyticsDashboard = () => {
         );
     }
 
-    const passRate = examAnalytics.total_submissions > 0
-        ? ((examAnalytics.passed_count || 0) / examAnalytics.total_submissions) * 100
-        : 0;
-
-
-
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             {/* Header */}
@@ -234,7 +278,7 @@ export const AnalyticsDashboard = () => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -256,22 +300,6 @@ export const AnalyticsDashboard = () => {
                                 </p>
                             </div>
                             <Target className="h-10 w-10 text-blue-600" />
-                        </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Pass Rate</p>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                                    {passRate.toFixed(1)}%
-                                </p>
-                            </div>
-                            {passRate >= 70 ? (
-                                <TrendingUp className="h-10 w-10 text-green-600" />
-                            ) : (
-                                <TrendingDown className="h-10 w-10 text-red-600" />
-                            )}
                         </div>
                     </div>
 
