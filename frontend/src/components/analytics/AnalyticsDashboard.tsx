@@ -13,7 +13,8 @@ import {
     ChevronDown,
     FileText,
     FileSpreadsheet,
-    Printer
+    Printer,
+    Crown
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
@@ -51,12 +52,35 @@ export const AnalyticsDashboard = () => {
     const [examAnalytics, setExamAnalytics] = useState<ExamAnalytics | null>(null);
     const [questionAnalytics, setQuestionAnalytics] = useState<QuestionAnalytics[]>([]);
     const [scoreDistribution, setScoreDistribution] = useState<any[]>([]);
+    const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null);
 
     useEffect(() => {
-        if (examId) {
-            fetchAnalytics();
+        checkSubscription();
+    }, []);
+
+    const checkSubscription = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data } = await supabase
+                .from('profiles')
+                .select('subscription_status')
+                .eq('id', user.id)
+                .single();
+
+            if (data?.subscription_status !== 'active') {
+                setIsSubscribed(false);
+                setLoading(false);
+            } else {
+                setIsSubscribed(true);
+                if (examId) fetchAnalytics();
+            }
+        } catch (error) {
+            console.error('Error checking subscription:', error);
+            setLoading(false);
         }
-    }, [examId]);
+    };
 
     const fetchAnalytics = async () => {
         setLoading(true);
@@ -258,7 +282,6 @@ export const AnalyticsDashboard = () => {
 
             const scaledHeight = imgHeight * scaleFactor;
 
-            // Add image directly without text to avoid font issues with Arabic
             pdf.addImage(imgData, 'PNG', margin, margin, contentWidth, scaledHeight);
             pdf.save(`${examAnalytics.exam_title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_analytics.pdf`);
 
@@ -334,6 +357,38 @@ export const AnalyticsDashboard = () => {
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
                     <p className="mt-4 text-gray-600 dark:text-gray-400">Loading analytics...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (isSubscribed === false) {
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+                <div className="text-center max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+                    <div className="bg-indigo-100 dark:bg-indigo-900/30 p-4 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                        <Crown className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                        Premium Feature
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                        Analytics is available exclusively for Professional plan subscribers. Upgrade now to unlock detailed insights and reports.
+                    </p>
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => navigate('/checkout')}
+                            className="w-full flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                        >
+                            Upgrade to Professional
+                        </button>
+                        <button
+                            onClick={() => navigate('/dashboard')}
+                            className="w-full flex items-center justify-center px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
+                            Back to Dashboard
+                        </button>
+                    </div>
                 </div>
             </div>
         );

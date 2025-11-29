@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Loader2, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Loader2, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -414,11 +414,25 @@ export default function Dashboard() {
                                                     <BarChart3 className="h-5 w-5" />
                                                 </button>
                                                 <button
-                                                    onClick={() => navigate(`/exam/${exam.id}/analytics`)}
-                                                    className="p-2 text-gray-400 hover:text-purple-600 transition-colors"
-                                                    title="Analytics Dashboard"
+                                                    onClick={() => {
+                                                        if (profile?.subscription_status === 'active') {
+                                                            navigate(`/exam/${exam.id}/analytics`);
+                                                        } else {
+                                                            toast.error('Upgrade to Professional plan to access Analytics');
+                                                            navigate('/checkout');
+                                                        }
+                                                    }}
+                                                    className={`p-2 transition-colors ${profile?.subscription_status === 'active'
+                                                            ? 'text-gray-400 hover:text-purple-600'
+                                                            : 'text-gray-300 hover:text-gray-400'
+                                                        }`}
+                                                    title={profile?.subscription_status === 'active' ? "Analytics Dashboard" : "Analytics (Premium Only)"}
                                                 >
-                                                    <TrendingUp className="h-5 w-5" />
+                                                    {profile?.subscription_status === 'active' ? (
+                                                        <TrendingUp className="h-5 w-5" />
+                                                    ) : (
+                                                        <Lock className="h-5 w-5" />
+                                                    )}
                                                 </button>
                                                 <Link
                                                     to={`/exam/${exam.id}/edit`}
