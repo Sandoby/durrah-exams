@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { BarChart } from '../charts';
-import { ArrowLeft, Users, Target, Clock, AlertTriangle, Download } from 'lucide-react';
+import { ArrowLeft, Users, Target, Clock, AlertTriangle, Download, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface QuestionAnalytics {
     question_id: string;
@@ -31,6 +33,7 @@ export const AnalyticsDashboard = () => {
     const { examId } = useParams<{ examId: string }>();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
+    const [exporting, setExporting] = useState(false);
     const [examAnalytics, setExamAnalytics] = useState<ExamAnalytics | null>(null);
     const [questionAnalytics, setQuestionAnalytics] = useState<QuestionAnalytics[]>([]);
     const [scoreDistribution, setScoreDistribution] = useState<any[]>([]);
@@ -193,6 +196,58 @@ export const AnalyticsDashboard = () => {
         }
     };
 
+    const handleExportPDF = async () => {
+        if (!examAnalytics) return;
+        setExporting(true);
+        const toastId = toast.loading('Generating report...');
+
+        try {
+            const element = document.getElementById('analytics-dashboard-content');
+            if (!element) throw new Error('Dashboard element not found');
+
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const imgWidth = canvas.width;
+            const imgHeight = canvas.height;
+
+            // Calculate ratio to fit width
+            const ratio = Math.min(pdfWidth / imgWidth, 1); // Don't scale up, only down if needed? No, fit to width usually.
+            // Actually, we want to fit to A4 width (minus margins)
+            const margin = 10;
+            const contentWidth = pdfWidth - (margin * 2);
+            const scaleFactor = contentWidth / imgWidth;
+
+            const scaledHeight = imgHeight * scaleFactor;
+
+            // If height is too big, we might need multiple pages, but for now let's just fit what we can or scale down
+            // Simple approach: Add image
+
+            pdf.setFontSize(18);
+            pdf.text(`${examAnalytics.exam_title} - Analytics Report`, margin, 15);
+            pdf.setFontSize(10);
+            pdf.text(`Generated on ${new Date().toLocaleDateString()}`, margin, 22);
+
+            pdf.addImage(imgData, 'PNG', margin, 30, contentWidth, scaledHeight);
+            pdf.save(`${examAnalytics.exam_title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_analytics.pdf`);
+
+            toast.success('Report exported successfully!', { id: toastId });
+        } catch (error) {
+            console.error('Export error:', error);
+            toast.error('Failed to export report', { id: toastId });
+        } finally {
+            setExporting(false);
+        }
+    };
+
     const getDifficultyColor = (percentage: number) => {
         if (percentage >= 70) return 'text-green-600 bg-green-100';
         if (percentage >= 40) return 'text-yellow-600 bg-yellow-100';
@@ -266,17 +321,22 @@ export const AnalyticsDashboard = () => {
                             </div>
                         </div>
                         <button
-                            onClick={() => toast.success('Export feature coming soon!')}
-                            className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                            onClick={handleExportPDF}
+                            disabled={exporting}
+                            className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <Download className="h-4 w-4 mr-2" />
-                            Export Report
+                            {exporting ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                                <Download className="h-4 w-4 mr-2" />
+                            )}
+                            {exporting ? 'Exporting...' : 'Export Report'}
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div id="analytics-dashboard-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 dark:bg-gray-900">
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
