@@ -14,6 +14,7 @@ import ExamView from './pages/ExamView';
 import Settings from './pages/Settings';
 import AdminPanel from './pages/AdminPanel';
 import { SubmissionSync } from './components/SubmissionSync';
+import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 
 function App() {
   return (
@@ -33,12 +34,21 @@ function App() {
             <Route path="/exam/new" element={<ExamEditor />} />
             <Route path="/exam/:id/edit" element={<ExamEditor />} />
             <Route path="/exam/:id" element={<ExamView />} />
+            <Route path="/exam/:examId/analytics" element={<AnalyticsDashboard />} />
             <Route path="/admin" element={<AdminPanel />} />
           </Routes>
           <Toaster position="top-right" />
         </div>
       </Router>
     </AuthProvider>
+  );
+}
+
+export default App;
+<Toaster position="top-right" />
+        </div >
+      </Router >
+    </AuthProvider >
   );
 }
 
