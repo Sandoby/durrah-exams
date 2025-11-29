@@ -2,10 +2,23 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { BarChart } from '../charts';
-import { ArrowLeft, Users, Target, Clock, AlertTriangle, Download, Loader2 } from 'lucide-react';
+import {
+    ArrowLeft,
+    Users,
+    Target,
+    Clock,
+    AlertTriangle,
+    Download,
+    Loader2,
+    ChevronDown,
+    FileText,
+    FileSpreadsheet,
+    Printer
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import * as XLSX from 'xlsx';
 
 interface QuestionAnalytics {
     question_id: string;
@@ -34,6 +47,7 @@ export const AnalyticsDashboard = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [exporting, setExporting] = useState(false);
+    const [showExportMenu, setShowExportMenu] = useState(false);
     const [examAnalytics, setExamAnalytics] = useState<ExamAnalytics | null>(null);
     const [questionAnalytics, setQuestionAnalytics] = useState<QuestionAnalytics[]>([]);
     const [scoreDistribution, setScoreDistribution] = useState<any[]>([]);
@@ -196,10 +210,23 @@ export const AnalyticsDashboard = () => {
         }
     };
 
+    const getDifficultyColor = (percentage: number) => {
+        if (percentage >= 70) return 'text-green-600 bg-green-100';
+        if (percentage >= 40) return 'text-yellow-600 bg-yellow-100';
+        return 'text-red-600 bg-red-100';
+    };
+
+    const getDifficultyLabel = (percentage: number) => {
+        if (percentage >= 70) return 'Easy';
+        if (percentage >= 40) return 'Medium';
+        return 'Hard';
+    };
+
     const handleExportPDF = async () => {
         if (!examAnalytics) return;
         setExporting(true);
-        const toastId = toast.loading('Generating report...');
+        setShowExportMenu(false);
+        const toastId = toast.loading('Generating PDF report...');
 
         try {
             const element = document.getElementById('analytics-dashboard-content');
@@ -215,21 +242,14 @@ export const AnalyticsDashboard = () => {
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
             const imgWidth = canvas.width;
             const imgHeight = canvas.height;
 
-            // Calculate ratio to fit width
-            const ratio = Math.min(pdfWidth / imgWidth, 1); // Don't scale up, only down if needed? No, fit to width usually.
-            // Actually, we want to fit to A4 width (minus margins)
             const margin = 10;
             const contentWidth = pdfWidth - (margin * 2);
             const scaleFactor = contentWidth / imgWidth;
 
             const scaledHeight = imgHeight * scaleFactor;
-
-            // If height is too big, we might need multiple pages, but for now let's just fit what we can or scale down
-            // Simple approach: Add image
 
             pdf.setFontSize(18);
             pdf.text(`${examAnalytics.exam_title} - Analytics Report`, margin, 15);
@@ -239,25 +259,70 @@ export const AnalyticsDashboard = () => {
             pdf.addImage(imgData, 'PNG', margin, 30, contentWidth, scaledHeight);
             pdf.save(`${examAnalytics.exam_title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_analytics.pdf`);
 
-            toast.success('Report exported successfully!', { id: toastId });
+            toast.success('PDF exported successfully!', { id: toastId });
         } catch (error) {
             console.error('Export error:', error);
-            toast.error('Failed to export report', { id: toastId });
+            toast.error('Failed to export PDF', { id: toastId });
         } finally {
             setExporting(false);
         }
     };
 
-    const getDifficultyColor = (percentage: number) => {
-        if (percentage >= 70) return 'text-green-600 bg-green-100';
-        if (percentage >= 40) return 'text-yellow-600 bg-yellow-100';
-        return 'text-red-600 bg-red-100';
+    const handleExportExcel = () => {
+        if (!examAnalytics) return;
+        setShowExportMenu(false);
+
+        try {
+            const wb = XLSX.utils.book_new();
+
+            // Summary Sheet
+            const summaryData = [
+                ['Exam Analytics Report'],
+                ['Generated On', new Date().toLocaleDateString()],
+                [],
+                ['Exam Title', examAnalytics.exam_title],
+                ['Total Submissions', examAnalytics.total_submissions],
+                ['Average Score', `${examAnalytics.average_score?.toFixed(1)}%`],
+                ['Median Score', `${examAnalytics.median_score?.toFixed(1)}%`],
+                ['Highest Score', `${examAnalytics.highest_score?.toFixed(1)}%`],
+                ['Lowest Score', `${examAnalytics.lowest_score?.toFixed(1)}%`],
+                ['Passed', examAnalytics.passed_count],
+                ['Failed', examAnalytics.failed_count]
+            ];
+            const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
+
+            // Question Analysis Sheet
+            const questionData = questionAnalytics.map(q => ({
+                'Question Number': `Q${q.question_number}`,
+                'Question Text': q.question_text,
+                'Total Attempts': q.total_attempts,
+                'Correct Attempts': q.correct_attempts,
+                'Success Rate': `${q.difficulty_percentage.toFixed(1)}%`,
+                'Difficulty': getDifficultyLabel(q.difficulty_percentage)
+            }));
+            const wsQuestions = XLSX.utils.json_to_sheet(questionData);
+            XLSX.utils.book_append_sheet(wb, wsQuestions, "Question Analysis");
+
+            // Score Distribution Sheet
+            const distributionData = scoreDistribution.map(d => ({
+                'Score Range': d.range,
+                'Count': d.count
+            }));
+            const wsDistribution = XLSX.utils.json_to_sheet(distributionData);
+            XLSX.utils.book_append_sheet(wb, wsDistribution, "Score Distribution");
+
+            XLSX.writeFile(wb, `${examAnalytics.exam_title.replace(/[^a-z0-9]/gi, '_')}_analytics.xlsx`);
+            toast.success('Excel exported successfully!');
+        } catch (error) {
+            console.error('Export error:', error);
+            toast.error('Failed to export Excel');
+        }
     };
 
-    const getDifficultyLabel = (percentage: number) => {
-        if (percentage >= 70) return 'Easy';
-        if (percentage >= 40) return 'Medium';
-        return 'Hard';
+    const handlePrint = () => {
+        setShowExportMenu(false);
+        window.print();
     };
 
     if (loading) {
@@ -301,9 +366,9 @@ export const AnalyticsDashboard = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 print:bg-white">
             {/* Header */}
-            <div className="bg-white dark:bg-gray-800 shadow">
+            <div className="bg-white dark:bg-gray-800 shadow print:hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
@@ -320,26 +385,60 @@ export const AnalyticsDashboard = () => {
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Analytics Dashboard</p>
                             </div>
                         </div>
-                        <button
-                            onClick={handleExportPDF}
-                            disabled={exporting}
-                            className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {exporting ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
+
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowExportMenu(!showExportMenu)}
+                                className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                            >
                                 <Download className="h-4 w-4 mr-2" />
+                                Export Report
+                                <ChevronDown className="h-4 w-4 ml-2" />
+                            </button>
+
+                            {showExportMenu && (
+                                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 ring-1 ring-black ring-opacity-5">
+                                    <div className="py-1">
+                                        <button
+                                            onClick={handleExportPDF}
+                                            disabled={exporting}
+                                            className="flex items-center w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+                                        >
+                                            {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2 text-red-500" />}
+                                            Export as PDF
+                                        </button>
+                                        <button
+                                            onClick={handleExportExcel}
+                                            className="flex items-center w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                        >
+                                            <FileSpreadsheet className="h-4 w-4 mr-2 text-green-600" />
+                                            Export as Excel
+                                        </button>
+                                        <button
+                                            onClick={handlePrint}
+                                            className="flex items-center w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                        >
+                                            <Printer className="h-4 w-4 mr-2 text-gray-600" />
+                                            Print Dashboard
+                                        </button>
+                                    </div>
+                                </div>
                             )}
-                            {exporting ? 'Exporting...' : 'Export Report'}
-                        </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div id="analytics-dashboard-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 dark:bg-gray-900">
+            {/* Print Header (Only visible when printing) */}
+            <div className="hidden print:block p-8 pb-0">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">{examAnalytics.exam_title}</h1>
+                <p className="text-gray-600">Analytics Report - Generated on {new Date().toLocaleDateString()}</p>
+            </div>
+
+            <div id="analytics-dashboard-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 dark:bg-gray-900 print:bg-white print:p-8">
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 print:grid-cols-3 print:gap-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 print:shadow-none print:border print:border-gray-200">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Total Submissions</p>
@@ -351,7 +450,7 @@ export const AnalyticsDashboard = () => {
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 print:shadow-none print:border print:border-gray-200">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Average Score</p>
@@ -363,7 +462,7 @@ export const AnalyticsDashboard = () => {
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 print:shadow-none print:border print:border-gray-200">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Median Score</p>
@@ -377,9 +476,9 @@ export const AnalyticsDashboard = () => {
                 </div>
 
                 {/* Charts Row */}
-                <div className="grid grid-cols-1 mb-8">
+                <div className="grid grid-cols-1 mb-8 print:break-inside-avoid">
                     {/* Score Distribution */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 print:shadow-none print:border print:border-gray-200">
                         <BarChart
                             data={scoreDistribution}
                             xKey="range"
@@ -392,7 +491,7 @@ export const AnalyticsDashboard = () => {
                 </div>
 
                 {/* Question Performance Table */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden print:shadow-none print:border print:border-gray-200">
                     <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                             Question Performance Analysis
@@ -421,12 +520,12 @@ export const AnalyticsDashboard = () => {
                             </thead>
                             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 {questionAnalytics.map((q) => (
-                                    <tr key={q.question_id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <tr key={q.question_id} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:break-inside-avoid">
                                         <td className="px-6 py-4">
                                             <div className="text-sm font-medium text-gray-900 dark:text-white">
                                                 Q{q.question_number}
                                             </div>
-                                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-md">
+                                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-md print:whitespace-normal">
                                                 {q.question_text}
                                             </div>
                                         </td>
@@ -438,9 +537,9 @@ export const AnalyticsDashboard = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2">
+                                                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2 print:border print:border-gray-300">
                                                     <div
-                                                        className="bg-indigo-600 h-2 rounded-full"
+                                                        className="bg-indigo-600 h-2 rounded-full print:bg-black"
                                                         style={{ width: `${q.difficulty_percentage}%` }}
                                                     ></div>
                                                 </div>
@@ -450,7 +549,7 @@ export const AnalyticsDashboard = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getDifficultyColor(q.difficulty_percentage)}`}>
+                                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getDifficultyColor(q.difficulty_percentage)} print:border print:border-gray-300`}>
                                                 {getDifficultyLabel(q.difficulty_percentage)}
                                             </span>
                                         </td>
