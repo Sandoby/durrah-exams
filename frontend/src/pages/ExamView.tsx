@@ -437,27 +437,38 @@ export default function ExamView() {
 
             console.log('Submitting to Edge Function:', edgeFunctionUrl);
 
+            // Debug: Log what we're sending
+            const submissionData = {
+                exam_id: id,
+                student_data: {
+                    name: studentName,
+                    email: studentEmail,
+                    ...studentData
+                },
+                answers: answersPayload,
+                violations: violations,
+                browser_info: browserInfo
+            };
+
+            console.log('📤 Submission Data:', JSON.stringify(submissionData, null, 2));
+            console.log('📊 Answers count:', answersPayload.length);
+            console.log('📋 Answers payload:', answersPayload);
+
             const response = await fetch(edgeFunctionUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${supabaseAnonKey}`
                 },
-                body: JSON.stringify({
-                    exam_id: id,
-                    student_data: {
-                        name: studentName,
-                        email: studentEmail,
-                        ...studentData
-                    },
-                    answers: answersPayload,
-                    violations: violations,
-                    browser_info: browserInfo
-                })
+                body: JSON.stringify(submissionData)
             });
+
+            console.log('📥 Response status:', response.status);
+            console.log('📥 Response ok:', response.ok);
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                console.error('❌ Error response:', errorData);
                 throw new Error(errorData.error || `Server returned ${response.status}`);
             }
 
