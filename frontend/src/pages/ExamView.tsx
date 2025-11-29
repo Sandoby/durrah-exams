@@ -1124,5 +1124,6 @@ export default function ExamView() {
                     </button>
                 </div>
             </div>
-            );
+        </div>
+    );
 }
