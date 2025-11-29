@@ -54,44 +54,71 @@ export const AnalyticsDashboard = () => {
             if (examError) throw examError;
             setExamAnalytics(examData);
 
-            // Fetch question-level analytics
-            const { data: questionsData, error: questionsError } = await supabase
-                .from('question_analytics')
-                .select(`
-                    *,
-                    questions (
-                        question_text
-                    )
-                `)
+            // Fetch questions
+            const { data: questions, error: questionsError } = await supabase
+                .from('questions')
+                .select('id, question_text')
                 .eq('exam_id', examId)
-                .order('question_id');
+                .order('created_at', { ascending: true });
 
             if (questionsError) throw questionsError;
 
-            const formattedQuestions = questionsData.map((q: any, index: number) => ({
-                question_id: q.question_id,
-                question_text: q.questions?.question_text || `Question ${index + 1}`,
-                question_number: index + 1,
-                total_attempts: q.total_attempts,
-                correct_attempts: q.correct_attempts,
-                difficulty_percentage: q.total_attempts > 0 ? (q.correct_attempts / q.total_attempts) * 100 : 0,
-                average_time_seconds: q.average_time_seconds || 0
-            }));
-
-            setQuestionAnalytics(formattedQuestions);
-
-            // Fetch submissions for score distribution
+            // Fetch submissions with answers
             const { data: submissions, error: submissionsError } = await supabase
                 .from('submissions')
-                .select('score, max_score')
+                .select(`
+                    score, 
+                    max_score,
+                    submission_answers (
+                        question_id,
+                        is_correct
+                    )
+                `)
                 .eq('exam_id', examId);
 
             if (submissionsError) throw submissionsError;
 
+            // Calculate Question Analytics Client-Side
+            const questionStats: Record<string, { total: number; correct: number }> = {};
+
+            // Initialize stats for all questions
+            questions.forEach(q => {
+                questionStats[q.id] = { total: 0, correct: 0 };
+            });
+
+            // Process all submissions
+            submissions.forEach((sub: any) => {
+                if (sub.submission_answers) {
+                    sub.submission_answers.forEach((ans: any) => {
+                        if (questionStats[ans.question_id]) {
+                            questionStats[ans.question_id].total++;
+                            if (ans.is_correct) {
+                                questionStats[ans.question_id].correct++;
+                            }
+                        }
+                    });
+                }
+            });
+
+            const formattedQuestions = questions.map((q: any, index: number) => {
+                const stats = questionStats[q.id] || { total: 0, correct: 0 };
+                return {
+                    question_id: q.id,
+                    question_text: q.question_text || `Question ${index + 1}`,
+                    question_number: index + 1,
+                    total_attempts: stats.total,
+                    correct_attempts: stats.correct,
+                    difficulty_percentage: stats.total > 0 ? (stats.correct / stats.total) * 100 : 0,
+                    average_time_seconds: 0
+                };
+            });
+
+            setQuestionAnalytics(formattedQuestions);
+
             // Create score distribution (0-10, 11-20, 21-30, etc.)
             const distribution: { [key: string]: number } = {};
             submissions.forEach((sub: any) => {
-                const percentage = (sub.score / sub.max_score) * 100;
+                const percentage = sub.max_score > 0 ? (sub.score / sub.max_score) * 100 : 0;
                 const bucket = Math.floor(percentage / 10) * 10;
                 const key = `${bucket}-${bucket + 9}%`;
                 distribution[key] = (distribution[key] || 0) + 1;
@@ -100,7 +127,11 @@ export const AnalyticsDashboard = () => {
             const distributionArray = Object.entries(distribution).map(([range, count]) => ({
                 range,
                 count
-            }));
+            })).sort((a, b) => {
+                const aVal = parseInt(a.range.split('-')[0]);
+                const bVal = parseInt(b.range.split('-')[0]);
+                return aVal - bVal;
+            });
 
             setScoreDistribution(distributionArray);
 
@@ -258,7 +289,7 @@ export const AnalyticsDashboard = () => {
                 </div>
 
                 {/* Charts Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div className="grid grid-cols-1 mb-8">
                     {/* Score Distribution */}
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                         <BarChart
@@ -267,21 +298,6 @@ export const AnalyticsDashboard = () => {
                             yKey="count"
                             title="Score Distribution"
                             color="#6366f1"
-                            height={300}
-                        />
-                    </div>
-
-                    {/* Pass/Fail Ratio */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                        <PieChart
-                            data={[
-                                { name: 'Passed', value: examAnalytics.passed_count || 0 },
-                                { name: 'Failed', value: failCount }
-                            ]}
-                            nameKey="name"
-                            valueKey="value"
-                            title="Pass/Fail Ratio"
-                            colors={['#10b981', '#ef4444']}
                             height={300}
                         />
                     </div>
