@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tutors.durrahsystem.tech/sitemap.xml

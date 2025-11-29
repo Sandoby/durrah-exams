@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star } from 'lucide-react';
 import { Logo } from '../components/Logo';
 
@@ -7,6 +8,12 @@ export default function LandingPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-violet-200 dark:from-indigo-950 dark:to-violet-900">
+            <Helmet>
+                <title>Durrah for Tutors | Create Secure Online Exams</title>
+                <meta name="description" content="The #1 platform for tutors to create, manage, and grade exams online. Features anti-cheating, auto-grading, and detailed analytics. Start for free!" />
+                <link rel="canonical" href="https://tutors.durrahsystem.tech/" />
+            </Helmet>
+
             {/* Navigation */}
             <nav className="fixed top-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-50 border-b border-gray-200 dark:border-gray-800">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
