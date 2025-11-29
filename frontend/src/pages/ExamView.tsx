@@ -73,6 +73,8 @@ export default function ExamView() {
     const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
     const [highContrast, setHighContrast] = useState(false);
     const [showCalculator, setShowCalculator] = useState(false);
+    const [debugInfo, setDebugInfo] = useState<any>(null);
+    const [showDebugPanel, setShowDebugPanel] = useState(false);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const isSubmittingRef = useRef(false);
@@ -454,6 +456,15 @@ export default function ExamView() {
             console.log('📊 Answers count:', answersPayload.length);
             console.log('📋 Answers payload:', answersPayload);
 
+            // Store debug info for UI display
+            setDebugInfo({
+                timestamp: new Date().toISOString(),
+                submissionData,
+                answersCount: answersPayload.length,
+                status: 'sending'
+            });
+            setShowDebugPanel(true);
+
             const response = await fetch(edgeFunctionUrl, {
                 method: 'POST',
                 headers: {
@@ -466,9 +477,25 @@ export default function ExamView() {
             console.log('📥 Response status:', response.status);
             console.log('📥 Response ok:', response.ok);
 
+            // Update debug info with response
+            setDebugInfo((prev: any) => ({
+                ...prev,
+                responseStatus: response.status,
+                responseOk: response.ok,
+                status: response.ok ? 'success' : 'error'
+            }));
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
                 console.error('❌ Error response:', errorData);
+
+                // Update debug info with error details
+                setDebugInfo((prev: any) => ({
+                    ...prev,
+                    errorData,
+                    status: 'error'
+                }));
+
                 throw new Error(errorData.error || `Server returned ${response.status}`);
             }
 
@@ -971,6 +998,64 @@ export default function ExamView() {
                 </div>
 
                 {showCalculator && <Calculator onClose={() => setShowCalculator(false)} />}
+
+                {/* Debug Panel */}
+                {showDebugPanel && debugInfo && (
+                    <div className="fixed bottom-4 right-4 w-96 max-h-96 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-2xl border-2 border-indigo-500 z-50">
+                        <div className="sticky top-0 bg-indigo-600 text-white p-3 flex items-center justify-between">
+                            <h3 className="font-bold">🐛 Debug Info</h3>
+                            <button
+                                onClick={() => setShowDebugPanel(false)}
+                                className="text-white hover:text-gray-200"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="p-4 text-xs font-mono">
+                            <div className="mb-3">
+                                <div className={`inline-block px-2 py-1 rounded ${debugInfo.status === 'success' ? 'bg-green-100 text-green-800' :
+                                        debugInfo.status === 'error' ? 'bg-red-100 text-red-800' :
+                                            'bg-yellow-100 text-yellow-800'
+                                    }`}>
+                                    Status: {debugInfo.status}
+                                </div>
+                            </div>
+
+                            <div className="mb-3">
+                                <strong className="text-gray-700 dark:text-gray-300">Timestamp:</strong>
+                                <div className="text-gray-600 dark:text-gray-400">{debugInfo.timestamp}</div>
+                            </div>
+
+                            <div className="mb-3">
+                                <strong className="text-gray-700 dark:text-gray-300">Answers Count:</strong>
+                                <div className="text-gray-600 dark:text-gray-400">{debugInfo.answersCount}</div>
+                            </div>
+
+                            {debugInfo.responseStatus && (
+                                <div className="mb-3">
+                                    <strong className="text-gray-700 dark:text-gray-300">Response Status:</strong>
+                                    <div className="text-gray-600 dark:text-gray-400">{debugInfo.responseStatus}</div>
+                                </div>
+                            )}
+
+                            {debugInfo.errorData && (
+                                <div className="mb-3">
+                                    <strong className="text-red-600">Error Details:</strong>
+                                    <pre className="bg-red-50 dark:bg-red-900/20 p-2 rounded mt-1 overflow-auto text-red-800 dark:text-red-200">
+                                        {JSON.stringify(debugInfo.errorData, null, 2)}
+                                    </pre>
+                                </div>
+                            )}
+
+                            <div className="mb-3">
+                                <strong className="text-gray-700 dark:text-gray-300">Submission Data:</strong>
+                                <pre className="bg-gray-100 dark:bg-gray-700 p-2 rounded mt-1 overflow-auto text-gray-800 dark:text-gray-200">
+                                    {JSON.stringify(debugInfo.submissionData, null, 2)}
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <ViolationModal
                     isOpen={showViolationModal}
