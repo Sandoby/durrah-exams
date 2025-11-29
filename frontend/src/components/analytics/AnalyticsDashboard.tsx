@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { BarChart, PieChart } from '../charts';
+import { BarChart } from '../charts';
 import { ArrowLeft, TrendingUp, TrendingDown, Users, Target, Clock, AlertTriangle, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -199,7 +199,7 @@ export const AnalyticsDashboard = () => {
         ? ((examAnalytics.passed_count || 0) / examAnalytics.total_submissions) * 100
         : 0;
 
-    const failCount = examAnalytics.total_submissions - (examAnalytics.passed_count || 0);
+
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
