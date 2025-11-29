@@ -45,11 +45,3 @@ function App() {
 }
 
 export default App;
-<Toaster position="top-right" />
-        </div >
-      </Router >
-    </AuthProvider >
-  );
-}
-
-export default App;
