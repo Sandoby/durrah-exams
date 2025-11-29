@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Loader2, Share2, BarChart3, FileText, Settings, Crown, Menu, X } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Loader2, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -418,7 +418,7 @@ export default function Dashboard() {
                                                     className="p-2 text-gray-400 hover:text-purple-600 transition-colors"
                                                     title="Analytics Dashboard"
                                                 >
-                                                    <BarChart3 className="h-5 w-5" />
+                                                    <TrendingUp className="h-5 w-5" />
                                                 </button>
                                                 <Link
                                                     to={`/exam/${exam.id}/edit`}

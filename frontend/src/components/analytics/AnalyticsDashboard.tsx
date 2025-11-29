@@ -138,13 +138,25 @@ export const AnalyticsDashboard = () => {
     if (!examAnalytics) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-                <div className="text-center">
+                <div className="text-center max-w-md">
                     <AlertTriangle className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400">No analytics data available</p>
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Analytics Data Available</h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        This exam doesn't have any submissions yet, or the analytics database hasn't been set up.
+                    </p>
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4 text-left">
+                        <p className="text-sm text-blue-800 dark:text-blue-200 font-semibold mb-2">To enable analytics:</p>
+                        <ol className="text-sm text-blue-700 dark:text-blue-300 list-decimal list-inside space-y-1">
+                            <li>Run the analytics migration in Supabase SQL Editor</li>
+                            <li>Deploy the updated grade-exam Edge Function</li>
+                            <li>Have students take the exam</li>
+                        </ol>
+                    </div>
                     <button
                         onClick={() => navigate('/dashboard')}
-                        className="mt-4 text-indigo-600 hover:text-indigo-700"
+                        className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                     >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
                         Back to Dashboard
                     </button>
                 </div>
@@ -153,8 +165,10 @@ export const AnalyticsDashboard = () => {
     }
 
     const passRate = examAnalytics.total_submissions > 0
-        ? (examAnalytics.passed_count / examAnalytics.total_submissions) * 100
+        ? ((examAnalytics.passed_count || 0) / examAnalytics.total_submissions) * 100
         : 0;
+
+    const failCount = examAnalytics.total_submissions - (examAnalytics.passed_count || 0);
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -261,8 +275,8 @@ export const AnalyticsDashboard = () => {
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                         <PieChart
                             data={[
-                                { name: 'Passed', value: examAnalytics.passed_count },
-                                { name: 'Failed', value: examAnalytics.failed_count }
+                                { name: 'Passed', value: examAnalytics.passed_count || 0 },
+                                { name: 'Failed', value: failCount }
                             ]}
                             nameKey="name"
                             valueKey="value"
