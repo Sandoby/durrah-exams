@@ -2,10 +2,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { AlertTriangle, CheckCircle, Clock, Loader2, Save } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Loader2, Save, Flag, LayoutGrid, Settings, Type, Sun, Moon, Calculator as CalcIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
+import { Calculator } from '../components/Calculator';
 
 interface Question {
     id: string;
@@ -14,6 +15,8 @@ interface Question {
     options?: string[];
     points: number;
     correct_answer?: string | string[] | null;
+    media_url?: string | null;
+    media_type?: 'image' | 'audio' | 'video' | null;
 }
 
 interface Violation {
@@ -64,6 +67,12 @@ export default function ExamView() {
     const [hasPreviousSession, setHasPreviousSession] = useState(false);
     const [isAvailable, setIsAvailable] = useState(true);
     const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
+    const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set());
+    const [showQuestionGrid, setShowQuestionGrid] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
+    const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
+    const [highContrast, setHighContrast] = useState(false);
+    const [showCalculator, setShowCalculator] = useState(false);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const isSubmittingRef = useRef(false);
@@ -98,6 +107,9 @@ export default function ExamView() {
                 setStudentData(parsed.studentData || {});
                 setAnswers(parsed.answers || {});
                 setViolations(parsed.violations || []);
+                if (parsed.flaggedQuestions) {
+                    setFlaggedQuestions(new Set(parsed.flaggedQuestions));
+                }
                 setStarted(parsed.started || false);
                 if (parsed.timeLeft !== null && parsed.timeLeft !== undefined) {
                     setTimeLeft(parsed.timeLeft);
@@ -120,13 +132,14 @@ export default function ExamView() {
                 studentData,
                 answers,
                 violations,
+                flaggedQuestions: Array.from(flaggedQuestions),
                 timeLeft,
                 started,
                 lastUpdated: Date.now()
             };
             localStorage.setItem(`durrah_exam_${id}_state`, JSON.stringify(stateToSave));
         }
-    }, [id, studentData, answers, violations, timeLeft, started, submitted]);
+    }, [id, studentData, answers, violations, timeLeft, started, submitted, flaggedQuestions]);
 
     const fetchExam = async () => {
         try {
@@ -137,7 +150,7 @@ export default function ExamView() {
             // Fetch questions WITHOUT correct_answer column
             const { data: qData, error: qError } = await supabase
                 .from('questions')
-                .select('id, type, question_text, options, points, randomize_options, exam_id, created_at')
+                .select('id, type, question_text, options, points, randomize_options, exam_id, created_at, media_url, media_type')
                 .eq('exam_id', id);
 
             if (qError) throw qError;
@@ -697,7 +710,7 @@ export default function ExamView() {
     );
 
     return (
-        <div ref={containerRef} className="min-h-screen p-3 sm:p-6 bg-gray-50 dark:bg-gray-900">
+        <div ref={containerRef} className={`min-h-screen p-3 sm:p-6 bg-gray-50 dark:bg-gray-900 ${highContrast ? 'contrast-125 saturate-150' : ''} ${fontSize === 'large' ? 'text-lg' : fontSize === 'xlarge' ? 'text-xl' : ''}`}>
             <div className="max-w-3xl mx-auto">
                 <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 sticky top-0 z-10">
                     <div className="flex flex-col gap-3">
@@ -713,6 +726,66 @@ export default function ExamView() {
                                 <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                                 <span className="font-bold">Violations: {violations.length}/{exam.settings.max_violations || 3}</span>
                             </div>
+
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowSettings(!showSettings)}
+                                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                    title="Accessibility Settings"
+                                >
+                                    <Settings className="h-5 w-5" />
+                                </button>
+
+                                {showSettings && (
+                                    <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-50">
+                                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Accessibility</h3>
+
+                                        <div className="mb-4">
+                                            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">Font Size</label>
+                                            <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                                                <button
+                                                    onClick={() => setFontSize('normal')}
+                                                    className={`flex-1 py-1 text-xs rounded-md ${fontSize === 'normal' ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}
+                                                >
+                                                    A
+                                                </button>
+                                                <button
+                                                    onClick={() => setFontSize('large')}
+                                                    className={`flex-1 py-1 text-sm rounded-md ${fontSize === 'large' ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}
+                                                >
+                                                    A+
+                                                </button>
+                                                <button
+                                                    onClick={() => setFontSize('xlarge')}
+                                                    className={`flex-1 py-1 text-base rounded-md ${fontSize === 'xlarge' ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}
+                                                >
+                                                    A++
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">Contrast</label>
+                                            <button
+                                                onClick={() => setHighContrast(!highContrast)}
+                                                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border ${highContrast ? 'bg-yellow-50 border-yellow-300 text-yellow-900' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600'}`}
+                                            >
+                                                <span className="text-sm">High Contrast</span>
+                                                {highContrast ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <button
+                                onClick={() => setShowCalculator(!showCalculator)}
+                                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                title="Calculator"
+                            >
+                                <CalcIcon className="h-5 w-5" />
+                            </button>
+
                             <button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
@@ -722,17 +795,81 @@ export default function ExamView() {
                                 {isSubmitting ? 'Submitting...' : 'Submit'}
                             </button>
                         </div>
+                        <button
+                            onClick={() => setShowQuestionGrid(!showQuestionGrid)}
+                            className="w-full mt-2 flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium"
+                        >
+                            <LayoutGrid className="h-4 w-4 mr-2" />
+                            {showQuestionGrid ? 'Hide Question Navigator' : 'Show Question Navigator'}
+                        </button>
+
+                        {showQuestionGrid && (
+                            <div className="mt-3 grid grid-cols-5 sm:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-1">
+                                {exam.questions.map((q, i) => {
+                                    const isAnswered = answers[q.id] !== undefined && answers[q.id] !== '';
+                                    const isFlagged = flaggedQuestions.has(q.id);
+                                    let bgClass = 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400';
+                                    if (isFlagged) bgClass = 'bg-yellow-100 text-yellow-800 border border-yellow-300';
+                                    else if (isAnswered) bgClass = 'bg-green-100 text-green-800 border border-green-300';
+
+                                    return (
+                                        <button
+                                            key={q.id}
+                                            onClick={() => {
+                                                document.getElementById(`question-${q.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                setShowQuestionGrid(false);
+                                            }}
+                                            className={`p-2 rounded text-xs font-bold ${bgClass}`}
+                                        >
+                                            {i + 1}
+                                            {isFlagged && <Flag className="h-2 w-2 ml-1 inline" />}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 <div className="space-y-4 sm:space-y-6">
                     {exam.questions.map((q, i) => (
                         <div key={q.id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
-                            <div className="font-medium text-gray-900 dark:text-white mb-4 flex flex-col sm:flex-row">
+                            <div id={`question-${q.id}`} className="font-medium text-gray-900 dark:text-white mb-4 flex flex-col sm:flex-row">
                                 <span className="mr-2">{i + 1}.</span>
                                 <span className="flex-1">{q.question_text}</span>
-                                <span className="text-sm text-gray-500 mt-2 sm:mt-0 sm:ml-auto">({q.points} pts)</span>
+                                <div className="flex items-center mt-2 sm:mt-0 sm:ml-auto space-x-3">
+                                    <button
+                                        onClick={() => {
+                                            const newFlags = new Set(flaggedQuestions);
+                                            if (newFlags.has(q.id)) {
+                                                newFlags.delete(q.id);
+                                            } else {
+                                                newFlags.add(q.id);
+                                            }
+                                            setFlaggedQuestions(newFlags);
+                                        }}
+                                        className={`p-1 rounded-full transition-colors ${flaggedQuestions.has(q.id) ? 'text-yellow-500 bg-yellow-50' : 'text-gray-400 hover:text-gray-600'}`}
+                                        title={flaggedQuestions.has(q.id) ? "Unflag" : "Flag for review"}
+                                    >
+                                        <Flag className={`h-5 w-5 ${flaggedQuestions.has(q.id) ? 'fill-current' : ''}`} />
+                                    </button>
+                                    <span className="text-sm text-gray-500">({q.points} pts)</span>
+                                </div>
                             </div>
+
+                            {q.media_url && (
+                                <div className="mb-4 flex justify-center">
+                                    {q.media_type === 'image' && (
+                                        <img src={q.media_url} alt="Question Media" className="max-w-full max-h-96 rounded-lg object-contain" />
+                                    )}
+                                    {q.media_type === 'audio' && (
+                                        <audio controls src={q.media_url} className="w-full max-w-md" />
+                                    )}
+                                    {q.media_type === 'video' && (
+                                        <video controls src={q.media_url} className="max-w-full max-h-96 rounded-lg" />
+                                    )}
+                                </div>
+                            )}
 
                             {q.type === 'multiple_choice' && q.options?.map((opt) => (
                                 <label key={opt} className="flex items-start space-x-3 p-3 sm:p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2 min-h-[44px]">
@@ -821,6 +958,8 @@ export default function ExamView() {
                         </div>
                     ))}
                 </div>
+
+                {showCalculator && <Calculator onClose={() => setShowCalculator(false)} />}
 
                 <ViolationModal
                     isOpen={showViolationModal}
