@@ -413,6 +413,13 @@ export default function Dashboard() {
                                                 >
                                                     <BarChart3 className="h-5 w-5" />
                                                 </button>
+                                                <button
+                                                    onClick={() => navigate(`/exam/${exam.id}/analytics`)}
+                                                    className="p-2 text-gray-400 hover:text-purple-600 transition-colors"
+                                                    title="Analytics Dashboard"
+                                                >
+                                                    <BarChart3 className="h-5 w-5" />
+                                                </button>
                                                 <Link
                                                     to={`/exam/${exam.id}/edit`}
                                                     className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"

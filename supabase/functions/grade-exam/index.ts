@@ -198,6 +198,21 @@ serve(async (req) => {
             // Don't fail the whole submission if answers fail
         }
 
+        // Update question analytics for each graded answer
+        for (const gradedAnswer of gradedAnswers) {
+            try {
+                await supabaseClient.rpc('update_question_analytics', {
+                    p_exam_id: exam_id,
+                    p_question_id: gradedAnswer.question_id,
+                    p_is_correct: gradedAnswer.is_correct,
+                    p_time_seconds: null // Time tracking not implemented yet
+                })
+            } catch (analyticsError) {
+                console.error('Analytics error for question:', gradedAnswer.question_id, analyticsError)
+                // Don't fail submission if analytics fails
+            }
+        }
+
         // Return grading results
         return new Response(
             JSON.stringify({
