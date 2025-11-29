@@ -435,7 +435,7 @@ export default function ExamView() {
             }
 
             // Call the Edge Function for server-side grading
-            const edgeFunctionUrl = `${supabaseUrl}/functions/v1/grade-exam`;
+            const edgeFunctionUrl = `${supabaseUrl}/functions/v1/dynamic-worker`;
 
             console.log('Submitting to Edge Function:', edgeFunctionUrl);
 
@@ -1014,8 +1014,8 @@ export default function ExamView() {
                         <div className="p-4 text-xs font-mono">
                             <div className="mb-3">
                                 <div className={`inline-block px-2 py-1 rounded ${debugInfo.status === 'success' ? 'bg-green-100 text-green-800' :
-                                        debugInfo.status === 'error' ? 'bg-red-100 text-red-800' :
-                                            'bg-yellow-100 text-yellow-800'
+                                    debugInfo.status === 'error' ? 'bg-red-100 text-red-800' :
+                                        'bg-yellow-100 text-yellow-800'
                                     }`}>
                                     Status: {debugInfo.status}
                                 </div>
