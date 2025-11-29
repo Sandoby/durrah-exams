@@ -236,7 +236,14 @@ export const AnalyticsDashboard = () => {
                 scale: 2,
                 useCORS: true,
                 logging: false,
-                backgroundColor: '#ffffff'
+                backgroundColor: '#ffffff',
+                onclone: (clonedDoc) => {
+                    const printHeader = clonedDoc.getElementById('print-header');
+                    if (printHeader) {
+                        printHeader.classList.remove('hidden');
+                        printHeader.classList.add('block');
+                    }
+                }
             });
 
             const imgData = canvas.toDataURL('image/png');
@@ -251,12 +258,8 @@ export const AnalyticsDashboard = () => {
 
             const scaledHeight = imgHeight * scaleFactor;
 
-            pdf.setFontSize(18);
-            pdf.text(`${examAnalytics.exam_title} - Analytics Report`, margin, 15);
-            pdf.setFontSize(10);
-            pdf.text(`Generated on ${new Date().toLocaleDateString()}`, margin, 22);
-
-            pdf.addImage(imgData, 'PNG', margin, 30, contentWidth, scaledHeight);
+            // Add image directly without text to avoid font issues with Arabic
+            pdf.addImage(imgData, 'PNG', margin, margin, contentWidth, scaledHeight);
             pdf.save(`${examAnalytics.exam_title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_analytics.pdf`);
 
             toast.success('PDF exported successfully!', { id: toastId });
@@ -429,13 +432,13 @@ export const AnalyticsDashboard = () => {
                 </div>
             </div>
 
-            {/* Print Header (Only visible when printing) */}
-            <div className="hidden print:block p-8 pb-0">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{examAnalytics.exam_title}</h1>
-                <p className="text-gray-600">Analytics Report - Generated on {new Date().toLocaleDateString()}</p>
-            </div>
-
             <div id="analytics-dashboard-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 dark:bg-gray-900 print:bg-white print:p-8">
+                {/* Print/Export Header (Hidden by default, shown in print/export) */}
+                <div id="print-header" className="hidden print:block mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{examAnalytics.exam_title}</h1>
+                    <p className="text-gray-600">Analytics Report - Generated on {new Date().toLocaleDateString()}</p>
+                </div>
+
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 print:grid-cols-3 print:gap-4">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 print:shadow-none print:border print:border-gray-200">
