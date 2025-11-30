@@ -18,12 +18,17 @@ i18n
             es: { translation: esTranslation },
         },
         fallbackLng: 'en',
+        debug: false,
         interpolation: {
             escapeValue: false,
         },
         detection: {
             order: ['localStorage', 'navigator'],
             caches: ['localStorage'],
+            lookupLocalStorage: 'i18nextLng',
+        },
+        react: {
+            useSuspense: false,
         }
     });
 

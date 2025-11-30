@@ -16,6 +16,8 @@ export function LanguageSwitcher() {
 
     const changeLanguage = (lng: string) => {
         i18n.changeLanguage(lng);
+        // Explicitly save to localStorage to ensure persistence
+        localStorage.setItem('i18nextLng', lng);
         setIsOpen(false);
     };
 
@@ -50,8 +52,8 @@ export function LanguageSwitcher() {
                             key={lang.code}
                             onClick={() => changeLanguage(lang.code)}
                             className={`block w-full text-left px-4 py-2 text-sm ${i18n.language.startsWith(lang.code)
-                                    ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
                         >
                             <span className="mr-2">{lang.flag}</span>
