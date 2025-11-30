@@ -137,6 +137,54 @@
         "subtitle": "Rejoignez des milliers de tuteurs qui font confiance à Durrah pour leurs examens",
         "cta": "Commencez votre essai gratuit"
     },
+    "checkout": {
+        "back": "Retour",
+        "title": "pour les Tuteurs",
+        "monthly": "Mensuel",
+        "yearly": "Annuel",
+        "save": "ÉCONOMISEZ 17%",
+        "mostPopular": "LE PLUS POPULAIRE",
+        "plans": {
+            "starter": {
+                "name": "Gratuit",
+                "desc": "Parfait pour commencer"
+            },
+            "pro": {
+                "name": "Professionnel",
+                "desc": "Pour les éducateurs sérieux"
+            }
+        },
+        "selected": "Sélectionner le Plan",
+        "choose": "Choisir",
+        "secure": "Paiement Sécurisé",
+        "coupon": {
+            "label": "Vous avez un code promo?",
+            "placeholder": "Entrez le code",
+            "apply": "Appliquer",
+            "remove": "Retirer"
+        },
+        "summary": {
+            "title": "Résumé de la Commande",
+            "original": "Prix Original:",
+            "discount": "Remise:",
+            "final": "Prix Final:",
+            "free": "Gratuit"
+        },
+        "features": {
+            "fast": {
+                "title": "Ultra Rapide",
+                "desc": "Créez des examens en quelques minutes avec nos outils IA."
+            },
+            "antiCheat": {
+                "title": "Anti-triche",
+                "desc": "Fonctionnalités de surveillance avancées incluant la détection de changement d'onglet."
+            },
+            "interface": {
+                "title": "Belle Interface",
+                "desc": "Expérience propre et sans distraction pour vous et vos étudiants."
+            }
+        }
+    },
     "dashboard": {
         "title": "Mes Examens",
         "createExam": "Créer un Nouvel Examen",

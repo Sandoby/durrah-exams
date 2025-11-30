@@ -137,6 +137,54 @@
         "subtitle": "Join thousands of tutors who trust Durrah for their exam needs",
         "cta": "Start Your Free Trial"
     },
+    "checkout": {
+        "back": "Back",
+        "title": "for Tutors",
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "save": "SAVE 17%",
+        "mostPopular": "MOST POPULAR",
+        "plans": {
+            "starter": {
+                "name": "Free",
+                "desc": "Perfect for getting started"
+            },
+            "pro": {
+                "name": "Professional",
+                "desc": "For serious educators"
+            }
+        },
+        "selected": "Select Plan",
+        "choose": "Choose",
+        "secure": "Secure Checkout",
+        "coupon": {
+            "label": "Have a coupon code?",
+            "placeholder": "Enter code",
+            "apply": "Apply",
+            "remove": "Remove"
+        },
+        "summary": {
+            "title": "Order Summary",
+            "original": "Original Price:",
+            "discount": "Discount:",
+            "final": "Final Price:",
+            "free": "Free"
+        },
+        "features": {
+            "fast": {
+                "title": "Lightning Fast",
+                "desc": "Create exams in minutes with our AI-powered tools."
+            },
+            "antiCheat": {
+                "title": "Anti-Cheating",
+                "desc": "Advanced monitoring features including tab switching detection and fullscreen enforcement."
+            },
+            "interface": {
+                "title": "Beautiful Interface",
+                "desc": "Clean, distraction-free experience for both you and your students."
+            }
+        }
+    },
     "dashboard": {
         "title": "My Exams",
         "createExam": "Create New Exam",

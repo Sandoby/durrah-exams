@@ -137,6 +137,54 @@
         "subtitle": "Únete a miles de tutores que confían en Durrah para sus necesidades de exámenes",
         "cta": "Comienza tu prueba gratis"
     },
+    "checkout": {
+        "back": "Atrás",
+        "title": "para Tutores",
+        "monthly": "Mensual",
+        "yearly": "Anual",
+        "save": "AHORRA 17%",
+        "mostPopular": "MÁS POPULAR",
+        "plans": {
+            "starter": {
+                "name": "Gratis",
+                "desc": "Perfecto para empezar"
+            },
+            "pro": {
+                "name": "Profesional",
+                "desc": "Para educadores serios"
+            }
+        },
+        "selected": "Seleccionar Plan",
+        "choose": "Elegir",
+        "secure": "Pago Seguro",
+        "coupon": {
+            "label": "¿Tienes un código de cupón?",
+            "placeholder": "Ingresa el código",
+            "apply": "Aplicar",
+            "remove": "Quitar"
+        },
+        "summary": {
+            "title": "Resumen del Pedido",
+            "original": "Precio Original:",
+            "discount": "Descuento:",
+            "final": "Precio Final:",
+            "free": "Gratis"
+        },
+        "features": {
+            "fast": {
+                "title": "Ultrarrápido",
+                "desc": "Crea exámenes en minutos con nuestras herramientas con IA."
+            },
+            "antiCheat": {
+                "title": "Anti-trampas",
+                "desc": "Funciones de monitoreo avanzadas incluyendo detección de cambio de pestaña."
+            },
+            "interface": {
+                "title": "Hermosa Interfaz",
+                "desc": "Experiencia limpia y sin distracciones para ti y tus estudiantes."
+            }
+        }
+    },
     "dashboard": {
         "title": "Mis Exámenes",
         "createExam": "Crear Nuevo Examen",
