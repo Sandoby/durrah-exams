@@ -6,6 +6,8 @@ import { AlertTriangle, CheckCircle, Clock, Loader2, Save, Flag, LayoutGrid, Set
 import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { Calculator } from '../components/Calculator';
 
 interface Question {
@@ -51,6 +53,7 @@ interface Exam {
 }
 
 export default function ExamView() {
+    const { t } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
     const [exam, setExam] = useState<Exam | null>(null);
@@ -115,7 +118,8 @@ export default function ExamView() {
                     setTimeLeft(parsed.timeLeft);
                 }
                 setHasPreviousSession(true);
-                toast.success('Previous session restored');
+                setHasPreviousSession(true);
+                toast.success(t('examView.previousSession'));
             } catch (e) {
                 console.error('Failed to restore session', e);
             }
@@ -204,10 +208,10 @@ export default function ExamView() {
 
             if (start && now < start) {
                 setIsAvailable(false);
-                setAvailabilityMessage(`Exam starts at ${start.toLocaleString()}`);
+                setAvailabilityMessage(`${t('examView.startsAt')} ${start.toLocaleString()}`);
             } else if (end && now > end) {
                 setIsAvailable(false);
-                setAvailabilityMessage(`Exam ended at ${end.toLocaleString()}`);
+                setAvailabilityMessage(`${t('examView.endedAt')} ${end.toLocaleString()}`);
             } else {
                 setIsAvailable(true);
                 setAvailabilityMessage(null);
@@ -228,7 +232,7 @@ export default function ExamView() {
             }
         } catch (err: any) {
             console.error(err);
-            toast.error('Failed to load exam');
+            toast.error(t('settings.profile.error'));
             navigate('/dashboard');
         }
     };
@@ -255,13 +259,13 @@ export default function ExamView() {
                 if (remaining <= 1) {
                     // Critical warning
                     setViolationMessage({
-                        title: 'Final Warning',
-                        message: `You have ${remaining} violation${remaining !== 1 ? 's' : ''} remaining before automatic submission.`
+                        title: t('examView.warnings.finalWarning'),
+                        message: t('examView.warnings.finalMessage', { count: remaining })
                     });
                     setShowViolationModal(true);
                 } else {
                     // Standard warning via toast
-                    toast.error(`Violation recorded! ${remaining} remaining.`, {
+                    toast.error(t('examView.warnings.violationRecorded', { count: remaining }), {
                         icon: '⚠️',
                         style: {
                             borderRadius: '10px',
@@ -273,8 +277,8 @@ export default function ExamView() {
             } else {
                 // Max violations reached
                 setViolationMessage({
-                    title: 'Maximum Violations Reached',
-                    message: 'Your exam will now be submitted automatically due to excessive violations.'
+                    title: t('examView.warnings.maxReached'),
+                    message: t('examView.warnings.maxMessage')
                 });
                 setShowViolationModal(true);
                 handleSubmit();
@@ -291,7 +295,7 @@ export default function ExamView() {
             if (document.hidden && exam.settings.detect_tab_switch) {
                 logViolation('tab_switch');
                 if (violations.length < (exam.settings.max_violations || 3) - 1) {
-                    setViolationMessage({ title: 'Tab Switch Detected', message: 'You switched away from the exam.' });
+                    setViolationMessage({ title: t('examView.warnings.tabSwitch'), message: t('examView.warnings.tabSwitchMessage') });
                     setShowViolationModal(true);
                 }
             }
@@ -334,7 +338,7 @@ export default function ExamView() {
             if (!isMobile && exam.settings.require_fullscreen && !document.fullscreenElement && started && !submitted) {
                 logViolation('exit_fullscreen');
                 if (violations.length < (exam.settings.max_violations || 3) - 1) {
-                    setViolationMessage({ title: 'Fullscreen Exit Detected', message: 'Return to fullscreen immediately.' });
+                    setViolationMessage({ title: t('examView.warnings.fullscreenExit'), message: t('examView.warnings.fullscreenExitMessage') });
                     setShowViolationModal(true);
                 }
             }
@@ -361,7 +365,7 @@ export default function ExamView() {
         const required = exam?.required_fields || ['name', 'email'];
         const missing = required.filter((f: string) => !studentData[f]);
         if (missing.length) {
-            toast.error('Please fill required fields');
+            toast.error(t('examView.fillRequired'));
             return;
         }
 
@@ -371,14 +375,14 @@ export default function ExamView() {
             const allowedEmails = exam.settings.allowed_emails.map(e => e.toLowerCase().trim());
 
             if (!studentEmail || !allowedEmails.includes(studentEmail)) {
-                toast.error('Access denied: Your email is not authorized to take this exam');
+                toast.error(t('examView.accessDenied'));
                 return;
             }
         }
 
         // Prevent starting if exam not available
         if (!isAvailable) {
-            toast.error(availabilityMessage || 'Exam is not available right now');
+            toast.error(availabilityMessage || t('examView.notAvailable'));
             return;
         }
         if (exam?.settings.require_fullscreen) {
@@ -408,7 +412,7 @@ export default function ExamView() {
         if (startStr) {
             const startD = new Date(startStr);
             if (!isNaN(startD.getTime()) && now < startD) {
-                toast.error(`Exam is not open yet. Starts at ${startD.toLocaleString()}`);
+                toast.error(t('examView.errors.notOpen', { time: startD.toLocaleString() }));
                 return;
             }
         }
@@ -416,14 +420,14 @@ export default function ExamView() {
         if (endStr) {
             const endD = new Date(endStr);
             if (!isNaN(endD.getTime()) && now > endD) {
-                toast.error('Exam has already ended');
+                toast.error(t('examView.errors.alreadyEnded'));
                 return;
             }
         }
 
         // Double check local storage to prevent race conditions
         if (localStorage.getItem(`durrah_exam_${id}_submitted`)) {
-            toast.error('Exam already submitted from this device.');
+            toast.error(t('examView.errors.alreadySubmitted'));
             setSubmitted(true);
             return;
         }
@@ -516,7 +520,7 @@ export default function ExamView() {
                     document.exitFullscreen().catch(() => { });
                 }
 
-                toast.success('Exam submitted successfully!', {
+                toast.success(t('examView.success.submitted'), {
                     duration: 5000,
                     icon: '✅'
                 });
@@ -529,7 +533,7 @@ export default function ExamView() {
 
             // Show user-friendly error message
             const errorMessage = err.message || 'Failed to submit exam';
-            toast.error(`Submission failed: ${errorMessage}`, {
+            toast.error(t('examView.errors.submissionFailed', { error: errorMessage }), {
                 duration: 7000,
                 icon: '❌'
             });
@@ -564,7 +568,7 @@ export default function ExamView() {
                 pending.push(submissionPayload);
                 localStorage.setItem('durrah_pending_submissions', JSON.stringify(pending));
 
-                toast('Submission saved locally and will be retried automatically.', {
+                toast(t('examView.errors.submissionSaved'), {
                     duration: 5000,
                     icon: '💾'
                 });
@@ -639,7 +643,7 @@ export default function ExamView() {
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
                 <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
                     <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
-                    <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white">Exam Submitted</h2>
+                    <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white">{t('examView.submitted.title')}</h2>
                     {showResults && score ? (
                         <div className="mt-4">
                             <p className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">{score.percentage.toFixed(1)}%</p>
@@ -647,11 +651,11 @@ export default function ExamView() {
                         </div>
                     ) : (
                         <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-md">
-                            <p>Thank you! Your answers have been submitted securely.</p>
-                            <p className="text-sm mt-2">Results will be released by your tutor.</p>
+                            <p>{t('examView.submitted.message')}</p>
+                            <p className="text-sm mt-2">{t('examView.submitted.resultsPending')}</p>
                         </div>
                     )}
-                    <p className="mt-4 text-sm text-gray-500">Your submission has been recorded.</p>
+                    <p className="mt-4 text-sm text-gray-500">{t('examView.submitted.recorded')}</p>
                 </div>
             </div>
         );
@@ -660,8 +664,11 @@ export default function ExamView() {
     if (!started) return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
             <div className="max-w-md w-full bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-                <div className="flex justify-center mb-6">
+                <div className="flex justify-center mb-6 relative">
                     <Logo size="md" />
+                    <div className="absolute right-0 top-0">
+                        <LanguageSwitcher />
+                    </div>
                 </div>
 
                 <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{exam.title}</h1>
@@ -670,13 +677,13 @@ export default function ExamView() {
                 {hasPreviousSession && (
                     <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-md text-sm flex items-center">
                         <Save className="h-4 w-4 mr-2" />
-                        Previous session found. Your progress has been restored.
+                        {t('examView.previousSession')}
                     </div>
                 )}
 
                 <div className="space-y-4 mb-6">
                     {(exam.required_fields || ['name', 'email']).map((field) => {
-                        const fieldLabels: Record<string, string> = { name: 'Full Name', email: 'Email Address', student_id: 'Student ID', phone: 'Phone Number' };
+                        const fieldLabels: Record<string, string> = { name: t('examEditor.studentInfo.name'), email: t('examEditor.studentInfo.email'), student_id: t('examEditor.studentInfo.studentId'), phone: t('examEditor.studentInfo.phone') };
                         const fieldTypes: Record<string, string> = { name: 'text', email: 'email', student_id: 'text', phone: 'tel' };
                         return (
                             <div key={field}>
@@ -696,14 +703,17 @@ export default function ExamView() {
                 <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-md mb-6">
                     <div className="flex">
                         <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                        <div className="ml-3">
-                            <h3 className="text-sm font-bold text-red-900 dark:text-red-200">Exam Security Rules</h3>
-                            <ul className="mt-2 text-xs text-red-800 dark:text-red-300 list-disc list-inside space-y-1">
-                                {exam.settings.require_fullscreen && <li>Fullscreen mode required</li>}
-                                {exam.settings.detect_tab_switch && <li>Tab switching is monitored</li>}
-                                {exam.settings.disable_copy_paste && <li>Copy/Paste disabled</li>}
-                                <li>Max violations: {exam.settings.max_violations || 3}</li>
-                            </ul>
+                        <div className="flex">
+                            <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                            <div className="ml-3">
+                                <h3 className="text-sm font-bold text-red-900 dark:text-red-200">{t('examView.security.title')}</h3>
+                                <ul className="mt-2 text-xs text-red-800 dark:text-red-300 list-disc list-inside space-y-1">
+                                    {exam.settings.require_fullscreen && <li>{t('examView.security.fullscreen')}</li>}
+                                    {exam.settings.detect_tab_switch && <li>{t('examView.security.tabSwitch')}</li>}
+                                    {exam.settings.disable_copy_paste && <li>{t('examView.security.copyPaste')}</li>}
+                                    <li>{t('examView.security.maxViolations')} {exam.settings.max_violations || 3}</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -713,15 +723,23 @@ export default function ExamView() {
                     <div className="flex">
                         <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
                         <div className="ml-3">
-                            <h3 className="text-sm font-bold text-yellow-900 dark:text-yellow-200">iPhone/Safari Submission Help</h3>
-                            <ul className="mt-2 text-xs text-yellow-800 dark:text-yellow-300 list-disc list-inside space-y-1">
-                                <li>Make sure Safari is <b>not</b> in Private Browsing mode.</li>
-                                <li>Enable cookies: Settings &gt; Safari &gt; Block All Cookies (<b>disable</b>).</li>
-                                <li>Disable "Prevent Cross-Site Tracking": Settings &gt; Safari &gt; Prevent Cross-Site Tracking (<b>disable</b>).</li>
-                                <li>Use "Add to Home Screen" for best reliability (Share &gt; Add to Home Screen).</li>
-                                <li>If you see a submission error, try logging out and logging in again before submitting.</li>
-                                <li>If it still fails, <b>take screenshots</b> of your answers before submitting and contact support/tutor.</li>
-                            </ul>
+                            {/* iPhone/Safari help modal or instructions */}
+                            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-md mb-6">
+                                <div className="flex">
+                                    <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+                                    <div className="ml-3">
+                                        <h3 className="text-sm font-bold text-yellow-900 dark:text-yellow-200">{t('examView.iphoneHelp.title')}</h3>
+                                        <ul className="mt-2 text-xs text-yellow-800 dark:text-yellow-300 list-disc list-inside space-y-1">
+                                            <li>{t('examView.iphoneHelp.privateMode')}</li>
+                                            <li>{t('examView.iphoneHelp.cookies')}</li>
+                                            <li>{t('examView.iphoneHelp.tracking')}</li>
+                                            <li>{t('examView.iphoneHelp.homeScreen')}</li>
+                                            <li>{t('examView.iphoneHelp.error')}</li>
+                                            <li>{t('examView.iphoneHelp.screenshot')}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -730,7 +748,7 @@ export default function ExamView() {
                     onClick={startExam}
                     className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
-                    {hasPreviousSession ? 'Resume Exam' : 'Start Exam'}
+                    {hasPreviousSession ? t('examView.resume') : t('examView.start')}
                 </button>
             </div>
         </div>
@@ -764,7 +782,11 @@ export default function ExamView() {
                                 )}
                                 <div className={`flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${violations.length > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
                                     <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                                    <span className="font-bold">Violations: {violations.length}/{exam.settings.max_violations || 3}</span>
+                                    <span className="font-bold">{t('examView.violations')} {violations.length}/{exam.settings.max_violations || 3}</span>
+                                </div>
+
+                                <div className="relative">
+                                    <LanguageSwitcher />
                                 </div>
 
                                 <div className="relative">
@@ -778,10 +800,10 @@ export default function ExamView() {
 
                                     {showSettings && (
                                         <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-50">
-                                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Accessibility</h3>
+                                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t('examView.accessibility.settings')}</h3>
 
                                             <div className="mb-4">
-                                                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">Font Size</label>
+                                                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">{t('examView.accessibility.fontSize')}</label>
                                                 <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                                                     <button
                                                         onClick={() => setFontSize('normal')}

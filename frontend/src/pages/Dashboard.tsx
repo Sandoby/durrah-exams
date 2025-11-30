@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, LogOut, Loader2, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock } from 'lucide-react';
 import { Logo } from '../components/Logo';
@@ -17,6 +18,7 @@ interface Exam {
 }
 
 export default function Dashboard() {
+    const { t } = useTranslation();
     const { user, signOut } = useAuth();
     const navigate = useNavigate();
     const [exams, setExams] = useState<Exam[]>([]);
@@ -66,7 +68,7 @@ export default function Dashboard() {
         // Check if user is on free plan and has reached limit
         if (profile?.subscription_status !== 'active' && exams.length >= 3) {
             e.preventDefault();
-            toast.error('Free plan is limited to 3 exams. Upgrade to Professional for unlimited exams!');
+            toast.error(t('dashboard.upgradeLimit'));
             return;
         }
         // If check passes, navigate
@@ -204,20 +206,20 @@ export default function Dashboard() {
         const examUrl = `${window.location.origin}/exam/${examId}`;
         try {
             navigator.clipboard.writeText(examUrl);
-            toast.success('Exam link copied to clipboard!');
+            toast.success(t('dashboard.linkCopied'));
         } catch (e) {
             // fallback
             const input = document.createElement('textarea');
             input.value = examUrl;
             document.body.appendChild(input);
             input.select();
-            try { document.execCommand('copy'); toast.success('Exam link copied to clipboard!'); } catch { toast.error('Failed to copy link'); }
+            try { document.execCommand('copy'); toast.success(t('dashboard.linkCopied')); } catch { toast.error('Failed to copy link'); }
             document.body.removeChild(input);
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Are you sure you want to delete this exam?')) return;
+        if (!window.confirm(t('dashboard.deleteConfirm'))) return;
 
         try {
             const { error } = await supabase
@@ -228,7 +230,7 @@ export default function Dashboard() {
 
             if (error) throw error;
 
-            toast.success('Exam deleted successfully');
+            toast.success(t('dashboard.deleteSuccess'));
             setExams(prev => prev.filter(exam => exam.id !== id));
         } catch (error: any) {
             console.error(error);
@@ -269,7 +271,7 @@ export default function Dashboard() {
                                     className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 focus:outline-none transition"
                                 >
                                     <Crown className="h-4 w-4 lg:mr-2" />
-                                    <span className="hidden lg:inline">Upgrade</span>
+                                    <span className="hidden lg:inline">{t('settings.subscription.upgrade')}</span>
                                 </Link>
                             )}
                             <Link
@@ -277,14 +279,14 @@ export default function Dashboard() {
                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition"
                             >
                                 <Settings className="h-4 w-4 lg:mr-2" />
-                                <span className="hidden lg:inline">Settings</span>
+                                <span className="hidden lg:inline">{t('settings.title')}</span>
                             </Link>
                             <button
                                 onClick={handleLogout}
                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition"
                             >
                                 <LogOut className="h-4 w-4 lg:mr-2" />
-                                <span className="hidden lg:inline">Logout</span>
+                                <span className="hidden lg:inline">{t('nav.login')}</span>
                             </button>
                         </div>
 
@@ -318,7 +320,7 @@ export default function Dashboard() {
                                     className="flex items-center px-3 py-2 rounded-md text-base font-medium text-indigo-600 dark:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700"
                                 >
                                     <Crown className="h-5 w-5 mr-3" />
-                                    Upgrade to Pro
+                                    {t('settings.subscription.upgrade')}
                                 </Link>
                             )}
                             <Link
@@ -327,14 +329,14 @@ export default function Dashboard() {
                                 className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                             >
                                 <Settings className="h-5 w-5 mr-3" />
-                                Settings
+                                {t('settings.title')}
                             </Link>
                             <button
                                 onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
                                 className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                             >
                                 <LogOut className="h-5 w-5 mr-3" />
-                                Logout
+                                {t('nav.login')}
                             </button>
                         </div>
                     </div>
@@ -344,28 +346,28 @@ export default function Dashboard() {
             <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
                 <div className="space-y-6">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white">My Exams</h1>
+                        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white">{t('dashboard.title')}</h1>
                         <button
                             onClick={handleCreateExam}
                             className="inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full sm:w-auto min-h-[44px]"
                         >
                             <Plus className="h-5 w-5 mr-2" />
-                            Create New Exam
+                            {t('dashboard.createExam')}
                         </button>
                     </div>
 
                     {exams.length === 0 ? (
                         <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">
                             <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No exams</h3>
-                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new exam.</p>
+                            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">{t('dashboard.noExams.title')}</h3>
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('dashboard.noExams.desc')}</p>
                             <div className="mt-6">
                                 <button
                                     onClick={handleCreateExam}
                                     className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                 >
                                     <Plus className="h-4 w-4 mr-2" />
-                                    Create New Exam
+                                    {t('dashboard.noExams.button')}
                                 </button>
                             </div>
                         </div>
@@ -384,7 +386,7 @@ export default function Dashboard() {
                                                 </p>
                                             </div>
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${exam.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                                {exam.is_active ? 'Active' : 'Inactive'}
+                                                {exam.is_active ? t('dashboard.status.active') : t('dashboard.status.inactive')}
                                             </span>
                                         </div>
                                         <div className="mt-6 flex items-center justify-between">
@@ -395,21 +397,21 @@ export default function Dashboard() {
                                                 <button
                                                     onClick={() => copyExamLink(exam.id)}
                                                     className="p-2 text-gray-400 hover:text-green-600 transition-colors"
-                                                    title="Copy Link"
+                                                    title={t('dashboard.actions.copyLink')}
                                                 >
                                                     <Share2 className="h-5 w-5" />
                                                 </button>
                                                 <button
                                                     onClick={() => downloadExamPDF(exam.id)}
                                                     className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                                                    title="Print / Save as PDF"
+                                                    title={t('dashboard.actions.print')}
                                                 >
                                                     <FileText className="h-5 w-5" />
                                                 </button>
                                                 <button
                                                     onClick={() => setSelectedExamForResults(exam)}
                                                     className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                                                    title="View Results"
+                                                    title={t('dashboard.actions.results')}
                                                 >
                                                     <BarChart3 className="h-5 w-5" />
                                                 </button>
@@ -418,15 +420,15 @@ export default function Dashboard() {
                                                         if (profile?.subscription_status === 'active') {
                                                             navigate(`/exam/${exam.id}/analytics`);
                                                         } else {
-                                                            toast.error('Upgrade to Professional plan to access Analytics');
+                                                            toast.error(t('dashboard.actions.analyticsLocked'));
                                                             navigate('/checkout');
                                                         }
                                                     }}
                                                     className={`p-2 transition-colors ${profile?.subscription_status === 'active'
-                                                            ? 'text-gray-400 hover:text-purple-600'
-                                                            : 'text-gray-300 hover:text-gray-400'
+                                                        ? 'text-gray-400 hover:text-purple-600'
+                                                        : 'text-gray-300 hover:text-gray-400'
                                                         }`}
-                                                    title={profile?.subscription_status === 'active' ? "Analytics Dashboard" : "Analytics (Premium Only)"}
+                                                    title={profile?.subscription_status === 'active' ? t('dashboard.actions.analytics') : t('dashboard.actions.analyticsLocked')}
                                                 >
                                                     {profile?.subscription_status === 'active' ? (
                                                         <TrendingUp className="h-5 w-5" />
@@ -437,14 +439,14 @@ export default function Dashboard() {
                                                 <Link
                                                     to={`/exam/${exam.id}/edit`}
                                                     className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
-                                                    title="Edit"
+                                                    title={t('dashboard.actions.edit')}
                                                 >
                                                     <Edit className="h-5 w-5" />
                                                 </Link>
                                                 <button
                                                     onClick={() => handleDelete(exam.id)}
                                                     className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                                                    title="Delete"
+                                                    title={t('dashboard.actions.delete')}
                                                 >
                                                     <Trash2 className="h-5 w-5" />
                                                 </button>

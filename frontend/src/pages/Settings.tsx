@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, User, Mail, Lock, Save, Loader2, Crown } from 'lucide-react';
 import { Logo } from '../components/Logo';
@@ -17,6 +18,7 @@ interface TutorProfile {
 }
 
 export default function Settings() {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
@@ -63,7 +65,7 @@ export default function Settings() {
             });
         } catch (error: any) {
             console.error('Error fetching profile:', error);
-            toast.error('Failed to load profile');
+            toast.error(t('settings.profile.error'));
         } finally {
             setIsLoading(false);
         }
@@ -97,10 +99,10 @@ export default function Settings() {
                 }
             });
 
-            toast.success('Profile updated successfully');
+            toast.success(t('settings.profile.success'));
         } catch (error: any) {
             console.error('Error updating profile:', error);
-            toast.error('Failed to update profile');
+            toast.error(t('settings.profile.updateError'));
         } finally {
             setIsSaving(false);
         }
@@ -110,12 +112,12 @@ export default function Settings() {
         e.preventDefault();
 
         if (passwordData.newPassword !== passwordData.confirmPassword) {
-            toast.error('New passwords do not match');
+            toast.error(t('settings.password.mismatch'));
             return;
         }
 
         if (passwordData.newPassword.length < 6) {
-            toast.error('Password must be at least 6 characters');
+            toast.error(t('settings.password.length'));
             return;
         }
 
@@ -127,14 +129,14 @@ export default function Settings() {
 
             if (error) throw error;
 
-            toast.success('Password updated successfully');
+            toast.success(t('settings.password.success'));
             setPasswordData({
                 newPassword: '',
                 confirmPassword: '',
             });
         } catch (error: any) {
             console.error('Error changing password:', error);
-            toast.error(error.message || 'Failed to change password');
+            toast.error(error.message || t('settings.password.error'));
         } finally {
             setIsChangingPassword(false);
         }
@@ -163,7 +165,7 @@ export default function Settings() {
                             </button>
                             <Logo size="md" />
                         </div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('settings.title')}</h1>
                     </div>
                 </div>
             </div>
@@ -176,13 +178,13 @@ export default function Settings() {
                         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                             <div className="flex items-center space-x-2">
                                 <User className="h-5 w-5 text-indigo-600" />
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Profile Information</h2>
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('settings.profile.title')}</h2>
                             </div>
                         </div>
                         <form onSubmit={handleProfileUpdate} className="p-6 space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Full Name
+                                    {t('settings.profile.fullName')}
                                 </label>
                                 <input
                                     type="text"
@@ -195,7 +197,7 @@ export default function Settings() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Email
+                                    {t('settings.profile.email')}
                                 </label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -206,12 +208,12 @@ export default function Settings() {
                                         className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                                     />
                                 </div>
-                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Email cannot be changed</p>
+                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t('settings.profile.emailNote')}</p>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Phone Number (Optional)
+                                    {t('settings.profile.phone')}
                                 </label>
                                 <input
                                     type="tel"
@@ -224,7 +226,7 @@ export default function Settings() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Institution (Optional)
+                                    {t('settings.profile.institution')}
                                 </label>
                                 <input
                                     type="text"
@@ -244,12 +246,12 @@ export default function Settings() {
                                     {isSaving ? (
                                         <>
                                             <Loader2 className="h-4 w-4 animate-spin" />
-                                            <span>Saving...</span>
+                                            <span>{t('settings.profile.saving')}</span>
                                         </>
                                     ) : (
                                         <>
                                             <Save className="h-4 w-4" />
-                                            <span>Save Changes</span>
+                                            <span>{t('settings.profile.save')}</span>
                                         </>
                                     )}
                                 </button>
@@ -262,13 +264,13 @@ export default function Settings() {
                         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                             <div className="flex items-center space-x-2">
                                 <Lock className="h-5 w-5 text-indigo-600" />
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Change Password</h2>
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('settings.password.title')}</h2>
                             </div>
                         </div>
                         <form onSubmit={handlePasswordChange} className="p-6 space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    New Password
+                                    {t('settings.password.new')}
                                 </label>
                                 <input
                                     type="password"
@@ -282,7 +284,7 @@ export default function Settings() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Confirm New Password
+                                    {t('settings.password.confirm')}
                                 </label>
                                 <input
                                     type="password"
@@ -303,12 +305,12 @@ export default function Settings() {
                                     {isChangingPassword ? (
                                         <>
                                             <Loader2 className="h-4 w-4 animate-spin" />
-                                            <span>Updating...</span>
+                                            <span>{t('settings.password.updating')}</span>
                                         </>
                                     ) : (
                                         <>
                                             <Lock className="h-4 w-4" />
-                                            <span>Update Password</span>
+                                            <span>{t('settings.password.update')}</span>
                                         </>
                                     )}
                                 </button>
@@ -321,27 +323,27 @@ export default function Settings() {
                         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                             <div className="flex items-center space-x-2">
                                 <Crown className="h-5 w-5 text-indigo-600" />
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Subscription Status</h2>
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('settings.subscription.title')}</h2>
                             </div>
                         </div>
                         <div className="p-6">
                             {profile.subscription_status === 'active' ? (
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.subscription.status')}</span>
                                         <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                            Active
+                                            {t('settings.subscription.active')}
                                         </span>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Plan:</span>
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.subscription.plan')}</span>
                                         <span className="text-sm text-gray-900 dark:text-white font-semibold">
                                             {profile.subscription_plan || 'Professional'}
                                         </span>
                                     </div>
                                     {profile.subscription_end_date && (
                                         <div className="flex items-center justify-between">
-                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Valid Until:</span>
+                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.subscription.validUntil')}</span>
                                             <span className="text-sm text-gray-900 dark:text-white">
                                                 {new Date(profile.subscription_end_date).toLocaleDateString()}
                                             </span>
@@ -351,14 +353,14 @@ export default function Settings() {
                             ) : (
                                 <div className="text-center py-4">
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                                        You are currently on the free plan
+                                        {t('settings.subscription.freeMessage')}
                                     </p>
                                     <Link
                                         to="/checkout"
                                         className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                                     >
                                         <Crown className="h-4 w-4 mr-2" />
-                                        Upgrade to Professional
+                                        {t('settings.subscription.upgrade')}
                                     </Link>
                                 </div>
                             )}
@@ -367,10 +369,10 @@ export default function Settings() {
 
                     {/* Account Info */}
                     <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Account Information</h3>
+                        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('settings.account.title')}</h3>
                         <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                            <p>User ID: <span className="font-mono text-xs">{user?.id}</span></p>
-                            <p>Account created: {new Date(user?.created_at || '').toLocaleDateString()}</p>
+                            <p>{t('settings.account.userId')} <span className="font-mono text-xs">{user?.id}</span></p>
+                            <p>{t('settings.account.created')} {new Date(user?.created_at || '').toLocaleDateString()}</p>
                         </div>
                     </div>
                 </div>
