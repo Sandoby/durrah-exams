@@ -120,7 +120,7 @@
             "emailLabel": "Email address",
             "passwordLabel": "Password",
             "confirmPasswordLabel": "Confirm Password",
-            "submit": "Create account",
+            "submit": "Sign up",
             "hasAccount": "Already have an account?",
             "login": "Sign in"
         }
@@ -136,5 +136,220 @@
         "title": "Ready to Transform Your Teaching?",
         "subtitle": "Join thousands of tutors who trust Durrah for their exam needs",
         "cta": "Start Your Free Trial"
+    },
+    "dashboard": {
+        "title": "My Exams",
+        "createExam": "Create New Exam",
+        "noExams": {
+            "title": "No exams",
+            "desc": "Get started by creating a new exam.",
+            "button": "Create New Exam"
+        },
+        "status": {
+            "active": "Active",
+            "inactive": "Inactive"
+        },
+        "actions": {
+            "copyLink": "Copy Link",
+            "print": "Print / Save as PDF",
+            "results": "View Results",
+            "analytics": "Analytics Dashboard",
+            "analyticsLocked": "Analytics (Premium Only)",
+            "edit": "Edit",
+            "delete": "Delete"
+        },
+        "deleteConfirm": "Are you sure you want to delete this exam?",
+        "linkCopied": "Exam link copied!",
+        "deleteSuccess": "Exam deleted successfully",
+        "upgradeLimit": "Free plan is limited to 3 exams. Upgrade to Pro for unlimited!"
+    },
+    "settings": {
+        "title": "Settings",
+        "back": "Back to Dashboard",
+        "profile": {
+            "title": "Profile Information",
+            "fullName": "Full Name",
+            "email": "Email Address",
+            "emailNote": "Email cannot be changed",
+            "phone": "Phone Number (optional)",
+            "institution": "Institution (optional)",
+            "save": "Save Changes",
+            "saving": "Saving...",
+            "success": "Profile updated successfully",
+            "error": "Failed to update profile"
+        },
+        "password": {
+            "title": "Change Password",
+            "new": "New Password",
+            "confirm": "Confirm New Password",
+            "update": "Update Password",
+            "updating": "Updating..."
+        },
+        "subscription": {
+            "title": "Subscription Status",
+            "status": "Status:",
+            "plan": "Plan:",
+            "validUntil": "Valid until:",
+            "active": "Active",
+            "freeMessage": "You are currently on the free plan",
+            "upgrade": "Upgrade to Pro"
+        },
+        "account": {
+            "summary": {
+                "original": "Original Price:",
+                "discount": "Discount:",
+                "final": "Final Price:",
+                "free": "Free"
+            },
+            "features": {
+                "fast": {
+                    "title": "Lightning Fast",
+                    "desc": "Create exams in minutes with our AI-powered tools."
+                },
+                "antiCheat": {
+                    "title": "Anti-Cheating",
+                    "desc": "Advanced monitoring features including tab switching detection and fullscreen enforcement."
+                },
+                "interface": {
+                    "title": "Beautiful Interface",
+                    "desc": "Clean, distraction-free experience for both you and your students."
+                }
+            }
+        }
+    },
+    "examEditor": {
+        "createTitle": "Create New Exam",
+        "editTitle": "Edit Exam",
+        "save": "Save Exam",
+        "saving": "Saving...",
+        "basicInfo": {
+            "title": "Basic Information",
+            "examTitle": "Title",
+            "description": "Description"
+        },
+        "studentInfo": {
+            "title": "Student Information Fields",
+            "desc": "Select which fields students must fill out before starting the exam",
+            "name": "Full Name",
+            "email": "Email Address",
+            "studentId": "Student ID",
+            "phone": "Phone Number"
+        },
+        "emailAccess": {
+            "title": "Email Access Control",
+            "desc": "Restrict exam access to specific email addresses",
+            "enable": "Enable email restriction"
+        },
+        "settings": {
+            "title": "Exam Settings",
+            "fullscreen": "Force Fullscreen",
+            "tabSwitch": "Detect Tab Switching",
+            "copyPaste": "Disable Copy/Paste",
+            "showResults": "Show Results Immediately",
+            "maxViolations": "Max Violations",
+            "timeLimit": "Time Limit (minutes)",
+            "startTime": "Start Time",
+            "startTimeDesc": "When students can start the exam",
+            "endTime": "End Time",
+            "endTimeDesc": "When the exam closes (no new submissions)"
+        },
+        "questions": {
+            "title": "Questions",
+            "add": "Add Question",
+            "remove": "Remove",
+            "type": "Question Type",
+            "points": "Points",
+            "text": "Question Text",
+            "options": "Options",
+            "addOption": "Add Option",
+            "correctAnswer": "Correct Answer",
+            "numericAnswer": "Correct Numeric Answer (Optional)",
+            "numericNote": "Exact numeric match will be used for auto-grading.",
+            "selectCorrect": "Options (Select one or more correct answers)",
+            "types": {
+                "multipleChoice": "Multiple Choice",
+                "multipleSelect": "Multiple Select",
+                "dropdown": "Dropdown",
+                "numeric": "Numeric",
+                "trueFalse": "True/False"
+            },
+            "trueFalse": {
+                "true": "True",
+                "false": "False"
+            },
+            "validation": {
+                "titleRequired": "Please enter an exam title.",
+                "descriptionRequired": "Please enter a description.",
+                "questionsRequired": "Please add at least one question.",
+                "questionTextRequired": "Question {{index}} is missing text.",
+                "optionsRequired": "Question {{index}} needs at least 2 options.",
+                "optionTextRequired": "Question {{index}} has empty options.",
+                "correctAnswerRequired": "Question {{index}} needs a correct answer."
+            },
+            "success": {
+                "saved": "Exam saved successfully!",
+                "created": "Exam created successfully!"
+            }
+        }
+    },
+    "examView": {
+        "start": "Start Exam",
+        "resume": "Resume Exam",
+        "submit": "Submit Exam",
+        "submitting": "Submitting...",
+        "submitted": {
+            "title": "Exam Submitted",
+            "message": "Thank you! Your answers have been submitted securely.",
+            "resultsPending": "Results will be published by your tutor.",
+            "recorded": "Your submission has been recorded."
+        },
+        "security": {
+            "title": "Exam Security Rules",
+            "fullscreen": "Fullscreen mode required",
+            "tabSwitch": "Tab switching monitored",
+            "copyPaste": "Copy/Paste disabled",
+            "maxViolations": "Max violations:"
+        },
+        "iphoneHelp": {
+            "title": "iPhone/Safari Submission Help",
+            "privateMode": "Ensure Safari is NOT in Private mode.",
+            "cookies": "Enable Cookies: Settings > Safari > Block All Cookies (OFF).",
+            "tracking": "Disable Tracking: Settings > Safari > Prevent Cross-Site Tracking (OFF).",
+            "homeScreen": "Use 'Add to Home Screen' for best reliability.",
+            "error": "If you see a submission error, try logging out and back in.",
+            "screenshot": "If failure persists, take screenshots of your answers before exiting."
+        },
+        "violations": "Violations:",
+        "accessibility": {
+            "settings": "Accessibility Settings",
+            "fontSize": "Font Size"
+        },
+        "previousSession": "Previous session found. Your progress has been restored.",
+        "fillRequired": "Please fill in all required fields",
+        "accessDenied": "Access Denied: Your email is not authorized for this exam",
+        "notAvailable": "Exam is not currently available",
+        "startsAt": "Exam starts at",
+        "endedAt": "Exam ended at",
+        "warnings": {
+            "finalWarning": "Final Warning",
+            "finalMessage": "You have {{count}} violation(s) remaining before auto-submission.",
+            "maxReached": "Max Violations Reached",
+            "maxMessage": "Your exam will be auto-submitted now due to excessive violations.",
+            "tabSwitch": "Tab Switch Detected",
+            "tabSwitchMessage": "You have navigated away from the exam page.",
+            "fullscreenExit": "Fullscreen Exit Detected",
+            "fullscreenExitMessage": "Please return to fullscreen mode immediately.",
+            "violationRecorded": "Violation recorded! {{count}} remaining."
+        },
+        "errors": {
+            "notOpen": "Exam has not started yet. Starts at {{time}}",
+            "alreadyEnded": "Exam time has ended",
+            "alreadySubmitted": "Exam already submitted from this device.",
+            "submissionFailed": "Submission failed: {{error}}",
+            "submissionSaved": "Submission saved locally. Retrying automatically."
+        },
+        "success": {
+            "submitted": "Exam submitted successfully!"
+        }
     }
 }

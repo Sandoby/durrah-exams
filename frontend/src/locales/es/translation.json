@@ -102,6 +102,29 @@
             "role": "Instructora de Idiomas, España"
         }
     },
+    "auth": {
+        "login": {
+            "title": "Bienvenido de nuevo",
+            "subtitle": "Inicia sesión en tu cuenta",
+            "emailLabel": "Correo electrónico",
+            "passwordLabel": "Contraseña",
+            "forgotPassword": "¿Olvidaste tu contraseña?",
+            "submit": "Iniciar sesión",
+            "noAccount": "¿No tienes cuenta?",
+            "register": "Regístrate"
+        },
+        "register": {
+            "title": "Crear una cuenta",
+            "subtitle": "Comienza a crear exámenes seguros hoy",
+            "nameLabel": "Nombre Completo",
+            "emailLabel": "Correo electrónico",
+            "passwordLabel": "Contraseña",
+            "confirmPasswordLabel": "Confirmar Contraseña",
+            "submit": "Registrarse",
+            "hasAccount": "¿Ya tienes cuenta?",
+            "login": "Iniciar sesión"
+        }
+    },
     "footer": {
         "desc": "La plataforma de exámenes moderna para tutores de todo el mundo.",
         "product": "Producto",
@@ -113,5 +136,220 @@
         "title": "¿Listo para transformar tu enseñanza?",
         "subtitle": "Únete a miles de tutores que confían en Durrah para sus necesidades de exámenes",
         "cta": "Comienza tu prueba gratis"
+    },
+    "dashboard": {
+        "title": "Mis Exámenes",
+        "createExam": "Crear Nuevo Examen",
+        "noExams": {
+            "title": "No se encontraron exámenes",
+            "desc": "Comienza creando tu primer examen.",
+            "button": "Crear Examen"
+        },
+        "status": {
+            "active": "Activo",
+            "inactive": "Inactivo"
+        },
+        "actions": {
+            "copyLink": "Copiar Enlace",
+            "print": "Imprimir / Guardar como PDF",
+            "results": "Ver Resultados",
+            "analytics": "Panel de Análisis",
+            "analyticsLocked": "Análisis (Solo Pro)",
+            "edit": "Editar",
+            "delete": "Eliminar"
+        },
+        "deleteConfirm": "¿Estás seguro de que quieres eliminar este examen?",
+        "linkCopied": "¡Enlace del examen copiado!",
+        "deleteSuccess": "Examen eliminado con éxito",
+        "upgradeLimit": "El plan gratuito está limitado a 3 exámenes. ¡Actualiza a Pro para ilimitados!"
+    },
+    "settings": {
+        "title": "Configuración",
+        "back": "Volver al Panel",
+        "profile": {
+            "title": "Información del Perfil",
+            "fullName": "Nombre Completo",
+            "email": "Correo Electrónico",
+            "emailNote": "El correo electrónico no se puede cambiar",
+            "phone": "Número de Teléfono (opcional)",
+            "institution": "Institución (opcional)",
+            "save": "Guardar Cambios",
+            "saving": "Guardando...",
+            "success": "Perfil actualizado con éxito",
+            "error": "Error al actualizar el perfil"
+        },
+        "password": {
+            "title": "Cambiar Contraseña",
+            "new": "Nueva Contraseña",
+            "confirm": "Confirmar Nueva Contraseña",
+            "update": "Actualizar Contraseña",
+            "updating": "Actualizando..."
+        },
+        "subscription": {
+            "title": "Estado de la Suscripción",
+            "status": "Estado:",
+            "plan": "Plan:",
+            "validUntil": "Válido hasta:",
+            "active": "Activo",
+            "freeMessage": "Actualmente estás en el plan gratuito",
+            "upgrade": "Actualizar a Pro"
+        },
+        "account": {
+            "summary": {
+                "original": "Precio Original:",
+                "discount": "Descuento:",
+                "final": "Precio Final:",
+                "free": "Gratis"
+            },
+            "features": {
+                "fast": {
+                    "title": "Ultrarrápido",
+                    "desc": "Crea exámenes en minutos."
+                },
+                "antiCheat": {
+                    "title": "Anti-trampas",
+                    "desc": "Monitoreo avanzado."
+                },
+                "interface": {
+                    "title": "Hermosa Interfaz",
+                    "desc": "Experiencia limpia y sin distracciones."
+                }
+            }
+        }
+    },
+    "examEditor": {
+        "createTitle": "Crear Nuevo Examen",
+        "editTitle": "Editar Examen",
+        "save": "Guardar Examen",
+        "saving": "Guardando...",
+        "basicInfo": {
+            "title": "Información Básica",
+            "examTitle": "Título",
+            "description": "Descripción"
+        },
+        "studentInfo": {
+            "title": "Campos de Información del Estudiante",
+            "desc": "Selecciona los campos que los estudiantes deben completar",
+            "name": "Nombre Completo",
+            "email": "Correo Electrónico",
+            "studentId": "ID de Estudiante",
+            "phone": "Número de Teléfono"
+        },
+        "emailAccess": {
+            "title": "Control de Acceso por Correo",
+            "desc": "Restringir el acceso a correos electrónicos específicos",
+            "enable": "Habilitar restricción por correo"
+        },
+        "settings": {
+            "title": "Configuración del Examen",
+            "fullscreen": "Forzar Pantalla Completa",
+            "tabSwitch": "Detectar Cambio de Pestaña",
+            "copyPaste": "Deshabilitar Copiar/Pegar",
+            "showResults": "Mostrar Resultados Inmediatamente",
+            "maxViolations": "Violaciones Máximas",
+            "timeLimit": "Límite de Tiempo (minutos)",
+            "startTime": "Hora de Inicio",
+            "startTimeDesc": "Cuándo pueden comenzar los estudiantes",
+            "endTime": "Hora de Finalización",
+            "endTimeDesc": "Cuándo termina el examen"
+        },
+        "questions": {
+            "title": "Preguntas",
+            "add": "Agregar Pregunta",
+            "remove": "Eliminar",
+            "type": "Tipo de Pregunta",
+            "points": "Puntos",
+            "text": "Texto de la Pregunta",
+            "options": "Opciones",
+            "addOption": "Agregar Opción",
+            "correctAnswer": "Respuesta Correcta",
+            "numericAnswer": "Respuesta Numérica Correcta (Opcional)",
+            "numericNote": "Se usará coincidencia numérica exacta para la calificación automática.",
+            "selectCorrect": "Opciones (Selecciona una o más respuestas correctas)",
+            "types": {
+                "multipleChoice": "Opción Múltiple",
+                "multipleSelect": "Selección Múltiple",
+                "dropdown": "Menú Desplegable",
+                "numeric": "Numérico",
+                "trueFalse": "Verdadero/Falso"
+            },
+            "trueFalse": {
+                "true": "Verdadero",
+                "false": "Falso"
+            },
+            "validation": {
+                "titleRequired": "Por favor ingresa un título de examen.",
+                "descriptionRequired": "Por favor ingresa una descripción.",
+                "questionsRequired": "Por favor agrega al menos una pregunta.",
+                "questionTextRequired": "La pregunta {{index}} no tiene texto.",
+                "optionsRequired": "La pregunta {{index}} necesita al menos 2 opciones.",
+                "optionTextRequired": "La pregunta {{index}} tiene opciones vacías.",
+                "correctAnswerRequired": "La pregunta {{index}} necesita una respuesta correcta."
+            },
+            "success": {
+                "saved": "¡Examen guardado con éxito!",
+                "created": "¡Examen creado con éxito!"
+            }
+        }
+    },
+    "examView": {
+        "start": "Comenzar Examen",
+        "resume": "Reanudar Examen",
+        "submit": "Enviar Examen",
+        "submitting": "Enviando...",
+        "submitted": {
+            "title": "Examen Enviado",
+            "message": "¡Gracias! Tus respuestas han sido enviadas de forma segura.",
+            "resultsPending": "Los resultados serán publicados por tu tutor.",
+            "recorded": "Tu envío ha sido registrado."
+        },
+        "security": {
+            "title": "Reglas de Seguridad del Examen",
+            "fullscreen": "Se requiere modo pantalla completa",
+            "tabSwitch": "Cambio de pestaña monitoreado",
+            "copyPaste": "Copiar/Pegar deshabilitado",
+            "maxViolations": "Violaciones máximas:"
+        },
+        "iphoneHelp": {
+            "title": "Ayuda de Envío iPhone/Safari",
+            "privateMode": "Asegúrate de que Safari no esté en modo Privado.",
+            "cookies": "Habilita cookies: Configuración > Safari > Bloquear todas las cookies (Desactivado).",
+            "tracking": "Deshabilita rastreo: Configuración > Safari > Evitar rastreo entre sitios (Desactivado).",
+            "homeScreen": "Usa 'Agregar a Inicio' para mayor confiabilidad.",
+            "error": "Si ves un error de envío, intenta cerrar sesión y volver a entrar.",
+            "screenshot": "Si falla, toma capturas de pantalla de tus respuestas antes de salir."
+        },
+        "violations": "Violaciones:",
+        "accessibility": {
+            "settings": "Configuración de Accesibilidad",
+            "fontSize": "Tamaño de Fuente"
+        },
+        "previousSession": "Sesión anterior encontrada. Tu progreso ha sido restaurado.",
+        "fillRequired": "Por favor completa todos los campos requeridos",
+        "accessDenied": "Acceso denegado: Tu correo no está autorizado para este examen",
+        "notAvailable": "El examen no está disponible actualmente",
+        "startsAt": "El examen comienza a las",
+        "endedAt": "El examen terminó a las",
+        "warnings": {
+            "finalWarning": "Advertencia Final",
+            "finalMessage": "Te quedan {{count}} violación(es) antes del envío automático.",
+            "maxReached": "Violaciones Máximas Alcanzadas",
+            "maxMessage": "Tu examen se enviará automáticamente ahora debido a violaciones excesivas.",
+            "tabSwitch": "Cambio de Pestaña Detectado",
+            "tabSwitchMessage": "Has salido de la página del examen.",
+            "fullscreenExit": "Salida de Pantalla Completa Detectada",
+            "fullscreenExitMessage": "Por favor regresa al modo pantalla completa inmediatamente.",
+            "violationRecorded": "¡Violación registrada! Quedan {{count}}."
+        },
+        "errors": {
+            "notOpen": "El examen aún no ha comenzado. Empieza a las {{time}}",
+            "alreadyEnded": "El tiempo del examen ha terminado",
+            "alreadySubmitted": "Examen ya enviado desde este dispositivo.",
+            "submissionFailed": "Error al enviar: {{error}}",
+            "submissionSaved": "Envío guardado localmente. Reintentando automáticamente."
+        },
+        "success": {
+            "submitted": "¡Examen enviado con éxito!"
+        }
     }
 }

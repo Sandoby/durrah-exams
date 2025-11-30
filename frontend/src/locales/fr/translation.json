@@ -102,6 +102,29 @@
             "role": "Instructrice de Langue, Espagne"
         }
     },
+    "auth": {
+        "login": {
+            "title": "Bon retour",
+            "subtitle": "Connectez-vous à votre compte",
+            "emailLabel": "Adresse email",
+            "passwordLabel": "Mot de passe",
+            "forgotPassword": "Mot de passe oublié ?",
+            "submit": "Se connecter",
+            "noAccount": "Pas de compte ?",
+            "register": "S'inscrire"
+        },
+        "register": {
+            "title": "Créer un compte",
+            "subtitle": "Commencez à créer des examens sécurisés aujourd'hui",
+            "nameLabel": "Nom Complet",
+            "emailLabel": "Adresse email",
+            "passwordLabel": "Mot de passe",
+            "confirmPasswordLabel": "Confirmer le mot de passe",
+            "submit": "S'inscrire",
+            "hasAccount": "Vous avez déjà un compte ?",
+            "login": "Se connecter"
+        }
+    },
     "footer": {
         "desc": "La plateforme d'examen moderne pour les tuteurs du monde entier.",
         "product": "Produit",
@@ -113,5 +136,220 @@
         "title": "Prêt à transformer votre enseignement ?",
         "subtitle": "Rejoignez des milliers de tuteurs qui font confiance à Durrah pour leurs examens",
         "cta": "Commencez votre essai gratuit"
+    },
+    "dashboard": {
+        "title": "Mes Examens",
+        "createExam": "Créer un Nouvel Examen",
+        "noExams": {
+            "title": "Aucun examen trouvé",
+            "desc": "Commencez par créer votre premier examen.",
+            "button": "Créer un Examen"
+        },
+        "status": {
+            "active": "Actif",
+            "inactive": "Inactif"
+        },
+        "actions": {
+            "copyLink": "Copier le lien",
+            "print": "Imprimer / Sauvegarder en PDF",
+            "results": "Voir les résultats",
+            "analytics": "Tableau de bord analytique",
+            "analyticsLocked": "Analytique (Pro uniquement)",
+            "edit": "Modifier",
+            "delete": "Supprimer"
+        },
+        "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet examen ?",
+        "linkCopied": "Lien de l'examen copié !",
+        "deleteSuccess": "Examen supprimé avec succès",
+        "upgradeLimit": "Le plan gratuit est limité à 3 examens. Passez à la version Pro pour un nombre illimité !"
+    },
+    "settings": {
+        "title": "Paramètres",
+        "back": "Retour au tableau de bord",
+        "profile": {
+            "title": "Informations du Profil",
+            "fullName": "Nom Complet",
+            "email": "Email",
+            "emailNote": "L'email ne peut pas être modifié",
+            "phone": "Numéro de téléphone (optionnel)",
+            "institution": "Institution (optionnel)",
+            "save": "Enregistrer les modifications",
+            "saving": "Enregistrement...",
+            "success": "Profil mis à jour avec succès",
+            "error": "Échec de la mise à jour du profil"
+        },
+        "password": {
+            "title": "Changer le mot de passe",
+            "new": "Nouveau mot de passe",
+            "confirm": "Confirmer le nouveau mot de passe",
+            "update": "Mettre à jour le mot de passe",
+            "updating": "Mise à jour..."
+        },
+        "subscription": {
+            "title": "Statut de l'abonnement",
+            "status": "Statut :",
+            "plan": "Plan :",
+            "validUntil": "Valable jusqu'au :",
+            "active": "Actif",
+            "freeMessage": "Vous êtes actuellement sur le plan gratuit",
+            "upgrade": "Passer à la version Pro"
+        },
+        "account": {
+            "summary": {
+                "original": "Prix original :",
+                "discount": "Remise :",
+                "final": "Prix final :",
+                "free": "Gratuit"
+            },
+            "features": {
+                "fast": {
+                    "title": "Ultra Rapide",
+                    "desc": "Créez des examens en quelques minutes."
+                },
+                "antiCheat": {
+                    "title": "Anti-triche",
+                    "desc": "Surveillance avancée."
+                },
+                "interface": {
+                    "title": "Belle Interface",
+                    "desc": "Expérience propre et sans distraction."
+                }
+            }
+        }
+    },
+    "examEditor": {
+        "createTitle": "Créer un Nouvel Examen",
+        "editTitle": "Modifier l'Examen",
+        "save": "Enregistrer l'Examen",
+        "saving": "Enregistrement...",
+        "basicInfo": {
+            "title": "Informations de Base",
+            "examTitle": "Titre",
+            "description": "Description"
+        },
+        "studentInfo": {
+            "title": "Champs d'Information Étudiant",
+            "desc": "Sélectionnez les champs que les étudiants doivent remplir",
+            "name": "Nom Complet",
+            "email": "Email",
+            "studentId": "ID Étudiant",
+            "phone": "Numéro de téléphone"
+        },
+        "emailAccess": {
+            "title": "Contrôle d'Accès par Email",
+            "desc": "Restreindre l'accès à des emails spécifiques",
+            "enable": "Activer la restriction par email"
+        },
+        "settings": {
+            "title": "Paramètres de l'Examen",
+            "fullscreen": "Forcer le plein écran",
+            "tabSwitch": "Détecter le changement d'onglet",
+            "copyPaste": "Désactiver copier/coller",
+            "showResults": "Afficher les résultats immédiatement",
+            "maxViolations": "Violations max",
+            "timeLimit": "Limite de temps (minutes)",
+            "startTime": "Heure de début",
+            "startTimeDesc": "Quand les étudiants peuvent commencer",
+            "endTime": "Heure de fin",
+            "endTimeDesc": "Quand l'examen se termine"
+        },
+        "questions": {
+            "title": "Questions",
+            "add": "Ajouter une Question",
+            "remove": "Supprimer",
+            "type": "Type de Question",
+            "points": "Points",
+            "text": "Texte de la Question",
+            "options": "Options",
+            "addOption": "Ajouter une Option",
+            "correctAnswer": "Bonne Réponse",
+            "numericAnswer": "Réponse Numérique Correcte (Optionnel)",
+            "numericNote": "La correspondance numérique exacte sera utilisée pour la notation automatique.",
+            "selectCorrect": "Options (Sélectionnez une ou plusieurs bonnes réponses)",
+            "types": {
+                "multipleChoice": "Choix Multiple",
+                "multipleSelect": "Sélection Multiple",
+                "dropdown": "Menu Déroulant",
+                "numeric": "Numérique",
+                "trueFalse": "Vrai/Faux"
+            },
+            "trueFalse": {
+                "true": "Vrai",
+                "false": "Faux"
+            },
+            "validation": {
+                "titleRequired": "Veuillez entrer un titre d'examen.",
+                "descriptionRequired": "Veuillez entrer une description.",
+                "questionsRequired": "Veuillez ajouter au moins une question.",
+                "questionTextRequired": "La question {{index}} n'a pas de texte.",
+                "optionsRequired": "La question {{index}} nécessite au moins 2 options.",
+                "optionTextRequired": "La question {{index}} a des options vides.",
+                "correctAnswerRequired": "La question {{index}} nécessite une bonne réponse."
+            },
+            "success": {
+                "saved": "Examen enregistré avec succès !",
+                "created": "Examen créé avec succès !"
+            }
+        }
+    },
+    "examView": {
+        "start": "Commencer l'Examen",
+        "resume": "Reprendre l'Examen",
+        "submit": "Soumettre l'Examen",
+        "submitting": "Soumission...",
+        "submitted": {
+            "title": "Examen Soumis",
+            "message": "Merci ! Vos réponses ont été soumises en toute sécurité.",
+            "resultsPending": "Les résultats seront publiés par votre tuteur.",
+            "recorded": "Votre soumission a été enregistrée."
+        },
+        "security": {
+            "title": "Règles de Sécurité de l'Examen",
+            "fullscreen": "Mode plein écran requis",
+            "tabSwitch": "Changement d'onglet surveillé",
+            "copyPaste": "Copier/Coller désactivé",
+            "maxViolations": "Violations max :"
+        },
+        "iphoneHelp": {
+            "title": "Aide à la Soumission iPhone/Safari",
+            "privateMode": "Assurez-vous que Safari n'est pas en mode Privé.",
+            "cookies": "Activez les cookies : Réglages > Safari > Bloquer tous les cookies (Désactivé).",
+            "tracking": "Désactivez le suivi : Réglages > Safari > Empêcher le suivi intersite (Désactivé).",
+            "homeScreen": "Utilisez 'Ajouter à l'écran d'accueil' pour une meilleure fiabilité.",
+            "error": "Si vous voyez une erreur de soumission, essayez de vous déconnecter et de vous reconnecter.",
+            "screenshot": "Si l'échec persiste, faites des captures d'écran de vos réponses avant de quitter."
+        },
+        "violations": "Violations :",
+        "accessibility": {
+            "settings": "Paramètres d'Accessibilité",
+            "fontSize": "Taille de la Police"
+        },
+        "previousSession": "Session précédente trouvée. Votre progression a été restaurée.",
+        "fillRequired": "Veuillez remplir tous les champs obligatoires",
+        "accessDenied": "Accès refusé : Votre email n'est pas autorisé pour cet examen",
+        "notAvailable": "L'examen n'est pas disponible actuellement",
+        "startsAt": "L'examen commence à",
+        "endedAt": "L'examen s'est terminé à",
+        "warnings": {
+            "finalWarning": "Dernier Avertissement",
+            "finalMessage": "Il vous reste {{count}} violation(s) avant la soumission automatique.",
+            "maxReached": "Violations Max Atteintes",
+            "maxMessage": "Votre examen va être soumis automatiquement maintenant en raison de violations excessives.",
+            "tabSwitch": "Changement d'Onglet Détecté",
+            "tabSwitchMessage": "Vous avez quitté la page de l'examen.",
+            "fullscreenExit": "Sortie Plein Écran Détectée",
+            "fullscreenExitMessage": "Veuillez retourner en mode plein écran immédiatement.",
+            "violationRecorded": "Violation enregistrée ! {{count}} restantes."
+        },
+        "errors": {
+            "notOpen": "L'examen n'a pas encore commencé. Début à {{time}}",
+            "alreadyEnded": "Le temps de l'examen est écoulé",
+            "alreadySubmitted": "Examen déjà soumis depuis cet appareil.",
+            "submissionFailed": "Échec de la soumission : {{error}}",
+            "submissionSaved": "Soumission enregistrée localement. Nouvelle tentative automatique."
+        },
+        "success": {
+            "submitted": "Examen soumis avec succès !"
+        }
     }
 }
