@@ -102,6 +102,29 @@
             "role": "Language Instructor, Spain"
         }
     },
+    "auth": {
+        "login": {
+            "title": "Welcome back",
+            "subtitle": "Sign in to your account",
+            "emailLabel": "Email address",
+            "passwordLabel": "Password",
+            "forgotPassword": "Forgot password?",
+            "submit": "Sign in",
+            "noAccount": "Don't have an account?",
+            "register": "Sign up"
+        },
+        "register": {
+            "title": "Create an account",
+            "subtitle": "Start creating secure exams today",
+            "nameLabel": "Full Name",
+            "emailLabel": "Email address",
+            "passwordLabel": "Password",
+            "confirmPasswordLabel": "Confirm Password",
+            "submit": "Create account",
+            "hasAccount": "Already have an account?",
+            "login": "Sign in"
+        }
+    },
     "footer": {
         "desc": "The modern exam platform for tutors worldwide.",
         "product": "Product",

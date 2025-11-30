@@ -7,6 +7,7 @@ import { Mail, Lock, User, Loader2 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
+import { useTranslation } from 'react-i18next';
 
 const registerSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -23,6 +24,7 @@ type RegisterForm = z.infer<typeof registerSchema>;
 export default function Register() {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const { t } = useTranslation();
 
     const { register, handleSubmit, formState: { errors } } = useForm<RegisterForm>({
         resolver: zodResolver(registerSchema),
@@ -59,12 +61,12 @@ export default function Register() {
                     <Logo size="lg" />
                 </div>
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-                    Create a new account
+                    {t('auth.register.title')}
                 </h2>
                 <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                    Or{' '}
+                    {t('auth.register.hasAccount')}{' '}
                     <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
-                        sign in to your existing account
+                        {t('auth.register.login')}
                     </Link>
                 </p>
             </div>
@@ -74,7 +76,7 @@ export default function Register() {
                     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Full Name
+                                {t('auth.register.nameLabel')}
                             </label>
                             <div className="mt-1 relative rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -94,7 +96,7 @@ export default function Register() {
 
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Email address
+                                {t('auth.register.emailLabel')}
                             </label>
                             <div className="mt-1 relative rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -114,7 +116,7 @@ export default function Register() {
 
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Password
+                                {t('auth.register.passwordLabel')}
                             </label>
                             <div className="mt-1 relative rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -134,7 +136,7 @@ export default function Register() {
 
                         <div>
                             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Confirm Password
+                                {t('auth.register.confirmPasswordLabel')}
                             </label>
                             <div className="mt-1 relative rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -161,10 +163,10 @@ export default function Register() {
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                                        Creating account...
+                                        {t('auth.register.submit')}...
                                     </>
                                 ) : (
-                                    'Create Account'
+                                    t('auth.register.submit')
                                 )}
                             </button>
                         </div>
