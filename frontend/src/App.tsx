@@ -16,7 +16,23 @@ import AdminPanel from './pages/AdminPanel';
 import { SubmissionSync } from './components/SubmissionSync';
 import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 
+import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
+
 function App() {
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = i18n.language;
+
+    if (i18n.language === 'ar') {
+      document.body.style.fontFamily = "'Cairo', sans-serif";
+    } else {
+      document.body.style.fontFamily = "inherit";
+    }
+  }, [i18n.language]);
+
   return (
     <AuthProvider>
       <SubmissionSync />

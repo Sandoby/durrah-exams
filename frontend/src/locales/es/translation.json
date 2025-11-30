@@ -1,0 +1,117 @@
+{
+    "hero": {
+        "title": "Crea Exámenes Que",
+        "titleHighlight": "Inspiren Excelencia",
+        "subtitle": "La plataforma de exámenes moderna en la que confían tutores de todo el mundo. Crea, distribuye y califica exámenes con potentes funciones anti-trampas.",
+        "cta": "Prueba Gratis",
+        "features": {
+            "noCreditCard": "No se requiere tarjeta de crédito",
+            "freeExams": "Gratis hasta 3 exámenes",
+            "cancelAnytime": "Cancela en cualquier momento"
+        }
+    },
+    "nav": {
+        "features": "Características",
+        "pricing": "Precios",
+        "testimonials": "Testimonios",
+        "login": "Iniciar Sesión",
+        "getStarted": "Empezar Gratis"
+    },
+    "features": {
+        "title": "Todo lo que necesitas para sobresalir",
+        "subtitle": "Funciones potentes diseñadas específicamente para educadores modernos",
+        "fastCreation": {
+            "title": "Creación ultrarrápida",
+            "desc": "Crea exámenes profesionales en minutos con nuestra interfaz intuitiva. Múltiples tipos de preguntas soportados."
+        },
+        "antiCheating": {
+            "title": "Anti-trampas avanzado",
+            "desc": "Modo pantalla completa, detección de cambio de pestaña, prevención de copiar y pegar, y seguimiento de violaciones."
+        },
+        "globalAccess": {
+            "title": "Accesibilidad global",
+            "desc": "Comparte exámenes en todo el mundo con enlaces únicos. Los estudiantes pueden acceder desde cualquier dispositivo, en cualquier lugar."
+        },
+        "unlimitedStudents": {
+            "title": "Estudiantes ilimitados",
+            "desc": "Sin límites en el número de estudiantes que pueden tomar tus exámenes. Escala sin esfuerzo."
+        },
+        "support": {
+            "title": "Soporte 24/7",
+            "desc": "Obtén ayuda cuando la necesites con nuestro equipo de soporte dedicado y documentación completa."
+        }
+    },
+    "pricing": {
+        "title": "Precios simples y transparentes",
+        "subtitle": "Empieza gratis, actualiza cuando estés listo",
+        "starter": {
+            "title": "Inicial",
+            "price": "Gratis",
+            "features": [
+                "Hasta 3 exámenes",
+                "100 estudiantes por examen",
+                "Anti-trampas básico",
+                "Soporte por correo electrónico"
+            ],
+            "cta": "Empezar"
+        },
+        "professional": {
+            "title": "Profesional",
+            "price": "200 EGP",
+            "period": "/mes",
+            "features": [
+                "Exámenes ilimitados",
+                "Estudiantes ilimitados",
+                "Análisis e ideas avanzadas",
+                "Soporte prioritario",
+                "Todas las funciones anti-trampas"
+            ],
+            "cta": "Prueba Gratis",
+            "badge": "POPULAR"
+        },
+        "yearly": {
+            "title": "Profesional Anual",
+            "price": "2000 EGP",
+            "period": "/año",
+            "features": [
+                "Todas las funciones profesionales",
+                "Soporte de cuenta dedicado",
+                "Comentarios prioritarios sobre la hoja de ruta",
+                "2 meses gratis vs mensual"
+            ],
+            "cta": "Prueba Gratis",
+            "badge": "MEJOR VALOR"
+        }
+    },
+    "testimonials": {
+        "title": "Amado por tutores de todo el mundo",
+        "subtitle": "Mira lo que dicen los educadores sobre Durrah",
+        "t1": {
+            "content": "Durrah ha transformado la forma en que creo y califico exámenes. La plataforma me ayuda a entender exactamente dónde necesitan ayuda mis estudiantes.",
+            "name": "Sarah Johnson",
+            "role": "Tutora de Matemáticas, EE. UU."
+        },
+        "t2": {
+            "content": "Las funciones anti-trampas me dan tranquilidad. Puedo confiar en que mis estudiantes están haciendo su propio trabajo.",
+            "name": "Ahmed Hassan",
+            "role": "Profesor de Física, Egipto"
+        },
+        "t3": {
+            "content": "Crear exámenes solía tomar horas. Ahora puedo hacerlo en minutos y concentrarme más en enseñar. ¡Vale totalmente la pena!",
+            "name": "Maria Garcia",
+            "role": "Instructora de Idiomas, España"
+        }
+    },
+    "footer": {
+        "desc": "La plataforma de exámenes moderna para tutores de todo el mundo.",
+        "product": "Producto",
+        "features": "Características",
+        "signup": "Registrarse",
+        "copyright": "© 2025 Durrah para Tutores. Todos los derechos reservados."
+    },
+    "ctaSection": {
+        "title": "¿Listo para transformar tu enseñanza?",
+        "subtitle": "Únete a miles de tutores que confían en Durrah para sus necesidades de exámenes",
+        "cta": "Comienza tu prueba gratis"
+    }
+}

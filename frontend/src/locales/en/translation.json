@@ -1,0 +1,117 @@
+{
+    "hero": {
+        "title": "Create Exams That",
+        "titleHighlight": "Inspire Excellence",
+        "subtitle": "The modern exam platform trusted by tutors worldwide. Create, distribute, and grade exams with powerful anti-cheating features.",
+        "cta": "Start Free Trial",
+        "features": {
+            "noCreditCard": "No credit card required",
+            "freeExams": "Free for up to 3 exams",
+            "cancelAnytime": "Cancel anytime"
+        }
+    },
+    "nav": {
+        "features": "Features",
+        "pricing": "Pricing",
+        "testimonials": "Testimonials",
+        "login": "Login",
+        "getStarted": "Get Started Free"
+    },
+    "features": {
+        "title": "Everything You Need to Excel",
+        "subtitle": "Powerful features designed specifically for modern educators",
+        "fastCreation": {
+            "title": "Lightning Fast Creation",
+            "desc": "Create professional exams in minutes with our intuitive interface. Multiple question types supported."
+        },
+        "antiCheating": {
+            "title": "Advanced Anti-Cheating",
+            "desc": "Fullscreen mode, tab switching detection, copy-paste prevention, and violation tracking."
+        },
+        "globalAccess": {
+            "title": "Global Accessibility",
+            "desc": "Share exams worldwide with unique links. Students can access from any device, anywhere."
+        },
+        "unlimitedStudents": {
+            "title": "Unlimited Students",
+            "desc": "No limits on the number of students who can take your exams. Scale effortlessly."
+        },
+        "support": {
+            "title": "24/7 Support",
+            "desc": "Get help whenever you need it with our dedicated support team and comprehensive documentation."
+        }
+    },
+    "pricing": {
+        "title": "Simple, Transparent Pricing",
+        "subtitle": "Start free, upgrade when you're ready",
+        "starter": {
+            "title": "Starter",
+            "price": "Free",
+            "features": [
+                "Up to 3 exams",
+                "100 students per exam",
+                "Basic anti-cheating",
+                "Email support"
+            ],
+            "cta": "Get Started"
+        },
+        "professional": {
+            "title": "Professional",
+            "price": "200 EGP",
+            "period": "/month",
+            "features": [
+                "Unlimited exams",
+                "Unlimited students",
+                "Advanced analytics & insights",
+                "Priority support",
+                "All anti-cheating features"
+            ],
+            "cta": "Start Free Trial",
+            "badge": "POPULAR"
+        },
+        "yearly": {
+            "title": "Professional Yearly",
+            "price": "2000 EGP",
+            "period": "/year",
+            "features": [
+                "All professional features",
+                "Dedicated account support",
+                "Priority roadmap feedback",
+                "2 months free vs. monthly"
+            ],
+            "cta": "Start Free Trial",
+            "badge": "BEST VALUE"
+        }
+    },
+    "testimonials": {
+        "title": "Loved by Tutors Worldwide",
+        "subtitle": "See what educators are saying about Durrah",
+        "t1": {
+            "content": "Durrah has transformed how I create and grade exams. The platform helps me understand exactly where my students need help.",
+            "name": "Sarah Johnson",
+            "role": "Math Tutor, USA"
+        },
+        "t2": {
+            "content": "The anti-cheating features give me peace of mind. I can trust that my students are doing their own work.",
+            "name": "Ahmed Hassan",
+            "role": "Physics Teacher, Egypt"
+        },
+        "t3": {
+            "content": "Creating exams used to take hours. Now I can do it in minutes and focus more on teaching. Absolutely worth it!",
+            "name": "Maria Garcia",
+            "role": "Language Instructor, Spain"
+        }
+    },
+    "footer": {
+        "desc": "The modern exam platform for tutors worldwide.",
+        "product": "Product",
+        "features": "Features",
+        "signup": "Sign Up",
+        "copyright": "© 2025 Durrah for Tutors. All rights reserved."
+    },
+    "ctaSection": {
+        "title": "Ready to Transform Your Teaching?",
+        "subtitle": "Join thousands of tutors who trust Durrah for their exam needs",
+        "cta": "Start Your Free Trial"
+    }
+}

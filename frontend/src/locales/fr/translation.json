@@ -1,0 +1,117 @@
+{
+    "hero": {
+        "title": "Créez des Examens Qui",
+        "titleHighlight": "Inspirent l'Excellence",
+        "subtitle": "La plateforme d'examen moderne approuvée par les tuteurs du monde entier. Créez, distribuez et notez des examens avec de puissantes fonctionnalités anti-triche.",
+        "cta": "Essai Gratuit",
+        "features": {
+            "noCreditCard": "Pas de carte de crédit requise",
+            "freeExams": "Gratuit jusqu'à 3 examens",
+            "cancelAnytime": "Annulez à tout moment"
+        }
+    },
+    "nav": {
+        "features": "Fonctionnalités",
+        "pricing": "Tarifs",
+        "testimonials": "Témoignages",
+        "login": "Connexion",
+        "getStarted": "Commencer Gratuitement"
+    },
+    "features": {
+        "title": "Tout ce dont vous avez besoin pour exceller",
+        "subtitle": "Des fonctionnalités puissantes conçues spécifiquement pour les éducateurs modernes",
+        "fastCreation": {
+            "title": "Création ultra-rapide",
+            "desc": "Créez des examens professionnels en quelques minutes avec notre interface intuitive. Plusieurs types de questions pris en charge."
+        },
+        "antiCheating": {
+            "title": "Anti-triche avancé",
+            "desc": "Mode plein écran, détection de changement d'onglet, prévention du copier-coller et suivi des violations."
+        },
+        "globalAccess": {
+            "title": "Accessibilité mondiale",
+            "desc": "Partagez des examens dans le monde entier avec des liens uniques. Les étudiants peuvent y accéder depuis n'importe quel appareil, n'importe où."
+        },
+        "unlimitedStudents": {
+            "title": "Étudiants illimités",
+            "desc": "Aucune limite sur le nombre d'étudiants pouvant passer vos examens. Évoluez sans effort."
+        },
+        "support": {
+            "title": "Support 24/7",
+            "desc": "Obtenez de l'aide quand vous en avez besoin avec notre équipe de support dédiée et une documentation complète."
+        }
+    },
+    "pricing": {
+        "title": "Tarification simple et transparente",
+        "subtitle": "Commencez gratuitement, mettez à niveau quand vous êtes prêt",
+        "starter": {
+            "title": "Démarrage",
+            "price": "Gratuit",
+            "features": [
+                "Jusqu'à 3 examens",
+                "100 étudiants par examen",
+                "Anti-triche de base",
+                "Support par email"
+            ],
+            "cta": "Commencer"
+        },
+        "professional": {
+            "title": "Professionnel",
+            "price": "200 EGP",
+            "period": "/mois",
+            "features": [
+                "Examens illimités",
+                "Étudiants illimités",
+                "Analyses et informations avancées",
+                "Support prioritaire",
+                "Toutes les fonctionnalités anti-triche"
+            ],
+            "cta": "Essai Gratuit",
+            "badge": "POPULAIRE"
+        },
+        "yearly": {
+            "title": "Professionnel Annuel",
+            "price": "2000 EGP",
+            "period": "/an",
+            "features": [
+                "Toutes les fonctionnalités professionnelles",
+                "Support de compte dédié",
+                "Retours prioritaires sur la roadmap",
+                "2 mois gratuits vs mensuel"
+            ],
+            "cta": "Essai Gratuit",
+            "badge": "MEILLEURE VALEUR"
+        }
+    },
+    "testimonials": {
+        "title": "Aimé par les tuteurs du monde entier",
+        "subtitle": "Voyez ce que les éducateurs disent de Durrah",
+        "t1": {
+            "content": "Durrah a transformé la façon dont je crée et note les examens. La plateforme m'aide à comprendre exactement où mes étudiants ont besoin d'aide.",
+            "name": "Sarah Johnson",
+            "role": "Professeur de Maths, USA"
+        },
+        "t2": {
+            "content": "Les fonctionnalités anti-triche me donnent la tranquillité d'esprit. Je peux être sûr que mes étudiants font leur propre travail.",
+            "name": "Ahmed Hassan",
+            "role": "Professeur de Physique, Égypte"
+        },
+        "t3": {
+            "content": "Créer des examens prenait des heures. Maintenant, je peux le faire en quelques minutes et me concentrer davantage sur l'enseignement. Ça vaut vraiment le coup !",
+            "name": "Maria Garcia",
+            "role": "Instructrice de Langue, Espagne"
+        }
+    },
+    "footer": {
+        "desc": "La plateforme d'examen moderne pour les tuteurs du monde entier.",
+        "product": "Produit",
+        "features": "Fonctionnalités",
+        "signup": "S'inscrire",
+        "copyright": "© 2025 Durrah pour les Tuteurs. Tous droits réservés."
+    },
+    "ctaSection": {
+        "title": "Prêt à transformer votre enseignement ?",
+        "subtitle": "Rejoignez des milliers de tuteurs qui font confiance à Durrah pour leurs examens",
+        "cta": "Commencez votre essai gratuit"
+    }
+}
