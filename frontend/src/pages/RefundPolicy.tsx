@@ -65,7 +65,7 @@ export default function RefundPolicy() {
                                 To request a refund, please contact our support team at:
                             </p>
                             <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4 mb-4">
-                                <p className="text-gray-900 dark:text-white font-medium">Email: support@durrahsystem.tech</p>
+                                <p className="text-gray-900 dark:text-white font-medium">Email: abdelrahmansandoby@gmail.com</p>
                             </div>
                             <p className="text-gray-600 dark:text-gray-300 mb-4">
                                 Please include the following information in your refund request:
@@ -142,7 +142,7 @@ export default function RefundPolicy() {
                             </p>
                             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                                 <p className="text-gray-900 dark:text-white font-medium mb-2">Durrah for Tutors Support</p>
-                                <p className="text-gray-600 dark:text-gray-300">Email: support@durrahsystem.tech</p>
+                                <p className="text-gray-600 dark:text-gray-300">Email: abdelrahmansandoby@gmail.com</p>
                             </div>
                         </section>
                     </div>
