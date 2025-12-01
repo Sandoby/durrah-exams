@@ -375,9 +375,12 @@ export default function Checkout() {
                                     <Shield className="h-8 w-8 text-indigo-600" />
                                 </div>
                                 <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('checkout.securePayment')}</h4>
-                                <p className="text-gray-500 dark:text-gray-400 mb-6">
+                                <p className="text-gray-500 dark:text-gray-400 mb-2">
                                     Proceed to pay securely with PaySky.<br />
                                     Selected Plan: <span className="font-semibold text-indigo-600">{plans.find(p => p.id === selectedPlan)?.name}</span> ({billingCycle})
+                                </p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500 italic">
+                                    * Payment will be processed in Egyptian Pounds (EGP). Displayed prices are converted for reference only.
                                 </p>
                             </div>
 
@@ -483,7 +486,7 @@ export default function Checkout() {
                 <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
                     <div className="text-center text-sm text-gray-500 dark:text-gray-400">
                         <p className="mb-2">
-                            By proceeding with payment, you agree to our terms and conditions.
+                            By proceeding with payment, you agree to our terms and conditions. All payments are processed in Egyptian Pounds (EGP).
                         </p>
                         <p>
                             Questions about our refund policy?{' '}
