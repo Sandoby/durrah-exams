@@ -5,6 +5,7 @@ import { Loader2, FileDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import * as XLSX from 'xlsx';
+import { TableSkeleton } from './skeletons';
 
 
 interface ExamResultsProps {
@@ -233,8 +234,11 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center p-8">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                <div className="mb-6 animate-pulse">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-48"></div>
+                </div>
+                <TableSkeleton rows={5} columns={5} />
             </div>
         );
     }

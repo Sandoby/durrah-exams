@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { ExamResults } from '../components/ExamResults';
 import { ChatWidget } from '../components/ChatWidget';
+import { CardSkeleton } from '../components/skeletons';
 
 interface Exam {
     id: string;
@@ -245,8 +246,27 @@ export default function Dashboard() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between h-16">
+                            <div className="flex items-center">
+                                <Logo />
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="mb-8 animate-pulse">
+                        <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-4"></div>
+                        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-96"></div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <CardSkeleton />
+                        <CardSkeleton />
+                        <CardSkeleton />
+                    </div>
+                </main>
             </div>
         );
     }
