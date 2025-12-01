@@ -19,6 +19,8 @@ import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 
+import { LocationLanguageHandler } from './components/LocationLanguageHandler';
+
 function App() {
   const { i18n } = useTranslation();
 
@@ -35,6 +37,7 @@ function App() {
 
   return (
     <AuthProvider>
+      <LocationLanguageHandler />
       <SubmissionSync />
       <Router>
         <div className="min-h-screen bg-background text-foreground font-sans antialiased">

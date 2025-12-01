@@ -154,30 +154,30 @@
                 "desc": "Pour les éducateurs sérieux"
             }
         },
-        "selected": "Sélectionner le Plan",
+        "selected": "Sélectionner un plan",
         "choose": "Choisir",
-        "secure": "Paiement Sécurisé",
+        "secure": "Paiement sécurisé",
         "coupon": {
-            "label": "Vous avez un code promo?",
-            "placeholder": "Entrez le code",
+            "label": "Avez-vous un code promo ?",
+            "placeholder": "Entrer le code",
             "apply": "Appliquer",
             "remove": "Retirer"
         },
         "summary": {
-            "title": "Résumé de la Commande",
-            "original": "Prix Original:",
-            "discount": "Remise:",
-            "final": "Prix Final:",
+            "title": "Résumé de la commande",
+            "original": "Prix original :",
+            "discount": "Remise :",
+            "final": "Prix final :",
             "free": "Gratuit"
         },
         "features": {
             "fast": {
-                "title": "Ultra Rapide",
-                "desc": "Créez des examens en quelques minutes avec nos outils IA."
+                "title": "Éclair Rapide",
+                "desc": "Créez des examens en quelques minutes avec nos outils alimentés par l'IA."
             },
             "antiCheat": {
-                "title": "Anti-triche",
-                "desc": "Fonctionnalités de surveillance avancées incluant la détection de changement d'onglet."
+                "title": "Anti-Triche",
+                "desc": "Fonctionnalités de surveillance avancées, y compris la détection de changement d'onglet."
             },
             "interface": {
                 "title": "Belle Interface",

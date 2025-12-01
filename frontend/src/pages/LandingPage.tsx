@@ -1,14 +1,19 @@
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star } from 'lucide-react';
+import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { useCurrency } from '../hooks/useCurrency';
 
 export default function LandingPage() {
     const { t, i18n } = useTranslation();
     const registrationUrl = 'https://tutors.durrahsystem.tech/register';
     const isRTL = i18n.language === 'ar';
+
+    // Dynamic currency conversion
+    const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(200);
+    const { price: yearlyPrice } = useCurrency(2000);
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-violet-200 dark:from-indigo-950 dark:to-violet-900" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -102,27 +107,33 @@ export default function LandingPage() {
                                 icon: Globe,
                                 title: t('features.globalAccess.title'),
                                 description: t('features.globalAccess.desc'),
-                                gradient: 'from-purple-400 to-pink-500'
+                                gradient: 'from-pink-400 to-rose-500'
                             },
                             {
                                 icon: Users,
                                 title: t('features.unlimitedStudents.title'),
                                 description: t('features.unlimitedStudents.desc'),
-                                gradient: 'from-red-400 to-rose-500'
+                                gradient: 'from-green-400 to-emerald-500'
                             },
                             {
                                 icon: MessageCircle,
                                 title: t('features.support.title'),
                                 description: t('features.support.desc'),
-                                gradient: 'from-blue-500 to-indigo-500'
+                                gradient: 'from-blue-400 to-cyan-500'
+                            },
+                            {
+                                icon: Layout,
+                                title: t('features.interface.title'),
+                                description: t('features.interface.desc'),
+                                gradient: 'from-purple-400 to-fuchsia-500'
                             }
                         ].map((feature, index) => (
-                            <div key={index} className="group p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-gray-700">
-                                <div className={`w-14 h-14 rounded-xl bg-gradient-to-r ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                            <div key={index} className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-gray-700 group">
+                                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
                                     <feature.icon className="h-7 w-7 text-white" />
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
-                                <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+                                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{feature.description}</p>
                             </div>
                         ))}
                     </div>
@@ -130,27 +141,32 @@ export default function LandingPage() {
             </section>
 
             {/* Pricing Section */}
-            <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
+            <section id="pricing" className="py-20 bg-gray-50 dark:bg-gray-900/50 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('pricing.title')}</h2>
                         <p className="text-xl text-gray-600 dark:text-gray-300">{t('pricing.subtitle')}</p>
                     </div>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border-2 border-gray-200 dark:border-gray-700">
+                    <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 transform hover:scale-105 transition-transform border border-gray-100 dark:border-gray-700">
                             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('pricing.starter.title')}</h3>
                             <div className="mb-6"><span className="text-5xl font-bold text-gray-900 dark:text-white">{t('pricing.starter.price')}</span></div>
                             <ul className="space-y-4 mb-8">
                                 {(t('pricing.starter.features', { returnObjects: true }) as string[]).map((feature, i) => (
-                                    <li key={i} className="flex items-start"><Check className="h-6 w-6 text-indigo-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{feature}</span></li>
+                                    <li key={i} className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{feature}</span></li>
                                 ))}
                             </ul>
-                            <Link to="/register" className="block w-full text-center bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white py-3 rounded-xl font-semibold hover:bg-indigo-50 dark:hover:bg-gray-600 transition">{t('pricing.starter.cta')}</Link>
+                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition">{t('pricing.starter.cta')}</a>
                         </div>
                         <div className="bg-gradient-to-br from-violet-600 to-blue-600 rounded-2xl shadow-2xl p-8 relative overflow-hidden transform hover:scale-105 transition-transform">
                             <div className="absolute top-0 right-0 bg-yellow-400 text-gray-900 px-4 py-1 rounded-bl-xl font-bold text-sm">{t('pricing.professional.badge')}</div>
                             <h3 className="text-2xl font-bold text-white mb-2">{t('pricing.professional.title')}</h3>
-                            <div className="mb-6"><span className="text-5xl font-bold text-white">{t('pricing.professional.price')}</span><span className="text-violet-100">{t('pricing.professional.period')}</span></div>
+                            <div className="mb-6">
+                                <span className="text-5xl font-bold text-white">
+                                    {isCurrencyLoading ? '...' : `${currencyCode} ${monthlyPrice}`}
+                                </span>
+                                <span className="text-violet-100">{t('pricing.professional.period')}</span>
+                            </div>
                             <ul className="space-y-4 mb-8">
                                 {(t('pricing.professional.features', { returnObjects: true }) as string[]).map((feature, i) => (
                                     <li key={i} className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-violet-50">{feature}</span></li>
@@ -161,7 +177,12 @@ export default function LandingPage() {
                         <div className="bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-700 rounded-2xl shadow-2xl p-8 relative overflow-hidden transform hover:scale-105 transition-transform">
                             <div className="absolute top-0 right-0 bg-white/90 text-indigo-700 px-4 py-1 rounded-bl-xl font-bold text-sm">{t('pricing.yearly.badge')}</div>
                             <h3 className="text-2xl font-bold text-white mb-2">{t('pricing.yearly.title')}</h3>
-                            <div className="mb-6"><span className="text-5xl font-bold text-white">{t('pricing.yearly.price')}</span><span className="text-indigo-100">{t('pricing.yearly.period')}</span></div>
+                            <div className="mb-6">
+                                <span className="text-5xl font-bold text-white">
+                                    {isCurrencyLoading ? '...' : `${currencyCode} ${yearlyPrice}`}
+                                </span>
+                                <span className="text-indigo-100">{t('pricing.yearly.period')}</span>
+                            </div>
                             <ul className="space-y-4 mb-8">
                                 {(t('pricing.yearly.features', { returnObjects: true }) as string[]).map((feature, i) => (
                                     <li key={i} className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-indigo-50">{feature}</span></li>

@@ -8,6 +8,8 @@ import { paySkyIntegration } from '../lib/paysky';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 
+import { useCurrency } from '../hooks/useCurrency';
+
 export default function Checkout() {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -19,12 +21,21 @@ export default function Checkout() {
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
     const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
+    // Dynamic currency conversion
+    const proMonthlyPrice = 200;
+    const proYearlyPrice = 2000;
+
+    const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(proMonthlyPrice);
+    const { price: yearlyPrice } = useCurrency(proYearlyPrice);
+
     // ---------- Plans ----------
     const plans = [
         {
             id: 'basic',
             name: t('checkout.plans.starter.name'),
-            price: billingCycle === 'monthly' ? 0 : 0,
+            price: 0,
+            displayPrice: '0',
+            currency: currencyCode,
             description: t('checkout.plans.starter.desc'),
             features: [
                 t('pricing.starter.features.0'),
@@ -37,7 +48,9 @@ export default function Checkout() {
         {
             id: 'pro',
             name: t('checkout.plans.pro.name'),
-            price: billingCycle === 'monthly' ? 200 : 2000,
+            price: billingCycle === 'monthly' ? proMonthlyPrice : proYearlyPrice,
+            displayPrice: billingCycle === 'monthly' ? monthlyPrice : yearlyPrice,
+            currency: currencyCode,
             description: t('checkout.plans.pro.desc'),
             features: [
                 t('pricing.professional.features.0'),
@@ -310,7 +323,11 @@ export default function Checkout() {
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{plan.description}</p>
                                 <div className="flex items-baseline mb-6">
                                     <span className="text-4xl font-extrabold text-gray-900 dark:text-white">
-                                        {plan.price === 0 ? t('pricing.starter.price') : `EGP ${plan.price}`}
+                                        {isCurrencyLoading ? (
+                                            <span className="animate-pulse">...</span>
+                                        ) : (
+                                            plan.price === 0 ? t('pricing.starter.price') : `${plan.currency} ${plan.displayPrice}`
+                                        )}
                                     </span>
                                     <span className="ml-2 text-gray-500 dark:text-gray-400">{billingCycle === 'monthly' ? t('pricing.professional.period') : t('pricing.yearly.period')}</span>
                                 </div>

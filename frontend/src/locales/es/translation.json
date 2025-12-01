@@ -154,30 +154,30 @@
                 "desc": "Para educadores serios"
             }
         },
-        "selected": "Seleccionar Plan",
+        "selected": "Seleccionar plan",
         "choose": "Elegir",
-        "secure": "Pago Seguro",
+        "secure": "Pago seguro",
         "coupon": {
             "label": "¿Tienes un código de cupón?",
-            "placeholder": "Ingresa el código",
+            "placeholder": "Introduce el código",
             "apply": "Aplicar",
-            "remove": "Quitar"
+            "remove": "Eliminar"
         },
         "summary": {
-            "title": "Resumen del Pedido",
-            "original": "Precio Original:",
+            "title": "Resumen del pedido",
+            "original": "Precio original:",
             "discount": "Descuento:",
-            "final": "Precio Final:",
+            "final": "Precio final:",
             "free": "Gratis"
         },
         "features": {
             "fast": {
-                "title": "Ultrarrápido",
-                "desc": "Crea exámenes en minutos con nuestras herramientas con IA."
+                "title": "Relámpago Rápido",
+                "desc": "Crea exámenes en minutos con nuestras herramientas impulsadas por IA."
             },
             "antiCheat": {
-                "title": "Anti-trampas",
-                "desc": "Funciones de monitoreo avanzadas incluyendo detección de cambio de pestaña."
+                "title": "Anti-Trampas",
+                "desc": "Funciones de monitoreo avanzadas que incluyen detección de cambio de pestaña."
             },
             "interface": {
                 "title": "Hermosa Interfaz",
