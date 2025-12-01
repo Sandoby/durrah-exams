@@ -478,6 +478,24 @@ export default function Checkout() {
                         </div>
                     </div>
                 </div>
+
+                {/* Footer with refund policy link */}
+                <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
+                    <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+                        <p className="mb-2">
+                            By proceeding with payment, you agree to our terms and conditions.
+                        </p>
+                        <p>
+                            Questions about our refund policy?{' '}
+                            <button
+                                onClick={() => navigate('/refund-policy')}
+                                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 underline font-medium"
+                            >
+                                View Refund Policy
+                            </button>
+                        </p>
+                    </div>
+                </div>
             </main>
         </div>
     );
