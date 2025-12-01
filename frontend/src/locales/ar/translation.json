@@ -140,9 +140,11 @@
     "checkout": {
         "back": "عودة",
         "title": "للمعلمين",
+        "subtitle": "اختر الخطة التي تناسب احتياجاتك",
         "monthly": "شهري",
         "yearly": "سنوي",
         "save": "وفر 17%",
+        "save20": "وفر 20%",
         "mostPopular": "الأكثر شيوعاً",
         "plans": {
             "starter": {
@@ -157,11 +159,17 @@
         "selected": "اختر الخطة",
         "choose": "اختر",
         "secure": "دفع آمن",
+        "secureCheckout": "دفع آمن",
+        "securePayment": "دفع آمن",
+        "processing": "جارٍ المعالجة...",
+        "proceed": "متابعة الدفع",
         "coupon": {
             "label": "هل لديك رمز قسيمة؟",
             "placeholder": "أدخل الرمز",
             "apply": "تطبيق",
-            "remove": "إزالة"
+            "remove": "إزالة",
+            "free": "مجاني",
+            "off": "خصم"
         },
         "summary": {
             "title": "ملخص الطلب",

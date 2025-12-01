@@ -140,9 +140,11 @@
     "checkout": {
         "back": "Atrás",
         "title": "para Tutores",
+        "subtitle": "Elige el plan que se adapte a tus necesidades",
         "monthly": "Mensual",
         "yearly": "Anual",
         "save": "AHORRA 17%",
+        "save20": "AHORRA 20%",
         "mostPopular": "MÁS POPULAR",
         "plans": {
             "starter": {
@@ -157,11 +159,17 @@
         "selected": "Seleccionar plan",
         "choose": "Elegir",
         "secure": "Pago seguro",
+        "secureCheckout": "Pago seguro",
+        "securePayment": "Pago seguro",
+        "processing": "Procesando...",
+        "proceed": "Proceder al pago",
         "coupon": {
             "label": "¿Tienes un código de cupón?",
             "placeholder": "Introduce el código",
             "apply": "Aplicar",
-            "remove": "Eliminar"
+            "remove": "Eliminar",
+            "free": "Gratis",
+            "off": "DE DESCUENTO"
         },
         "summary": {
             "title": "Resumen del pedido",

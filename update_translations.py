@@ -5,9 +5,11 @@ import os
 checkout_en = {
     "back": "Back",
     "title": "for Tutors",
+    "subtitle": "Choose the plan that fits your needs",
     "monthly": "Monthly",
     "yearly": "Yearly",
     "save": "SAVE 17%",
+    "save20": "SAVE 20%",
     "mostPopular": "MOST POPULAR",
     "plans": {
         "starter": {
@@ -22,11 +24,17 @@ checkout_en = {
     "selected": "Select Plan",
     "choose": "Choose",
     "secure": "Secure Checkout",
+    "secureCheckout": "Secure Checkout",
+    "securePayment": "Secure Payment",
+    "processing": "Processing...",
+    "proceed": "Proceed to Payment",
     "coupon": {
         "label": "Have a coupon code?",
         "placeholder": "Enter code",
         "apply": "Apply",
-        "remove": "Remove"
+        "remove": "Remove",
+        "free": "Free",
+        "off": "OFF"
     },
     "summary": {
         "title": "Order Summary",
@@ -54,9 +62,11 @@ checkout_en = {
 checkout_ar = {
     "back": "عودة",
     "title": "للمعلمين",
+    "subtitle": "اختر الخطة التي تناسب احتياجاتك",
     "monthly": "شهري",
     "yearly": "سنوي",
     "save": "وفر 17%",
+    "save20": "وفر 20%",
     "mostPopular": "الأكثر شيوعاً",
     "plans": {
         "starter": {
@@ -71,11 +81,17 @@ checkout_ar = {
     "selected": "اختر الخطة",
     "choose": "اختر",
     "secure": "دفع آمن",
+    "secureCheckout": "دفع آمن",
+    "securePayment": "دفع آمن",
+    "processing": "جارٍ المعالجة...",
+    "proceed": "متابعة الدفع",
     "coupon": {
         "label": "هل لديك رمز قسيمة؟",
         "placeholder": "أدخل الرمز",
         "apply": "تطبيق",
-        "remove": "إزالة"
+        "remove": "إزالة",
+        "free": "مجاني",
+        "off": "خصم"
     },
     "summary": {
         "title": "ملخص الطلب",
@@ -103,9 +119,11 @@ checkout_ar = {
 checkout_fr = {
     "back": "Retour",
     "title": "pour les Tuteurs",
+    "subtitle": "Choisissez le plan qui correspond à vos besoins",
     "monthly": "Mensuel",
     "yearly": "Annuel",
     "save": "ÉCONOMISEZ 17%",
+    "save20": "ÉCONOMISEZ 20%",
     "mostPopular": "LE PLUS POPULAIRE",
     "plans": {
         "starter": {
@@ -120,11 +138,17 @@ checkout_fr = {
     "selected": "Sélectionner un plan",
     "choose": "Choisir",
     "secure": "Paiement sécurisé",
+    "secureCheckout": "Paiement sécurisé",
+    "securePayment": "Paiement sécurisé",
+    "processing": "Traitement...",
+    "proceed": "Procéder au paiement",
     "coupon": {
         "label": "Avez-vous un code promo ?",
         "placeholder": "Entrer le code",
         "apply": "Appliquer",
-        "remove": "Retirer"
+        "remove": "Retirer",
+        "free": "Gratuit",
+        "off": "DE RÉDUCTION"
     },
     "summary": {
         "title": "Résumé de la commande",
@@ -152,9 +176,11 @@ checkout_fr = {
 checkout_es = {
     "back": "Atrás",
     "title": "para Tutores",
+    "subtitle": "Elige el plan que se adapte a tus necesidades",
     "monthly": "Mensual",
     "yearly": "Anual",
     "save": "AHORRA 17%",
+    "save20": "AHORRA 20%",
     "mostPopular": "MÁS POPULAR",
     "plans": {
         "starter": {
@@ -169,11 +195,17 @@ checkout_es = {
     "selected": "Seleccionar plan",
     "choose": "Elegir",
     "secure": "Pago seguro",
+    "secureCheckout": "Pago seguro",
+    "securePayment": "Pago seguro",
+    "processing": "Procesando...",
+    "proceed": "Proceder al pago",
     "coupon": {
         "label": "¿Tienes un código de cupón?",
         "placeholder": "Introduce el código",
         "apply": "Aplicar",
-        "remove": "Eliminar"
+        "remove": "Eliminar",
+        "free": "Gratis",
+        "off": "DE DESCUENTO"
     },
     "summary": {
         "title": "Resumen del pedido",

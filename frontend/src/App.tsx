@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import UpdatePassword from './pages/UpdatePassword';
 import Checkout from './pages/Checkout';
+import RefundPolicy from './pages/RefundPolicy';
 
 import Dashboard from './pages/Dashboard';
 import ExamEditor from './pages/ExamEditor';
@@ -55,6 +56,7 @@ function App() {
             <Route path="/exam/:id" element={<ExamView />} />
             <Route path="/exam/:examId/analytics" element={<AnalyticsDashboard />} />
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
           </Routes>
           <Toaster position="top-right" />
         </div>

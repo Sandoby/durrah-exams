@@ -140,9 +140,11 @@
     "checkout": {
         "back": "Retour",
         "title": "pour les Tuteurs",
+        "subtitle": "Choisissez le plan qui correspond à vos besoins",
         "monthly": "Mensuel",
         "yearly": "Annuel",
         "save": "ÉCONOMISEZ 17%",
+        "save20": "ÉCONOMISEZ 20%",
         "mostPopular": "LE PLUS POPULAIRE",
         "plans": {
             "starter": {
@@ -157,11 +159,17 @@
         "selected": "Sélectionner un plan",
         "choose": "Choisir",
         "secure": "Paiement sécurisé",
+        "secureCheckout": "Paiement sécurisé",
+        "securePayment": "Paiement sécurisé",
+        "processing": "Traitement...",
+        "proceed": "Procéder au paiement",
         "coupon": {
             "label": "Avez-vous un code promo ?",
             "placeholder": "Entrer le code",
             "apply": "Appliquer",
-            "remove": "Retirer"
+            "remove": "Retirer",
+            "free": "Gratuit",
+            "off": "DE RÉDUCTION"
         },
         "summary": {
             "title": "Résumé de la commande",

@@ -140,9 +140,11 @@
     "checkout": {
         "back": "Back",
         "title": "for Tutors",
+        "subtitle": "Choose the plan that fits your needs",
         "monthly": "Monthly",
         "yearly": "Yearly",
         "save": "SAVE 17%",
+        "save20": "SAVE 20%",
         "mostPopular": "MOST POPULAR",
         "plans": {
             "starter": {
@@ -157,11 +159,17 @@
         "selected": "Select Plan",
         "choose": "Choose",
         "secure": "Secure Checkout",
+        "secureCheckout": "Secure Checkout",
+        "securePayment": "Secure Payment",
+        "processing": "Processing...",
+        "proceed": "Proceed to Payment",
         "coupon": {
             "label": "Have a coupon code?",
             "placeholder": "Enter code",
             "apply": "Apply",
-            "remove": "Remove"
+            "remove": "Remove",
+            "free": "Free",
+            "off": "OFF"
         },
         "summary": {
             "title": "Order Summary",
