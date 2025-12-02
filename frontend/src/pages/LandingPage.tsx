@@ -21,6 +21,8 @@ export default function LandingPage() {
                 <title>{t('hero.title')} {t('hero.titleHighlight')} | Durrah</title>
                 <meta name="description" content={t('hero.subtitle')} />
                 <link rel="canonical" href="https://tutors.durrahsystem.tech/" />
+                {/* LottieFiles Web Component */}
+                <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
             </Helmet>
 
             {/* Navigation */}
@@ -49,9 +51,9 @@ export default function LandingPage() {
             </nav>
 
             {/* Hero Section */}
-            <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+            <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center">
+                    <div className="text-center relative">
                         <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight transition-all duration-500 ease-in-out hover:scale-105">
                             {t('hero.title')}
                             <span className="block bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
@@ -67,8 +69,22 @@ export default function LandingPage() {
                                 <ArrowRight className={`ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform ${isRTL ? 'rotate-180' : ''}`} />
                             </a>
                         </div>
-                        <div className="mt-10 max-w-3xl mx-auto">
-                            <img src="/illustrations/folks-boy-is-sitting-on-a-chair-and-writing.png" alt="Hero Illustration" className="w-full h-auto mx-auto" />
+                        {/* Hero animated illustrations */}
+                        <div className="mt-10 max-w-4xl mx-auto relative">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
+                                <lottie-player src="/illustrations/bendy-young-man-studying-something-and-watching-a-video.json" background="transparent" speed="1" class="w-full h-48" autoplay loop></lottie-player>
+                                <lottie-player src="/illustrations/juicy-woman-focused-on-online-learning.json" background="transparent" speed="1" class="w-full h-48" autoplay loop></lottie-player>
+                                <lottie-player src="/illustrations/dizzy-student-doing-homework-at-desk.json" background="transparent" speed="1" class="w-full h-48" autoplay loop></lottie-player>
+                            </div>
+                            {/* Decorative floating animations */}
+                            <div className="pointer-events-none absolute inset-0">
+                                <div className="absolute -top-10 -left-10 opacity-30">
+                                    <lottie-player src="/illustrations/juicy-boy-is-tired-of-doing-homework.json" background="transparent" speed="0.7" class="w-40 h-40" autoplay loop></lottie-player>
+                                </div>
+                                <div className="absolute -bottom-12 -right-6 opacity-30">
+                                    <lottie-player src="/illustrations/juicy-woman-focused-on-online-learning.json" background="transparent" speed="0.7" class="w-32 h-32" autoplay loop></lottie-player>
+                                </div>
+                            </div>
                         </div>
                         <div className="mt-12 flex flex-wrap justify-center gap-8 text-sm text-gray-600 dark:text-gray-400">
                             <div className="flex items-center">
@@ -85,6 +101,28 @@ export default function LandingPage() {
                 </div>
             </section>
 
+            {/* Paper → Online banner */}
+            <section className="px-4 sm:px-6 lg:px-8">
+                <div className="max-w-6xl mx-auto bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 border border-gray-100 dark:border-gray-700">
+                    <div className="flex-1">
+                        <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                            {t('hero.title')} — {t('hero.titleHighlight')}
+                        </h3>
+                        <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
+                            Instead of paper exams, start using secure, accessible online exams. Save time, prevent cheating, and reach students anywhere.
+                        </p>
+                        <div className="flex flex-wrap gap-3">
+                            <span className="inline-flex items-center bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200 px-3 py-1 rounded-full text-sm"><Shield className="h-4 w-4 mr-2"/>Secure</span>
+                            <span className="inline-flex items-center bg-violet-50 text-violet-700 dark:bg-violet-900/40 dark:text-violet-200 px-3 py-1 rounded-full text-sm"><Zap className="h-4 w-4 mr-2"/>Fast</span>
+                            <span className="inline-flex items-center bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200 px-3 py-1 rounded-full text-sm"><Globe className="h-4 w-4 mr-2"/>Global</span>
+                        </div>
+                    </div>
+                    <div className="w-full md:w-80">
+                        <lottie-player src="/illustrations/bendy-young-man-studying-something-and-watching-a-video.json" background="transparent" speed="1" class="w-full h-60" autoplay loop></lottie-player>
+                    </div>
+                </div>
+            </section>
+
             {/* Features Section */}
             <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
@@ -92,7 +130,7 @@ export default function LandingPage() {
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('features.title')}</h2>
                         <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">{t('features.subtitle')}</p>
                     </div>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 relative">
                         {[
                             {
                                 icon: Zap,
@@ -137,23 +175,18 @@ export default function LandingPage() {
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
                                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{feature.description}</p>
-                                {index === 0 && (
-                                    <img src="/illustrations/techny-standardized-test-as-method-of-assessment.png" alt="Fast Creation" className="w-full h-auto mt-6 rounded-xl" />
-                                )}
-                                {index === 1 && (
-                                    <img src="/illustrations/blue-shield-with-lock-and-coins-online-payment-security-financial-protection-and-privacy.png" alt="Anti-cheating" className="w-full h-auto mt-6 rounded-xl" />
-                                )}
-                                {index === 2 && (
-                                    <img src="/illustrations/folks-woman-focused-on-online-learning2.png" alt="Global Access" className="w-full h-auto mt-6 rounded-xl" />
-                                )}
                             </div>
                         ))}
+                        {/* Ambient animation near features */}
+                        <div className="pointer-events-none absolute -top-6 -right-6 opacity-20">
+                            <lottie-player src="/illustrations/juicy-woman-focused-on-online-learning.json" background="transparent" speed="1" class="w-32 h-32" autoplay loop></lottie-player>
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Pricing Section */}
-            <section id="pricing" className="py-20 bg-gray-50 dark:bg-gray-900/50 px-4 sm:px-6 lg:px-8">
+            <section id="pricing" className="py-20 bg-gray-50 dark:bg-gray-900/50 px-4 sm:px-6 lg:px-8 relative">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('pricing.title')}</h2>
@@ -204,10 +237,14 @@ export default function LandingPage() {
                         </div>
                     </div>
                 </div>
+                {/* Subtle animation background for pricing */}
+                <div className="pointer-events-none absolute top-6 left-2 opacity-10">
+                    <lottie-player src="/illustrations/dizzy-student-doing-homework-at-desk.json" background="transparent" speed="0.8" class="w-40 h-40" autoplay loop></lottie-player>
+                </div>
             </section>
 
             {/* Testimonials Section */}
-            <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8">
+            <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 relative">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('testimonials.title')}</h2>
@@ -249,10 +286,13 @@ export default function LandingPage() {
                         ))}
                     </div>
                 </div>
+                <div className="pointer-events-none absolute -bottom-6 right-6 opacity-10">
+                    <lottie-player src="/illustrations/bendy-young-man-studying-something-and-watching-a-video.json" background="transparent" speed="0.8" class="w-36 h-36" autoplay loop></lottie-player>
+                </div>
             </section>
 
             {/* CTA Section */}
-            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 to-violet-600">
+            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 to-violet-600 relative overflow-hidden">
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 transition-all duration-500 ease-in-out hover:scale-105">{t('ctaSection.title')}</h2>
                     <p className="text-xl text-indigo-100 mb-8">{t('ctaSection.subtitle')}</p>
@@ -260,6 +300,10 @@ export default function LandingPage() {
                         {t('ctaSection.cta')}
                         <ArrowRight className={`ml-2 h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
                     </a>
+                </div>
+                {/* CTA background animation */}
+                <div className="pointer-events-none absolute -top-8 left-8 opacity-20">
+                    <lottie-player src="/illustrations/juicy-boy-is-tired-of-doing-homework.json" background="transparent" speed="1" class="w-48 h-48" autoplay loop></lottie-player>
                 </div>
             </section>
 
