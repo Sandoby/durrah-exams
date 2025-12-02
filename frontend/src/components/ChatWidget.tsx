@@ -30,7 +30,7 @@ export function ChatWidget() {
     const [isTyping, setIsTyping] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const typingTimeoutRef = useRef<number>();
+    const typingTimeoutRef = useRef<number | undefined>(undefined);
     const channelRef = useRef<any>(null);
 
     useEffect(() => {
