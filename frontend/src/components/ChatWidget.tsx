@@ -30,7 +30,7 @@ export function ChatWidget() {
     const [isTyping, setIsTyping] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const typingTimeoutRef = useRef<NodeJS.Timeout>();
+    const typingTimeoutRef = useRef<number>();
     const channelRef = useRef<any>(null);
 
     useEffect(() => {
@@ -220,11 +220,11 @@ export function ChatWidget() {
 
         // Clear existing timeout
         if (typingTimeoutRef.current) {
-            clearTimeout(typingTimeoutRef.current);
+            window.clearTimeout(typingTimeoutRef.current);
         }
 
         // Set new timeout to stop typing indicator
-        typingTimeoutRef.current = setTimeout(() => {
+        typingTimeoutRef.current = window.setTimeout(() => {
             updateTypingStatus(false);
         }, 2000);
     };
@@ -238,7 +238,7 @@ export function ChatWidget() {
             // Stop typing indicator
             updateTypingStatus(false);
             if (typingTimeoutRef.current) {
-                clearTimeout(typingTimeoutRef.current);
+                window.clearTimeout(typingTimeoutRef.current);
             }
 
             const { error } = await supabase
