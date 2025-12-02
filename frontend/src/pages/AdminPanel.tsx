@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Users, MessageCircle, Tag, Lock, LogOut,
-    Loader2, Plus, Send, UserPlus
+    Loader2, Plus, Send, UserPlus, BarChart3
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
@@ -10,6 +10,35 @@ import toast from 'react-hot-toast';
 import { playNotificationSound } from '../lib/notificationSound';
 import { UserFiltersComponent, UserFilters } from '../components/admin/UserFilters';
 import { EnhancedUserCard } from '../components/admin/EnhancedUserCard';
+import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
+import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
+import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
+import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
+import {
+    BarChart3,
+    Users,
+    MessageCircle,
+    Tag,
+    Lock,
+    LogOut,
+    Loader2,
+    Plus,
+    Send,
+    UserPlus
+} from 'lucide-react';
+import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
+import {
+    BarChart3,
+    Users,
+    MessageCircle,
+    Tag,
+    Lock,
+    LogOut,
+    Loader2,
+    Plus,
+    Send,
+    UserPlus
+} from 'lucide-react';
 
 const SUPER_ADMIN_PASSWORD = '2352206';
 
@@ -82,7 +111,7 @@ export default function AdminPanel() {
     const [accessCode, setAccessCode] = useState('');
     const [userRole, setUserRole] = useState<'super_admin' | 'support_agent' | null>(null);
     const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'users' | 'coupons' | 'chat' | 'agents'>('users');
+    const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'coupons' | 'chat' | 'agents'>('analytics');
 
     // Users
     const [users, setUsers] = useState<User[]>([]);
@@ -881,6 +910,16 @@ export default function AdminPanel() {
                 <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
                     <nav className="-mb-px flex space-x-8">
                         <button
+                            onClick={() => setActiveTab('analytics')}
+                            className={`${activeTab === 'analytics'
+                                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                        >
+                            <BarChart3 className="h-5 w-5 mr-2" />
+                            Analytics
+                        </button>
+                        <button
                             onClick={() => setActiveTab('users')}
                             className={`${activeTab === 'users'
                                 ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
@@ -924,6 +963,31 @@ export default function AdminPanel() {
                         )}
                     </nav>
                 </div>
+
+                {/* Analytics Tab */}
+                {activeTab === 'analytics' && (
+                    <AnalyticsDashboard />
+                )}
+
+                {/* Analytics Tab */}
+                {activeTab === 'analytics' && (
+                    <AnalyticsDashboard />
+                )}
+
+                {/* Analytics Tab */}
+                {activeTab === 'analytics' && (
+                    <AnalyticsDashboard />
+                )}
+
+                {/* Analytics Tab */}
+                {activeTab === 'analytics' && (
+                    <AnalyticsDashboard />
+                )}
+
+                {/* Analytics Tab */}
+                {activeTab === 'analytics' && (
+                    <AnalyticsDashboard />
+                )}
 
                 {/* Users Tab */}
                 {activeTab === 'users' && (
