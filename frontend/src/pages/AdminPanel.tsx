@@ -8,6 +8,8 @@ import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { playNotificationSound } from '../lib/notificationSound';
+import { UserFiltersComponent, UserFilters } from '../components/admin/UserFilters';
+import { EnhancedUserCard } from '../components/admin/EnhancedUserCard';
 
 const SUPER_ADMIN_PASSWORD = '2352206';
 
@@ -84,8 +86,16 @@ export default function AdminPanel() {
 
     // Users
     const [users, setUsers] = useState<User[]>([]);
+    const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
     const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [filters, setFilters] = useState<UserFilters>({
+        searchTerm: '',
+        subscriptionStatus: 'all',
+        subscriptionPlan: 'all',
+        dateRange: 'all',
+        sortBy: 'created_at',
+        sortOrder: 'desc'
+    });
 
     // Coupons
     const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -274,6 +284,103 @@ export default function AdminPanel() {
             setIsLoadingUsers(false);
         }
     };
+
+    useEffect(() => {
+        let result = [...users];
+
+        // Search
+        if (filters.searchTerm) {
+            const term = filters.searchTerm.toLowerCase();
+            result = result.filter(user =>
+                user.email.toLowerCase().includes(term) ||
+                user.full_name?.toLowerCase().includes(term) ||
+                user.id.includes(term)
+            );
+        }
+
+        // Status Filter
+        if (filters.subscriptionStatus !== 'all') {
+            if (filters.subscriptionStatus === 'expired') {
+                const now = new Date();
+                result = result.filter(user =>
+                    user.subscription_end_date && new Date(user.subscription_end_date) < now
+                );
+            } else if (filters.subscriptionStatus === 'active') {
+                const now = new Date();
+                result = result.filter(user =>
+                    user.subscription_status === 'active' &&
+                    (!user.subscription_end_date || new Date(user.subscription_end_date) > now)
+                );
+            } else {
+                result = result.filter(user =>
+                    !user.subscription_status || user.subscription_status !== 'active'
+                );
+            }
+        }
+
+        // Plan Filter
+        if (filters.subscriptionPlan !== 'all') {
+            result = result.filter(user =>
+                user.subscription_plan === filters.subscriptionPlan
+            );
+        }
+
+        // Date Range Filter
+        if (filters.dateRange !== 'all') {
+            const now = new Date();
+            let startDate = new Date();
+
+            switch (filters.dateRange) {
+                case 'today':
+                    startDate.setHours(0, 0, 0, 0);
+                    break;
+                case 'week':
+                    startDate.setDate(now.getDate() - 7);
+                    break;
+                case 'month':
+                    startDate.setMonth(now.getMonth() - 1);
+                    break;
+                case 'custom':
+                    if (filters.customDateStart) {
+                        startDate = new Date(filters.customDateStart);
+                    }
+                    break;
+            }
+
+            result = result.filter(user => new Date(user.created_at) >= startDate);
+
+            if (filters.dateRange === 'custom' && filters.customDateEnd) {
+                const endDate = new Date(filters.customDateEnd);
+                endDate.setHours(23, 59, 59, 999);
+                result = result.filter(user => new Date(user.created_at) <= endDate);
+            }
+        }
+
+        // Sorting
+        result.sort((a, b) => {
+            let valA: any = a[filters.sortBy as keyof User];
+            let valB: any = b[filters.sortBy as keyof User];
+
+            if (filters.sortBy === 'subscription_end_date') {
+                valA = a.subscription_end_date ? new Date(a.subscription_end_date).getTime() : 0;
+                valB = b.subscription_end_date ? new Date(b.subscription_end_date).getTime() : 0;
+            } else if (filters.sortBy === 'created_at') {
+                valA = new Date(a.created_at).getTime();
+                valB = new Date(b.created_at).getTime();
+            } else {
+                valA = (valA || '').toString().toLowerCase();
+                valB = (valB || '').toString().toLowerCase();
+            }
+
+            if (filters.sortOrder === 'asc') {
+                return valA > valB ? 1 : -1;
+            } else {
+                return valA < valB ? 1 : -1;
+            }
+        });
+
+        setFilteredUsers(result);
+    }, [users, filters]);
 
     const activateSubscription = async (userId: string, plan: string, duration: 'monthly' | 'yearly') => {
         try {
@@ -821,111 +928,51 @@ export default function AdminPanel() {
                 {/* Users Tab */}
                 {activeTab === 'users' && (
                     <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex justify-between items-center mb-6">
                             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                User Management
+                                Users Management
                             </h2>
-                            <div className="mt-4">
-                                <input
-                                    type="text"
-                                    placeholder="Search by name or email..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                />
+                            <div className="flex items-center gap-2">
+                                <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-300">
+                                    Total: {users.length}
+                                </span>
+                                <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
+                                    Showing: {filteredUsers.length}
+                                </span>
                             </div>
                         </div>
-                        <div className="overflow-x-auto">
-                            {isLoadingUsers ? (
-                                <div className="flex items-center justify-center p-8">
-                                    <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-                                </div>
-                            ) : (
-                                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                    <thead className="bg-gray-50 dark:bg-gray-700">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                User
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Status
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Plan
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Valid Until
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {users.filter(user =>
-                                            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                            (user.full_name && user.full_name.toLowerCase().includes(searchTerm.toLowerCase()))
-                                        ).map((user) => (
-                                            <tr key={user.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                                        {user.full_name || user.email}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                                                        {user.email}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {user.subscription_status === 'active' ? (
-                                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                                            Active
-                                                        </span>
-                                                    ) : (
-                                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400">
-                                                            Free
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                    {user.subscription_plan || '-'}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                    {user.subscription_end_date
-                                                        ? new Date(user.subscription_end_date).toLocaleDateString()
-                                                        : '-'
-                                                    }
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                                                    {user.subscription_status === 'active' ? (
-                                                        <button
-                                                            onClick={() => deactivateSubscription(user.id)}
-                                                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                        >
-                                                            Deactivate
-                                                        </button>
-                                                    ) : (
-                                                        <>
-                                                            <button
-                                                                onClick={() => activateSubscription(user.id, 'Professional', 'monthly')}
-                                                                className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                                                            >
-                                                                1 Month
-                                                            </button>
-                                                            <button
-                                                                onClick={() => activateSubscription(user.id, 'Professional', 'yearly')}
-                                                                className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                                                            >
-                                                                1 Year
-                                                            </button>
-                                                        </>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
+
+                        <UserFiltersComponent
+                            filters={filters}
+                            onFiltersChange={setFilters}
+                            totalResults={filteredUsers.length}
+                        />
+
+                        {isLoadingUsers ? (
+                            <div className="flex justify-center py-12">
+                                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {filteredUsers.length === 0 ? (
+                                    <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">
+                                        <Users className="mx-auto h-12 w-12 text-gray-400" />
+                                        <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No users found</h3>
+                                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                            Try adjusting your search or filters.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    filteredUsers.map((user) => (
+                                        <EnhancedUserCard
+                                            key={user.id}
+                                            user={user}
+                                            onUpdate={fetchUsers}
+                                        />
+                                    ))
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -1319,7 +1366,27 @@ export default function AdminPanel() {
                                         </div>
                                         <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex justify-end">
                                             <button
-                                                onClick={closeChat}
+                                                onClick={async () => {
+                                                    if (!selectedChatUser) return;
+
+                                                    try {
+                                                        // Send system message to trigger rating on user side
+                                                        await supabase
+                                                            .from('chat_messages')
+                                                            .insert({
+                                                                user_id: selectedChatUser,
+                                                                user_email: selectedUserInfo?.email || 'admin',
+                                                                message: 'CHAT_CLOSED_BY_ADMIN',
+                                                                is_admin: true
+                                                            });
+
+                                                        // Close the chat assignment
+                                                        await closeChat();
+                                                    } catch (error) {
+                                                        console.error('Error closing chat:', error);
+                                                        toast.error('Failed to close chat properly');
+                                                    }
+                                                }}
                                                 className="text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 px-3 py-1 rounded-full transition-colors"
                                             >
                                                 Close Chat & Request Rating

@@ -324,12 +324,14 @@ export function ChatWidget() {
             {!isOpen && (
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="fixed bottom-6 right-6 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-all z-50 flex items-center justify-center relative"
+                    className="fixed bottom-4 right-4 md:bottom-6 md:right-6 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-all z-[9999] flex items-center justify-center hover:scale-110 active:scale-95"
+                    aria-label="Open chat"
+                    style={{ position: 'fixed', bottom: '24px', right: '24px' }}
                 >
                     <MessageCircle className="h-6 w-6" />
                     {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
-                            {unreadCount > 9 ? '9+' : unreadCount}
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white animate-pulse">
+                            {unreadCount}
                         </span>
                     )}
                 </button>
