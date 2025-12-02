@@ -1,15 +1,17 @@
 /// <reference types="vite/client" />
 
-declare namespace JSX {
-  interface IntrinsicElements {
-    'lottie-player': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
-      src?: string;
-      background?: string;
-      speed?: number | string;
-      autoplay?: boolean;
-      loop?: boolean;
-      class?: string;
-    };
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'lottie-player': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
+        src?: string;
+        background?: string;
+        speed?: number | string;
+        autoplay?: boolean;
+        loop?: boolean;
+        className?: string;
+      };
+    }
   }
 }
 

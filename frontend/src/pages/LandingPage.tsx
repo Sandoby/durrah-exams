@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { LottiePlayer } from '../components/LottiePlayer';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
 
@@ -72,17 +73,17 @@ export default function LandingPage() {
                         {/* Hero animated illustrations */}
                         <div className="mt-10 max-w-4xl mx-auto relative">
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
-                                <lottie-player src="/illustrations/bendy-young-man-studying-something-and-watching-a-video.json" background="transparent" speed="1" class="w-full h-48" autoplay loop></lottie-player>
-                                <lottie-player src="/illustrations/juicy-woman-focused-on-online-learning.json" background="transparent" speed="1" class="w-full h-48" autoplay loop></lottie-player>
-                                <lottie-player src="/illustrations/dizzy-student-doing-homework-at-desk.json" background="transparent" speed="1" class="w-full h-48" autoplay loop></lottie-player>
+                                <LottiePlayer src="/illustrations/bendy-young-man-studying-something-and-watching-a-video.json" background="transparent" speed={1} className="w-full h-48" autoplay loop />
+                                <LottiePlayer src="/illustrations/juicy-woman-focused-on-online-learning.json" background="transparent" speed={1} className="w-full h-48" autoplay loop />
+                                <LottiePlayer src="/illustrations/dizzy-student-doing-homework-at-desk.json" background="transparent" speed={1} className="w-full h-48" autoplay loop />
                             </div>
                             {/* Decorative floating animations */}
                             <div className="pointer-events-none absolute inset-0">
                                 <div className="absolute -top-10 -left-10 opacity-30">
-                                    <lottie-player src="/illustrations/juicy-boy-is-tired-of-doing-homework.json" background="transparent" speed="0.7" class="w-40 h-40" autoplay loop></lottie-player>
+                                    <LottiePlayer src="/illustrations/juicy-boy-is-tired-of-doing-homework.json" background="transparent" speed={0.7} className="w-40 h-40" autoplay loop />
                                 </div>
                                 <div className="absolute -bottom-12 -right-6 opacity-30">
-                                    <lottie-player src="/illustrations/juicy-woman-focused-on-online-learning.json" background="transparent" speed="0.7" class="w-32 h-32" autoplay loop></lottie-player>
+                                    <LottiePlayer src="/illustrations/juicy-woman-focused-on-online-learning.json" background="transparent" speed={0.7} className="w-32 h-32" autoplay loop />
                                 </div>
                             </div>
                         </div>
@@ -118,7 +119,7 @@ export default function LandingPage() {
                         </div>
                     </div>
                     <div className="w-full md:w-80">
-                        <lottie-player src="/illustrations/bendy-young-man-studying-something-and-watching-a-video.json" background="transparent" speed="1" class="w-full h-60" autoplay loop></lottie-player>
+                        <LottiePlayer src="/illustrations/bendy-young-man-studying-something-and-watching-a-video.json" background="transparent" speed={1} className="w-full h-60" autoplay loop />
                     </div>
                 </div>
             </section>
@@ -179,7 +180,7 @@ export default function LandingPage() {
                         ))}
                         {/* Ambient animation near features */}
                         <div className="pointer-events-none absolute -top-6 -right-6 opacity-20">
-                            <lottie-player src="/illustrations/juicy-woman-focused-on-online-learning.json" background="transparent" speed="1" class="w-32 h-32" autoplay loop></lottie-player>
+                            <LottiePlayer src="/illustrations/juicy-woman-focused-on-online-learning.json" background="transparent" speed={1} className="w-32 h-32" autoplay loop />
                         </div>
                     </div>
                 </div>
@@ -239,7 +240,7 @@ export default function LandingPage() {
                 </div>
                 {/* Subtle animation background for pricing */}
                 <div className="pointer-events-none absolute top-6 left-2 opacity-10">
-                    <lottie-player src="/illustrations/dizzy-student-doing-homework-at-desk.json" background="transparent" speed="0.8" class="w-40 h-40" autoplay loop></lottie-player>
+                    <LottiePlayer src="/illustrations/dizzy-student-doing-homework-at-desk.json" background="transparent" speed={0.8} className="w-40 h-40" autoplay loop />
                 </div>
             </section>
 
@@ -287,7 +288,7 @@ export default function LandingPage() {
                     </div>
                 </div>
                 <div className="pointer-events-none absolute -bottom-6 right-6 opacity-10">
-                    <lottie-player src="/illustrations/bendy-young-man-studying-something-and-watching-a-video.json" background="transparent" speed="0.8" class="w-36 h-36" autoplay loop></lottie-player>
+                    <LottiePlayer src="/illustrations/bendy-young-man-studying-something-and-watching-a-video.json" background="transparent" speed={0.8} className="w-36 h-36" autoplay loop />
                 </div>
             </section>
 
@@ -303,7 +304,7 @@ export default function LandingPage() {
                 </div>
                 {/* CTA background animation */}
                 <div className="pointer-events-none absolute -top-8 left-8 opacity-20">
-                    <lottie-player src="/illustrations/juicy-boy-is-tired-of-doing-homework.json" background="transparent" speed="1" class="w-48 h-48" autoplay loop></lottie-player>
+                    <LottiePlayer src="/illustrations/juicy-boy-is-tired-of-doing-homework.json" background="transparent" speed={1} className="w-48 h-48" autoplay loop />
                 </div>
             </section>
 
