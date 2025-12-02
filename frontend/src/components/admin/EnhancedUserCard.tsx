@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
     User, Mail, Clock,
     CreditCard, ChevronDown, ChevronUp,
-    FileText, MessageSquare, Plus
+    FileText, MessageSquare, Plus, Calendar, X, Check
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
@@ -45,6 +45,11 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
     const [newNote, setNewNote] = useState('');
     const [isLoadingStats, setIsLoadingStats] = useState(false);
     const [isAddingNote, setIsAddingNote] = useState(false);
+    const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+    const [subscriptionAction, setSubscriptionAction] = useState<'activate' | 'extend' | 'deactivate'>('activate');
+    const [subscriptionPlan, setSubscriptionPlan] = useState<'pro' | 'basic'>('pro');
+    const [subscriptionDuration, setSubscriptionDuration] = useState<'monthly' | 'yearly' | 'custom'>('monthly');
+    const [customDays, setCustomDays] = useState(30);
 
     useEffect(() => {
         if (isExpanded && !stats) {
@@ -107,8 +112,50 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
         }
     };
 
-    const extendSubscription = async (days: number) => {
+    const activateSubscription = async () => {
         try {
+            let days = 0;
+            if (subscriptionDuration === 'monthly') {
+                days = 30;
+            } else if (subscriptionDuration === 'yearly') {
+                days = 365;
+            } else {
+                days = customDays;
+            }
+
+            const endDate = new Date();
+            endDate.setDate(endDate.getDate() + days);
+
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    subscription_status: 'active',
+                    subscription_plan: subscriptionPlan,
+                    subscription_end_date: endDate.toISOString()
+                })
+                .eq('id', user.id);
+
+            if (error) throw error;
+            toast.success(`Subscription activated: ${subscriptionPlan} (${days} days)`);
+            setShowSubscriptionModal(false);
+            onUpdate();
+        } catch (error) {
+            console.error('Error activating subscription:', error);
+            toast.error('Failed to activate subscription');
+        }
+    };
+
+    const extendSubscription = async () => {
+        try {
+            let days = 0;
+            if (subscriptionDuration === 'monthly') {
+                days = 30;
+            } else if (subscriptionDuration === 'yearly') {
+                days = 365;
+            } else {
+                days = customDays;
+            }
+
             const currentEnd = user.subscription_end_date
                 ? new Date(user.subscription_end_date)
                 : new Date();
@@ -126,10 +173,42 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
 
             if (error) throw error;
             toast.success(`Subscription extended by ${days} days`);
+            setShowSubscriptionModal(false);
             onUpdate();
         } catch (error) {
             console.error('Error extending subscription:', error);
             toast.error('Failed to extend subscription');
+        }
+    };
+
+    const deactivateSubscription = async () => {
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    subscription_status: null,
+                    subscription_plan: null,
+                    subscription_end_date: null
+                })
+                .eq('id', user.id);
+
+            if (error) throw error;
+            toast.success('Subscription deactivated');
+            setShowSubscriptionModal(false);
+            onUpdate();
+        } catch (error) {
+            console.error('Error deactivating subscription:', error);
+            toast.error('Failed to deactivate subscription');
+        }
+    };
+
+    const handleSubscriptionAction = () => {
+        if (subscriptionAction === 'activate') {
+            activateSubscription();
+        } else if (subscriptionAction === 'extend') {
+            extendSubscription();
+        } else {
+            deactivateSubscription();
         }
     };
 
@@ -294,18 +373,42 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
                                 </div>
                             ) : null}
 
-                            {/* Quick Actions */}
+                            {/* Subscription Management */}
                             <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-                                <h5 className="font-semibold text-gray-900 dark:text-white mb-2">Quick Actions</h5>
+                                <h5 className="font-semibold text-gray-900 dark:text-white mb-2">Subscription Management</h5>
                                 <div className="space-y-2">
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            extendSubscription(30);
+                                            setSubscriptionAction('activate');
+                                            setShowSubscriptionModal(true);
                                         }}
-                                        className="w-full px-3 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+                                        className="w-full px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                                     >
-                                        Extend 30 Days
+                                        <Check className="h-4 w-4" />
+                                        Activate Subscription
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSubscriptionAction('extend');
+                                            setShowSubscriptionModal(true);
+                                        }}
+                                        className="w-full px-3 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <Calendar className="h-4 w-4" />
+                                        Extend Subscription
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSubscriptionAction('deactivate');
+                                            setShowSubscriptionModal(true);
+                                        }}
+                                        className="w-full px-3 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <X className="h-4 w-4" />
+                                        Deactivate Subscription
                                     </button>
                                     <button
                                         onClick={(e) => {
@@ -362,6 +465,155 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
                                     )}
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Subscription Management Modal */}
+            {showSubscriptionModal && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                    onClick={() => setShowSubscriptionModal(false)}
+                >
+                    <div
+                        className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                {subscriptionAction === 'activate' && 'Activate Subscription'}
+                                {subscriptionAction === 'extend' && 'Extend Subscription'}
+                                {subscriptionAction === 'deactivate' && 'Deactivate Subscription'}
+                            </h3>
+                            <button
+                                onClick={() => setShowSubscriptionModal(false)}
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            {subscriptionAction === 'deactivate' ? (
+                                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                                    <p className="text-sm text-red-800 dark:text-red-200">
+                                        Are you sure you want to deactivate this user's subscription? This will remove their access to premium features.
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    {/* Plan Selection (only for activation) */}
+                                    {subscriptionAction === 'activate' && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Subscription Plan
+                                            </label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <button
+                                                    onClick={() => setSubscriptionPlan('pro')}
+                                                    className={`px-4 py-2 rounded border-2 transition-colors ${subscriptionPlan === 'pro'
+                                                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                                                            : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                                                        }`}
+                                                >
+                                                    Pro
+                                                </button>
+                                                <button
+                                                    onClick={() => setSubscriptionPlan('basic')}
+                                                    className={`px-4 py-2 rounded border-2 transition-colors ${subscriptionPlan === 'basic'
+                                                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                                                            : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                                                        }`}
+                                                >
+                                                    Basic
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Duration Selection */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Duration
+                                        </label>
+                                        <div className="grid grid-cols-3 gap-2 mb-2">
+                                            <button
+                                                onClick={() => setSubscriptionDuration('monthly')}
+                                                className={`px-4 py-2 rounded border-2 transition-colors ${subscriptionDuration === 'monthly'
+                                                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                                                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                                                    }`}
+                                            >
+                                                Monthly
+                                            </button>
+                                            <button
+                                                onClick={() => setSubscriptionDuration('yearly')}
+                                                className={`px-4 py-2 rounded border-2 transition-colors ${subscriptionDuration === 'yearly'
+                                                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                                                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                                                    }`}
+                                            >
+                                                Yearly
+                                            </button>
+                                            <button
+                                                onClick={() => setSubscriptionDuration('custom')}
+                                                className={`px-4 py-2 rounded border-2 transition-colors ${subscriptionDuration === 'custom'
+                                                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                                                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                                                    }`}
+                                            >
+                                                Custom
+                                            </button>
+                                        </div>
+
+                                        {subscriptionDuration === 'custom' && (
+                                            <div className="mt-2">
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Number of Days
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    value={customDays}
+                                                    onChange={(e) => setCustomDays(parseInt(e.target.value) || 1)}
+                                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Summary */}
+                                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                                            <strong>Summary:</strong>
+                                            {subscriptionAction === 'activate' && ` Activate ${subscriptionPlan} plan for `}
+                                            {subscriptionAction === 'extend' && ` Extend subscription by `}
+                                            {subscriptionDuration === 'monthly' && '30 days'}
+                                            {subscriptionDuration === 'yearly' && '365 days'}
+                                            {subscriptionDuration === 'custom' && `${customDays} days`}
+                                        </p>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button
+                                onClick={() => setShowSubscriptionModal(false)}
+                                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSubscriptionAction}
+                                className={`flex-1 px-4 py-2 text-white rounded transition-colors ${subscriptionAction === 'deactivate'
+                                        ? 'bg-red-600 hover:bg-red-700'
+                                        : 'bg-indigo-600 hover:bg-indigo-700'
+                                    }`}
+                            >
+                                Confirm
+                            </button>
                         </div>
                     </div>
                 </div>
