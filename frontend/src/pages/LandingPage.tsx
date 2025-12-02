@@ -81,7 +81,7 @@ export default function LandingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-indigo-950 dark:to-purple-950" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="min-h-screen bg-gradient-to-br from-violet-50 via-indigo-50 to-blue-100 dark:from-gray-900 dark:via-indigo-950 dark:to-blue-950" dir={isRTL ? 'rtl' : 'ltr'}>
             <Helmet>
                 <title>{t('hero.title')} {t('hero.titleHighlight')} | Durrah</title>
                 <meta name="description" content={t('hero.subtitle')} />
@@ -95,19 +95,19 @@ export default function LandingPage() {
                         <div className="flex items-center space-x-3">
                             <Logo className="h-10 w-10" showText={false} />
                             <div>
-                                <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                                <span className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-blue-700 bg-clip-text text-transparent">
                                     Durrah
                                 </span>
                                 <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">for Tutors</span>
                             </div>
                         </div>
                         <div className="hidden md:flex items-center space-x-8">
-                            <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium">{t('nav.features')}</a>
-                            <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium">{t('nav.pricing')}</a>
-                            <a href="#testimonials" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium">{t('nav.testimonials')}</a>
+                            <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-violet-600 dark:hover:text-blue-400 transition font-medium">{t('nav.features')}</a>
+                            <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-violet-600 dark:hover:text-blue-400 transition font-medium">{t('nav.pricing')}</a>
+                            <a href="#testimonials" className="text-gray-700 dark:text-gray-300 hover:text-violet-600 dark:hover:text-blue-400 transition font-medium">{t('nav.testimonials')}</a>
                             <LanguageSwitcher />
-                            <Link to="/login" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium">{t('nav.login')}</Link>
-                            <Link to="/register" className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-6 py-2.5 rounded-full hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold">
+                            <Link to="/login" className="text-gray-700 dark:text-gray-300 hover:text-violet-600 dark:hover:text-blue-400 transition font-medium">{t('nav.login')}</Link>
+                            <Link to="/register" className="bg-gradient-to-r from-violet-600 to-blue-700 text-white px-6 py-2.5 rounded-full hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold">
                                 {t('nav.getStarted')}
                             </Link>
                         </div>
@@ -126,13 +126,13 @@ export default function LandingPage() {
                             variants={fadeInUp}
                             transition={{ duration: 0.6 }}
                         >
-                            <div className="inline-flex items-center px-4 py-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-full mb-6">
-                                <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-2" />
-                                <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">Trusted by 1,250+ Tutors Worldwide</span>
+                            <div className="inline-flex items-center px-4 py-2 bg-violet-100 dark:bg-violet-900/30 rounded-full mb-6">
+                                <Sparkles className="h-4 w-4 text-violet-600 dark:text-violet-400 mr-2" />
+                                <span className="text-sm font-semibold text-violet-700 dark:text-violet-300">Trusted by 1,250+ Tutors Worldwide</span>
                             </div>
                             <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
                                 {t('hero.title')}
-                                <span className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mt-2">
+                                <span className="block bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-700 bg-clip-text text-transparent mt-2">
                                     {t('hero.titleHighlight')}
                                 </span>
                             </h1>
@@ -140,24 +140,24 @@ export default function LandingPage() {
                                 {t('hero.subtitle')}
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                                <a href={registrationUrl} target="_blank" rel="noreferrer" className="group bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center">
+                                <a href={registrationUrl} target="_blank" rel="noreferrer" className="group bg-gradient-to-r from-violet-600 to-blue-700 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center">
                                     {t('hero.cta')}
                                     <ArrowRight className={`ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform ${isRTL ? 'rotate-180' : ''}`} />
                                 </a>
-                                <button className="group bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-8 py-4 rounded-full text-lg font-semibold border-2 border-gray-200 dark:border-gray-700 hover:border-indigo-600 dark:hover:border-indigo-500 hover:shadow-xl transition-all duration-300 flex items-center justify-center">
+                                <button className="group bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-8 py-4 rounded-full text-lg font-semibold border-2 border-gray-200 dark:border-gray-700 hover:border-violet-600 dark:hover:border-blue-500 hover:shadow-xl transition-all duration-300 flex items-center justify-center">
                                     <Play className="h-5 w-5 mr-2" />
                                     Watch Demo
                                 </button>
                             </div>
                             <div className="flex flex-wrap gap-6 text-sm text-gray-600 dark:text-gray-400">
                                 <div className="flex items-center">
-                                    <Check className="h-5 w-5 text-green-500 mr-2" /> {t('hero.features.noCreditCard')}
+                                    <Check className="h-5 w-5 text-violet-500 mr-2" /> {t('hero.features.noCreditCard')}
                                 </div>
                                 <div className="flex items-center">
-                                    <Check className="h-5 w-5 text-green-500 mr-2" /> {t('hero.features.freeExams')}
+                                    <Check className="h-5 w-5 text-violet-500 mr-2" /> {t('hero.features.freeExams')}
                                 </div>
                                 <div className="flex items-center">
-                                    <Check className="h-5 w-5 text-green-500 mr-2" /> {t('hero.features.cancelAnytime')}
+                                    <Check className="h-5 w-5 text-violet-500 mr-2" /> {t('hero.features.cancelAnytime')}
                                 </div>
                             </div>
                         </motion.div>
@@ -167,11 +167,25 @@ export default function LandingPage() {
                             transition={{ duration: 0.8, delay: 0.2 }}
                             className="relative"
                         >
-                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl blur-3xl opacity-20"></div>
-                            <LottiePlayer
-                                animationPath="/illustrations/bendy-young-man-studying-something-and-watching-a-video.json"
-                                className="relative z-10 w-full h-auto"
-                            />
+                            <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-blue-600 rounded-3xl blur-3xl opacity-20"></div>
+                            <div className="relative z-10 grid grid-cols-2 gap-4">
+                                <LottiePlayer
+                                    animationPath="/illustrations/bendy-young-man-studying-something-and-watching-a-video.json"
+                                    className="w-full h-auto"
+                                />
+                                <LottiePlayer
+                                    animationPath="/illustrations/dizzy-student-doing-homework-at-desk.json"
+                                    className="w-full h-auto"
+                                />
+                                <LottiePlayer
+                                    animationPath="/illustrations/juicy-boy-is-tired-of-doing-homework.json"
+                                    className="w-full h-auto"
+                                />
+                                <LottiePlayer
+                                    animationPath="/illustrations/juicy-woman-focused-on-online-learning.json"
+                                    className="w-full h-auto"
+                                />
+                            </div>
                         </motion.div>
                     </div>
                 </div>
@@ -220,23 +234,23 @@ export default function LandingPage() {
                             variants={fadeInUp}
                             transition={{ delay: 0.2 }}
                         >
-                            <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-3xl p-8 border-2 border-green-200 dark:border-green-800">
+                            <div className="bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 rounded-3xl p-8 border-2 border-violet-200 dark:border-violet-800">
                                 <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Our Solution</h3>
                                 <ul className="space-y-4">
                                     <li className="flex items-start">
-                                        <span className="text-green-500 mr-3 text-2xl">✓</span>
+                                        <span className="text-violet-600 mr-3 text-2xl">✓</span>
                                         <span className="text-gray-700 dark:text-gray-300">Create exams in minutes with AI assistance</span>
                                     </li>
                                     <li className="flex items-start">
-                                        <span className="text-green-500 mr-3 text-2xl">✓</span>
+                                        <span className="text-violet-600 mr-3 text-2xl">✓</span>
                                         <span className="text-gray-700 dark:text-gray-300">Advanced anti-cheating with browser lockdown</span>
                                     </li>
                                     <li className="flex items-start">
-                                        <span className="text-green-500 mr-3 text-2xl">✓</span>
+                                        <span className="text-violet-600 mr-3 text-2xl">✓</span>
                                         <span className="text-gray-700 dark:text-gray-300">Comprehensive analytics and performance tracking</span>
                                     </li>
                                     <li className="flex items-start">
-                                        <span className="text-green-500 mr-3 text-2xl">✓</span>
+                                        <span className="text-violet-600 mr-3 text-2xl">✓</span>
                                         <span className="text-gray-700 dark:text-gray-300">Intuitive interface, ready in 5 minutes</span>
                                     </li>
                                 </ul>
@@ -272,25 +286,27 @@ export default function LandingPage() {
                             viewport={{ once: true }}
                             variants={fadeInUp}
                         >
-                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center mb-6 shadow-lg">
-                                <Zap className="h-8 w-8 text-white" />
+                            <div className="rounded-3xl p-8 border bg-white/60 dark:bg-gray-800/60 backdrop-blur-md border-violet-100 dark:border-gray-700 shadow-xl">
+                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center mb-6 shadow-lg">
+                                    <Zap className="h-8 w-8 text-white" />
+                                </div>
+                                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('features.fastCreation.title')}</h3>
+                                <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">{t('features.fastCreation.desc')}</p>
+                                <ul className="space-y-3">
+                                    <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                        <Check className="h-5 w-5 text-violet-500 mr-3" />
+                                        Drag-and-drop question builder
+                                    </li>
+                                    <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                        <Check className="h-5 w-5 text-violet-500 mr-3" />
+                                        Question bank with 1000+ templates
+                                    </li>
+                                    <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                        <Check className="h-5 w-5 text-violet-500 mr-3" />
+                                        Bulk import from Excel/CSV
+                                    </li>
+                                </ul>
                             </div>
-                            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('features.fastCreation.title')}</h3>
-                            <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">{t('features.fastCreation.desc')}</p>
-                            <ul className="space-y-3">
-                                <li className="flex items-center text-gray-700 dark:text-gray-300">
-                                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                                    Drag-and-drop question builder
-                                </li>
-                                <li className="flex items-center text-gray-700 dark:text-gray-300">
-                                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                                    Question bank with 1000+ templates
-                                </li>
-                                <li className="flex items-center text-gray-700 dark:text-gray-300">
-                                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                                    Bulk import from Excel/CSV
-                                </li>
-                            </ul>
                         </motion.div>
                         <motion.div
                             initial={{ opacity: 0, x: 50 }}
@@ -328,25 +344,27 @@ export default function LandingPage() {
                             variants={fadeInUp}
                             className="order-1 lg:order-2"
                         >
-                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center mb-6 shadow-lg">
+                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center mb-6 shadow-lg">
                                 <Shield className="h-8 w-8 text-white" />
                             </div>
-                            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('features.antiCheating.title')}</h3>
-                            <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">{t('features.antiCheating.desc')}</p>
-                            <ul className="space-y-3">
-                                <li className="flex items-center text-gray-700 dark:text-gray-300">
-                                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                                    Browser lockdown mode
-                                </li>
-                                <li className="flex items-center text-gray-700 dark:text-gray-300">
-                                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                                    Question randomization
-                                </li>
-                                <li className="flex items-center text-gray-700 dark:text-gray-300">
-                                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                                    Time limits and monitoring
-                                </li>
-                            </ul>
+                            <div className="rounded-3xl p-8 border bg-white/60 dark:bg-gray-800/60 backdrop-blur-md border-violet-100 dark:border-gray-700 shadow-xl">
+                                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('features.antiCheating.title')}</h3>
+                                <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">{t('features.antiCheating.desc')}</p>
+                                <ul className="space-y-3">
+                                    <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                        <Check className="h-5 w-5 text-violet-500 mr-3" />
+                                        Browser lockdown mode
+                                    </li>
+                                    <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                        <Check className="h-5 w-5 text-violet-500 mr-3" />
+                                        Question randomization
+                                    </li>
+                                    <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                        <Check className="h-5 w-5 text-violet-500 mr-3" />
+                                        Time limits and monitoring
+                                    </li>
+                                </ul>
+                            </div>
                         </motion.div>
                     </div>
 
@@ -358,25 +376,27 @@ export default function LandingPage() {
                             viewport={{ once: true }}
                             variants={fadeInUp}
                         >
-                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center mb-6 shadow-lg">
+                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center mb-6 shadow-lg">
                                 <Globe className="h-8 w-8 text-white" />
                             </div>
-                            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('features.globalAccess.title')}</h3>
-                            <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">{t('features.globalAccess.desc')}</p>
-                            <ul className="space-y-3">
-                                <li className="flex items-center text-gray-700 dark:text-gray-300">
-                                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                                    Multi-language support (Arabic, English, French)
-                                </li>
-                                <li className="flex items-center text-gray-700 dark:text-gray-300">
-                                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                                    RTL support for Arabic
-                                </li>
-                                <li className="flex items-center text-gray-700 dark:text-gray-300">
-                                    <Check className="h-5 w-5 text-green-500 mr-3" />
-                                    Works on any device, anywhere
-                                </li>
-                            </ul>
+                            <div className="rounded-3xl p-8 border bg-white/60 dark:bg-gray-800/60 backdrop-blur-md border-violet-100 dark:border-gray-700 shadow-xl">
+                                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('features.globalAccess.title')}</h3>
+                                <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">{t('features.globalAccess.desc')}</p>
+                                <ul className="space-y-3">
+                                    <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                        <Check className="h-5 w-5 text-violet-500 mr-3" />
+                                        Multi-language support (Arabic, English, French)
+                                    </li>
+                                    <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                        <Check className="h-5 w-5 text-violet-500 mr-3" />
+                                        RTL support for Arabic
+                                    </li>
+                                    <li className="flex items-center text-gray-700 dark:text-gray-300">
+                                        <Check className="h-5 w-5 text-violet-500 mr-3" />
+                                        Works on any device, anywhere
+                                    </li>
+                                </ul>
+                            </div>
                         </motion.div>
                         <motion.div
                             initial={{ opacity: 0, x: 50 }}
@@ -395,7 +415,7 @@ export default function LandingPage() {
             </section>
 
             {/* How It Works */}
-            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50">
+            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-indigo-950/50 dark:to-blue-950/50">
                 <div className="max-w-7xl mx-auto">
                     <motion.div
                         initial="hidden"
@@ -424,10 +444,10 @@ export default function LandingPage() {
                                 className="relative"
                             >
                                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-shadow">
-                                    <div className="absolute -top-6 left-8 w-12 h-12 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                                    <div className="absolute -top-6 left-8 w-12 h-12 bg-gradient-to-r from-violet-600 to-blue-700 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">
                                         {step.number}
                                     </div>
-                                    <step.icon className="h-12 w-12 text-indigo-600 dark:text-indigo-400 mb-4 mt-4" />
+                                    <step.icon className="h-12 w-12 text-violet-600 dark:text-blue-400 mb-4 mt-4" />
                                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">{step.title}</h3>
                                     <p className="text-gray-600 dark:text-gray-400">{step.desc}</p>
                                 </div>
@@ -446,7 +466,7 @@ export default function LandingPage() {
             </section>
 
             {/* Stats Section */}
-            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 to-violet-600 relative overflow-hidden">
+            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-violet-600 to-blue-700 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10">
                     <LottiePlayer
                         animationPath="/illustrations/dizzy-student-doing-homework-at-desk.json"
@@ -471,7 +491,7 @@ export default function LandingPage() {
                                 <div className="text-5xl md:text-6xl font-bold text-white mb-2">
                                     {stat.value.toLocaleString()}{stat.suffix}
                                 </div>
-                                <div className="text-indigo-100 text-lg">{stat.label}</div>
+                                <div className="text-violet-100 text-lg">{stat.label}</div>
                             </motion.div>
                         ))}
                     </div>
@@ -524,6 +544,7 @@ export default function LandingPage() {
                                     {isCurrencyLoading ? '...' : `${currencyCode} ${monthlyPrice}`}
                                 </span>
                                 <span className="text-violet-100">{t('pricing.professional.period')}</span>
+                                <span className="ml-3 inline-block bg-white/20 text-white text-xs px-2 py-1 rounded-full">Save 20% yearly</span>
                             </div>
                             <ul className="space-y-4 mb-8">
                                 {(t('pricing.professional.features', { returnObjects: true }) as string[]).map((feature, i) => (
@@ -548,6 +569,7 @@ export default function LandingPage() {
                                     {isCurrencyLoading ? '...' : `${currencyCode} ${yearlyPrice}`}
                                 </span>
                                 <span className="text-indigo-100">{t('pricing.yearly.period')}</span>
+                                <span className="ml-3 inline-block bg-white/20 text-white text-xs px-2 py-1 rounded-full">Best value</span>
                             </div>
                             <ul className="space-y-4 mb-8">
                                 {(t('pricing.yearly.features', { returnObjects: true }) as string[]).map((feature, i) => (
@@ -583,7 +605,7 @@ export default function LandingPage() {
                     </motion.div>
 
                     <div className="relative max-w-4xl mx-auto">
-                        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-12 border border-gray-100 dark:border-gray-700">
+                        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-3xl shadow-2xl p-12 border border-violet-100 dark:border-gray-700">
                             <div className="flex mb-6">
                                 {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
                                     <Star key={i} className="h-6 w-6 text-yellow-400 fill-current" />
@@ -593,7 +615,7 @@ export default function LandingPage() {
                                 "{testimonials[currentTestimonial].content}"
                             </p>
                             <div className="flex items-center">
-                                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 flex items-center justify-center text-white font-bold text-2xl mr-4">
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-violet-600 to-blue-700 flex items-center justify-center text-white font-bold text-2xl mr-4">
                                     {testimonials[currentTestimonial].name.charAt(0)}
                                 </div>
                                 <div>
@@ -608,18 +630,22 @@ export default function LandingPage() {
                                     key={index}
                                     onClick={() => setCurrentTestimonial(index)}
                                     className={`w-3 h-3 rounded-full transition-all ${index === currentTestimonial
-                                        ? 'bg-indigo-600 w-8'
+                                        ? 'bg-violet-600 w-8'
                                         : 'bg-gray-300 dark:bg-gray-600'
                                         }`}
                                 />
                             ))}
+                        </div>
+                        <div className="flex justify-center mt-4 gap-6">
+                            <button onClick={() => setCurrentTestimonial((currentTestimonial - 1 + testimonials.length) % testimonials.length)} className="px-3 py-2 rounded-full border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-violet-600">Prev</button>
+                            <button onClick={() => setCurrentTestimonial((currentTestimonial + 1) % testimonials.length)} className="px-3 py-2 rounded-full border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-violet-600">Next</button>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* CTA Section */}
-            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
+            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-violet-700 via-indigo-700 to-blue-800 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10">
                     <img
                         src="/illustrations/create-an-illustrated-character-or-minimal-scene-f_02.12.2025.webp"
@@ -637,16 +663,16 @@ export default function LandingPage() {
                         <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">{t('ctaSection.title')}</h2>
                         <p className="text-xl text-indigo-100 mb-8">{t('ctaSection.subtitle')}</p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="inline-flex items-center bg-white text-indigo-600 px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300">
+                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="inline-flex items-center bg-white text-violet-700 px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300">
                                 {t('ctaSection.cta')}
                                 <ArrowRight className={`ml-2 h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
                             </a>
-                            <button className="inline-flex items-center bg-transparent border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-indigo-600 transition-all duration-300">
+                            <button className="inline-flex items-center bg-transparent border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-violet-700 transition-all duration-300">
                                 <MessageCircle className="h-5 w-5 mr-2" />
                                 Contact Sales
                             </button>
                         </div>
-                        <p className="text-indigo-100 mt-6 text-sm">
+                        <p className="text-violet-100 mt-6 text-sm">
                             <Award className="inline h-5 w-5 mr-2" />
                             Join 1,250+ tutors who started this month
                         </p>
