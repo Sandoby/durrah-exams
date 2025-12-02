@@ -67,6 +67,9 @@ export default function LandingPage() {
                                 <ArrowRight className={`ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform ${isRTL ? 'rotate-180' : ''}`} />
                             </a>
                         </div>
+                        <div className="mt-10 max-w-3xl mx-auto">
+                            <img src="/illustrations/folks-boy-is-sitting-on-a-chair-and-writing.png" alt="Hero Illustration" className="w-full h-auto mx-auto" />
+                        </div>
                         <div className="mt-12 flex flex-wrap justify-center gap-8 text-sm text-gray-600 dark:text-gray-400">
                             <div className="flex items-center">
                                 <Check className="h-5 w-5 text-indigo-500 mr-2" /> {t('hero.features.noCreditCard')}
@@ -134,6 +137,15 @@ export default function LandingPage() {
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
                                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{feature.description}</p>
+                                {index === 0 && (
+                                    <img src="/illustrations/techny-standardized-test-as-method-of-assessment.png" alt="Fast Creation" className="w-full h-auto mt-6 rounded-xl" />
+                                )}
+                                {index === 1 && (
+                                    <img src="/illustrations/blue-shield-with-lock-and-coins-online-payment-security-financial-protection-and-privacy.png" alt="Anti-cheating" className="w-full h-auto mt-6 rounded-xl" />
+                                )}
+                                {index === 2 && (
+                                    <img src="/illustrations/folks-woman-focused-on-online-learning2.png" alt="Global Access" className="w-full h-auto mt-6 rounded-xl" />
+                                )}
                             </div>
                         ))}
                     </div>
