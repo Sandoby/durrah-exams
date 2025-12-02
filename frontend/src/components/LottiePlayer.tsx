@@ -1,35 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
-import Lottie, { type LottieRefCurrentProps } from 'lottie-react';
+import React from 'react';
 
-interface LottiePlayerProps {
-    animationPath: string;
-    className?: string;
-    loop?: boolean;
+type LottieProps = {
+    src?: string;
+    background?: string;
+    speed?: number | string;
     autoplay?: boolean;
-}
+    loop?: boolean;
+    className?: string;
+    style?: React.CSSProperties;
+};
 
-export function LottiePlayer({ animationPath, className = '', loop = true, autoplay = true }: LottiePlayerProps) {
-    const lottieRef = useRef<LottieRefCurrentProps>(null);
-    const [animationData, setAnimationData] = useState<any>(null);
-
-    useEffect(() => {
-        fetch(animationPath)
-            .then(response => response.json())
-            .then(data => setAnimationData(data))
-            .catch(error => console.error('Error loading Lottie animation:', error));
-    }, [animationPath]);
-
-    if (!animationData) {
-        return <div className={`${className} animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg`}></div>;
-    }
-
-    return (
-        <Lottie
-            lottieRef={lottieRef}
-            animationData={animationData}
-            loop={loop}
-            autoplay={autoplay}
-            className={className}
-        />
-    );
+export function LottiePlayer(props: LottieProps) {
+    const { className, style, ...rest } = props;
+    // Render the web component via React.createElement to bypass JSX intrinsic typing
+    return React.createElement('lottie-player', { class: className, style, ...rest });
 }
