@@ -7,6 +7,7 @@ import {
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
+import { playNotificationSound } from '../lib/notificationSound';
 
 const SUPER_ADMIN_PASSWORD = '2352206';
 
@@ -182,6 +183,12 @@ export default function AdminPanel() {
                             }
                             return [...prev, newMsg];
                         });
+
+                        // Play notification sound for user messages
+                        if (!newMsg.is_admin) {
+                            playNotificationSound();
+                        }
+
                         scrollToBottom();
                     }
                 )

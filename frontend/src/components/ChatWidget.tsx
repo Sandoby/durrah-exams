@@ -3,6 +3,7 @@ import { Send, X, MessageCircle, Loader2, Star, Wifi, WifiOff, Check, CheckCheck
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { playNotificationSound } from '../lib/notificationSound';
 
 interface Message {
     id: string;
@@ -84,6 +85,11 @@ export function ChatWidget() {
                             }
                             return [...prev, newMsg];
                         });
+
+                        // Play notification sound for admin messages
+                        if (newMsg.is_admin) {
+                            playNotificationSound();
+                        }
 
                         // Mark admin messages as read immediately
                         if (newMsg.is_admin && isOpen) {
