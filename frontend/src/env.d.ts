@@ -1,5 +1,18 @@
 /// <reference types="vite/client" />
 
+declare namespace JSX {
+  interface IntrinsicElements {
+    'lottie-player': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
+      src?: string;
+      background?: string;
+      speed?: number | string;
+      autoplay?: boolean;
+      loop?: boolean;
+      class?: string;
+    };
+  }
+}
+
 declare interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL?: string;
   readonly VITE_SUPABASE_ANON_KEY?: string;
