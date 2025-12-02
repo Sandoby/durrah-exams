@@ -7,7 +7,7 @@ interface EmailWhitelistProps {
     onChange: (emails: string[]) => void;
 }
 
-const GROQ_API_KEY = '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';
+const GROQ_API_KEY = 'AIzaSyCpZF9UZaNd_y8rTmretXWwmJvm-WEesZc';
 
 export function EmailWhitelist({ emails, onChange }: EmailWhitelistProps) {
     const [newEmail, setNewEmail] = useState('');

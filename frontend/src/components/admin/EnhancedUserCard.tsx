@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
-    ChevronDown, ChevronUp, Mail, Calendar, Crown, Activity,
-    FileText, Users, TrendingUp, Clock, Edit, Trash2, Send
+    User, Mail, Clock,
+    CreditCard, ChevronDown, ChevronUp,
+    FileText, MessageSquare, Plus
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
@@ -205,151 +206,162 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
             {isExpanded && (
                 <div className="border-t border-gray-200 dark:border-gray-700 p-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Left: User Info */}
-                        <div>
-                            <h4 className="font-semibold text-gray-900 dark:text-white mb-3">User Information</h4>
+                        {/* User Details */}
+                        <div className="space-y-3">
+                            <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                User Details
+                            </h4>
                             <div className="space-y-2 text-sm">
                                 <div>
                                     <span className="text-gray-500 dark:text-gray-400">Email:</span>
-                                    <p className="font-medium text-gray-900 dark:text-white">{user.email}</p>
-                                </div>
-                                <div>
-                                    <span className="text-gray-500 dark:text-gray-400">Name:</span>
-                                    <p className="font-medium text-gray-900 dark:text-white">{user.full_name || 'N/A'}</p>
+                                    <p className="text-gray-900 dark:text-white">{user.email}</p>
                                 </div>
                                 {user.phone && (
                                     <div>
                                         <span className="text-gray-500 dark:text-gray-400">Phone:</span>
-                                        <p className="font-medium text-gray-900 dark:text-white">{user.phone}</p>
+                                        <p className="text-gray-900 dark:text-white">{user.phone}</p>
                                     </div>
                                 )}
                                 {user.institution && (
                                     <div>
                                         <span className="text-gray-500 dark:text-gray-400">Institution:</span>
-                                        <p className="font-medium text-gray-900 dark:text-white">{user.institution}</p>
+                                        <p className="text-gray-900 dark:text-white">{user.institution}</p>
                                     </div>
                                 )}
                                 <div>
                                     <span className="text-gray-500 dark:text-gray-400">Joined:</span>
-                                    <p className="font-medium text-gray-900 dark:text-white">{formatDate(user.created_at)}</p>
+                                    <p className="text-gray-900 dark:text-white flex items-center gap-1">
+                                        <Clock className="h-3 w-3" />
+                                        {formatDate(user.created_at)}
+                                    </p>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Middle: Statistics */}
-                        <div>
-                            <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Statistics</h4>
-                            {isLoadingStats ? (
-                                <div className="text-sm text-gray-500">Loading...</div>
-                            ) : stats ? (
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2">
-                                        <FileText className="h-4 w-4 text-indigo-600" />
-                                        <div>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Total Exams</p>
-                                            <p className="font-semibold text-gray-900 dark:text-white">{stats.total_exams}</p>
-                                        </div>
+                            {/* Subscription Info */}
+                            <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                                <h5 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-2">
+                                    <CreditCard className="h-4 w-4" />
+                                    Subscription
+                                </h5>
+                                <div className="space-y-2 text-sm">
+                                    <div>
+                                        <span className="text-gray-500 dark:text-gray-400">Status:</span>
+                                        <div className="mt-1">{getStatusBadge()}</div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <Users className="h-4 w-4 text-green-600" />
+                                    {user.subscription_plan && (
                                         <div>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Total Submissions</p>
-                                            <p className="font-semibold text-gray-900 dark:text-white">{stats.total_submissions}</p>
+                                            <span className="text-gray-500 dark:text-gray-400">Plan:</span>
+                                            <p className="text-gray-900 dark:text-white capitalize">{user.subscription_plan}</p>
                                         </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <TrendingUp className="h-4 w-4 text-blue-600" />
+                                    )}
+                                    {user.subscription_end_date && (
                                         <div>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Active Exams</p>
-                                            <p className="font-semibold text-gray-900 dark:text-white">{stats.active_exams}</p>
-                                        </div>
-                                    </div>
-                                    {stats.last_login && (
-                                        <div className="flex items-center gap-2">
-                                            <Clock className="h-4 w-4 text-purple-600" />
-                                            <div>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Last Login</p>
-                                                <p className="font-semibold text-gray-900 dark:text-white">{formatDate(stats.last_login)}</p>
-                                            </div>
+                                            <span className="text-gray-500 dark:text-gray-400">Expires:</span>
+                                            <p className="text-gray-900 dark:text-white">{formatDate(user.subscription_end_date)}</p>
                                         </div>
                                     )}
                                 </div>
-                            ) : null}
-
-                            {/* Subscription Info */}
-                            {user.subscription_status === 'active' && user.subscription_end_date && (
-                                <div className="mt-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <Crown className="h-4 w-4 text-indigo-600" />
-                                        <span className="text-xs font-semibold text-indigo-900 dark:text-indigo-200">
-                                            {user.subscription_plan} Plan
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-indigo-700 dark:text-indigo-300">
-                                        Expires: {formatDate(user.subscription_end_date)}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Right: Quick Actions */}
-                        <div>
-                            <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Quick Actions</h4>
-                            <div className="space-y-2">
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); extendSubscription(30); }}
-                                    className="w-full text-left px-3 py-2 text-sm bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg transition-colors"
-                                >
-                                    Extend 30 Days
-                                </button>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); sendEmail(); }}
-                                    className="w-full text-left px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg transition-colors flex items-center gap-2"
-                                >
-                                    <Send className="h-4 w-4" />
-                                    Send Email
-                                </button>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Support Notes */}
-                    <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Support Notes</h4>
+                        {/* User Statistics */}
+                        <div className="space-y-3">
+                            <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                <FileText className="h-4 w-4" />
+                                Statistics
+                            </h4>
+                            {isLoadingStats ? (
+                                <div className="space-y-2">
+                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                </div>
+                            ) : stats ? (
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500 dark:text-gray-400">Total Exams:</span>
+                                        <span className="font-semibold text-gray-900 dark:text-white">{stats.total_exams}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500 dark:text-gray-400">Submissions:</span>
+                                        <span className="font-semibold text-gray-900 dark:text-white">{stats.total_submissions}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500 dark:text-gray-400">Active Exams:</span>
+                                        <span className="font-semibold text-gray-900 dark:text-white">{stats.active_exams}</span>
+                                    </div>
+                                </div>
+                            ) : null}
 
-                        {/* Add Note */}
-                        <div className="mb-4">
-                            <textarea
-                                value={newNote}
-                                onChange={(e) => setNewNote(e.target.value)}
-                                onClick={(e) => e.stopPropagation()}
-                                placeholder="Add internal note about this user..."
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm resize-none"
-                                rows={2}
-                            />
-                            <button
-                                onClick={(e) => { e.stopPropagation(); addNote(); }}
-                                disabled={isAddingNote || !newNote.trim()}
-                                className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 text-sm"
-                            >
-                                {isAddingNote ? 'Adding...' : 'Add Note'}
-                            </button>
+                            {/* Quick Actions */}
+                            <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                                <h5 className="font-semibold text-gray-900 dark:text-white mb-2">Quick Actions</h5>
+                                <div className="space-y-2">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            extendSubscription(30);
+                                        }}
+                                        className="w-full px-3 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+                                    >
+                                        Extend 30 Days
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            sendEmail();
+                                        }}
+                                        className="w-full px-3 py-2 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                                    >
+                                        Send Email
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Notes List */}
-                        <div className="space-y-2 max-h-60 overflow-y-auto">
-                            {notes.length === 0 ? (
-                                <p className="text-sm text-gray-500 dark:text-gray-400 italic">No notes yet</p>
-                            ) : (
-                                notes.map(note => (
-                                    <div key={note.id} className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                        <p className="text-sm text-gray-900 dark:text-white">{note.note}</p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                            {formatDate(note.created_at)}
-                                        </p>
-                                    </div>
-                                ))
-                            )}
+                        {/* Support Notes */}
+                        <div className="space-y-3">
+                            <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                <MessageSquare className="h-4 w-4" />
+                                Support Notes
+                            </h4>
+                            <div className="space-y-2">
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={newNote}
+                                        onChange={(e) => setNewNote(e.target.value)}
+                                        onClick={(e) => e.stopPropagation()}
+                                        placeholder="Add a note..."
+                                        className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            addNote();
+                                        }}
+                                        disabled={isAddingNote || !newNote.trim()}
+                                        className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <Plus className="h-4 w-4" />
+                                    </button>
+                                </div>
+                                <div className="space-y-2 max-h-40 overflow-y-auto">
+                                    {notes.length === 0 ? (
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">No notes yet</p>
+                                    ) : (
+                                        notes.map((note) => (
+                                            <div key={note.id} className="p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm">
+                                                <p className="text-gray-900 dark:text-white">{note.note}</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                    {formatDate(note.created_at)}
+                                                </p>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

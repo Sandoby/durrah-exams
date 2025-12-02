@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import {
-    Users, CreditCard, TrendingUp, Activity,
-    DollarSign, FileText, AlertCircle
+    Users, CreditCard, Activity,
+    DollarSign
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { MetricsCard } from './MetricsCard';
 import { ActivityFeed } from './ActivityFeed';
 import {
-    LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid,
+    AreaChart, Area, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer, BarChart, Bar
 } from 'recharts';
 

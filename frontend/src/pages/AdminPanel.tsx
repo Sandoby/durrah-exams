@@ -8,37 +8,10 @@ import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { playNotificationSound } from '../lib/notificationSound';
-import { UserFiltersComponent, UserFilters } from '../components/admin/UserFilters';
+import { UserFiltersComponent } from '../components/admin/UserFilters';
+import type { UserFilters } from '../components/admin/UserFilters';
 import { EnhancedUserCard } from '../components/admin/EnhancedUserCard';
 import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
-import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
-import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
-import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
-import {
-    BarChart3,
-    Users,
-    MessageCircle,
-    Tag,
-    Lock,
-    LogOut,
-    Loader2,
-    Plus,
-    Send,
-    UserPlus
-} from 'lucide-react';
-import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
-import {
-    BarChart3,
-    Users,
-    MessageCircle,
-    Tag,
-    Lock,
-    LogOut,
-    Loader2,
-    Plus,
-    Send,
-    UserPlus
-} from 'lucide-react';
 
 const SUPER_ADMIN_PASSWORD = '2352206';
 
@@ -411,52 +384,9 @@ export default function AdminPanel() {
         setFilteredUsers(result);
     }, [users, filters]);
 
-    const activateSubscription = async (userId: string, plan: string, duration: 'monthly' | 'yearly') => {
-        try {
-            const endDate = new Date();
-            if (duration === 'monthly') {
-                endDate.setMonth(endDate.getMonth() + 1);
-            } else {
-                endDate.setFullYear(endDate.getFullYear() + 1);
-            }
 
-            const { error } = await supabase
-                .from('profiles')
-                .update({
-                    subscription_status: 'active',
-                    subscription_plan: plan,
-                    subscription_end_date: endDate.toISOString()
-                })
-                .eq('id', userId);
 
-            if (error) throw error;
-            toast.success('Subscription activated successfully');
-            fetchUsers();
-        } catch (error) {
-            console.error('Error activating subscription:', error);
-            toast.error('Failed to activate subscription');
-        }
-    };
 
-    const deactivateSubscription = async (userId: string) => {
-        try {
-            const { error } = await supabase
-                .from('profiles')
-                .update({
-                    subscription_status: null,
-                    subscription_plan: null,
-                    subscription_end_date: null
-                })
-                .eq('id', userId);
-
-            if (error) throw error;
-            toast.success('Subscription deactivated');
-            fetchUsers();
-        } catch (error) {
-            console.error('Error deactivating subscription:', error);
-            toast.error('Failed to deactivate subscription');
-        }
-    };
 
     const fetchCoupons = async () => {
         setIsLoadingCoupons(true);
