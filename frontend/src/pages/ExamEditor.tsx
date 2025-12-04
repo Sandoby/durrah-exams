@@ -427,12 +427,13 @@ export default function ExamEditor() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12">
-            <div className="bg-white dark:bg-gray-800 shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <button
+        <>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12">
+                <div className="bg-white dark:bg-gray-800 shadow">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                                <button
                                 onClick={() => navigate('/dashboard')}
                                 className="mr-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                             >
@@ -900,9 +901,10 @@ export default function ExamEditor() {
                     ))}
                 </div>
             </div>
+        </div>
 
-            {/* Import from Question Bank Modal */}
-            {showImportModal && (
+        {/* Import from Question Bank Modal */}
+        {showImportModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
                         <div className="p-6">
@@ -992,6 +994,6 @@ export default function ExamEditor() {
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 }

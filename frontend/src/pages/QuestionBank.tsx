@@ -524,16 +524,16 @@ export default function QuestionBank() {
                         
                         {!aiApiKey && (
                             <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                                <p className="text-sm text-yellow-800 dark:text-yellow-200 mb-2">⚠️ OpenAI API Key Required</p>
+                                <p className="text-sm text-yellow-800 dark:text-yellow-200 mb-2">⚠️ AI API Key Required</p>
                                 <input
                                     type="password"
-                                    placeholder="Enter your OpenAI API key"
+                                    placeholder="Enter your AI API key (optional)"
                                     value={aiApiKey}
                                     onChange={(e) => saveAiApiKey(e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                                 />
                                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                                    Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">OpenAI Platform</a>
+                                    Get a free API key from <a href="https://console.groq.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 underline">Groq Console</a>
                                 </p>
                             </div>
                         )}

@@ -1,13 +1,13 @@
-import { getOpenAIKey } from './config';
+import { getAIKey } from './config';
 
 /**
- * Extract questions from document content using OpenAI
+ * Extract questions from document content using Groq AI
  */
 export const extractQuestionsWithAI = async (content: string): Promise<any[]> => {
-    const apiKey = getOpenAIKey();
+    const apiKey = getAIKey();
     
     if (!apiKey) {
-        throw new Error('OpenAI API key not configured');
+        throw new Error('AI API key not configured');
     }
 
     const prompt = `Extract all exam questions from the following text and return them as a JSON array. Each question should be an object with these fields:
@@ -26,14 +26,14 @@ ${content}
 Return ONLY the JSON array, no other text.`;
 
     try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                model: 'gpt-4o-mini',
+                model: 'llama-3.3-70b-versatile',
                 messages: [
                     {
                         role: 'system',
@@ -85,10 +85,10 @@ export const generateQuestionsWithAI = async (
     difficulty: 'easy' | 'medium' | 'hard' = 'medium',
     type?: string
 ): Promise<any[]> => {
-    const apiKey = getOpenAIKey();
+    const apiKey = getAIKey();
     
     if (!apiKey) {
-        throw new Error('OpenAI API key not configured');
+        throw new Error('AI API key not configured');
     }
 
     const typeFilter = type ? `All questions should be of type: ${type}` : 'Use a variety of question types (multiple_choice, true_false, etc.)';
@@ -108,14 +108,14 @@ Return a JSON array where each question has:
 Return ONLY the JSON array, no other text.`;
 
     try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                model: 'gpt-4o-mini',
+                model: 'llama-3.3-70b-versatile',
                 messages: [
                     {
                         role: 'system',

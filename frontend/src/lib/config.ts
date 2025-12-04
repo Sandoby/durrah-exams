@@ -1,10 +1,10 @@
 // Global configuration for the application
 
 export const config = {
-    // OpenAI API Configuration
-    openai: {
-        apiKey: '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',
-        model: 'gpt-4o-mini',
+    // Groq API Configuration (Free & Fast AI)
+    groq: {
+        apiKey: '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',
+        model: 'llama-3.3-70b-versatile',
         temperature: 0.3,
     },
     
@@ -17,16 +17,20 @@ export const config = {
 };
 
 /**
- * Get the OpenAI API key from localStorage or use default
+ * Get the Groq API key from localStorage or use default
  */
-export const getOpenAIKey = (): string => {
+export const getAIKey = (): string => {
     const saved = localStorage.getItem(config.storage.aiApiKey);
-    return saved || config.openai.apiKey;
+    return saved || config.groq.apiKey;
 };
 
 /**
- * Save OpenAI API key to localStorage
+ * Save AI API key to localStorage
  */
-export const setOpenAIKey = (key: string): void => {
+export const setAIKey = (key: string): void => {
     localStorage.setItem(config.storage.aiApiKey, key);
 };
+
+// Keep old names for backwards compatibility
+export const getOpenAIKey = getAIKey;
+export const setOpenAIKey = setAIKey;
