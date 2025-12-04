@@ -905,95 +905,95 @@ export default function ExamEditor() {
 
         {/* Import from Question Bank Modal */}
         {showImportModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-                        <div className="p-6">
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                                Import Questions from Bank
-                            </h2>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                    <div className="p-6">
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                            Import Questions from Bank
+                        </h2>
 
-                            <div className="space-y-4">
-                                {/* Number of questions input */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Number of Random Questions
-                                    </label>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={questionCount}
-                                        onChange={(e) => setQuestionCount(parseInt(e.target.value) || 1)}
-                                        className="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white p-2"
-                                    />
-                                </div>
+                        <div className="space-y-4">
+                            {/* Number of questions input */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Number of Random Questions
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={questionCount}
+                                    onChange={(e) => setQuestionCount(parseInt(e.target.value) || 1)}
+                                    className="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white p-2"
+                                />
+                            </div>
 
-                                {/* Question banks selection */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Select Question Banks
-                                    </label>
-                                    {questionBanks.length === 0 ? (
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                                            No question banks found. Create one first from the dashboard.
-                                        </p>
-                                    ) : (
-                                        <div className="space-y-2 max-h-60 overflow-y-auto border dark:border-gray-600 rounded-md p-3">
-                                            {questionBanks.map(bank => (
-                                                <label
-                                                    key={bank.id}
-                                                    className="flex items-center space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedBankIds.includes(bank.id)}
-                                                        onChange={() => toggleBankSelection(bank.id)}
-                                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                                    />
-                                                    <div className="flex-1">
-                                                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                                            {bank.name}
+                            {/* Question banks selection */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Select Question Banks
+                                </label>
+                                {questionBanks.length === 0 ? (
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        No question banks found. Create one first from the dashboard.
+                                    </p>
+                                ) : (
+                                    <div className="space-y-2 max-h-60 overflow-y-auto border dark:border-gray-600 rounded-md p-3">
+                                        {questionBanks.map(bank => (
+                                            <label
+                                                key={bank.id}
+                                                className="flex items-center space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer"
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedBankIds.includes(bank.id)}
+                                                    onChange={() => toggleBankSelection(bank.id)}
+                                                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                />
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                        {bank.name}
+                                                    </p>
+                                                    {bank.description && (
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                            {bank.description}
                                                         </p>
-                                                        {bank.description && (
-                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                {bank.description}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
+                                                    )}
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
+                        </div>
 
-                            {/* Modal actions */}
-                            <div className="mt-6 flex justify-end gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setShowImportModal(false);
-                                        setSelectedBankIds([]);
-                                        setQuestionCount(5);
-                                    }}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
-                                    disabled={isImporting}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleImportFromBanks}
-                                    disabled={isImporting || selectedBankIds.length === 0}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                                >
-                                    {isImporting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                                    Import Questions
-                                </button>
-                            </div>
+                        {/* Modal actions */}
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowImportModal(false);
+                                    setSelectedBankIds([]);
+                                    setQuestionCount(5);
+                                }}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+                                disabled={isImporting}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleImportFromBanks}
+                                disabled={isImporting || selectedBankIds.length === 0}
+                                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                            >
+                                {isImporting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                                Import Questions
+                            </button>
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
+        )}
         </>
     );
 }
