@@ -681,7 +681,7 @@ export default function ExamEditor() {
                 </div>
 
                 {/* Questions */}
-                <div className="grid grid-cols-1 gap-6">
+                <div className="w-full flex flex-col gap-6">
                     <div className="flex items-center justify-between">
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('examEditor.questions.title')}</h3>
                         <div className="flex gap-2">
