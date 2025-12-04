@@ -211,6 +211,7 @@
     "dashboard": {
         "title": "My Exams",
         "createExam": "Create New Exam",
+        "questionBank": "Question Bank",
         "noExams": {
             "title": "No exams",
             "desc": "Get started by creating a new exam.",

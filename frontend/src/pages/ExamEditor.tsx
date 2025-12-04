@@ -4,7 +4,7 @@ import type { ChangeEvent } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Save, ArrowLeft, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { EmailWhitelist } from '../components/EmailWhitelist';
@@ -56,6 +56,11 @@ export default function ExamEditor() {
     const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(!!id);
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [questionBanks, setQuestionBanks] = useState<any[]>([]);
+    const [selectedBankIds, setSelectedBankIds] = useState<string[]>([]);
+    const [questionCount, setQuestionCount] = useState(5);
+    const [isImporting, setIsImporting] = useState(false);
 
     const { register, control, handleSubmit, reset, watch, setValue } = useForm<ExamForm>({
         defaultValues: {
@@ -90,6 +95,12 @@ export default function ExamEditor() {
             fetchExam();
         }
     }, [id, user]);
+
+    useEffect(() => {
+        if (showImportModal) {
+            fetchQuestionBanks();
+        }
+    }, [showImportModal]);
 
     // Keep a reactive watch of questions so options and correct answers update immediately
     const questionsWatch = watch('questions');
@@ -323,6 +334,88 @@ export default function ExamEditor() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const fetchQuestionBanks = async () => {
+        if (!user) return;
+        try {
+            const { data, error } = await supabase
+                .from('question_banks')
+                .select('id, name, description')
+                .eq('tutor_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setQuestionBanks(data || []);
+        } catch (error: any) {
+            console.error('Error fetching question banks:', error);
+            toast.error('Failed to load question banks');
+        }
+    };
+
+    const handleImportFromBanks = async () => {
+        if (selectedBankIds.length === 0) {
+            toast.error('Please select at least one question bank');
+            return;
+        }
+
+        if (questionCount <= 0) {
+            toast.error('Please enter a valid number of questions');
+            return;
+        }
+
+        setIsImporting(true);
+        try {
+            // Fetch all questions from selected banks
+            const { data: questions, error } = await supabase
+                .from('question_bank_questions')
+                .select('*')
+                .in('bank_id', selectedBankIds);
+
+            if (error) throw error;
+
+            if (!questions || questions.length === 0) {
+                toast.error('No questions found in selected banks');
+                setIsImporting(false);
+                return;
+            }
+
+            // Shuffle and pick random questions
+            const shuffled = [...questions].sort(() => Math.random() - 0.5);
+            const selected = shuffled.slice(0, Math.min(questionCount, shuffled.length));
+
+            // Convert to exam question format and append
+            const currentQuestions = watch('questions');
+            selected.forEach(q => {
+                const newQuestion: Question = {
+                    type: q.type,
+                    question_text: q.question_text,
+                    options: q.options || [],
+                    correct_answer: q.correct_answer,
+                    points: q.points || 1,
+                    randomize_options: true,
+                };
+                append(newQuestion);
+            });
+
+            toast.success(`Imported ${selected.length} questions`);
+            setShowImportModal(false);
+            setSelectedBankIds([]);
+            setQuestionCount(5);
+        } catch (error: any) {
+            console.error('Error importing questions:', error);
+            toast.error('Failed to import questions');
+        } finally {
+            setIsImporting(false);
+        }
+    };
+
+    const toggleBankSelection = (bankId: string) => {
+        setSelectedBankIds(prev => 
+            prev.includes(bankId) 
+                ? prev.filter(id => id !== bankId)
+                : [...prev, bankId]
+        );
     };
 
     if (isFetching) {
@@ -581,10 +674,19 @@ export default function ExamEditor() {
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('examEditor.questions.title')}</h3>
-                        <button
-                            type="button"
-                            onClick={() => append(defaultQuestion)}
-                            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setShowImportModal(true)}
+                                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                            >
+                                <BookOpen className="h-4 w-4 mr-2" />
+                                Import from Bank
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => append(defaultQuestion)}
+                                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                         >
                             <Plus className="h-4 w-4 mr-2" />
                             {t('examEditor.questions.add')}
@@ -798,6 +900,98 @@ export default function ExamEditor() {
                     ))}
                 </div>
             </div>
+
+            {/* Import from Question Bank Modal */}
+            {showImportModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                        <div className="p-6">
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                                Import Questions from Bank
+                            </h2>
+
+                            <div className="space-y-4">
+                                {/* Number of questions input */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Number of Random Questions
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={questionCount}
+                                        onChange={(e) => setQuestionCount(parseInt(e.target.value) || 1)}
+                                        className="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white p-2"
+                                    />
+                                </div>
+
+                                {/* Question banks selection */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Select Question Banks
+                                    </label>
+                                    {questionBanks.length === 0 ? (
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                            No question banks found. Create one first from the dashboard.
+                                        </p>
+                                    ) : (
+                                        <div className="space-y-2 max-h-60 overflow-y-auto border dark:border-gray-600 rounded-md p-3">
+                                            {questionBanks.map(bank => (
+                                                <label
+                                                    key={bank.id}
+                                                    className="flex items-center space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedBankIds.includes(bank.id)}
+                                                        onChange={() => toggleBankSelection(bank.id)}
+                                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                    />
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                            {bank.name}
+                                                        </p>
+                                                        {bank.description && (
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                                {bank.description}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Modal actions */}
+                            <div className="mt-6 flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowImportModal(false);
+                                        setSelectedBankIds([]);
+                                        setQuestionCount(5);
+                                    }}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+                                    disabled={isImporting}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleImportFromBanks}
+                                    disabled={isImporting || selectedBankIds.length === 0}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                >
+                                    {isImporting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                                    Import Questions
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

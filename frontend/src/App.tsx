@@ -14,6 +14,7 @@ import ExamEditor from './pages/ExamEditor';
 import ExamView from './pages/ExamView';
 import Settings from './pages/Settings';
 import AdminPanel from './pages/AdminPanel';
+import QuestionBank from './pages/QuestionBank';
 import { SubmissionSync } from './components/SubmissionSync';
 import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 
@@ -51,6 +52,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/question-bank" element={<QuestionBank />} />
             <Route path="/exam/new" element={<ExamEditor />} />
             <Route path="/exam/:id/edit" element={<ExamEditor />} />
             <Route path="/exam/:id" element={<ExamView />} />

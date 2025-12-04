@@ -214,6 +214,7 @@
     "dashboard": {
         "title": "Mes Examens",
         "createExam": "Créer un Nouvel Examen",
+        "questionBank": "Banque de Questions",
         "noExams": {
             "title": "Aucun examen trouvé",
             "desc": "Commencez par créer votre premier examen.",
