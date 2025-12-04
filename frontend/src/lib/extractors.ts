@@ -72,7 +72,7 @@ function normalizeWhitespace(s: string): string {
 
 // Core parser: attempts to detect common exam formats
 export function extractQuestionsFromText(raw: string): ExtractedQuestion[] {
-  const text = raw.replace(/\r/g, '\n').replace(/\n{2,}/g, '\n').trim();
+  const text = normalizeForSegmentation(raw);
   const blocks = splitIntoQuestionBlocks(text);
   const results: ExtractedQuestion[] = [];
 
@@ -81,16 +81,41 @@ export function extractQuestionsFromText(raw: string): ExtractedQuestion[] {
     if (parsed) results.push(parsed);
   }
 
-  return results;
+  // Post-process: filter obviously empty, dedupe options, ensure points
+  return results
+    .filter(q => (q.question_text || '').length > 5)
+    .map(q => ({
+      ...q,
+      options: q.options ? dedupeOptions(q.options) : q.options,
+      points: q.points || 1,
+    }));
+}
+
+function normalizeForSegmentation(text: string): string {
+  return text
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\t\u00A0]+/g, ' ')
+    .replace(/\f/g, '\n')
+    .replace(/\s+\n/g, '\n')
+    .replace(/\n{2,}/g, '\n')
+    .trim();
 }
 
 function splitIntoQuestionBlocks(text: string): string[] {
-  // Split by lines starting with number or Q:
   const lines = text.split('\n');
   const blocks: string[] = [];
   let current: string[] = [];
 
-  const startsQuestion = (line: string) => /^(Q\s*[:\.]\s*|\(?\d+\)?[\.:\-]\s+)/i.test(line.trim());
+  // Start markers: English and Arabic numbering
+  const startsQuestion = (line: string) => {
+    const l = line.trim();
+    return (
+      /^(Q\s*[:\.]\s*)/i.test(l) ||
+      /^(\(?\d+\)?[\.:\-]\s+)/.test(l) ||
+      /^(سؤال)\s*\d+\s*[\.:\-]/i.test(l) || // Arabic "سؤال 1:"
+      /^\d+\s*\-\s+/.test(l) // "1 - "
+    );
+  };
 
   for (const line of lines) {
     if (startsQuestion(line) && current.length) {
@@ -101,7 +126,12 @@ function splitIntoQuestionBlocks(text: string): string[] {
     }
   }
   if (current.length) blocks.push(current.join('\n'));
-  return blocks.map(b => b.trim()).filter(Boolean);
+
+  // Merge short trailing lines into previous block
+  return blocks
+    .map(b => b.trim())
+    .filter(Boolean)
+    .map(b => b.replace(/\n\s*(?:\-|•)\s*/g, '\n- '));
 }
 
 function parseQuestionBlock(block: string): ExtractedQuestion | null {
@@ -110,14 +140,22 @@ function parseQuestionBlock(block: string): ExtractedQuestion | null {
   if (!lines.length) return null;
 
   // Remove leading marker like "Q1." or "1)"
-  const first = lines[0].replace(/^(Q\s*[:\.]\s*|\(?\d+\)?[\.:\-]\s+)/i, '').trim();
+  const first = lines[0]
+    .replace(/^(Q\s*[:\.]\s*|\(?\d+\)?[\.:\-]\s+)/i, '')
+    .replace(/^(سؤال)\s*\d+\s*[\.:\-]\s*/i, '')
+    .trim();
   let questionText = first;
   let optionLines: string[] = [];
   let restText = '';
 
+  // Gather potential answer key line
+  let answerLine: string | null = null;
+
   for (let i = 1; i < lines.length; i++) {
     const ln = lines[i];
-    if (isOptionLine(ln)) optionLines.push(ln); else restText += (restText ? ' ' : '') + ln;
+    if (isAnswerLine(ln)) answerLine = ln;
+    else if (isOptionLine(ln)) optionLines.push(ln);
+    else restText += (restText ? ' ' : '') + ln;
   }
 
   // If no options detected, try splitting by semicolons in restText
@@ -142,23 +180,32 @@ function parseQuestionBlock(block: string): ExtractedQuestion | null {
   }
 
   const options = optionLines.map(cleanOptionText).filter(Boolean);
-  // Detect multiple_select if lines have multiple correct markers like "[✓]"
-  const isMulti = optionLines.some(l => /\[\s*✓\s*\]|\(\s*✓\s*\)/.test(l));
+  // Detect multiple_select if lines have multiple correct markers like "[✓]" or Arabic "صح"
+  const isMulti = optionLines.some(l => /\[\s*✓\s*\]|\(\s*✓\s*\)|\bصح\b/.test(l));
   const type: ExtractedQuestion['type'] = isMulti ? 'multiple_select' : 'multiple_choice';
 
-  return {
+  const q: ExtractedQuestion = {
     type,
     question_text: questionText,
     options,
     points: 1,
   };
+
+  // Map answer line to correct_answer
+  if (answerLine) {
+    const idx = extractAnswerIndex(answerLine, options);
+    if (idx !== null) q.correct_answer = isMulti ? [options[idx]] : options[idx];
+  }
+  return q;
 }
 
 function isOptionLine(line: string): boolean {
   return (
     /^([A-Da-d]|\d+)[)\.\-]\s+/.test(line) || // A) Option, 1. Option
     /^[-•]\s+/.test(line) || // - bullet
-    /^\([A-Da-d]\)\s+/.test(line) // (A) Option
+    /^\([A-Da-d]\)\s+/.test(line) || // (A) Option
+    // Arabic option markers like (أ) (ب) (ج) (د)
+    /^\([أبجده]\)\s+/.test(line)
   );
 }
 
@@ -173,4 +220,46 @@ function cleanOptionText(line: string): string {
 export async function extractQuestionsFromFile(file: File): Promise<ExtractedQuestion[]> {
   const text = await readFileText(file);
   return extractQuestionsFromText(text);
+}
+
+function dedupeOptions(opts: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const o of opts) {
+    const k = o.trim().toLowerCase();
+    if (!k || seen.has(k)) continue;
+    seen.add(k);
+    out.push(o.trim());
+  }
+  return out;
+}
+
+function isAnswerLine(line: string): boolean {
+  return /^(answer|correct|الإجابة|الصحيح)\s*[:\-]/i.test(line) || /^(?:\*\s*)?\b[A-Da-d]\b$/.test(line.trim());
+}
+
+function extractAnswerIndex(line: string, options: string[]): number | null {
+  const l = line.trim();
+  // Formats: "Answer: A", "Correct: 2", Arabic "الإجابة: ب"
+  const m1 = l.match(/\b([A-Da-d])\b/);
+  if (m1) {
+    const letter = m1[1].toUpperCase();
+    const map = { A: 0, B: 1, C: 2, D: 3 } as const;
+    const idx = (map as any)[letter];
+    return idx != null && idx < options.length ? idx : null;
+  }
+  const m2 = l.match(/\b(\d+)\b/);
+  if (m2) {
+    const num = parseInt(m2[1], 10);
+    const idx = num - 1;
+    return idx >= 0 && idx < options.length ? idx : null;
+  }
+  // Arabic letter mapping: أ, ب, ج, د
+  const m3 = l.match(/[أبجده]/);
+  if (m3) {
+    const order = ['أ', 'ب', 'ج', 'د', 'ه'];
+    const idx = order.indexOf(m3[0]);
+    return idx >= 0 && idx < options.length ? idx : null;
+  }
+  return null;
 }
