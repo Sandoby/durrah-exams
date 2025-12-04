@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Upload, FileText, BookOpen, Edit, Loader2, Download, Search } from 'lucide-react';
+import { Plus, Trash2, Upload, FileText, BookOpen, Loader2, Download, Search } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { getOpenAIKey, setOpenAIKey } from '../lib/config';
@@ -30,7 +29,6 @@ interface QuestionBank {
 }
 
 export default function QuestionBank() {
-    const { t } = useTranslation();
     const navigate = useNavigate();
     const { user } = useAuth();
     const [banks, setBanks] = useState<QuestionBank[]>([]);
@@ -118,7 +116,7 @@ export default function QuestionBank() {
 
         setIsCreating(true);
         try {
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('question_banks')
                 .insert({
                     name: newBankName,

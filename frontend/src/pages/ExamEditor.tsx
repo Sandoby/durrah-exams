@@ -385,7 +385,7 @@ export default function ExamEditor() {
             const selected = shuffled.slice(0, Math.min(questionCount, shuffled.length));
 
             // Convert to exam question format and append
-            const currentQuestions = watch('questions');
+            // removed unused variable
             selected.forEach(q => {
                 const newQuestion: Question = {
                     type: q.type,
@@ -427,9 +427,8 @@ export default function ExamEditor() {
     }
 
     return (
-        <>
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12">
-                <div className="bg-white dark:bg-gray-800 shadow">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12 relative">
+            <div className="bg-white dark:bg-gray-800 shadow">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center">
@@ -455,9 +454,9 @@ export default function ExamEditor() {
                             )}
                             {isLoading ? t('examEditor.saving') : t('examEditor.save')}
                         </button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
                 {/* Basic Info */}
@@ -901,7 +900,6 @@ export default function ExamEditor() {
                     ))}
                 </div>
             </div>
-        </div>
 
         {/* Import from Question Bank Modal */}
         {showImportModal && (
@@ -994,6 +992,7 @@ export default function ExamEditor() {
                 </div>
             </div>
         )}
-    </>
+    </div>
+    </div>
     );
 }
