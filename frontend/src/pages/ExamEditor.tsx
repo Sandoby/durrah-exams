@@ -442,18 +442,28 @@ export default function ExamEditor() {
                                 {id ? t('examEditor.editTitle') : t('examEditor.createTitle')}
                             </h1>
                         </div>
-                        <button
-                            onClick={handleSubmit(onSubmit)}
-                            disabled={isLoading}
-                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                        >
-                            {isLoading ? (
-                                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                            ) : (
-                                <Save className="h-5 w-5 mr-2" />
-                            )}
-                            {isLoading ? t('examEditor.saving') : t('examEditor.save')}
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setShowImportModal(true)}
+                                type="button"
+                                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                            >
+                                <BookOpen className="h-4 w-4 mr-2" />
+                                Import from Bank
+                            </button>
+                            <button
+                                onClick={handleSubmit(onSubmit)}
+                                disabled={isLoading}
+                                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                            >
+                                {isLoading ? (
+                                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                                ) : (
+                                    <Save className="h-5 w-5 mr-2" />
+                                )}
+                                {isLoading ? t('examEditor.saving') : t('examEditor.save')}
+                            </button>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -675,14 +685,6 @@ export default function ExamEditor() {
                     <div className="flex items-center justify-between">
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('examEditor.questions.title')}</h3>
                         <div className="flex gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setShowImportModal(true)}
-                                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                            >
-                                <BookOpen className="h-4 w-4 mr-2" />
-                                Import from Bank
-                            </button>
                             <button
                                 type="button"
                                 onClick={() => append(defaultQuestion)}
