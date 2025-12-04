@@ -671,7 +671,7 @@ export default function ExamEditor() {
                 </div>
 
                 {/* Questions */}
-                <div className="flex flex-col gap-6">
+                <div className="grid grid-cols-1 gap-6">
                     <div className="flex items-center justify-between">
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('examEditor.questions.title')}</h3>
                         <div className="flex gap-2">
@@ -694,7 +694,7 @@ export default function ExamEditor() {
                     </div>
 
                     {fields.map((field, index) => (
-                        <div key={field.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 relative w-full">
+                        <div key={field.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 relative w-full block">
                             <button
                                 type="button"
                                 onClick={() => remove(index)}
