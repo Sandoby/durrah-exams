@@ -6,8 +6,13 @@ import type { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 // Lazy imports to avoid bundling weight unless used
 const loadPdfJs = async () => {
   const pdfjs = await import('pdfjs-dist');
+  // Use local bundled worker to avoid CDN fetch issues
+  // pdfjs-dist v4 ships ESM worker at build/pdf.worker.mjs
+  // Vite resolves new URL relative to module
+  // @ts-ignore
+  const workerUrl = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
   // @ts-ignore set worker src for browser
-  pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+  pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
   return pdfjs;
 };
 
