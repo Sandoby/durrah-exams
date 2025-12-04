@@ -4,8 +4,7 @@ import toast from 'react-hot-toast';
 import { Plus, Trash2, Upload, FileText, BookOpen, Loader2, Download, Search } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { getOpenAIKey, setOpenAIKey } from '../lib/config';
-import { extractQuestionsWithAI, readFileContent } from '../lib/ai-utils';
+import { extractQuestionsFromFile } from '../lib/extractors';
 
 interface Question {
     id: string;
@@ -43,12 +42,11 @@ export default function QuestionBank() {
     const [isImporting, setIsImporting] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [aiApiKey, setAiApiKey] = useState('');
+    // Removed AI key usage; using local extraction only
 
     useEffect(() => {
         if (user) {
             fetchBanks();
-            loadAiApiKey();
         }
     }, [user]);
 
@@ -58,15 +56,7 @@ export default function QuestionBank() {
         }
     }, [selectedBank]);
 
-    const loadAiApiKey = () => {
-        const key = getOpenAIKey();
-        setAiApiKey(key);
-    };
-
-    const saveAiApiKey = (key: string) => {
-        setOpenAIKey(key);
-        setAiApiKey(key);
-    };
+    // AI key handlers no longer needed
 
     const fetchBanks = async () => {
         try {
@@ -171,32 +161,15 @@ export default function QuestionBank() {
             toast.error('Please select a file');
             return;
         }
-
-        if (!aiApiKey) {
-            toast.error('Please enter your OpenAI API key in settings');
-            return;
-        }
-
         if (!selectedBank) {
             toast.error('Please select a question bank first');
             return;
         }
-
         setIsImporting(true);
         const loadingToast = toast.loading('Extracting questions from file...');
-
         try {
-            // Read file content
-            const fileContent = await readFileContent(selectedFile);
-
-            // Call AI to extract questions
-            const extractedQuestions = await extractQuestionsWithAI(fileContent);
-
-            if (extractedQuestions.length === 0) {
-                throw new Error('No questions found in file');
-            }
-
-            // Save questions to database
+            const extractedQuestions = await extractQuestionsFromFile(selectedFile);
+            if (!extractedQuestions.length) throw new Error('No questions found in file');
             const questionsToInsert = extractedQuestions.map(q => ({
                 bank_id: selectedBank.id,
                 type: q.type,
@@ -208,13 +181,8 @@ export default function QuestionBank() {
                 category: q.category || '',
                 tags: q.tags || []
             }));
-
-            const { error } = await supabase
-                .from('question_bank_questions')
-                .insert(questionsToInsert);
-
+            const { error } = await supabase.from('question_bank_questions').insert(questionsToInsert);
             if (error) throw error;
-
             toast.success(`Successfully imported ${extractedQuestions.length} questions!`, { id: loadingToast });
             setShowImportModal(false);
             setSelectedFile(null);
@@ -520,21 +488,7 @@ export default function QuestionBank() {
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full mx-4 p-6">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Import Questions</h3>
                         
-                        {!aiApiKey && (
-                            <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                                <p className="text-sm text-yellow-800 dark:text-yellow-200 mb-2">⚠️ AI API Key Required</p>
-                                <input
-                                    type="password"
-                                    placeholder="Enter your AI API key (optional)"
-                                    value={aiApiKey}
-                                    onChange={(e) => saveAiApiKey(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                                />
-                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                                    Get a free API key from <a href="https://console.groq.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 underline">Groq Console</a>
-                                </p>
-                            </div>
-                        )}
+                        {/* Local extraction requires no API key */}
 
                         <div className="space-y-4">
                             <div>
@@ -565,7 +519,7 @@ export default function QuestionBank() {
                             </button>
                             <button
                                 onClick={handleFileUpload}
-                                disabled={isImporting || !selectedFile || !aiApiKey}
+                                disabled={isImporting || !selectedFile}
                                 className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {isImporting ? (

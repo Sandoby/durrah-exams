@@ -37,7 +37,9 @@
     "tailwind-merge": "^3.4.0",
     "tslib": "^2.8.1",
     "xlsx": "^0.18.5",
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "mammoth": "^1.6.0",
+    "pdfjs-dist": "^4.4.168"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
