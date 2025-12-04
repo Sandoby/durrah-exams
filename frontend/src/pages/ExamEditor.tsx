@@ -696,60 +696,61 @@ export default function ExamEditor() {
                     </div>
 
                     {fields.map((field, index) => (
-                        <div key={field.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 relative w-full block">
-                            <button
-                                type="button"
-                                onClick={() => remove(index)}
-                                className="absolute top-4 right-4 text-gray-400 hover:text-red-500"
-                            >
-                                <Trash2 className="h-5 w-5" />
-                            </button>
+                        <div key={field.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <span className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-800 font-bold text-sm">
+                                        {index + 1}
+                                    </span>
+                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Question {index + 1}</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => remove(index)}
+                                    className="text-gray-400 hover:text-red-500"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                </button>
+                            </div>
 
                             <div className="space-y-4">
-                                <div className="grid grid-cols-12 gap-4">
-                                    <div className="col-span-1">
-                                        <span className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-800 font-bold">
-                                            {index + 1}
-                                        </span>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.type')}</label>
+                                        <select
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                            {...register(`questions.${index}.type`)}
+                                        >
+                                            <option value="multiple_choice">{t('examEditor.questions.types.multipleChoice')}</option>
+                                            <option value="multiple_select">{t('examEditor.questions.types.multipleSelect')}</option>
+                                            <option value="dropdown">{t('examEditor.questions.types.dropdown')}</option>
+                                            <option value="numeric">{t('examEditor.questions.types.numeric')}</option>
+                                            <option value="true_false">{t('examEditor.questions.types.trueFalse')}</option>
+                                        </select>
                                     </div>
-                                    <div className="col-span-11 space-y-4">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.type')}</label>
-                                                <select
-                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                    {...register(`questions.${index}.type`)}
-                                                >
-                                                    <option value="multiple_choice">{t('examEditor.questions.types.multipleChoice')}</option>
-                                                    <option value="multiple_select">{t('examEditor.questions.types.multipleSelect')}</option>
-                                                    <option value="dropdown">{t('examEditor.questions.types.dropdown')}</option>
-                                                    <option value="numeric">{t('examEditor.questions.types.numeric')}</option>
-                                                    <option value="true_false">{t('examEditor.questions.types.trueFalse')}</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.points')}</label>
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                    {...register(`questions.${index}.points`, { valueAsNumber: true })}
-                                                />
-                                            </div>
-                                        </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.points')}</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                            {...register(`questions.${index}.points`, { valueAsNumber: true })}
+                                        />
+                                    </div>
+                                </div>
 
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.text')}</label>
-                                            <textarea
-                                                rows={2}
-                                                required
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                {...register(`questions.${index}.question_text`)}
-                                            />
-                                        </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.text')}</label>
+                                    <textarea
+                                        rows={2}
+                                        required
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                        {...register(`questions.${index}.question_text`)}
+                                    />
+                                </div>
 
-                                        {['multiple_choice', 'dropdown'].includes(questionsWatch?.[index]?.type) && (
-                                            <div className="space-y-2">
+                                {['multiple_choice', 'dropdown'].includes(questionsWatch?.[index]?.type) && (
+                                    <div className="space-y-2">
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.options')}</label>
                                                 {(() => {
                                                     const opts = (questionsWatch?.[index]?.options ?? []) as string[];
@@ -793,8 +794,8 @@ export default function ExamEditor() {
                                             </div>
                                         )}
 
-                                        {questionsWatch?.[index]?.type === 'multiple_select' && (
-                                            <div className="space-y-2">
+                                {questionsWatch?.[index]?.type === 'multiple_select' && (
+                                    <div className="space-y-2">
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.selectCorrect')}</label>
                                                 {(() => {
                                                     const opts = (questionsWatch?.[index]?.options ?? []) as string[];
@@ -855,8 +856,8 @@ export default function ExamEditor() {
                                             </div>
                                         )}
 
-                                        {watch(`questions.${index}.type`) === 'true_false' && (
-                                            <div className="space-y-2">
+                                {watch(`questions.${index}.type`) === 'true_false' && (
+                                    <div className="space-y-2">
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.correctAnswer')}</label>
                                                 <div className="flex space-x-4">
                                                     <label className="inline-flex items-center">
@@ -881,8 +882,8 @@ export default function ExamEditor() {
                                             </div>
                                         )}
 
-                                        {watch(`questions.${index}.type`) === 'numeric' && (
-                                            <div>
+                                {watch(`questions.${index}.type`) === 'numeric' && (
+                                    <div>
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.numericAnswer')}</label>
                                                 <input
                                                     type="number"
@@ -896,8 +897,6 @@ export default function ExamEditor() {
 
                                         {/* short_answer removed from supported types */}
                                     </div>
-                                </div>
-                            </div>
                         </div>
                     ))}
                 </div>
