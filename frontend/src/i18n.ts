@@ -1,14 +1,18 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import countryLanguageDetector from './lib/countryLanguageDetector';
 
 import enTranslation from './locales/en/translation.json';
 import arTranslation from './locales/ar/translation.json';
 import frTranslation from './locales/fr/translation.json';
 import esTranslation from './locales/es/translation.json';
 
+const languageDetector = new LanguageDetector();
+languageDetector.addDetector(countryLanguageDetector);
+
 i18n
-    .use(LanguageDetector)
+    .use(languageDetector)
     .use(initReactI18next)
     .init({
         resources: {
@@ -23,7 +27,7 @@ i18n
             escapeValue: false,
         },
         detection: {
-            order: ['localStorage', 'navigator'],
+            order: ['localStorage', 'countryDetector', 'navigator'],
             caches: ['localStorage'],
             lookupLocalStorage: 'i18nextLng',
         },

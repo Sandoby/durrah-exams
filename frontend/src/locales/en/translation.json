@@ -4,6 +4,12 @@
         "titleHighlight": "Inspire Excellence",
         "subtitle": "The modern exam platform trusted by tutors worldwide. Create, distribute, and grade exams with powerful anti-cheating features.",
         "cta": "Start Free Trial",
+        "watchDemo": "Watch Demo",
+        "trustedBadge": "Trusted by 10,000+ Tutors",
+        "stats": {
+            "satisfaction": "Satisfaction",
+            "setupTime": "Setup Time"
+        },
         "features": {
             "noCreditCard": "No credit card required",
             "freeExams": "Free for up to 3 exams",
@@ -17,9 +23,16 @@
         "login": "Login",
         "getStarted": "Get Started Free"
     },
+    "stats": {
+        "tutors": "Active Tutors",
+        "exams": "Exams Created",
+        "students": "Students Tested",
+        "satisfaction": "Satisfaction Rate"
+    },
     "features": {
         "title": "Everything You Need to Excel",
         "subtitle": "Powerful features designed specifically for modern educators",
+        "badge": "Features",
         "fastCreation": {
             "title": "Lightning Fast Creation",
             "desc": "Create professional exams in minutes with our intuitive interface. Multiple question types supported."
@@ -39,67 +52,69 @@
         "support": {
             "title": "24/7 Support",
             "desc": "Get help whenever you need it with our dedicated support team and comprehensive documentation."
+        },
+        "interface": {
+            "title": "Intuitive Interface",
+            "desc": "Easy to use, powerful features"
         }
     },
     "pricing": {
         "title": "Simple, Transparent Pricing",
-        "subtitle": "Start free, upgrade when you're ready",
+        "subtitle": "Choose the plan that fits your needs",
+        "badge": "Pricing",
         "starter": {
             "title": "Starter",
             "price": "Free",
             "features": [
                 "Up to 3 exams",
-                "100 students per exam",
-                "Basic anti-cheating",
-                "Email support"
+                "50 students per exam",
+                "Basic analytics"
             ],
-            "cta": "Get Started"
+            "cta": "Get Started Free"
         },
         "professional": {
             "title": "Professional",
             "price": "200 EGP",
             "period": "/month",
+            "badge": "Most Popular",
             "features": [
                 "Unlimited exams",
                 "Unlimited students",
-                "Advanced analytics & insights",
-                "Priority support",
-                "All anti-cheating features"
+                "Advanced analytics",
+                "Priority support"
             ],
-            "cta": "Start Free Trial",
-            "badge": "POPULAR"
+            "cta": "Start Free Trial"
         },
         "yearly": {
-            "title": "Professional Yearly",
+            "title": "Yearly",
             "price": "2000 EGP",
             "period": "/year",
+            "badge": "Save 20%",
             "features": [
-                "All professional features",
-                "Dedicated account support",
-                "Priority roadmap feedback",
-                "2 months free vs. monthly"
+                "Everything in Professional",
+                "2 months free",
+                "Premium support"
             ],
-            "cta": "Start Free Trial",
-            "badge": "BEST VALUE"
+            "cta": "Get Started"
         }
     },
     "testimonials": {
         "title": "Loved by Tutors Worldwide",
-        "subtitle": "See what educators are saying about Durrah",
+        "subtitle": "See what educators are saying",
         "t1": {
-            "content": "Durrah has transformed how I create and grade exams. The platform helps me understand exactly where my students need help.",
+            "content": "This platform has revolutionized how I conduct exams. The anti-cheating features give me peace of mind.",
             "name": "Sarah Johnson",
-            "role": "Math Tutor, USA"
+            "role": "Mathematics Tutor"
         },
         "t2": {
-            "content": "The anti-cheating features give me peace of mind. I can trust that my students are doing their own work.",
+            "content": "Setup was incredibly easy. I created my first exam in under 5 minutes!",
             "name": "Ahmed Hassan",
-            "role": "Physics Teacher, Egypt"
+            "role": "Science Teacher"
         },
         "t3": {
-            "content": "Creating exams used to take hours. Now I can do it in minutes and focus more on teaching. Absolutely worth it!",
+            "content": "The analytics help me understand my students better. Highly recommended!",
             "name": "Maria Garcia",
-            "role": "Language Instructor, Spain"
+            "role": "Language Instructor"
         }
     },
     "auth": {
@@ -133,9 +148,9 @@
         "copyright": "© 2025 Durrah for Tutors. All rights reserved."
     },
     "ctaSection": {
-        "title": "Ready to Transform Your Teaching?",
-        "subtitle": "Join thousands of tutors who trust Durrah for their exam needs",
-        "cta": "Start Your Free Trial"
+        "title": "Ready to Transform Your Exams?",
+        "subtitle": "Join thousands of tutors who trust Durrah",
+        "cta": "Get Started Free"
     },
     "checkout": {
         "back": "Back",

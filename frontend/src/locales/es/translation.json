@@ -4,6 +4,12 @@
         "titleHighlight": "Inspiren Excelencia",
         "subtitle": "La plataforma de exámenes moderna en la que confían tutores de todo el mundo. Crea, distribuye y califica exámenes con potentes funciones anti-trampas.",
         "cta": "Prueba Gratis",
+        "watchDemo": "Ver Demostración",
+        "trustedBadge": "Confiado por más de 10,000 tutores",
+        "stats": {
+            "satisfaction": "Satisfacción",
+            "setupTime": "Tiempo de Configuración"
+        },
         "features": {
             "noCreditCard": "No se requiere tarjeta de crédito",
             "freeExams": "Gratis hasta 3 exámenes",
@@ -17,9 +23,16 @@
         "login": "Iniciar Sesión",
         "getStarted": "Empezar Gratis"
     },
+    "stats": {
+        "tutors": "Tutores Activos",
+        "exams": "Exámenes Creados",
+        "students": "Estudiantes Evaluados",
+        "satisfaction": "Tasa de Satisfacción"
+    },
     "features": {
         "title": "Todo lo que necesitas para sobresalir",
         "subtitle": "Funciones potentes diseñadas específicamente para educadores modernos",
+        "badge": "Características",
         "fastCreation": {
             "title": "Creación ultrarrápida",
             "desc": "Crea exámenes profesionales en minutos con nuestra interfaz intuitiva. Múltiples tipos de preguntas soportados."
@@ -39,11 +52,16 @@
         "support": {
             "title": "Soporte 24/7",
             "desc": "Obtén ayuda cuando la necesites con nuestro equipo de soporte dedicado y documentación completa."
+        },
+        "interface": {
+            "title": "Interfaz Intuitiva",
+            "desc": "Fácil de usar, funciones potentes"
         }
     },
     "pricing": {
         "title": "Precios simples y transparentes",
         "subtitle": "Empieza gratis, actualiza cuando estés listo",
+        "badge": "Precios",
         "starter": {
             "title": "Inicial",
             "price": "Gratis",
@@ -53,7 +71,7 @@
                 "Anti-trampas básico",
                 "Soporte por correo electrónico"
             ],
-            "cta": "Empezar"
+            "cta": "Empezar Gratis"
         },
         "professional": {
             "title": "Profesional",
@@ -85,7 +103,7 @@
     },
     "testimonials": {
         "title": "Amado por tutores de todo el mundo",
-        "subtitle": "Mira lo que dicen los educadores sobre Durrah",
+        "subtitle": "Mira lo que dicen los educadores",
         "t1": {
             "content": "Durrah ha transformado la forma en que creo y califico exámenes. La plataforma me ayuda a entender exactamente dónde necesitan ayuda mis estudiantes.",
             "name": "Sarah Johnson",
@@ -133,9 +151,9 @@
         "copyright": "© 2025 Durrah para Tutores. Todos los derechos reservados."
     },
     "ctaSection": {
-        "title": "¿Listo para transformar tu enseñanza?",
-        "subtitle": "Únete a miles de tutores que confían en Durrah para sus necesidades de exámenes",
-        "cta": "Comienza tu prueba gratis"
+        "title": "¿Listo para Transformar tus Exámenes?",
+        "subtitle": "Únete a miles de tutores que confían en Durrah",
+        "cta": "Empezar Gratis"
     },
     "checkout": {
         "back": "Atrás",

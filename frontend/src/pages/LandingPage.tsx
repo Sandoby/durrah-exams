@@ -1,7 +1,8 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock } from 'lucide-react';
+import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X } from 'lucide-react';
+import { useState } from 'react';
 import { Logo } from '../components/Logo';
 import { LottiePlayer } from '../components/LottiePlayer';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
@@ -9,6 +10,7 @@ import { useCurrency } from '../hooks/useCurrency';
 
 export default function LandingPage() {
     const { t, i18n } = useTranslation();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const registrationUrl = 'https://tutors.durrahsystem.tech/register';
     const isRTL = i18n.language === 'ar';
 
@@ -57,9 +59,49 @@ export default function LandingPage() {
                                 </Link>
                             </div>
                         </div>
+                        
+                        {/* Mobile Menu Button */}
+                        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                        </button>
                     </div>
                 </div>
             </nav>
+
+            {/* Mobile Menu */}
+            {mobileMenuOpen && (
+                <>
+                    {/* Backdrop */}
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setMobileMenuOpen(false)} />
+                    
+                    {/* Menu Drawer */}
+                    <div className={`fixed top-20 ${isRTL ? 'left-4' : 'right-4'} w-[calc(100%-2rem)] max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl z-50 lg:hidden border border-gray-200 dark:border-gray-700 overflow-hidden animate-in slide-in-from-top duration-300`}>
+                        <div className="p-6 space-y-4">
+                            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-colors">
+                                {t('nav.features')}
+                            </a>
+                            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-colors">
+                                {t('nav.pricing')}
+                            </a>
+                            <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-colors">
+                                {t('nav.testimonials')}
+                            </a>
+                            
+                            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <div className="mb-4">
+                                    <LanguageSwitcher />
+                                </div>
+                                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors mb-3">
+                                    {t('nav.login')}
+                                </Link>
+                                <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white rounded-xl font-semibold text-base shadow-lg shadow-indigo-500/30">
+                                    {t('nav.getStarted')}
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
 
             {/* Hero Section */}
             <section className="pt-40 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -72,28 +114,28 @@ export default function LandingPage() {
                         <div className="text-center lg:text-left">
                             <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-6">
                                 <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Trusted by 10,000+ Tutors</span>
+                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('hero.trustedBadge')}</span>
                             </div>
                             
                             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 dark:text-white mb-6 leading-[1.1]">
-                                Create Exams<br />
-                                That <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Inspire Excellence</span>
+                                {t('hero.title')}<br />
+                                <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">{t('hero.titleHighlight')}</span>
                             </h1>
                             
                             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0">
-                                The modern exam platform trusted by tutors worldwide. Create, distribute, and grade exams with powerful anti-cheating features.
+                                {t('hero.subtitle')}
                             </p>
                             
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
                                 <a href={registrationUrl} target="_blank" rel="noreferrer" className="group relative bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-2xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center">
                                     <span className="relative z-10 flex items-center gap-2">
-                                        Start Free Trial
+                                        {t('hero.cta')}
                                         <ArrowRight className={`w-5 h-5 group-hover:translate-x-1 transition-transform ${isRTL ? 'rotate-180' : ''}`} />
                                     </span>
                                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 </a>
                                 <a href="#features" className="group bg-white dark:bg-slate-800 text-gray-900 dark:text-white px-8 py-4 rounded-2xl font-semibold text-lg border-2 border-gray-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-xl transition-all duration-300 flex items-center justify-center">
-                                    Watch Demo
+                                    {t('hero.watchDemo', 'Watch Demo')}
                                     <svg className="w-5 h-5 ml-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -102,9 +144,9 @@ export default function LandingPage() {
                             </div>
                             
                             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-gray-600 dark:text-gray-400">
-                                <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>No credit card required</span></div>
-                                <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>Free for 3 exams</span></div>
-                                <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>Cancel anytime</span></div>
+                                <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>{t('hero.features.noCreditCard')}</span></div>
+                                <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>{t('hero.features.freeExams')}</span></div>
+                                <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>{t('hero.features.cancelAnytime')}</span></div>
                             </div>
                         </div>
 
@@ -119,7 +161,7 @@ export default function LandingPage() {
                                         </div>
                                         <div>
                                             <div className="text-2xl font-bold text-gray-900 dark:text-white">98%</div>
-                                            <div className="text-xs text-gray-600 dark:text-gray-400">Satisfaction</div>
+                                            <div className="text-xs text-gray-600 dark:text-gray-400">{t('hero.stats.satisfaction')}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -131,7 +173,7 @@ export default function LandingPage() {
                                         </div>
                                         <div>
                                             <div className="text-2xl font-bold text-gray-900 dark:text-white">2 min</div>
-                                            <div className="text-xs text-gray-600 dark:text-gray-400">Setup Time</div>
+                                            <div className="text-xs text-gray-600 dark:text-gray-400">{t('hero.stats.setupTime')}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -152,19 +194,19 @@ export default function LandingPage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                         <div className="text-center">
                             <div className="text-4xl font-bold text-white mb-2">10K+</div>
-                            <div className="text-indigo-100">Active Tutors</div>
+                            <div className="text-indigo-100">{t('stats.tutors')}</div>
                         </div>
                         <div className="text-center">
                             <div className="text-4xl font-bold text-white mb-2">500K+</div>
-                            <div className="text-indigo-100">Exams Created</div>
+                            <div className="text-indigo-100">{t('stats.exams')}</div>
                         </div>
                         <div className="text-center">
                             <div className="text-4xl font-bold text-white mb-2">2M+</div>
-                            <div className="text-indigo-100">Students Tested</div>
+                            <div className="text-indigo-100">{t('stats.students')}</div>
                         </div>
                         <div className="text-center">
                             <div className="text-4xl font-bold text-white mb-2">98%</div>
-                            <div className="text-indigo-100">Satisfaction Rate</div>
+                            <div className="text-indigo-100">{t('stats.satisfaction')}</div>
                         </div>
                     </div>
                 </div>
@@ -176,19 +218,19 @@ export default function LandingPage() {
                     <div className="text-center mb-16">
                         <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-4">
                             <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                            <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Features</span>
+                            <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('features.badge')}</span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Everything You Need to Excel</h2>
-                        <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">Powerful features designed specifically for modern educators</p>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('features.title')}</h2>
+                        <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">{t('features.subtitle')}</p>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[
-                            { icon: Zap, title: 'Lightning Fast Creation', desc: 'Create professional exams in minutes', gradient: 'from-yellow-400 to-orange-500' },
-                            { icon: Shield, title: 'Advanced Anti-Cheating', desc: 'Fullscreen mode, tab detection, violation tracking', gradient: 'from-indigo-400 to-violet-500' },
-                            { icon: Globe, title: 'Global Access', desc: 'Students can take exams anywhere, anytime', gradient: 'from-pink-400 to-rose-500' },
-                            { icon: Users, title: 'Unlimited Students', desc: 'No limits on the number of students', gradient: 'from-green-400 to-emerald-500' },
-                            { icon: MessageCircle, title: '24/7 Support', desc: 'Always here to help you succeed', gradient: 'from-blue-400 to-cyan-500' },
-                            { icon: Layout, title: 'Intuitive Interface', desc: 'Easy to use, powerful features', gradient: 'from-purple-400 to-fuchsia-500' }
+                            { icon: Zap, title: t('features.fastCreation.title'), desc: t('features.fastCreation.desc', 'Create professional exams in minutes'), gradient: 'from-yellow-400 to-orange-500' },
+                            { icon: Shield, title: t('features.antiCheating.title'), desc: t('features.antiCheating.desc', 'Fullscreen mode, tab detection, violation tracking'), gradient: 'from-indigo-400 to-violet-500' },
+                            { icon: Globe, title: t('features.globalAccess.title'), desc: t('features.globalAccess.desc', 'Students can take exams anywhere, anytime'), gradient: 'from-pink-400 to-rose-500' },
+                            { icon: Users, title: t('features.unlimitedStudents.title'), desc: t('features.unlimitedStudents.desc', 'No limits on the number of students'), gradient: 'from-green-400 to-emerald-500' },
+                            { icon: MessageCircle, title: t('features.support.title'), desc: t('features.support.desc', 'Always here to help you succeed'), gradient: 'from-blue-400 to-cyan-500' },
+                            { icon: Layout, title: t('features.interface.title'), desc: t('features.interface.desc', 'Easy to use, powerful features'), gradient: 'from-purple-400 to-fuchsia-500' }
                         ].map((feature, index) => (
                             <div key={index} className="group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-slate-700 p-8">
                                 <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
@@ -208,50 +250,50 @@ export default function LandingPage() {
                     <div className="text-center mb-16">
                         <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-4">
                             <Award className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                            <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Pricing</span>
+                            <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('pricing.badge')}</span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Simple, Transparent Pricing</h2>
-                        <p className="text-xl text-gray-600 dark:text-gray-300">Choose the plan that fits your needs</p>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('pricing.title')}</h2>
+                        <p className="text-xl text-gray-600 dark:text-gray-300">{t('pricing.subtitle')}</p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                         <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-200 dark:border-slate-700 p-8">
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Starter</h3>
-                            <div className="mb-6"><span className="text-5xl font-bold text-gray-900 dark:text-white">Free</span></div>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('pricing.starter.title')}</h3>
+                            <div className="mb-6"><span className="text-5xl font-bold text-gray-900 dark:text-white">{t('pricing.starter.price')}</span></div>
                             <ul className="space-y-4 mb-8">
-                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">Up to 3 exams</span></li>
-                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">50 students per exam</span></li>
-                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">Basic analytics</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.starter.features.0')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.starter.features.1')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.starter.features.2')}</span></li>
                             </ul>
-                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-slate-600 transition">Get Started Free</a>
+                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-slate-600 transition">{t('pricing.starter.cta')}</a>
                         </div>
                         <div className="relative bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 rounded-3xl shadow-2xl p-8 transform hover:scale-105 transition-all duration-300">
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-gray-900 px-4 py-1 rounded-full font-bold text-sm shadow-lg">Most Popular</div>
-                            <h3 className="text-2xl font-bold text-white mb-2">Professional</h3>
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-gray-900 px-4 py-1 rounded-full font-bold text-sm shadow-lg">{t('pricing.professional.badge')}</div>
+                            <h3 className="text-2xl font-bold text-white mb-2">{t('pricing.professional.title')}</h3>
                             <div className="mb-6">
                                 <span className="text-5xl font-bold text-white">{isCurrencyLoading ? '...' : `${currencyCode} ${monthlyPrice}`}</span>
-                                <span className="text-indigo-100">/month</span>
+                                <span className="text-indigo-100">{t('pricing.professional.period')}</span>
                             </div>
                             <ul className="space-y-4 mb-8">
-                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">Unlimited exams</span></li>
-                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">Unlimited students</span></li>
-                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">Advanced analytics</span></li>
-                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">Priority support</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">{t('pricing.professional.features.0')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">{t('pricing.professional.features.1')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">{t('pricing.professional.features.2')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">{t('pricing.professional.features.3')}</span></li>
                             </ul>
-                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-white text-indigo-600 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition shadow-lg">Start Free Trial</a>
+                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-white text-indigo-600 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition shadow-lg">{t('pricing.professional.cta')}</a>
                         </div>
                         <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-indigo-200 dark:border-indigo-800 p-8">
-                            <div className="inline-block bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full font-semibold text-sm mb-4">Save 20%</div>
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Yearly</h3>
+                            <div className="inline-block bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full font-semibold text-sm mb-4">{t('pricing.yearly.badge')}</div>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('pricing.yearly.title')}</h3>
                             <div className="mb-6">
                                 <span className="text-5xl font-bold text-gray-900 dark:text-white">{isCurrencyLoading ? '...' : `${currencyCode} ${yearlyPrice}`}</span>
-                                <span className="text-gray-600 dark:text-gray-400">/year</span>
+                                <span className="text-gray-600 dark:text-gray-400">{t('pricing.yearly.period')}</span>
                             </div>
                             <ul className="space-y-4 mb-8">
-                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">Everything in Professional</span></li>
-                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">2 months free</span></li>
-                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">Premium support</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.yearly.features.0')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.yearly.features.1')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.yearly.features.2')}</span></li>
                             </ul>
-                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition">Get Started</a>
+                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition">{t('pricing.yearly.cta')}</a>
                         </div>
                     </div>
                 </div>
@@ -261,14 +303,14 @@ export default function LandingPage() {
             <section id="testimonials" className="py-24 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Loved by Tutors Worldwide</h2>
-                        <p className="text-xl text-gray-600 dark:text-gray-300">See what educators are saying</p>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('testimonials.title')}</h2>
+                        <p className="text-xl text-gray-600 dark:text-gray-300">{t('testimonials.subtitle')}</p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8">
                         {[
-                            { name: 'Sarah Johnson', role: 'Mathematics Tutor', content: 'This platform has revolutionized how I conduct exams. The anti-cheating features give me peace of mind.', rating: 5 },
-                            { name: 'Ahmed Hassan', role: 'Science Teacher', content: 'Setup was incredibly easy. I created my first exam in under 5 minutes!', rating: 5 },
-                            { name: 'Maria Garcia', role: 'Language Instructor', content: 'The analytics help me understand my students better. Highly recommended!', rating: 5 }
+                            { name: t('testimonials.t1.name'), role: t('testimonials.t1.role'), content: t('testimonials.t1.content'), rating: 5 },
+                            { name: t('testimonials.t2.name'), role: t('testimonials.t2.role'), content: t('testimonials.t2.content'), rating: 5 },
+                            { name: t('testimonials.t3.name'), role: t('testimonials.t3.role'), content: t('testimonials.t3.content'), rating: 5 }
                         ].map((testimonial, index) => (
                             <div key={index} className="group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-slate-700 p-8">
                                 <div className="flex mb-4">
@@ -291,10 +333,10 @@ export default function LandingPage() {
             <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJsLTEtMWgtMWwtMS0xaC0ybC0xLTFoLTJsLTEgMWgtMWwtMSAxaC0ybC0xIDFoLTJsLTEgMWgtMWwtMSAxdjFsLTEgMXYxbC0xIDF2MWwtMSAxdjJsLTEgMXYxbC0xIDF2MmwtMSAxdjJsLTEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMWgxbDEgMWgxbDEgMWgxbDEgMWgybDEgMWgybDEgMWgybDEtMWgxbDEtMWgybDEtMWgybDEtMWgybDEtMWgxbDEtMWgxbDEtMWgxbDEtMXYtMWwxLTF2LTFsMS0xdi0xbDEtMXYtMWwxLTF2LTFsMS0xdi0ybDEtMXYtMWwxLTF2LTJsMS0xdi0ybC0xLTF2LTFsLTEtMXYtMWwtMS0xdi0xbC0xLTF2LTFsLTEtMXYtMWwtMS0xdi0xbC0xLTF2LTFsLTEtMWgtMWwtMS0xaC0xbC0xLTFoLTFsLTEtMWgtMmwtMS0xaC0yeiIvPjwvZz48L2c+PC9zdmc+')] opacity-10"></div>
                 <div className="max-w-4xl mx-auto text-center relative z-10">
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Ready to Transform Your Exams?</h2>
-                    <p className="text-xl text-indigo-100 mb-8">Join thousands of tutors who trust Durrah</p>
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">{t('ctaSection.title')}</h2>
+                    <p className="text-xl text-indigo-100 mb-8">{t('ctaSection.subtitle')}</p>
                     <a href={registrationUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-white text-indigo-600 px-10 py-5 rounded-2xl text-lg font-bold hover:shadow-2xl hover:scale-105 transition-all duration-300">
-                        Get Started Free
+                        {t('ctaSection.cta')}
                         <ArrowRight className={`w-6 h-6 ${isRTL ? 'rotate-180' : ''}`} />
                     </a>
                 </div>
