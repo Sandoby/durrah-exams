@@ -8,8 +8,9 @@ interface ProtectedRouteProps {
 // Admin-only route
 export function AdminRoute({ children }: ProtectedRouteProps) {
     const { role, loading } = useAuth();
+    const isSimpleAdmin = sessionStorage.getItem('agent_authenticated') === 'true' && sessionStorage.getItem('agent_role') === 'admin';
 
-    if (loading) {
+    if (loading && !isSimpleAdmin) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
                 <div className="text-center">
@@ -20,7 +21,7 @@ export function AdminRoute({ children }: ProtectedRouteProps) {
         );
     }
 
-    if (role !== 'admin') {
+    if (role !== 'admin' && !isSimpleAdmin) {
         return <Navigate to="/dashboard" replace />;
     }
 
@@ -30,8 +31,9 @@ export function AdminRoute({ children }: ProtectedRouteProps) {
 // Agent or Admin route
 export function AgentRoute({ children }: ProtectedRouteProps) {
     const { role, loading } = useAuth();
+    const isSimpleAdmin = sessionStorage.getItem('agent_authenticated') === 'true' && sessionStorage.getItem('agent_role') === 'admin';
 
-    if (loading) {
+    if (loading && !isSimpleAdmin) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
                 <div className="text-center">
@@ -42,7 +44,7 @@ export function AgentRoute({ children }: ProtectedRouteProps) {
         );
     }
 
-    if (role !== 'admin' && role !== 'agent') {
+    if (role !== 'admin' && role !== 'agent' && !isSimpleAdmin) {
         return <Navigate to="/dashboard" replace />;
     }
 

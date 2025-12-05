@@ -69,6 +69,8 @@ export default function AdminDashboard() {
 
     const handleLogout = async () => {
         await signOut();
+        sessionStorage.removeItem('agent_authenticated');
+        sessionStorage.removeItem('agent_role');
         navigate('/agent-login');
     };
 
