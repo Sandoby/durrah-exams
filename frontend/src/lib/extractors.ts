@@ -67,7 +67,37 @@ async function extractTextFromDOCX(file: File): Promise<string> {
 }
 
 function normalizeWhitespace(s: string): string {
-  return s.replace(/\r/g, ' ').replace(/\t/g, ' ').replace(/\u00A0/g, ' ').replace(/ +/g, ' ').replace(/\s*\n\s*/g, '\n').trim();
+  return s
+    .replace(/\r/g, ' ')
+    .replace(/\t/g, ' ')
+    .replace(/\u00A0/g, ' ')
+    .replace(/\0/g, '') // Remove null bytes
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '') // Remove control characters except newline
+    .replace(/ +/g, ' ')
+    .replace(/\s*\n\s*/g, '\n')
+    .trim();
+}
+
+/**
+ * Sanitize text to prevent encoding issues
+ * Removes invalid Unicode sequences and control characters
+ */
+export function sanitizeText(text: string): string {
+  if (typeof text !== 'string') return '';
+  
+  return text
+    .replace(/\0/g, '') // Remove null bytes
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, ' ') // Replace control chars with space
+    .replace(/[\uFFFD]/g, '') // Remove replacement character
+    .replace(/[^\w\s\-.,!?()[\]'"\n]/g, (char) => {
+      // Keep alphanumeric, spaces, common punctuation, and newlines
+      const code = char.charCodeAt(0);
+      // Keep common extended ASCII and Unicode letters
+      if (code >= 32 && code !== 127) return char;
+      return '';
+    })
+    .replace(/ +/g, ' ') // Collapse spaces
+    .trim();
 }
 
 // Core parser: attempts to detect common exam formats
