@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { Ticket, MessageSquare, Clock, CheckCircle, LogOut } from 'lucide-react';
+import { Ticket, MessageSquare, Clock, CheckCircle, LogOut, LayoutDashboard } from 'lucide-react';
+import { AgentChatInterface } from '../../components/support/AgentChatInterface';
 
 interface TicketSummary {
     id: string;
@@ -19,6 +20,7 @@ interface TicketSummary {
 export default function SupportDashboard() {
     const { user, signOut, role } = useAuth();
     const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState<'dashboard' | 'chat'>('dashboard');
     const [tickets, setTickets] = useState<TicketSummary[]>([]);
     const [stats, setStats] = useState({
         myTickets: 0,
@@ -78,9 +80,9 @@ export default function SupportDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
             {/* Header */}
-            <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+            <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 shrink-0">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center justify-between">
                         <div>
@@ -109,152 +111,144 @@ export default function SupportDashboard() {
                             </button>
                         </div>
                     </div>
+
+                    {/* Navigation Tabs */}
+                    <div className="flex gap-6 mt-6">
+                        <button
+                            onClick={() => setActiveTab('dashboard')}
+                            className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'dashboard'
+                                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                                }`}
+                        >
+                            <LayoutDashboard className="w-4 h-4" />
+                            Overview
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('chat')}
+                            className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'chat'
+                                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                                }`}
+                        >
+                            <MessageSquare className="w-4 h-4" />
+                            Live Chat
+                        </button>
+                    </div>
                 </div>
             </header>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <StatCard
-                        icon={<Ticket className="w-6 h-6" />}
-                        label="My Tickets"
-                        value={stats.myTickets}
-                        color="indigo"
-                    />
-                    <StatCard
-                        icon={<Clock className="w-6 h-6" />}
-                        label="Open Tickets"
-                        value={stats.openTickets}
-                        color="orange"
-                    />
-                    <StatCard
-                        icon={<CheckCircle className="w-6 h-6" />}
-                        label="Resolved Today"
-                        value={stats.resolvedToday}
-                        color="green"
-                    />
-                </div>
-
-                {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <Link
-                        to="/support/tickets"
-                        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
-                    >
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                                <Ticket className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                    View Tickets
-                                </h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    Manage support tickets
-                                </p>
-                            </div>
-                        </div>
-                    </Link>
-
-                    <Link
-                        to="/support/chat"
-                        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
-                    >
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                                <MessageSquare className="w-6 h-6 text-green-600 dark:text-green-400" />
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                    Live Chat
-                                </h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    Handle live chat sessions
-                                </p>
-                            </div>
-                        </div>
-                    </Link>
-                </div>
-
-                {/* Recent Tickets */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            Recent Tickets
-                        </h2>
-                    </div>
-
-                    <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {tickets.length === 0 ? (
-                            <div className="px-6 py-12 text-center">
-                                <Ticket className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                <p className="text-gray-600 dark:text-gray-400">No tickets yet</p>
-                            </div>
-                        ) : (
-                            tickets.map((ticket) => (
-                                <div key={ticket.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <span className="text-sm font-mono text-gray-600 dark:text-gray-400">
-                                                    {ticket.ticket_number}
-                                                </span>
-                                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${ticket.is_open
-                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                                    : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                                                    }`}>
-                                                    {ticket.is_open ? 'Open' : 'Closed'}
-                                                </span>
-                                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${ticket.priority === 'high'
-                                                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                                                    : ticket.priority === 'medium'
-                                                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                                                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-                                                    }`}>
-                                                    {ticket.priority}
-                                                </span>
-                                            </div>
-                                            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                                                {ticket.subject}
-                                            </h3>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                {ticket.user_name || 'Anonymous'} • {ticket.category}
-                                            </p>
-                                        </div>
-                                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                                            {new Date(ticket.created_at).toLocaleDateString()}
-                                        </div>
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {activeTab === 'chat' ? (
+                    <AgentChatInterface />
+                ) : (
+                    <>
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">My Tickets</p>
+                                        <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{stats.myTickets}</p>
+                                    </div>
+                                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
+                                        <Ticket className="w-6 h-6" />
                                     </div>
                                 </div>
-                            ))
-                        )}
-                    </div>
-                </div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Open Tickets</p>
+                                        <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{stats.openTickets}</p>
+                                    </div>
+                                    <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-orange-600 dark:text-orange-400">
+                                        <Clock className="w-6 h-6" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Resolved Today</p>
+                                        <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{stats.resolvedToday}</p>
+                                    </div>
+                                    <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-600 dark:text-green-400">
+                                        <CheckCircle className="w-6 h-6" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Tickets */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    Recent Tickets
+                                </h2>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="bg-gray-50 dark:bg-gray-700/50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                Ticket ID
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                Subject
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                User
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                Status
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                Created
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                        {tickets.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={5} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                                    No tickets found
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            tickets.map((ticket) => (
+                                                <tr key={ticket.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                                                        #{ticket.ticket_number}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                        {ticket.subject}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                                                        {ticket.user_name}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${ticket.is_open
+                                                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                                                : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                                                            }`}>
+                                                            {ticket.is_open ? 'Open' : 'Closed'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                                                        {new Date(ticket.created_at).toLocaleDateString()}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </>
+                )}
             </main>
-        </div>
-    );
-}
-
-// Stat Card Component
-function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: number; color: string }) {
-    const colors = {
-        indigo: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400',
-        green: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400',
-        orange: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
-    };
-
-    return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{label}</p>
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{value}</p>
-                </div>
-                <div className={`p-3 rounded-lg ${colors[color as keyof typeof colors]}`}>
-                    {icon}
-                </div>
-            </div>
         </div>
     );
 }

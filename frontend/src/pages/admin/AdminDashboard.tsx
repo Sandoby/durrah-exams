@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { Users, Ticket, Plus, LogOut } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface Agent {
     id: string;
@@ -280,19 +282,68 @@ function CreateAgentModal({ onClose, onSuccess }: { onClose: () => void; onSucce
         setLoading(true);
 
         try {
-            // Create auth user
-            const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+            // Create a temporary client for signup to avoid logging out the admin
+            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+            const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+            if (!supabaseUrl || !supabaseAnonKey) {
+                throw new Error('Missing Supabase environment variables');
+            }
+
+            const tempSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+                auth: {
+                    persistSession: false, // Don't overwrite local storage
+                    autoRefreshToken: false,
+                    detectSessionInUrl: false
+                }
+            });
+
+            // Create auth user using the temporary client
+            const { data: authData, error: authError } = await tempSupabase.auth.signUp({
                 email,
                 password,
-                email_confirm: true,
-                user_metadata: {
-                    full_name: fullName,
+                options: {
+                    data: {
+                        full_name: fullName,
+                    },
                 },
             });
 
             if (authError) throw authError;
 
-            // Create agent profile
+            if (!authData.user) {
+                throw new Error('Failed to create user');
+            }
+
+            // Wait a bit for the profile to be created by the trigger
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Check if profile exists, if not create it (using main admin client)
+            const { data: existingProfile } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('id', authData.user.id)
+                .single();
+
+            if (!existingProfile) {
+                // Create profile manually if it doesn't exist
+                await supabase
+                    .from('profiles')
+                    .insert({
+                        id: authData.user.id,
+                        full_name: fullName,
+                        email: email,
+                        role: 'agent',
+                    });
+            } else {
+                // Update existing profile role
+                await supabase
+                    .from('profiles')
+                    .update({ role: 'agent' })
+                    .eq('id', authData.user.id);
+            }
+
+            // Create agent profile (using main admin client)
             const { error: agentError } = await supabase
                 .from('support_agents')
                 .insert({
@@ -305,14 +356,10 @@ function CreateAgentModal({ onClose, onSuccess }: { onClose: () => void; onSucce
 
             if (agentError) throw agentError;
 
-            // Update profile role
-            await supabase
-                .from('profiles')
-                .update({ role: 'agent' })
-                .eq('id', authData.user.id);
-
             onSuccess();
+            toast.success('Agent created successfully');
         } catch (err: any) {
+            console.error('Agent creation error:', err);
             setError(err.message || 'Failed to create agent');
         } finally {
             setLoading(false);
