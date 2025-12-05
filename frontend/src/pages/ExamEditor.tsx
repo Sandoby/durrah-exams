@@ -681,8 +681,8 @@ export default function ExamEditor() {
                 </div>
 
                 {/* Questions */}
-                <div className="w-full flex flex-col gap-6">
-                    <div className="flex items-center justify-between">
+                <div className="w-full">
+                    <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('examEditor.questions.title')}</h3>
                         <div className="flex gap-2">
                             <button
@@ -695,8 +695,9 @@ export default function ExamEditor() {
                         </button>
                     </div>
 
-                    {fields.map((field, index) => (
-                        <div key={field.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                    <div className="space-y-6 w-full">
+                        {fields.map((field, index) => (
+                            <div key={field.id} className="w-full bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-3">
                                     <span className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-800 font-bold text-sm">
@@ -899,6 +900,7 @@ export default function ExamEditor() {
                                     </div>
                         </div>
                     ))}
+                    </div>
                 </div>
             </div>
 
