@@ -18,7 +18,10 @@ interface ChatSession {
   id: string;
   user_id: string;
   agent_id: string | null;
-  status: 'open' | 'closed';
+  is_active: boolean;
+  is_ended: boolean;
+  started_at: string;
+  ended_at: string | null;
   created_at: string;
   updated_at: string;
   profiles?: {
@@ -38,14 +41,37 @@ function AgentChatInterface() {
   const [isUserTyping, setIsUserTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<any>(null);
+  const presenceChannelRef = useRef<any>(null);
   const typingTimeoutRef = useRef<any>(null);
+
+  const trackAgentPresence = async () => {
+    const channel = supabase.channel('agent-presence');
+    
+    await channel
+      .on('presence', { event: 'sync' }, () => {
+        // Presence synced
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({
+            online_at: new Date().toISOString(),
+            role: 'agent',
+            agent_id: user?.id
+          });
+        }
+      });
+    
+    presenceChannelRef.current = channel;
+  };
 
   useEffect(() => {
     fetchSessions();
     const channel = subscribeToSessions();
+    trackAgentPresence();
 
     return () => {
       if (channel) supabase.removeChannel(channel);
+      if (presenceChannelRef.current) supabase.removeChannel(presenceChannelRef.current);
     };
   }, []);
 
@@ -72,7 +98,7 @@ function AgentChatInterface() {
             email
           )
         `)
-        .eq('status', 'open')
+        .eq('is_ended', false)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
@@ -253,8 +279,8 @@ function AgentChatInterface() {
       const { error } = await supabase
         .from('live_chat_sessions')
         .update({ 
-          status: 'closed',
-          closed_at: new Date().toISOString()
+          is_ended: true,
+          ended_at: new Date().toISOString()
         })
         .eq('id', sessionId);
 

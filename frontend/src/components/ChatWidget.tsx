@@ -18,8 +18,12 @@ interface ChatSession {
   id: string;
   user_id: string;
   agent_id: string | null;
-  status: 'open' | 'closed';
+  is_active: boolean;
+  is_ended: boolean;
+  started_at: string;
+  ended_at: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 function ChatWidget() {
@@ -73,8 +77,8 @@ function ChatWidget() {
           .from('live_chat_sessions')
           .select('*')
           .eq('user_id', user.id)
-          .eq('status', 'closed')
-          .order('closed_at', { ascending: false })
+          .eq('is_ended', true)
+          .order('ended_at', { ascending: false })
           .limit(1)
           .single();
 
@@ -96,7 +100,7 @@ function ChatWidget() {
         .from('live_chat_sessions')
         .insert({
           user_id: user.id,
-          status: 'open'
+          is_ended: false
         })
         .select()
         .single();
@@ -172,11 +176,6 @@ function ChatWidget() {
           }
         }
       )
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState();
-        const agents = Object.values(state).flat().filter((p: any) => p.role === 'agent');
-        setIsAgentOnline(agents.length > 0);
-      })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           await channel.track({
@@ -187,7 +186,22 @@ function ChatWidget() {
       });
 
     channelRef.current = channel;
+    
+    // Subscribe to agent presence on a separate channel
+    subscribeToAgentPresence();
+    
     return channel;
+  };
+
+  const subscribeToAgentPresence = () => {
+    const presenceChannel = supabase
+      .channel('agent-presence')
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState();
+        const agents = Object.values(state).flat().filter((p: any) => p.role === 'agent');
+        setIsAgentOnline(agents.length > 0);
+      })
+      .subscribe();
   };
 
   const handleTyping = async () => {
@@ -211,7 +225,7 @@ function ChatWidget() {
       let sessionId = currentSession?.id;
 
       // Check if current session is closed, if so create a new one
-      if (currentSession?.status === 'closed') {
+      if (currentSession?.is_ended === true) {
         // Clear old messages
         setMessages([]);
         // Create new session
@@ -436,7 +450,7 @@ function ChatWidget() {
               </div>
 
               <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shrink-0">
-                {currentSession?.status === 'closed' ? (
+                {currentSession?.is_ended === true ? (
                   <div className="text-center">
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                       This chat session has been closed.
