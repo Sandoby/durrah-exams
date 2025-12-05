@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -7,8 +7,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables');
 }
 
+// Singleton instance to prevent multiple clients
+let supabaseInstance: SupabaseClient | null = null;
+
 // Configure Supabase with persistent session storage
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = supabaseInstance || (supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
         // Use localStorage for persistent sessions (default)
         // This ensures users stay logged in across browser sessions
@@ -18,7 +21,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         persistSession: true,
         detectSessionInUrl: true,
     },
-});
+}));
 
 function isIphoneOrSafari() {
     if (typeof navigator === 'undefined') return false;
