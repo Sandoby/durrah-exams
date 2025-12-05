@@ -15,6 +15,8 @@ import ExamView from './pages/ExamView';
 import Settings from './pages/Settings';
 import AdminPanel from './pages/AdminPanel';
 import QuestionBank from './pages/QuestionBank';
+import AgentLogin from './pages/AgentLogin';
+import SupportDashboard from './pages/support/SupportDashboard';
 import { SubmissionSync } from './components/SubmissionSync';
 import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 
@@ -58,7 +60,10 @@ function App() {
             <Route path="/exam/:id" element={<ExamView />} />
             <Route path="/exam/:examId/analytics" element={<AnalyticsDashboard />} />
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/agent-login" element={<AgentLogin />} />
+            <Route path="/support" element={<SupportDashboard />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route path="*" element={<LandingPage />} />
           </Routes>
           <Toaster position="top-right" />
         </div>
