@@ -36,7 +36,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    const checkCustomAuth = () => {
+        const isAgentAuth = sessionStorage.getItem('agent_authenticated') === 'true';
+        if (isAgentAuth) {
+            const agentRole = sessionStorage.getItem('agent_role') as UserRole;
+            const agentId = sessionStorage.getItem('agent_id');
+            const agentEmail = sessionStorage.getItem('agent_email');
+
+            if (agentRole && agentId) {
+                setRole(agentRole);
+                // Create a mock user object for the context
+                setUser({
+                    id: agentId,
+                    email: agentEmail || '',
+                    app_metadata: {},
+                    user_metadata: {},
+                    aud: 'authenticated',
+                    created_at: new Date().toISOString()
+                } as User);
+                setLoading(false);
+                return true;
+            }
+        }
+        return false;
+    };
+
     useEffect(() => {
+        // Check custom auth first
+        if (checkCustomAuth()) {
+            return;
+        }
+
         // Check active sessions and sets the user
         supabase.auth.getSession().then(async ({ data: { session } }) => {
             setSession(session);
@@ -57,7 +87,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (session?.user) {
                 await fetchUserRole(session.user.id);
             } else {
-                setRole(null);
+                // If signed out from Supabase, check if custom auth is active
+                if (!checkCustomAuth()) {
+                    setRole(null);
+                }
             }
 
             setLoading(false);
@@ -68,7 +101,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const signOut = async () => {
         await supabase.auth.signOut();
+        sessionStorage.removeItem('agent_authenticated');
+        sessionStorage.removeItem('agent_role');
+        sessionStorage.removeItem('agent_id');
+        sessionStorage.removeItem('agent_email');
+        sessionStorage.removeItem('agent_name');
         setRole(null);
+        setUser(null);
     };
 
     return (

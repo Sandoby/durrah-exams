@@ -31,9 +31,10 @@ export function AdminRoute({ children }: ProtectedRouteProps) {
 // Agent or Admin route
 export function AgentRoute({ children }: ProtectedRouteProps) {
     const { role, loading } = useAuth();
-    const isSimpleAdmin = sessionStorage.getItem('agent_authenticated') === 'true' && sessionStorage.getItem('agent_role') === 'admin';
+    const isSimpleAuth = sessionStorage.getItem('agent_authenticated') === 'true';
+    const simpleRole = sessionStorage.getItem('agent_role');
 
-    if (loading && !isSimpleAdmin) {
+    if (loading && !isSimpleAuth) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
                 <div className="text-center">
@@ -44,9 +45,8 @@ export function AgentRoute({ children }: ProtectedRouteProps) {
         );
     }
 
-    if (role !== 'admin' && role !== 'agent' && !isSimpleAdmin) {
+    if (role !== 'admin' && role !== 'agent' && (!isSimpleAuth || (simpleRole !== 'admin' && simpleRole !== 'agent'))) {
         return <Navigate to="/dashboard" replace />;
     }
-
     return <>{children}</>;
 }
