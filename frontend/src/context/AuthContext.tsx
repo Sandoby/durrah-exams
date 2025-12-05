@@ -71,27 +71,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }, 5000); // 5 second timeout
 
         // Check custom auth first
-        if (checkCustomAuth()) {
+        const hasCustomAuth = checkCustomAuth();
+        
+        if (!hasCustomAuth) {
+            // Check active sessions and sets the user
+            supabase.auth.getSession().then(async ({ data: { session } }) => {
+                setSession(session);
+                setUser(session?.user ?? null);
+
+                if (session?.user) {
+                    await fetchUserRole(session.user.id);
+                }
+
+                setLoading(false);
+                clearTimeout(loadingTimeout);
+            }).catch((error) => {
+                console.error('Error initializing auth:', error);
+                setLoading(false);
+                clearTimeout(loadingTimeout);
+            });
+        } else {
+            // Custom auth is active, clear timeout
             clearTimeout(loadingTimeout);
-            return;
         }
-
-        // Check active sessions and sets the user
-        supabase.auth.getSession().then(async ({ data: { session } }) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-
-            if (session?.user) {
-                await fetchUserRole(session.user.id);
-            }
-
-            setLoading(false);
-            clearTimeout(loadingTimeout);
-        }).catch((error) => {
-            console.error('Error initializing auth:', error);
-            setLoading(false);
-            clearTimeout(loadingTimeout);
-        });
 
         // Listen for changes on auth state (sign in, sign out, etc.)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
