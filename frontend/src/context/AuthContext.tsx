@@ -28,7 +28,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 .eq('id', userId)
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                console.error('Error fetching user role:', error);
+                setRole('tutor'); // Default to tutor if error
+                return;
+            }
             setRole(data?.role || 'tutor');
         } catch (error) {
             console.error('Error fetching user role:', error);
@@ -62,13 +66,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     useEffect(() => {
+        let isMounted = true;
+        
         // Set a timeout to prevent infinite loading
         const loadingTimeout = setTimeout(() => {
-            if (loading) {
+            if (isMounted && loading) {
                 console.warn('Auth initialization timeout - proceeding anyway');
                 setLoading(false);
             }
-        }, 5000); // 5 second timeout
+        }, 10000); // 10 second timeout (increased from 5)
 
         // Check custom auth first
         const hasCustomAuth = checkCustomAuth();
@@ -76,16 +82,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (!hasCustomAuth) {
             // Check active sessions and sets the user
             supabase.auth.getSession().then(async ({ data: { session } }) => {
+                if (!isMounted) return;
+                
                 setSession(session);
                 setUser(session?.user ?? null);
 
                 if (session?.user) {
-                    await fetchUserRole(session.user.id);
+                    // Fetch role but don't block on it
+                    fetchUserRole(session.user.id).catch(err => {
+                        console.error('Role fetch failed:', err);
+                    });
                 }
 
                 setLoading(false);
                 clearTimeout(loadingTimeout);
             }).catch((error) => {
+                if (!isMounted) return;
                 console.error('Error initializing auth:', error);
                 setLoading(false);
                 clearTimeout(loadingTimeout);
@@ -97,11 +109,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         // Listen for changes on auth state (sign in, sign out, etc.)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            if (!isMounted) return;
+            
             setSession(session);
             setUser(session?.user ?? null);
 
             if (session?.user) {
-                await fetchUserRole(session.user.id);
+                // Fetch role but don't block
+                fetchUserRole(session.user.id).catch(err => {
+                    console.error('Role fetch failed:', err);
+                });
             } else {
                 // If signed out from Supabase, check if custom auth is active
                 if (!checkCustomAuth()) {
@@ -113,6 +130,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
 
         return () => {
+            isMounted = false;
             clearTimeout(loadingTimeout);
             subscription.unsubscribe();
         };
