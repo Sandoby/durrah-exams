@@ -2,6 +2,7 @@
 import { parseQuestionsLocally } from './localParser';
 import { enhanceWithGroqAI, enhanceWithHuggingFaceAI, mergeExtractions } from './groqExtractor';
 import { extractWithOllama } from './ollamaExtractor';
+import { extractQuestionsWithWebLLM, checkWebGPUSupport } from './webllmExtractor';
 import type { ExtractedQuestion } from '../extractors';
 
 export interface HybridExtractionResult {
@@ -10,7 +11,7 @@ export interface HybridExtractionResult {
     totalExtracted: number;
     localConfidenceScore: number;
     usedAI: boolean;
-    aiProvider?: 'groq' | 'huggingface' | 'ollama' | 'none';
+    aiProvider?: 'groq' | 'huggingface' | 'ollama' | 'webllm' | 'none';
     processingTime: number;
     issues: string[];
   };
@@ -59,7 +60,7 @@ export async function extractQuestionsHybrid(
   // Step 2: Check if we need AI enhancement
   let finalQuestions: ExtractedQuestion[] = localResult.questions;
   let usedAI = false;
-  let aiProvider: 'groq' | 'huggingface' | 'ollama' | 'none' = 'none';
+  let aiProvider: 'groq' | 'huggingface' | 'ollama' | 'webllm' | 'none' = 'none';
 
   if (useAI && localResult.totalConfidence < confidenceThreshold) {
     console.log(`⚠️  Confidence ${localResult.totalConfidence}% below threshold ${confidenceThreshold}%`);
@@ -67,8 +68,18 @@ export async function extractQuestionsHybrid(
 
     let aiQuestions: ExtractedQuestion[] | null = null;
 
-    // Step 2a: Try local Ollama first (if preferred and available)
-    if (preferLocal) {
+    // Step 2a: Try WebLLM first (browser-based, no server needed)
+    if (preferLocal && (await checkWebGPUSupport())) {
+      console.log('🌐 Trying browser-based WebLLM AI...');
+      aiQuestions = await extractQuestionsWithWebLLM(text, maxQuestions);
+      if (aiQuestions) {
+        aiProvider = 'webllm';
+        console.log('✅ WebLLM succeeded');
+      }
+    }
+
+    // Step 2b: Try local Ollama if WebLLM failed
+    if (!aiQuestions && preferLocal) {
       console.log('🏠 Trying local Ollama AI...');
       aiQuestions = await extractWithOllama(text, maxQuestions);
       if (aiQuestions) {
@@ -77,7 +88,7 @@ export async function extractQuestionsHybrid(
       }
     }
 
-    // Step 2b: Try Groq if Ollama failed/unavailable
+    // Step 2c: Try Groq if local options failed
     if (!aiQuestions) {
       console.log('☁️  Trying cloud Groq API...');
       aiQuestions = await enhanceWithGroqAI(text, maxQuestions);
@@ -87,7 +98,7 @@ export async function extractQuestionsHybrid(
       }
     }
 
-    // Step 2c: Try Hugging Face fallback
+    // Step 2d: Try Hugging Face fallback
     if (!aiQuestions) {
       console.log('☁️  Trying Hugging Face fallback...');
       aiQuestions = await enhanceWithHuggingFaceAI(text, maxQuestions);
