@@ -43,19 +43,36 @@ export default function SupportDashboard() {
                 .single();
 
             if (agentData) {
-                // Fetch tickets
+                // 1. Fetch Tickets
                 const { data: ticketsData } = await supabase
                     .from('support_tickets')
                     .select('*')
                     .order('created_at', { ascending: false })
                     .limit(10);
 
+                // 2. Fetch Active Chats Count
+                const { count: activeChatsCount } = await supabase
+                    .from('live_chat_sessions')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('agent_id', agentData.id)
+                    .eq('status', 'open');
+
+                // 3. Fetch Resolved Today Count
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const { count: resolvedTodayCount } = await supabase
+                    .from('support_tickets')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('status', 'resolved')
+                    .gte('updated_at', today.toISOString());
+
                 if (ticketsData) {
                     setTickets(ticketsData);
                     setStats({
                         myTickets: ticketsData.filter((t: TicketSummary) => t.assigned_to === agentData.id).length,
-                        openTickets: ticketsData.filter((t: TicketSummary) => t.is_open).length,
-                        resolvedToday: 0, // TODO: Calculate today's resolved tickets
+                        openTickets: activeChatsCount || 0, // Using openTickets slot for Active Chats as per UI
+                        resolvedToday: resolvedTodayCount || 0,
                     });
                 }
             }
@@ -117,8 +134,8 @@ export default function SupportDashboard() {
                         <button
                             onClick={() => setActiveTab('dashboard')}
                             className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'dashboard'
-                                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                                 }`}
                         >
                             <LayoutDashboard className="w-4 h-4" />
@@ -127,8 +144,8 @@ export default function SupportDashboard() {
                         <button
                             onClick={() => setActiveTab('chat')}
                             className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'chat'
-                                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                                 }`}
                         >
                             <MessageSquare className="w-4 h-4" />
@@ -230,8 +247,8 @@ export default function SupportDashboard() {
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${ticket.is_open
-                                                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                                                : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                                                             }`}>
                                                             {ticket.is_open ? 'Open' : 'Closed'}
                                                         </span>
