@@ -69,9 +69,16 @@ export async function extractQuestionsHybrid(
     if (!aiQuestions) {
       console.log('⚠️  Groq unavailable, trying Hugging Face...');
       aiQuestions = await enhanceWithHuggingFaceAI(text, maxQuestions);
-      if (aiQuestions) aiProvider = 'huggingface';
+      if (aiQuestions) {
+        aiProvider = 'huggingface';
+        console.log('✅ Hugging Face succeeded');
+      } else {
+        console.log('⚠️  Both AI providers failed, using local results');
+        issues.push('AI enhancement failed - using local parsing results');
+      }
     } else {
       aiProvider = 'groq';
+      console.log('✅ Groq succeeded');
     }
 
     if (aiQuestions && aiQuestions.length > 0) {
@@ -79,8 +86,15 @@ export async function extractQuestionsHybrid(
       finalQuestions = mergeExtractions(localResult.questions, aiQuestions);
       usedAI = true;
     } else {
-      issues.push('AI enhancement failed, using local results');
+      console.log('ℹ️  AI returned no results, keeping local results');
+      if (!issues.includes('AI enhancement failed - using local parsing results')) {
+        issues.push('AI returned no valid questions');
+      }
     }
+  } else if (useAI && localResult.totalConfidence >= confidenceThreshold) {
+    console.log(`✅ Confidence ${localResult.totalConfidence}% is sufficient, skipping AI`);
+  } else if (!useAI) {
+    console.log('ℹ️  Hybrid extraction disabled, using local parsing only');
   }
 
   // Step 3: Limit to maxQuestions

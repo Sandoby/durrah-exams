@@ -17,22 +17,11 @@ export interface GroqResponse {
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-// System prompt for question extraction
-const SYSTEM_PROMPT = `You are an expert at parsing and extracting educational questions from text.
-Your task is to parse questions and return them in valid JSON format.
-
-For each question, extract:
-1. type: one of "multiple_choice", "true_false", "fill_blank", "short_answer", "essay"
-2. question_text: the full question
-3. options: array of options (if multiple choice)
-4. correct_answer: the correct answer or option
-5. points: number of points (default 1)
-6. difficulty: "easy", "medium", or "hard"
-7. category: subject/category if identifiable
-8. tags: array of relevant tags
-
-Return ONLY valid JSON array, no markdown, no explanation.
-Example: [{"type":"multiple_choice","question_text":"What is 2+2?","options":["3","4","5"],"correct_answer":"4","points":1,"difficulty":"easy"}]`;
+// System prompt for question extraction (simplified for reliability)
+const SYSTEM_PROMPT = `Extract questions from text and return ONLY a valid JSON array.
+For each question, include: type, question_text, options (if applicable), correct_answer, points, difficulty.
+Valid types: "multiple_choice", "true_false", "fill_blank", "short_answer".
+Return ONLY JSON, no markdown, no explanation.`;
 
 export async function enhanceWithGroqAI(
   text: string,
@@ -45,59 +34,114 @@ export async function enhanceWithGroqAI(
 
   try {
     // Limit text to reasonable size to avoid token limits
-    const limitedText = text.substring(0, 8000);
+    const limitedText = text.substring(0, 4000); // Reduced from 8000
 
+    // Clean text: remove null bytes and invalid characters
+    const cleanedText = limitedText
+      .replace(/\0/g, '') // Remove null bytes
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, ''); // Remove control characters
+
+    const requestBody = {
+      model: 'mixtral-8x7b-32768',
+      messages: [
+        {
+          role: 'system',
+          content: SYSTEM_PROMPT,
+        },
+        {
+          role: 'user',
+          content: `Extract ${maxQuestions} questions from this text:\n\n${cleanedText}`,
+        },
+      ],
+      temperature: 0.2,
+      max_tokens: 2048,
+      top_p: 0.9,
+    };
+
+    console.log('📤 Sending to Groq API...');
     const response = await fetch(GROQ_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${GROQ_API_KEY}`,
       },
-      body: JSON.stringify({
-        model: 'mixtral-8x7b-32768', // Fast model
-        messages: [
-          {
-            role: 'system',
-            content: SYSTEM_PROMPT,
-          },
-          {
-            role: 'user',
-            content: `Extract and parse all questions from this text. Limit to ${maxQuestions} questions:\n\n${limitedText}`,
-          },
-        ],
-        temperature: 0.3, // Lower temperature for consistency
-        max_tokens: 4096,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
-      const error = (await response.json()) as GroqError;
-      console.error('Groq API error:', error);
+      const errorText = await response.text();
+      console.error(`❌ Groq API error (${response.status}):`, errorText);
+      
+      // Check for common error codes
+      if (response.status === 401) {
+        console.error('❌ Invalid API key - check VITE_GROQ_API_KEY');
+      } else if (response.status === 429) {
+        console.error('⚠️  Rate limit exceeded - try again later');
+      } else if (response.status === 400) {
+        console.error('❌ Bad request - check request format');
+      }
       return null;
     }
 
-    const data = (await response.json()) as GroqResponse;
-    const content = data.choices[0]?.message?.content;
+    const responseText = await response.text();
+    console.log('📥 Groq response received:', responseText.substring(0, 200));
+
+    let data: GroqResponse;
+    try {
+      data = JSON.parse(responseText) as GroqResponse;
+    } catch (parseError) {
+      console.error('Failed to parse Groq response:', parseError);
+      console.error('Response text:', responseText);
+      return null;
+    }
+
+    const content = data.choices?.[0]?.message?.content;
 
     if (!content) {
-      console.error('No content in Groq response');
+      console.error('No content in Groq response', data);
       return null;
     }
 
+    // Clean content: remove markdown code blocks if present
+    let jsonContent = content;
+    if (jsonContent.includes('```json')) {
+      jsonContent = jsonContent.split('```json')[1]?.split('```')[0] || content;
+    } else if (jsonContent.includes('```')) {
+      jsonContent = jsonContent.split('```')[1]?.split('```')[0] || content;
+    }
+    jsonContent = jsonContent.trim();
+
     // Parse JSON response
-    const rawQuestions = JSON.parse(content) as Array<any>;
+    let rawQuestions: Array<any>;
+    try {
+      rawQuestions = JSON.parse(jsonContent) as Array<any>;
+    } catch (parseError) {
+      console.error('Failed to parse questions JSON:', parseError);
+      console.error('JSON content:', jsonContent);
+      return null;
+    }
+
+    if (!Array.isArray(rawQuestions) || rawQuestions.length === 0) {
+      console.warn('No questions in Groq response');
+      return null;
+    }
 
     // Validate and normalize questions
-    return rawQuestions.map((q) => ({
-      type: normalizeQuestionType(q.type),
-      question_text: q.question_text?.trim() || '',
-      options: q.options || [],
-      correct_answer: q.correct_answer || undefined,
-      points: q.points || 1,
-      difficulty: normalizeDifficulty(q.difficulty),
-      category: q.category || undefined,
-      tags: q.tags || [],
-    })) as ExtractedQuestion[];
+    const processedQuestions = rawQuestions
+      .filter((q) => q && q.question_text) // Filter out invalid entries
+      .map((q) => ({
+        type: normalizeQuestionType(q.type || 'multiple_choice'),
+        question_text: q.question_text?.trim() || '',
+        options: Array.isArray(q.options) ? q.options : [],
+        correct_answer: q.correct_answer || undefined,
+        points: Math.max(1, Math.min(100, q.points || 1)),
+        difficulty: normalizeDifficulty(q.difficulty),
+        category: q.category || undefined,
+        tags: Array.isArray(q.tags) ? q.tags : [],
+      })) as ExtractedQuestion[];
+
+    console.log(`✅ Successfully processed ${processedQuestions.length} questions from Groq`);
+    return processedQuestions;
   } catch (error) {
     console.error('Error calling Groq API:', error);
     return null;
