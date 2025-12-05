@@ -7,7 +7,18 @@ if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Configure Supabase with persistent session storage
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        // Use localStorage for persistent sessions (default)
+        // This ensures users stay logged in across browser sessions
+        storage: window.localStorage,
+        storageKey: 'durrah-auth-token',
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+    },
+});
 
 function isIphoneOrSafari() {
     if (typeof navigator === 'undefined') return false;
