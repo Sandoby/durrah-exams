@@ -34,6 +34,7 @@ export default function AgentSetup() {
                     data: {
                         full_name: fullName,
                     },
+                    emailRedirectTo: undefined, // Disable email confirmation
                 },
             });
 
@@ -43,7 +44,35 @@ export default function AgentSetup() {
                 throw new Error('Failed to create user');
             }
 
-            // Create agent profile
+            // Wait a bit for the profile to be created by the trigger
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Check if profile exists, if not create it
+            const { data: existingProfile } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('id', authData.user.id)
+                .single();
+
+            if (!existingProfile) {
+                // Create profile manually if it doesn't exist
+                await supabase
+                    .from('profiles')
+                    .insert({
+                        id: authData.user.id,
+                        full_name: fullName,
+                        email: email,
+                        role: 'admin',
+                    });
+            } else {
+                // Update existing profile role
+                await supabase
+                    .from('profiles')
+                    .update({ role: 'admin' })
+                    .eq('id', authData.user.id);
+            }
+
+            // Now create agent profile
             const { error: agentError } = await supabase
                 .from('support_agents')
                 .insert({
@@ -54,13 +83,10 @@ export default function AgentSetup() {
                     is_active: true,
                 });
 
-            if (agentError) throw agentError;
-
-            // Update profile role
-            await supabase
-                .from('profiles')
-                .update({ role: 'admin' })
-                .eq('id', authData.user.id);
+            if (agentError) {
+                console.error('Agent creation error:', agentError);
+                throw new Error(`Failed to create agent profile: ${agentError.message}`);
+            }
 
             // Sign in the user
             const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -73,6 +99,7 @@ export default function AgentSetup() {
             // Navigate to admin dashboard
             navigate('/admin');
         } catch (err: any) {
+            console.error('Setup error:', err);
             setError(err.message || 'Failed to create admin account');
         } finally {
             setLoading(false);
