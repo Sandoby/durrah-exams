@@ -32,32 +32,34 @@ export default function AgentLogin() {
                     toast.error('Invalid access code');
                 }
             } else {
-                // Email/Password login for agents
-                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-                    email,
-                    password,
-                });
-
-                if (authError) throw authError;
-
-                // Check if user is an agent
-                const { data: agentData, error: agentError } = await supabase
+                // Email/Password login for agents (Direct Table Auth)
+                const { data: agent, error } = await supabase
                     .from('support_agents')
                     .select('*')
-                    .eq('user_id', authData.user.id)
+                    .eq('email', email)
                     .single();
 
-                if (agentError || !agentData) {
-                    await supabase.auth.signOut();
-                    throw new Error('You are not authorized as a support agent');
+                if (error || !agent) {
+                    throw new Error('Invalid email or password');
                 }
 
-                // Update profile role just in case
-                await supabase
-                    .from('profiles')
-                    .update({ role: 'agent' })
-                    .eq('id', authData.user.id);
+                // Check password (simple comparison as requested)
+                if (agent.password !== password) {
+                    throw new Error('Invalid email or password');
+                }
 
+                if (!agent.is_active) {
+                    throw new Error('Account is inactive');
+                }
+
+                // Store session in sessionStorage (Separate from main auth)
+                sessionStorage.setItem('agent_authenticated', 'true');
+                sessionStorage.setItem('agent_role', 'agent');
+                sessionStorage.setItem('agent_id', agent.id);
+                sessionStorage.setItem('agent_email', agent.email);
+                sessionStorage.setItem('agent_name', agent.full_name);
+
+                toast.success(`Welcome back, ${agent.full_name}!`);
                 navigate('/support');
             }
         } catch (error: any) {
@@ -92,8 +94,8 @@ export default function AgentLogin() {
                             type="button"
                             onClick={() => setLoginMethod('code')}
                             className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-md transition-all ${loginMethod === 'code'
-                                    ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                                 }`}
                         >
                             <Lock className="w-4 h-4" />
@@ -103,8 +105,8 @@ export default function AgentLogin() {
                             type="button"
                             onClick={() => setLoginMethod('email')}
                             className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-md transition-all ${loginMethod === 'email'
-                                    ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                                 }`}
                         >
                             <Mail className="w-4 h-4" />

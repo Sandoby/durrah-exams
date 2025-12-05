@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { createClient } from '@supabase/supabase-js';
+
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { Users, Ticket, Plus, LogOut } from 'lucide-react';
@@ -282,84 +282,35 @@ function CreateAgentModal({ onClose, onSuccess }: { onClose: () => void; onSucce
         setLoading(true);
 
         try {
-            // Create a temporary client for signup to avoid logging out the admin
-            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-            const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-            if (!supabaseUrl || !supabaseAnonKey) {
-                throw new Error('Missing Supabase environment variables');
-            }
-
-            const tempSupabase = createClient(supabaseUrl, supabaseAnonKey, {
-                auth: {
-                    persistSession: false, // Don't overwrite local storage
-                    autoRefreshToken: false,
-                    detectSessionInUrl: false
-                }
-            });
-
-            // Create auth user using the temporary client
-            const { data: authData, error: authError } = await tempSupabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: {
-                        full_name: fullName,
-                    },
-                },
-            });
-
-            if (authError) throw authError;
-
-            if (!authData.user) {
-                throw new Error('Failed to create user');
-            }
-
-            // Wait a bit for the profile to be created by the trigger
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Check if profile exists, if not create it (using main admin client)
-            const { data: existingProfile } = await supabase
-                .from('profiles')
+            // Check if email already exists
+            const { data: existingAgent } = await supabase
+                .from('support_agents')
                 .select('id')
-                .eq('id', authData.user.id)
+                .eq('email', email)
                 .single();
 
-            if (!existingProfile) {
-                // Create profile manually if it doesn't exist
-                await supabase
-                    .from('profiles')
-                    .insert({
-                        id: authData.user.id,
-                        full_name: fullName,
-                        email: email,
-                        role: 'agent',
-                    });
-            } else {
-                // Update existing profile role
-                await supabase
-                    .from('profiles')
-                    .update({ role: 'agent' })
-                    .eq('id', authData.user.id);
+            if (existingAgent) {
+                throw new Error('An agent with this email already exists');
             }
 
-            // Create agent profile (using main admin client)
-            const { error: agentError } = await supabase
+            // Create agent directly in the support_agents table
+            const { error: insertError } = await supabase
                 .from('support_agents')
                 .insert({
-                    user_id: authData.user.id,
                     full_name: fullName,
-                    email,
-                    is_admin: false,
-                    is_active: true,
+                    email: email,
+                    password: password,
+                    role: 'agent',
+                    is_active: true
                 });
 
-            if (agentError) throw agentError;
+            if (insertError) throw insertError;
 
-            onSuccess();
             toast.success('Agent created successfully');
+            onSuccess();
+            onClose();
         } catch (err: any) {
-            console.error('Agent creation error:', err);
+            console.error('Error creating agent:', err);
             setError(err.message || 'Failed to create agent');
         } finally {
             setLoading(false);
