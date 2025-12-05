@@ -411,8 +411,8 @@ export default function ExamEditor() {
     };
 
     const toggleBankSelection = (bankId: string) => {
-        setSelectedBankIds(prev =>
-            prev.includes(bankId)
+        setSelectedBankIds(prev => 
+            prev.includes(bankId) 
                 ? prev.filter(id => id !== bankId)
                 : [...prev, bankId]
         );
@@ -429,10 +429,10 @@ export default function ExamEditor() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12 relative">
             <div className="bg-white dark:bg-gray-800 shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <button
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                                <button
                                 onClick={() => navigate('/dashboard')}
                                 className="mr-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                             >
@@ -464,9 +464,9 @@ export default function ExamEditor() {
                                 {isLoading ? t('examEditor.saving') : t('examEditor.save')}
                             </button>
                         </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
                 {/* Basic Info */}
@@ -681,322 +681,319 @@ export default function ExamEditor() {
                 </div>
 
                 {/* Questions */}
-                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-6">
+                <div className="w-full flex flex-col gap-6">
+                    <div className="flex items-center justify-between">
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('examEditor.questions.title')}</h3>
                         <div className="flex gap-2">
                             <button
                                 type="button"
                                 onClick={() => append(defaultQuestion)}
                                 className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                            >
-                                <Plus className="h-4 w-4 mr-2" />
-                                {t('examEditor.questions.add')}
-                            </button>
-                        </div>
+                        >
+                            <Plus className="h-4 w-4 mr-2" />
+                            {t('examEditor.questions.add')}
+                        </button>
                     </div>
 
-                    {/* Questions List - Vertical Stack */}
-                    <div className="space-y-6">
-                        {fields.map((field, index) => (
-                            <div key={field.id} className="bg-gray-50 dark:bg-gray-700/50 shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-600">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <span className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 font-bold text-sm">
-                                            {index + 1}
-                                        </span>
-                                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Question {index + 1}</span>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => remove(index)}
-                                        className="text-gray-400 hover:text-red-500 transition-colors"
-                                    >
-                                        <Trash2 className="h-5 w-5" />
-                                    </button>
+                    {fields.map((field, index) => (
+                        <div key={field.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <span className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-800 font-bold text-sm">
+                                        {index + 1}
+                                    </span>
+                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Question {index + 1}</span>
                                 </div>
-
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.type')}</label>
-                                            <select
-                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                {...register(`questions.${index}.type`)}
-                                            >
-                                                <option value="multiple_choice">{t('examEditor.questions.types.multipleChoice')}</option>
-                                                <option value="multiple_select">{t('examEditor.questions.types.multipleSelect')}</option>
-                                                <option value="dropdown">{t('examEditor.questions.types.dropdown')}</option>
-                                                <option value="numeric">{t('examEditor.questions.types.numeric')}</option>
-                                                <option value="true_false">{t('examEditor.questions.types.trueFalse')}</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.points')}</label>
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                {...register(`questions.${index}.points`, { valueAsNumber: true })}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.text')}</label>
-                                        <textarea
-                                            rows={2}
-                                            required
-                                            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                            {...register(`questions.${index}.question_text`)}
-                                        />
-                                    </div>
-
-                                    {['multiple_choice', 'dropdown'].includes(questionsWatch?.[index]?.type) && (
-                                        <div className="space-y-2">
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.options')}</label>
-                                            {(() => {
-                                                const opts = (questionsWatch?.[index]?.options ?? []) as string[];
-                                                const corr = (questionsWatch?.[index]?.correct_answer ?? '') as string;
-                                                return (
-                                                    <>
-                                                        {opts.map((optValue: string, optionIndex: number) => (
-                                                            <div key={optionIndex} className="flex items-center space-x-2">
-                                                                <input
-                                                                    type="radio"
-                                                                    value={optValue}
-                                                                    checked={corr === optValue && optValue !== ''}
-                                                                    onChange={() => setValue(`questions.${index}.correct_answer`, optValue)}
-                                                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                                                                />
-                                                                <input
-                                                                    type="text"
-                                                                    required
-                                                                    placeholder={`Option ${optionIndex + 1}`}
-                                                                    className="ml-2 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                                    {...register(`questions.${index}.options.${optionIndex}`)}
-                                                                />
-                                                                <button type="button" className="ml-2 text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" onClick={() => {
-                                                                    const arr = [...(questionsWatch?.[index]?.options ?? [])];
-                                                                    const removed = arr.splice(optionIndex, 1);
-                                                                    setValue(`questions.${index}.options`, arr);
-                                                                    if ((questionsWatch?.[index]?.correct_answer ?? '') === removed[0]) setValue(`questions.${index}.correct_answer`, '');
-                                                                }}>{t('examEditor.questions.remove')}</button>
-                                                            </div>
-                                                        ))}
-                                                        <div className="mt-2">
-                                                            <button type="button" onClick={() => {
-                                                                const arr = [...(questionsWatch?.[index]?.options ?? [])];
-                                                                arr.push('');
-                                                                setValue(`questions.${index}.options`, arr);
-                                                            }} className="inline-flex items-center px-2 py-1 border rounded text-sm bg-white dark:bg-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">{t('examEditor.questions.addOption')}</button>
-                                                        </div>
-                                                    </>
-                                                );
-                                            })()}
-                                        </div>
-                                    )}
-
-                                    {questionsWatch?.[index]?.type === 'multiple_select' && (
-                                        <div className="space-y-2">
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.selectCorrect')}</label>
-                                            {(() => {
-                                                const opts = (questionsWatch?.[index]?.options ?? []) as string[];
-                                                const currentCorrect = (questionsWatch?.[index]?.correct_answer as string[]) ?? [];
-                                                return (
-                                                    <>
-                                                        {opts.map((optValue: string, optionIndex: number) => (
-                                                            <div key={optionIndex} className="flex items-center space-x-2">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={optValue ? currentCorrect.includes(optValue) : false}
-                                                                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                                                                        const arr = [...currentCorrect];
-                                                                        if (e.target.checked) {
-                                                                            if (optValue && !arr.includes(optValue)) arr.push(optValue);
-                                                                        } else {
-                                                                            const idx = arr.indexOf(optValue);
-                                                                            if (idx !== -1) arr.splice(idx, 1);
-                                                                        }
-                                                                        setValue(`questions.${index}.correct_answer`, arr);
-                                                                    }}
-                                                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                                                                />
-                                                                <input
-                                                                    type="text"
-                                                                    required
-                                                                    placeholder={`Option ${optionIndex + 1}`}
-                                                                    className="ml-2 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                                    {...register(`questions.${index}.options.${optionIndex}`)}
-                                                                    onBlur={() => {
-                                                                        const optsNow = (questionsWatch?.[index]?.options ?? []) as string[];
-                                                                        const newOpt = optsNow[optionIndex] ?? '';
-                                                                        const corr = (questionsWatch?.[index]?.correct_answer as string[]) ?? [];
-                                                                        const updated = corr.map(a => (a === optValue ? newOpt : a)).filter(Boolean);
-                                                                        setValue(`questions.${index}.correct_answer`, updated);
-                                                                    }}
-                                                                />
-                                                                <button type="button" className="ml-2 text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" onClick={() => {
-                                                                    const arrOpts = [...(questionsWatch?.[index]?.options ?? [])] as string[];
-                                                                    const removed = arrOpts.splice(optionIndex, 1);
-                                                                    setValue(`questions.${index}.options`, arrOpts);
-                                                                    const corr = (questionsWatch?.[index]?.correct_answer as string[]) ?? [];
-                                                                    const updatedCorr = corr.filter(c => !removed.includes(c));
-                                                                    setValue(`questions.${index}.correct_answer`, updatedCorr);
-                                                                }}>{t('examEditor.questions.remove')}</button>
-                                                            </div>
-                                                        ))}
-                                                        <div className="mt-2">
-                                                            <button type="button" onClick={() => {
-                                                                const arr = [...(questionsWatch?.[index]?.options ?? [])];
-                                                                arr.push('');
-                                                                setValue(`questions.${index}.options`, arr);
-                                                            }} className="inline-flex items-center px-2 py-1 border rounded text-sm bg-white dark:bg-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">{t('examEditor.questions.addOption')}</button>
-                                                        </div>
-                                                    </>
-                                                );
-                                            })()}
-                                        </div>
-                                    )}
-
-                                    {watch(`questions.${index}.type`) === 'true_false' && (
-                                        <div className="space-y-2">
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.correctAnswer')}</label>
-                                            <div className="flex space-x-4">
-                                                <label className="inline-flex items-center">
-                                                    <input
-                                                        type="radio"
-                                                        value="True"
-                                                        className="form-radio text-indigo-600"
-                                                        {...register(`questions.${index}.correct_answer`)}
-                                                    />
-                                                    <span className="ml-2">{t('examEditor.questions.true')}</span>
-                                                </label>
-                                                <label className="inline-flex items-center">
-                                                    <input
-                                                        type="radio"
-                                                        value="False"
-                                                        className="form-radio text-indigo-600"
-                                                        {...register(`questions.${index}.correct_answer`)}
-                                                    />
-                                                    <span className="ml-2">{t('examEditor.questions.false')}</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {watch(`questions.${index}.type`) === 'numeric' && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.numericAnswer')}</label>
-                                            <input
-                                                type="number"
-                                                step="any"
-                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                {...register(`questions.${index}.correct_answer`)}
-                                            />
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('examEditor.questions.numericNote')}</p>
-                                        </div>
-                                    )}
-
-                                    {/* short_answer removed from supported types */}
-                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => remove(index)}
+                                    className="text-gray-400 hover:text-red-500"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                </button>
                             </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Import from Question Bank Modal */}
-            {showImportModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-                        <div className="p-6">
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                                Import Questions from Bank
-                            </h2>
 
                             <div className="space-y-4">
-                                {/* Number of questions input */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.type')}</label>
+                                        <select
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                            {...register(`questions.${index}.type`)}
+                                        >
+                                            <option value="multiple_choice">{t('examEditor.questions.types.multipleChoice')}</option>
+                                            <option value="multiple_select">{t('examEditor.questions.types.multipleSelect')}</option>
+                                            <option value="dropdown">{t('examEditor.questions.types.dropdown')}</option>
+                                            <option value="numeric">{t('examEditor.questions.types.numeric')}</option>
+                                            <option value="true_false">{t('examEditor.questions.types.trueFalse')}</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.points')}</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                            {...register(`questions.${index}.points`, { valueAsNumber: true })}
+                                        />
+                                    </div>
+                                </div>
+
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Number of Random Questions
-                                    </label>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={questionCount}
-                                        onChange={(e) => setQuestionCount(parseInt(e.target.value) || 1)}
-                                        className="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white p-2"
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.text')}</label>
+                                    <textarea
+                                        rows={2}
+                                        required
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                        {...register(`questions.${index}.question_text`)}
                                     />
                                 </div>
 
-                                {/* Question banks selection */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Select Question Banks
-                                    </label>
-                                    {questionBanks.length === 0 ? (
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                                            No question banks found. Create one first from the dashboard.
-                                        </p>
-                                    ) : (
-                                        <div className="space-y-2 max-h-60 overflow-y-auto border dark:border-gray-600 rounded-md p-3">
-                                            {questionBanks.map(bank => (
-                                                <label
-                                                    key={bank.id}
-                                                    className="flex items-center space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedBankIds.includes(bank.id)}
-                                                        onChange={() => toggleBankSelection(bank.id)}
-                                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                                    />
-                                                    <div className="flex-1">
-                                                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                                            {bank.name}
-                                                        </p>
-                                                        {bank.description && (
-                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                {bank.description}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
+                                {['multiple_choice', 'dropdown'].includes(questionsWatch?.[index]?.type) && (
+                                    <div className="space-y-2">
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.options')}</label>
+                                                {(() => {
+                                                    const opts = (questionsWatch?.[index]?.options ?? []) as string[];
+                                                    const corr = (questionsWatch?.[index]?.correct_answer ?? '') as string;
+                                                    return (
+                                                        <>
+                                                            {opts.map((optValue: string, optionIndex: number) => (
+                                                                <div key={optionIndex} className="flex items-center space-x-2">
+                                                                    <input
+                                                                        type="radio"
+                                                                        value={optValue}
+                                                                        checked={corr === optValue && optValue !== ''}
+                                                                        onChange={() => setValue(`questions.${index}.correct_answer`, optValue)}
+                                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                                    />
+                                                                    <input
+                                                                        type="text"
+                                                                        required
+                                                                        placeholder={`Option ${optionIndex + 1}`}
+                                                                        className="ml-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                                        {...register(`questions.${index}.options.${optionIndex}`)}
+                                                                    />
+                                                                    <button type="button" className="ml-2 text-sm text-red-600" onClick={() => {
+                                                                        const arr = [...(questionsWatch?.[index]?.options ?? [])];
+                                                                        const removed = arr.splice(optionIndex, 1);
+                                                                        setValue(`questions.${index}.options`, arr);
+                                                                        if ((questionsWatch?.[index]?.correct_answer ?? '') === removed[0]) setValue(`questions.${index}.correct_answer`, '');
+                                                                    }}>{t('examEditor.questions.remove')}</button>
+                                                                </div>
+                                                            ))}
+                                                            <div className="mt-2">
+                                                                <button type="button" onClick={() => {
+                                                                    const arr = [...(questionsWatch?.[index]?.options ?? [])];
+                                                                    arr.push('');
+                                                                    setValue(`questions.${index}.options`, arr);
+                                                                }} className="inline-flex items-center px-2 py-1 border rounded text-sm bg-white hover:bg-gray-50">{t('examEditor.questions.addOption')}</button>
+                                                            </div>
+                                                        </>
+                                                    );
+                                                })()}
+                                            </div>
+                                        )}
+
+                                {questionsWatch?.[index]?.type === 'multiple_select' && (
+                                    <div className="space-y-2">
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.selectCorrect')}</label>
+                                                {(() => {
+                                                    const opts = (questionsWatch?.[index]?.options ?? []) as string[];
+                                                    const currentCorrect = (questionsWatch?.[index]?.correct_answer as string[]) ?? [];
+                                                    return (
+                                                        <>
+                                                            {opts.map((optValue: string, optionIndex: number) => (
+                                                                <div key={optionIndex} className="flex items-center space-x-2">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={optValue ? currentCorrect.includes(optValue) : false}
+                                                                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                                                            const arr = [...currentCorrect];
+                                                                            if (e.target.checked) {
+                                                                                if (optValue && !arr.includes(optValue)) arr.push(optValue);
+                                                                            } else {
+                                                                                const idx = arr.indexOf(optValue);
+                                                                                if (idx !== -1) arr.splice(idx, 1);
+                                                                            }
+                                                                            setValue(`questions.${index}.correct_answer`, arr);
+                                                                        }}
+                                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                                    />
+                                                                    <input
+                                                                        type="text"
+                                                                        required
+                                                                        placeholder={`Option ${optionIndex + 1}`}
+                                                                        className="ml-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                                        {...register(`questions.${index}.options.${optionIndex}`)}
+                                                                        onBlur={() => {
+                                                                            const optsNow = (questionsWatch?.[index]?.options ?? []) as string[];
+                                                                            const newOpt = optsNow[optionIndex] ?? '';
+                                                                            const corr = (questionsWatch?.[index]?.correct_answer as string[]) ?? [];
+                                                                            const updated = corr.map(a => (a === optValue ? newOpt : a)).filter(Boolean);
+                                                                            setValue(`questions.${index}.correct_answer`, updated);
+                                                                        }}
+                                                                    />
+                                                                    <button type="button" className="ml-2 text-sm text-red-600" onClick={() => {
+                                                                        const arrOpts = [...(questionsWatch?.[index]?.options ?? [])] as string[];
+                                                                        const removed = arrOpts.splice(optionIndex, 1);
+                                                                        setValue(`questions.${index}.options`, arrOpts);
+                                                                        const corr = (questionsWatch?.[index]?.correct_answer as string[]) ?? [];
+                                                                        const updatedCorr = corr.filter(c => !removed.includes(c));
+                                                                        setValue(`questions.${index}.correct_answer`, updatedCorr);
+                                                                    }}>{t('examEditor.questions.remove')}</button>
+                                                                </div>
+                                                            ))}
+                                                            <div className="mt-2">
+                                                                <button type="button" onClick={() => {
+                                                                    const arr = [...(questionsWatch?.[index]?.options ?? [])];
+                                                                    arr.push('');
+                                                                    setValue(`questions.${index}.options`, arr);
+                                                                }} className="inline-flex items-center px-2 py-1 border rounded text-sm bg-white hover:bg-gray-50">{t('examEditor.questions.addOption')}</button>
+                                                            </div>
+                                                        </>
+                                                    );
+                                                })()}
+                                            </div>
+                                        )}
+
+                                {watch(`questions.${index}.type`) === 'true_false' && (
+                                    <div className="space-y-2">
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.correctAnswer')}</label>
+                                                <div className="flex space-x-4">
+                                                    <label className="inline-flex items-center">
+                                                        <input
+                                                            type="radio"
+                                                            value="True"
+                                                            className="form-radio text-indigo-600"
+                                                            {...register(`questions.${index}.correct_answer`)}
+                                                        />
+                                                        <span className="ml-2">{t('examEditor.questions.true')}</span>
+                                                    </label>
+                                                    <label className="inline-flex items-center">
+                                                        <input
+                                                            type="radio"
+                                                            value="False"
+                                                            className="form-radio text-indigo-600"
+                                                            {...register(`questions.${index}.correct_answer`)}
+                                                        />
+                                                        <span className="ml-2">{t('examEditor.questions.false')}</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                {watch(`questions.${index}.type`) === 'numeric' && (
+                                    <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.numericAnswer')}</label>
+                                                <input
+                                                    type="number"
+                                                    step="any"
+                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                    {...register(`questions.${index}.correct_answer`)}
+                                                />
+                                                <p className="text-xs text-gray-500 mt-1">{t('examEditor.questions.numericNote')}</p>
+                                            </div>
+                                        )}
+
+                                        {/* short_answer removed from supported types */}
+                                    </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+        {/* Import from Question Bank Modal */}
+        {showImportModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                    <div className="p-6">
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                            Import Questions from Bank
+                        </h2>
+
+                        <div className="space-y-4">
+                            {/* Number of questions input */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Number of Random Questions
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={questionCount}
+                                    onChange={(e) => setQuestionCount(parseInt(e.target.value) || 1)}
+                                    className="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white p-2"
+                                />
                             </div>
 
-                            {/* Modal actions */}
-                            <div className="mt-6 flex justify-end gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setShowImportModal(false);
-                                        setSelectedBankIds([]);
-                                        setQuestionCount(5);
-                                    }}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
-                                    disabled={isImporting}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleImportFromBanks}
-                                    disabled={isImporting || selectedBankIds.length === 0}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                                >
-                                    {isImporting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                                    Import Questions
-                                </button>
+                            {/* Question banks selection */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Select Question Banks
+                                </label>
+                                {questionBanks.length === 0 ? (
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        No question banks found. Create one first from the dashboard.
+                                    </p>
+                                ) : (
+                                    <div className="space-y-2 max-h-60 overflow-y-auto border dark:border-gray-600 rounded-md p-3">
+                                        {questionBanks.map(bank => (
+                                            <label
+                                                key={bank.id}
+                                                className="flex items-center space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer"
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedBankIds.includes(bank.id)}
+                                                    onChange={() => toggleBankSelection(bank.id)}
+                                                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                />
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                        {bank.name}
+                                                    </p>
+                                                    {bank.description && (
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                            {bank.description}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
+                        </div>
+
+                        {/* Modal actions */}
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowImportModal(false);
+                                    setSelectedBankIds([]);
+                                    setQuestionCount(5);
+                                }}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+                                disabled={isImporting}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleImportFromBanks}
+                                disabled={isImporting || selectedBankIds.length === 0}
+                                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                            >
+                                {isImporting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                                Import Questions
+                            </button>
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
+            </div>
+        )}
+    </div>
+    </div>
     );
 }

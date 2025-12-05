@@ -587,8 +587,8 @@ const subscribeToSession = (sessionId: string) => {
 
                                                     <div
                                                         className={`max-w-[80%] rounded-2xl px-4 py-2 ${isMe
-                                                                ? 'bg-indigo-600 text-white rounded-br-none'
-                                                                : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none shadow-sm'
+                                                            ? 'bg-indigo-600 text-white rounded-br-none'
+                                                            : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none shadow-sm'
                                                             }`}
                                                     >
                                                         <p className="text-sm break-words">{msg.message}</p>

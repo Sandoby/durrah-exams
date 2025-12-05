@@ -9,7 +9,6 @@ import { supabase } from '../lib/supabase';
 import { ExamResults } from '../components/ExamResults';
 import { ChatWidget } from '../components/ChatWidget';
 import { CardSkeleton } from '../components/skeletons';
-import { DashboardTutorial } from '../components/DashboardTutorial';
 
 interface Exam {
     id: string;
@@ -28,7 +27,6 @@ export default function Dashboard() {
     const [selectedExamForResults, setSelectedExamForResults] = useState<Exam | null>(null);
     const [profile, setProfile] = useState<any>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [runTutorial, setRunTutorial] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -41,15 +39,10 @@ export default function Dashboard() {
         try {
             const { data } = await supabase
                 .from('profiles')
-                .select('subscription_status, subscription_plan, subscription_end_date, tutorial_completed')
+                .select('subscription_status, subscription_plan, subscription_end_date')
                 .eq('id', user?.id)
                 .single();
             setProfile(data);
-
-            // Auto-start tutorial for first-time users
-            if (data && !data.tutorial_completed) {
-                setTimeout(() => setRunTutorial(true), 1500);
-            }
         } catch (error) {
             console.error('Error fetching profile:', error);
         }
@@ -251,21 +244,6 @@ export default function Dashboard() {
         navigate('/login');
     };
 
-    const handleTutorialComplete = async () => {
-        try {
-            await supabase
-                .from('profiles')
-                .update({ tutorial_completed: true })
-                .eq('id', user?.id);
-
-            setRunTutorial(false);
-            toast.success(t('tutorial.completion.title'));
-        } catch (error) {
-            console.error('Error updating tutorial status:', error);
-            setRunTutorial(false);
-        }
-    };
-
     if (isLoading) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -318,7 +296,6 @@ export default function Dashboard() {
                             )}
                             <Link
                                 to="/settings"
-                                data-tutorial="settings"
                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition"
                             >
                                 <Settings className="h-4 w-4 lg:mr-2" />
@@ -329,7 +306,7 @@ export default function Dashboard() {
                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition"
                             >
                                 <LogOut className="h-4 w-4 lg:mr-2" />
-                                <span className="hidden lg:inline">{t('nav.logout')}</span>
+                                <span className="hidden lg:inline">{t('nav.login')}</span>
                             </button>
                         </div>
 
@@ -393,7 +370,6 @@ export default function Dashboard() {
                         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                             <Link
                                 to="/question-bank"
-                                data-tutorial="question-bank"
                                 className="inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full sm:w-auto min-h-[44px]"
                             >
                                 <BookOpen className="h-5 w-5 mr-2" />
@@ -401,7 +377,6 @@ export default function Dashboard() {
                             </Link>
                             <button
                                 onClick={handleCreateExam}
-                                data-tutorial="create-exam"
                                 className="inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full sm:w-auto min-h-[44px]"
                             >
                                 <Plus className="h-5 w-5 mr-2" />
@@ -427,12 +402,8 @@ export default function Dashboard() {
                         </div>
                     ) : (
                         <div className="grid gap-4 sm:gap-6 mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                            {exams.map((exam, index) => (
-                                <div
-                                    key={exam.id}
-                                    className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow duration-200"
-                                    data-tutorial={index === 0 ? "exam-card" : undefined}
-                                >
+                            {exams.map((exam) => (
+                                <div key={exam.id} className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow duration-200">
                                     <div className="p-6">
                                         <div className="flex justify-between items-start">
                                             <div>
@@ -451,7 +422,7 @@ export default function Dashboard() {
                                             <div className="text-sm text-gray-500 dark:text-gray-400">
                                                 {new Date(exam.created_at).toLocaleDateString()}
                                             </div>
-                                            <div className="flex space-x-2" data-tutorial={index === 0 ? "exam-actions" : undefined}>
+                                            <div className="flex space-x-2">
                                                 <button
                                                     onClick={() => copyExamLink(exam.id)}
                                                     className="p-2 text-gray-400 hover:text-green-600 transition-colors"
@@ -498,7 +469,6 @@ export default function Dashboard() {
                                                     to={`/exam/${exam.id}/edit`}
                                                     className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
                                                     title={t('dashboard.actions.edit')}
-                                                    data-tutorial={index === 0 ? "exam-edit" : undefined}
                                                 >
                                                     <Edit className="h-5 w-5" />
                                                 </Link>
@@ -543,13 +513,6 @@ export default function Dashboard() {
                 </div>
             )}
             <ChatWidget />
-
-            {/* Dashboard Tutorial */}
-            <DashboardTutorial
-                run={runTutorial}
-                onComplete={handleTutorialComplete}
-                onSkip={handleTutorialComplete}
-            />
         </div>
     );
 }

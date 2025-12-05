@@ -21,7 +21,6 @@
         "pricing": "Pricing",
         "testimonials": "Testimonials",
         "login": "Login",
-        "logout": "Logout",
         "getStarted": "Get Started Free"
     },
     "stats": {
@@ -423,47 +422,6 @@
         },
         "success": {
             "submitted": "Exam submitted successfully!"
-        }
-    },
-    "tutorial": {
-        "welcome": {
-            "title": "Welcome to Durrah!",
-            "message": "Let's take a quick tour of your dashboard to get you started. This will only take a minute!"
-        },
-        "createExam": {
-            "title": "Create Exams",
-            "message": "Click here to create a new exam. You can create up to 3 exams for free, or unlimited exams with a Pro subscription."
-        },
-        "questionBank": {
-            "title": "Question Bank",
-            "message": "Build reusable question banks to speed up exam creation. Import questions from your banks into any exam."
-        },
-        "examCard": {
-            "title": "Your Exams",
-            "message": "Your exams appear here. Each card shows the exam title, description, status, and creation date."
-        },
-        "examActions": {
-            "title": "Quick Actions",
-            "message": "Share exam link, download PDF, view results, and access analytics - all with one click!"
-        },
-        "examEdit": {
-            "title": "Edit & Delete",
-            "message": "Edit your exam settings or delete exams you no longer need."
-        },
-        "settings": {
-            "title": "Settings",
-            "message": "Manage your account, subscription, and preferences here. You can also restart this tutorial anytime."
-        },
-        "completion": {
-            "title": "You're All Set!",
-            "message": "Start creating your first exam or explore the question bank. If you need help, you can restart this tutorial from Settings."
-        },
-        "buttons": {
-            "next": "Next",
-            "back": "Back",
-            "skip": "Skip Tutorial",
-            "close": "Close",
-            "finish": "Get Started"
         }
     }
 }

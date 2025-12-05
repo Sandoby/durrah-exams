@@ -153,7 +153,7 @@ export function AgentChatInterface() {
     }, []);
 
     useEffect(() => {
-        if (selectedSession) {
+        if (selectedSession?.id) {
             fetchMessages(selectedSession.id);
         const channel = subscribeToMessages(selectedSession.id);
         markAsRead(selectedSession.id);
@@ -162,7 +162,7 @@ export function AgentChatInterface() {
                 if (channel) supabase.removeChannel(channel);
             };
         }
-    }, [selectedSession]);
+    }, [selectedSession?.id]);
 
     // ... (fetchSessions remains same)
 

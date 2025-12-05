@@ -1,17 +1,15 @@
 ﻿import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, User } from 'lucide-react';
+import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { Logo } from '../components/Logo';
 import { LottiePlayer } from '../components/LottiePlayer';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
-import { useAuth } from '../context/AuthContext';
 
 export default function LandingPage() {
     const { t, i18n } = useTranslation();
-    const { user } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const registrationUrl = 'https://tutors.durrahsystem.tech/register';
     const isRTL = i18n.language === 'ar';
@@ -54,31 +52,14 @@ export default function LandingPage() {
                             <a href="#testimonials" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{t('nav.testimonials')}</a>
                             <LanguageSwitcher />
                             <div className="flex items-center gap-3">
-                                {user ? (
-                                    <>
-                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-full">
-                                            <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                {user.user_metadata?.full_name || user.email?.split('@')[0]}
-                                            </span>
-                                        </div>
-                                        <Link to="/dashboard" className="group relative bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-medium text-sm shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300">
-                                            <span className="relative z-10">Go to Dashboard</span>
-                                            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                        </Link>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Link to="/login" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 transition-colors">{t('nav.login')}</Link>
-                                        <Link to="/register" className="group relative bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-medium text-sm shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300">
-                                            <span className="relative z-10">{t('nav.getStarted')}</span>
-                                            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                        </Link>
-                                    </>
-                                )}
+                                <Link to="/login" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 transition-colors">{t('nav.login')}</Link>
+                                <Link to="/register" className="group relative bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-medium text-sm shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300">
+                                    <span className="relative z-10">{t('nav.getStarted')}</span>
+                                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                </Link>
                             </div>
                         </div>
-
+                        
                         {/* Mobile Menu Button */}
                         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
                             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -92,7 +73,7 @@ export default function LandingPage() {
                 <>
                     {/* Backdrop */}
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setMobileMenuOpen(false)} />
-
+                    
                     {/* Menu Drawer */}
                     <div className={`fixed top-20 ${isRTL ? 'left-4' : 'right-4'} w-[calc(100%-2rem)] max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl z-50 lg:hidden border border-gray-200 dark:border-gray-700 overflow-hidden animate-in slide-in-from-top duration-300`}>
                         <div className="p-6 space-y-4">
@@ -105,35 +86,17 @@ export default function LandingPage() {
                             <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-colors">
                                 {t('nav.testimonials')}
                             </a>
-
+                            
                             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <div className="mb-4">
                                     <LanguageSwitcher />
                                 </div>
-                                {user ? (
-                                    <>
-                                        <div className="mb-3 py-3 px-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl">
-                                            <div className="flex items-center gap-2 justify-center">
-                                                <User className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                                                <span className="text-base font-medium text-gray-700 dark:text-gray-300">
-                                                    {user.user_metadata?.full_name || user.email?.split('@')[0]}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white rounded-xl font-semibold text-base shadow-lg shadow-indigo-500/30">
-                                            Go to Dashboard
-                                        </Link>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors mb-3">
-                                            {t('nav.login')}
-                                        </Link>
-                                        <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white rounded-xl font-semibold text-base shadow-lg shadow-indigo-500/30">
-                                            {t('nav.getStarted')}
-                                        </Link>
-                                    </>
-                                )}
+                                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors mb-3">
+                                    {t('nav.login')}
+                                </Link>
+                                <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white rounded-xl font-semibold text-base shadow-lg shadow-indigo-500/30">
+                                    {t('nav.getStarted')}
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -145,7 +108,7 @@ export default function LandingPage() {
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
                 <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
                 <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-purple-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
-
+                
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         <div className="text-center lg:text-left">
@@ -153,16 +116,16 @@ export default function LandingPage() {
                                 <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                                 <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('hero.trustedBadge')}</span>
                             </div>
-
+                            
                             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 dark:text-white mb-6 leading-[1.1]">
                                 {t('hero.title')}<br />
                                 <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">{t('hero.titleHighlight')}</span>
                             </h1>
-
+                            
                             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0">
                                 {t('hero.subtitle')}
                             </p>
-
+                            
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
                                 <a href={registrationUrl} target="_blank" rel="noreferrer" className="group relative bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-2xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center">
                                     <span className="relative z-10 flex items-center gap-2">
@@ -179,7 +142,7 @@ export default function LandingPage() {
                                     </svg>
                                 </a>
                             </div>
-
+                            
                             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-gray-600 dark:text-gray-400">
                                 <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>{t('hero.features.noCreditCard')}</span></div>
                                 <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>{t('hero.features.freeExams')}</span></div>
@@ -190,7 +153,7 @@ export default function LandingPage() {
                         <div className="relative">
                             <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl shadow-indigo-500/10 p-8 border border-gray-100 dark:border-slate-700">
                                 <LottiePlayer src="/illustrations/juicy-woman-focused-on-online-learning.json" background="transparent" speed={1} className="w-full h-80" autoplay loop />
-
+                                
                                 <div className="absolute -top-6 -left-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-indigo-500/10 p-4 border border-gray-100 dark:border-slate-700 animate-float">
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
@@ -202,7 +165,7 @@ export default function LandingPage() {
                                         </div>
                                     </div>
                                 </div>
-
+                                
                                 <div className="absolute -bottom-6 -right-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-violet-500/10 p-4 border border-gray-100 dark:border-slate-700 animate-float animation-delay-2000">
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl flex items-center justify-center">
@@ -215,7 +178,7 @@ export default function LandingPage() {
                                     </div>
                                 </div>
                             </div>
-
+                            
                             <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full">
                                 <div className="absolute top-0 right-0 w-72 h-72 bg-indigo-300/30 dark:bg-indigo-600/20 rounded-full filter blur-3xl"></div>
                                 <div className="absolute bottom-0 left-0 w-72 h-72 bg-violet-300/30 dark:bg-violet-600/20 rounded-full filter blur-3xl"></div>

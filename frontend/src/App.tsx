@@ -16,14 +16,8 @@ import Settings from './pages/Settings';
 import AdminPanel from './pages/AdminPanel';
 import QuestionBank from './pages/QuestionBank';
 import { SubmissionSync } from './components/SubmissionSync';
+import { AdminRoute, AgentRoute, ProtectedRoute } from './components/ProtectedRoute';
 import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
-
-// Agent Portal
-import AgentLogin from './pages/AgentLogin';
-import AgentSetup from './pages/AgentSetup';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import SupportDashboard from './pages/support/SupportDashboard';
-import { AdminRoute, AgentRoute } from './components/ProtectedRoute';
 
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
@@ -64,14 +58,8 @@ function App() {
             <Route path="/exam/:id/edit" element={<ExamEditor />} />
             <Route path="/exam/:id" element={<ExamView />} />
             <Route path="/exam/:examId/analytics" element={<AnalyticsDashboard />} />
-            <Route path="/admin-old" element={<AdminPanel />} />
+            <Route path="/admin" element={<AdminPanel />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
-
-            {/* Agent Portal Routes */}
-            <Route path="/agent-setup" element={<AgentSetup />} />
-            <Route path="/agent-login" element={<AgentLogin />} />
-            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-            <Route path="/support" element={<AgentRoute><SupportDashboard /></AgentRoute>} />
           </Routes>
           <Toaster position="top-right" />
         </div>
