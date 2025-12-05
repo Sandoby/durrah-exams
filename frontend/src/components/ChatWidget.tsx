@@ -46,26 +46,42 @@ function ChatWidget() {
     if (!user) return;
 
     try {
-      const { data } = await supabase
+      // First check for open session
+      const { data: openSession } = await supabase
         .from('live_chat_sessions')
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'open')
         .single();
 
-      if (data) {
-        setCurrentSession(data);
-        fetchMessages(data.id);
-        subscribeToSession(data.id);
+      if (openSession) {
+        setCurrentSession(openSession);
+        fetchMessages(openSession.id);
+        subscribeToSession(openSession.id);
 
         const { count } = await supabase
           .from('chat_messages')
           .select('*', { count: 'exact', head: true })
-          .eq('session_id', data.id)
+          .eq('session_id', openSession.id)
           .neq('sender_id', user.id)
           .eq('is_read', false);
 
         setUnreadCount(count || 0);
+      } else {
+        // Check for most recent closed session to show rating message
+        const { data: closedSession } = await supabase
+          .from('live_chat_sessions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'closed')
+          .order('closed_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (closedSession) {
+          setCurrentSession(closedSession);
+          fetchMessages(closedSession.id);
+        }
       }
     } catch (error) {
       console.log('No active session');
@@ -194,7 +210,16 @@ function ChatWidget() {
     try {
       let sessionId = currentSession?.id;
 
-      if (!sessionId) {
+      // Check if current session is closed, if so create a new one
+      if (currentSession?.status === 'closed') {
+        // Clear old messages
+        setMessages([]);
+        // Create new session
+        const newSession = await startNewSession();
+        if (!newSession) return;
+        sessionId = newSession.id;
+      } else if (!sessionId) {
+        // No session at all, create new one
         const newSession = await startNewSession();
         if (!newSession) return;
         sessionId = newSession.id;
@@ -411,25 +436,45 @@ function ChatWidget() {
               </div>
 
               <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shrink-0">
-                <form onSubmit={sendMessage} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => {
-                      setNewMessage(e.target.value);
-                      handleTyping();
-                    }}
-                    placeholder="Type a message..."
-                    className="flex-1 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!newMessage.trim()}
-                    className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Send className="w-5 h-5" />
-                  </button>
-                </form>
+                {currentSession?.status === 'closed' ? (
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                      This chat session has been closed.
+                    </p>
+                    <button
+                      onClick={async () => {
+                        setMessages([]);
+                        const newSession = await startNewSession();
+                        if (newSession) {
+                          subscribeToSession(newSession.id);
+                        }
+                      }}
+                      className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                      Start New Chat
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={sendMessage} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => {
+                        setNewMessage(e.target.value);
+                        handleTyping();
+                      }}
+                      placeholder="Type a message..."
+                      className="flex-1 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!newMessage.trim()}
+                      className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Send className="w-5 h-5" />
+                    </button>
+                  </form>
+                )}
               </div>
             </>
           )}

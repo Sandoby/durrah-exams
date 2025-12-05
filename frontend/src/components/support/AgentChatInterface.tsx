@@ -189,16 +189,27 @@ function AgentChatInterface() {
 
   const assignSession = async (sessionId: string) => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('live_chat_sessions')
         .update({ agent_id: user?.id })
-        .eq('id', sessionId);
+        .eq('id', sessionId)
+        .select()
+        .single();
 
-      if (error) throw error;
-      toast.success('Session assigned to you');
+      if (error) {
+        console.error('Error assigning session:', error);
+        // Continue anyway - the message will still send
+        return;
+      }
+      
+      if (data) {
+        toast.success('Session assigned to you');
+        // Update the selected session with agent info
+        setSelectedSession(prev => prev ? { ...prev, agent_id: user?.id || null } : null);
+      }
     } catch (error) {
       console.error('Error assigning session:', error);
-      toast.error('Failed to assign session');
+      // Don't show error toast - just log it
     }
   };
 
@@ -238,13 +249,29 @@ function AgentChatInterface() {
 
   const closeSession = async (sessionId: string) => {
     try {
+      // Close the session
       const { error } = await supabase
         .from('live_chat_sessions')
-        .update({ status: 'closed' })
+        .update({ 
+          status: 'closed',
+          closed_at: new Date().toISOString()
+        })
         .eq('id', sessionId);
 
       if (error) throw error;
-      toast.success('Session closed');
+
+      // Send a system message asking for rating
+      await supabase
+        .from('chat_messages')
+        .insert({
+          session_id: sessionId,
+          sender_id: user?.id,
+          message: '🎯 Thank you for contacting support! Please rate your experience:\n⭐⭐⭐⭐⭐ (5 stars) - Excellent\n⭐⭐⭐⭐ (4 stars) - Good\n⭐⭐⭐ (3 stars) - Average\n⭐⭐ (2 stars) - Poor\n⭐ (1 star) - Very Poor\n\nYour feedback helps us improve our service!',
+          sender_role: 'agent',
+          is_read: false
+        });
+
+      toast.success('Session closed - Rating request sent to user');
       setSelectedSession(null);
       fetchSessions();
     } catch (error) {
