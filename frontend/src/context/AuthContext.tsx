@@ -40,6 +40,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    const cacheSession = (sessionData: Session | null, userData: User | null) => {
+        if (sessionData && userData) {
+            localStorage.setItem('cached_session', JSON.stringify(sessionData));
+            localStorage.setItem('cached_user', JSON.stringify(userData));
+            localStorage.setItem('session_timestamp', Date.now().toString());
+        } else {
+            localStorage.removeItem('cached_session');
+            localStorage.removeItem('cached_user');
+            localStorage.removeItem('session_timestamp');
+        }
+    };
+
+    const getCachedSession = () => {
+        try {
+            const cached = localStorage.getItem('cached_session');
+            const user = localStorage.getItem('cached_user');
+            const timestamp = localStorage.getItem('session_timestamp');
+            
+            if (cached && user && timestamp) {
+                // Session valid for 30 days
+                const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+                if (parseInt(timestamp) > thirtyDaysAgo) {
+                    return {
+                        session: JSON.parse(cached),
+                        user: JSON.parse(user)
+                    };
+                }
+            }
+        } catch (error) {
+            console.error('Error reading cached session:', error);
+        }
+        return null;
+    };
+
     const checkCustomAuth = () => {
         const isAgentAuth = sessionStorage.getItem('agent_authenticated') === 'true';
         if (isAgentAuth) {
@@ -54,7 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     id: agentId,
                     email: agentEmail || '',
                     app_metadata: {},
-                    user_metadata: {},
+                    user_metadata: { name: sessionStorage.getItem('agent_name') || '' },
                     aud: 'authenticated',
                     created_at: new Date().toISOString()
                 } as User);
@@ -74,38 +108,59 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 console.warn('Auth initialization timeout - proceeding anyway');
                 setLoading(false);
             }
-        }, 10000); // 10 second timeout (increased from 5)
+        }, 10000);
 
-        // Check custom auth first
-        const hasCustomAuth = checkCustomAuth();
-        
-        if (!hasCustomAuth) {
-            // Check active sessions and sets the user
-            supabase.auth.getSession().then(async ({ data: { session } }) => {
-                if (!isMounted) return;
-                
-                setSession(session);
-                setUser(session?.user ?? null);
-
-                if (session?.user) {
+        const initAuth = async () => {
+            // Check custom auth first
+            const hasCustomAuth = checkCustomAuth();
+            
+            if (!hasCustomAuth) {
+                // Try to use cached session first
+                const cachedData = getCachedSession();
+                if (cachedData?.session && cachedData?.user) {
+                    if (!isMounted) return;
+                    setSession(cachedData.session);
+                    setUser(cachedData.user);
                     // Fetch role but don't block on it
-                    fetchUserRole(session.user.id).catch(err => {
+                    fetchUserRole(cachedData.user.id).catch(err => {
                         console.error('Role fetch failed:', err);
                     });
+                    setLoading(false);
+                    clearTimeout(loadingTimeout);
+                    return;
                 }
 
-                setLoading(false);
+                // No cache, check active sessions
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!isMounted) return;
+                    
+                    setSession(session);
+                    setUser(session?.user ?? null);
+
+                    if (session?.user) {
+                        // Cache the session
+                        cacheSession(session, session.user);
+                        // Fetch role but don't block on it
+                        fetchUserRole(session.user.id).catch(err => {
+                            console.error('Role fetch failed:', err);
+                        });
+                    }
+
+                    setLoading(false);
+                    clearTimeout(loadingTimeout);
+                } catch (error) {
+                    if (!isMounted) return;
+                    console.error('Error initializing auth:', error);
+                    setLoading(false);
+                    clearTimeout(loadingTimeout);
+                }
+            } else {
                 clearTimeout(loadingTimeout);
-            }).catch((error) => {
-                if (!isMounted) return;
-                console.error('Error initializing auth:', error);
-                setLoading(false);
-                clearTimeout(loadingTimeout);
-            });
-        } else {
-            // Custom auth is active, clear timeout
-            clearTimeout(loadingTimeout);
-        }
+            }
+        };
+
+        initAuth();
 
         // Listen for changes on auth state (sign in, sign out, etc.)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -115,11 +170,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(session?.user ?? null);
 
             if (session?.user) {
+                // Cache the session on auth state change
+                cacheSession(session, session.user);
                 // Fetch role but don't block
                 fetchUserRole(session.user.id).catch(err => {
                     console.error('Role fetch failed:', err);
                 });
             } else {
+                // Clear cache on sign out
+                cacheSession(null, null);
                 // If signed out from Supabase, check if custom auth is active
                 if (!checkCustomAuth()) {
                     setRole(null);
@@ -138,6 +197,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const signOut = async () => {
         await supabase.auth.signOut();
+        cacheSession(null, null);
         sessionStorage.removeItem('agent_authenticated');
         sessionStorage.removeItem('agent_role');
         sessionStorage.removeItem('agent_id');

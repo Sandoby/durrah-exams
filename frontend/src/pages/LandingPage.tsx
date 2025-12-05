@@ -1,18 +1,28 @@
-﻿import { Link } from 'react-router-dom';
+﻿import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Logo } from '../components/Logo';
 import { LottiePlayer } from '../components/LottiePlayer';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
+import { useAuth } from '../context/AuthContext';
 
 export default function LandingPage() {
     const { t, i18n } = useTranslation();
+    const { user, loading } = useAuth();
+    const navigate = useNavigate();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const registrationUrl = 'https://tutors.durrahsystem.tech/register';
     const isRTL = i18n.language === 'ar';
+
+    // Redirect to dashboard if user is logged in
+    useEffect(() => {
+        if (!loading && user) {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [user, loading, navigate]);
 
     const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(200);
     const { price: yearlyPrice } = useCurrency(2000);
