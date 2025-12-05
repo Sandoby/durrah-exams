@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Upload, FileText, BookOpen, Loader2, Download, Search } from 'lucide-react';
+import { Plus, Trash2, Upload, FileText, BookOpen, Loader2, Download, Search, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { extractQuestionsFromFile } from '../lib/extractors';
+import { extractQuestionsHybrid, formatConfidenceDisplay, getConfidenceColor } from '../lib/ai/hybridExtractor';
 
 interface Question {
     id: string;
@@ -42,7 +43,8 @@ export default function QuestionBank() {
     const [isImporting, setIsImporting] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    // Removed AI key usage; using local extraction only
+    const [useHybridExtraction, setUseHybridExtraction] = useState(true);
+    const [extractionMetadata, setExtractionMetadata] = useState<any>(null);
 
     useEffect(() => {
         if (user) {
@@ -168,8 +170,33 @@ export default function QuestionBank() {
         setIsImporting(true);
         const loadingToast = toast.loading('Extracting questions from file...');
         try {
-            const extractedQuestions = await extractQuestionsFromFile(selectedFile);
+            let extractedQuestions;
+            let metadata = null;
+
+            if (useHybridExtraction) {
+                // Use hybrid extraction with AI fallback
+                const text = await selectedFile.text();
+                const result = await extractQuestionsHybrid(text, {
+                    useAI: true,
+                    confidenceThreshold: 80,
+                });
+                extractedQuestions = result.questions;
+                metadata = result.metadata;
+                setExtractionMetadata(metadata);
+
+                // Log extraction details
+                console.log(`✅ Hybrid extraction: ${extractedQuestions.length} questions`);
+                console.log(`📊 Confidence: ${metadata.localConfidenceScore}%`);
+                if (metadata.usedAI) {
+                    console.log(`🤖 AI Provider: ${metadata.aiProvider}`);
+                }
+            } else {
+                // Fallback to original extraction
+                extractedQuestions = await extractQuestionsFromFile(selectedFile);
+            }
+
             if (!extractedQuestions.length) throw new Error('No questions found in file');
+
             const questionsToInsert = extractedQuestions.map(q => ({
                 bank_id: selectedBank.id,
                 type: q.type,
@@ -181,9 +208,15 @@ export default function QuestionBank() {
                 category: q.category || '',
                 tags: q.tags || []
             }));
+
             const { error } = await supabase.from('question_bank_questions').insert(questionsToInsert);
             if (error) throw error;
-            toast.success(`Successfully imported ${extractedQuestions.length} questions!`, { id: loadingToast });
+
+            const successMsg = metadata 
+                ? `Imported ${extractedQuestions.length} questions (${formatConfidenceDisplay(metadata.localConfidenceScore)})`
+                : `Successfully imported ${extractedQuestions.length} questions!`;
+
+            toast.success(successMsg, { id: loadingToast });
             setShowImportModal(false);
             setSelectedFile(null);
             fetchQuestions(selectedBank.id);
@@ -488,9 +521,30 @@ export default function QuestionBank() {
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full mx-4 p-6">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Import Questions</h3>
                         
-                        {/* Local extraction requires no API key */}
-
                         <div className="space-y-4">
+                            {/* Hybrid Extraction Toggle */}
+                            <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="checkbox"
+                                        id="hybridToggle"
+                                        checked={useHybridExtraction}
+                                        onChange={(e) => setUseHybridExtraction(e.target.checked)}
+                                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 cursor-pointer"
+                                    />
+                                    <div className="flex-1">
+                                        <label htmlFor="hybridToggle" className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-900 dark:text-white">
+                                            <Zap className="h-4 w-4 text-amber-500" />
+                                            Use Hybrid Extraction
+                                        </label>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                            Smart local + AI fallback for better accuracy
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* File Upload */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Upload PDF or Word Document
@@ -505,6 +559,48 @@ export default function QuestionBank() {
                                     Supported formats: PDF, DOC, DOCX, TXT
                                 </p>
                             </div>
+
+                            {/* Extraction Metadata Display */}
+                            {extractionMetadata && (
+                                <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-3 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Questions Extracted:</span>
+                                        <span className="text-sm font-bold text-indigo-600">{extractionMetadata.totalExtracted}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Confidence:</span>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-24 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                                <div 
+                                                    className="h-2 rounded-full transition-all"
+                                                    style={{
+                                                        width: `${extractionMetadata.localConfidenceScore}%`,
+                                                        backgroundColor: getConfidenceColor(extractionMetadata.localConfidenceScore)
+                                                    }}
+                                                />
+                                            </div>
+                                            <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                                {formatConfidenceDisplay(extractionMetadata.localConfidenceScore)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {extractionMetadata.usedAI && (
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-medium text-gray-600 dark:text-gray-300">AI Provider:</span>
+                                            <span className="text-xs font-medium px-2 py-1 bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 rounded">
+                                                {extractionMetadata.aiProvider?.toUpperCase()}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {extractionMetadata.issues.length > 0 && (
+                                        <div className="pt-2 border-t border-gray-200 dark:border-gray-600">
+                                            <p className="text-xs text-amber-600 dark:text-amber-400">
+                                                ⚠️ {extractionMetadata.issues.join(', ')}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex gap-3 mt-6">
@@ -512,6 +608,7 @@ export default function QuestionBank() {
                                 onClick={() => {
                                     setShowImportModal(false);
                                     setSelectedFile(null);
+                                    setExtractionMetadata(null);
                                 }}
                                 className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                             >
