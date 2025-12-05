@@ -49,6 +49,13 @@ function ChatWidget() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (isOpen && currentSession?.id) {
+      fetchMessages(currentSession.id);
+      subscribeToSession(currentSession.id);
+    }
+  }, [isOpen, currentSession?.id]);
+
   const checkActiveSession = async () => {
     if (!user) return;
 
@@ -494,6 +501,18 @@ function ChatWidget() {
                     </div>
                   </div>
                 )}
+                {/* Rating Button - Show when session is ended */}
+                {currentSession?.is_ended && (
+                  <div className="flex justify-center my-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button
+                      onClick={() => setShowRatingModal(true)}
+                      className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white rounded-full font-semibold shadow-lg transition-all hover:shadow-xl"
+                    >
+                      <span>⭐</span>
+                      <span>Rate Your Experience</span>
+                    </button>
+                  </div>
+                )}
                 <div ref={messagesEndRef} />
               </div>
 
@@ -545,33 +564,37 @@ function ChatWidget() {
 
       {/* Rating Modal */}
       {showRatingModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-              Rate Your Experience
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-              How would you rate our support service?
-            </p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4 animate-fade-in">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all animate-scale-up">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="text-5xl mb-4">⭐</div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                How was your experience?
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">
+                Your feedback helps us improve our service
+              </p>
+            </div>
             
-            {/* Star Rating */}
-            <div className="flex justify-center gap-2 mb-6">
+            {/* Star Rating - Interactive */}
+            <div className="flex justify-center gap-3 mb-8">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   onClick={() => setSelectedRating(star)}
-                  className="transition-transform hover:scale-110"
+                  className="group transition-all duration-200"
+                  onMouseEnter={() => {/* Visual feedback on hover */}}
                 >
                   <svg
-                    className={`w-12 h-12 ${
+                    className={`w-14 h-14 transition-all duration-200 cursor-pointer ${
                       star <= selectedRating
-                        ? 'text-yellow-400 fill-yellow-400'
-                        : 'text-gray-300 dark:text-gray-600'
+                        ? 'text-yellow-400 fill-yellow-400 scale-110'
+                        : 'text-gray-300 dark:text-gray-600 hover:text-yellow-300 hover:scale-105'
                     }`}
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="1"
+                    fill="currentColor"
                   >
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </svg>
@@ -579,12 +602,23 @@ function ChatWidget() {
               ))}
             </div>
 
+            {/* Rating Label */}
+            {selectedRating > 0 && (
+              <div className="text-center mb-6 text-lg font-semibold text-indigo-600 dark:text-indigo-400">
+                {selectedRating === 5 && "Excellent! 🎉"}
+                {selectedRating === 4 && "Great! 😊"}
+                {selectedRating === 3 && "Good 👍"}
+                {selectedRating === 2 && "Fair 🤔"}
+                {selectedRating === 1 && "Poor 😞"}
+              </div>
+            )}
+
             {/* Feedback Text */}
             <textarea
               value={ratingFeedback}
               onChange={(e) => setRatingFeedback(e.target.value)}
-              placeholder="Tell us more about your experience... (optional)"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none mb-4"
+              placeholder="Tell us more... (optional)"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none mb-6 text-sm"
               rows={3}
             />
 
@@ -596,7 +630,7 @@ function ChatWidget() {
                   setSelectedRating(0);
                   setRatingFeedback('');
                 }}
-                className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 Skip
               </button>
@@ -610,9 +644,10 @@ function ChatWidget() {
                         feedback: ratingFeedback || null,
                         user_id: user?.id
                       });
-                      toast.success('Thank you for your feedback!');
+                      toast.success('Thank you for rating! 🙏');
                     } catch (error) {
                       console.error('Error saving rating:', error);
+                      toast.error('Failed to save rating');
                     }
                   }
                   setShowRatingModal(false);
@@ -620,9 +655,9 @@ function ChatWidget() {
                   setRatingFeedback('');
                 }}
                 disabled={selectedRating === 0}
-                className="flex-1 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
               >
-                Submit Rating
+                Submit
               </button>
             </div>
           </div>
