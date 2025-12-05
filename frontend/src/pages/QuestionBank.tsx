@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Upload, FileText, BookOpen, Loader2, Download, Search, Zap } from 'lucide-react';
+import { Plus, Trash2, FileText, BookOpen, Loader2, Download, Search, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { extractQuestionsFromFile } from '../lib/extractors';
-import { extractQuestionsHybrid, formatConfidenceDisplay, getConfidenceColor } from '../lib/ai/hybridExtractor';
 
 interface Question {
     id: string;
@@ -36,15 +34,24 @@ export default function QuestionBank() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [showImportModal, setShowImportModal] = useState(false);
+    const [showAddQuestionModal, setShowAddQuestionModal] = useState(false);
     const [newBankName, setNewBankName] = useState('');
     const [newBankDescription, setNewBankDescription] = useState('');
     const [isCreating, setIsCreating] = useState(false);
-    const [isImporting, setIsImporting] = useState(false);
+    const [isAdding, setIsAdding] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [useHybridExtraction, setUseHybridExtraction] = useState(true);
-    const [extractionMetadata, setExtractionMetadata] = useState<any>(null);
+    
+    // New question form state
+    const [newQuestion, setNewQuestion] = useState({
+        question_text: '',
+        type: 'multiple_choice',
+        options: ['', '', '', ''],
+        correct_answer: '',
+        points: 1,
+        difficulty: 'medium',
+        category: '',
+        tags: ''
+    });
 
     useEffect(() => {
         if (user) {
@@ -158,100 +165,81 @@ export default function QuestionBank() {
         }
     };
 
-    const handleFileUpload = async () => {
-        if (!selectedFile) {
-            toast.error('Please select a file');
+    const handleAddQuestion = async () => {
+        if (!newQuestion.question_text.trim()) {
+            toast.error('Please enter a question');
             return;
         }
         if (!selectedBank) {
             toast.error('Please select a question bank first');
             return;
         }
-        setIsImporting(true);
-        const loadingToast = toast.loading('Extracting questions from file...');
+
+        setIsAdding(true);
         try {
-            let extractedQuestions;
-            let metadata = null;
-
-            if (useHybridExtraction) {
-                // Use hybrid extraction with AI fallback
-                const text = await selectedFile.text();
-                const result = await extractQuestionsHybrid(text, {
-                    useAI: true,
-                    confidenceThreshold: 80,
-                });
-                extractedQuestions = result.questions;
-                metadata = result.metadata;
-                setExtractionMetadata(metadata);
-
-                // Log extraction details
-                console.log(`✅ Hybrid extraction: ${extractedQuestions.length} questions`);
-                console.log(`📊 Confidence: ${metadata.localConfidenceScore}%`);
-                if (metadata.usedAI) {
-                    console.log(`🤖 AI Provider: ${metadata.aiProvider}`);
+            // Validate based on question type
+            if (newQuestion.type === 'multiple_choice' || newQuestion.type === 'multiple_select') {
+                const validOptions = newQuestion.options.filter(o => o.trim());
+                if (validOptions.length < 2) {
+                    toast.error('Please provide at least 2 options');
+                    setIsAdding(false);
+                    return;
                 }
-            } else {
-                // Fallback to original extraction
-                extractedQuestions = await extractQuestionsFromFile(selectedFile);
+                if (!newQuestion.correct_answer) {
+                    toast.error('Please select a correct answer');
+                    setIsAdding(false);
+                    return;
+                }
             }
 
-            if (!extractedQuestions.length) throw new Error('No questions found in file');
-
-            // Sanitize function to clean invalid characters
-            const sanitizeText = (text: string | undefined): string => {
-                if (!text) return '';
-                // Remove null bytes and control characters
-                return text
-                    .replace(/\0/g, '') // Remove null bytes
-                    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '') // Remove control characters
-                    .trim();
-            };
-
-            const sanitizeArray = (arr: any[] | undefined): string[] => {
-                if (!Array.isArray(arr)) return [];
-                return arr
-                    .filter(item => item !== null && item !== undefined)
-                    .map(item => sanitizeText(String(item)))
-                    .filter(item => item.length > 0);
-            };
-
-            const questionsToInsert = extractedQuestions.map(q => ({
+            // Prepare question data
+            const questionData = {
                 bank_id: selectedBank.id,
-                type: q.type || 'multiple_choice',
-                question_text: sanitizeText(q.question_text),
-                options: sanitizeArray(q.options),
-                correct_answer: sanitizeText(String(q.correct_answer || '')),
-                points: Math.max(1, Math.min(100, q.points || 1)),
-                difficulty: q.difficulty || 'medium',
-                category: sanitizeText(q.category),
-                tags: sanitizeArray(q.tags)
-            })).filter(q => q.question_text.length > 0); // Filter out empty questions
+                question_text: newQuestion.question_text.trim(),
+                type: newQuestion.type,
+                options: newQuestion.type === 'short_answer' || newQuestion.type === 'numeric' 
+                    ? [] 
+                    : newQuestion.options.filter(o => o.trim()),
+                correct_answer: newQuestion.correct_answer,
+                points: newQuestion.points,
+                difficulty: newQuestion.difficulty,
+                category: newQuestion.category.trim() || null,
+                tags: newQuestion.tags
+                    .split(',')
+                    .map(t => t.trim())
+                    .filter(t => t.length > 0)
+            };
 
-            if (!questionsToInsert.length) {
-                throw new Error('No valid questions to insert after sanitization');
+            const { error } = await supabase
+                .from('question_bank_questions')
+                .insert([questionData]);
+
+            if (error) throw error;
+
+            toast.success('Question added successfully!');
+            
+            // Reset form
+            setNewQuestion({
+                question_text: '',
+                type: 'multiple_choice',
+                options: ['', '', '', ''],
+                correct_answer: '',
+                points: 1,
+                difficulty: 'medium',
+                category: '',
+                tags: ''
+            });
+
+            setShowAddQuestionModal(false);
+            if (selectedBank) {
+                fetchQuestions(selectedBank.id);
+                fetchBanks();
             }
-
-            console.log(`📤 Inserting ${questionsToInsert.length} sanitized questions...`);
-            const { error } = await supabase.from('question_bank_questions').insert(questionsToInsert);
-            if (error) {
-                console.error('❌ Supabase insert error:', error);
-                throw error;
-            }
-
-            const successMsg = metadata 
-                ? `Imported ${questionsToInsert.length} questions (${formatConfidenceDisplay(metadata.localConfidenceScore)})`
-                : `Successfully imported ${questionsToInsert.length} questions!`;
-
-            toast.success(successMsg, { id: loadingToast });
-            setShowImportModal(false);
-            setSelectedFile(null);
-            fetchQuestions(selectedBank.id);
-            fetchBanks();
         } catch (error: any) {
-            console.error('Error importing questions:', error);
-            toast.error(error.message || 'Failed to import questions', { id: loadingToast });
+            console.error('Error adding question:', error);
+            toast.error('Failed to add question');
         } finally {
-            setIsImporting(false);
+            setIsAdding(false);
         }
     };
 
@@ -410,11 +398,11 @@ export default function QuestionBank() {
                                         <p className="text-sm text-gray-600 dark:text-gray-400">{questions.length} questions</p>
                                     </div>
                                     <button
-                                        onClick={() => setShowImportModal(true)}
+                                        onClick={() => setShowAddQuestionModal(true)}
                                         className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                                     >
-                                        <Upload className="h-4 w-4" />
-                                        Import Questions
+                                        <Plus className="h-4 w-4" />
+                                        Add Question
                                     </button>
                                 </div>
 
@@ -541,119 +529,196 @@ export default function QuestionBank() {
                 </div>
             )}
 
-            {/* Import Modal */}
-            {showImportModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full mx-4 p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Import Questions</h3>
+            {/* Add Question Modal */}
+            {showAddQuestionModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 my-8 p-6">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Add Question</h3>
+                            <button
+                                onClick={() => setShowAddQuestionModal(false)}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
                         
-                        <div className="space-y-4">
-                            {/* Hybrid Extraction Toggle */}
-                            <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
-                                <div className="flex items-center gap-3">
-                                    <input
-                                        type="checkbox"
-                                        id="hybridToggle"
-                                        checked={useHybridExtraction}
-                                        onChange={(e) => setUseHybridExtraction(e.target.checked)}
-                                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 cursor-pointer"
-                                    />
-                                    <div className="flex-1">
-                                        <label htmlFor="hybridToggle" className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-900 dark:text-white">
-                                            <Zap className="h-4 w-4 text-amber-500" />
-                                            Use Hybrid Extraction
-                                        </label>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                            Smart local + AI fallback for better accuracy
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* File Upload */}
+                        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+                            {/* Question Text */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Upload PDF or Word Document
+                                    Question Text *
                                 </label>
-                                <input
-                                    type="file"
-                                    accept=".pdf,.doc,.docx,.txt"
-                                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                                <textarea
+                                    value={newQuestion.question_text}
+                                    onChange={(e) => setNewQuestion({...newQuestion, question_text: e.target.value})}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    rows={3}
+                                    placeholder="Enter your question here..."
                                 />
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                    Supported formats: PDF, DOC, DOCX, TXT
-                                </p>
                             </div>
 
-                            {/* Extraction Metadata Display */}
-                            {extractionMetadata && (
-                                <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-3 space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Questions Extracted:</span>
-                                        <span className="text-sm font-bold text-indigo-600">{extractionMetadata.totalExtracted}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Confidence:</span>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-24 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                                                <div 
-                                                    className="h-2 rounded-full transition-all"
-                                                    style={{
-                                                        width: `${extractionMetadata.localConfidenceScore}%`,
-                                                        backgroundColor: getConfidenceColor(extractionMetadata.localConfidenceScore)
+                            {/* Question Type */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Question Type *
+                                </label>
+                                <select
+                                    value={newQuestion.type}
+                                    onChange={(e) => {
+                                        const newType = e.target.value;
+                                        setNewQuestion({
+                                            ...newQuestion,
+                                            type: newType,
+                                            options: (newType === 'short_answer' || newType === 'numeric') ? [] : ['', '', '', ''],
+                                            correct_answer: ''
+                                        });
+                                    }}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                >
+                                    <option value="multiple_choice">Multiple Choice</option>
+                                    <option value="true_false">True / False</option>
+                                    <option value="short_answer">Short Answer</option>
+                                    <option value="numeric">Numeric Answer</option>
+                                    <option value="multiple_select">Multiple Select</option>
+                                </select>
+                            </div>
+
+                            {/* Options (for MCQ, True/False, Multiple Select) */}
+                            {(newQuestion.type === 'multiple_choice' || newQuestion.type === 'true_false' || newQuestion.type === 'multiple_select') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Options {newQuestion.type !== 'true_false' ? '*' : ''}
+                                    </label>
+                                    <div className="space-y-2">
+                                        {(newQuestion.type === 'true_false' ? ['True', 'False'] : newQuestion.options).map((option, index) => (
+                                            <div key={index} className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={option}
+                                                    onChange={(e) => {
+                                                        if (newQuestion.type !== 'true_false') {
+                                                            const newOptions = [...newQuestion.options];
+                                                            newOptions[index] = e.target.value;
+                                                            setNewQuestion({...newQuestion, options: newOptions});
+                                                        }
                                                     }}
+                                                    disabled={newQuestion.type === 'true_false'}
+                                                    placeholder={`Option ${index + 1}`}
+                                                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50"
+                                                />
+                                                <input
+                                                    type="radio"
+                                                    name="correct_answer"
+                                                    value={option}
+                                                    checked={newQuestion.correct_answer === option}
+                                                    onChange={() => setNewQuestion({...newQuestion, correct_answer: option})}
+                                                    className="mt-3 h-4 w-4 cursor-pointer"
                                                 />
                                             </div>
-                                            <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                                                {formatConfidenceDisplay(extractionMetadata.localConfidenceScore)}
-                                            </span>
-                                        </div>
+                                        ))}
                                     </div>
-                                    {extractionMetadata.usedAI && (
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs font-medium text-gray-600 dark:text-gray-300">AI Provider:</span>
-                                            <span className="text-xs font-medium px-2 py-1 bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 rounded">
-                                                {extractionMetadata.aiProvider?.toUpperCase()}
-                                            </span>
-                                        </div>
-                                    )}
-                                    {extractionMetadata.issues.length > 0 && (
-                                        <div className="pt-2 border-t border-gray-200 dark:border-gray-600">
-                                            <p className="text-xs text-amber-600 dark:text-amber-400">
-                                                ⚠️ {extractionMetadata.issues.join(', ')}
-                                            </p>
-                                        </div>
-                                    )}
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Select the radio button for the correct answer</p>
                                 </div>
                             )}
+
+                            {/* Correct Answer for Short/Numeric */}
+                            {(newQuestion.type === 'short_answer' || newQuestion.type === 'numeric') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Correct Answer *
+                                    </label>
+                                    <input
+                                        type={newQuestion.type === 'numeric' ? 'number' : 'text'}
+                                        value={newQuestion.correct_answer}
+                                        onChange={(e) => setNewQuestion({...newQuestion, correct_answer: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                        placeholder="Enter the correct answer..."
+                                    />
+                                </div>
+                            )}
+
+                            {/* Points */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Points
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="100"
+                                    value={newQuestion.points}
+                                    onChange={(e) => setNewQuestion({...newQuestion, points: parseInt(e.target.value) || 1})}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                />
+                            </div>
+
+                            {/* Difficulty */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Difficulty
+                                </label>
+                                <select
+                                    value={newQuestion.difficulty}
+                                    onChange={(e) => setNewQuestion({...newQuestion, difficulty: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                >
+                                    <option value="easy">Easy</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </div>
+
+                            {/* Category */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Category (optional)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newQuestion.category}
+                                    onChange={(e) => setNewQuestion({...newQuestion, category: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    placeholder="e.g., Biology, Chapter 3"
+                                />
+                            </div>
+
+                            {/* Tags */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Tags (optional, comma-separated)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newQuestion.tags}
+                                    onChange={(e) => setNewQuestion({...newQuestion, tags: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    placeholder="e.g., important, exam2024"
+                                />
+                            </div>
                         </div>
 
                         <div className="flex gap-3 mt-6">
                             <button
-                                onClick={() => {
-                                    setShowImportModal(false);
-                                    setSelectedFile(null);
-                                    setExtractionMetadata(null);
-                                }}
+                                onClick={() => setShowAddQuestionModal(false)}
                                 className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                             >
                                 Cancel
                             </button>
                             <button
-                                onClick={handleFileUpload}
-                                disabled={isImporting || !selectedFile}
+                                onClick={handleAddQuestion}
+                                disabled={isAdding}
                                 className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
                             >
-                                {isImporting ? (
+                                {isAdding ? (
                                     <>
                                         <Loader2 className="h-5 w-5 animate-spin" />
-                                        Processing...
+                                        Adding...
                                     </>
                                 ) : (
                                     <>
-                                        <Upload className="h-5 w-5" />
-                                        Import
+                                        <Plus className="h-5 w-5" />
+                                        Add Question
                                     </>
                                 )}
                             </button>
