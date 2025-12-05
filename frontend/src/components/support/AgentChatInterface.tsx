@@ -38,6 +38,7 @@ function AgentChatInterface() {
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isUserOnline, setIsUserOnline] = useState(false);
+  const [activeTab, setActiveTab] = useState<'new' | 'current' | 'closed'>('new');
   const [isUserTyping, setIsUserTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<any>(null);
@@ -65,7 +66,7 @@ function AgentChatInterface() {
   };
 
   useEffect(() => {
-    fetchSessions();
+    fetchSessions(activeTab);
     const channel = subscribeToSessions();
     trackAgentPresence();
 
@@ -73,7 +74,7 @@ function AgentChatInterface() {
       if (channel) supabase.removeChannel(channel);
       if (presenceChannelRef.current) supabase.removeChannel(presenceChannelRef.current);
     };
-  }, []);
+  }, [activeTab]);
 
   useEffect(() => {
     if (selectedSession?.id) {
@@ -86,10 +87,10 @@ function AgentChatInterface() {
     }
   }, [selectedSession?.id]);
 
-  const fetchSessions = async () => {
+  const fetchSessions = async (tab: 'new' | 'current' | 'closed' = activeTab) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('live_chat_sessions')
         .select(`
           *,
@@ -97,9 +98,21 @@ function AgentChatInterface() {
             full_name,
             email
           )
-        `)
-        .eq('is_ended', false)
-        .order('updated_at', { ascending: false });
+        `);
+
+      // Filter based on tab
+      if (tab === 'new') {
+        // New: not ended, no agent assigned
+        query = query.eq('is_ended', false).is('agent_id', null);
+      } else if (tab === 'current') {
+        // Current: not ended, agent assigned to this agent
+        query = query.eq('is_ended', false).eq('agent_id', user?.id);
+      } else if (tab === 'closed') {
+        // Closed: ended sessions
+        query = query.eq('is_ended', true);
+      }
+
+      const { data, error } = await query.order('updated_at', { ascending: false });
 
       if (error) throw error;
       setSessions(data || []);
@@ -286,20 +299,9 @@ function AgentChatInterface() {
 
       if (error) throw error;
 
-      // Send a system message asking for rating
-      await supabase
-        .from('chat_messages')
-        .insert({
-          session_id: sessionId,
-          sender_id: user?.id,
-          message: '🎯 Thank you for contacting support! Please rate your experience:\n⭐⭐⭐⭐⭐ (5 stars) - Excellent\n⭐⭐⭐⭐ (4 stars) - Good\n⭐⭐⭐ (3 stars) - Average\n⭐⭐ (2 stars) - Poor\n⭐ (1 star) - Very Poor\n\nYour feedback helps us improve our service!',
-          sender_role: 'agent',
-          is_read: false
-        });
-
-      toast.success('Session closed - Rating request sent to user');
+      toast.success('Session closed successfully');
       setSelectedSession(null);
-      fetchSessions();
+      fetchSessions(activeTab);
     } catch (error) {
       console.error('Error closing session:', error);
       toast.error('Failed to close session');
@@ -322,12 +324,48 @@ function AgentChatInterface() {
   return (
     <div className="flex h-[calc(100vh-200px)] bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
       <div className="w-80 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+        {/* Tabs */}
+        <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab('new')}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'new'
+                  ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 bg-white dark:bg-gray-800'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
+            >
+              New
+            </button>
+            <button
+              onClick={() => setActiveTab('current')}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'current'
+                  ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 bg-white dark:bg-gray-800'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
+            >
+              Current
+            </button>
+            <button
+              onClick={() => setActiveTab('closed')}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'closed'
+                  ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 bg-white dark:bg-gray-800'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
+            >
+              Closed
+            </button>
+          </div>
+        </div>
+
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Active Chats
+            {activeTab === 'new' ? 'New Chats' : activeTab === 'current' ? 'My Chats' : 'Closed Chats'}
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {sessions.length} open sessions
+            {sessions.length} {activeTab} session{sessions.length !== 1 ? 's' : ''}
           </p>
         </div>
 

@@ -36,6 +36,9 @@ function ChatWidget() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isAgentOnline, setIsAgentOnline] = useState(false);
   const [isAgentTyping, setIsAgentTyping] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [ratingFeedback, setRatingFeedback] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<any>(null);
   const typingTimeoutRef = useRef<any>(null);
@@ -96,6 +99,34 @@ function ChatWidget() {
     if (!user) return null;
 
     try {
+      // Check if there's a recently ended session (within 24 hours) - reopen it
+      const { data: recentSession } = await supabase
+        .from('live_chat_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_ended', true)
+        .gte('ended_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .order('ended_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (recentSession) {
+        // Reopen the recent session
+        const { data, error } = await supabase
+          .from('live_chat_sessions')
+          .update({ is_ended: false, ended_at: null })
+          .eq('id', recentSession.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        setCurrentSession(data);
+        fetchMessages(data.id);
+        subscribeToSession(data.id);
+        return data;
+      }
+
+      // Create new session only if no recent session exists
       const { data, error } = await supabase
         .from('live_chat_sessions')
         .insert({
@@ -138,6 +169,23 @@ function ChatWidget() {
   const subscribeToSession = (sessionId: string) => {
     const channel = supabase
       .channel(`session:${sessionId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'live_chat_sessions',
+          filter: `id=eq.${sessionId}`
+        },
+        (payload) => {
+          const updated = payload.new as ChatSession;
+          if (updated.is_ended) {
+            // Show rating modal when session is closed
+            setShowRatingModal(true);
+            setCurrentSession(updated);
+          }
+        }
+      )
       .on(
         'postgres_changes',
         {
@@ -492,6 +540,92 @@ function ChatWidget() {
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {/* Rating Modal */}
+      {showRatingModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              Rate Your Experience
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+              How would you rate our support service?
+            </p>
+            
+            {/* Star Rating */}
+            <div className="flex justify-center gap-2 mb-6">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onClick={() => setSelectedRating(star)}
+                  className="transition-transform hover:scale-110"
+                >
+                  <svg
+                    className={`w-12 h-12 ${
+                      star <= selectedRating
+                        ? 'text-yellow-400 fill-yellow-400'
+                        : 'text-gray-300 dark:text-gray-600'
+                    }`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                  >
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                </button>
+              ))}
+            </div>
+
+            {/* Feedback Text */}
+            <textarea
+              value={ratingFeedback}
+              onChange={(e) => setRatingFeedback(e.target.value)}
+              placeholder="Tell us more about your experience... (optional)"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none mb-4"
+              rows={3}
+            />
+
+            {/* Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowRatingModal(false);
+                  setSelectedRating(0);
+                  setRatingFeedback('');
+                }}
+                className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Skip
+              </button>
+              <button
+                onClick={async () => {
+                  if (selectedRating > 0) {
+                    try {
+                      await supabase.from('chat_ratings').insert({
+                        session_id: currentSession?.id,
+                        rating: selectedRating,
+                        feedback: ratingFeedback || null,
+                        user_id: user?.id
+                      });
+                      toast.success('Thank you for your feedback!');
+                    } catch (error) {
+                      console.error('Error saving rating:', error);
+                    }
+                  }
+                  setShowRatingModal(false);
+                  setSelectedRating(0);
+                  setRatingFeedback('');
+                }}
+                disabled={selectedRating === 0}
+                className="flex-1 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Submit Rating
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>
