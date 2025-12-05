@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, FileText, BookOpen, Loader2, Download, Search, X } from 'lucide-react';
+import { Plus, Trash2, FileText, BookOpen, Loader2, Download, Search, X, ChevronDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { exportToJSON, exportToPDF, exportToWord } from '../lib/exportUtils';
 
 interface Question {
     id: string;
@@ -40,6 +41,7 @@ export default function QuestionBank() {
     const [isCreating, setIsCreating] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [exportMenuOpen, setExportMenuOpen] = useState<string | null>(null);
     
     // New question form state
     const [newQuestion, setNewQuestion] = useState({
@@ -265,24 +267,36 @@ export default function QuestionBank() {
         }
     };
 
-    const exportBank = async (bankId: string) => {
+    const exportBank = async (bankId: string, format: 'json' | 'pdf' | 'docx' = 'json') => {
         try {
+            const bank = banks.find(b => b.id === bankId);
+            const bankName = bank?.name || 'question_bank';
+
             const { data, error } = await supabase
                 .from('question_bank_questions')
                 .select('*')
                 .eq('bank_id', bankId);
 
             if (error) throw error;
+            if (!data || data.length === 0) {
+                toast.error('No questions to export');
+                return;
+            }
 
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `question_bank_${bankId}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
+            switch (format) {
+                case 'pdf':
+                    exportToPDF(data, bankName);
+                    break;
+                case 'docx':
+                    await exportToWord(data, bankName);
+                    break;
+                case 'json':
+                default:
+                    exportToJSON(data, bankName);
+                    break;
+            }
 
-            toast.success('Question bank exported');
+            toast.success(`Question bank exported as ${format.toUpperCase()}`);
         } catch (error: any) {
             console.error('Error exporting:', error);
             toast.error('Failed to export');
@@ -358,17 +372,56 @@ export default function QuestionBank() {
                                                     )}
                                                     <p className="text-xs text-gray-500 mt-2">{bank.question_count || 0} questions</p>
                                                 </div>
-                                                <div className="flex gap-1">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            exportBank(bank.id);
-                                                        }}
-                                                        className="p-1 text-gray-400 hover:text-green-600"
-                                                        title="Export"
-                                                    >
-                                                        <Download className="h-4 w-4" />
-                                                    </button>
+                                                <div className="flex gap-1 relative">
+                                                    <div className="relative">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setExportMenuOpen(exportMenuOpen === bank.id ? null : bank.id);
+                                                            }}
+                                                            className="flex items-center gap-1 px-2 py-1 text-gray-400 hover:text-green-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                            title="Export"
+                                                        >
+                                                            <Download className="h-4 w-4" />
+                                                            <ChevronDown className="h-3 w-3" />
+                                                        </button>
+                                                        
+                                                        {/* Export dropdown menu */}
+                                                        {exportMenuOpen === bank.id && (
+                                                            <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        exportBank(bank.id, 'pdf');
+                                                                        setExportMenuOpen(null);
+                                                                    }}
+                                                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-t"
+                                                                >
+                                                                    📄 Export as PDF
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        exportBank(bank.id, 'docx');
+                                                                        setExportMenuOpen(null);
+                                                                    }}
+                                                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border-t border-gray-200 dark:border-gray-600"
+                                                                >
+                                                                    📝 Export as Word
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        exportBank(bank.id, 'json');
+                                                                        setExportMenuOpen(null);
+                                                                    }}
+                                                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border-t border-gray-200 dark:border-gray-600 rounded-b"
+                                                                >
+                                                                    { } Export as JSON
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
