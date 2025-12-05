@@ -197,24 +197,50 @@ export default function QuestionBank() {
 
             if (!extractedQuestions.length) throw new Error('No questions found in file');
 
+            // Sanitize function to clean invalid characters
+            const sanitizeText = (text: string | undefined): string => {
+                if (!text) return '';
+                // Remove null bytes and control characters
+                return text
+                    .replace(/\0/g, '') // Remove null bytes
+                    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '') // Remove control characters
+                    .trim();
+            };
+
+            const sanitizeArray = (arr: any[] | undefined): string[] => {
+                if (!Array.isArray(arr)) return [];
+                return arr
+                    .filter(item => item !== null && item !== undefined)
+                    .map(item => sanitizeText(String(item)))
+                    .filter(item => item.length > 0);
+            };
+
             const questionsToInsert = extractedQuestions.map(q => ({
                 bank_id: selectedBank.id,
-                type: q.type,
-                question_text: q.question_text,
-                options: q.options || [],
-                correct_answer: q.correct_answer,
-                points: q.points || 1,
+                type: q.type || 'multiple_choice',
+                question_text: sanitizeText(q.question_text),
+                options: sanitizeArray(q.options),
+                correct_answer: sanitizeText(String(q.correct_answer || '')),
+                points: Math.max(1, Math.min(100, q.points || 1)),
                 difficulty: q.difficulty || 'medium',
-                category: q.category || '',
-                tags: q.tags || []
-            }));
+                category: sanitizeText(q.category),
+                tags: sanitizeArray(q.tags)
+            })).filter(q => q.question_text.length > 0); // Filter out empty questions
 
+            if (!questionsToInsert.length) {
+                throw new Error('No valid questions to insert after sanitization');
+            }
+
+            console.log(`📤 Inserting ${questionsToInsert.length} sanitized questions...`);
             const { error } = await supabase.from('question_bank_questions').insert(questionsToInsert);
-            if (error) throw error;
+            if (error) {
+                console.error('❌ Supabase insert error:', error);
+                throw error;
+            }
 
             const successMsg = metadata 
-                ? `Imported ${extractedQuestions.length} questions (${formatConfidenceDisplay(metadata.localConfidenceScore)})`
-                : `Successfully imported ${extractedQuestions.length} questions!`;
+                ? `Imported ${questionsToInsert.length} questions (${formatConfidenceDisplay(metadata.localConfidenceScore)})`
+                : `Successfully imported ${questionsToInsert.length} questions!`;
 
             toast.success(successMsg, { id: loadingToast });
             setShowImportModal(false);
