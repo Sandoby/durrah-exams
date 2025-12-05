@@ -16,7 +16,6 @@ import Settings from './pages/Settings';
 import AdminPanel from './pages/AdminPanel';
 import QuestionBank from './pages/QuestionBank';
 import { SubmissionSync } from './components/SubmissionSync';
-import { AdminRoute, AgentRoute, ProtectedRoute } from './components/ProtectedRoute';
 import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 
 import { useTranslation } from 'react-i18next';
