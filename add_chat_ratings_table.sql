@@ -3,7 +3,11 @@
 -- Store user ratings and feedback for chat sessions
 -- =====================================================
 
-CREATE TABLE IF NOT EXISTS chat_ratings (
+-- Drop existing table if it has issues
+DROP TABLE IF EXISTS chat_ratings CASCADE;
+
+-- Create the table with correct schema
+CREATE TABLE chat_ratings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     session_id UUID REFERENCES live_chat_sessions(id) ON DELETE CASCADE,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
