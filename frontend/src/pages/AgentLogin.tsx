@@ -184,7 +184,16 @@ export default function AgentLogin() {
                     </form>
 
                     {/* Footer */}
-                    <div className="mt-6 text-center">
+                    <div className="mt-6 text-center space-y-2">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                            First time?{' '}
+                            <button
+                                onClick={() => navigate('/agent-setup')}
+                                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
+                            >
+                                Create Admin Account
+                            </button>
+                        </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                             Not an agent?{' '}
                             <button

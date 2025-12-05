@@ -20,6 +20,7 @@ import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 
 // Agent Portal
 import AgentLogin from './pages/AgentLogin';
+import AgentSetup from './pages/AgentSetup';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import SupportDashboard from './pages/support/SupportDashboard';
 import { AdminRoute, AgentRoute } from './components/ProtectedRoute';
@@ -67,6 +68,7 @@ function App() {
             <Route path="/refund-policy" element={<RefundPolicy />} />
 
             {/* Agent Portal Routes */}
+            <Route path="/agent-setup" element={<AgentSetup />} />
             <Route path="/agent-login" element={<AgentLogin />} />
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/support" element={<AgentRoute><SupportDashboard /></AgentRoute>} />
