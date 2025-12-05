@@ -62,8 +62,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     useEffect(() => {
+        // Set a timeout to prevent infinite loading
+        const loadingTimeout = setTimeout(() => {
+            if (loading) {
+                console.warn('Auth initialization timeout - proceeding anyway');
+                setLoading(false);
+            }
+        }, 5000); // 5 second timeout
+
         // Check custom auth first
         if (checkCustomAuth()) {
+            clearTimeout(loadingTimeout);
             return;
         }
 
@@ -77,6 +86,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
 
             setLoading(false);
+            clearTimeout(loadingTimeout);
+        }).catch((error) => {
+            console.error('Error initializing auth:', error);
+            setLoading(false);
+            clearTimeout(loadingTimeout);
         });
 
         // Listen for changes on auth state (sign in, sign out, etc.)
@@ -96,7 +110,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setLoading(false);
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            clearTimeout(loadingTimeout);
+            subscription.unsubscribe();
+        };
     }, []);
 
     const signOut = async () => {
@@ -110,9 +127,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(null);
     };
 
+    // Show loading spinner instead of blank screen
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                    <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <AuthContext.Provider value={{ user, session, role, loading, signOut }}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 };
