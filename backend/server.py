@@ -659,4 +659,68 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# ============ QUESTION EXTRACTION ROUTES (LOCAL AI) ============
+
+from ollama_extractor import extract_questions_with_ollama, check_ollama_available, get_available_models
+
+class TextExtractionRequest(BaseModel):
+    text: str
+    max_questions: Optional[int] = 50
+
+@api_router.post("/extract/questions/ollama")
+async def extract_questions_endpoint(request: TextExtractionRequest, tutor_id: str = Depends(get_current_tutor)):
+    """
+    Extract questions using local Ollama AI (completely free, no API keys needed)
+    
+    Requirements:
+    - Ollama must be installed and running: ollama serve
+    - At least one model must be available: ollama pull mistral (or llama2, neural-chat)
+    """
+    if not request.text or len(request.text.strip()) == 0:
+        raise HTTPException(status_code=400, detail="Text cannot be empty")
+    
+    logger.info(f"🤖 Extracting questions for tutor {tutor_id} using Ollama...")
+    
+    questions = await extract_questions_with_ollama(request.text, request.max_questions)
+    
+    if questions is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Ollama is not available. Install from https://ollama.ai and run: ollama serve"
+        )
+    
+    if not questions:
+        raise HTTPException(status_code=400, detail="No valid questions could be extracted")
+    
+    logger.info(f"✅ Successfully extracted {len(questions)} questions")
+    
+    return {
+        "status": "success",
+        "questions_count": len(questions),
+        "questions": [q.model_dump() for q in questions],
+        "ai_provider": "ollama (free, local)"
+    }
+
+@api_router.get("/extract/ollama/status")
+async def ollama_status():
+    """Check if Ollama is available and list installed models"""
+    available = await check_ollama_available()
+    
+    if not available:
+        return {
+            "status": "unavailable",
+            "message": "Ollama is not running. Start it with: ollama serve",
+            "models": [],
+            "setup_url": "https://ollama.ai"
+        }
+    
+    models = await get_available_models()
+    
+    return {
+        "status": "ready",
+        "message": "Ollama is running and ready for question extraction",
+        "models": models,
+        "recommended_model": "mistral",
+        "setup_help": "Download models with: ollama pull mistral"
+    }
 
