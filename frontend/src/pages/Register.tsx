@@ -33,7 +33,7 @@ export default function Register() {
     const onSubmit = async (data: RegisterForm) => {
         setIsLoading(true);
         try {
-            const { error } = await supabase.auth.signUp({
+            const { data: authData, error } = await supabase.auth.signUp({
                 email: data.email,
                 password: data.password,
                 options: {
@@ -44,6 +44,23 @@ export default function Register() {
             });
 
             if (error) throw error;
+
+            // Send welcome email (don't block on this)
+            if (authData.user) {
+                try {
+                    await supabase.functions.invoke('send-welcome-email', {
+                        body: {
+                            userId: authData.user.id,
+                            email: data.email,
+                            name: data.name,
+                            emailType: 'welcome',
+                        },
+                    });
+                } catch (emailError) {
+                    console.error('Failed to send welcome email:', emailError);
+                    // Continue with registration even if email fails
+                }
+            }
 
             toast.success('Registration successful! Please check your email to verify your account.');
             navigate('/login');
