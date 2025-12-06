@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, Calendar, User, Share2, Bookmark } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Share2, Bookmark, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface BlogPostContent {
@@ -426,20 +426,27 @@ export function BlogPost() {
       </Helmet>
 
       <article className="min-h-screen bg-white dark:bg-gray-900">
-        {/* Header */}
-        <div className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 py-8 px-4 sm:px-6 lg:px-8">
+        {/* Hero */}
+        <div className="bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 text-white py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto">
             <button
               onClick={() => navigate('/blog')}
-              className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 mb-6 transition"
+              className="flex items-center gap-2 text-indigo-100 hover:text-white mb-6 transition"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Blog
             </button>
 
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{post.title}</h1>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-sm font-semibold">
+                {post.category}
+              </span>
+              <span className="text-indigo-100">{post.readTime} min read</span>
+            </div>
 
-            <div className="flex flex-wrap gap-4 text-gray-600 dark:text-gray-400">
+            <h1 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">{post.title}</h1>
+
+            <div className="flex flex-wrap gap-6 text-indigo-100">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 {new Date(post.date).toLocaleDateString('en-US', {
@@ -452,10 +459,6 @@ export function BlogPost() {
                 <User className="w-4 h-4" />
                 {post.author}
               </div>
-              <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-medium">
-                {post.category}
-              </span>
-              <span className="text-gray-600 dark:text-gray-400">{post.readTime} min read</span>
             </div>
           </div>
         </div>
@@ -465,31 +468,116 @@ export function BlogPost() {
           <div className="prose dark:prose-invert max-w-none">
             <div
               dangerouslySetInnerHTML={{ __html: post.content }}
-              className="text-gray-700 dark:text-gray-300 leading-relaxed space-y-4"
+              className="text-gray-700 dark:text-gray-300 leading-relaxed space-y-4 mb-12"
             />
           </div>
 
-          {/* Share Section */}
-          <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex flex-wrap gap-4">
+          {/* Share & Bookmark */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-8 mb-12">
+            <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href);
-                  toast.success('Link copied to clipboard!');
+                  toast.success('Link copied!');
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition font-semibold"
               >
                 <Share2 className="w-4 h-4" />
                 Share
               </button>
               <button
-                onClick={() => toast.success('Article bookmarked!')}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                onClick={() => toast.success('Bookmarked!')}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition font-semibold"
               >
                 <Bookmark className="w-4 h-4" />
                 Bookmark
               </button>
             </div>
+          </div>
+
+          {/* CTA Box */}
+          <div className="bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 border-l-4 border-indigo-600 rounded-lg p-8 mb-12">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+              Ready to Apply These Strategies?
+            </h3>
+            <p className="text-gray-700 dark:text-gray-300 mb-6">
+              Durrah makes it easy to implement these best practices. Create your first exam and see the difference anti-cheating, auto-grading, and analytics make.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a
+                href="https://tutors.durrahsystem.tech/register"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-lg font-bold hover:shadow-lg transition-all"
+              >
+                Try Durrah Free <ArrowRight className="w-4 h-4" />
+              </a>
+              <a
+                href="https://tutors.durrahsystem.tech/demo"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-indigo-600 rounded-lg font-bold hover:bg-indigo-50 dark:hover:bg-gray-700 transition-all"
+              >
+                Watch Demo
+              </a>
+            </div>
+          </div>
+
+          {/* Newsletter Signup */}
+          <div className="bg-white dark:bg-gray-800 border-2 border-indigo-200 dark:border-indigo-900/30 rounded-xl p-8">
+            <div className="flex items-start gap-4">
+              <div className="text-3xl">📧</div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  Get More Tips Like This
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Join 5,000+ tutors getting weekly strategies, real data, and exclusive features.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+                  />
+                  <button
+                    onClick={() => toast.success('Thanks for subscribing!')}
+                    className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-lg font-bold hover:shadow-lg transition-all whitespace-nowrap"
+                  >
+                    Subscribe
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer CTA */}
+        <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white py-16 px-4 sm:px-6 lg:px-8 mt-16">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-4xl font-black mb-4">Transform Your Tutoring Today</h2>
+            <p className="text-lg text-indigo-100 mb-8">
+              10,000+ tutors are already saving 10+ hours every week with Durrah.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="https://tutors.durrahsystem.tech/register"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-indigo-600 rounded-xl font-bold text-lg hover:shadow-xl hover:scale-105 transition-all"
+              >
+                Start Free Trial <ArrowRight className="w-5 h-5" />
+              </a>
+              <a
+                href="https://tutors.durrahsystem.tech/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white text-white rounded-xl font-bold text-lg hover:bg-white/10 transition-all"
+              >
+                Learn More
+              </a>
+            </div>
+            <p className="text-indigo-100 text-sm mt-6">No credit card required • 7 days free</p>
           </div>
         </div>
       </article>
