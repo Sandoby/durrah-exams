@@ -68,6 +68,298 @@ For each template, you can use these variables:
 - `{{ .SiteURL }}` - Your site URL
 - `{{ .Email }}` - User's email
 
+### Professional Sign-Up/Welcome Template:
+
+> **Note:** This template uses your hosted logo from `https://durrah-clinic-managment.web.app/logo.jpeg`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to Durrah for Tutors</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #1e293b;
+      background-color: #f1f5f9;
+    }
+    .email-wrapper {
+      background-color: #f1f5f9;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      background: linear-gradient(120deg, #0f172a 0%, #1d4ed8 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .logo-container {
+      margin-bottom: 20px;
+    }
+    .logo {
+      width: 100px;
+      height: 100px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+    .logo img {
+      max-width: 100%;
+      height: auto;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .subheader {
+      font-size: 16px;
+      opacity: 0.95;
+      margin-top: 8px;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .content p {
+      margin: 16px 0;
+      font-size: 16px;
+      color: #334155;
+    }
+    .welcome-box {
+      background: linear-gradient(120deg, #ecfdf5 0%, #d1fae5 100%);
+      border-left: 4px solid #10b981;
+      padding: 20px;
+      margin: 24px 0;
+      border-radius: 4px;
+    }
+    .welcome-box h3 {
+      margin: 0 0 12px 0;
+      color: #065f46;
+      font-size: 16px;
+    }
+    .welcome-box p {
+      margin: 8px 0;
+      color: #047857;
+      font-size: 15px;
+    }
+    .button-container {
+      text-align: center;
+      margin: 32px 0;
+    }
+    .button {
+      display: inline-block;
+      padding: 16px 40px;
+      background: linear-gradient(120deg, #10b981 0%, #059669 100%);
+      color: white !important;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .features-grid {
+      margin: 32px 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .feature-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .feature-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    .feature-title {
+      font-weight: 600;
+      color: #0f172a;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .feature-desc {
+      font-size: 13px;
+      color: #64748b;
+      margin: 0;
+    }
+    .getting-started {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 20px;
+      margin: 24px 0;
+      border-radius: 4px;
+    }
+    .getting-started h3 {
+      margin: 0 0 12px 0;
+      color: #1e40af;
+      font-size: 16px;
+    }
+    .getting-started ol {
+      margin: 0;
+      padding-left: 20px;
+      color: #334155;
+      font-size: 14px;
+    }
+    .getting-started li {
+      margin: 8px 0;
+    }
+    .support-section {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 20px;
+      margin: 24px 0;
+      border-radius: 4px;
+    }
+    .support-section h3 {
+      margin: 0 0 8px 0;
+      color: #92400e;
+      font-size: 16px;
+    }
+    .support-section p {
+      margin: 0;
+      color: #78350f;
+      font-size: 14px;
+    }
+    .footer {
+      text-align: center;
+      padding: 30px;
+      background-color: #f8fafc;
+      color: #64748b;
+      font-size: 14px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .footer-links {
+      margin-top: 16px;
+    }
+    .footer-links a {
+      color: #0f172a;
+      text-decoration: none;
+      margin: 0 12px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+    <div class="container">
+      <div class="header">
+        <div class="logo-container">
+          <div class="logo">
+            <img src="https://durrah-clinic-managment.web.app/logo.jpeg" alt="Durrah for Tutors Logo" style="width: 90%; height: auto;">
+          </div>
+        </div>
+        <h1>Welcome to Durrah for Tutors! 🎓</h1>
+        <p class="subheader">Your account is ready to go</p>
+      </div>
+      
+      <div class="content">
+        <p><strong>Hello,</strong></p>
+        
+        <p>Welcome to <strong>Durrah for Tutors</strong>! We're thrilled to have you join our community of innovative educators.</p>
+        
+        <div class="welcome-box">
+          <h3>✨ Your Account is Ready</h3>
+          <p>You're all set! Your account has been created and is ready to use. You can now start creating exams, managing student submissions, and leveraging AI-powered features.</p>
+        </div>
+        
+        <p style="font-weight: 600; color: #0f172a; font-size: 18px; margin-top: 28px;">What You Can Do Now:</p>
+        
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">✏️</div>
+            <div class="feature-title">Create Exams</div>
+            <div class="feature-desc">Design and deploy exams in minutes</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <div class="feature-title">AI Question Bank</div>
+            <div class="feature-desc">Extract questions from documents</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <div class="feature-title">Analytics</div>
+            <div class="feature-desc">Track student performance</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🔗</div>
+            <div class="feature-title">QR Codes</div>
+            <div class="feature-desc">Share exams instantly</div>
+          </div>
+        </div>
+        
+        <div class="button-container">
+          <a href="https://tutors.durrahsystem.tech/dashboard" class="button">Go to Dashboard</a>
+        </div>
+        
+        <div class="getting-started">
+          <h3>🚀 Getting Started (Next 5 minutes):</h3>
+          <ol>
+            <li>Log in to your account at <strong>https://tutors.durrahsystem.tech</strong></li>
+            <li>Complete your profile with your name and subject area</li>
+            <li>Create your first exam or upload existing questions</li>
+            <li>Generate a QR code to share with students</li>
+            <li>Watch results come in real-time!</li>
+          </ol>
+        </div>
+        
+        <div class="support-section">
+          <h3>❓ Need Help?</h3>
+          <p>Check out our <strong><a href="https://tutors.durrahsystem.tech/docs" style="color: #b45309;">documentation</a></strong> or reach out to our support team. We're here to help you succeed!</p>
+        </div>
+        
+        <p style="font-size: 14px; color: #64748b; margin-top: 32px; padding-top: 32px; border-top: 1px solid #e2e8f0;">
+          <strong>Pro Tip:</strong> Bookmark <strong>https://tutors.durrahsystem.tech</strong> for quick access to your dashboard.
+        </p>
+      </div>
+      
+      <div class="footer">
+        <p><strong>Durrah for Tutors</strong></p>
+        <p style="margin: 8px 0;">Building better exam experiences for educators worldwide</p>
+        <div class="footer-links">
+          <a href="https://tutors.durrahsystem.tech">Website</a>
+          <a href="https://tutors.durrahsystem.tech/support">Support</a>
+          <a href="https://tutors.durrahsystem.tech/docs">Documentation</a>
+        </div>
+        <p style="margin-top: 16px; font-size: 12px;">© 2025 Durrah for Tutors. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+```
+
+### Important Notes:
+
+**Logo URL:** The template uses your hosted logo from:
+```
+https://durrah-clinic-managment.web.app/logo.jpeg
+```
+
+This ensures:
+- ✅ Professional branding throughout
+- ✅ Quick load time
+- ✅ Consistent with other emails
+- ✅ No base64 encoding (better compatibility)
+
 ### Professional Password Reset Template:
 
 ```html
