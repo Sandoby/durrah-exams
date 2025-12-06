@@ -54,6 +54,7 @@ export default function LandingPage() {
                             <a href="#features" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{t('nav.features')}</a>
                             <a href="#pricing" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{t('nav.pricing')}</a>
                             <a href="#testimonials" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{t('nav.testimonials')}</a>
+                            <Link to="/blog" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Blog</Link>
                             <LanguageSwitcher />
                             <div className="flex items-center gap-3">
                                 {!loading && user ? (
@@ -102,6 +103,9 @@ export default function LandingPage() {
                             <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-colors">
                                 {t('nav.testimonials')}
                             </a>
+                            <Link to="/blog" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-colors">
+                                Blog
+                            </Link>
                             
                             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <div className="mb-4">
@@ -386,6 +390,7 @@ export default function LandingPage() {
                             <ul className="space-y-2">
                                 <li><a href="#features" className="hover:text-white transition">Features</a></li>
                                 <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
+                                <li><Link to="/blog" className="hover:text-white transition">Blog</Link></li>
                             </ul>
                         </div>
                         <div>

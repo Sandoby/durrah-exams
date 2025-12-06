@@ -18,6 +18,8 @@ import AdminPanel from './pages/AdminPanel';
 import QuestionBank from './pages/QuestionBank';
 import AgentLogin from './pages/AgentLogin';
 import SupportDashboard from './pages/support/SupportDashboard';
+import { BlogList } from './pages/blog/BlogList';
+import { BlogPost } from './pages/blog/BlogPost';
 import { SubmissionSync } from './components/SubmissionSync';
 import { ExamAnalyticsDashboard } from "./components/analytics/ExamAnalyticsDashboard";
 
@@ -49,6 +51,8 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/demo" element={<DemoPage />} />
+            <Route path="/blog" element={<BlogList />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
