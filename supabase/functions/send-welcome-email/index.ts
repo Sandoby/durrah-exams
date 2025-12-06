@@ -13,16 +13,18 @@ const corsHeaders = {
 const LOGO_URL = 'https://durrah-clinic-managment.web.app/logo.jpeg'
 const HERO_ILLUSTRATION = 'https://tutors.durrahsystem.tech/illustrations/techny-standardized-test-as-method-of-assessment.png'
 
-type EmailType = 'welcome' | 'subscription_reminder_7d' | 'subscription_reminder_3d' | 'subscription_expired' | 'subscription_expired_3d'
+type EmailType = 'welcome' | 'subscription_reminder_7d' | 'subscription_reminder_3d' | 'subscription_expired' | 'subscription_expired_3d' | 'password_reset' | 'email_verification'
 
 interface EmailRequest {
-  userId: string
+  userId?: string
   email: string
   name?: string
   emailType?: EmailType
+  resetToken?: string
+  verificationToken?: string
 }
 
-const getEmailTemplate = (type: EmailType, name: string, expiryDate?: string) => {
+const getEmailTemplate = (type: EmailType, name: string, expiryDate?: string, resetUrl?: string) => {
   const templates: Record<EmailType, { subject: string; html: string }> = {
     welcome: {
       subject: 'Welcome to Durrah for Tutors',
@@ -299,6 +301,104 @@ const getEmailTemplate = (type: EmailType, name: string, expiryDate?: string) =>
         </body>
         </html>
       `
+    },
+    password_reset: {
+      subject: '🔑 Reset your Durrah for Tutors password',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1e293b; margin: 0; padding: 0; background-color: #f1f5f9; }
+            .email-wrapper { background-color: #f1f5f9; padding: 40px 20px; }
+            .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+            .header { background: linear-gradient(120deg, #0f172a 0%, #1d4ed8 100%); color: white; padding: 40px 30px; text-align: center; }
+            .logo { width: 120px; height: auto; margin-bottom: 20px; background: rgba(255, 255, 255, 0.2); padding: 10px; border-radius: 8px; }
+            .logo-fallback { width: 60px; height: 60px; background: white; color: #1d4ed8; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin-bottom: 20px; }
+            .header h1 { margin: 0; font-size: 28px; font-weight: 700; }
+            .content { padding: 40px 30px; }
+            .content p { margin: 16px 0; font-size: 16px; }
+            .button { display: inline-block; padding: 14px 32px; background: linear-gradient(120deg, #0f172a 0%, #1d4ed8 100%); color: white; text-decoration: none; border-radius: 8px; margin: 24px 0; font-weight: 600; font-size: 16px; }
+            .info-box { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0; border-radius: 4px; font-size: 14px; }
+            .footer { text-align: center; padding: 30px; background-color: #f8fafc; color: #64748b; font-size: 14px; border-top: 1px solid #e2e8f0; }
+          </style>
+        </head>
+        <body>
+          <div class="email-wrapper">
+            <div class="container">
+              <div class="header">
+                <img src="${LOGO_URL}" alt="Durrah for Tutors" class="logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" />
+                <div class="logo-fallback" style="display: none;">D</div>
+                <h1>Reset Your Password 🔑</h1>
+              </div>
+              <div class="content">
+                <p>Hi ${name},</p>
+                <p>We received a request to reset your password for your Durrah for Tutors account.</p>
+                <p>Click the button below to create a new password:</p>
+                <a href="${resetUrl || '#'}" class="button">Reset Password</a>
+                <div class="info-box">
+                  <strong>⏰ This link expires in 1 hour</strong><br>
+                  If you didn't request a password reset, you can safely ignore this email.
+                </div>
+                <p style="margin-top: 20px; font-size: 14px; color: #64748b;">
+                  If the button doesn't work, copy and paste this link into your browser:<br>
+                  <span style="word-break: break-all;">${resetUrl || '#'}</span>
+                </p>
+              </div>
+              <div class="footer">
+                <p>© ${new Date().getFullYear()} Durrah for Tutors. All rights reserved.</p>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    },
+    email_verification: {
+      subject: '✉️ Verify your Durrah for Tutors email',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1e293b; margin: 0; padding: 0; background-color: #f1f5f9; }
+            .email-wrapper { background-color: #f1f5f9; padding: 40px 20px; }
+            .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+            .header { background: linear-gradient(120deg, #10b981 0%, #059669 100%); color: white; padding: 40px 30px; text-align: center; }
+            .logo { width: 120px; height: auto; margin-bottom: 20px; background: rgba(255, 255, 255, 0.2); padding: 10px; border-radius: 8px; }
+            .logo-fallback { width: 60px; height: 60px; background: white; color: #10b981; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin-bottom: 20px; }
+            .header h1 { margin: 0; font-size: 28px; font-weight: 700; }
+            .content { padding: 40px 30px; }
+            .content p { margin: 16px 0; font-size: 16px; }
+            .button { display: inline-block; padding: 14px 32px; background: linear-gradient(120deg, #10b981 0%, #059669 100%); color: white; text-decoration: none; border-radius: 8px; margin: 24px 0; font-weight: 600; font-size: 16px; }
+            .footer { text-align: center; padding: 30px; background-color: #f8fafc; color: #64748b; font-size: 14px; border-top: 1px solid #e2e8f0; }
+          </style>
+        </head>
+        <body>
+          <div class="email-wrapper">
+            <div class="container">
+              <div class="header">
+                <img src="${LOGO_URL}" alt="Durrah for Tutors" class="logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" />
+                <div class="logo-fallback" style="display: none;">D</div>
+                <h1>Verify Your Email ✉️</h1>
+              </div>
+              <div class="content">
+                <p>Hi ${name},</p>
+                <p>Thanks for signing up for Durrah for Tutors! Please verify your email address to get started.</p>
+                <a href="${resetUrl || '#'}" class="button">Verify Email</a>
+                <p style="margin-top: 20px; font-size: 14px; color: #64748b;">
+                  If the button doesn't work, copy and paste this link into your browser:<br>
+                  <span style="word-break: break-all;">${resetUrl || '#'}</span>
+                </p>
+              </div>
+              <div class="footer">
+                <p>© ${new Date().getFullYear()} Durrah for Tutors. All rights reserved.</p>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
     }
   }
 
@@ -312,10 +412,10 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { userId, email, name, emailType = 'welcome' }: EmailRequest = await req.json()
+    const { userId, email, name, emailType = 'welcome', resetToken, verificationToken }: EmailRequest = await req.json()
 
-    if (!userId || !email) {
-      throw new Error('userId and email are required')
+    if (!email) {
+      throw new Error('email is required')
     }
 
     if (!RESEND_API_KEY) {
@@ -327,7 +427,16 @@ serve(async (req: Request) => {
 
     // Get user profile for subscription info if needed
     let expiryDate = undefined
-    if (emailType !== 'welcome') {
+    let resetUrl = undefined
+    
+    // Handle password reset and email verification URLs
+    if (emailType === 'password_reset' && resetToken) {
+      resetUrl = `https://tutors.durrahsystem.tech/update-password?token=${resetToken}`
+    } else if (emailType === 'email_verification' && verificationToken) {
+      resetUrl = `https://tutors.durrahsystem.tech/verify-email?token=${verificationToken}`
+    }
+    
+    if (emailType !== 'welcome' && emailType !== 'password_reset' && emailType !== 'email_verification' && userId) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('subscription_expires_at')
@@ -343,7 +452,7 @@ serve(async (req: Request) => {
       }
     }
 
-    const template = getEmailTemplate(emailType, name || email.split('@')[0], expiryDate)
+    const template = getEmailTemplate(emailType, name || email.split('@')[0], expiryDate, resetUrl)
 
     // Send email via Resend
     const resendResponse = await fetch('https://api.resend.com/emails', {
@@ -366,16 +475,18 @@ serve(async (req: Request) => {
       throw new Error(`Resend API error: ${JSON.stringify(resendData)}`)
     }
 
-    // Log the email in database
-    await supabase.from('email_logs').insert({
-      user_id: userId,
-      email_type: emailType,
-      recipient_email: email,
-      status: 'sent',
-    })
+    // Log the email in database (only if userId exists)
+    if (userId) {
+      await supabase.from('email_logs').insert({
+        user_id: userId,
+        email_type: emailType,
+        recipient_email: email,
+        status: 'sent',
+      })
+    }
 
     // Update last_reminder_sent_at if it's a subscription reminder
-    if (emailType.startsWith('subscription_')) {
+    if (emailType.startsWith('subscription_') && userId) {
       await supabase
         .from('profiles')
         .update({ last_reminder_sent_at: new Date().toISOString() })
