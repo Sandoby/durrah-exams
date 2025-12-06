@@ -1,8 +1,8 @@
-﻿import { Link, useNavigate } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Logo } from '../components/Logo';
 import { LottiePlayer } from '../components/LottiePlayer';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
@@ -12,17 +12,11 @@ import { useAuth } from '../context/AuthContext';
 export default function LandingPage() {
     const { t, i18n } = useTranslation();
     const { user, loading } = useAuth();
-    const navigate = useNavigate();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const registrationUrl = 'https://tutors.durrahsystem.tech/register';
     const isRTL = i18n.language === 'ar';
 
-    // Redirect to dashboard if user is logged in
-    useEffect(() => {
-        if (!loading && user) {
-            navigate('/dashboard', { replace: true });
-        }
-    }, [user, loading, navigate]);
+    // No auto-redirect - show authenticated UI instead
 
     const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(200);
     const { price: yearlyPrice } = useCurrency(2000);
@@ -62,11 +56,23 @@ export default function LandingPage() {
                             <a href="#testimonials" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{t('nav.testimonials')}</a>
                             <LanguageSwitcher />
                             <div className="flex items-center gap-3">
-                                <Link to="/login" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 transition-colors">{t('nav.login')}</Link>
-                                <Link to="/register" className="group relative bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-medium text-sm shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300">
-                                    <span className="relative z-10">{t('nav.getStarted')}</span>
-                                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                </Link>
+                                {!loading && user ? (
+                                    <>
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{user.email?.split('@')[0]}</span>
+                                        <Link to="/dashboard" className="group relative bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-medium text-sm shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300">
+                                            <span className="relative z-10">{t('nav.goToDashboard', 'Go to Dashboard')}</span>
+                                            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        </Link>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link to="/login" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 transition-colors">{t('nav.login')}</Link>
+                                        <Link to="/register" className="group relative bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-medium text-sm shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300">
+                                            <span className="relative z-10">{t('nav.getStarted')}</span>
+                                            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        </Link>
+                                    </>
+                                )}
                             </div>
                         </div>
                         
@@ -101,12 +107,25 @@ export default function LandingPage() {
                                 <div className="mb-4">
                                     <LanguageSwitcher />
                                 </div>
-                                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors mb-3">
-                                    {t('nav.login')}
-                                </Link>
-                                <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white rounded-xl font-semibold text-base shadow-lg shadow-indigo-500/30">
-                                    {t('nav.getStarted')}
-                                </Link>
+                                {!loading && user ? (
+                                    <>
+                                        <div className="py-3 px-4 text-center text-base font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                            {user.email?.split('@')[0]}
+                                        </div>
+                                        <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white rounded-xl font-semibold text-base shadow-lg shadow-indigo-500/30">
+                                            {t('nav.goToDashboard', 'Go to Dashboard')}
+                                        </Link>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors mb-3">
+                                            {t('nav.login')}
+                                        </Link>
+                                        <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white rounded-xl font-semibold text-base shadow-lg shadow-indigo-500/30">
+                                            {t('nav.getStarted')}
+                                        </Link>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>

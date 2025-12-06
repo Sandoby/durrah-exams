@@ -9,6 +9,8 @@ import { supabase } from '../lib/supabase';
 import { ExamResults } from '../components/ExamResults';
 import { ChatWidget } from '../components/ChatWidget';
 import { CardSkeleton } from '../components/skeletons';
+import Joyride, { STATUS } from 'react-joyride';
+import type { Step, CallBackProps } from 'react-joyride';
 
 interface Exam {
     id: string;
@@ -27,13 +29,62 @@ export default function Dashboard() {
     const [selectedExamForResults, setSelectedExamForResults] = useState<Exam | null>(null);
     const [profile, setProfile] = useState<any>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [runTour, setRunTour] = useState(false);
+    const [tourSteps] = useState<Step[]>([
+        {
+            target: '[data-tour="create-exam"]',
+            content: t('dashboard.tour.createExam', 'Click here to create a new exam with custom questions and settings'),
+            disableBeacon: true,
+        },
+        {
+            target: '[data-tour="exam-card"]',
+            content: t('dashboard.tour.examCard', 'Each card shows your exam details. Click to view submissions and results'),
+        },
+        {
+            target: '[data-tour="copy-link"]',
+            content: t('dashboard.tour.copyLink', 'Copy the exam link to share with your students'),
+        },
+        {
+            target: '[data-tour="results"]',
+            content: t('dashboard.tour.results', 'View all student submissions and export results to Excel'),
+        },
+        {
+            target: '[data-tour="question-bank"]',
+            content: t('dashboard.tour.questionBank', 'Manage your question bank and reuse questions across exams'),
+        },
+        {
+            target: '[data-tour="settings"]',
+            content: t('dashboard.tour.settings', 'Access your profile settings and subscription management'),
+        },
+    ]);
 
     useEffect(() => {
         if (user) {
             fetchExams();
             fetchProfile();
+            checkFirstVisit();
         }
     }, [user]);
+
+    const checkFirstVisit = () => {
+        const hasSeenTour = localStorage.getItem(`dashboard_tour_${user?.id}`);
+        if (!hasSeenTour) {
+            // Delay tour start to ensure DOM is ready
+            setTimeout(() => setRunTour(true), 1000);
+        }
+    };
+
+    const handleTourCallback = (data: CallBackProps) => {
+        const { status } = data;
+        if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+            setRunTour(false);
+            localStorage.setItem(`dashboard_tour_${user?.id}`, 'true');
+        }
+    };
+
+    const startTour = () => {
+        setRunTour(true);
+    };
 
     const fetchProfile = async () => {
         try {
@@ -273,18 +324,57 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <Logo />
-                        </div>
+            {/* Interactive Tutorial Tour */}
+            <Joyride
+                steps={tourSteps}
+                run={runTour}
+                continuous
+                showProgress
+                showSkipButton
+                callback={handleTourCallback}
+                styles={{
+                    options: {
+                        primaryColor: '#6366f1',
+                        zIndex: 10000,
+                    },
+                    tooltip: {
+                        fontSize: 16,
+                    },
+                    buttonNext: {
+                        fontSize: 14,
+                        padding: '8px 16px',
+                    },
+                    buttonBack: {
+                        fontSize: 14,
+                        padding: '8px 16px',
+                    },
+                }}
+                locale={{
+                    back: t('tour.back', 'Back'),
+                    close: t('tour.close', 'Close'),
+                    last: t('tour.last', 'Finish'),
+                    next: t('tour.next', 'Next'),
+                    skip: t('tour.skip', 'Skip Tour'),
+                }}
+            />
+
+            <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">\n                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">\n                    <div className="flex justify-between h-16">\n                        <div className="flex items-center">\n                            <Logo />\n                        </div>
 
                         {/* Desktop Navigation */}
                         <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
                             <span className="hidden lg:inline text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
                                 {user?.user_metadata?.full_name || user?.email}
                             </span>
+                            <button
+                                onClick={startTour}
+                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 focus:outline-none transition"
+                                title={t('dashboard.tour.startTour', 'Tutorial')}
+                            >
+                                <svg className="h-4 w-4 lg:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="hidden lg:inline">{t('dashboard.tour.startTour', 'Tutorial')}</span>
+                            </button>
                             {profile?.subscription_status !== 'active' && (
                                 <Link
                                     to="/checkout"
@@ -296,6 +386,7 @@ export default function Dashboard() {
                             )}
                             <Link
                                 to="/settings"
+                                data-tour="settings"
                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition"
                             >
                                 <Settings className="h-4 w-4 lg:mr-2" />
@@ -333,6 +424,15 @@ export default function Dashboard() {
                             <div className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
                                 {user?.user_metadata?.full_name || user?.email}
                             </div>
+                            <button
+                                onClick={() => { startTour(); setIsMobileMenuOpen(false); }}
+                                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-indigo-600 dark:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                                <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {t('dashboard.tour.startTour', 'Tutorial')}
+                            </button>
                             {profile?.subscription_status !== 'active' && (
                                 <Link
                                     to="/checkout"
@@ -370,6 +470,7 @@ export default function Dashboard() {
                         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                             <Link
                                 to="/question-bank"
+                                data-tour="question-bank"
                                 className="inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full sm:w-auto min-h-[44px]"
                             >
                                 <BookOpen className="h-5 w-5 mr-2" />
@@ -377,6 +478,7 @@ export default function Dashboard() {
                             </Link>
                             <button
                                 onClick={handleCreateExam}
+                                data-tour="create-exam"
                                 className="inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full sm:w-auto min-h-[44px]"
                             >
                                 <Plus className="h-5 w-5 mr-2" />
@@ -402,8 +504,8 @@ export default function Dashboard() {
                         </div>
                     ) : (
                         <div className="grid gap-4 sm:gap-6 mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                            {exams.map((exam) => (
-                                <div key={exam.id} className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow duration-200">
+                            {exams.map((exam, index) => (
+                                <div key={exam.id} data-tour={index === 0 ? "exam-card" : undefined} className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow duration-200">
                                     <div className="p-6">
                                         <div className="flex justify-between items-start">
                                             <div>
@@ -425,6 +527,7 @@ export default function Dashboard() {
                                             <div className="flex space-x-2">
                                                 <button
                                                     onClick={() => copyExamLink(exam.id)}
+                                                    data-tour={index === 0 ? "copy-link" : undefined}
                                                     className="p-2 text-gray-400 hover:text-green-600 transition-colors"
                                                     title={t('dashboard.actions.copyLink')}
                                                 >
@@ -439,6 +542,7 @@ export default function Dashboard() {
                                                 </button>
                                                 <button
                                                     onClick={() => setSelectedExamForResults(exam)}
+                                                    data-tour={index === 0 ? "results" : undefined}
                                                     className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
                                                     title={t('dashboard.actions.results')}
                                                 >
