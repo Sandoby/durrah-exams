@@ -83,36 +83,35 @@ export function ExamAnalyticsDashboard() {
                 );
             }
 
-            // Fetch questions for stats
-            const { data: questionsData } = await supabase
-                .from('questions')
-                .select('*')
-                .eq('exam_id', examId);
+            // Get questions from exam data (they're stored as JSONB in the exam)
+            const questionsData = examData?.questions || [];
 
             if (questionsData && questionsData.length > 0 && submissionsData && submissionsData.length > 0) {
-                const stats = questionsData.map(q => {
+                const stats = questionsData.map((q: any, index: number) => {
                     let correctCount = 0;
                     let incorrectCount = 0;
                     let totalTime = 0;
                     let timeCount = 0;
 
-                    submissionsData.forEach(sub => {
-                        const answer = sub.answers?.[q.id];
+                    const questionKey = q.id || `q${index}`;
+
+                    submissionsData.forEach((sub: any) => {
+                        const answer = sub.answers?.[questionKey];
                         if (answer) {
-                            if (answer.is_correct) {
+                            if (answer.is_correct || answer.isCorrect) {
                                 correctCount++;
                             } else {
                                 incorrectCount++;
                             }
-                            if (answer.time_spent) {
-                                totalTime += answer.time_spent;
+                            if (answer.time_spent || answer.timeSpent) {
+                                totalTime += (answer.time_spent || answer.timeSpent);
                                 timeCount++;
                             }
                         }
                     });
 
                     return {
-                        question_text: q.question_text,
+                        question_text: q.question || q.question_text || `Question ${index + 1}`,
                         correct_count: correctCount,
                         incorrect_count: incorrectCount,
                         average_time: timeCount > 0 ? Math.round(totalTime / timeCount) : 0
