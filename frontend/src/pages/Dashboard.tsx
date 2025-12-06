@@ -92,13 +92,13 @@ export default function Dashboard() {
     };
 
     const handleTourCallback = (data: CallBackProps) => {
-        const { status, type, step } = data;
-        
+        const { status, type } = data;
+
         // Continue tour even if step target is not found
         if (type === 'tour:start') {
             console.log('Tour started');
         }
-        
+
         if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
             setRunTour(false);
             localStorage.setItem(`dashboard_tour_${user?.id}`, 'true');
