@@ -11,7 +11,7 @@ import { playNotificationSound } from '../lib/notificationSound';
 import { UserFiltersComponent } from '../components/admin/UserFilters';
 import type { UserFilters } from '../components/admin/UserFilters';
 import { EnhancedUserCard } from '../components/admin/EnhancedUserCard';
-import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
+import { AdminAnalyticsDashboard } from '../components/analytics/AdminAnalyticsDashboard';
 
 const SUPER_ADMIN_PASSWORD = '2352206';
 
@@ -896,27 +896,27 @@ export default function AdminPanel() {
 
                 {/* Analytics Tab */}
                 {activeTab === 'analytics' && (
-                    <AnalyticsDashboard />
+                    <AdminAnalyticsDashboard />
                 )}
 
                 {/* Analytics Tab */}
                 {activeTab === 'analytics' && (
-                    <AnalyticsDashboard />
+                    <AdminAnalyticsDashboard />
                 )}
 
                 {/* Analytics Tab */}
                 {activeTab === 'analytics' && (
-                    <AnalyticsDashboard />
+                    <AdminAnalyticsDashboard />
                 )}
 
                 {/* Analytics Tab */}
                 {activeTab === 'analytics' && (
-                    <AnalyticsDashboard />
+                    <AdminAnalyticsDashboard />
                 )}
 
                 {/* Analytics Tab */}
                 {activeTab === 'analytics' && (
-                    <AnalyticsDashboard />
+                    <AdminAnalyticsDashboard />
                 )}
 
                 {/* Users Tab */}

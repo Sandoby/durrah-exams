@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ChangeEvent } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { EmailWhitelist } from '../components/EmailWhitelist';
+import { useDemoTour } from '../hooks/useDemoTour';
 
 interface Question {
     id?: string;
@@ -61,6 +62,10 @@ export default function ExamEditor() {
     const [selectedBankIds, setSelectedBankIds] = useState<string[]>([]);
     const [questionCount, setQuestionCount] = useState(5);
     const [isImporting, setIsImporting] = useState(false);
+    const [startTour] = useState(new URLSearchParams(window.location.search).get('demo') === 'true');
+    const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
+
+    useDemoTour('create-exam', startTour && isDemo);
 
     const { register, control, handleSubmit, reset, watch, setValue } = useForm<ExamForm>({
         defaultValues: {
@@ -91,7 +96,56 @@ export default function ExamEditor() {
     });
 
     useEffect(() => {
-        if (id && user) {
+        const demoMode = new URLSearchParams(window.location.search).get('demo') === 'true';
+        if (demoMode) {
+            // Load demo exam data
+            reset({
+                title: '📐 Mathematics Quiz - Grade 10',
+                description: 'A comprehensive mathematics assessment covering algebra, geometry, and trigonometry concepts.',
+                required_fields: ['name', 'email'],
+                questions: [
+                    {
+                        type: 'multiple_choice',
+                        question_text: 'What is the value of x in the equation: 2x + 5 = 13?',
+                        options: ['3', '4', '5', '6'],
+                        correct_answer: '1',
+                        points: 5,
+                        randomize_options: true,
+                    },
+                    {
+                        type: 'multiple_choice',
+                        question_text: 'Which of the following is NOT a prime number?',
+                        options: ['17', '19', '21', '23'],
+                        correct_answer: '2',
+                        points: 5,
+                        randomize_options: true,
+                    },
+                    {
+                        type: 'short_answer',
+                        question_text: 'What is the square root of 144?',
+                        options: [],
+                        correct_answer: '12',
+                        points: 5,
+                        randomize_options: false,
+                    },
+                ],
+                settings: {
+                    require_fullscreen: true,
+                    detect_tab_switch: true,
+                    disable_copy_paste: true,
+                    disable_right_click: true,
+                    max_violations: 3,
+                    randomize_questions: true,
+                    show_results_immediately: false,
+                    time_limit_minutes: 30,
+                    start_time: null,
+                    end_time: null,
+                    restrict_by_email: false,
+                    allowed_emails: [],
+                },
+            });
+            setIsFetching(false);
+        } else if (id && user) {
             fetchExam();
         }
     }, [id, user]);
@@ -428,12 +482,23 @@ export default function ExamEditor() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12 relative">
+            {new URLSearchParams(window.location.search).get('demo') === 'true' && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800 px-4 sm:px-6 lg:px-8 py-3">
+                    <div className="max-w-7xl mx-auto flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            <span className="text-sm font-medium text-blue-900 dark:text-blue-200">Demo Mode - Try editing questions, adjusting settings, and then sign up to save your work!</span>
+                        </div>
+                        <Link to="/demo" className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">Back to Demo</Link>
+                    </div>
+                </div>
+            )}
             <div className="bg-white dark:bg-gray-800 shadow">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center">
                                 <button
-                                onClick={() => navigate('/dashboard')}
+                                onClick={() => navigate(new URLSearchParams(window.location.search).get('demo') === 'true' ? '/demo' : '/dashboard')}
                                 className="mr-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                             >
                                 <ArrowLeft className="h-6 w-6" />
@@ -451,18 +516,30 @@ export default function ExamEditor() {
                                 <BookOpen className="h-4 w-4 mr-2" />
                                 Import from Bank
                             </button>
-                            <button
-                                onClick={handleSubmit(onSubmit)}
-                                disabled={isLoading}
-                                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                            >
-                                {isLoading ? (
-                                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                                ) : (
-                                    <Save className="h-5 w-5 mr-2" />
-                                )}
-                                {isLoading ? t('examEditor.saving') : t('examEditor.save')}
-                            </button>
+                            {new URLSearchParams(window.location.search).get('demo') === 'true' ? (
+                                <Link
+                                    to="/register"
+                                    id="save-exam"
+                                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                >
+                                    <Sparkles className="h-5 w-5 mr-2" />
+                                    Sign Up to Save
+                                </Link>
+                            ) : (
+                                <button
+                                    id="save-exam"
+                                    onClick={handleSubmit(onSubmit)}
+                                    disabled={isLoading}
+                                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                                >
+                                    {isLoading ? (
+                                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                                    ) : (
+                                        <Save className="h-5 w-5 mr-2" />
+                                    )}
+                                    {isLoading ? t('examEditor.saving') : t('examEditor.save')}
+                                </button>
+                            )}
                         </div>
                         </div>
                     </div>
@@ -470,7 +547,7 @@ export default function ExamEditor() {
 
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
                 {/* Basic Info */}
-                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6" id="exam-title">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('examEditor.basicInfo.title')}</h3>
                     <div className="space-y-4">
                         <div>
@@ -482,7 +559,7 @@ export default function ExamEditor() {
                                 {...register('title')}
                             />
                         </div>
-                        <div>
+                        <div id="exam-description">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.basicInfo.description')}</label>
                             <textarea
                                 rows={3}
@@ -494,7 +571,7 @@ export default function ExamEditor() {
                 </div>
 
                 {/* Student Fields */}
-                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6" id="required-fields">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('examEditor.studentInfo.title')}</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('examEditor.studentInfo.desc')}</p>
                     <div className="grid grid-cols-1 gap-y-3 sm:grid-cols-2">
@@ -605,7 +682,7 @@ export default function ExamEditor() {
                 </div>
 
                 {/* Settings */}
-                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6" id="exam-settings">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('examEditor.settings.title')}</h3>
                     <div className="grid grid-cols-1 gap-y-4 gap-x-8 sm:grid-cols-2">
                         <div className="flex items-center">
@@ -649,7 +726,7 @@ export default function ExamEditor() {
                                 {...register('settings.max_violations', { valueAsNumber: true })}
                             />
                         </div>
-                        <div>
+                        <div id="time-settings">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.timeLimit')}</label>
                             <input
                                 type="number"
@@ -681,7 +758,7 @@ export default function ExamEditor() {
                 </div>
 
                 {/* Questions */}
-                <div className="w-full">
+                <div className="w-full" id="questions-section">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('examEditor.questions.title')}</h3>
                         <div className="flex gap-2">

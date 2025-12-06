@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, FileText, BookOpen, Loader2, Download, Search, X, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, FileText, BookOpen, Loader2, Download, Search, X, ChevronDown, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { exportToJSON, exportToPDF, exportToWord } from '../lib/exportUtils';
+import { useDemoTour } from '../hooks/useDemoTour';
 
 interface Question {
     id: string;
@@ -55,17 +56,86 @@ export default function QuestionBank() {
         tags: ''
     });
 
+    const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true' || localStorage.getItem('demoMode') === 'true';
+    const [startDemoTour] = useState(isDemo);
+
+    useDemoTour('question-bank', startDemoTour && isDemo);
+
     useEffect(() => {
+        if (isDemo) {
+            const demoBanks: QuestionBank[] = [
+                {
+                    id: 'demo-bank-1',
+                    name: 'STEM Essentials',
+                    description: 'Math, Physics, and Chemistry fundamentals',
+                    tutor_id: 'demo',
+                    created_at: new Date().toISOString(),
+                    question_count: 12,
+                },
+                {
+                    id: 'demo-bank-2',
+                    name: 'English Mastery',
+                    description: 'Grammar, comprehension, and vocabulary drills',
+                    tutor_id: 'demo',
+                    created_at: new Date(Date.now() - 86400000).toISOString(),
+                    question_count: 8,
+                },
+            ];
+
+            const demoQuestions: Question[] = [
+                {
+                    id: 'q1',
+                    type: 'multiple_choice',
+                    question_text: 'What is the derivative of x²?',
+                    options: ['x', '2x', 'x²', '2'],
+                    correct_answer: '1',
+                    points: 2,
+                    difficulty: 'medium',
+                    category: 'Calculus',
+                    tags: ['derivative', 'basics'],
+                },
+                {
+                    id: 'q2',
+                    type: 'multiple_choice',
+                    question_text: 'The chemical symbol for Sodium is:',
+                    options: ['S', 'Na', 'So', 'No'],
+                    correct_answer: '1',
+                    points: 2,
+                    difficulty: 'easy',
+                    category: 'Chemistry',
+                    tags: ['elements'],
+                },
+                {
+                    id: 'q3',
+                    type: 'short_answer',
+                    question_text: 'State Newton’s Second Law of Motion.',
+                    options: [],
+                    correct_answer: 'F = m a',
+                    points: 3,
+                    difficulty: 'medium',
+                    category: 'Physics',
+                    tags: ['laws', 'dynamics'],
+                },
+            ];
+
+            setBanks(demoBanks);
+            setSelectedBank(demoBanks[0]);
+            setQuestions(demoQuestions);
+            setIsLoading(false);
+            return;
+        }
+
         if (user) {
             fetchBanks();
         }
-    }, [user]);
+    }, [user, isDemo]);
 
     useEffect(() => {
+        if (isDemo) return;
         if (selectedBank) {
             fetchQuestions(selectedBank.id);
         }
-    }, [selectedBank]);
+    }, [selectedBank, isDemo]);
 
     // AI key handlers no longer needed
 
@@ -110,6 +180,10 @@ export default function QuestionBank() {
     };
 
     const createBank = async () => {
+        if (isDemo) {
+            toast('Demo mode: Sign up to save your own question banks');
+            return;
+        }
         if (!newBankName.trim()) {
             toast.error('Please enter a bank name');
             return;
@@ -143,6 +217,10 @@ export default function QuestionBank() {
     };
 
     const deleteBank = async (bankId: string) => {
+        if (isDemo) {
+            toast('Demo mode: Sign up to delete and manage banks');
+            return;
+        }
         if (!confirm('Are you sure you want to delete this question bank? All questions will be removed.')) {
             return;
         }
@@ -168,6 +246,10 @@ export default function QuestionBank() {
     };
 
     const handleAddQuestion = async () => {
+        if (isDemo) {
+            toast('Demo mode: Sign up to add your own questions');
+            return;
+        }
         if (!newQuestion.question_text.trim()) {
             toast.error('Please enter a question');
             return;
@@ -317,6 +399,17 @@ export default function QuestionBank() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            {isDemo && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800 px-4 sm:px-6 lg:px-8 py-3">
+                    <div className="max-w-7xl mx-auto flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            <span className="text-sm font-medium text-blue-900 dark:text-blue-200">Demo Mode - Explore the question bank. Sign up to create and save your own.</span>
+                        </div>
+                        <Link to="/demo" className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">Back to Demo</Link>
+                    </div>
+                </div>
+            )}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex justify-between items-center mb-8">
                     <div>
@@ -324,20 +417,21 @@ export default function QuestionBank() {
                         <p className="text-gray-600 dark:text-gray-400 mt-1">Create and manage reusable question collections</p>
                     </div>
                     <button
-                        onClick={() => navigate('/dashboard')}
+                        onClick={() => navigate(isDemo ? '/demo' : '/dashboard')}
                         className="text-indigo-600 hover:text-indigo-700 flex items-center gap-2"
                     >
-                        ← Back to Dashboard
+                        ← Back to {isDemo ? 'Demo' : 'Dashboard'}
                     </button>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Banks List */}
-                    <div className="lg:col-span-1">
+                    <div className="lg:col-span-1" id="bank-list">
                         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Your Banks</h2>
                                 <button
+                                    id="create-bank-btn"
                                     onClick={() => setShowCreateModal(true)}
                                     className="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                                 >
@@ -442,7 +536,7 @@ export default function QuestionBank() {
                     </div>
 
                     {/* Questions List */}
-                    <div className="lg:col-span-2">
+                    <div className="lg:col-span-2" id="questions-list">
                         {selectedBank ? (
                             <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                                 <div className="flex justify-between items-center mb-6">
