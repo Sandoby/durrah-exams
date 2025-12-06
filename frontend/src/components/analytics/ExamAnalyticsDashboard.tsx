@@ -19,7 +19,8 @@ interface SubmissionData {
     percentage?: number;
     submitted_at: string;
     created_at?: string;
-    time_taken: number;
+    time_taken?: number | null;
+    student_data?: any;
     answers?: any;
 }
 
@@ -159,15 +160,23 @@ export function ExamAnalyticsDashboard() {
     const exportResults = async (format: 'csv' | 'pdf') => {
         try {
             if (format === 'csv') {
-                const headers = ['Student Name', 'Email', 'Score', 'Max Score', 'Percentage', 'Submitted At'];
-                const rows = submissions.map(s => [
-                    s.student_name,
-                    s.student_email,
-                    s.score || 0,
-                    s.max_score || s.total_points || 0,
-                    s.percentage ? `${s.percentage.toFixed(2)}%` : `${(((s.score || 0) / (s.max_score || 1)) * 100).toFixed(2)}%`,
-                    new Date(s.submitted_at || s.created_at || new Date()).toLocaleString()
-                ]);
+                const extraHeaders = extraFields.map((f: string) => f.replace(/_/g, ' '));
+                const headers = ['Student Name', 'Email', ...extraHeaders, 'Score', 'Max Score', 'Percentage', 'Submitted At', 'Time Taken'];
+                const rows = submissions.map((s) => {
+                    const maxScore = s.max_score || s.total_points || 1;
+                    const percentage = s.percentage ? `${s.percentage.toFixed(2)}%` : `${(((s.score || 0) / maxScore) * 100).toFixed(2)}%`;
+                    const dynamicFields = extraFields.map((f: string) => s.student_data?.[f] ?? '');
+                    return [
+                        s.student_name,
+                        s.student_email,
+                        ...dynamicFields,
+                        s.score || 0,
+                        maxScore,
+                        percentage,
+                        new Date(s.submitted_at || s.created_at || new Date()).toLocaleString(),
+                        formatDuration(s.time_taken)
+                    ];
+                });
 
                 const csv = [headers, ...rows].map(r => r.map(cell => `"${cell}"`).join(',')).join('\n');
                 const blob = new Blob([csv], { type: 'text/csv' });
@@ -210,6 +219,17 @@ export function ExamAnalyticsDashboard() {
             return ((s.score || 0) / maxScore) * 100;
         })).toFixed(2)
         : 'N/A';
+
+    const requiredFields = exam?.required_fields || ['name', 'email'];
+    const extraFields = requiredFields.filter((f: string) => !['name', 'email'].includes(f));
+
+    const formatDuration = (seconds?: number | null) => {
+        if (seconds === undefined || seconds === null) return 'N/A';
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        if (mins === 0) return `${secs}s`;
+        return `${mins}m ${secs.toString().padStart(2, '0')}s`;
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -276,10 +296,11 @@ export function ExamAnalyticsDashboard() {
                             <div>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">Avg Time</p>
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                                    {submissions.length > 0
-                                        ? `${Math.round(submissions.reduce((sum, s) => sum + s.time_taken, 0) / submissions.length)} min`
-                                        : 'N/A'
-                                    }
+                                    {(() => {
+                                        if (submissions.length === 0) return 'N/A';
+                                        const avgSeconds = Math.round(submissions.reduce((sum, s) => sum + (s.time_taken ?? 0), 0) / submissions.length);
+                                        return formatDuration(avgSeconds);
+                                    })()}
                                 </p>
                             </div>
                             <Clock className="h-8 w-8 text-orange-600" />
@@ -309,7 +330,10 @@ export function ExamAnalyticsDashboard() {
                         <ResponsiveContainer width="100%" height={300}>
                             <AreaChart data={submissions.map((s, idx) => ({
                                 index: idx + 1,
-                                score: (s.score / s.total_points) * 100
+                                score: (() => {
+                                    const maxScore = s.max_score || s.total_points || 1;
+                                    return ((s.score || 0) / maxScore) * 100;
+                                })()
                             }))}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="index" />
@@ -363,6 +387,11 @@ export function ExamAnalyticsDashboard() {
                                 <tr className="border-b border-gray-200 dark:border-gray-700">
                                     <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Student Name</th>
                                     <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Email</th>
+                                    {extraFields.map((field: string) => (
+                                        <th key={field} className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            {field.replace(/_/g, ' ')}
+                                        </th>
+                                    ))}
                                     <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Score</th>
                                     <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Percentage</th>
                                     <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Submitted</th>
@@ -377,6 +406,11 @@ export function ExamAnalyticsDashboard() {
                                         <tr key={s.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                             <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">{s.student_name}</td>
                                             <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">{s.student_email}</td>
+                                            {extraFields.map((field: string) => (
+                                                <td key={field} className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
+                                                    {s.student_data?.[field] || '-'}
+                                                </td>
+                                            ))}
                                             <td className="py-3 px-4 text-sm font-medium text-gray-900 dark:text-white">{s.score || 0}/{maxScore}</td>
                                             <td className="py-3 px-4 text-sm font-medium text-indigo-600">
                                                 {percentage.toFixed(2)}%
@@ -384,7 +418,7 @@ export function ExamAnalyticsDashboard() {
                                             <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
                                                 {new Date(s.submitted_at || s.created_at || new Date()).toLocaleString()}
                                             </td>
-                                            <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">N/A</td>
+                                            <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">{formatDuration(s.time_taken)}</td>
                                         </tr>
                                     );
                                 })}

@@ -41,6 +41,10 @@ CREATE INDEX IF NOT EXISTS idx_submission_answers_submission_id ON public.submis
 CREATE INDEX IF NOT EXISTS idx_submission_answers_question_id ON public.submission_answers(question_id);
 CREATE INDEX IF NOT EXISTS idx_questions_exam_id ON public.questions(exam_id);
 
+-- 4.1 Add helpful columns for analytics (idempotent)
+ALTER TABLE public.submissions ADD COLUMN IF NOT EXISTS student_data jsonb DEFAULT '{}'::jsonb;
+ALTER TABLE public.submissions ADD COLUMN IF NOT EXISTS time_taken integer;
+
 -- 5. Verify RLS is enabled on all tables
 ALTER TABLE public.submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.submission_answers ENABLE ROW LEVEL SECURITY;

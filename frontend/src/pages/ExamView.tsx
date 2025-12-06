@@ -76,6 +76,7 @@ export default function ExamView() {
     const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
     const [highContrast, setHighContrast] = useState(false);
     const [showCalculator, setShowCalculator] = useState(false);
+    const [startedAt, setStartedAt] = useState<number | null>(null);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const isSubmittingRef = useRef(false);
@@ -139,11 +140,12 @@ export default function ExamView() {
                 flaggedQuestions: Array.from(flaggedQuestions),
                 timeLeft,
                 started,
+                startedAt,
                 lastUpdated: Date.now()
             };
             localStorage.setItem(`durrah_exam_${id}_state`, JSON.stringify(stateToSave));
         }
-    }, [id, studentData, answers, violations, timeLeft, started, submitted, flaggedQuestions]);
+    }, [id, studentData, answers, violations, timeLeft, started, startedAt, submitted, flaggedQuestions]);
 
     const fetchExam = async () => {
         try {
@@ -395,6 +397,7 @@ export default function ExamView() {
             }
         }
         setStarted(true);
+        setStartedAt(Date.now());
     };
 
 
@@ -465,6 +468,8 @@ export default function ExamView() {
             // Call the Edge Function for server-side grading
             const edgeFunctionUrl = `${supabaseUrl}/functions/v1/grade-exam`;
 
+            const timeTakenSeconds = startedAt ? Math.max(0, Math.floor((Date.now() - startedAt) / 1000)) : null;
+
             const submissionData = {
                 exam_id: id,
                 student_data: {
@@ -474,7 +479,8 @@ export default function ExamView() {
                 },
                 answers: answersPayload,
                 violations: violations,
-                browser_info: browserInfo
+                browser_info: browserInfo,
+                time_taken: timeTakenSeconds
             };
 
             const response = await fetch(edgeFunctionUrl, {
@@ -562,7 +568,8 @@ export default function ExamView() {
                         user_agent: navigator.userAgent,
                         student_data: studentData
                     },
-                    created_at: new Date().toISOString()
+                    created_at: new Date().toISOString(),
+                    time_taken: startedAt ? Math.max(0, Math.floor((Date.now() - startedAt) / 1000)) : null
                 };
 
                 pending.push(submissionPayload);
@@ -592,7 +599,8 @@ export default function ExamView() {
             const remaining: any[] = [];
             for (const item of pending) {
                 try {
-                    const { submissionPayload, answersPayload } = item;
+                    const submissionPayload = item.submissionPayload || item;
+                    const answersPayload = item.answersPayload || item.answersPayload;
 
                     // Direct Supabase flush (backend removed)
                     const { data: submission, error } = await supabase.from('submissions').insert(submissionPayload).select().single();

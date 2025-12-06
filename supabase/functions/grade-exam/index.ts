@@ -33,7 +33,7 @@ serve(async (req) => {
         )
 
         // Parse request body
-        const { exam_id, student_data, answers, violations, browser_info } = await req.json()
+        const { exam_id, student_data, answers, violations, browser_info, time_taken } = await req.json()
 
         // Validate required fields
         if (!exam_id || !student_data || !Array.isArray(answers)) {
@@ -182,7 +182,9 @@ serve(async (req) => {
                 max_score: maxScore,
                 percentage,
                 violations: violations || [],
-                browser_info: browser_info || {}
+                browser_info: browser_info || {},
+                student_data: student_data || {},
+                time_taken: typeof time_taken === 'number' ? time_taken : null
             })
             .select()
             .single()
@@ -238,10 +240,10 @@ serve(async (req) => {
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Edge function error:', error)
         return new Response(
-            JSON.stringify({ error: error.message }),
+            JSON.stringify({ error: error?.message || 'Unknown error' }),
             { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
     }
