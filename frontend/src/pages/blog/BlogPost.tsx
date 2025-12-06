@@ -14,6 +14,7 @@ interface BlogPostContent {
   category: string;
   content: string;
   keywords: string[];
+  image: string;
 }
 
 const blogPosts: { [key: string]: BlogPostContent } = {
@@ -26,6 +27,7 @@ const blogPosts: { [key: string]: BlogPostContent } = {
     date: '2024-12-06',
     readTime: 8,
     category: 'Anti-Cheating',
+    image: 'https://images.unsplash.com/photo-1633356122544-f134ef2944f0?w=1200&h=600&fit=crop&q=80',
     keywords: ['online exam security', 'prevent cheating', 'academic integrity', 'proctoring'],
     content: `
       <h2>The Real Problem: How Prevalent is Cheating in Online Exams?</h2>
@@ -97,6 +99,7 @@ const blogPosts: { [key: string]: BlogPostContent } = {
     date: '2024-12-05',
     readTime: 7,
     category: 'Productivity',
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=600&fit=crop&q=80',
     keywords: ['essay grading', 'auto grading', 'AI grading', 'save time'],
     content: `
       <h2>The Time Drain: How Much Do Teachers Actually Spend Grading?</h2>
@@ -183,6 +186,7 @@ const blogPosts: { [key: string]: BlogPostContent } = {
     date: '2024-12-04',
     readTime: 9,
     category: 'Research',
+    image: 'https://images.unsplash.com/photo-1516321318423-f06f70d504f0?w=1200&h=600&fit=crop&q=80',
     keywords: ['online vs traditional', 'effectiveness', 'tutoring research', 'online learning'],
     content: `
       <h2>The Assumption: Online Learning is Inferior</h2>
@@ -279,6 +283,7 @@ const blogPosts: { [key: string]: BlogPostContent } = {
     date: '2024-12-03',
     readTime: 10,
     category: 'Student Engagement',
+    image: 'https://images.unsplash.com/photo-1552308995-5658abf46a67?w=1200&h=600&fit=crop&q=80',
     keywords: ['dropout rates', 'student engagement', 'completion rates', 'online learning'],
     content: `
       <h2>The Crisis: How Many Students Actually Finish?</h2>
@@ -426,54 +431,65 @@ export function BlogPost() {
       </Helmet>
 
       <article className="min-h-screen bg-white dark:bg-gray-900">
-        {/* Hero */}
-        <div className="bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 text-white py-12 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto">
-            <button
-              onClick={() => navigate('/blog')}
-              className="flex items-center gap-2 text-indigo-100 hover:text-white mb-6 transition"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Blog
-            </button>
+        {/* Hero with Image */}
+        <div className="relative h-96 md:h-[500px] bg-gradient-to-br from-indigo-600 to-purple-600 overflow-hidden">
+          {/* Featured Image */}
+          <img
+            src={post.image}
+            alt={post.title}
+            className="w-full h-full object-cover"
+          />
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
 
-            <div className="flex items-center gap-3 mb-4">
-              <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-sm font-semibold">
-                {post.category}
-              </span>
-              <span className="text-indigo-100">{post.readTime} min read</span>
-            </div>
+          {/* Content */}
+          <div className="absolute inset-0 flex flex-col justify-end p-8 sm:p-12 lg:p-16">
+            <div className="max-w-3xl">
+              <button
+                onClick={() => navigate('/blog')}
+                className="flex items-center gap-2 text-white/80 hover:text-white mb-6 transition"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Blog
+              </button>
 
-            <h1 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">{post.title}</h1>
-
-            <div className="flex flex-wrap gap-6 text-indigo-100">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                {new Date(post.date).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+              <div className="inline-flex items-center gap-3 mb-4">
+                <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-sm font-bold text-white">
+                  {post.category}
+                </span>
+                <span className="text-white/80 text-sm">{post.readTime} min read</span>
               </div>
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                {post.author}
+
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight max-w-3xl">
+                {post.title}
+              </h1>
+
+              <div className="flex flex-wrap gap-6 text-white/90">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  {new Date(post.date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </div>
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  {post.author}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="prose dark:prose-invert max-w-none">
-            <div
-              dangerouslySetInnerHTML={{ __html: post.content }}
-              className="text-gray-700 dark:text-gray-300 leading-relaxed space-y-4 mb-12"
-            />
+        {/* Article Content */}
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="prose dark:prose-invert max-w-none prose-headings:font-black prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed prose-p:text-lg">
+            <div dangerouslySetInnerHTML={{ __html: post.content }} />
           </div>
 
-          {/* Share & Bookmark */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-8 mb-12">
+          {/* Share Section */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-8 mt-12">
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => {
@@ -496,19 +512,19 @@ export function BlogPost() {
           </div>
 
           {/* CTA Box */}
-          <div className="bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 border-l-4 border-indigo-600 rounded-lg p-8 mb-12">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+          <div className="bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 border-l-4 border-indigo-600 rounded-xl p-8 my-12">
+            <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-3">
               Ready to Apply These Strategies?
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 mb-6">
-              Durrah makes it easy to implement these best practices. Create your first exam and see the difference anti-cheating, auto-grading, and analytics make.
+            <p className="text-gray-700 dark:text-gray-300 mb-6 text-lg">
+              Durrah makes it easy to implement these best practices. Create your first exam in 2 minutes and see the difference anti-cheating, auto-grading, and real-time analytics make.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <a
                 href="https://tutors.durrahsystem.tech/register"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-lg font-bold hover:shadow-lg transition-all"
+                className="inline-flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl font-bold hover:shadow-lg transition-all"
               >
                 Try Durrah Free <ArrowRight className="w-4 h-4" />
               </a>
@@ -516,7 +532,7 @@ export function BlogPost() {
                 href="https://tutors.durrahsystem.tech/demo"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-indigo-600 rounded-lg font-bold hover:bg-indigo-50 dark:hover:bg-gray-700 transition-all"
+                className="inline-flex items-center justify-center gap-2 px-6 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-indigo-600 rounded-xl font-bold hover:bg-indigo-50 dark:hover:bg-gray-700 transition-all"
               >
                 Watch Demo
               </a>
@@ -524,25 +540,25 @@ export function BlogPost() {
           </div>
 
           {/* Newsletter Signup */}
-          <div className="bg-white dark:bg-gray-800 border-2 border-indigo-200 dark:border-indigo-900/30 rounded-xl p-8">
+          <div className="bg-white dark:bg-gray-800 border-2 border-indigo-200 dark:border-indigo-900/30 rounded-2xl p-8 mb-12">
             <div className="flex items-start gap-4">
-              <div className="text-3xl">📧</div>
+              <div className="text-4xl">📧</div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2">
                   Get More Tips Like This
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Join 5,000+ tutors getting weekly strategies, real data, and exclusive features.
+                <p className="text-gray-600 dark:text-gray-400 mb-4 text-lg">
+                  Join 5,000+ tutors getting weekly strategies, real data, and exclusive features. No spam, just actionable insights.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="email"
                     placeholder="your@email.com"
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+                    className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-600 focus:border-transparent font-medium"
                   />
                   <button
                     onClick={() => toast.success('Thanks for subscribing!')}
-                    className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-lg font-bold hover:shadow-lg transition-all whitespace-nowrap"
+                    className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-lg font-bold hover:shadow-lg transition-all whitespace-nowrap"
                   >
                     Subscribe
                   </button>
@@ -552,34 +568,37 @@ export function BlogPost() {
           </div>
         </div>
 
-        {/* Footer CTA */}
-        <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white py-16 px-4 sm:px-6 lg:px-8 mt-16">
+        {/* Footer CTA - Matches Landing Page */}
+        <section className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white py-24 px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-4xl font-black mb-4">Transform Your Tutoring Today</h2>
-            <p className="text-lg text-indigo-100 mb-8">
-              10,000+ tutors are already saving 10+ hours every week with Durrah.
+            <h2 className="text-4xl md:text-5xl font-black mb-6">Transform Your Tutoring Today</h2>
+            <p className="text-xl text-indigo-100 mb-12">
+              10,000+ tutors are already saving 10+ hours every week with Durrah. Join them and never spend hours grading or worrying about cheating again.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href="https://tutors.durrahsystem.tech/register"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-indigo-600 rounded-xl font-bold text-lg hover:shadow-xl hover:scale-105 transition-all"
+                className="group relative inline-flex items-center justify-center gap-2 px-10 py-5 bg-white text-indigo-600 rounded-2xl font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all"
               >
-                Start Free Trial <ArrowRight className="w-5 h-5" />
+                <span className="relative z-10 flex items-center gap-2">
+                  Start Free Trial
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </span>
               </a>
               <a
                 href="https://tutors.durrahsystem.tech/"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white text-white rounded-xl font-bold text-lg hover:bg-white/10 transition-all"
+                className="inline-flex items-center justify-center gap-2 px-10 py-5 border-2 border-white text-white rounded-2xl font-bold text-lg hover:bg-white/10 transition-all"
               >
                 Learn More
               </a>
             </div>
-            <p className="text-indigo-100 text-sm mt-6">No credit card required • 7 days free</p>
+            <p className="text-indigo-100 text-sm mt-8">✨ No credit card required • 7 days free</p>
           </div>
-        </div>
+        </section>
       </article>
     </>
   );
