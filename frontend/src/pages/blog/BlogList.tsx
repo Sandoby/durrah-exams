@@ -49,7 +49,7 @@ const blogPosts: BlogPost[] = [
     date: '2024-12-04',
     readTime: 9,
     category: 'Research',
-    image: 'https://images.unsplash.com/photo-1516321318423-f06f70d504f0?w=800&h=400&fit=crop&q=80'
+    image: 'https://images.unsplash.com/photo-1588702547919-26089e690ecc?w=800&h=400&fit=crop&q=80'
   },
   {
     id: '4',
@@ -60,7 +60,7 @@ const blogPosts: BlogPost[] = [
     date: '2024-12-03',
     readTime: 10,
     category: 'Student Engagement',
-    image: 'https://images.unsplash.com/photo-1552308995-5658abf46a67?w=800&h=400&fit=crop&q=80'
+    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=400&fit=crop&q=80'
   }
 ];
 
