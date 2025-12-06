@@ -463,7 +463,7 @@ export default function ExamView() {
             }
 
             // Call the Edge Function for server-side grading
-            const edgeFunctionUrl = `${supabaseUrl}/functions/v1/dynamic-worker`;
+            const edgeFunctionUrl = `${supabaseUrl}/functions/v1/grade-exam`;
 
             const submissionData = {
                 exam_id: id,
