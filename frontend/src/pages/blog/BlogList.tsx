@@ -144,11 +144,12 @@ export function BlogList() {
             >
               <div className="relative rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-3xl transition-all duration-300 hover:-translate-y-2">
                 {/* Featured Image */}
-                <div className="relative h-96 bg-gradient-to-br from-indigo-500 to-purple-600 overflow-hidden">
+                <div className="relative h-96 overflow-hidden bg-gray-300 dark:bg-gray-600">
                   <img
                     src={featuredPost.image}
                     alt={featuredPost.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="eager"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                   <div className="absolute top-6 right-6 bg-yellow-400 text-gray-900 px-6 py-3 rounded-full font-black text-sm shadow-lg">
@@ -235,13 +236,14 @@ export function BlogList() {
                     className="group bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 hover:-translate-y-2"
                   >
                     {/* Image */}
-                    <div className="relative h-48 bg-gradient-to-br from-indigo-500 to-purple-600 overflow-hidden">
+                    <div className="relative h-48 overflow-hidden bg-gray-200 dark:bg-gray-700">
                       <img
                         src={post.image}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        loading="lazy"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     </div>
 
                     {/* Content */}
