@@ -15,9 +15,12 @@ interface SubmissionData {
     student_email: string;
     score: number;
     total_points: number;
+    max_score?: number;
+    percentage?: number;
     submitted_at: string;
+    created_at?: string;
     time_taken: number;
-    answers: any;
+    answers?: any;
 }
 
 interface QuestionStats {
@@ -163,7 +166,7 @@ export function ExamAnalyticsDashboard() {
                     s.score || 0,
                     s.max_score || s.total_points || 0,
                     s.percentage ? `${s.percentage.toFixed(2)}%` : `${(((s.score || 0) / (s.max_score || 1)) * 100).toFixed(2)}%`,
-                    new Date(s.submitted_at || s.created_at).toLocaleString()
+                    new Date(s.submitted_at || s.created_at || new Date()).toLocaleString()
                 ]);
 
                 const csv = [headers, ...rows].map(r => r.map(cell => `"${cell}"`).join(',')).join('\n');
@@ -379,7 +382,7 @@ export function ExamAnalyticsDashboard() {
                                                 {percentage.toFixed(2)}%
                                             </td>
                                             <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                                                {new Date(s.submitted_at || s.created_at).toLocaleString()}
+                                                {new Date(s.submitted_at || s.created_at || new Date()).toLocaleString()}
                                             </td>
                                             <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">N/A</td>
                                         </tr>
