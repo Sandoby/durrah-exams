@@ -20,6 +20,7 @@ export const supabase = supabaseInstance || (supabaseInstance = createClient(sup
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
+        flowType: 'pkce', // Use PKCE flow for better security and session persistence
     },
 }));
 

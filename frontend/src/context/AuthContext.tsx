@@ -59,13 +59,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const timestamp = localStorage.getItem('session_timestamp');
             
             if (cached && user && timestamp) {
-                // Session valid for 30 days
-                const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-                if (parseInt(timestamp) > thirtyDaysAgo) {
+                // Session valid for 60 days (extended from 30)
+                const sixtyDaysAgo = Date.now() - (60 * 24 * 60 * 60 * 1000);
+                if (parseInt(timestamp) > sixtyDaysAgo) {
                     return {
                         session: JSON.parse(cached),
                         user: JSON.parse(user)
                     };
+                } else {
+                    // Clean up expired cache
+                    localStorage.removeItem('cached_session');
+                    localStorage.removeItem('cached_user');
+                    localStorage.removeItem('session_timestamp');
                 }
             }
         } catch (error) {
@@ -188,9 +193,45 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setLoading(false);
         });
 
+        // Periodically refresh session to keep it alive (every 30 minutes)
+        const refreshInterval = setInterval(async () => {
+            try {
+                const { data: { session: currentSession } } = await supabase.auth.getSession();
+                if (currentSession) {
+                    const { data, error } = await supabase.auth.refreshSession();
+                    if (!error && data.session) {
+                        cacheSession(data.session, data.session.user);
+                    }
+                }
+            } catch (error) {
+                console.error('Session refresh failed:', error);
+            }
+        }, 30 * 60 * 1000); // 30 minutes
+
+        // Refresh session when user returns to the tab
+        const handleVisibilityChange = async () => {
+            if (document.visibilityState === 'visible') {
+                try {
+                    const { data: { session: currentSession } } = await supabase.auth.getSession();
+                    if (currentSession) {
+                        const { data, error } = await supabase.auth.refreshSession();
+                        if (!error && data.session) {
+                            cacheSession(data.session, data.session.user);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Session refresh on visibility change failed:', error);
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
         return () => {
             isMounted = false;
             clearTimeout(loadingTimeout);
+            clearInterval(refreshInterval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
             subscription.unsubscribe();
         };
     }, []);
