@@ -164,7 +164,7 @@ export function ExamAnalyticsDashboard() {
                 const rows = submissions.map((s) => {
                     const maxScore = s.max_score || s.total_points || 1;
                     const percentage = s.percentage ? `${s.percentage.toFixed(2)}%` : `${(((s.score || 0) / maxScore) * 100).toFixed(2)}%`;
-                    const dynamicFields = studentFields.map((f: string) => s.student_data?.[f] ?? s[f as keyof typeof s] ?? '');
+                    const dynamicFields = studentFields.map((f: string) => resolveFieldValue(s, f));
                     return [
                         ...dynamicFields,
                         s.score || 0,
@@ -219,6 +219,12 @@ export function ExamAnalyticsDashboard() {
     const studentFields = (exam?.required_fields || []).length
         ? exam.required_fields || []
         : ['name'];
+
+    const resolveFieldValue = (s: SubmissionData, field: string) => {
+        if (field === 'name') return s.student_data?.name || s.student_name || '-';
+        if (field === 'email') return s.student_data?.email || s.student_email || '-';
+        return s.student_data?.[field] ?? (s as any)[field] ?? '-';
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -328,7 +334,6 @@ export function ExamAnalyticsDashboard() {
                                     <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Question</th>
                                     <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Correct</th>
                                     <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Incorrect</th>
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Avg Time</th>
                                     <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Success Rate</th>
                                 </tr>
                             </thead>
@@ -341,7 +346,6 @@ export function ExamAnalyticsDashboard() {
                                             <td className="py-3 px-4 text-sm text-gray-900 dark:text-white truncate max-w-md">{q.question_text}</td>
                                             <td className="py-3 px-4 text-sm text-green-600 font-medium">{q.correct_count}</td>
                                             <td className="py-3 px-4 text-sm text-red-600 font-medium">{q.incorrect_count}</td>
-                                            <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">{q.average_time}s</td>
                                             <td className="py-3 px-4 text-sm font-medium text-indigo-600">{successRate}%</td>
                                         </tr>
                                     );
@@ -376,7 +380,7 @@ export function ExamAnalyticsDashboard() {
                                         <tr key={s.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                             {studentFields.map((field: string) => (
                                                 <td key={field} className="py-3 px-4 text-sm text-gray-900 dark:text-white">
-                                                    {s.student_data?.[field] ?? s[field as keyof typeof s] ?? '-'}
+                                                    {resolveFieldValue(s, field)}
                                                 </td>
                                             ))}
                                             <td className="py-3 px-4 text-sm font-medium text-gray-900 dark:text-white">{s.score || 0}/{maxScore}</td>
