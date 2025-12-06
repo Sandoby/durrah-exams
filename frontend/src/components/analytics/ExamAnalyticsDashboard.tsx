@@ -56,23 +56,34 @@ export function ExamAnalyticsDashboard() {
             if (examError) throw examError;
             setExam(examData);
 
-            // Fetch submissions
+            // Fetch submissions with created_at instead of submitted_at
             const { data: submissionsData, error: submissionsError } = await supabase
                 .from('submissions')
                 .select('*')
                 .eq('exam_id', examId)
-                .order('submitted_at', { ascending: false });
+                .order('created_at', { ascending: false });
 
             if (submissionsError) throw submissionsError;
-            setSubmissions(submissionsData || []);
+
+            // Transform submissions to match expected format
+            const transformedSubmissions = (submissionsData || []).map(sub => ({
+                ...sub,
+                submitted_at: sub.created_at,
+                total_points: sub.max_score,
+                time_taken: 0 // Not stored in schema
+            }));
+
+            setSubmissions(transformedSubmissions);
 
             // Calculate score distribution
             if (submissionsData && submissionsData.length > 0) {
                 const distribution = Array(11).fill(0);
                 submissionsData.forEach(sub => {
-                    const percentage = (sub.score / sub.total_points) * 100;
-                    const bucket = Math.floor(percentage / 10);
-                    distribution[Math.min(bucket, 10)]++;
+                    if (sub.max_score && sub.max_score > 0) {
+                        const percentage = (sub.score / sub.max_score) * 100;
+                        const bucket = Math.floor(percentage / 10);
+                        distribution[Math.min(bucket, 10)]++;
+                    }
                 });
 
                 setScoreDistribution(
@@ -83,38 +94,52 @@ export function ExamAnalyticsDashboard() {
                 );
             }
 
-            // Get questions from exam data (they're stored as JSONB in the exam)
-            const questionsData = examData?.questions || [];
+            // Fetch questions from questions table
+            const { data: questionsData, error: questionsError } = await supabase
+                .from('questions')
+                .select('*')
+                .eq('exam_id', examId)
+                .order('created_at', { ascending: true });
 
+            if (questionsError) {
+                console.error('Error fetching questions:', questionsError);
+            }
+
+            // Fetch all submission answers for this exam
             if (questionsData && questionsData.length > 0 && submissionsData && submissionsData.length > 0) {
-                const stats = questionsData.map((q: any, index: number) => {
+                const submissionIds = submissionsData.map(s => s.id);
+
+                const { data: answersData, error: answersError } = await supabase
+                    .from('submission_answers')
+                    .select('*')
+                    .in('submission_id', submissionIds);
+
+                if (answersError) {
+                    console.error('Error fetching answers:', answersError);
+                }
+
+                // Calculate stats for each question
+                const stats = questionsData.map(q => {
                     let correctCount = 0;
                     let incorrectCount = 0;
-                    let totalTime = 0;
-                    let timeCount = 0;
 
-                    const questionKey = q.id || `q${index}`;
-
-                    submissionsData.forEach((sub: any) => {
-                        const answer = sub.answers?.[questionKey];
-                        if (answer) {
-                            if (answer.is_correct || answer.isCorrect) {
-                                correctCount++;
-                            } else {
-                                incorrectCount++;
+                    if (answersData) {
+                        answersData.forEach(answer => {
+                            if (answer.question_id === q.id) {
+                                if (answer.is_correct) {
+                                    correctCount++;
+                                } else {
+                                    incorrectCount++;
+                                }
                             }
-                            if (answer.time_spent || answer.timeSpent) {
-                                totalTime += (answer.time_spent || answer.timeSpent);
-                                timeCount++;
-                            }
-                        }
-                    });
+                        });
+                    }
 
                     return {
-                        question_text: q.question || q.question_text || `Question ${index + 1}`,
+                        question_text: q.question_text || `Question`,
                         correct_count: correctCount,
                         incorrect_count: incorrectCount,
-                        average_time: timeCount > 0 ? Math.round(totalTime / timeCount) : 0
+                        average_time: 0 // Time not tracked in current schema
                     };
                 });
 
@@ -131,14 +156,14 @@ export function ExamAnalyticsDashboard() {
     const exportResults = async (format: 'csv' | 'pdf') => {
         try {
             if (format === 'csv') {
-                const headers = ['Student Name', 'Email', 'Score', 'Percentage', 'Submitted At', 'Time Taken'];
+                const headers = ['Student Name', 'Email', 'Score', 'Max Score', 'Percentage', 'Submitted At'];
                 const rows = submissions.map(s => [
                     s.student_name,
                     s.student_email,
-                    `${s.score}/${s.total_points}`,
-                    `${((s.score / s.total_points) * 100).toFixed(2)}%`,
-                    new Date(s.submitted_at).toLocaleString(),
-                    `${s.time_taken} min`
+                    s.score || 0,
+                    s.max_score || s.total_points || 0,
+                    s.percentage ? `${s.percentage.toFixed(2)}%` : `${(((s.score || 0) / (s.max_score || 1)) * 100).toFixed(2)}%`,
+                    new Date(s.submitted_at || s.created_at).toLocaleString()
                 ]);
 
                 const csv = [headers, ...rows].map(r => r.map(cell => `"${cell}"`).join(',')).join('\n');
@@ -170,8 +195,18 @@ export function ExamAnalyticsDashboard() {
     }
 
     const avgScore = submissions.length > 0
-        ? (submissions.reduce((sum, s) => sum + (s.score / s.total_points), 0) / submissions.length * 100).toFixed(2)
+        ? (submissions.reduce((sum, s) => {
+            const maxScore = s.max_score || s.total_points || 1;
+            return sum + ((s.score || 0) / maxScore);
+        }, 0) / submissions.length * 100).toFixed(2)
         : 0;
+
+    const highestScore = submissions.length > 0
+        ? Math.max(...submissions.map(s => {
+            const maxScore = s.max_score || s.total_points || 1;
+            return ((s.score || 0) / maxScore) * 100;
+        })).toFixed(2)
+        : 'N/A';
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -226,10 +261,7 @@ export function ExamAnalyticsDashboard() {
                             <div>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">Highest Score</p>
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                                    {submissions.length > 0
-                                        ? `${Math.max(...submissions.map(s => (s.score / s.total_points) * 100)).toFixed(2)}%`
-                                        : 'N/A'
-                                    }
+                                    {highestScore}%
                                 </p>
                             </div>
                             <CheckCircle className="h-8 w-8 text-blue-600" />
@@ -335,20 +367,24 @@ export function ExamAnalyticsDashboard() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {submissions.map((s) => (
-                                    <tr key={s.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                        <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">{s.student_name}</td>
-                                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">{s.student_email}</td>
-                                        <td className="py-3 px-4 text-sm font-medium text-gray-900 dark:text-white">{s.score}/{s.total_points}</td>
-                                        <td className="py-3 px-4 text-sm font-medium text-indigo-600">
-                                            {((s.score / s.total_points) * 100).toFixed(2)}%
-                                        </td>
-                                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                                            {new Date(s.submitted_at).toLocaleString()}
-                                        </td>
-                                        <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">{s.time_taken} min</td>
-                                    </tr>
-                                ))}
+                                {submissions.map((s) => {
+                                    const maxScore = s.max_score || s.total_points || 1;
+                                    const percentage = s.percentage || ((s.score || 0) / maxScore) * 100;
+                                    return (
+                                        <tr key={s.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                            <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">{s.student_name}</td>
+                                            <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">{s.student_email}</td>
+                                            <td className="py-3 px-4 text-sm font-medium text-gray-900 dark:text-white">{s.score || 0}/{maxScore}</td>
+                                            <td className="py-3 px-4 text-sm font-medium text-indigo-600">
+                                                {percentage.toFixed(2)}%
+                                            </td>
+                                            <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
+                                                {new Date(s.submitted_at || s.created_at).toLocaleString()}
+                                            </td>
+                                            <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">N/A</td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
