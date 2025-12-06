@@ -32,29 +32,46 @@ export default function Dashboard() {
     const [runTour, setRunTour] = useState(false);
     const [tourSteps] = useState<Step[]>([
         {
+            target: 'body',
+            content: t('dashboard.tour.welcome', 'Welcome to Durrah for Tutors! Let\'s learn how to use your dashboard.'),
+            placement: 'center',
+            disableBeacon: true,
+        },
+        {
+            target: '[data-tour="question-bank"]',
+            content: t('dashboard.tour.questionBank', 'Start by managing your question bank - create and organize reusable questions here'),
+            disableBeacon: true,
+        },
+        {
             target: '[data-tour="create-exam"]',
             content: t('dashboard.tour.createExam', 'Click here to create a new exam with custom questions and settings'),
             disableBeacon: true,
         },
         {
             target: '[data-tour="exam-card"]',
-            content: t('dashboard.tour.examCard', 'Each card shows your exam details. Click to view submissions and results'),
+            content: t('dashboard.tour.examCard', 'Once you create exams, they\'ll appear here. Each card shows your exam details'),
+            placement: 'top',
         },
         {
             target: '[data-tour="copy-link"]',
-            content: t('dashboard.tour.copyLink', 'Copy the exam link to share with your students'),
+            content: t('dashboard.tour.copyLink', 'Share this link with your students to take the exam'),
+            placement: 'top',
         },
         {
             target: '[data-tour="results"]',
-            content: t('dashboard.tour.results', 'View all student submissions and export results to Excel'),
-        },
-        {
-            target: '[data-tour="question-bank"]',
-            content: t('dashboard.tour.questionBank', 'Manage your question bank and reuse questions across exams'),
+            content: t('dashboard.tour.results', 'View all student submissions and download results'),
+            placement: 'top',
         },
         {
             target: '[data-tour="settings"]',
-            content: t('dashboard.tour.settings', 'Access your profile settings and subscription management'),
+            content: t('dashboard.tour.settings', 'Access your profile settings and subscription details here'),
+            disableBeacon: true,
+        },
+        {
+            target: 'body',
+            content: t('dashboard.tour.completion', 'You\'re all set! Start creating exams and adding questions. Need help? Visit our support center.'),
+            placement: 'center',
+            disableBeacon: true,
         },
     ]);
 
@@ -69,13 +86,19 @@ export default function Dashboard() {
     const checkFirstVisit = () => {
         const hasSeenTour = localStorage.getItem(`dashboard_tour_${user?.id}`);
         if (!hasSeenTour) {
-            // Delay tour start to ensure DOM is ready
-            setTimeout(() => setRunTour(true), 1000);
+            // Delay tour start to ensure DOM is ready and elements are mounted
+            setTimeout(() => setRunTour(true), 1500);
         }
     };
 
     const handleTourCallback = (data: CallBackProps) => {
-        const { status } = data;
+        const { status, type, step } = data;
+        
+        // Continue tour even if step target is not found
+        if (type === 'tour:start') {
+            console.log('Tour started');
+        }
+        
         if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
             setRunTour(false);
             localStorage.setItem(`dashboard_tour_${user?.id}`, 'true');
@@ -331,6 +354,9 @@ export default function Dashboard() {
                 continuous
                 showProgress
                 showSkipButton
+                disableScrolling
+                scrollToFirstStep
+                scrollOffset={100}
                 callback={handleTourCallback}
                 styles={{
                     options: {
