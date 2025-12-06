@@ -68,37 +68,389 @@ For each template, you can use these variables:
 - `{{ .SiteURL }}` - Your site URL
 - `{{ .Email }}` - User's email
 
-### Example Password Reset Template:
+### Professional Password Reset Template:
 
 ```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Your Password - Durrah for Tutors</title>
   <style>
-    body { font-family: -apple-system, sans-serif; line-height: 1.6; color: #1e293b; margin: 0; padding: 40px 20px; background: #f1f5f9; }
-    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
-    .header { background: linear-gradient(120deg, #0f172a 0%, #1d4ed8 100%); color: white; padding: 40px; text-align: center; }
-    .content { padding: 40px; }
-    .button { display: inline-block; padding: 14px 32px; background: linear-gradient(120deg, #0f172a 0%, #1d4ed8 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; }
-    .footer { padding: 30px; background: #f8fafc; color: #64748b; font-size: 14px; text-align: center; border-top: 1px solid #e2e8f0; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #1e293b;
+      background-color: #f1f5f9;
+    }
+    .email-wrapper {
+      background-color: #f1f5f9;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      background: linear-gradient(120deg, #0f172a 0%, #1d4ed8 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .logo-container {
+      margin-bottom: 20px;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+    .logo img {
+      max-width: 100%;
+      height: auto;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .content p {
+      margin: 16px 0;
+      font-size: 16px;
+      color: #334155;
+    }
+    .security-notice {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 16px;
+      margin: 24px 0;
+      border-radius: 4px;
+    }
+    .security-notice strong {
+      color: #1e40af;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .button-container {
+      text-align: center;
+      margin: 32px 0;
+    }
+    .button {
+      display: inline-block;
+      padding: 16px 40px;
+      background: linear-gradient(120deg, #0f172a 0%, #1d4ed8 100%);
+      color: white !important;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+    }
+    .alternative-link {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 16px;
+      margin: 24px 0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #64748b;
+      word-break: break-all;
+    }
+    .warning-box {
+      background: #fef2f2;
+      border-left: 4px solid #ef4444;
+      padding: 16px;
+      margin: 24px 0;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .footer {
+      text-align: center;
+      padding: 30px;
+      background-color: #f8fafc;
+      color: #64748b;
+      font-size: 14px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .footer-links {
+      margin-top: 16px;
+    }
+    .footer-links a {
+      color: #3b82f6;
+      text-decoration: none;
+      margin: 0 8px;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>Reset Your Password 🔑</h1>
+  <div class="email-wrapper">
+    <div class="container">
+      <div class="header">
+        <div class="logo-container">
+          <div class="logo">
+            <img src="https://durrah-clinic-managment.web.app/logo.jpeg" alt="Durrah for Tutors">
+          </div>
+        </div>
+        <h1>Reset Your Password</h1>
+      </div>
+      
+      <div class="content">
+        <p><strong>Hello,</strong></p>
+        
+        <p>We received a request to reset the password for your <strong>Durrah for Tutors</strong> account associated with {{ .Email }}.</p>
+        
+        <div class="security-notice">
+          <strong>🔒 Security Notice</strong>
+          This is a secure password reset request. Click the button below to set a new password for your account.
+        </div>
+        
+        <div class="button-container">
+          <a href="{{ .ConfirmationURL }}" class="button">Reset My Password</a>
+        </div>
+        
+        <p style="text-align: center; color: #64748b; font-size: 14px;">This link will expire in <strong>1 hour</strong></p>
+        
+        <div class="alternative-link">
+          <strong style="color: #334155;">Link not working?</strong><br>
+          Copy and paste this URL into your browser:<br>
+          {{ .ConfirmationURL }}
+        </div>
+        
+        <div class="warning-box">
+          <strong style="color: #991b1b;">⚠️ Didn't request this?</strong><br>
+          If you didn't request a password reset, please ignore this email or contact our support team if you're concerned about your account security.
+        </div>
+        
+        <p style="font-size: 14px; color: #64748b; margin-top: 32px;">
+          <strong>Why am I receiving this?</strong><br>
+          This email was sent because a password reset was requested for your account. If you didn't make this request, no action is needed.
+        </p>
+      </div>
+      
+      <div class="footer">
+        <p><strong>Durrah for Tutors</strong></p>
+        <p>Building better exam experiences for educators</p>
+        <div class="footer-links">
+          <a href="https://tutors.durrahsystem.tech">Visit Website</a> |
+          <a href="https://tutors.durrahsystem.tech/support">Support</a>
+        </div>
+        <p style="margin-top: 16px;">© 2025 Durrah for Tutors. All rights reserved.</p>
+      </div>
     </div>
-    <div class="content">
-      <p>Hi there,</p>
-      <p>We received a request to reset your password for your Durrah for Tutors account.</p>
-      <p>Click the button below to create a new password:</p>
-      <p style="text-align: center; margin: 30px 0;">
-        <a href="{{ .ConfirmationURL }}" class="button">Reset Password</a>
-      </p>
-      <p style="font-size: 14px; color: #64748b;">If you didn't request this, you can safely ignore this email.</p>
-    </div>
-    <div class="footer">
-      <p>© 2025 Durrah for Tutors. All rights reserved.</p>
+  </div>
+</body>
+</html>
+```
+
+### Professional Email Verification Template:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your Email - Durrah for Tutors</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #1e293b;
+      background-color: #f1f5f9;
+    }
+    .email-wrapper {
+      background-color: #f1f5f9;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      background: linear-gradient(120deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .logo-container {
+      margin-bottom: 20px;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+    .logo img {
+      max-width: 100%;
+      height: auto;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .content p {
+      margin: 16px 0;
+      font-size: 16px;
+      color: #334155;
+    }
+    .welcome-box {
+      background: linear-gradient(120deg, #ecfdf5 0%, #d1fae5 100%);
+      border-left: 4px solid #10b981;
+      padding: 20px;
+      margin: 24px 0;
+      border-radius: 4px;
+    }
+    .welcome-box h3 {
+      margin: 0 0 8px 0;
+      color: #065f46;
+    }
+    .button-container {
+      text-align: center;
+      margin: 32px 0;
+    }
+    .button {
+      display: inline-block;
+      padding: 16px 40px;
+      background: linear-gradient(120deg, #10b981 0%, #059669 100%);
+      color: white !important;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .alternative-link {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 16px;
+      margin: 24px 0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #64748b;
+      word-break: break-all;
+    }
+    .features {
+      margin: 32px 0;
+    }
+    .feature-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .feature-item:last-child {
+      border-bottom: none;
+    }
+    .footer {
+      text-align: center;
+      padding: 30px;
+      background-color: #f8fafc;
+      color: #64748b;
+      font-size: 14px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .footer-links {
+      margin-top: 16px;
+    }
+    .footer-links a {
+      color: #10b981;
+      text-decoration: none;
+      margin: 0 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+    <div class="container">
+      <div class="header">
+        <div class="logo-container">
+          <div class="logo">
+            <img src="https://durrah-clinic-managment.web.app/logo.jpeg" alt="Durrah for Tutors">
+          </div>
+        </div>
+        <h1>Welcome to Durrah for Tutors! 🎉</h1>
+      </div>
+      
+      <div class="content">
+        <p><strong>Hello,</strong></p>
+        
+        <p>Thanks for signing up! We're excited to have you join the <strong>Durrah for Tutors</strong> community.</p>
+        
+        <div class="welcome-box">
+          <h3>✉️ One More Step...</h3>
+          <p style="margin: 0;">Please verify your email address ({{ .Email }}) to activate your account and start creating amazing exams.</p>
+        </div>
+        
+        <div class="button-container">
+          <a href="{{ .ConfirmationURL }}" class="button">Verify My Email</a>
+        </div>
+        
+        <div class="alternative-link">
+          <strong style="color: #334155;">Button not working?</strong><br>
+          Copy and paste this URL into your browser:<br>
+          {{ .ConfirmationURL }}
+        </div>
+        
+        <div class="features">
+          <p><strong>Once verified, you'll be able to:</strong></p>
+          <div class="feature-item">
+            ✅ <strong>Create unlimited exams</strong> with AI-powered question extraction
+          </div>
+          <div class="feature-item">
+            ✅ <strong>Track student performance</strong> with real-time analytics
+          </div>
+          <div class="feature-item">
+            ✅ <strong>Generate QR codes</strong> for easy exam distribution
+          </div>
+          <div class="feature-item">
+            ✅ <strong>Access priority support</strong> from our team
+          </div>
+        </div>
+        
+        <p style="font-size: 14px; color: #64748b; margin-top: 32px;">
+          <strong>Need help?</strong><br>
+          If you have any questions or need assistance, our support team is here to help.
+        </p>
+      </div>
+      
+      <div class="footer">
+        <p><strong>Durrah for Tutors</strong></p>
+        <p>Building better exam experiences for educators</p>
+        <div class="footer-links">
+          <a href="https://tutors.durrahsystem.tech">Visit Website</a> |
+          <a href="https://tutors.durrahsystem.tech/support">Support</a> |
+          <a href="https://tutors.durrahsystem.tech/docs">Documentation</a>
+        </div>
+        <p style="margin-top: 16px;">© 2025 Durrah for Tutors. All rights reserved.</p>
+      </div>
     </div>
   </div>
 </body>
