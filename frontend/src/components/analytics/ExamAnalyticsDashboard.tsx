@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, BarChart3, Users, CheckCircle, Clock } from 'lucide-react';
+import { ArrowLeft, Download, BarChart3, Users, CheckCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import {
@@ -160,21 +160,17 @@ export function ExamAnalyticsDashboard() {
     const exportResults = async (format: 'csv' | 'pdf') => {
         try {
             if (format === 'csv') {
-                const extraHeaders = extraFields.map((f: string) => f.replace(/_/g, ' '));
-                const headers = ['Student Name', 'Email', ...extraHeaders, 'Score', 'Max Score', 'Percentage', 'Submitted At', 'Time Taken'];
+                const headers = [...studentFields.map((f: string) => f.replace(/_/g, ' ')), 'Score', 'Max Score', 'Percentage', 'Submitted At'];
                 const rows = submissions.map((s) => {
                     const maxScore = s.max_score || s.total_points || 1;
                     const percentage = s.percentage ? `${s.percentage.toFixed(2)}%` : `${(((s.score || 0) / maxScore) * 100).toFixed(2)}%`;
-                    const dynamicFields = extraFields.map((f: string) => s.student_data?.[f] ?? '');
+                    const dynamicFields = studentFields.map((f: string) => s.student_data?.[f] ?? s[f as keyof typeof s] ?? '');
                     return [
-                        s.student_name,
-                        s.student_email,
                         ...dynamicFields,
                         s.score || 0,
                         maxScore,
                         percentage,
-                        new Date(s.submitted_at || s.created_at || new Date()).toLocaleString(),
-                        formatDuration(s.time_taken)
+                        new Date(s.submitted_at || s.created_at || new Date()).toLocaleString()
                     ];
                 });
 
@@ -220,16 +216,9 @@ export function ExamAnalyticsDashboard() {
         })).toFixed(2)
         : 'N/A';
 
-    const requiredFields = exam?.required_fields || ['name', 'email'];
-    const extraFields = requiredFields.filter((f: string) => !['name', 'email'].includes(f));
-
-    const formatDuration = (seconds?: number | null) => {
-        if (seconds === undefined || seconds === null) return 'N/A';
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        if (mins === 0) return `${secs}s`;
-        return `${mins}m ${secs.toString().padStart(2, '0')}s`;
-    };
+    const studentFields = (exam?.required_fields || []).length
+        ? exam.required_fields || []
+        : ['name'];
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -258,7 +247,7 @@ export function ExamAnalyticsDashboard() {
                 </div>
 
                 {/* Key Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
                         <div className="flex items-center justify-between">
                             <div>
@@ -288,22 +277,6 @@ export function ExamAnalyticsDashboard() {
                                 </p>
                             </div>
                             <CheckCircle className="h-8 w-8 text-blue-600" />
-                        </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Avg Time</p>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                                    {(() => {
-                                        if (submissions.length === 0) return 'N/A';
-                                        const avgSeconds = Math.round(submissions.reduce((sum, s) => sum + (s.time_taken ?? 0), 0) / submissions.length);
-                                        return formatDuration(avgSeconds);
-                                    })()}
-                                </p>
-                            </div>
-                            <Clock className="h-8 w-8 text-orange-600" />
                         </div>
                     </div>
                 </div>
@@ -385,9 +358,7 @@ export function ExamAnalyticsDashboard() {
                         <table className="w-full">
                             <thead>
                                 <tr className="border-b border-gray-200 dark:border-gray-700">
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Student Name</th>
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Email</th>
-                                    {extraFields.map((field: string) => (
+                                    {studentFields.map((field: string) => (
                                         <th key={field} className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">
                                             {field.replace(/_/g, ' ')}
                                         </th>
@@ -395,7 +366,6 @@ export function ExamAnalyticsDashboard() {
                                     <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Score</th>
                                     <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Percentage</th>
                                     <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Submitted</th>
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Time Taken</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -404,11 +374,9 @@ export function ExamAnalyticsDashboard() {
                                     const percentage = s.percentage || ((s.score || 0) / maxScore) * 100;
                                     return (
                                         <tr key={s.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                            <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">{s.student_name}</td>
-                                            <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">{s.student_email}</td>
-                                            {extraFields.map((field: string) => (
-                                                <td key={field} className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                                                    {s.student_data?.[field] || '-'}
+                                            {studentFields.map((field: string) => (
+                                                <td key={field} className="py-3 px-4 text-sm text-gray-900 dark:text-white">
+                                                    {s.student_data?.[field] ?? s[field as keyof typeof s] ?? '-'}
                                                 </td>
                                             ))}
                                             <td className="py-3 px-4 text-sm font-medium text-gray-900 dark:text-white">{s.score || 0}/{maxScore}</td>
@@ -418,7 +386,6 @@ export function ExamAnalyticsDashboard() {
                                             <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
                                                 {new Date(s.submitted_at || s.created_at || new Date()).toLocaleString()}
                                             </td>
-                                            <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">{formatDuration(s.time_taken)}</td>
                                         </tr>
                                     );
                                 })}
