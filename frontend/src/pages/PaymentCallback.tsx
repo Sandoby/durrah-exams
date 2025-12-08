@@ -21,13 +21,13 @@ export default function PaymentCallback() {
           throw new Error('No order ID provided');
         }
 
-        // Retrieve stored payment metadata
-        const metadata = localStorage.getItem(`kashier_payment_${orderId}`);
+        // Retrieve stored payment metadata with proper error handling
+        const metadata = kashierIntegration.getPaymentMetadata(orderId);
         if (!metadata) {
-          throw new Error('Payment metadata not found');
+          throw new Error('Payment metadata not found or expired. Please try the payment again.');
         }
 
-        const { userId, planId, billingCycle } = JSON.parse(metadata);
+        const { userId, planId, billingCycle } = metadata;
 
         // Verify the order with Kashier API
         const response = await fetch(`https://api.kashier.io/api/v1/orders/${orderId}`, {
@@ -77,7 +77,7 @@ export default function PaymentCallback() {
           }
 
           // Clean up localStorage
-          localStorage.removeItem(`kashier_payment_${orderId}`);
+          kashierIntegration.clearPaymentData(orderId);
 
           setStatus('success');
           setMessage('Payment successful! Your subscription is now active.');

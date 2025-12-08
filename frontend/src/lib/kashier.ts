@@ -36,7 +36,90 @@ export class KashierIntegration {
   }
 
   /**
-   * Load Kashier payment script
+   * Store payment metadata with timeout and uniqueness
+   */
+  private storePaymentMetadata(orderId: string, metadata: any): string {
+    try {
+      const key = `kashier_payment_${orderId}`;
+      const sessionKey = `${key}_session_${Date.now()}`;
+      
+      // Store with timestamp for cache busting
+      const dataToStore = {
+        ...metadata,
+        storedAt: Date.now(),
+        sessionId: sessionKey
+      };
+
+      localStorage.setItem(key, JSON.stringify(dataToStore));
+      localStorage.setItem(sessionKey, JSON.stringify(dataToStore));
+      
+      console.log('✅ Payment metadata stored:', { key, sessionKey });
+      return key;
+    } catch (error) {
+      console.error('❌ Error storing payment metadata:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieve payment metadata with fallback and timeout validation
+   */
+  private retrievePaymentMetadata(orderId: string): any {
+    try {
+      const key = `kashier_payment_${orderId}`;
+      const data = localStorage.getItem(key);
+
+      if (!data) {
+        console.warn('⚠️ No payment metadata found for order:', orderId);
+        return null;
+      }
+
+      const metadata = JSON.parse(data);
+      const storedAt = metadata.storedAt || 0;
+      const now = Date.now();
+      const maxAge = 30 * 60 * 1000; // 30 minutes
+
+      // Check if data is too old
+      if (now - storedAt > maxAge) {
+        console.warn('⚠️ Payment metadata expired, clearing');
+        localStorage.removeItem(key);
+        return null;
+      }
+
+      console.log('✅ Payment metadata retrieved:', metadata);
+      return metadata;
+    } catch (error) {
+      console.error('❌ Error retrieving payment metadata:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Clear payment metadata safely
+   */
+  private clearPaymentMetadata(orderId: string): void {
+    try {
+      const key = `kashier_payment_${orderId}`;
+      
+      // Clear main key
+      localStorage.removeItem(key);
+      
+      // Clear any session-based keys
+      for (let i = 0; i < localStorage.length; i++) {
+        const storageKey = localStorage.key(i);
+        if (storageKey?.startsWith(`${key}_session_`)) {
+          localStorage.removeItem(storageKey);
+        }
+      }
+      
+      console.log('✅ Payment metadata cleared:', key);
+    } catch (error) {
+      console.error('❌ Error clearing payment metadata:', error);
+    }
+  }
+
+  /**
+   * Load Kashier payment script with fallback
    */
   private loadKashierScript(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -47,18 +130,70 @@ export class KashierIntegration {
         return;
       }
 
-      const script = document.createElement('script');
-      script.src = 'https://cdn.kashier.io/kashier.js';
-      script.async = true;
-      script.onload = () => {
-        console.log('✅ Kashier script loaded successfully');
-        resolve();
+      // Check if script is already loading
+      const existingScript = document.querySelector('script[src*="kashier"]');
+      if (existingScript) {
+        console.log('⏳ Kashier script already loading, waiting...');
+        const checkInterval = setInterval(() => {
+          if ((window as any).kashier) {
+            clearInterval(checkInterval);
+            console.log('✅ Kashier loaded from existing script');
+            resolve();
+          }
+        }, 100);
+
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          reject(new Error('Kashier script loading timeout'));
+        }, 10000);
+        return;
+      }
+
+      // Primary CDN
+      const primaryUrl = 'https://cdn.kashier.io/kashier.js';
+      // Fallback CDN (alternative)
+      const fallbackUrl = 'https://checkout.kashier.io/static/kashier.js';
+
+      const loadScript = (url: string, isFallback: boolean = false) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.async = true;
+
+        script.onload = () => {
+          console.log(`✅ Kashier script loaded successfully from ${isFallback ? 'fallback' : 'primary'} CDN`);
+          if ((window as any).kashier) {
+            resolve();
+          } else {
+            console.warn('⚠️ Script loaded but Kashier object not found, retrying...');
+            setTimeout(() => {
+              if ((window as any).kashier) {
+                resolve();
+              } else if (!isFallback) {
+                // Try fallback if primary failed
+                console.log('📡 Trying fallback CDN...');
+                loadScript(fallbackUrl, true);
+              } else {
+                reject(new Error('Kashier object not initialized'));
+              }
+            }, 500);
+          }
+        };
+
+        script.onerror = () => {
+          if (!isFallback) {
+            console.warn(`⚠️ Primary CDN failed, trying fallback: ${fallbackUrl}`);
+            loadScript(fallbackUrl, true);
+          } else {
+            console.error('❌ Both CDN attempts failed');
+            reject(new Error('Failed to load Kashier script from both CDNs'));
+          }
+        };
+
+        document.head.appendChild(script);
       };
-      script.onerror = () => {
-        console.error('❌ Failed to load Kashier script');
-        reject(new Error('Failed to load Kashier script'));
-      };
-      document.head.appendChild(script);
+
+      // Start with primary CDN
+      loadScript(primaryUrl, false);
     });
   }
 
@@ -124,18 +259,20 @@ export class KashierIntegration {
         throw new Error('Failed to create Kashier order');
       }
 
-      // Store payment metadata in localStorage for webhook handling
-      localStorage.setItem(
-        `kashier_payment_${orderId}`,
-        JSON.stringify({
+      // Store payment metadata in localStorage for webhook handling with proper error handling
+      try {
+        this.storePaymentMetadata(orderId, {
           userId,
           planId,
           billingCycle,
           userEmail,
           amount,
           createdAt: new Date().toISOString(),
-        })
-      );
+        });
+      } catch (storageError) {
+        console.warn('⚠️ Failed to store metadata, continuing anyway:', storageError);
+        // Continue even if storage fails, order is already created
+      }
 
       // Redirect to Kashier payment page
       console.log('🔗 Redirecting to Kashier payment page...');
@@ -265,15 +402,16 @@ export class KashierIntegration {
         // Update payment record
         await this.updatePaymentRecord(order_id, 'completed', payload);
 
-        // Retrieve stored payment metadata
-        const metadata = localStorage.getItem(`kashier_payment_${order_id}`);
+        // Retrieve stored payment metadata with proper method
+        const metadata = this.retrievePaymentMetadata(order_id);
         if (metadata) {
-          const { userId, planId, billingCycle } = JSON.parse(metadata);
+          const { userId, planId, billingCycle } = metadata;
 
           // Activate subscription instantly
           await this.updateUserProfile(userId, planId, billingCycle);
 
           // Clean up localStorage
+          this.clearPaymentMetadata(order_id);
           localStorage.removeItem(`kashier_payment_${order_id}`);
         }
 
@@ -290,6 +428,22 @@ export class KashierIntegration {
       console.error('❌ Error handling webhook:', error);
       return false;
     }
+  }
+
+  /**
+   * Public wrapper for retrieving payment metadata
+   * Used by PaymentCallback component
+   */
+  public getPaymentMetadata(orderId: string): any {
+    return this.retrievePaymentMetadata(orderId);
+  }
+
+  /**
+   * Public wrapper for clearing payment metadata
+   * Used by PaymentCallback component
+   */
+  public clearPaymentData(orderId: string): void {
+    return this.clearPaymentMetadata(orderId);
   }
 }
 
