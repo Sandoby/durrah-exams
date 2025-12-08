@@ -14,39 +14,34 @@ export default function PaymentCallback() {
   useEffect(() => {
     const processCallback = async () => {
       try {
-        const orderId = searchParams.get('order_id');
-        const paymentStatus = searchParams.get('status');
+        // Kashier returns orderId or merchantOrderId in callback
+        const orderId = searchParams.get('orderId') || searchParams.get('merchantOrderId');
+        const paymentStatus = searchParams.get('paymentStatus');
+        
+        console.log('Payment callback params:', { orderId, paymentStatus, allParams: Object.fromEntries(searchParams) });
 
         if (!orderId) {
-          throw new Error('No order ID provided');
+          throw new Error('No order ID provided in callback');
         }
 
-        // Retrieve stored payment metadata with proper error handling
+        // Retrieve stored payment metadata
         const metadata = kashierIntegration.getPaymentMetadata(orderId);
         if (!metadata) {
-          throw new Error('Payment metadata not found or expired. Please try the payment again.');
+          throw new Error('Payment session expired. Please contact support if payment was successful.');
         }
 
         const { userId, planId, billingCycle } = metadata;
 
-        // Verify the order with Kashier API
-        const response = await fetch(`https://api.kashier.io/api/v1/orders/${orderId}`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer af01074c-fe16-4daf-a235-c36fea074d52`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to verify payment status');
-        }
-
-        const orderData = await response.json();
-
-        if (orderData.status === 'completed' || orderData.status === 'success' || paymentStatus === 'success') {
+        // Check payment status from Kashier callback params
+        // Kashier returns: paymentStatus=success/failure/pending
+        if (paymentStatus === 'success' || paymentStatus === 'SUCCESS') {
+          console.log('✅ Payment confirmed by Kashier callback');
+          
           // Update payment record
-          await kashierIntegration.updatePaymentRecord(orderId, 'completed', orderData);
+          await kashierIntegration.updatePaymentRecord(orderId, 'completed', {
+            paymentStatus,
+            callbackParams: Object.fromEntries(searchParams)
+          });
 
           // Activate subscription instantly
           await kashierIntegration.updateUserProfile(userId, planId, billingCycle);
@@ -81,20 +76,32 @@ export default function PaymentCallback() {
 
           setStatus('success');
           setMessage('Payment successful! Your subscription is now active.');
-          toast.success('Subscription activated instantly!');
+          toast.success('Subscription activated!');
 
           // Redirect after 2 seconds
           setTimeout(() => {
             navigate('/dashboard');
           }, 2000);
+        } else if (paymentStatus === 'failure' || paymentStatus === 'FAILURE' || paymentStatus === 'failed') {
+          // Payment failed
+          await kashierIntegration.updatePaymentRecord(orderId, 'failed', {
+            paymentStatus,
+            callbackParams: Object.fromEntries(searchParams)
+          });
+          
+          kashierIntegration.clearPaymentData(orderId);
+          localStorage.removeItem('pendingCoupon');
+          
+          throw new Error('Payment was not successful. Please try again.');
         } else {
-          throw new Error(`Payment status: ${orderData.status || paymentStatus}`);
+          // Unknown or pending status
+          throw new Error(`Payment status: ${paymentStatus || 'unknown'}. Please contact support.`);
         }
       } catch (error) {
         console.error('Payment callback error:', error);
         setStatus('error');
         setMessage((error as Error).message || 'Payment verification failed');
-        toast.error('Payment could not be verified');
+        toast.error('Payment verification failed');
 
         // Redirect after 3 seconds
         setTimeout(() => {

@@ -196,57 +196,59 @@ export default function Checkout() {
 
         // Paid flow – use selected payment provider with discounted amount
         setIsProcessing(true);
+        
+        // Store coupon for later redemption after successful payment
+        if (appliedCoupon) {
+            localStorage.setItem('pendingCoupon', JSON.stringify(appliedCoupon));
+        }
+        
         try {
-            let result;
-            
             if (selectedPaymentProvider === 'kashier') {
-                result = await kashierIntegration.pay({
+                // Kashier will redirect to hosted checkout, then callback handles success
+                await kashierIntegration.pay({
                     amount: finalPrice,
                     planId: plan.id,
                     userId: user?.id || '',
                     userEmail: user?.email || '',
                     billingCycle,
                 });
+                // User will be redirected - no code after this runs
             } else {
-                result = await paySkyIntegration.pay({
+                // PaySky opens iframe/lightbox - handle callback
+                const result = await paySkyIntegration.pay({
                     amount: finalPrice,
                     planId: plan.id,
                     userId: user?.id || '',
                     userEmail: user?.email || '',
                     billingCycle,
                 });
-            }
 
-            if (result.success) {
-                // Record coupon usage if a coupon was applied
-                if (appliedCoupon) {
-                    // Insert into coupon_usage table
-                    const { error: usageError } = await supabase
-                        .from('coupon_usage')
-                        .insert({
-                            coupon_id: appliedCoupon.id,
-                            user_id: user?.id
-                        });
+                if (result.success) {
+                    // PaySky payment completed - record coupon and activate
+                    if (appliedCoupon) {
+                        const { error: usageError } = await supabase
+                            .from('coupon_usage')
+                            .insert({
+                                coupon_id: appliedCoupon.id,
+                                user_id: user?.id
+                            });
 
-                    if (usageError) {
-                        console.error('Failed to record coupon usage:', usageError);
+                        if (!usageError) {
+                            await supabase
+                                .from('coupons')
+                                .update({ used_count: appliedCoupon.used_count + 1 })
+                                .eq('id', appliedCoupon.id);
+                        }
+                        
+                        localStorage.removeItem('pendingCoupon');
                     }
 
-                    // Increment the coupon's used_count
-                    const { error: updateError } = await supabase
-                        .from('coupons')
-                        .update({ used_count: appliedCoupon.used_count + 1 })
-                        .eq('id', appliedCoupon.id);
-
-                    if (updateError) {
-                        console.error('Failed to increment coupon usage:', updateError);
-                    }
+                    toast.success('Payment successful!');
+                    navigate('/dashboard');
+                } else {
+                    localStorage.removeItem('pendingCoupon');
+                    toast.error(result.error?.message || 'Payment failed');
                 }
-
-                toast.success('Payment successful!');
-                navigate('/dashboard');
-            } else {
-                toast.error(result.error?.message || 'Payment failed');
             }
         } catch (e) {
             console.error(e);
