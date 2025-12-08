@@ -141,14 +141,20 @@ export default function PaymentCallback() {
 
         {status === 'success' && (
           <div className="text-center">
-            <div className="h-16 w-16 mx-auto mb-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-              <Check className="h-10 w-10 text-green-600 dark:text-green-400" />
+            <div className="relative h-20 w-20 mx-auto mb-6">
+              <div className="absolute inset-0 bg-green-100 dark:bg-green-900/30 rounded-full animate-ping opacity-75"></div>
+              <div className="relative h-20 w-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center shadow-lg">
+                <Check className="h-12 w-12 text-green-600 dark:text-green-400" strokeWidth={3} />
+              </div>
             </div>
-            <h2 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-3">Payment Successful!</h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
-            <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Redirecting to dashboard...</span>
+            <h2 className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">Payment Successful!</h2>
+            <p className="text-lg text-gray-700 dark:text-gray-200 mb-2">{message}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">Thank you for subscribing to Durrah for Tutors</p>
+            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 mb-6">
+              <div className="flex items-center justify-center gap-2 text-indigo-600 dark:text-indigo-400">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span className="font-medium">Redirecting to your dashboard...</span>
+              </div>
             </div>
           </div>
         )}
