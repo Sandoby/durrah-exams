@@ -20,6 +20,7 @@ export class KashierIntegration {
   private apiKey = import.meta.env.VITE_KASHIER_API_KEY || 'af01074c-fe16-4daf-a235-c36fea074d52';
   private baseUrl = 'https://api.kashier.io';
   private isInitialized = false;
+  private scriptLoadPromise: Promise<void> | null = null;
 
   async initialize() {
     if (this.isInitialized) return;
@@ -121,80 +122,95 @@ export class KashierIntegration {
   /**
    * Load Kashier payment script with fallback
    */
-  private loadKashierScript(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      // Check if Kashier is already loaded
-      if ((window as any).kashier) {
-        console.log('✅ Kashier already loaded');
-        resolve();
-        return;
-      }
+  private async loadKashierScript(): Promise<void> {
+    if (typeof window === 'undefined') return;
 
-      // Check if script is already loading
-      const existingScript = document.querySelector('script[src*="kashier"]');
-      if (existingScript) {
-        console.log('⏳ Kashier script already loading, waiting...');
-        const checkInterval = setInterval(() => {
-          if ((window as any).kashier) {
-            clearInterval(checkInterval);
-            console.log('✅ Kashier loaded from existing script');
-            resolve();
-          }
-        }, 100);
+    // Already available
+    if ((window as any).kashier) {
+      console.log('✅ Kashier already loaded');
+      return;
+    }
 
-        setTimeout(() => {
-          clearInterval(checkInterval);
-          reject(new Error('Kashier script loading timeout'));
-        }, 10000);
-        return;
-      }
+    // If a previous load attempt is in-flight, wait for it
+    if (this.scriptLoadPromise) {
+      console.log('⏳ Kashier script load in progress, awaiting existing promise');
+      return this.scriptLoadPromise;
+    }
 
-      // Primary CDN
-      const primaryUrl = 'https://cdn.kashier.io/kashier.js';
-      // Fallback CDN (alternative)
-      const fallbackUrl = 'https://checkout.kashier.io/static/kashier.js';
+    // Clean up any stale Kashier scripts to avoid stuck states
+    document
+      .querySelectorAll('script[data-kashier-script="true"]')
+      .forEach(node => node.remove());
 
-      const loadScript = (url: string, isFallback: boolean = false) => {
+    const primaryUrl = 'https://cdn.kashier.io/kashier.js';
+    const fallbackUrl = 'https://checkout.kashier.io/static/kashier.js';
+    const legacyFallbackUrl = 'https://checkout.kashier.io/js/kashier.js';
+    const altCheckoutUrl = 'https://checkouts.kashier.io/static/kashier.js';
+    const customUrl = import.meta.env.VITE_KASHIER_SCRIPT_URL;
+
+    // Deduplicate URLs while preserving order
+    const candidateUrls = Array.from(
+      new Set([customUrl, primaryUrl, fallbackUrl, legacyFallbackUrl, altCheckoutUrl].filter(Boolean))
+    ) as string[];
+
+    const attemptLoad = (url: string) =>
+      new Promise<void>((resolve, reject) => {
         const script = document.createElement('script');
         script.src = url;
         script.async = true;
+        script.dataset.kashierScript = 'true';
+
+        // Timeout to guard against hanging requests
+        const timeout = window.setTimeout(() => {
+          script.remove();
+          reject(new Error(`Kashier script load timed out for ${url}`));
+        }, 12000);
 
         script.onload = () => {
-          console.log(`✅ Kashier script loaded successfully from ${isFallback ? 'fallback' : 'primary'} CDN`);
+          window.clearTimeout(timeout);
           if ((window as any).kashier) {
+            console.log(`✅ Kashier script loaded successfully from ${url}`);
             resolve();
           } else {
-            console.warn('⚠️ Script loaded but Kashier object not found, retrying...');
-            setTimeout(() => {
-              if ((window as any).kashier) {
-                resolve();
-              } else if (!isFallback) {
-                // Try fallback if primary failed
-                console.log('📡 Trying fallback CDN...');
-                loadScript(fallbackUrl, true);
-              } else {
-                reject(new Error('Kashier object not initialized'));
-              }
-            }, 500);
+            script.remove();
+            reject(new Error(`Kashier script loaded but window.kashier missing for ${url}`));
           }
         };
 
         script.onerror = () => {
-          if (!isFallback) {
-            console.warn(`⚠️ Primary CDN failed, trying fallback: ${fallbackUrl}`);
-            loadScript(fallbackUrl, true);
-          } else {
-            console.error('❌ Both CDN attempts failed');
-            reject(new Error('Failed to load Kashier script from both CDNs'));
-          }
+          window.clearTimeout(timeout);
+          script.remove();
+          reject(new Error(`Failed to load Kashier script from ${url}`));
         };
 
         document.head.appendChild(script);
-      };
+      });
 
-      // Start with primary CDN
-      loadScript(primaryUrl, false);
-    });
+    this.scriptLoadPromise = (async () => {
+      const errors: string[] = [];
+
+      for (const url of candidateUrls) {
+        try {
+          await attemptLoad(url);
+          return;
+        } catch (error) {
+          const message = (error as Error).message;
+          console.warn(`⚠️ Kashier script load failed for ${url}:`, message);
+          errors.push(message);
+        }
+      }
+
+      throw new Error(
+        `Kashier script failed after ${candidateUrls.length} attempt(s). Errors: ${errors.join(' | ')}`
+      );
+    })();
+
+    try {
+      await this.scriptLoadPromise;
+    } finally {
+      // Allow future attempts if this one failed
+      this.scriptLoadPromise = null;
+    }
   }
 
   /**
