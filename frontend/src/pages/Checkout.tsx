@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
 import { paySkyIntegration } from '../lib/paysky';
+import { kashierIntegration } from '../lib/kashier';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 
@@ -16,6 +17,7 @@ export default function Checkout() {
     const { user } = useAuth();
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+    const [selectedPaymentProvider, setSelectedPaymentProvider] = useState<'paysky' | 'kashier'>('paysky');
     const [isProcessing, setIsProcessing] = useState(false);
     const [couponCode, setCouponCode] = useState('');
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
@@ -192,16 +194,28 @@ export default function Checkout() {
             return;
         }
 
-        // Paid flow – use PaySky integration with discounted amount
+        // Paid flow – use selected payment provider with discounted amount
         setIsProcessing(true);
         try {
-            const result = await paySkyIntegration.pay({
-                amount: finalPrice,
-                planId: plan.id,
-                userId: user?.id || '',
-                userEmail: user?.email || '',
-                billingCycle,
-            });
+            let result;
+            
+            if (selectedPaymentProvider === 'kashier') {
+                result = await kashierIntegration.pay({
+                    amount: finalPrice,
+                    planId: plan.id,
+                    userId: user?.id || '',
+                    userEmail: user?.email || '',
+                    billingCycle,
+                });
+            } else {
+                result = await paySkyIntegration.pay({
+                    amount: finalPrice,
+                    planId: plan.id,
+                    userId: user?.id || '',
+                    userEmail: user?.email || '',
+                    billingCycle,
+                });
+            }
 
             if (result.success) {
                 // Record coupon usage if a coupon was applied
@@ -438,6 +452,40 @@ export default function Checkout() {
                                     <div className="flex justify-between font-bold text-lg text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-700 pt-2">
                                         <span>{t('checkout.summary.final')}</span>
                                         <span>{calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0) === 0 ? t('checkout.summary.free') : `EGP ${calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}`}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Payment Provider Selection */}
+                            {selectedPlan && plans.find(p => p.id === selectedPlan)?.price !== 0 && (
+                                <div className="mb-8 max-w-md mx-auto">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                        <CreditCard className="inline h-4 w-4 mr-2" />
+                                        Payment Method
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => setSelectedPaymentProvider('paysky')}
+                                            className={`p-4 rounded-lg border-2 transition-all ${
+                                                selectedPaymentProvider === 'paysky'
+                                                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
+                                                    : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400'
+                                            }`}
+                                        >
+                                            <div className="font-bold text-gray-900 dark:text-white">PaySky</div>
+                                            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Instant Payment</div>
+                                        </button>
+                                        <button
+                                            onClick={() => setSelectedPaymentProvider('kashier')}
+                                            className={`p-4 rounded-lg border-2 transition-all ${
+                                                selectedPaymentProvider === 'kashier'
+                                                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
+                                                    : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400'
+                                            }`}
+                                        >
+                                            <div className="font-bold text-gray-900 dark:text-white">Kashier</div>
+                                            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Secure Checkout</div>
+                                        </button>
                                     </div>
                                 </div>
                             )}
