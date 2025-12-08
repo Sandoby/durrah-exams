@@ -18,22 +18,24 @@ interface PayResult {
 
 export class KashierIntegration {
   private apiKey = import.meta.env.VITE_KASHIER_API_KEY || 'af01074c-fe16-4daf-a235-c36fea074d52';
-  private baseUrl = 'https://api.kashier.io';
+  private merchantId = import.meta.env.VITE_KASHIER_MERCHANT_ID || 'MID-38682-577';
+  private baseUrl = 'https://checkout.kashier.io';
   private isInitialized = false;
-  private scriptLoadPromise: Promise<void> | null = null;
 
   async initialize() {
     if (this.isInitialized) return;
+    this.isInitialized = true;
+    console.log('✅ Kashier integration initialized successfully');
+  }
 
-    try {
-      // Load Kashier SDK if needed
-      await this.loadKashierScript();
-      this.isInitialized = true;
-      console.log('✅ Kashier integration initialized successfully');
-    } catch (error) {
-      console.error('❌ Kashier initialization failed:', error);
-      throw error;
-    }
+  /**
+   * Generate hash for Kashier order (HMAC-SHA256)
+   */
+  private generateOrderHash(orderId: string, amount: number, currency: string = 'EGP'): string {
+    const path = `/?payment=${this.merchantId}.${orderId}.${amount}.${currency}`;
+    const hash = CryptoJS.HmacSHA256(path, this.apiKey).toString();
+    console.log('🔐 Generated order hash for:', { orderId, amount, currency });
+    return hash;
   }
 
   /**
@@ -120,135 +122,7 @@ export class KashierIntegration {
   }
 
   /**
-   * Load Kashier payment script with fallback
-   */
-  private async loadKashierScript(): Promise<void> {
-    if (typeof window === 'undefined') return;
-
-    // Already available
-    if ((window as any).kashier) {
-      console.log('✅ Kashier already loaded');
-      return;
-    }
-
-    // If a previous load attempt is in-flight, wait for it
-    if (this.scriptLoadPromise) {
-      console.log('⏳ Kashier script load in progress, awaiting existing promise');
-      return this.scriptLoadPromise;
-    }
-
-    // Clean up any stale Kashier scripts to avoid stuck states
-    document
-      .querySelectorAll('script[data-kashier-script="true"]')
-      .forEach(node => node.remove());
-
-    const primaryUrl = 'https://cdn.kashier.io/kashier.js';
-    const fallbackUrl = 'https://checkout.kashier.io/static/kashier.js';
-    const legacyFallbackUrl = 'https://checkout.kashier.io/js/kashier.js';
-    const altCheckoutUrl = 'https://checkouts.kashier.io/static/kashier.js';
-    const customUrl = import.meta.env.VITE_KASHIER_SCRIPT_URL;
-
-    // Deduplicate URLs while preserving order
-    const candidateUrls = Array.from(
-      new Set([customUrl, primaryUrl, fallbackUrl, legacyFallbackUrl, altCheckoutUrl].filter(Boolean))
-    ) as string[];
-
-    const attemptLoad = (url: string) =>
-      new Promise<void>((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = url;
-        script.async = true;
-        script.dataset.kashierScript = 'true';
-
-        // Timeout to guard against hanging requests
-        const timeout = window.setTimeout(() => {
-          script.remove();
-          reject(new Error(`Kashier script load timed out for ${url}`));
-        }, 12000);
-
-        script.onload = () => {
-          window.clearTimeout(timeout);
-          if ((window as any).kashier) {
-            console.log(`✅ Kashier script loaded successfully from ${url}`);
-            resolve();
-          } else {
-            script.remove();
-            reject(new Error(`Kashier script loaded but window.kashier missing for ${url}`));
-          }
-        };
-
-        script.onerror = () => {
-          window.clearTimeout(timeout);
-          script.remove();
-          reject(new Error(`Failed to load Kashier script from ${url}`));
-        };
-
-        document.head.appendChild(script);
-      });
-
-    this.scriptLoadPromise = (async () => {
-      const errors: string[] = [];
-
-      for (const url of candidateUrls) {
-        try {
-          await attemptLoad(url);
-          return;
-        } catch (error) {
-          const message = (error as Error).message;
-          console.warn(`⚠️ Kashier script load failed for ${url}:`, message);
-          errors.push(message);
-        }
-      }
-
-      throw new Error(
-        `Kashier script failed after ${candidateUrls.length} attempt(s). Errors: ${errors.join(' | ')}`
-      );
-    })();
-
-    try {
-      await this.scriptLoadPromise;
-    } finally {
-      // Allow future attempts if this one failed
-      this.scriptLoadPromise = null;
-    }
-  }
-
-  /**
-   * Create order on Kashier API
-   */
-  private async createOrder(orderId: string, amount: number, userEmail: string): Promise<any> {
-    try {
-      const response = await fetch(`${this.baseUrl}/api/v1/orders`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          order_id: orderId,
-          amount: amount,
-          currency: 'EGP',
-          customer_email: userEmail,
-          redirect_url: `${window.location.origin}/checkout?payment=complete`,
-          webhook_url: `${window.location.origin}/api/webhook/kashier`,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Kashier API error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('✅ Kashier order created:', data);
-      return data;
-    } catch (error) {
-      console.error('❌ Error creating Kashier order:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Main payment method - create payment intent and redirect
+   * Main payment method - redirect to Kashier hosted checkout
    */
   async pay({
     amount,
@@ -263,19 +137,15 @@ export class KashierIntegration {
       await this.initialize();
 
       // Generate unique order ID
-      const orderId = `DURRAH_${userId}_${Date.now()}`;
+      const orderId = `DURRAH_${userId.slice(0, 8)}_${Date.now()}`;
 
       // Create payment record first
       await this.createPaymentRecord(planId, amount, orderId, userEmail);
 
-      // Create order on Kashier
-      const orderResponse = await this.createOrder(orderId, amount, userEmail);
+      // Generate hash for order
+      const hash = this.generateOrderHash(orderId, amount, 'EGP');
 
-      if (!orderResponse.success || !orderResponse.payment_url) {
-        throw new Error('Failed to create Kashier order');
-      }
-
-      // Store payment metadata in localStorage for webhook handling with proper error handling
+      // Store payment metadata in localStorage for callback handling
       try {
         this.storePaymentMetadata(orderId, {
           userId,
@@ -287,14 +157,35 @@ export class KashierIntegration {
         });
       } catch (storageError) {
         console.warn('⚠️ Failed to store metadata, continuing anyway:', storageError);
-        // Continue even if storage fails, order is already created
       }
 
-      // Redirect to Kashier payment page
-      console.log('🔗 Redirecting to Kashier payment page...');
-      window.location.href = orderResponse.payment_url;
+      // Build Kashier hosted checkout URL
+      const callbackUrl = `${window.location.origin}/payment-callback`;
+      const metadata = encodeURIComponent(JSON.stringify({
+        userId,
+        planId,
+        userEmail,
+      }));
 
-      return { success: true, data: orderResponse };
+      const checkoutUrl = `${this.baseUrl}?` +
+        `merchantId=${this.merchantId}` +
+        `&orderId=${orderId}` +
+        `&amount=${amount}` +
+        `&currency=EGP` +
+        `&hash=${hash}` +
+        `&merchantRedirect=${encodeURIComponent(callbackUrl)}` +
+        `&metaData=${metadata}` +
+        `&display=en` +
+        `&mode=live` +
+        `&failureRedirect=true` +
+        `&redirectMethod=get`;
+
+      console.log('🔗 Redirecting to Kashier hosted checkout...');
+      
+      // Redirect to Kashier hosted payment page
+      window.location.href = checkoutUrl;
+
+      return { success: true, data: { orderId, checkoutUrl } };
     } catch (error: any) {
       console.error('❌ Kashier payment error:', error);
       toast.error('Payment initialization failed: ' + error.message);
