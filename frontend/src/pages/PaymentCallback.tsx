@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Loader2, Check, X } from 'lucide-react';
+import { Loader2, Check, X, AlertCircle, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { kashierIntegration } from '../lib/kashier';
@@ -8,7 +8,7 @@ import { kashierIntegration } from '../lib/kashier';
 export default function PaymentCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'cancelled'>('loading');
   const [message, setMessage] = useState('Processing payment...');
 
   useEffect(() => {
@@ -82,6 +82,21 @@ export default function PaymentCallback() {
           setTimeout(() => {
             navigate('/dashboard');
           }, 2000);
+        } else if (paymentStatus === 'CANCELLED' || paymentStatus === 'cancelled' || paymentStatus === 'CANCELED' || paymentStatus === 'canceled') {
+          // Payment cancelled by user
+          await kashierIntegration.updatePaymentRecord(orderId, 'cancelled', {
+            paymentStatus,
+            callbackParams: Object.fromEntries(searchParams)
+          });
+          
+          kashierIntegration.clearPaymentData(orderId);
+          localStorage.removeItem('pendingCoupon');
+          
+          setStatus('cancelled');
+          setMessage('You cancelled the payment. No charges were made.');
+          
+          // Don't auto-redirect, let user click button
+          return;
         } else if (paymentStatus === 'failure' || paymentStatus === 'FAILURE' || paymentStatus === 'failed') {
           // Payment failed
           await kashierIntegration.updatePaymentRecord(orderId, 'failed', {
@@ -92,10 +107,10 @@ export default function PaymentCallback() {
           kashierIntegration.clearPaymentData(orderId);
           localStorage.removeItem('pendingCoupon');
           
-          throw new Error('Payment was not successful. Please try again.');
+          throw new Error('Payment was declined. Please check your payment details and try again.');
         } else {
           // Unknown or pending status
-          throw new Error(`Payment status: ${paymentStatus || 'unknown'}. Please contact support.`);
+          throw new Error(`Payment status unclear. Please contact support if you were charged.`);
         }
       } catch (error) {
         console.error('Payment callback error:', error);
@@ -103,10 +118,10 @@ export default function PaymentCallback() {
         setMessage((error as Error).message || 'Payment verification failed');
         toast.error('Payment verification failed');
 
-        // Redirect after 3 seconds
+        // Redirect after 5 seconds
         setTimeout(() => {
           navigate('/checkout');
-        }, 3000);
+        }, 5000);
       }
     };
 
@@ -115,35 +130,62 @@ export default function PaymentCallback() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-12 max-w-md w-full text-center">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 sm:p-12 max-w-md w-full">
         {status === 'loading' && (
-          <>
+          <div className="text-center">
             <Loader2 className="h-16 w-16 mx-auto mb-6 text-indigo-600 animate-spin" />
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Processing Payment</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Processing Payment</h2>
             <p className="text-gray-600 dark:text-gray-300">{message}</p>
-          </>
+          </div>
         )}
 
         {status === 'success' && (
-          <>
+          <div className="text-center">
             <div className="h-16 w-16 mx-auto mb-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-              <Check className="h-10 w-10 text-green-600" />
+              <Check className="h-10 w-10 text-green-600 dark:text-green-400" />
             </div>
-            <h2 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">Payment Successful!</h2>
+            <h2 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-3">Payment Successful!</h2>
             <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Redirecting to dashboard...</p>
-          </>
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Redirecting to dashboard...</span>
+            </div>
+          </div>
+        )}
+
+        {status === 'cancelled' && (
+          <div className="text-center">
+            <div className="h-16 w-16 mx-auto mb-6 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
+              <AlertCircle className="h-10 w-10 text-orange-600 dark:text-orange-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Payment Cancelled</h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-8">{message}</p>
+            <button
+              onClick={() => navigate('/checkout')}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              Return to Checkout
+            </button>
+          </div>
         )}
 
         {status === 'error' && (
-          <>
+          <div className="text-center">
             <div className="h-16 w-16 mx-auto mb-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-              <X className="h-10 w-10 text-red-600" />
+              <X className="h-10 w-10 text-red-600 dark:text-red-400" />
             </div>
-            <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Payment Error</h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Redirecting to checkout...</p>
-          </>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Payment Failed</h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-8">{message}</p>
+            <button
+              onClick={() => navigate('/checkout')}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl mb-3"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              Try Again
+            </button>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Auto-redirecting in 5 seconds...</p>
+          </div>
         )}
       </div>
     </div>
