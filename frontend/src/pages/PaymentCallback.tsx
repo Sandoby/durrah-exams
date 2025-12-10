@@ -4,6 +4,7 @@ import { Loader2, Check, X, AlertCircle, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { kashierIntegration } from '../lib/kashier';
+import { pollPaymentStatus } from '../lib/paymentPoller';
 
 export default function PaymentCallback() {
   const [searchParams] = useSearchParams();
@@ -14,11 +15,10 @@ export default function PaymentCallback() {
   useEffect(() => {
     const processCallback = async () => {
       try {
-        // Kashier returns orderId or merchantOrderId in callback
+        // Kashier/PaySky return orderId or merchantOrderId in callback
         const orderId = searchParams.get('orderId') || searchParams.get('merchantOrderId');
-        const paymentStatus = searchParams.get('paymentStatus');
         
-        console.log('Payment callback params:', { orderId, paymentStatus, allParams: Object.fromEntries(searchParams) });
+        console.log('Payment callback received:', { orderId, allParams: Object.fromEntries(searchParams) });
 
         if (!orderId) {
           throw new Error('No order ID provided in callback');
@@ -32,18 +32,18 @@ export default function PaymentCallback() {
 
         const { userId, planId, billingCycle } = metadata;
 
-        // Check payment status from Kashier callback params
-        // Kashier returns: paymentStatus=success/failure/pending
-        if (paymentStatus === 'success' || paymentStatus === 'SUCCESS') {
-          console.log('✅ Payment confirmed by Kashier callback');
-          
-          // Update payment record
-          await kashierIntegration.updatePaymentRecord(orderId, 'completed', {
-            paymentStatus,
-            callbackParams: Object.fromEntries(searchParams)
-          });
+        // ===== POLLING APPROACH: Since providers don't support webhooks =====
+        // Start polling payment status from database
+        // Payment provider will update payment record asynchronously when payment is processed
+        console.log('⏳ Polling payment status...', { orderId });
+        
+        const paymentResult = await pollPaymentStatus(orderId, 30, 2000);
+        console.log('✅ Polling complete:', paymentResult);
 
-          // Activate subscription instantly
+        if (paymentResult.status === 'completed') {
+          console.log('✅ Payment confirmed');
+          
+          // Activate subscription
           await kashierIntegration.updateUserProfile(userId, planId, billingCycle);
 
           // Send success email notification
@@ -112,35 +112,33 @@ export default function PaymentCallback() {
           setTimeout(() => {
             navigate('/dashboard');
           }, 2000);
-        } else if (paymentStatus === 'CANCELLED' || paymentStatus === 'cancelled' || paymentStatus === 'CANCELED' || paymentStatus === 'canceled') {
+        } else if (paymentResult.status === 'cancelled') {
           // Payment cancelled by user
-          await kashierIntegration.updatePaymentRecord(orderId, 'cancelled', {
-            paymentStatus,
-            callbackParams: Object.fromEntries(searchParams)
-          });
-          
           kashierIntegration.clearPaymentData(orderId);
           localStorage.removeItem('pendingCoupon');
           
           setStatus('cancelled');
           setMessage('You cancelled the payment. No charges were made.');
-          
-          // Don't auto-redirect, let user click button
           return;
-        } else if (paymentStatus === 'failure' || paymentStatus === 'FAILURE' || paymentStatus === 'failed') {
+        } else if (paymentResult.status === 'failed') {
           // Payment failed
-          await kashierIntegration.updatePaymentRecord(orderId, 'failed', {
-            paymentStatus,
-            callbackParams: Object.fromEntries(searchParams)
-          });
-          
           kashierIntegration.clearPaymentData(orderId);
           localStorage.removeItem('pendingCoupon');
           
           throw new Error('Payment was declined. Please check your payment details and try again.');
+        } else if (paymentResult.status === 'pending') {
+          // Still pending after max attempts - might succeed later or may have failed
+          // Show user a message to check their email or contact support
+          setStatus('error');
+          setMessage('Payment is being processed. You will receive a confirmation email shortly. If not received within 10 minutes, please contact support.');
+          toast.error('Payment still processing');
+          
+          // Redirect after 8 seconds
+          setTimeout(() => {
+            navigate('/checkout');
+          }, 8000);
         } else {
-          // Unknown or pending status
-          throw new Error(`Payment status unclear. Please contact support if you were charged.`);
+          throw new Error(`Payment status unclear: ${paymentResult.status}`);
         }
       } catch (error) {
         console.error('Payment callback error:', error);

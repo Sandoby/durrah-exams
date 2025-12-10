@@ -14,5 +14,8 @@
     "backup:db": "node scripts/backup-db.js",
     "migrate:db": "node scripts/migrate-db.js",
     "health:check": "node scripts/health-check.js"
+  },
+  "devDependencies": {
+    "supabase": "^2.65.8"
   }
 }
