@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Play, AlertCircle, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
@@ -13,7 +12,6 @@ interface TestPayment {
 }
 
 export default function PaymentTest() {
-  const navigate = useNavigate();
   const [testPayments, setTestPayments] = useState<TestPayment[]>([]);
   const [loading, setLoading] = useState(false);
   const [simulating, setSimulating] = useState<string | null>(null);
@@ -109,39 +107,26 @@ export default function PaymentTest() {
   };
 
   /**
-   * Simulate payment processing
+   * Simulate payment processing - instant redirect
    */
   const simulatePayment = async (payment: TestPayment, finalStatus: 'completed' | 'failed' | 'cancelled') => {
     try {
       setSimulating(payment.orderId);
 
-      // Step 1: Simulate payment processing delay
-      console.log(`⏳ Simulating ${finalStatus} payment for ${payment.orderId}...`);
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Quick processing animation (1 second)
+      console.log(`⏳ Simulating ${finalStatus}...`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Step 2: Call backend edge function to update payment status
-      const { data, error } = await supabase.functions.invoke('update-payment-status', {
-        body: {
-          orderId: payment.orderId,
+      // Update payment record in background
+      supabase
+        .from('payments')
+        .update({
           status: finalStatus,
-          paymentMethod: 'kashier',
-          providerData: {
-            simulated: true,
-            timestamp: new Date().toISOString(),
-            scenario: finalStatus,
-          }
-        }
-      });
+          updated_at: new Date().toISOString(),
+        })
+        .eq('merchant_reference', payment.orderId);
 
-      if (error) {
-        console.error('Error updating payment status:', error);
-        toast.error(`Failed to update payment status: ${error.message}`);
-        return;
-      }
-
-      console.log('✅ Payment status updated:', data);
-
-      // Step 3: Update local state
+      // Update local state
       setTestPayments(prev =>
         prev.map(p =>
           p.orderId === payment.orderId
@@ -150,22 +135,18 @@ export default function PaymentTest() {
         )
       );
 
-      // Step 4: Show success message
+      // Show message
       if (finalStatus === 'completed') {
-        toast.success(`✅ Test payment successful! Check email for confirmation.`);
-        // Redirect to dashboard after 2 seconds
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 2000);
+        toast.success(`✅ Payment successful!`);
       } else if (finalStatus === 'failed') {
-        toast.error('❌ Test payment failed');
+        toast.error('❌ Payment failed');
       } else {
-        toast.success('⚠️ Test payment cancelled');
+        toast.success('⚠️ Payment cancelled');
       }
 
-      console.log(`✅ ${finalStatus.toUpperCase()}: Test payment processed`);
+      console.log(`✅ ${finalStatus.toUpperCase()}`);
     } catch (error) {
-      console.error('Error simulating payment:', error);
+      console.error('Error:', error);
       toast.error('Failed to simulate payment');
     } finally {
       setSimulating(null);
@@ -177,16 +158,16 @@ export default function PaymentTest() {
    */
   const simulateCallbackRedirect = async (payment: TestPayment, finalStatus: 'completed' | 'failed' | 'cancelled') => {
     try {
-      // First update the payment status
+      // Simulate payment first
       await simulatePayment(payment, finalStatus);
 
       // Then redirect to payment callback page
       setTimeout(() => {
         window.location.href = `/payment-callback?orderId=${payment.orderId}&paymentStatus=${finalStatus}`;
-      }, 1000);
+      }, 500);
     } catch (error) {
-      console.error('Error simulating callback:', error);
-      toast.error('Failed to simulate callback');
+      console.error('Error:', error);
+      toast.error('Failed');
     }
   };
 

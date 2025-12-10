@@ -4,7 +4,6 @@ import { Loader2, Check, X, AlertCircle, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { kashierIntegration } from '../lib/kashier';
-import { pollPaymentStatus } from '../lib/paymentPoller';
 
 export default function PaymentCallback() {
   const [searchParams] = useSearchParams();
@@ -13,49 +12,56 @@ export default function PaymentCallback() {
   const [message, setMessage] = useState('Processing payment...');
 
   useEffect(() => {
-    const processCallback = async () => {
+    const processPayment = async () => {
       try {
-        // Kashier/PaySky return orderId or merchantOrderId in callback
+        // Get order ID from URL
         const orderId = searchParams.get('orderId') || searchParams.get('merchantOrderId');
-        
-        console.log('Payment callback received:', { orderId, allParams: Object.fromEntries(searchParams) });
+        const paymentStatus = searchParams.get('paymentStatus');
+
+        console.log('📍 Payment callback:', { orderId, paymentStatus });
 
         if (!orderId) {
-          throw new Error('No order ID provided in callback');
+          throw new Error('No order ID in callback');
         }
 
-        // Retrieve stored payment metadata
+        // Get payment metadata from localStorage
         const metadata = kashierIntegration.getPaymentMetadata(orderId);
         if (!metadata) {
-          throw new Error('Payment session expired. Please contact support if payment was successful.');
+          throw new Error('Payment session expired');
         }
 
         const { userId, planId, billingCycle } = metadata;
 
-        // ===== POLLING APPROACH: Since providers don't support webhooks =====
-        // Start polling payment status from database
-        // Payment provider will update payment record asynchronously when payment is processed
-        console.log('⏳ Polling payment status...', { orderId });
+        // ===== INSTANT DECISION BASED ON URL STATUS =====
+        // Don't query database or call edge functions - just use the callback status
         
-        const paymentResult = await pollPaymentStatus(orderId, 30, 2000);
-        console.log('✅ Polling complete:', paymentResult);
+        if (paymentStatus === 'success' || paymentStatus === 'SUCCESS') {
+          // Success - immediately activate
+          console.log('✅ Payment successful');
 
-        if (paymentResult.status === 'completed') {
-          console.log('✅ Payment confirmed');
-          
-          // Activate subscription
+          // Update database in background (no await)
+          supabase
+            .from('payments')
+            .update({
+              status: 'completed',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('merchant_reference', orderId)
+            .then(() => console.log('DB updated'));
+
+          // Activate subscription instantly
           await kashierIntegration.updateUserProfile(userId, planId, billingCycle);
 
-          // Send success email notification
-          try {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', userId)
-              .single();
+          // Send email in background (no await)
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email, full_name')
+            .eq('id', userId)
+            .single();
 
-            if (profile) {
-              await supabase.functions.invoke('send-payment-email', {
+          if (profile?.email) {
+            supabase.functions
+              .invoke('send-payment-email', {
                 body: {
                   type: 'payment_success',
                   email: profile.email,
@@ -65,95 +71,79 @@ export default function PaymentCallback() {
                     amount: metadata.amount,
                     currency: 'EGP',
                     orderId,
-                    date: new Date().toISOString(),
-                    subscriptionEndDate: profile.subscription_end_date,
-                    dashboardUrl: `${window.location.origin}/dashboard`
-                  }
+                  },
                 }
               });
-            }
-          } catch (emailError) {
-            console.warn('Failed to send email:', emailError);
           }
 
-          // Record coupon usage if applicable
+          // Record coupon usage in background
           const pendingCoupon = localStorage.getItem('pendingCoupon');
           if (pendingCoupon) {
             try {
               const couponData = JSON.parse(pendingCoupon);
-              const { error: usageError } = await supabase
+              supabase
                 .from('coupon_usage')
-                .insert({
-                  coupon_id: couponData.id,
-                  user_id: userId,
+                .insert({ coupon_id: couponData.id, user_id: userId })
+                .then(() => {
+                  supabase
+                    .from('coupons')
+                    .update({ used_count: couponData.used_count + 1 })
+                    .eq('id', couponData.id);
                 });
-
-              if (!usageError) {
-                await supabase
-                  .from('coupons')
-                  .update({ used_count: couponData.used_count + 1 })
-                  .eq('id', couponData.id);
-              }
-
               localStorage.removeItem('pendingCoupon');
             } catch (e) {
-              console.warn('Failed to record coupon usage:', e);
+              console.warn('Coupon error (non-blocking):', e);
             }
           }
 
-          // Clean up localStorage
+          // Clear localStorage
           kashierIntegration.clearPaymentData(orderId);
 
+          // Show success
           setStatus('success');
           setMessage('Payment successful! Your subscription is now active.');
-          toast.success('Subscription activated!');
+          toast.success('✅ Subscription activated!');
 
           // Redirect after 2 seconds
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 2000);
-        } else if (paymentResult.status === 'cancelled') {
-          // Payment cancelled by user
+          setTimeout(() => navigate('/dashboard'), 2000);
+        } else if (paymentStatus?.toUpperCase() === 'CANCELLED') {
+          // Cancelled
+          console.log('⚠️ Payment cancelled');
+
+          supabase
+            .from('payments')
+            .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+            .eq('merchant_reference', orderId);
+
           kashierIntegration.clearPaymentData(orderId);
           localStorage.removeItem('pendingCoupon');
-          
+
           setStatus('cancelled');
           setMessage('You cancelled the payment. No charges were made.');
-          return;
-        } else if (paymentResult.status === 'failed') {
-          // Payment failed
+        } else {
+          // Failed or unknown
+          console.log('❌ Payment failed');
+
+          supabase
+            .from('payments')
+            .update({ status: 'failed', updated_at: new Date().toISOString() })
+            .eq('merchant_reference', orderId);
+
           kashierIntegration.clearPaymentData(orderId);
           localStorage.removeItem('pendingCoupon');
-          
-          throw new Error('Payment was declined. Please check your payment details and try again.');
-        } else if (paymentResult.status === 'pending') {
-          // Still pending after max attempts - might succeed later or may have failed
-          // Show user a message to check their email or contact support
-          setStatus('error');
-          setMessage('Payment is being processed. You will receive a confirmation email shortly. If not received within 10 minutes, please contact support.');
-          toast.error('Payment still processing');
-          
-          // Redirect after 8 seconds
-          setTimeout(() => {
-            navigate('/checkout');
-          }, 8000);
-        } else {
-          throw new Error(`Payment status unclear: ${paymentResult.status}`);
+
+          throw new Error('Payment failed. Please try again.');
         }
       } catch (error) {
-        console.error('Payment callback error:', error);
+        console.error('❌ Callback error:', error);
         setStatus('error');
-        setMessage((error as Error).message || 'Payment verification failed');
+        setMessage((error as Error).message || 'Payment processing failed');
         toast.error('Payment verification failed');
-
-        // Redirect after 5 seconds
-        setTimeout(() => {
-          navigate('/checkout');
-        }, 5000);
+        setTimeout(() => navigate('/checkout'), 5000);
       }
     };
 
-    processCallback();
+    processPayment();
   }, [searchParams, navigate]);
 
   return (
