@@ -1,10 +1,36 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { createHmac } from 'https://deno.land/std@0.170.0/node/crypto.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+// Async HMAC-SHA256 verification
+async function verifyHmacSHA256(message: string, key: string, signature: string): Promise<boolean> {
+  try {
+    const encoder = new TextEncoder()
+    const keyData = encoder.encode(key)
+    const messageData = encoder.encode(message)
+    
+    const importedKey = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { hash: 'SHA-256', name: 'HMAC' },
+      false,
+      ['sign']
+    )
+    
+    const sig = await crypto.subtle.sign('HMAC', importedKey, messageData)
+    const expectedSignature = Array.from(new Uint8Array(sig))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+    
+    return signature === expectedSignature
+  } catch (error) {
+    console.error('HMAC verification error:', error)
+    return false
+  }
 }
 
 serve(async (req) => {
@@ -27,11 +53,9 @@ serve(async (req) => {
 
     if (signature && payskySecretKey) {
       const dataToSign = `${payload.MerchantReference}${payload.Amount}${payload.SystemReference}`
-      const expectedSignature = createHmac('sha256', payskySecretKey)
-        .update(dataToSign)
-        .digest('hex')
+      const isValid = await verifyHmacSHA256(dataToSign, payskySecretKey, signature)
 
-      if (signature !== expectedSignature) {
+      if (!isValid) {
         console.error('Invalid PaySky signature')
         return new Response(
           JSON.stringify({ error: 'Invalid signature' }),
@@ -95,10 +119,10 @@ serve(async (req) => {
       JSON.stringify({ success: true, message: 'Webhook processed' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
-  } catch (error) {
+  } catch (error: any) {
     console.error('Webhook error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error?.message || 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }

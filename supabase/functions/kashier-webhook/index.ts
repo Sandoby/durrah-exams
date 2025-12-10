@@ -1,10 +1,36 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Hmac } from 'https://deno.land/x/hmac@v2.0.1/mod.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+// Async HMAC-SHA256 verification
+async function verifyHmacSHA256(message: string, key: string, signature: string): Promise<boolean> {
+  try {
+    const encoder = new TextEncoder()
+    const keyData = encoder.encode(key)
+    const messageData = encoder.encode(message)
+    
+    const importedKey = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { hash: 'SHA-256', name: 'HMAC' },
+      false,
+      ['sign']
+    )
+    
+    const sig = await crypto.subtle.sign('HMAC', importedKey, messageData)
+    const expectedSignature = Array.from(new Uint8Array(sig))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+    
+    return signature === expectedSignature
+  } catch (error) {
+    console.error('HMAC verification error:', error)
+    return false
+  }
 }
 
 serve(async (req) => {
@@ -28,41 +54,20 @@ serve(async (req) => {
 
     // Verify signature
     if (signature && kashierApiKey) {
-      const {
-        paymentStatus,
-        cardDataToken,
-        maskedCard,
-        merchantOrderId,
-        orderId,
-        cardBrand,
-        orderReference,
-        transactionId,
-        amount,
-        currency
-      } = payload
-
       const queryString = 
-        `&paymentStatus=${paymentStatus}` +
-        `&cardDataToken=${cardDataToken || ''}` +
-        `&maskedCard=${maskedCard || ''}` +
-        `&merchantOrderId=${merchantOrderId}` +
-        `&orderId=${orderId}` +
-        `&cardBrand=${cardBrand || ''}` +
-        `&orderReference=${orderReference}` +
-        `&transactionId=${transactionId}` +
-        `&amount=${amount}` +
-        `&currency=${currency}`
-
-      const finalUrl = queryString.substr(1)
-      const hmac = new Hmac('sha256', kashierApiKey)
-      const expectedSignature = hmac.update(finalUrl).toString()
-
-      if (signature !== expectedSignature) {
-        console.error('Invalid signature')
-        return new Response(
-          JSON.stringify({ error: 'Invalid signature' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        `paymentStatus=${payload.paymentStatus}` +
+        `&merchantOrderId=${payload.merchantOrderId}` +
+        `&amount=${payload.amount}` +
+        `&currency=${payload.currency}`
+      
+      const isValid = await verifyHmacSHA256(queryString, kashierApiKey, signature)
+      
+      if (!isValid) {
+        console.error('Invalid Kashier signature')
+        return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
       }
     }
 
@@ -125,10 +130,10 @@ serve(async (req) => {
       JSON.stringify({ success: true, message: 'Webhook processed' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
-  } catch (error) {
+  } catch (error: any) {
     console.error('Webhook error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error?.message || 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
