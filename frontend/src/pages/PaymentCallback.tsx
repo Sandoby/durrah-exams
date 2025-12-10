@@ -46,6 +46,36 @@ export default function PaymentCallback() {
           // Activate subscription instantly
           await kashierIntegration.updateUserProfile(userId, planId, billingCycle);
 
+          // Send success email notification
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', userId)
+              .single();
+
+            if (profile) {
+              await supabase.functions.invoke('send-payment-email', {
+                body: {
+                  type: 'payment_success',
+                  email: profile.email,
+                  data: {
+                    userName: profile.full_name || profile.email,
+                    plan: planId === 'pro' ? 'Professional' : 'Starter',
+                    amount: metadata.amount,
+                    currency: 'EGP',
+                    orderId,
+                    date: new Date().toISOString(),
+                    subscriptionEndDate: profile.subscription_end_date,
+                    dashboardUrl: `${window.location.origin}/dashboard`
+                  }
+                }
+              });
+            }
+          } catch (emailError) {
+            console.warn('Failed to send email:', emailError);
+          }
+
           // Record coupon usage if applicable
           const pendingCoupon = localStorage.getItem('pendingCoupon');
           if (pendingCoupon) {

@@ -9,6 +9,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import UpdatePassword from './pages/UpdatePassword';
 import Checkout from './pages/Checkout';
 import PaymentCallback from './pages/PaymentCallback';
+import PaymentHistory from './pages/PaymentHistory';
 import RefundPolicy from './pages/RefundPolicy';
 
 import Dashboard from './pages/Dashboard';
@@ -62,6 +63,7 @@ function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/payment-callback" element={<PaymentCallback />} />
+            <Route path="/payment-history" element={<PaymentHistory />} />
             <Route path="/question-bank" element={<QuestionBank />} />
             <Route path="/exam/new" element={<ExamEditor />} />
             <Route path="/exam/:id/edit" element={<ExamEditor />} />
