@@ -6,7 +6,6 @@ import {
     Search, Key, Activity, Zap
 } from 'lucide-react';
 import { Logo } from '../../components/Logo';
-import { DebugWindow } from '../../components/DebugWindow';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
@@ -834,7 +833,6 @@ export default function AgentDashboard() {
                 )}
             </div>
         </div>
-        <DebugWindow />
         </>
     );
 }

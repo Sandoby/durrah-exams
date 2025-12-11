@@ -3,7 +3,6 @@ import { Send, X, MessageCircle, Loader2, User, Check, CheckCheck } from 'lucide
 import { supabase } from '../lib/supabase';
 import { chatService } from '../services/RealtimeChatService';
 import { useAuth } from '../context/AuthContext';
-import { DebugWindow } from './DebugWindow';
 import toast from 'react-hot-toast';
 
 interface ChatMessage {
@@ -93,11 +92,14 @@ function ChatWidget() {
       unsubscribeFromMessages.current = chatService.subscribeToSessionMessages(
         currentSession.id,
         (message) => {
+          console.log('[CHAT] Received real-time message:', message);
           setMessages((prev) => {
             // Avoid duplicates
             if (prev.find((m) => m.id === message.id)) {
+              console.log('[CHAT] Duplicate message ignored:', message.id);
               return prev;
             }
+            console.log('[CHAT] Adding new message to UI:', message.id);
             return [...prev, message];
           });
 
@@ -625,7 +627,6 @@ function ChatWidget() {
           </div>
         </div>
       )}
-      <DebugWindow />
     </>
   );
 }
