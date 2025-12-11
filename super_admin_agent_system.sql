@@ -50,6 +50,14 @@ CREATE TABLE IF NOT EXISTS agent_activity_logs (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Add user_id column if it doesn't exist (for existing tables)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='agent_activity_logs' AND column_name='user_id') THEN
+        ALTER TABLE agent_activity_logs ADD COLUMN user_id UUID;
+    END IF;
+END $$;
+
 CREATE INDEX IF NOT EXISTS idx_agent_activity_agent ON agent_activity_logs(agent_id);
 CREATE INDEX IF NOT EXISTS idx_agent_activity_created ON agent_activity_logs(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_agent_activity_user ON agent_activity_logs(user_id) WHERE user_id IS NOT NULL;
@@ -67,6 +75,14 @@ CREATE TABLE IF NOT EXISTS agent_user_notes (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Add user_id column if it doesn't exist (for existing tables)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='agent_user_notes' AND column_name='user_id') THEN
+        ALTER TABLE agent_user_notes ADD COLUMN user_id UUID NOT NULL;
+    END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_agent_notes_user ON agent_user_notes(user_id);
 CREATE INDEX IF NOT EXISTS idx_agent_notes_agent ON agent_user_notes(agent_id);
@@ -88,6 +104,14 @@ CREATE TABLE IF NOT EXISTS subscription_history (
     reason TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Add user_id column if it doesn't exist (for existing tables)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='subscription_history' AND column_name='user_id') THEN
+        ALTER TABLE subscription_history ADD COLUMN user_id UUID NOT NULL;
+    END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_subscription_history_user ON subscription_history(user_id);
 CREATE INDEX IF NOT EXISTS idx_subscription_history_agent ON subscription_history(changed_by_agent_id) WHERE changed_by_agent_id IS NOT NULL;
