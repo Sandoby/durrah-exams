@@ -33,8 +33,8 @@ WHERE pubname = 'supabase_realtime'
 ORDER BY tablename;
 
 -- Check replica identity is set to FULL
-SELECT schemaname, tablename, replica_identity 
-FROM pg_class 
-JOIN pg_namespace ON pg_class.relnamespace = pg_namespace.oid 
-WHERE relname IN ('chat_messages', 'live_chat_sessions')
-  AND schemaname = 'public';
+SELECT n.nspname as schemaname, c.relname as tablename, c.relreplident as replica_identity 
+FROM pg_class c
+JOIN pg_namespace n ON c.relnamespace = n.oid 
+WHERE c.relname IN ('chat_messages', 'live_chat_sessions')
+  AND n.nspname = 'public';
