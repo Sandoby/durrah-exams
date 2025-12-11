@@ -191,12 +191,37 @@ To prevent similar issues:
 
 ---
 
+## If Message Still Fails to Send
+
+### Exact Steps to Fix:
+
+1. **Run Diagnostic Queries:**
+   - Open `DIAGNOSTIC_QUERIES.sql`
+   - Copy and paste into Supabase SQL Editor
+   - Run it and check if `chat_messages` table exists
+
+2. **If chat_messages is missing:**
+   - Run `FIX_CHAT_MESSAGES_TABLE.sql` - this creates the table with correct schema
+
+3. **If chat_messages exists but still fails:**
+   - Run `FIX_DATABASE_ERRORS.sql` - this fixes all schema issues
+
+4. **Test after fix:**
+   ```sql
+   SELECT * FROM chat_messages LIMIT 1;
+   ```
+   If no error, try sending a message in the app.
+
+---
+
 ## Quick Reference
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| 409 Conflict | Invalid foreign key | Run FIX_DATABASE_ERRORS.sql |
+| 409 Conflict | Invalid foreign key | Run FIX_CHAT_MESSAGES_TABLE.sql |
+| Message send fails | chat_messages table missing | Run FIX_CHAT_MESSAGES_TABLE.sql |
 | updated_at missing | Column doesn't exist | `ALTER TABLE profiles ADD COLUMN updated_at TIMESTAMPTZ;` |
 | sender_id invalid | User doesn't exist | Verify auth.users has the user |
 | session_id invalid | Session doesn't exist | Create session first, then insert message |
+| Not sure what's wrong | Schema is unclear | Run DIAGNOSTIC_QUERIES.sql first |
 
