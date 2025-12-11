@@ -33,26 +33,26 @@ interface ChatSession {
     user_id: string;
     agent_id: string | null;
     status: string;
-    created_at: string;
-    profiles?: {
-        email: string;
-        full_name: string;
-    };
+    started_at?: string;
+    assigned_at?: string | null;
+    ended_at?: string | null;
+    user_email?: string | null;
+    user_name?: string | null;
     support_agents?: {
         name: string;
-    };
+    } | null;
 }
 
 interface AgentActivity {
     id: string;
     agent_id: string;
-    action_type: string;
-    user_id: string | null;
+    action: string;
+    user_id?: string | null;
     details: any;
     created_at: string;
-    support_agents: {
+    support_agents?: {
         name: string;
-    };
+    } | null;
 }
 
 interface SystemStats {
@@ -87,7 +87,7 @@ export default function SuperAdminPanel() {
     // Chat Management
     const [chats, setChats] = useState<ChatSession[]>([]);
     const [chatSearch, setChatSearch] = useState('');
-    const [chatFilter, setChatFilter] = useState<'all' | 'open' | 'closed'>('all');
+    const [chatFilter, setChatFilter] = useState<'all' | 'waiting' | 'active' | 'ended'>('all');
 
     // Activity Logs
     const [activities, setActivities] = useState<AgentActivity[]>([]);
@@ -161,16 +161,21 @@ export default function SuperAdminPanel() {
         let query = supabase
             .from('live_chat_sessions')
             .select(`
-                *,
-                profiles:user_id(email, full_name),
-                support_agents:agent_id(name)
+                id,
+                user_id,
+                user_email,
+                user_name,
+                agent_id,
+                status,
+                started_at,
+                assigned_at,
+                ended_at,
+                support_agents!agent_id(name)
             `)
-            .order('created_at', { ascending: false });
+            .order('started_at', { ascending: false });
 
-        if (chatFilter === 'open') {
-            query = query.eq('status', 'open');
-        } else if (chatFilter === 'closed') {
-            query = query.eq('status', 'closed');
+        if (chatFilter !== 'all') {
+            query = query.eq('status', chatFilter);
         }
 
         const { data, error } = await query;
@@ -180,15 +185,19 @@ export default function SuperAdminPanel() {
             return;
         }
 
-        setChats(data || []);
+        setChats((data as any) || []);
     };
 
     const fetchActivities = async () => {
         const { data, error } = await supabase
             .from('agent_activity_logs')
             .select(`
-                *,
-                support_agents(name)
+                id,
+                agent_id,
+                action,
+                details,
+                created_at,
+                support_agents!agent_id(name)
             `)
             .order('created_at', { ascending: false })
             .limit(100);
@@ -198,7 +207,7 @@ export default function SuperAdminPanel() {
             return;
         }
 
-        setActivities(data || []);
+        setActivities((data as any) || []);
     };
 
     const fetchStats = async () => {
@@ -211,7 +220,7 @@ export default function SuperAdminPanel() {
         ]);
 
         const activeAgents = agentsRes.data?.filter(a => a.is_active).length || 0;
-        const activeChats = chatsRes.data?.filter((c: any) => c.status === 'open').length || 0;
+        const activeChats = chatsRes.data?.filter((c: any) => c.status === 'active').length || 0;
 
         setStats({
             totalAgents: agentsRes.count || 0,
@@ -342,8 +351,8 @@ export default function SuperAdminPanel() {
 
     const filteredChats = chats.filter(chat => {
         if (!chatSearch) return true;
-        const email = chat.profiles?.email?.toLowerCase() || '';
-        const name = chat.profiles?.full_name?.toLowerCase() || '';
+        const email = (chat.user_email || '').toLowerCase();
+        const name = (chat.user_name || '').toLowerCase();
         return email.includes(chatSearch.toLowerCase()) || name.includes(chatSearch.toLowerCase());
     });
 
@@ -626,7 +635,7 @@ export default function SuperAdminPanel() {
                                     />
                                 </div>
                                 <div className="flex space-x-2">
-                                    {(['all', 'open', 'closed'] as const).map((filter) => (
+                                    {(['all', 'waiting', 'active', 'ended'] as const).map((filter) => (
                                         <button
                                             key={filter}
                                             onClick={() => setChatFilter(filter)}
@@ -635,7 +644,7 @@ export default function SuperAdminPanel() {
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                 }`}
                                         >
-                                            {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                                                {filter === 'all' ? 'All' : filter.charAt(0).toUpperCase() + filter.slice(1)}
                                         </button>
                                     ))}
                                 </div>
@@ -649,19 +658,21 @@ export default function SuperAdminPanel() {
                                         <div className="flex-1">
                                             <div className="flex items-center space-x-3 mb-2">
                                                 <h3 className="font-bold text-gray-900">
-                                                    {chat.profiles?.full_name || 'Unknown User'}
+                                                    {chat.user_name || 'Unknown User'}
                                                 </h3>
-                                                <span className={`px-2 py-1 rounded text-xs font-medium ${chat.status === 'open'
+                                                <span className={`px-2 py-1 rounded text-xs font-medium ${chat.status === 'active'
                                                     ? 'bg-green-100 text-green-800'
-                                                    : 'bg-gray-100 text-gray-800'
+                                                    : chat.status === 'ended'
+                                                        ? 'bg-gray-100 text-gray-800'
+                                                        : 'bg-blue-100 text-blue-800'
                                                     }`}>
                                                     {chat.status}
                                                 </span>
                                             </div>
                                             <div className="space-y-1 text-sm text-gray-600">
-                                                <p>📧 {chat.profiles?.email}</p>
+                                                <p>📧 {chat.user_email || 'Unknown email'}</p>
                                                 <p>👤 Assigned to: {chat.support_agents?.name || 'Unassigned'}</p>
-                                                <p>🕒 Started: {new Date(chat.created_at).toLocaleString()}</p>
+                                                <p>🕒 Started: {chat.started_at ? new Date(chat.started_at).toLocaleString() : 'Unknown start'}</p>
                                             </div>
                                         </div>
                                         <button
@@ -695,9 +706,9 @@ export default function SuperAdminPanel() {
                                         <Activity className="h-5 w-5 text-indigo-600 mt-0.5" />
                                         <div className="flex-1">
                                             <div className="flex items-center space-x-2 mb-1">
-                                                <span className="font-medium text-gray-900">{activity.support_agents.name}</span>
+                                                <span className="font-medium text-gray-900">{activity.support_agents?.name || 'Unknown agent'}</span>
                                                 <span className="text-gray-500">•</span>
-                                                <span className="text-sm text-gray-600">{activity.action_type.replace(/_/g, ' ')}</span>
+                                                <span className="text-sm text-gray-600">{activity.action.replace(/_/g, ' ')}</span>
                                             </div>
                                             {activity.details && Object.keys(activity.details).length > 0 && (
                                                 <pre className="text-xs text-gray-500 bg-gray-50 p-2 rounded mt-1 overflow-x-auto">

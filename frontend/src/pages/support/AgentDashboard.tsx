@@ -25,14 +25,9 @@ interface ChatSession {
     id: string;
     user_id: string;
     status: string;
-    created_at: string;
-    profiles: {
-        email: string;
-        full_name: string;
-        subscription_plan: string;
-        subscription_status: string;
-        subscription_end_date: string;
-    };
+    started_at?: string;
+    user_email?: string | null;
+    user_name?: string | null;
 }
 
 interface UserProfile {
@@ -119,10 +114,10 @@ export default function AgentDashboard() {
     }, [isAuthenticated, agent]);
 
     useEffect(() => {
-        if (selectedUser) {
-            fetchUserDetails(selectedUser.id);
+        if (selectedChat?.user_id) {
+            fetchUserDetails(selectedChat.user_id);
         }
-    }, [selectedUser]);
+    }, [selectedChat?.user_id]);
 
     useEffect(() => {
         if (selectedChat) {
@@ -192,17 +187,15 @@ export default function AgentDashboard() {
         const { data, error } = await supabase
             .from('live_chat_sessions')
             .select(`
-                *,
-                profiles:user_id(
-                    email,
-                    full_name,
-                    subscription_plan,
-                    subscription_status,
-                    subscription_end_date
-                )
+                id,
+                user_id,
+                user_email,
+                user_name,
+                status,
+                started_at
             `)
             .eq('agent_id', agent.id)
-            .order('created_at', { ascending: false });
+            .order('started_at', { ascending: false });
 
         if (!error && data) {
             setChats(data);
@@ -418,8 +411,8 @@ export default function AgentDashboard() {
 
     const filteredChats = chats.filter(chat => {
         if (!chatSearch) return true;
-        const email = chat.profiles?.email?.toLowerCase() || '';
-        const name = chat.profiles?.full_name?.toLowerCase() || '';
+        const email = (chat.user_email || '').toLowerCase();
+        const name = (chat.user_name || '').toLowerCase();
         return email.includes(chatSearch.toLowerCase()) || name.includes(chatSearch.toLowerCase());
     });
 
@@ -470,25 +463,26 @@ export default function AgentDashboard() {
                                 key={chat.id}
                                 onClick={() => {
                                     setSelectedChat(chat);
-                                    setSelectedUser(chat.profiles as any);
                                 }}
                                 className={`w-full p-4 text-left border-b hover:bg-gray-50 transition-colors ${selectedChat?.id === chat.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
                                     }`}
                             >
                                 <div className="flex items-start justify-between mb-1">
                                     <h3 className="font-semibold text-gray-900 truncate">
-                                        {chat.profiles?.full_name || 'Unknown'}
+                                        {chat.user_name || 'Unknown'}
                                     </h3>
-                                    <span className={`px-2 py-0.5 rounded text-xs ${chat.status === 'open'
+                                    <span className={`px-2 py-0.5 rounded text-xs ${chat.status === 'active'
                                         ? 'bg-green-100 text-green-800'
-                                        : 'bg-gray-100 text-gray-800'
+                                        : chat.status === 'ended'
+                                            ? 'bg-gray-100 text-gray-800'
+                                            : 'bg-blue-100 text-blue-800'
                                         }`}>
                                         {chat.status}
                                     </span>
                                 </div>
-                                <p className="text-sm text-gray-600 truncate">{chat.profiles?.email}</p>
+                                <p className="text-sm text-gray-600 truncate">{chat.user_email || 'Unknown email'}</p>
                                 <p className="text-xs text-gray-500 mt-1">
-                                    {new Date(chat.created_at).toLocaleString()}
+                                    {chat.started_at ? new Date(chat.started_at).toLocaleString() : 'Unknown start'}
                                 </p>
                             </button>
                         ))}
@@ -508,9 +502,9 @@ export default function AgentDashboard() {
                         <>
                             <div className="bg-white border-b p-4">
                                 <h2 className="font-bold text-lg text-gray-900">
-                                    Chat with {selectedChat.profiles?.full_name}
+                                    Chat with {selectedUser?.full_name || selectedChat.user_name || 'Unknown user'}
                                 </h2>
-                                <p className="text-sm text-gray-600">{selectedChat.profiles?.email}</p>
+                                <p className="text-sm text-gray-600">{selectedUser?.email || selectedChat.user_email || 'Unknown email'}</p>
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-4 space-y-3">
