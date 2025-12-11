@@ -24,6 +24,7 @@ interface Agent {
 interface ChatSession {
     id: string;
     user_id: string;
+    agent_id?: string | null;
     status: string;
     started_at?: string;
     user_email?: string | null;
@@ -184,6 +185,7 @@ export default function AgentDashboard() {
     const fetchChats = async () => {
         if (!agent) return;
 
+        // Fetch both: chats assigned to this agent AND unassigned waiting chats
         const { data, error } = await supabase
             .from('live_chat_sessions')
             .select(`
@@ -191,14 +193,17 @@ export default function AgentDashboard() {
                 user_id,
                 user_email,
                 user_name,
+                agent_id,
                 status,
                 started_at
             `)
-            .eq('agent_id', agent.id)
+            .or(`agent_id.eq.${agent.id},and(agent_id.is.null,status.eq.waiting)`)
             .order('started_at', { ascending: false });
 
         if (!error && data) {
             setChats(data);
+        } else if (error) {
+            console.error('Error fetching chats:', error);
         }
     };
 
@@ -276,23 +281,47 @@ export default function AgentDashboard() {
     };
 
     const fetchMessages = async (chatId: string) => {
-        const { data } = await supabase
-            .from('live_chat_messages')
+        const { data, error } = await supabase
+            .from('chat_messages')
             .select('*')
-            .eq('chat_session_id', chatId)
+            .eq('session_id', chatId)
             .order('created_at', { ascending: true });
 
         if (data) {
             setMessages(data);
+        } else if (error) {
+            console.error('Error fetching messages:', error);
         }
     };
 
     const sendMessage = async () => {
         if (!newMessage.trim() || !selectedChat || !agent) return;
 
-        const { error } = await supabase.from('live_chat_messages').insert({
-            chat_session_id: selectedChat.id,
+        // If chat is unassigned, assign it to this agent first
+        if (!selectedChat.agent_id) {
+            const { error: assignError } = await supabase
+                .from('live_chat_sessions')
+                .update({ 
+                    agent_id: agent.id,
+                    status: 'active',
+                    assigned_at: new Date().toISOString()
+                })
+                .eq('id', selectedChat.id);
+
+            if (assignError) {
+                console.error('Error assigning chat:', assignError);
+            } else {
+                // Update local state
+                setSelectedChat(prev => prev ? { ...prev, agent_id: agent.id, status: 'active' } : null);
+                toast.success('Chat assigned to you');
+            }
+        }
+
+        const { error } = await supabase.from('chat_messages').insert({
+            session_id: selectedChat.id,
             sender_id: agent.id,
+            sender_role: 'agent',
+            sender_name: agent.name,
             message: newMessage,
             is_agent: true
         });
@@ -304,6 +333,7 @@ export default function AgentDashboard() {
 
         setNewMessage('');
         fetchMessages(selectedChat.id);
+        fetchChats(); // Refresh chat list
     };
 
     const addNote = async () => {
@@ -470,6 +500,7 @@ export default function AgentDashboard() {
                                 <div className="flex items-start justify-between mb-1">
                                     <h3 className="font-semibold text-gray-900 truncate">
                                         {chat.user_name || 'Unknown'}
+                                        {!chat.agent_id && <span className="ml-2 text-xs text-orange-600">(New)</span>}
                                     </h3>
                                     <span className={`px-2 py-0.5 rounded text-xs ${chat.status === 'active'
                                         ? 'bg-green-100 text-green-800'

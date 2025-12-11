@@ -1,17 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, X, MessageCircle, Loader2, User, Check, CheckCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { chatService } from '../services/RealtimeChatService';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 interface ChatMessage {
   id: string;
   session_id: string;
-  sender_id: string;
+  sender_id: string | null;
+  is_agent: boolean;
+  sender_role: 'user' | 'agent' | 'admin';
+  sender_name: string;
   message: string;
   created_at: string;
   is_read: boolean;
-  sender_role?: 'user' | 'agent' | 'admin';
 }
 
 interface ChatSession {
@@ -26,8 +29,8 @@ interface ChatSession {
   ended_at: string | null;
   rating: number | null;
   feedback: string | null;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 function ChatWidget() {
@@ -35,58 +38,122 @@ function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [isAgentOnline, setIsAgentOnline] = useState(false);
-  const [isAgentTyping, setIsAgentTyping] = useState(false);
+  const [agentAssigned, setAgentAssigned] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedRating, setSelectedRating] = useState(0);
   const [ratingFeedback, setRatingFeedback] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const channelRef = useRef<any>(null);
-  const typingTimeoutRef = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const unsubscribeFromMessages = useRef<(() => void) | null>(null);
+  const unsubscribeFromSession = useRef<(() => void) | null>(null);
+  const unsubscribeFromStatus = useRef<(() => void) | null>(null);
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Check for active session when user logs in
   useEffect(() => {
     if (user) {
       checkActiveSession();
     }
+
+    return () => {
+      unsubscribeFromMessages.current?.();
+      unsubscribeFromSession.current?.();
+      unsubscribeFromStatus.current?.();
+    };
   }, [user]);
 
+  // Subscribe to online/offline status
+  useEffect(() => {
+    unsubscribeFromStatus.current = chatService.onStatusChange((isOnline) => {
+      setIsOnline(isOnline);
+      if (!isOnline) {
+        toast.error('Connection lost. Messages will be sent when online.');
+      } else {
+        toast.success('Back online!');
+      }
+    });
+
+    return () => unsubscribeFromStatus.current?.();
+  }, []);
+
+  // Open/close handlers
   useEffect(() => {
     if (isOpen && currentSession?.id) {
-      fetchMessages(currentSession.id);
-      subscribeToSession(currentSession.id);
+      // Subscribe to real-time messages
+      unsubscribeFromMessages.current = chatService.subscribeToSessionMessages(
+        currentSession.id,
+        (message) => {
+          setMessages((prev) => {
+            // Avoid duplicates
+            if (prev.find((m) => m.id === message.id)) {
+              return prev;
+            }
+            return [...prev, message];
+          });
+
+          // Update unread count
+          if (message.sender_role === 'agent' && message.sender_id !== user?.id) {
+            setUnreadCount((c) => c + 1);
+          }
+        }
+      );
+
+      // Subscribe to session updates (assignment, status changes)
+      unsubscribeFromSession.current = chatService.subscribeToSession(
+        currentSession.id,
+        (updated) => {
+          setCurrentSession({
+            ...updated,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+          if (updated.agent_id && !agentAssigned) {
+            setAgentAssigned(true);
+            toast.success('An agent has joined the chat!');
+          }
+        }
+      );
+
+      // Load existing messages
+      loadMessages(currentSession.id);
     }
+
+    return () => {
+      unsubscribeFromMessages.current?.();
+      unsubscribeFromSession.current?.();
+    };
   }, [isOpen, currentSession?.id]);
 
   const checkActiveSession = async () => {
     if (!user) return;
 
     try {
-      // First check for active or waiting session
-      const { data: openSession } = await supabase
+      // Look for waiting or active session
+      const { data: openSession, error } = await supabase
         .from('live_chat_sessions')
         .select('*')
         .eq('user_id', user.id)
         .in('status', ['waiting', 'active'])
+        .order('started_at', { ascending: false })
+        .limit(1)
         .single();
 
-      if (openSession) {
+      if (openSession && !error) {
         setCurrentSession(openSession);
-        fetchMessages(openSession.id);
-        subscribeToSession(openSession.id);
-
-        const { count } = await supabase
-          .from('chat_messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('session_id', openSession.id)
-          .neq('sender_id', user.id)
-          .eq('is_read', false);
-
-        setUnreadCount(count || 0);
+        if (openSession.agent_id) {
+          setAgentAssigned(true);
+        }
       } else {
-        // Check for most recent ended session to show rating message
+        // Check for most recent ended session
         const { data: closedSession } = await supabase
           .from('live_chat_sessions')
           .select('*')
@@ -96,79 +163,17 @@ function ChatWidget() {
           .limit(1)
           .single();
 
-        if (closedSession) {
+        if (closedSession && !closedSession.rating) {
           setCurrentSession(closedSession);
-          fetchMessages(closedSession.id);
+          setShowRatingModal(true);
         }
       }
-    } catch (error) {
-      console.log('No active session');
+    } catch (err) {
+      console.error('[CHAT] Error checking session:', err);
     }
   };
 
-  const startNewSession = async () => {
-    if (!user) return null;
-
-    try {
-      // Get user profile for denormalized fields
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('email, full_name')
-        .eq('id', user.id)
-        .single();
-
-      // Check if there's a recently ended session (within 24 hours) - reopen it
-      const { data: recentSession } = await supabase
-        .from('live_chat_sessions')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'ended')
-        .gte('ended_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-        .order('ended_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (recentSession) {
-        // Reopen the recent session
-        const { data, error } = await supabase
-          .from('live_chat_sessions')
-          .update({ status: 'waiting', ended_at: null })
-          .eq('id', recentSession.id)
-          .select()
-          .single();
-
-        if (error) throw error;
-        setCurrentSession(data);
-        fetchMessages(data.id);
-        subscribeToSession(data.id);
-        return data;
-      }
-
-      // Create new session only if no recent session exists
-      const { data, error } = await supabase
-        .from('live_chat_sessions')
-        .insert({
-          user_id: user.id,
-          user_email: profile?.email || user.email || '',
-          user_name: profile?.full_name || 'User',
-          status: 'waiting'
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      setCurrentSession(data);
-      subscribeToSession(data.id);
-      return data;
-    } catch (error) {
-      console.error('Error starting session:', error);
-      toast.error('Failed to start chat');
-      return null;
-    }
-  };
-
-  const fetchMessages = async (sessionId: string) => {
-    setIsLoading(true);
+  const loadMessages = async (sessionId: string) => {
     try {
       const { data, error } = await supabase
         .from('chat_messages')
@@ -177,175 +182,106 @@ function ChatWidget() {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
+
       setMessages(data || []);
-      scrollToBottom();
-    } catch (error) {
-      console.error('Error fetching messages:', error);
+
+      // Mark agent messages as read
+      const unreadMessages = (data || []).filter(
+        (m) => m.is_agent && !m.is_read
+      );
+
+      if (unreadMessages.length > 0) {
+        for (const msg of unreadMessages) {
+          await chatService.markMessageAsRead(msg.id);
+        }
+        setUnreadCount(0);
+      }
+    } catch (err) {
+      console.error('[CHAT] Error loading messages:', err);
+      toast.error('Failed to load messages');
+    }
+  };
+
+  const startNewSession = async () => {
+    if (!user) return;
+
+    try {
+      setIsLoading(true);
+
+      const { data, error } = await supabase
+        .from('live_chat_sessions')
+        .insert({
+          user_id: user.id,
+          user_email: user.email || '',
+          user_name: user.user_metadata?.full_name || 'Guest',
+          status: 'waiting',
+          started_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setCurrentSession(data);
+      setMessages([]);
+      setUnreadCount(0);
+      setAgentAssigned(false);
+      toast.success('Chat started! Waiting for an agent...');
+    } catch (err) {
+      console.error('[CHAT] Error starting session:', err);
+      toast.error('Failed to start chat session');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const subscribeToSession = (sessionId: string) => {
-    const channel = supabase
-      .channel(`session:${sessionId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'live_chat_sessions',
-          filter: `id=eq.${sessionId}`
-        },
-        (payload) => {
-          const updated = payload.new as ChatSession;
-          if (updated.status === 'ended') {
-            // Show rating modal when session is closed
-            setShowRatingModal(true);
-            setCurrentSession(updated);
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages',
-          filter: `session_id=eq.${sessionId}`
-        },
-        (payload) => {
-          const newMsg = payload.new as ChatMessage;
-          setMessages(prev => [...prev, newMsg]);
-          scrollToBottom();
-
-          if (isOpen) {
-            markMessagesAsRead(sessionId);
-          } else {
-            setUnreadCount(prev => prev + 1);
-          }
-
-          if (newMsg.sender_role !== 'user') {
-            setIsAgentTyping(false);
-          }
-        }
-      )
-      .on(
-        'broadcast',
-        { event: 'typing' },
-        (payload) => {
-          if (payload.payload.sender_role === 'agent') {
-            setIsAgentTyping(true);
-
-            if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-            typingTimeoutRef.current = setTimeout(() => {
-              setIsAgentTyping(false);
-            }, 3000);
-          }
-        }
-      )
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          await channel.track({
-            online_at: new Date().toISOString(),
-            role: 'user'
-          });
-        }
-      });
-
-    channelRef.current = channel;
-    
-    // Subscribe to agent presence on a separate channel
-    subscribeToAgentPresence();
-    
-    return channel;
-  };
-
-  const subscribeToAgentPresence = () => {
-    const presenceChannel = supabase
-      .channel('agent-presence')
-      .on('presence', { event: 'sync' }, () => {
-        const state = presenceChannel.presenceState();
-        const agents = Object.values(state).flat().filter((p: any) => p.role === 'agent');
-        setIsAgentOnline(agents.length > 0);
-      })
-      .subscribe();
-  };
-
-  const handleTyping = async () => {
-    if (!currentSession || !channelRef.current) return;
-
-    await channelRef.current.send({
-      type: 'broadcast',
-      event: 'typing',
-      payload: { sender_role: 'user' }
-    });
-  };
-
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !user) return;
 
-    const msgContent = newMessage.trim();
+    if (!newMessage.trim() || !currentSession || isSending) return;
+
+    const messageText = newMessage;
     setNewMessage('');
 
     try {
-      let sessionId = currentSession?.id;
+      setIsSending(true);
 
-      // Check if current session is ended, if so create a new one
-      if (currentSession?.status === 'ended') {
-        // Clear old messages
-        setMessages([]);
-        // Create new session
-        const newSession = await startNewSession();
-        if (!newSession) return;
-        sessionId = newSession.id;
-      } else if (!sessionId) {
-        // No session at all, create new one
-        const newSession = await startNewSession();
-        if (!newSession) return;
-        sessionId = newSession.id;
+      const result = await chatService.sendMessage(
+        currentSession.id,
+        user?.id || null,
+        false, // is_agent
+        'user',
+        user?.user_metadata?.full_name || 'You',
+        messageText
+      );
+
+      if (!result.success) {
+        toast.error(result.error || 'Failed to send message');
+        setNewMessage(messageText); // Restore message
       }
-
-      const { error } = await supabase
-        .from('chat_messages')
-        .insert({
-          session_id: sessionId,
-          sender_id: user.id,
-          sender_role: 'user',
-          sender_name: currentSession?.user_name || 'User',
-          message: msgContent
-        });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast.error('Failed to send message');
-      setNewMessage(msgContent);
+    } catch (err) {
+      console.error('[CHAT] Error sending message:', err);
+      toast.error('Error sending message');
+      setNewMessage(messageText);
+    } finally {
+      setIsSending(false);
     }
   };
 
-  const markMessagesAsRead = async (sessionId: string) => {
-    if (!user) return;
+  const handleRateSession = async () => {
+    if (!currentSession || !selectedRating) return;
 
     try {
-      await supabase
-        .from('chat_messages')
-        .update({ is_read: true })
-        .eq('session_id', sessionId)
-        .neq('sender_id', user.id)
-        .eq('is_read', false);
-
-      setUnreadCount(0);
-    } catch (error) {
-      console.error('Error marking messages as read:', error);
+      await chatService.rateSession(currentSession.id, selectedRating, ratingFeedback);
+      toast.success('Thank you for your feedback!');
+      setShowRatingModal(false);
+      setSelectedRating(0);
+      setRatingFeedback('');
+      setCurrentSession(null);
+    } catch (err) {
+      console.error('[CHAT] Error rating session:', err);
+      toast.error('Failed to submit rating');
     }
-  };
-
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
   };
 
   const getDateLabel = (date: Date): string => {
@@ -385,16 +321,16 @@ function ChatWidget() {
           <div className="p-4 bg-indigo-600 flex justify-between items-center text-white shrink-0">
             <div className="flex items-center gap-2">
               <MessageCircle className="w-5 h-5" />
-              <h3 className="font-semibold">Live Support</h3>
+              <h3 className="font-semibold">Durrah Support</h3>
             </div>
             <div className="flex items-center gap-2">
               <div
                 className={`w-2 h-2 rounded-full ${
-                  isAgentOnline ? 'bg-green-400 animate-pulse' : 'bg-gray-400'
+                  isOnline ? 'bg-green-400 animate-pulse' : 'bg-gray-400'
                 }`}
               ></div>
               <span className="text-xs opacity-90">
-                {isAgentOnline ? 'Agent Online' : 'Offline'}
+                {isOnline ? 'Online' : 'Offline'}
               </span>
             </div>
             <button
@@ -503,7 +439,7 @@ function ChatWidget() {
                     </div>
                   );
                 })}
-                {isAgentTyping && (
+                {false && (
                   <div className="flex justify-start mt-4">
                     <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center mr-2">
                       <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
@@ -539,10 +475,7 @@ function ChatWidget() {
                     <button
                       onClick={async () => {
                         setMessages([]);
-                        const newSession = await startNewSession();
-                        if (newSession) {
-                          subscribeToSession(newSession.id);
-                        }
+                        await startNewSession();
                       }}
                       className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
                     >
@@ -556,17 +489,21 @@ function ChatWidget() {
                       value={newMessage}
                       onChange={(e) => {
                         setNewMessage(e.target.value);
-                        handleTyping();
                       }}
                       placeholder="Type a message..."
-                      className="flex-1 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      disabled={isSending || !isOnline}
+                      className="flex-1 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-50"
                     />
                     <button
                       type="submit"
-                      disabled={!newMessage.trim()}
+                      disabled={!newMessage.trim() || isSending || !isOnline}
                       className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Send className="w-5 h-5" />
+                      {isSending ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Send className="w-5 h-5" />
+                      )}
                     </button>
                   </form>
                 )}
@@ -650,23 +587,9 @@ function ChatWidget() {
               </button>
               <button
                 onClick={async () => {
-                  if (selectedRating > 0) {
-                    try {
-                      await supabase.from('chat_ratings').insert({
-                        session_id: currentSession?.id,
-                        rating: selectedRating,
-                        feedback: ratingFeedback || null,
-                        user_id: user?.id
-                      });
-                      toast.success('Thank you for rating! 🙏');
-                    } catch (error) {
-                      console.error('Error saving rating:', error);
-                      toast.error('Failed to save rating');
-                    }
+                  if (selectedRating > 0 && currentSession) {
+                    await handleRateSession();
                   }
-                  setShowRatingModal(false);
-                  setSelectedRating(0);
-                  setRatingFeedback('');
                 }}
                 disabled={selectedRating === 0}
                 className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
