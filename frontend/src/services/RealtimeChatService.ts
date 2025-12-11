@@ -271,19 +271,8 @@ export class RealtimeChatService {
     this.notifyMessageCallbacks(sessionId, optimisticMessage);
 
     try {
-      // Validate session exists before sending
-      const { data: sessionExists } = await this.supabase
-        .from('live_chat_sessions')
-        .select('id')
-        .eq('id', sessionId)
-        .single();
-
-      if (!sessionExists) {
-        console.error('[CHAT] Session does not exist:', sessionId);
-        return { success: false, error: 'Session not found' };
-      }
-
       // Send to database
+      // RLS policies will handle access control
       const { data, error } = await this.supabase
         .from('chat_messages')
         .insert({
