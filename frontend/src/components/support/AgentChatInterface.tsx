@@ -74,7 +74,7 @@ function AgentChatInterface() {
       if (channel) supabase.removeChannel(channel);
       if (presenceChannelRef.current) supabase.removeChannel(presenceChannelRef.current);
     };
-  }, [activeTab]);
+  }, [activeTab, user?.id]);
 
   useEffect(() => {
     if (selectedSession?.id) {
@@ -136,16 +136,29 @@ function AgentChatInterface() {
 
   const subscribeToSessions = () => {
     const channel = supabase
-      .channel('live_chat_sessions')
+      .channel('live_chat_sessions_' + Date.now())
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'live_chat_sessions'
         },
         () => {
-          fetchSessions();
+          // New session created - immediately refetch to get all updates
+          fetchSessions(activeTab);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'live_chat_sessions'
+        },
+        () => {
+          // Session updated - refetch
+          fetchSessions(activeTab);
         }
       )
       .subscribe();
@@ -267,8 +280,9 @@ function AgentChatInterface() {
         .insert({
           session_id: selectedSession.id,
           sender_id: user?.id,
-          message: msgContent,
-          sender_role: 'agent'
+          sender_role: 'agent',
+          sender_name: 'Support Agent',
+          message: msgContent
         });
 
       if (error) throw error;

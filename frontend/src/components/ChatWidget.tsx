@@ -312,8 +312,9 @@ function ChatWidget() {
         .insert({
           session_id: sessionId,
           sender_id: user.id,
-          message: msgContent,
-          sender_role: 'user'
+          sender_role: 'user',
+          sender_name: currentSession?.user_name || 'User',
+          message: msgContent
         });
 
       if (error) throw error;
