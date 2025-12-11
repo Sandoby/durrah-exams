@@ -17,11 +17,15 @@ interface ChatMessage {
 interface ChatSession {
   id: string;
   user_id: string;
+  user_email: string;
+  user_name: string;
   agent_id: string | null;
-  is_active: boolean;
-  is_ended: boolean;
+  status: 'waiting' | 'active' | 'ended';
   started_at: string;
+  assigned_at: string | null;
   ended_at: string | null;
+  rating: number | null;
+  feedback: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -60,12 +64,12 @@ function ChatWidget() {
     if (!user) return;
 
     try {
-      // First check for open session
+      // First check for active or waiting session
       const { data: openSession } = await supabase
         .from('live_chat_sessions')
         .select('*')
         .eq('user_id', user.id)
-        .eq('status', 'open')
+        .in('status', ['waiting', 'active'])
         .single();
 
       if (openSession) {
@@ -82,12 +86,12 @@ function ChatWidget() {
 
         setUnreadCount(count || 0);
       } else {
-        // Check for most recent closed session to show rating message
+        // Check for most recent ended session to show rating message
         const { data: closedSession } = await supabase
           .from('live_chat_sessions')
           .select('*')
           .eq('user_id', user.id)
-          .eq('is_ended', true)
+          .eq('status', 'ended')
           .order('ended_at', { ascending: false })
           .limit(1)
           .single();
@@ -106,12 +110,19 @@ function ChatWidget() {
     if (!user) return null;
 
     try {
+      // Get user profile for denormalized fields
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', user.id)
+        .single();
+
       // Check if there's a recently ended session (within 24 hours) - reopen it
       const { data: recentSession } = await supabase
         .from('live_chat_sessions')
         .select('*')
         .eq('user_id', user.id)
-        .eq('is_ended', true)
+        .eq('status', 'ended')
         .gte('ended_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
         .order('ended_at', { ascending: false })
         .limit(1)
@@ -121,7 +132,7 @@ function ChatWidget() {
         // Reopen the recent session
         const { data, error } = await supabase
           .from('live_chat_sessions')
-          .update({ is_ended: false, ended_at: null })
+          .update({ status: 'waiting', ended_at: null })
           .eq('id', recentSession.id)
           .select()
           .single();
@@ -138,7 +149,9 @@ function ChatWidget() {
         .from('live_chat_sessions')
         .insert({
           user_id: user.id,
-          is_ended: false
+          user_email: profile?.email || user.email || '',
+          user_name: profile?.full_name || 'User',
+          status: 'waiting'
         })
         .select()
         .single();
@@ -186,7 +199,7 @@ function ChatWidget() {
         },
         (payload) => {
           const updated = payload.new as ChatSession;
-          if (updated.is_ended) {
+          if (updated.status === 'ended') {
             // Show rating modal when session is closed
             setShowRatingModal(true);
             setCurrentSession(updated);
@@ -279,8 +292,8 @@ function ChatWidget() {
     try {
       let sessionId = currentSession?.id;
 
-      // Check if current session is closed, if so create a new one
-      if (currentSession?.is_ended === true) {
+      // Check if current session is ended, if so create a new one
+      if (currentSession?.status === 'ended') {
         // Clear old messages
         setMessages([]);
         // Create new session
@@ -502,7 +515,7 @@ function ChatWidget() {
                   </div>
                 )}
                 {/* Rating Button - Show when session is ended */}
-                {currentSession?.is_ended && (
+                {currentSession?.status === 'ended' && (
                   <div className="flex justify-center my-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button
                       onClick={() => setShowRatingModal(true)}
@@ -517,7 +530,7 @@ function ChatWidget() {
               </div>
 
               <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shrink-0">
-                {currentSession?.is_ended === true ? (
+                {currentSession?.status === 'ended' ? (
                   <div className="text-center">
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                       This chat session has been closed.

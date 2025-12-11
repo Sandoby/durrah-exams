@@ -17,17 +17,17 @@ interface ChatMessage {
 interface ChatSession {
   id: string;
   user_id: string;
+  user_email: string;
+  user_name: string;
   agent_id: string | null;
-  is_active: boolean;
-  is_ended: boolean;
+  status: 'waiting' | 'active' | 'ended';
   started_at: string;
+  assigned_at: string | null;
   ended_at: string | null;
+  rating: number | null;
+  feedback: string | null;
   created_at: string;
   updated_at: string;
-  profiles?: {
-    full_name: string;
-    email: string;
-  };
 }
 
 function AgentChatInterface() {
@@ -92,24 +92,18 @@ function AgentChatInterface() {
     try {
       let query = supabase
         .from('live_chat_sessions')
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            email
-          )
-        `);
+        .select('*');
 
       // Filter based on tab
       if (tab === 'new') {
-        // New: not ended, no agent assigned
-        query = query.eq('is_ended', false).is('agent_id', null);
+        // New: waiting status, no agent assigned
+        query = query.eq('status', 'waiting').is('agent_id', null);
       } else if (tab === 'current') {
-        // Current: not ended, agent assigned to this agent
-        query = query.eq('is_ended', false).eq('agent_id', user?.id);
+        // Current: active or waiting, agent assigned to this agent
+        query = query.in('status', ['waiting', 'active']).eq('agent_id', user?.id);
       } else if (tab === 'closed') {
         // Closed: ended sessions
-        query = query.eq('is_ended', true);
+        query = query.eq('status', 'ended');
       }
 
       const { data, error } = await query.order('updated_at', { ascending: false });
@@ -230,7 +224,11 @@ function AgentChatInterface() {
     try {
       const { data, error } = await supabase
         .from('live_chat_sessions')
-        .update({ agent_id: user?.id })
+        .update({ 
+          agent_id: user?.id,
+          status: 'active',
+          assigned_at: new Date().toISOString()
+        })
         .eq('id', sessionId)
         .select()
         .single();
@@ -292,7 +290,7 @@ function AgentChatInterface() {
       const { error } = await supabase
         .from('live_chat_sessions')
         .update({ 
-          is_ended: true,
+          status: 'ended',
           ended_at: new Date().toISOString()
         })
         .eq('id', sessionId);
@@ -391,14 +389,14 @@ function AgentChatInterface() {
               >
                 <div className="flex items-start justify-between mb-1">
                   <span className="font-medium text-gray-900 dark:text-white">
-                    {session.profiles?.full_name || 'Guest User'}
+                    {session.user_name || 'Guest User'}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {formatTime(session.updated_at)}
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-300 truncate">
-                  {session.profiles?.email || 'No email'}
+                  {session.user_email || 'No email'}
                 </p>
               </button>
             ))
@@ -412,8 +410,9 @@ function AgentChatInterface() {
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-white">
-                  {selectedSession.profiles?.full_name || 'Guest User'}
+                  {selectedSession.user_name || 'Guest User'}
                 </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{selectedSession.user_email}</p>
                 <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                   <div
                     className={`w-2 h-2 rounded-full ${
