@@ -3,6 +3,7 @@ import { Send, X, MessageCircle, Loader2, User, Check, CheckCheck } from 'lucide
 import { supabase } from '../lib/supabase';
 import { chatService } from '../services/RealtimeChatService';
 import { useAuth } from '../context/AuthContext';
+import { DebugWindow } from './DebugWindow';
 import toast from 'react-hot-toast';
 
 interface ChatMessage {
@@ -600,6 +601,7 @@ function ChatWidget() {
           </div>
         </div>
       )}
+      <DebugWindow />
     </>
   );
 }

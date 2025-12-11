@@ -6,6 +6,7 @@ import {
     Search, Key, Activity, Zap
 } from 'lucide-react';
 import { Logo } from '../../components/Logo';
+import { DebugWindow } from '../../components/DebugWindow';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
@@ -297,8 +298,16 @@ export default function AgentDashboard() {
     const sendMessage = async () => {
         if (!newMessage.trim() || !selectedChat || !agent) return;
 
+        console.log('[AGENT] Sending message:', {
+            chatId: selectedChat.id,
+            agentId: agent.id,
+            agentName: agent.name,
+            message: newMessage.substring(0, 50),
+        });
+
         // If chat is unassigned, assign it to this agent first
         if (!selectedChat.agent_id) {
+            console.log('[AGENT] Chat is unassigned, assigning to agent...');
             const { error: assignError } = await supabase
                 .from('live_chat_sessions')
                 .update({ 
@@ -309,14 +318,16 @@ export default function AgentDashboard() {
                 .eq('id', selectedChat.id);
 
             if (assignError) {
-                console.error('Error assigning chat:', assignError);
+                console.error('[AGENT] Error assigning chat:', assignError);
             } else {
+                console.log('[AGENT] Chat assigned successfully');
                 // Update local state
                 setSelectedChat(prev => prev ? { ...prev, agent_id: agent.id, status: 'active' } : null);
                 toast.success('Chat assigned to you');
             }
         }
 
+        console.log('[AGENT] Inserting message into database...');
         const { error } = await supabase.from('chat_messages').insert({
             session_id: selectedChat.id,
             sender_id: agent.id,
@@ -327,6 +338,7 @@ export default function AgentDashboard() {
         });
 
         if (error) {
+            console.error('[AGENT] Message send error:', error);
             toast.error('Failed to send message');
             return;
         }
@@ -447,6 +459,7 @@ export default function AgentDashboard() {
     });
 
     return (
+        <>
         <div className="min-h-screen bg-gray-50 flex flex-col">
             {/* Header */}
             <div className="bg-white shadow-sm border-b">
@@ -809,5 +822,7 @@ export default function AgentDashboard() {
                 )}
             </div>
         </div>
+        <DebugWindow />
+        </>
     );
 }

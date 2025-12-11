@@ -1,4 +1,5 @@
 import { createClient, RealtimeChannel } from '@supabase/supabase-js';
+import { DebugLogger } from '../components/DebugWindow';
 
 /**
  * Professional Real-time Chat Service
@@ -271,6 +272,15 @@ export class RealtimeChatService {
     this.notifyMessageCallbacks(sessionId, optimisticMessage);
 
     try {
+      const debugLogger = DebugLogger.getInstance();
+      debugLogger.addLog('info', `[SEND] Inserting message to session ${sessionId}`, {
+        sessionId,
+        senderId,
+        isAgent,
+        senderRole,
+        senderName,
+      });
+
       // Send to database
       // RLS policies will handle access control
       const { data, error } = await this.supabase
@@ -288,9 +298,15 @@ export class RealtimeChatService {
         .single();
 
       if (error) {
+        const debugLogger = DebugLogger.getInstance();
+        debugLogger.addLog('error', `[CHAT] Error sending message: ${error.message}`, error);
         console.error('[CHAT] Error sending message:', error);
         return { success: false, error: error.message };
       }
+
+      debugLogger.addLog('success', `[SEND] Message sent successfully to ${sessionId}`, {
+        messageId: data.id,
+      });
 
       // Real message from DB will arrive via realtime subscription
       // So we don't need to manually notify again
