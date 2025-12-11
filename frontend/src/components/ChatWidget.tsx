@@ -204,17 +204,31 @@ function ChatWidget() {
   };
 
   const startNewSession = async () => {
-    if (!user) return;
-
     try {
       setIsLoading(true);
+
+      // If user is not authenticated, sign them in anonymously
+      let authUser = user;
+      if (!authUser) {
+        console.log('[CHAT] No user found, signing in anonymously...');
+        const { data: anonData, error: anonError } = await supabase.auth.signInAnonymously();
+        
+        if (anonError || !anonData.user) {
+          console.error('[CHAT] Anonymous sign-in error:', anonError);
+          toast.error('Failed to start chat session');
+          return;
+        }
+        
+        authUser = anonData.user;
+        console.log('[CHAT] Anonymous user created:', authUser.id);
+      }
 
       const { data, error } = await supabase
         .from('live_chat_sessions')
         .insert({
-          user_id: user.id,
-          user_email: user.email || '',
-          user_name: user.user_metadata?.full_name || 'Guest',
+          user_id: authUser.id,
+          user_email: authUser.email || 'guest@chat.com',
+          user_name: authUser.user_metadata?.full_name || 'Guest',
           status: 'waiting',
           started_at: new Date().toISOString(),
         })
@@ -247,12 +261,22 @@ function ChatWidget() {
     try {
       setIsSending(true);
 
+      // Get current authenticated user (could be anonymous)
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      
+      if (!authUser) {
+        console.error('[CHAT] No authenticated user found');
+        toast.error('Please refresh and try again');
+        setNewMessage(messageText);
+        return;
+      }
+
       const result = await chatService.sendMessage(
         currentSession.id,
-        user?.id || null,
+        authUser.id,
         false, // is_agent
         'user',
-        user?.user_metadata?.full_name || 'You',
+        authUser.user_metadata?.full_name || user?.user_metadata?.full_name || 'You',
         messageText
       );
 
