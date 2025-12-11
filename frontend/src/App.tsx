@@ -18,9 +18,11 @@ import ExamEditor from './pages/ExamEditor';
 import ExamView from './pages/ExamView';
 import Settings from './pages/Settings';
 import AdminPanel from './pages/AdminPanel';
+import SuperAdminPanel from './pages/SuperAdminPanel';
 import QuestionBank from './pages/QuestionBank';
 import AgentLogin from './pages/AgentLogin';
 import SupportDashboard from './pages/support/SupportDashboard';
+import AgentDashboard from './pages/support/AgentDashboard';
 import { BlogList } from './pages/blog/BlogList';
 import { BlogPost } from './pages/blog/BlogPost';
 import { SubmissionSync } from './components/SubmissionSync';
@@ -72,6 +74,8 @@ function App() {
             <Route path="/exam/:id" element={<ExamView />} />
             <Route path="/exam/:examId/analytics" element={<ExamAnalyticsDashboard />} />
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/super-admin" element={<SuperAdminPanel />} />
+            <Route path="/agent" element={<AgentDashboard />} />
             <Route path="/agent-login" element={<AgentLogin />} />
             <Route path="/support" element={<SupportDashboard />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />

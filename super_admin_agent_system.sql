@@ -133,6 +133,26 @@ CREATE TABLE IF NOT EXISTS canned_responses (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Add missing columns if they don't exist (for existing tables)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='canned_responses' AND column_name='category') THEN
+        ALTER TABLE canned_responses ADD COLUMN category TEXT DEFAULT 'general';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='canned_responses' AND column_name='shortcut') THEN
+        ALTER TABLE canned_responses ADD COLUMN shortcut TEXT UNIQUE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='canned_responses' AND column_name='is_active') THEN
+        ALTER TABLE canned_responses ADD COLUMN is_active BOOLEAN DEFAULT true;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='canned_responses' AND column_name='usage_count') THEN
+        ALTER TABLE canned_responses ADD COLUMN usage_count INTEGER DEFAULT 0;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='canned_responses' AND column_name='created_by_agent_id') THEN
+        ALTER TABLE canned_responses ADD COLUMN created_by_agent_id UUID REFERENCES support_agents(id);
+    END IF;
+END $$;
+
 CREATE INDEX IF NOT EXISTS idx_canned_responses_category ON canned_responses(category);
 CREATE INDEX IF NOT EXISTS idx_canned_responses_active ON canned_responses(is_active);
 
