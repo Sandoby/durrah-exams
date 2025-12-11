@@ -328,9 +328,21 @@ export default function AgentDashboard() {
         }
 
         console.log('[AGENT] Inserting message into database...');
+        
+        // Get the current authenticated user's ID (auth.users.id)
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+            console.error('[AGENT] No authenticated user found');
+            toast.error('Authentication error');
+            return;
+        }
+        
+        console.log('[AGENT] Using sender_id:', user.id);
+        
         const { error } = await supabase.from('chat_messages').insert({
             session_id: selectedChat.id,
-            sender_id: agent.id,
+            sender_id: user.id,
             sender_role: 'agent',
             sender_name: agent.name,
             message: newMessage,

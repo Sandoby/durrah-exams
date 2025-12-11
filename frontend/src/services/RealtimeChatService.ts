@@ -273,21 +273,30 @@ export class RealtimeChatService {
 
     try {
       const debugLogger = DebugLogger.getInstance();
+      
+      // Get authenticated user's ID to match foreign key constraint
+      const { data: { user } } = await this.supabase.auth.getUser();
+      
+      if (!user) {
+        debugLogger.addLog('error', '[SEND] No authenticated user found');
+        throw new Error('Not authenticated');
+      }
+      
       debugLogger.addLog('info', `[SEND] Inserting message to session ${sessionId}`, {
         sessionId,
-        senderId,
+        authUserId: user.id,
         isAgent,
         senderRole,
         senderName,
       });
 
-      // Send to database
+      // Send to database - use auth user ID for sender_id
       // RLS policies will handle access control
       const { data, error } = await this.supabase
         .from('chat_messages')
         .insert({
           session_id: sessionId,
-          sender_id: senderId,
+          sender_id: user.id,
           is_agent: isAgent,
           sender_role: senderRole,
           sender_name: senderName,
