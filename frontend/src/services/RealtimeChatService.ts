@@ -1,4 +1,5 @@
-import { createClient, RealtimeChannel } from '@supabase/supabase-js';
+import { RealtimeChannel } from '@supabase/supabase-js';
+import { supabase as supabaseClient } from '../lib/supabase';
 import { DebugLogger } from '../components/DebugWindow';
 
 /**
@@ -50,10 +51,7 @@ type SessionCallback = (session: ChatSession) => void;
 type StatusCallback = (isOnline: boolean) => void;
 
 export class RealtimeChatService {
-  private supabase = createClient(
-    import.meta.env.VITE_SUPABASE_URL || '',
-    import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-  );
+  private supabase = supabaseClient; // Use shared Supabase instance with auth
 
   private messageChannels: Map<string, RealtimeChannel> = new Map();
   private sessionChannels: Map<string, RealtimeChannel> = new Map();
@@ -274,29 +272,21 @@ export class RealtimeChatService {
     try {
       const debugLogger = DebugLogger.getInstance();
       
-      // Get authenticated user's ID to match foreign key constraint
-      const { data: { user } } = await this.supabase.auth.getUser();
-      
-      if (!user) {
-        debugLogger.addLog('error', '[SEND] No authenticated user found');
-        throw new Error('Not authenticated');
-      }
-      
       debugLogger.addLog('info', `[SEND] Inserting message to session ${sessionId}`, {
         sessionId,
-        authUserId: user.id,
+        senderId,
         isAgent,
         senderRole,
         senderName,
       });
 
-      // Send to database - use auth user ID for sender_id
+      // Send to database - senderId is already verified by caller
       // RLS policies will handle access control
       const { data, error } = await this.supabase
         .from('chat_messages')
         .insert({
           session_id: sessionId,
-          sender_id: user.id,
+          sender_id: senderId,
           is_agent: isAgent,
           sender_role: senderRole,
           sender_name: senderName,
