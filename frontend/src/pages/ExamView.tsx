@@ -799,38 +799,41 @@ export default function ExamView() {
                     <p className="mt-4 text-sm text-gray-500">{t('examView.submitted.recorded')}</p>
 
                     {/* View Answers Button */}
-                    <div className="mt-6 flex justify-center">
-                        <button
-                            onClick={() => {
-                                let subId = score?.submission_id;
+                    {/* View Answers Button */}
+                    {exam?.settings.show_detailed_results && (
+                        <div className="mt-6 flex justify-center">
+                            <button
+                                onClick={() => {
+                                    let subId = score?.submission_id;
 
-                                // Fallback: Try to read from localStorage if state is missing ID
-                                if (!subId) {
-                                    try {
-                                        const saved = localStorage.getItem(`durrah_exam_${id}_score`);
-                                        if (saved) {
-                                            const parsed = JSON.parse(saved);
-                                            subId = parsed.submission_id;
-                                            console.log('🔄 Recovered submission_id from storage:', subId);
+                                    // Fallback: Try to read from localStorage if state is missing ID
+                                    if (!subId) {
+                                        try {
+                                            const saved = localStorage.getItem(`durrah_exam_${id}_score`);
+                                            if (saved) {
+                                                const parsed = JSON.parse(saved);
+                                                subId = parsed.submission_id;
+                                                console.log('🔄 Recovered submission_id from storage:', subId);
+                                            }
+                                        } catch (e) {
+                                            console.error('Failed to recover ID from storage', e);
                                         }
-                                    } catch (e) {
-                                        console.error('Failed to recover ID from storage', e);
                                     }
-                                }
 
-                                if (subId) {
-                                    navigate(`/exam/${id}?submission=${subId}`);
-                                } else {
-                                    console.error('Submission ID explicitly missing. Score state:', score);
-                                    toast.error('Unable to load review. Please refresh the page.');
-                                }
-                            }}
-                            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 flex items-center justify-center gap-2"
-                        >
-                            <Eye className="w-5 h-5" />
-                            View Answers
-                        </button>
-                    </div>
+                                    if (subId) {
+                                        navigate(`/exam/${id}?submission=${subId}`);
+                                    } else {
+                                        console.error('Submission ID explicitly missing. Score state:', score);
+                                        toast.error('Unable to load review. Please refresh the page.');
+                                    }
+                                }}
+                                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 flex items-center justify-center gap-2"
+                            >
+                                <Eye className="w-5 h-5" />
+                                View Answers
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
