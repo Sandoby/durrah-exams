@@ -235,7 +235,14 @@ serve(async (req) => {
                 score: totalScore,
                 max_score: maxScore,
                 percentage: percentage,
-                violations_count: (violations || []).length
+                violations_count: (violations || []).length,
+                detailed_results: (settings.show_detailed_results) ? gradedAnswers.map((a: any) => {
+                    const q = exam.questions.find((q: any) => q.id === a.question_id);
+                    return {
+                        ...a,
+                        correct_answer: q?.correct_answer
+                    };
+                }) : undefined
             }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )

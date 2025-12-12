@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { AlertTriangle, CheckCircle, Clock, Loader2, Save, Flag, LayoutGrid, Settings, Sun, Moon, Calculator as CalcIcon } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Sun, Moon, Calculator as CalcIcon, Star, Eye } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
@@ -41,6 +41,7 @@ interface Exam {
         time_limit_minutes: number | null;
         randomize_questions?: boolean;
         show_results_immediately?: boolean;
+        show_detailed_results?: boolean; // NEW
         // optional scheduling fields (back-end and editor may use either naming)
         start_time?: string | null;
         end_time?: string | null;
@@ -65,18 +66,24 @@ export default function ExamView() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [score, setScore] = useState<{ score: number; max_score: number; percentage: number } | null>(null);
+    const [detailedResults, setDetailedResults] = useState<any[] | null>(null); // NEW
     const [showViolationModal, setShowViolationModal] = useState(false);
     const [violationMessage, setViolationMessage] = useState({ title: '', message: '' });
     const [hasPreviousSession, setHasPreviousSession] = useState(false);
     const [isAvailable, setIsAvailable] = useState(true);
     const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
     const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set());
+
     const [showQuestionGrid, setShowQuestionGrid] = useState(false);
-    const [showSettings, setShowSettings] = useState(false);
     const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
     const [highContrast, setHighContrast] = useState(false);
     const [showCalculator, setShowCalculator] = useState(false);
     const [startedAt, setStartedAt] = useState<number | null>(null);
+
+    // New State for View Modes
+    const [viewMode, setViewMode] = useState<'list' | 'single'>('single'); // Default to single question per page
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [isZenMode, setIsZenMode] = useState(false);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const isSubmittingRef = useRef(false);
@@ -98,7 +105,11 @@ export default function ExamView() {
             // Optionally try to load the score if we saved it
             const savedScore = localStorage.getItem(`durrah_exam_${id}_score`);
             if (savedScore) {
-                setScore(JSON.parse(savedScore));
+                const parsed = JSON.parse(savedScore);
+                setScore(parsed);
+                if (parsed.detailed_results) {
+                    setDetailedResults(parsed.detailed_results);
+                }
             }
             return;
         }
@@ -508,6 +519,10 @@ export default function ExamView() {
                     percentage: result.percentage
                 });
 
+                if (result.detailed_results) {
+                    setDetailedResults(result.detailed_results);
+                }
+
                 setSubmitted(true);
 
                 // Mark as submitted in local storage
@@ -515,7 +530,8 @@ export default function ExamView() {
                 localStorage.setItem(`durrah_exam_${id}_score`, JSON.stringify({
                     score: result.score,
                     max_score: result.max_score,
-                    percentage: result.percentage
+                    percentage: result.percentage,
+                    detailed_results: result.detailed_results
                 }));
 
                 // Clear temporary state
@@ -630,6 +646,31 @@ export default function ExamView() {
         }
     };
 
+    // Navigation for Single Question Mode
+    const goToNextQuestion = () => {
+        if (!exam) return;
+        if (currentQuestionIndex < exam.questions.length - 1) {
+            setCurrentQuestionIndex(prev => prev + 1);
+            // Scroll to top of question container
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    const goToPrevQuestion = () => {
+        if (currentQuestionIndex > 0) {
+            setCurrentQuestionIndex(prev => prev - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    const jumpToQuestion = (index: number) => {
+        if (!exam) return;
+        if (index >= 0 && index < exam.questions.length) {
+            setCurrentQuestionIndex(index);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
     useEffect(() => {
         // try flushing pending submissions when back online or when component mounts
         flushPendingSubmissions();
@@ -648,8 +689,8 @@ export default function ExamView() {
         const showResults = exam?.settings.show_results_immediately !== false;
 
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-                <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+                <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-2xl w-full mb-8">
                     <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
                     <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white">{t('examView.submitted.title')}</h2>
                     {showResults && score ? (
@@ -665,6 +706,59 @@ export default function ExamView() {
                     )}
                     <p className="mt-4 text-sm text-gray-500">{t('examView.submitted.recorded')}</p>
                 </div>
+
+                {/* Detailed Results Breakdown */}
+                {detailedResults && (
+                    <div className="max-w-4xl w-full space-y-6 pb-12">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Exam Review</h3>
+                        {detailedResults.map((result: any, index: number) => {
+                            const question = exam?.questions.find(q => q.id === result.question_id);
+                            return (
+                                <div key={result.question_id} className={`bg-white dark:bg-gray-800 shadow rounded-lg p-6 border-l-4 ${result.is_correct ? 'border-green-500' : 'border-red-500'}`}>
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className={`flex items-center justify-center h-6 w-6 rounded-full text-xs font-bold ${result.is_correct ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                    {index + 1}
+                                                </span>
+                                                <span className={`text-sm font-bold ${result.is_correct ? 'text-green-600' : 'text-red-600'}`}>
+                                                    {result.is_correct ? 'Correct' : 'Incorrect'}
+                                                </span>
+                                            </div>
+                                            <p className="text-gray-900 dark:text-white font-medium mb-4">{question?.question_text || 'Question Text'}</p>
+
+                                            <div className="space-y-2">
+                                                <div className="text-sm">
+                                                    <span className="text-gray-500 dark:text-gray-400 font-medium">Your Answer: </span>
+                                                    <span className={`${result.is_correct ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'} font-medium`}>
+                                                        {typeof result.answer === 'object' ? JSON.stringify(result.answer) : String(result.answer || 'No Answer')}
+                                                    </span>
+                                                </div>
+
+                                                {!result.is_correct && result.correct_answer && (
+                                                    <div className="text-sm">
+                                                        <span className="text-gray-500 dark:text-gray-400 font-medium">Correct Answer: </span>
+                                                        <span className="text-indigo-600 dark:text-indigo-400 font-medium">
+                                                            {typeof result.correct_answer === 'object' ? JSON.stringify(result.correct_answer) : String(result.correct_answer)}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        <div className="flex justify-center mt-8">
+                            <button
+                                onClick={() => navigate('/dashboard')}
+                                className="px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm"
+                            >
+                                Return to Dashboard
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
@@ -711,17 +805,14 @@ export default function ExamView() {
                 <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-md mb-6">
                     <div className="flex">
                         <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                        <div className="flex">
-                            <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                            <div className="ml-3">
-                                <h3 className="text-sm font-bold text-red-900 dark:text-red-200">{t('examView.security.title')}</h3>
-                                <ul className="mt-2 text-xs text-red-800 dark:text-red-300 list-disc list-inside space-y-1">
-                                    {exam.settings.require_fullscreen && <li>{t('examView.security.fullscreen')}</li>}
-                                    {exam.settings.detect_tab_switch && <li>{t('examView.security.tabSwitch')}</li>}
-                                    {exam.settings.disable_copy_paste && <li>{t('examView.security.copyPaste')}</li>}
-                                    <li>{t('examView.security.maxViolations')} {exam.settings.max_violations || 3}</li>
-                                </ul>
-                            </div>
+                        <div className="ml-3">
+                            <h3 className="text-sm font-bold text-red-900 dark:text-red-200">{t('examView.security.title')}</h3>
+                            <ul className="mt-2 text-xs text-red-800 dark:text-red-300 list-disc list-inside space-y-1">
+                                {exam.settings.require_fullscreen && <li>{t('examView.security.fullscreen')}</li>}
+                                {exam.settings.detect_tab_switch && <li>{t('examView.security.tabSwitch')}</li>}
+                                {exam.settings.disable_copy_paste && <li>{t('examView.security.copyPaste')}</li>}
+                                <li>{t('examView.security.maxViolations')} {exam.settings.max_violations || 3}</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -731,23 +822,15 @@ export default function ExamView() {
                     <div className="flex">
                         <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
                         <div className="ml-3">
-                            {/* iPhone/Safari help modal or instructions */}
-                            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-md mb-6">
-                                <div className="flex">
-                                    <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
-                                    <div className="ml-3">
-                                        <h3 className="text-sm font-bold text-yellow-900 dark:text-yellow-200">{t('examView.iphoneHelp.title')}</h3>
-                                        <ul className="mt-2 text-xs text-yellow-800 dark:text-yellow-300 list-disc list-inside space-y-1">
-                                            <li>{t('examView.iphoneHelp.privateMode')}</li>
-                                            <li>{t('examView.iphoneHelp.cookies')}</li>
-                                            <li>{t('examView.iphoneHelp.tracking')}</li>
-                                            <li>{t('examView.iphoneHelp.homeScreen')}</li>
-                                            <li>{t('examView.iphoneHelp.error')}</li>
-                                            <li>{t('examView.iphoneHelp.screenshot')}</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
+                            <h3 className="text-sm font-bold text-yellow-900 dark:text-yellow-200">{t('examView.iphoneHelp.title')}</h3>
+                            <ul className="mt-2 text-xs text-yellow-800 dark:text-yellow-300 list-disc list-inside space-y-1">
+                                <li>{t('examView.iphoneHelp.privateMode')}</li>
+                                <li>{t('examView.iphoneHelp.cookies')}</li>
+                                <li>{t('examView.iphoneHelp.tracking')}</li>
+                                <li>{t('examView.iphoneHelp.homeScreen')}</li>
+                                <li>{t('examView.iphoneHelp.error')}</li>
+                                <li>{t('examView.iphoneHelp.screenshot')}</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -778,285 +861,389 @@ export default function ExamView() {
 
             <div className={`max-w-4xl mx-auto ${highContrast ? 'contrast-125 saturate-150' : ''} ${fontSize === 'large' ? 'text-lg' : fontSize === 'xlarge' ? 'text-xl' : ''}`}>
                 <div className="max-w-3xl mx-auto">
-                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 sticky top-0 z-10">
-                        <div className="flex flex-col gap-3">
-                            <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">{exam.title}</h1>
-                            <div className="flex flex-wrap items-center gap-2">
-                                {timeLeft !== null && (
-                                    <div className={`flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${timeLeft < 60 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
-                                        <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                                        <span className="font-mono font-bold">{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</span>
+                    {/* Header - Hidden in Zen Mode unless hovered or essential */}
+                    {!isZenMode && (
+                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 sticky top-0 z-10">
+                            <div className="flex flex-col gap-3">
+                                <div className="flex justify-between items-center">
+                                    <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate max-w-[50%]">{exam.title}</h1>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setViewMode(prev => prev === 'list' ? 'single' : 'list')}
+                                            className="p-2 text-gray-500 hover:text-indigo-600 dark:text-gray-400"
+                                            title={viewMode === 'list' ? "Switch to One Question Per Page" : "Switch to List View"}
+                                        >
+                                            {viewMode === 'list' ? <LayoutGrid size={20} /> : <div className="flex items-center"><span className="text-xs font-bold mr-1">1/1</span></div>}
+                                        </button>
+                                        <button
+                                            onClick={() => setIsZenMode(!isZenMode)}
+                                            className={`p-2 ${isZenMode ? 'text-indigo-600' : 'text-gray-500 hover:text-indigo-600'} dark:text-gray-400`}
+                                            title="Toggle Zen Mode"
+                                        >
+                                            {isZenMode ? <Star size={20} /> : <Eye size={20} />}
+                                        </button>
                                     </div>
-                                )}
-                                <div className={`flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${violations.length > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                                    <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                                    <span className="font-bold">{t('examView.violations')} {violations.length}/{exam.settings.max_violations || 3}</span>
                                 </div>
+                            </div>
+                        </div>
+                    )}
 
-                                <div className="relative">
-                                    <LanguageSwitcher />
-                                </div>
+                    <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
+                        {/* Questions Render Logic */}
+                        {viewMode === 'list' ? (
+                            // List View (Original)
+                            <div className="space-y-6">
+                                {exam.questions.map((question, index) => (
+                                    <div key={question.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                                        {/* Question Content (Same as before) */}
+                                        <div className="flex justify-between items-start mb-4">
+                                            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                                                <span className="mr-2 text-indigo-600 dark:text-indigo-400">Q{index + 1}.</span>
+                                                {question.question_text}
+                                            </h3>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const newFlagged = new Set(flaggedQuestions);
+                                                        if (newFlagged.has(question.id)) {
+                                                            newFlagged.delete(question.id);
+                                                        } else {
+                                                            newFlagged.add(question.id);
+                                                        }
+                                                        setFlaggedQuestions(newFlagged);
+                                                    }}
+                                                    className={`p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 ${flaggedQuestions.has(question.id) ? 'text-red-500' : 'text-gray-400'}`}
+                                                >
+                                                    <Flag size={20} fill={flaggedQuestions.has(question.id) ? "currentColor" : "none"} />
+                                                </button>
+                                                <span className="text-sm text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                                    {question.points} {t('examEditor.points')}
+                                                </span>
+                                            </div>
+                                        </div>
 
-                                <div className="relative">
-                                    <button
-                                        onClick={() => setShowSettings(!showSettings)}
-                                        className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                        title="Accessibility Settings"
-                                    >
-                                        <Settings className="h-5 w-5" />
-                                    </button>
-
-                                    {showSettings && (
-                                        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-50">
-                                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t('examView.accessibility.settings')}</h3>
-
+                                        {question.media_url && (
                                             <div className="mb-4">
-                                                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">{t('examView.accessibility.fontSize')}</label>
-                                                <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                                                {question.media_type === 'image' && <img src={question.media_url} alt="Question media" className="max-h-96 rounded-lg mx-auto" />}
+                                                {question.media_type === 'audio' && <audio src={question.media_url} controls className="w-full" />}
+                                                {question.media_type === 'video' && <video src={question.media_url} controls className="w-full rounded-lg" />}
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-3">
+                                            {/* Render options based on type */}
+                                            {question.type === 'multiple_choice' && question.options?.map((option, optIndex) => (
+                                                <div key={optIndex} className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name={`question-${question.id}`}
+                                                        id={`q${question.id}-o${optIndex}`}
+                                                        value={option}
+                                                        checked={answers[question.id]?.answer === option}
+                                                        onChange={() => setAnswers({ ...answers, [question.id]: { answer: option } })}
+                                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                                    />
+                                                    <label htmlFor={`q${question.id}-o${optIndex}`} className="ml-3 block text-gray-700 dark:text-gray-300">
+                                                        {option}
+                                                    </label>
+                                                </div>
+                                            ))}
+
+                                            {/* Other Types handling... reusing generic structure for brevity in update */}
+                                            {question.type === 'true_false' && ['True', 'False'].map((option, optIndex) => (
+                                                <div key={optIndex} className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name={`question-${question.id}`}
+                                                        id={`q${question.id}-o${optIndex}`}
+                                                        value={option}
+                                                        checked={String(answers[question.id]?.answer) === option}
+                                                        onChange={() => setAnswers({ ...answers, [question.id]: { answer: option } })}
+                                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                                    />
+                                                    <label htmlFor={`q${question.id}-o${optIndex}`} className="ml-3 block text-gray-700 dark:text-gray-300">
+                                                        {option}
+                                                    </label>
+                                                </div>
+                                            ))}
+
+                                            {question.type === 'short_answer' && (
+                                                <textarea
+                                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                    rows={3}
+                                                    value={answers[question.id]?.answer || ''}
+                                                    onChange={(e) => setAnswers({ ...answers, [question.id]: { answer: e.target.value } })}
+                                                    placeholder="Type your answer here..."
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            // Single Question Mode (Pagination)
+                            <div className="space-y-6">
+                                {exam.questions[currentQuestionIndex] && (() => {
+                                    const question = exam.questions[currentQuestionIndex];
+                                    return (
+                                        <div key={question.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 min-h-[50vh]">
+                                            <div className="flex justify-between items-center mb-6 border-b pb-4 dark:border-gray-700">
+                                                <h3 className="text-xl font-bold text-gray-500 dark:text-gray-400">
+                                                    Question {currentQuestionIndex + 1} of {exam.questions.length}
+                                                </h3>
+                                                <div className="flex items-center gap-2">
                                                     <button
-                                                        onClick={() => setFontSize('normal')}
-                                                        className={`flex-1 py-1 text-xs rounded-md ${fontSize === 'normal' ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const newFlagged = new Set(flaggedQuestions);
+                                                            if (newFlagged.has(question.id)) {
+                                                                newFlagged.delete(question.id);
+                                                            } else {
+                                                                newFlagged.add(question.id);
+                                                            }
+                                                            setFlaggedQuestions(newFlagged);
+                                                        }}
+                                                        className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 ${flaggedQuestions.has(question.id) ? 'text-red-500' : 'text-gray-400'}`}
+                                                        title="Flag for Review"
                                                     >
-                                                        A
+                                                        <Flag size={20} fill={flaggedQuestions.has(question.id) ? "currentColor" : "none"} />
                                                     </button>
-                                                    <button
-                                                        onClick={() => setFontSize('large')}
-                                                        className={`flex-1 py-1 text-sm rounded-md ${fontSize === 'large' ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}
-                                                    >
-                                                        A+
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setFontSize('xlarge')}
-                                                        className={`flex-1 py-1 text-base rounded-md ${fontSize === 'xlarge' ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}
-                                                    >
-                                                        A++
-                                                    </button>
+                                                    <span className="text-sm px-3 py-1 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-full font-medium">
+                                                        {question.points} Marks
+                                                    </span>
                                                 </div>
                                             </div>
 
-                                            <div>
-                                                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">Contrast</label>
+                                            <div className="mb-6">
+                                                <h3 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white leading-relaxed">
+                                                    {question.question_text}
+                                                </h3>
+                                            </div>
+
+                                            {question.media_url && (
+                                                <div className="mb-6">
+                                                    {question.media_type === 'image' && <img src={question.media_url} alt="Question media" className="max-h-96 rounded-lg shadow-md" />}
+                                                </div>
+                                            )}
+
+                                            <div className="space-y-4">
+                                                {/* Render options based on type - Simplified for Single View */}
+                                                {question.type === 'multiple_choice' && question.options?.map((option, optIndex) => (
+                                                    <label key={optIndex} className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all ${answers[question.id]?.answer === option ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'}`}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${question.id}`}
+                                                            value={option}
+                                                            checked={answers[question.id]?.answer === option}
+                                                            onChange={() => setAnswers({ ...answers, [question.id]: { answer: option } })}
+                                                            className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                                        />
+                                                        <span className="ml-3 text-lg text-gray-900 dark:text-white">{option}</span>
+                                                    </label>
+                                                ))}
+
+                                                {question.type === 'true_false' && ['True', 'False'].map((option, optIndex) => (
+                                                    <label key={optIndex} className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all ${String(answers[question.id]?.answer) === option ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'}`}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`question-${question.id}`}
+                                                            value={option}
+                                                            checked={String(answers[question.id]?.answer) === option}
+                                                            onChange={() => setAnswers({ ...answers, [question.id]: { answer: option } })}
+                                                            className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                                        />
+                                                        <span className="ml-3 text-lg text-gray-900 dark:text-white">{option}</span>
+                                                    </label>
+                                                ))}
+
+
+                                                {question.type === 'short_answer' && (
+                                                    <textarea
+                                                        className="w-full p-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white"
+                                                        rows={6}
+                                                        value={answers[question.id]?.answer || ''}
+                                                        onChange={(e) => setAnswers({ ...answers, [question.id]: { answer: e.target.value } })}
+                                                        placeholder="Type your answer here..."
+                                                    />
+                                                )}
+                                            </div>
+
+                                            {/* Navigation Buttons */}
+                                            <div className="flex justify-between items-center mt-8 pt-6 border-t dark:border-gray-700">
                                                 <button
-                                                    onClick={() => setHighContrast(!highContrast)}
-                                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border ${highContrast ? 'bg-yellow-50 border-yellow-300 text-yellow-900' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600'}`}
+                                                    type="button"
+                                                    onClick={goToPrevQuestion}
+                                                    disabled={currentQuestionIndex === 0}
+                                                    className={`px-4 py-2 rounded-md text-sm font-medium ${currentQuestionIndex === 0 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
                                                 >
-                                                    <span className="text-sm">High Contrast</span>
-                                                    {highContrast ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                                                    Previous
                                                 </button>
+
+                                                {/* Pagination Dots/Numbers simplified */}
+                                                <div className="hidden sm:flex space-x-1">
+                                                    {exam.questions.map((_, idx) => (
+                                                        <button
+                                                            key={idx}
+                                                            type="button"
+                                                            onClick={() => jumpToQuestion(idx)}
+                                                            className={`h-2 w-2 rounded-full ${idx === currentQuestionIndex ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                                        />
+                                                    ))}
+                                                </div>
+
+                                                {currentQuestionIndex < exam.questions.length - 1 ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={goToNextQuestion}
+                                                        className="px-6 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                                    >
+                                                        Next Question
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        type="submit"
+                                                        disabled={isSubmitting}
+                                                        className="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                                                    >
+                                                        {isSubmitting ? (
+                                                            <>
+                                                                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                                                                Submitting...
+                                                            </>
+                                                        ) : (
+                                                            'Submit Exam'
+                                                        )}
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
-                                    )}
-                                </div>
+                                    );
+                                })()}
+                            </div>
+                        )}
 
+                        {viewMode === 'list' && (
+                            <div className="flex justify-end pt-4">
                                 <button
-                                    onClick={() => setShowCalculator(!showCalculator)}
-                                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                    title="Calculator"
-                                >
-                                    <CalcIcon className="h-5 w-5" />
-                                </button>
-
-                                <button
-                                    onClick={handleSubmit}
+                                    type="submit"
                                     disabled={isSubmitting}
-                                    className="ml-auto px-3 sm:px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 text-xs sm:text-sm font-medium flex items-center min-h-[36px] sm:min-h-[40px]"
+                                    className="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 w-full sm:w-auto"
                                 >
-                                    {isSubmitting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
-                                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                                    {isSubmitting ? (
+                                        <>
+                                            <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                                            Submitting...
+                                        </>
+                                    ) : (
+                                        t('examView.submit')
+                                    )}
                                 </button>
                             </div>
-                            <button
-                                onClick={() => setShowQuestionGrid(!showQuestionGrid)}
-                                className="w-full mt-2 flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium"
-                            >
-                                <LayoutGrid className="h-4 w-4 mr-2" />
-                                {showQuestionGrid ? 'Hide Question Navigator' : 'Show Question Navigator'}
-                            </button>
-
-                            {showQuestionGrid && (
-                                <div className="mt-3 grid grid-cols-5 sm:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-1">
-                                    {exam.questions.map((q, i) => {
-                                        const isAnswered = answers[q.id] !== undefined && answers[q.id] !== '';
-                                        const isFlagged = flaggedQuestions.has(q.id);
-                                        let bgClass = 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400';
-                                        if (isFlagged) bgClass = 'bg-yellow-100 text-yellow-800 border border-yellow-300';
-                                        else if (isAnswered) bgClass = 'bg-green-100 text-green-800 border border-green-300';
-
-                                        return (
-                                            <button
-                                                key={q.id}
-                                                onClick={() => {
-                                                    document.getElementById(`question-${q.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                                    setShowQuestionGrid(false);
-                                                }}
-                                                className={`p-2 rounded text-xs font-bold ${bgClass}`}
-                                            >
-                                                {i + 1}
-                                                {isFlagged && <Flag className="h-2 w-2 ml-1 inline" />}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="space-y-4 sm:space-y-6">
-                        {exam.questions.map((q, i) => (
-                            <div key={q.id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
-                                <div id={`question-${q.id}`} className="font-medium text-gray-900 dark:text-white mb-4 flex flex-col sm:flex-row">
-                                    <span className="mr-2">{i + 1}.</span>
-                                    <span className="flex-1">{q.question_text}</span>
-                                    <div className="flex items-center mt-2 sm:mt-0 sm:ml-auto space-x-3">
-                                        <button
-                                            onClick={() => {
-                                                const newFlags = new Set(flaggedQuestions);
-                                                if (newFlags.has(q.id)) {
-                                                    newFlags.delete(q.id);
-                                                } else {
-                                                    newFlags.add(q.id);
-                                                }
-                                                setFlaggedQuestions(newFlags);
-                                            }}
-                                            className={`p-1 rounded-full transition-colors ${flaggedQuestions.has(q.id) ? 'text-yellow-500 bg-yellow-50' : 'text-gray-400 hover:text-gray-600'}`}
-                                            title={flaggedQuestions.has(q.id) ? "Unflag" : "Flag for review"}
-                                        >
-                                            <Flag className={`h-5 w-5 ${flaggedQuestions.has(q.id) ? 'fill-current' : ''}`} />
-                                        </button>
-                                        <span className="text-sm text-gray-500">({q.points} pts)</span>
-                                    </div>
-                                </div>
-
-                                {q.media_url && (
-                                    <div className="mb-4 flex justify-center">
-                                        {q.media_type === 'image' && (
-                                            <img src={q.media_url} alt="Question Media" className="max-w-full max-h-96 rounded-lg object-contain" />
-                                        )}
-                                        {q.media_type === 'audio' && (
-                                            <audio controls src={q.media_url} className="w-full max-w-md" />
-                                        )}
-                                        {q.media_type === 'video' && (
-                                            <video controls src={q.media_url} className="max-w-full max-h-96 rounded-lg" />
-                                        )}
-                                    </div>
-                                )}
-
-                                {q.type === 'multiple_choice' && q.options?.map((opt) => (
-                                    <label key={opt} className="flex items-start space-x-3 p-3 sm:p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2 min-h-[44px]">
-                                        <input
-                                            type="radio"
-                                            name={q.id}
-                                            value={opt}
-                                            checked={answers[q.id] === opt}
-                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                            className="h-5 w-5 sm:h-4 sm:w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 mt-0.5 flex-shrink-0"
-                                        />
-                                        <span className="text-gray-700 dark:text-gray-300 text-base sm:text-sm">{opt}</span>
-                                    </label>
-                                ))}
-
-                                {q.type === 'dropdown' && (
-                                    <div>
-                                        <select
-                                            className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            value={answers[q.id] || ''}
-                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                        >
-                                            <option value="">Select...</option>
-                                            {q.options?.map((opt) => (
-                                                <option key={opt} value={opt}>{opt}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
-
-                                {q.type === 'numeric' && (
-                                    <div>
-                                        <input
-                                            type="number"
-                                            className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            value={answers[q.id] ?? ''}
-                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                        />
-                                    </div>
-                                )}
-
-                                {q.type === 'true_false' && ['True', 'False'].map((opt) => (
-                                    <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
-                                        <input
-                                            type="radio"
-                                            name={q.id}
-                                            value={opt}
-                                            checked={answers[q.id] === opt}
-                                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                        />
-                                        <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                                    </label>
-                                ))}
-
-                                {q.type === 'short_answer' && (
-                                    <textarea
-                                        rows={4}
-                                        className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                        placeholder="Type your answer here..."
-                                        value={answers[q.id] || ''}
-                                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                                    />
-                                )}
-
-                                {q.type === 'multiple_select' && q.options?.map((opt: string) => (
-                                    <label key={opt} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer mb-2">
-                                        <input
-                                            type="checkbox"
-                                            checked={Array.isArray(answers[q.id]) ? (answers[q.id] as string[]).includes(opt) : false}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                const current: string[] = Array.isArray(answers[q.id]) ? [...answers[q.id]] : [];
-                                                if (e.target.checked) {
-                                                    current.push(opt);
-                                                } else {
-                                                    const idx = current.indexOf(opt);
-                                                    if (idx !== -1) current.splice(idx, 1);
-                                                }
-                                                setAnswers({ ...answers, [q.id]: current });
-                                            }}
-                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                        />
-                                        <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
-
-                    {showCalculator && <Calculator onClose={() => setShowCalculator(false)} />}
-
-                    <ViolationModal
-                        isOpen={showViolationModal}
-                        onClose={() => setShowViolationModal(false)}
-                        title={violationMessage.title}
-                        message={violationMessage.message}
-                        severity={violationMessage.title.includes('Final') || violationMessage.title.includes('Maximum') ? 'critical' : 'warning'}
-                    />
-
-                    <div className="mt-8 text-center pb-8">
-                        <div className="inline-flex items-center justify-center space-x-2 text-gray-400 dark:text-gray-500">
-                            <span className="text-sm">Powered by</span>
-                            <Logo size="sm" showText={true} className="opacity-75 grayscale hover:grayscale-0 transition-all duration-300" />
-                        </div>
-                    </div>
+                        )}
+                    </form>
                 </div>
 
-                {/* Mobile Sticky Submit Button */}
-                <div className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
+                {/* Floating Toolbar */}
+                <div className={`fixed bottom-6 right-6 flex flex-col gap-2 z-50 transition-opacity duration-300 ${isZenMode ? 'opacity-20 hover:opacity-100' : 'opacity-100'}`}>
                     <button
-                        onClick={handleSubmit}
-                        disabled={isSubmitting}
-                        className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-lg font-bold flex justify-center items-center shadow-md"
+                        onClick={() => setShowCalculator(!showCalculator)}
+                        className={`p-3 rounded-full shadow-lg ${showCalculator ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50'}`}
+                        title="Calculator"
                     >
-                        {isSubmitting ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : null}
-                        {isSubmitting ? 'Submitting Exam...' : 'Submit Exam'}
+                        <CalcIcon size={24} />
                     </button>
+                    <button
+                        onClick={() => setShowQuestionGrid(!showQuestionGrid)}
+                        className="p-3 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full shadow-lg hover:bg-gray-50"
+                        title="Question Map"
+                    >
+                        <LayoutGrid size={24} />
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (fontSize === 'normal') setFontSize('large');
+                            else if (fontSize === 'large') setFontSize('xlarge');
+                            else setFontSize('normal');
+                        }}
+                        className="p-3 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full shadow-lg hover:bg-gray-50 font-serif font-bold"
+                        title="Toggle Font Size"
+                    >
+                        Aa
+                    </button>
+                    <button
+                        onClick={() => setHighContrast(!highContrast)}
+                        className={`p-3 rounded-full shadow-lg ${highContrast ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-400' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50'}`}
+                        title="Toggle High Contrast"
+                    >
+                        {highContrast ? <Sun size={24} /> : <Moon size={24} />}
+                    </button>
+                </div>
+
+                {/* Calculator Drawer */}
+                {showCalculator && (
+                    <div className="fixed bottom-24 right-6 z-50 animate-fade-in-up">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-1 border dark:border-gray-700">
+                            <Calculator onClose={() => setShowCalculator(false)} />
+                        </div>
+                    </div>
+                )}
+
+                {/* Question Grid Drawer */}
+                {showQuestionGrid && exam && (
+                    <div className="fixed inset-y-0 right-0 w-80 bg-white dark:bg-gray-800 shadow-2xl z-50 p-6 overflow-y-auto transform transition-transform duration-300">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Exam Overview</h3>
+                            <button onClick={() => setShowQuestionGrid(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+                        </div>
+                        <div className="grid grid-cols-4 gap-3">
+                            {exam.questions.map((q, idx) => (
+                                <button
+                                    key={q.id}
+                                    onClick={() => {
+                                        jumpToQuestion(idx);
+                                        setShowQuestionGrid(false);
+                                        if (viewMode === 'list') {
+                                            // Scroll to specific question in list
+                                            const el = document.getElementById(`question-${idx}`); // Assuming we add ids to list items
+                                            el?.scrollIntoView({ behavior: 'smooth' });
+                                        }
+                                    }}
+                                    className={`p-3 rounded-lg text-sm font-bold border-2 ${idx === currentQuestionIndex && viewMode === 'single'
+                                        ? 'border-indigo-600 text-indigo-600 bg-indigo-50'
+                                        : answers[q.id]
+                                            ? 'border-green-500 bg-green-50 text-green-700'
+                                            : flaggedQuestions.has(q.id)
+                                                ? 'border-red-400 bg-red-50 text-red-700'
+                                                : 'border-gray-200 text-gray-600 hover:border-indigo-300'
+                                        }`}
+                                >
+                                    {flaggedQuestions.has(q.id) && <Flag size={10} className="absolute top-1 right-1 fill-red-500 text-red-500" />}
+                                    {idx + 1}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="mt-8 space-y-2">
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"><div className="w-4 h-4 border-2 border-green-500 bg-green-50 rounded"></div> Answered</div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"><div className="w-4 h-4 border-2 border-red-400 bg-red-50 rounded"></div> Flagged</div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"><div className="w-4 h-4 border-2 border-gray-200 rounded"></div> Not Attempted</div>
+                        </div>
+                    </div>
+                )}
+
+                <ViolationModal
+                    isOpen={showViolationModal}
+                    onClose={() => setShowViolationModal(false)}
+                    title={violationMessage.title}
+                    message={violationMessage.message}
+                    severity={violationMessage.title.includes('Final') || violationMessage.title.includes('Maximum') ? 'critical' : 'warning'}
+                />
+
+                <div className="mt-8 text-center pb-8">
+                    <div className="inline-flex items-center justify-center space-x-2 text-gray-400 dark:text-gray-500">
+                        <span className="text-sm">Powered by</span>
+                        <Logo size="sm" showText={true} className="opacity-75 grayscale hover:grayscale-0 transition-all duration-300" />
+                    </div>
                 </div>
             </div>
         </div>
