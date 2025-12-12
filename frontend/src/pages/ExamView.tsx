@@ -1,6 +1,6 @@
 // helper: get user session or attempt background anonymous sign-in (non-blocking)
 import { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Sun, Moon, Calculator as CalcIcon, Star, Eye } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -57,6 +57,9 @@ export default function ExamView() {
     const { t } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const submissionId = searchParams.get('submission');
+    const isReviewMode = !!submissionId;
     const [exam, setExam] = useState<Exam | null>(null);
     const [studentData, setStudentData] = useState<Record<string, string>>({});
     const [started, setStarted] = useState(false);
@@ -65,7 +68,7 @@ export default function ExamView() {
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
-    const [score, setScore] = useState<{ score: number; max_score: number; percentage: number } | null>(null);
+    const [score, setScore] = useState<{ score: number; max_score: number; percentage: number; submission_id?: string } | null>(null);
     const [detailedResults, setDetailedResults] = useState<any[] | null>(null); // NEW
     const [showViolationModal, setShowViolationModal] = useState(false);
     const [violationMessage, setViolationMessage] = useState({ title: '', message: '' });
@@ -85,14 +88,26 @@ export default function ExamView() {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [isZenMode, setIsZenMode] = useState(false);
 
+    // Review Mode State
+    const [reviewData, setReviewData] = useState<{
+        submission: any;
+        submissionAnswers: any[];
+    } | null>(null);
+
+
     const containerRef = useRef<HTMLDivElement>(null);
     const isSubmittingRef = useRef(false);
 
-    // Load exam data
+    // Load exam data or review data
     useEffect(() => {
-        if (id) fetchExam();
+        if (id) {
+            fetchExam();
+            if (isReviewMode && submissionId) {
+                fetchReviewData(submissionId);
+            }
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [id]);
+    }, [id, isReviewMode, submissionId]);
 
     // Check for existing session and submitted status on mount
     useEffect(() => {
@@ -246,6 +261,44 @@ export default function ExamView() {
         } catch (err: any) {
             console.error(err);
             toast.error(t('settings.profile.error'));
+            navigate('/dashboard');
+        }
+    };
+
+    // Fetch submission data for review mode
+    const fetchReviewData = async (subId: string) => {
+        try {
+            // Fetch submission with answers
+            const { data: submission, error: subError } = await supabase
+                .from('submissions')
+                .select('*')
+                .eq('id', subId)
+                .single();
+
+            if (subError) throw subError;
+
+            // Fetch submission answers
+            const { data: submissionAnswers, error: answersError } = await supabase
+                .from('submission_answers')
+                .select('*')
+                .eq('submission_id', subId);
+
+            if (answersError) throw answersError;
+
+            setReviewData({
+                submission,
+                submissionAnswers: submissionAnswers || []
+            });
+
+            // Also set the score for display
+            setScore({
+                score: submission.score,
+                max_score: submission.max_score,
+                percentage: submission.percentage
+            });
+        } catch (err: any) {
+            console.error('Error fetching review data:', err);
+            toast.error('Failed to load exam review');
             navigate('/dashboard');
         }
     };
@@ -516,7 +569,8 @@ export default function ExamView() {
                 setScore({
                     score: result.score,
                     max_score: result.max_score,
-                    percentage: result.percentage
+                    percentage: result.percentage,
+                    submission_id: result.submission_id
                 });
 
                 if (result.detailed_results) {
@@ -705,10 +759,29 @@ export default function ExamView() {
                         </div>
                     )}
                     <p className="mt-4 text-sm text-gray-500">{t('examView.submitted.recorded')}</p>
+
+                    {/* Action Buttons */}
+                    <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                        {exam?.settings.show_detailed_results && score?.submission_id && (
+                            <button
+                                onClick={() => navigate(`/exam/${id}?submission=${score.submission_id}`)}
+                                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 flex items-center justify-center gap-2"
+                            >
+                                <Eye className="w-5 h-5" />
+                                View Answers
+                            </button>
+                        )}
+                        <button
+                            onClick={() => navigate('/dashboard')}
+                            className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200"
+                        >
+                            Return to Dashboard
+                        </button>
+                    </div>
                 </div>
 
-                {/* Detailed Results Breakdown */}
-                {detailedResults && exam?.settings.show_detailed_results && (
+                {/* Detailed Results - Now shown in review mode */}
+                {false && detailedResults && exam?.settings.show_detailed_results && (
                     <div className="max-w-5xl w-full space-y-6 pb-12">
                         {/* Header */}
                         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -720,25 +793,25 @@ export default function ExamView() {
                         <div className="grid grid-cols-3 gap-4">
                             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Questions</p>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-white">{detailedResults.length}</p>
+                                <p className="text-3xl font-bold text-gray-900 dark:text-white">{detailedResults?.length || 0}</p>
                             </div>
                             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-green-200 dark:border-green-800 p-4">
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Correct</p>
                                 <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                                    {detailedResults.filter((r: any) => r.is_correct).length}
+                                    {detailedResults?.filter((r: any) => r.is_correct).length || 0}
                                 </p>
                             </div>
                             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-red-200 dark:border-red-800 p-4">
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Incorrect</p>
                                 <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                                    {detailedResults.filter((r: any) => !r.is_correct).length}
+                                    {detailedResults?.filter((r: any) => !r.is_correct).length || 0}
                                 </p>
                             </div>
                         </div>
 
                         {/* Questions Review */}
                         <div className="space-y-4">
-                            {detailedResults.map((result: any, index: number) => {
+                            {detailedResults?.map((result: any, index: number) => {
                                 const question = exam?.questions.find(q => q.id === result.question_id);
                                 const isCorrect = result.is_correct;
 
@@ -791,15 +864,15 @@ export default function ExamView() {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {/* Your Answer */}
                                                 <div className={`p-4 rounded-lg border ${isCorrect
-                                                        ? 'border-green-200 bg-green-50 dark:bg-green-900/10 dark:border-green-800'
-                                                        : 'border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-800'
+                                                    ? 'border-green-200 bg-green-50 dark:bg-green-900/10 dark:border-green-800'
+                                                    : 'border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-800'
                                                     }`}>
                                                     <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                                                         Your Answer
                                                     </p>
                                                     <p className={`text-sm font-medium ${isCorrect
-                                                            ? 'text-green-900 dark:text-green-100'
-                                                            : 'text-red-900 dark:text-red-100'
+                                                        ? 'text-green-900 dark:text-green-100'
+                                                        : 'text-red-900 dark:text-red-100'
                                                         }`}>
                                                         {typeof result.answer === 'object'
                                                             ? JSON.stringify(result.answer)
@@ -838,6 +911,203 @@ export default function ExamView() {
                         </div>
                     </div>
                 )}
+            </div>
+        );
+    }
+
+    // Review Mode - Show exam with answers
+    if (isReviewMode && reviewData && exam) {
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+                <div className="max-w-4xl mx-auto">
+                    {/* Header */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{exam.title}</h1>
+                            <button
+                                onClick={() => navigate('/dashboard')}
+                                className="px-4 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                            >
+                                ← Back
+                            </button>
+                        </div>
+                        {score && (
+                            <div className="flex items-center gap-6">
+                                <div>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Your Score</p>
+                                    <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                                        {score.percentage.toFixed(1)}%
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Points</p>
+                                    <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                                        {score.score} / {score.max_score}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Questions */}
+                    <div className="space-y-6">
+                        {exam.questions.map((question, index) => {
+                            const submissionAnswer = reviewData.submissionAnswers.find(
+                                (a: any) => a.question_id === question.id
+                            );
+                            const isCorrect = submissionAnswer?.is_correct || false;
+                            const studentAnswer = submissionAnswer?.answer;
+
+                            return (
+                                <div
+                                    key={question.id}
+                                    className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border-2 overflow-hidden ${isCorrect
+                                        ? 'border-green-300 dark:border-green-700'
+                                        : 'border-red-300 dark:border-red-700'
+                                        }`}
+                                >
+                                    {/* Question Header */}
+                                    <div
+                                        className={`px-6 py-4 border-l-4 ${isCorrect
+                                            ? 'border-l-green-500 bg-green-50 dark:bg-green-900/10'
+                                            : 'border-l-red-500 bg-red-50 dark:bg-red-900/10'
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                                    Question {index + 1}
+                                                </span>
+                                                <span
+                                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isCorrect
+                                                        ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
+                                                        : 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+                                                        }`}
+                                                >
+                                                    {isCorrect ? 'Correct' : 'Incorrect'}
+                                                </span>
+                                            </div>
+                                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                {question.points} {question.points === 1 ? 'point' : 'points'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Question Content */}
+                                    <div className="px-6 py-5 space-y-4">
+                                        {/* Question Text */}
+                                        <p className="text-base font-medium text-gray-900 dark:text-white">
+                                            {question.question_text}
+                                        </p>
+
+                                        {/* Options for multiple choice */}
+                                        {(question.type === 'multiple_choice' || question.type === 'true_false') && question.options && (
+                                            <div className="space-y-2">
+                                                {question.options.map((option, optIndex) => {
+                                                    const isStudentAnswer = studentAnswer === option;
+                                                    const isCorrectAnswer = question.correct_answer === option;
+
+                                                    return (
+                                                        <div
+                                                            key={optIndex}
+                                                            className={`p-3 rounded-lg border-2 ${isStudentAnswer && isCorrect
+                                                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                                                                : isStudentAnswer && !isCorrect
+                                                                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                                                                    : isCorrectAnswer && !isCorrect
+                                                                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                                                                        : 'border-gray-200 dark:border-gray-700'
+                                                                }`}
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <div
+                                                                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isStudentAnswer
+                                                                        ? isCorrect
+                                                                            ? 'border-green-500 bg-green-500'
+                                                                            : 'border-red-500 bg-red-500'
+                                                                        : isCorrectAnswer && !isCorrect
+                                                                            ? 'border-indigo-500 bg-indigo-500'
+                                                                            : 'border-gray-300'
+                                                                        }`}
+                                                                >
+                                                                    {(isStudentAnswer || (isCorrectAnswer && !isCorrect)) && (
+                                                                        <div className="w-2 h-2 rounded-full bg-white"></div>
+                                                                    )}
+                                                                </div>
+                                                                <span
+                                                                    className={`flex-1 ${isStudentAnswer || isCorrectAnswer
+                                                                        ? 'font-medium'
+                                                                        : ''
+                                                                        } text-gray-900 dark:text-white`}
+                                                                >
+                                                                    {option}
+                                                                </span>
+                                                                {isStudentAnswer && (
+                                                                    <span className="text-xs font-semibold">
+                                                                        {isCorrect ? '✓ Your Answer' : '✗ Your Answer'}
+                                                                    </span>
+                                                                )}
+                                                                {isCorrectAnswer && !isCorrect && !isStudentAnswer && (
+                                                                    <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                                                                        ✓ Correct Answer
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+
+                                        {/* For other question types, show answer boxes */}
+                                        {question.type !== 'multiple_choice' && question.type !== 'true_false' && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div
+                                                    className={`p-4 rounded-lg border ${isCorrect
+                                                        ? 'border-green-200 bg-green-50 dark:bg-green-900/10'
+                                                        : 'border-red-200 bg-red-50 dark:bg-red-900/10'
+                                                        }`}
+                                                >
+                                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
+                                                        Your Answer
+                                                    </p>
+                                                    <p
+                                                        className={`text-sm font-medium ${isCorrect
+                                                            ? 'text-green-900 dark:text-green-100'
+                                                            : 'text-red-900 dark:text-red-100'
+                                                            }`}
+                                                    >
+                                                        {studentAnswer || 'No answer'}
+                                                    </p>
+                                                </div>
+                                                {!isCorrect && question.correct_answer && (
+                                                    <div className="p-4 rounded-lg border border-indigo-200 bg-indigo-50 dark:bg-indigo-900/10">
+                                                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
+                                                            Correct Answer
+                                                        </p>
+                                                        <p className="text-sm font-medium text-indigo-900 dark:text-indigo-100">
+                                                            {String(question.correct_answer)}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Return Button */}
+                    <div className="mt-8 flex justify-center">
+                        <button
+                            onClick={() => navigate('/dashboard')}
+                            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors"
+                        >
+                            Return to Dashboard
+                        </button>
+                    </div>
+                </div>
             </div>
         );
     }
