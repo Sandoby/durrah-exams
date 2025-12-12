@@ -136,8 +136,17 @@ serve(async (req) => {
                     correctSorted.every((val: string, idx: number) => val === studentSorted[idx])
             } else {
                 // Handle single answer questions
-                const correctAnswer = String(question.correct_answer).trim().toLowerCase()
-                const studentAnswerStr = String(studentAnswer.answer).trim().toLowerCase()
+                // Normalize Unicode strings to handle Arabic and other languages properly
+                const normalizeString = (str: any) => {
+                    return String(str)
+                        .trim()
+                        .normalize('NFC') // Normalize Unicode
+                        .toLowerCase()
+                        .replace(/\s+/g, ' '); // Normalize whitespace
+                };
+
+                const correctAnswer = normalizeString(question.correct_answer);
+                const studentAnswerStr = normalizeString(studentAnswer.answer);
 
                 if (question.type === 'numeric') {
                     try {
