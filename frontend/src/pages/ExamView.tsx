@@ -784,11 +784,27 @@ export default function ExamView() {
                     <div className="mt-6 flex justify-center">
                         <button
                             onClick={() => {
-                                const subId = score?.submission_id;
+                                let subId = score?.submission_id;
+
+                                // Fallback: Try to read from localStorage if state is missing ID
+                                if (!subId) {
+                                    try {
+                                        const saved = localStorage.getItem(`durrah_exam_${id}_score`);
+                                        if (saved) {
+                                            const parsed = JSON.parse(saved);
+                                            subId = parsed.submission_id;
+                                            console.log('🔄 Recovered submission_id from storage:', subId);
+                                        }
+                                    } catch (e) {
+                                        console.error('Failed to recover ID from storage', e);
+                                    }
+                                }
+
                                 if (subId) {
                                     navigate(`/exam/${id}?submission=${subId}`);
                                 } else {
-                                    toast.error('Unable to load review. Please refresh and try again.');
+                                    console.error('Submission ID explicitly missing. Score state:', score);
+                                    toast.error('Unable to load review. Please refresh the page.');
                                 }
                             }}
                             className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 flex items-center justify-center gap-2"
