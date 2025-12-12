@@ -1014,16 +1014,6 @@ export default function ExamView() {
                             );
                         })}
                     </div>
-
-                    {/* Return Button */}
-                    <div className="mt-8 flex justify-center">
-                        <button
-                            onClick={() => navigate('/dashboard')}
-                            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors"
-                        >
-                            Return to Dashboard
-                        </button>
-                    </div>
                 </div>
             </div>
         );
