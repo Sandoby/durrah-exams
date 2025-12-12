@@ -516,20 +516,28 @@ export default function ExamView() {
             // Prepare answers for submission using original question IDs from exam data
             // This ensures types (number/string) match exactly what the backend expects
             const answersPayload = (exam?.questions || []).map(q => {
-                const answer = answers[q.id];
-                if (answer === undefined) return null;
+                const answerData = answers[q.id];
+                if (!answerData) return null;
+
+                // IMPORTANT: The answers state stores objects like { answer: "value" }
+                // We must extract the actual answer value to send to the backend
+                const actualAnswer = answerData.answer;
+
                 return {
                     question_id: q.id,
-                    answer: Array.isArray(answer) ? answer : answer
+                    answer: actualAnswer
                 };
             }).filter(Boolean);
 
             // If no answers matched (shouldn't happen), fallback to current method
             if (answersPayload.length === 0 && Object.keys(answers).length > 0) {
                 Object.entries(answers).forEach(([key, val]) => {
+                    // Handle potential wrapped answer here too
+                    const actualVal = (val as any)?.answer !== undefined ? (val as any).answer : val;
+
                     answersPayload.push({
                         question_id: key,
-                        answer: Array.isArray(val) ? val : val
+                        answer: actualVal
                     });
                 });
             }
