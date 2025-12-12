@@ -767,7 +767,17 @@ export default function ExamView() {
         </div>
     );
 
-    if (submitted) {
+    // Initial loading for review data
+    if (isReviewMode && !reviewData) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            </div>
+        );
+    }
+
+    // Only show submitted screen if NOT in review mode
+    if (submitted && !isReviewMode) {
         const showResults = exam?.settings.show_results_immediately !== false;
 
         return (
