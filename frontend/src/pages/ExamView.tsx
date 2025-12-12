@@ -513,11 +513,26 @@ export default function ExamView() {
                 language: navigator.language
             };
 
-            // Prepare answers for submission
-            const answersPayload = Object.entries(answers).map(([question_id, answer]) => ({
-                question_id,
-                answer: Array.isArray(answer) ? answer : answer
-            }));
+            // Prepare answers for submission using original question IDs from exam data
+            // This ensures types (number/string) match exactly what the backend expects
+            const answersPayload = (exam?.questions || []).map(q => {
+                const answer = answers[q.id];
+                if (answer === undefined) return null;
+                return {
+                    question_id: q.id,
+                    answer: Array.isArray(answer) ? answer : answer
+                };
+            }).filter(Boolean);
+
+            // If no answers matched (shouldn't happen), fallback to current method
+            if (answersPayload.length === 0 && Object.keys(answers).length > 0) {
+                Object.entries(answers).forEach(([key, val]) => {
+                    answersPayload.push({
+                        question_id: key,
+                        answer: Array.isArray(val) ? val : val
+                    });
+                });
+            }
 
             // Get Supabase credentials from environment
             const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -571,8 +586,6 @@ export default function ExamView() {
                     submission_id: result.submission_id
                 });
 
-
-
                 setSubmitted(true);
 
                 // Mark as submitted in local storage
@@ -581,7 +594,7 @@ export default function ExamView() {
                     score: result.score,
                     max_score: result.max_score,
                     percentage: result.percentage,
-                    detailed_results: result.detailed_results
+                    submission_id: result.submission_id // Saved for review mode
                 }));
 
                 // Clear temporary state
