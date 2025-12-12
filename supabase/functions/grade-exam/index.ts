@@ -255,7 +255,15 @@ serve(async (req) => {
                         ...a,
                         correct_answer: q?.correct_answer
                     };
-                }) : undefined
+                }) : undefined,
+                // Debug info
+                debug_info: {
+                    answers_count: answers.length,
+                    first_graded: gradedAnswers.length > 0 ? gradedAnswers[0] : null,
+                    first_question_id: gradedAnswers.length > 0 ? gradedAnswers[0].question_id : null,
+                    expected_answer_for_first: gradedAnswers.length > 0 ?
+                        exam.questions.find((q: any) => q.id === gradedAnswers[0].question_id)?.correct_answer : null
+                }
             }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )

@@ -576,8 +576,19 @@ export default function ExamView() {
             }
 
             const result = await response.json();
+            console.log('✅ Exam Grading Result:', result);
+
+            if (result.debug_info) {
+                console.log('🐛 Debug Info:', result.debug_info);
+            }
 
             if (result.success) {
+                // Check if submission_id is missing
+                if (!result.submission_id) {
+                    console.error('❌ Critical: Server returned success but NO submission_id!');
+                    toast.error('Warning: Submission ID missing despite success');
+                }
+
                 // Set the score from server response
                 setScore({
                     score: result.score,
