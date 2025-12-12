@@ -228,6 +228,10 @@ serve(async (req) => {
         }
 
         // Return grading results
+        // Note: JSONB can store booleans as strings, so check for both true and "true"
+        const shouldShowDetailedResults = settings.show_detailed_results === true ||
+            settings.show_detailed_results === 'true';
+
         return new Response(
             JSON.stringify({
                 success: true,
@@ -236,7 +240,7 @@ serve(async (req) => {
                 max_score: maxScore,
                 percentage: percentage,
                 violations_count: (violations || []).length,
-                detailed_results: (settings.show_detailed_results) ? gradedAnswers.map((a: any) => {
+                detailed_results: shouldShowDetailedResults ? gradedAnswers.map((a: any) => {
                     const q = exam.questions.find((q: any) => q.id === a.question_id);
                     return {
                         ...a,
