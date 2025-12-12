@@ -708,7 +708,7 @@ export default function ExamView() {
                 </div>
 
                 {/* Detailed Results Breakdown */}
-                {detailedResults && (
+                {detailedResults && exam?.settings.show_detailed_results && (
                     <div className="max-w-4xl w-full space-y-6 pb-12">
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Exam Review</h3>
                         {detailedResults.map((result: any, index: number) => {
@@ -859,8 +859,8 @@ export default function ExamView() {
                 </div>
             )}
 
-            <div className={`max-w-4xl mx-auto ${highContrast ? 'contrast-125 saturate-150' : ''} ${fontSize === 'large' ? 'text-lg' : fontSize === 'xlarge' ? 'text-xl' : ''}`}>
-                <div className="max-w-3xl mx-auto">
+            <div className={`max-w-4xl mx-auto ${highContrast ? 'contrast-150 saturate-200 brightness-110' : ''}`}>
+                <div className={`max-w-3xl mx-auto ${fontSize === 'large' ? 'text-lg' : fontSize === 'xlarge' ? 'text-xl' : ''}`}>
                     {/* Header - Hidden in Zen Mode unless hovered or essential */}
                     {!isZenMode && (
                         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 sticky top-0 z-10">
@@ -1145,44 +1145,58 @@ export default function ExamView() {
                 </div>
 
                 {/* Floating Toolbar */}
-                <div className={`fixed bottom-6 right-6 flex flex-col gap-2 z-50 transition-opacity duration-300 ${isZenMode ? 'opacity-20 hover:opacity-100' : 'opacity-100'}`}>
+                <div className={`fixed bottom-4 sm:bottom-6 right-4 sm:right-6 flex flex-col gap-2 z-50 transition-opacity duration-300 ${isZenMode ? 'opacity-20 hover:opacity-100' : 'opacity-100'}`}>
                     <button
                         onClick={() => setShowCalculator(!showCalculator)}
-                        className={`p-3 rounded-full shadow-lg ${showCalculator ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50'}`}
+                        className={`p-2 sm:p-3 rounded-full shadow-lg transition-all ${showCalculator ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                         title="Calculator"
+                        aria-label="Toggle Calculator"
                     >
-                        <CalcIcon size={24} />
+                        <CalcIcon size={20} className="sm:w-6 sm:h-6" />
                     </button>
                     <button
                         onClick={() => setShowQuestionGrid(!showQuestionGrid)}
-                        className="p-3 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full shadow-lg hover:bg-gray-50"
+                        className="p-2 sm:p-3 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                         title="Question Map"
+                        aria-label="Toggle Question Grid"
                     >
-                        <LayoutGrid size={24} />
+                        <LayoutGrid size={20} className="sm:w-6 sm:h-6" />
                     </button>
                     <button
                         onClick={() => {
-                            if (fontSize === 'normal') setFontSize('large');
-                            else if (fontSize === 'large') setFontSize('xlarge');
-                            else setFontSize('normal');
+                            const newSize = fontSize === 'normal' ? 'large' : fontSize === 'large' ? 'xlarge' : 'normal';
+                            setFontSize(newSize);
+                            const sizeLabels = { normal: 'Normal', large: 'Large', xlarge: 'Extra Large' };
+                            toast.success(`Font size: ${sizeLabels[newSize]}`, { duration: 1500, icon: '🔤' });
                         }}
-                        className="p-3 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full shadow-lg hover:bg-gray-50 font-serif font-bold"
+                        className={`p-2 sm:p-3 rounded-full shadow-lg transition-all font-serif font-bold ${fontSize === 'normal' ? 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300' :
+                            fontSize === 'large' ? 'bg-blue-100 text-blue-800 border-2 border-blue-400' :
+                                'bg-purple-100 text-purple-800 border-2 border-purple-400'
+                            } hover:bg-gray-50 dark:hover:bg-gray-700`}
                         title="Toggle Font Size"
+                        aria-label={`Font Size: ${fontSize}`}
                     >
-                        Aa
+                        <span className="text-sm sm:text-base">Aa</span>
                     </button>
                     <button
-                        onClick={() => setHighContrast(!highContrast)}
-                        className={`p-3 rounded-full shadow-lg ${highContrast ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-400' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50'}`}
+                        onClick={() => {
+                            setHighContrast(!highContrast);
+                            toast.success(highContrast ? 'High Contrast Off' : 'High Contrast On', {
+                                duration: 1500,
+                                icon: highContrast ? '🌙' : '☀️'
+                            });
+                        }}
+                        className={`p-2 sm:p-3 rounded-full shadow-lg transition-all ${highContrast ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-400' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                         title="Toggle High Contrast"
+                        aria-label={`High Contrast: ${highContrast ? 'On' : 'Off'}`}
                     >
-                        {highContrast ? <Sun size={24} /> : <Moon size={24} />}
+                        {highContrast ? <Sun size={20} className="sm:w-6 sm:h-6" /> : <Moon size={20} className="sm:w-6 sm:h-6" />}
                     </button>
                 </div>
 
                 {/* Calculator Drawer */}
                 {showCalculator && (
-                    <div className="fixed bottom-24 right-6 z-50 animate-fade-in-up">
+                    <div className="fixed bottom-16 sm:bottom-24 right-4 sm:right-6 z-50 animate-fade-in-up">
                         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-1 border dark:border-gray-700">
                             <Calculator onClose={() => setShowCalculator(false)} />
                         </div>
@@ -1191,12 +1205,18 @@ export default function ExamView() {
 
                 {/* Question Grid Drawer */}
                 {showQuestionGrid && exam && (
-                    <div className="fixed inset-y-0 right-0 w-80 bg-white dark:bg-gray-800 shadow-2xl z-50 p-6 overflow-y-auto transform transition-transform duration-300">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Exam Overview</h3>
-                            <button onClick={() => setShowQuestionGrid(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+                    <div className="fixed inset-y-0 right-0 w-full sm:w-80 bg-white dark:bg-gray-800 shadow-2xl z-50 p-4 sm:p-6 overflow-y-auto transform transition-transform duration-300">
+                        <div className="flex justify-between items-center mb-4 sm:mb-6">
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Exam Overview</h3>
+                            <button
+                                onClick={() => setShowQuestionGrid(false)}
+                                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl leading-none p-2"
+                                aria-label="Close Question Grid"
+                            >
+                                ✕
+                            </button>
                         </div>
-                        <div className="grid grid-cols-4 gap-3">
+                        <div className="grid grid-cols-5 sm:grid-cols-4 gap-2 sm:gap-3">
                             {exam.questions.map((q, idx) => (
                                 <button
                                     key={q.id}
@@ -1209,16 +1229,17 @@ export default function ExamView() {
                                             el?.scrollIntoView({ behavior: 'smooth' });
                                         }
                                     }}
-                                    className={`p-3 rounded-lg text-sm font-bold border-2 ${idx === currentQuestionIndex && viewMode === 'single'
-                                        ? 'border-indigo-600 text-indigo-600 bg-indigo-50'
+                                    className={`p-2 sm:p-3 rounded-lg text-xs sm:text-sm font-bold border-2 relative ${idx === currentQuestionIndex && viewMode === 'single'
+                                        ? 'border-indigo-600 text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
                                         : answers[q.id]
-                                            ? 'border-green-500 bg-green-50 text-green-700'
+                                            ? 'border-green-500 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
                                             : flaggedQuestions.has(q.id)
-                                                ? 'border-red-400 bg-red-50 text-red-700'
-                                                : 'border-gray-200 text-gray-600 hover:border-indigo-300'
+                                                ? 'border-red-400 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                                                : 'border-gray-200 text-gray-600 hover:border-indigo-300 dark:border-gray-600 dark:text-gray-400'
                                         }`}
+                                    aria-label={`Question ${idx + 1}${flaggedQuestions.has(q.id) ? ' (Flagged)' : ''}${answers[q.id] ? ' (Answered)' : ''}`}
                                 >
-                                    {flaggedQuestions.has(q.id) && <Flag size={10} className="absolute top-1 right-1 fill-red-500 text-red-500" />}
+                                    {flaggedQuestions.has(q.id) && <Flag size={8} className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 fill-red-500 text-red-500" />}
                                     {idx + 1}
                                 </button>
                             ))}
@@ -1246,6 +1267,6 @@ export default function ExamView() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
