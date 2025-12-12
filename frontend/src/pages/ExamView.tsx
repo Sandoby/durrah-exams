@@ -847,12 +847,6 @@ export default function ExamView() {
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
                         <div className="flex items-center justify-between mb-4">
                             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{exam.title}</h1>
-                            <button
-                                onClick={() => navigate('/dashboard')}
-                                className="px-4 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                            >
-                                ← Back
-                            </button>
                         </div>
                         {score && (
                             <div className="flex items-center gap-6">
