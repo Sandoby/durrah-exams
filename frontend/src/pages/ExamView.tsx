@@ -709,51 +709,158 @@ export default function ExamView() {
 
                 {/* Detailed Results Breakdown */}
                 {detailedResults && exam?.settings.show_detailed_results && (
-                    <div className="max-w-4xl w-full space-y-6 pb-12">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Exam Review</h3>
-                        {detailedResults.map((result: any, index: number) => {
-                            const question = exam?.questions.find(q => q.id === result.question_id);
-                            return (
-                                <div key={result.question_id} className={`bg-white dark:bg-gray-800 shadow rounded-lg p-6 border-l-4 ${result.is_correct ? 'border-green-500' : 'border-red-500'}`}>
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <span className={`flex items-center justify-center h-6 w-6 rounded-full text-xs font-bold ${result.is_correct ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                                    {index + 1}
-                                                </span>
-                                                <span className={`text-sm font-bold ${result.is_correct ? 'text-green-600' : 'text-red-600'}`}>
-                                                    {result.is_correct ? 'Correct' : 'Incorrect'}
-                                                </span>
-                                            </div>
-                                            <p className="text-gray-900 dark:text-white font-medium mb-4">{question?.question_text || 'Question Text'}</p>
+                    <div className="max-w-5xl w-full space-y-6 pb-12">
+                        {/* Summary Header */}
+                        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+                            <h2 className="text-2xl font-bold mb-2">📊 Detailed Exam Review</h2>
+                            <p className="text-indigo-100">Review your answers and learn from your mistakes</p>
+                        </div>
 
-                                            <div className="space-y-2">
-                                                <div className="text-sm">
-                                                    <span className="text-gray-500 dark:text-gray-400 font-medium">Your Answer: </span>
-                                                    <span className={`${result.is_correct ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'} font-medium`}>
-                                                        {typeof result.answer === 'object' ? JSON.stringify(result.answer) : String(result.answer || 'No Answer')}
+                        {/* Statistics Cards */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border-l-4 border-blue-500">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Questions</p>
+                                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{detailedResults.length}</p>
+                                    </div>
+                                    <div className="text-blue-500 text-3xl">📝</div>
+                                </div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border-l-4 border-green-500">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Correct Answers</p>
+                                        <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                            {detailedResults.filter((r: any) => r.is_correct).length}
+                                        </p>
+                                    </div>
+                                    <div className="text-green-500 text-3xl">✅</div>
+                                </div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border-l-4 border-red-500">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Incorrect Answers</p>
+                                        <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                                            {detailedResults.filter((r: any) => !r.is_correct).length}
+                                        </p>
+                                    </div>
+                                    <div className="text-red-500 text-3xl">❌</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Questions Review */}
+                        <div className="space-y-4">
+                            {detailedResults.map((result: any, index: number) => {
+                                const question = exam?.questions.find(q => q.id === result.question_id);
+                                const isCorrect = result.is_correct;
+
+                                return (
+                                    <div
+                                        key={result.question_id}
+                                        className={`bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border-2 transition-all hover:shadow-lg ${isCorrect
+                                                ? 'border-green-200 dark:border-green-800'
+                                                : 'border-red-200 dark:border-red-800'
+                                            }`}
+                                    >
+                                        {/* Question Header */}
+                                        <div className={`px-6 py-4 ${isCorrect
+                                                ? 'bg-green-50 dark:bg-green-900/20'
+                                                : 'bg-red-50 dark:bg-red-900/20'
+                                            }`}>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`flex items-center justify-center h-10 w-10 rounded-full text-sm font-bold shadow-sm ${isCorrect
+                                                            ? 'bg-green-500 text-white'
+                                                            : 'bg-red-500 text-white'
+                                                        }`}>
+                                                        {index + 1}
                                                     </span>
-                                                </div>
-
-                                                {!result.is_correct && result.correct_answer && (
-                                                    <div className="text-sm">
-                                                        <span className="text-gray-500 dark:text-gray-400 font-medium">Correct Answer: </span>
-                                                        <span className="text-indigo-600 dark:text-indigo-400 font-medium">
-                                                            {typeof result.correct_answer === 'object' ? JSON.stringify(result.correct_answer) : String(result.correct_answer)}
+                                                    <div>
+                                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${isCorrect
+                                                                ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
+                                                                : 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+                                                            }`}>
+                                                            {isCorrect ? '✓ Correct' : '✗ Incorrect'}
                                                         </span>
                                                     </div>
-                                                )}
+                                                </div>
+                                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                                    {question?.points || 1} {question?.points === 1 ? 'point' : 'points'}
+                                                </span>
                                             </div>
                                         </div>
+
+                                        {/* Question Content */}
+                                        <div className="px-6 py-5 space-y-4">
+                                            {/* Question Text */}
+                                            <div>
+                                                <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                                                    Question
+                                                </h4>
+                                                <p className="text-lg text-gray-900 dark:text-white font-medium leading-relaxed">
+                                                    {question?.question_text || 'Question Text'}
+                                                </p>
+                                            </div>
+
+                                            {/* Your Answer */}
+                                            <div className={`p-4 rounded-lg border-2 ${isCorrect
+                                                    ? 'bg-green-50 border-green-200 dark:bg-green-900/10 dark:border-green-800'
+                                                    : 'bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-800'
+                                                }`}>
+                                                <div className="flex items-start gap-3">
+                                                    <span className={`text-2xl ${isCorrect ? 'text-green-500' : 'text-red-500'}`}>
+                                                        {isCorrect ? '✓' : '✗'}
+                                                    </span>
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                                                            Your Answer:
+                                                        </p>
+                                                        <p className={`text-base font-semibold ${isCorrect
+                                                                ? 'text-green-700 dark:text-green-300'
+                                                                : 'text-red-700 dark:text-red-300'
+                                                            }`}>
+                                                            {typeof result.answer === 'object'
+                                                                ? JSON.stringify(result.answer)
+                                                                : String(result.answer || 'No Answer Provided')}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Correct Answer (shown for all questions) */}
+                                            {result.correct_answer && (
+                                                <div className="p-4 rounded-lg border-2 bg-indigo-50 border-indigo-200 dark:bg-indigo-900/10 dark:border-indigo-800">
+                                                    <div className="flex items-start gap-3">
+                                                        <span className="text-2xl text-indigo-500">💡</span>
+                                                        <div className="flex-1">
+                                                            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                                                                Correct Answer:
+                                                            </p>
+                                                            <p className="text-base font-semibold text-indigo-700 dark:text-indigo-300">
+                                                                {typeof result.correct_answer === 'object'
+                                                                    ? JSON.stringify(result.correct_answer)
+                                                                    : String(result.correct_answer)}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
-                        <div className="flex justify-center mt-8">
+                                );
+                            })}
+                        </div>
+
+                        {/* Return Button */}
+                        <div className="flex justify-center mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
                             <button
                                 onClick={() => navigate('/dashboard')}
-                                className="px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm"
+                                className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
                             >
+                                <span>←</span>
                                 Return to Dashboard
                             </button>
                         </div>
