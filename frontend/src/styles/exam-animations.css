@@ -1,0 +1,173 @@
+/* Durrah Exams - Custom Animations for New Features */
+
+/* Fade In Animation - For modals appearing */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Scale In Animation - For smooth modal entrance */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Bounce In Animation - For attention-grabbing entrance */
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Slide In from Top - For notifications */
+@keyframes slide-in-top {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pulse Animation - For progress completion */
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Utility Classes */
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.animate-slide-in-top {
+  animation: slide-in-top 0.4s ease-out;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Progress Bar Smooth Transition */
+.progress-bar-transition {
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Countdown Circle Animation */
+.countdown-circle {
+  transition: stroke-dashoffset 1s linear;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Button Hover Effects */
+.button-hover-scale {
+  transition: transform 0.2s ease-in-out;
+}
+
+.button-hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.button-hover-scale:active {
+  transform: scale(0.95);
+}
+
+/* Question Jump Button Animation */
+.question-jump-btn {
+  transition: all 0.2s ease-in-out;
+}
+
+.question-jump-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Warning Badge Pulse */
+@keyframes badge-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(251, 146, 60, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(251, 146, 60, 0);
+  }
+}
+
+.badge-pulse {
+  animation: badge-pulse 2s infinite;
+}
+
+/* Dark Mode Specific */
+@media (prefers-color-scheme: dark) {
+  .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.85);
+  }
+}
+
+/* Responsive Animations - Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-scale-in,
+  .animate-bounce-in,
+  .animate-slide-in-top {
+    animation: none;
+    transition: none;
+  }
+  
+  .progress-bar-transition {
+    transition: none;
+  }
+}
+
+/* Loading State Spinner */
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spinner 1s linear infinite;
+}
