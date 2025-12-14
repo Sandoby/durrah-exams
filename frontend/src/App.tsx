@@ -28,6 +28,9 @@ import { BlogPost } from './pages/blog/BlogPost';
 import { SubmissionSync } from './components/SubmissionSync';
 import { ExamAnalyticsDashboard } from "./components/analytics/ExamAnalyticsDashboard";
 
+import KidsLanding from './pages/KidsLanding';
+import KidsExamView from './pages/KidsExamView';
+
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 
@@ -55,6 +58,8 @@ function App() {
         <div className="min-h-screen bg-background text-foreground font-sans antialiased">
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/kids" element={<KidsLanding />} />
+            <Route path="/kids/quiz/:id" element={<KidsExamView />} />
             <Route path="/demo" element={<DemoPage />} />
             <Route path="/blog" element={<BlogList />} />
             <Route path="/blog/:slug" element={<BlogPost />} />

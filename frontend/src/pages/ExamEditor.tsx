@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ChangeEvent } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -45,6 +45,11 @@ interface ExamForm {
         end_time: string | null;
         restrict_by_email: boolean;
         allowed_emails: string[];
+
+        // Kids Mode
+        child_mode_enabled?: boolean;
+        attempt_limit?: number | null;
+        leaderboard_visibility?: 'hidden' | 'after_submit' | 'always';
     };
 }
 
@@ -72,6 +77,31 @@ export default function ExamEditor() {
     const [startTour] = useState(new URLSearchParams(window.location.search).get('demo') === 'true');
     const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
 
+    // Kids Mode helpers
+    const [savedQuizCode, setSavedQuizCode] = useState<string | null>(null);
+    const kidsLandingUrl = useMemo(() => `${window.location.origin}/kids`, []);
+
+    const generateQuizCode = () => {
+        const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+        const chunk = (n: number) => Array.from({ length: n }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
+        return `KID-${chunk(3)}${chunk(3)}`;
+    };
+
+    const ensureQuizCode = () => {
+        if (savedQuizCode) return savedQuizCode;
+        const next = generateQuizCode();
+        setSavedQuizCode(next);
+        return next;
+    };
+
+    const copyText = async (text: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            toast.success(t?.('common.copied') ?? 'Copied');
+        } catch {
+            toast.error(t?.('common.copyFailed') ?? 'Copy failed');
+        }
+    };
     useDemoTour('create-exam', startTour && isDemo);
 
 
@@ -129,7 +159,7 @@ export default function ExamEditor() {
         if (demoMode) {
             // Load demo exam data
             reset({
-                title: '📐 Mathematics Quiz - Grade 10',
+                title: 'ًں“گ Mathematics Quiz - Grade 10',
                 description: 'A comprehensive mathematics assessment covering algebra, geometry, and trigonometry concepts.',
                 required_fields: ['name', 'email'],
                 questions: [
@@ -199,6 +229,9 @@ export default function ExamEditor() {
                 .single();
 
             if (examError) throw examError;
+
+            // Persist quiz code if present
+            setSavedQuizCode(exam?.quiz_code ?? null);
 
             // Fetch questions
             const { data: questions, error: questionsError } = await supabase
@@ -302,6 +335,11 @@ export default function ExamEditor() {
         try {
             let examId = id;
 
+            const finalQuizCode = data.settings?.child_mode_enabled ? (savedQuizCode || generateQuizCode()) : null;
+            if (data.settings?.child_mode_enabled && !savedQuizCode && finalQuizCode) {
+                setSavedQuizCode(finalQuizCode);
+            }
+
             // 1. Upsert Exam
             const examData = {
                 title: data.title,
@@ -310,6 +348,7 @@ export default function ExamEditor() {
                 required_fields: data.required_fields,
                 tutor_id: user.id,
                 is_active: true,
+                quiz_code: finalQuizCode,
             };
 
             if (id) {
@@ -411,9 +450,10 @@ export default function ExamEditor() {
             // Wait, I can use `t('examEditor.save')` + 'd' ? No.
             // I'll just leave it English for now to be safe.
             navigate('/dashboard');
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error saving exam:', error);
-            toast.error(error.message || 'Failed to save exam');
+            const message = error instanceof Error ? error.message : 'Failed to save exam';
+            toast.error(message);
         } finally {
             setIsLoading(false);
         }
@@ -797,6 +837,119 @@ export default function ExamEditor() {
                                     />
                                     <p className="mt-1 text-xs text-gray-500">{t('examEditor.settings.endTimeDesc')}</p>
                                 </div>
+
+                                {/* Kids Mode Settings */}
+                                <div className="col-span-2">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-md font-medium text-gray-900 dark:text-white">{t('examEditor.settings.kidsMode.title')}</h4>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={watch('settings.child_mode_enabled')}
+                                                onChange={(e) => {
+                                                    setValue('settings.child_mode_enabled', e.target.checked);
+                                                    if (e.target.checked) {
+                                                        // Set default values for Kids Mode
+                                                        setValue('settings.attempt_limit', 1);
+                                                        setValue('settings.leaderboard_visibility', 'after_submit');
+                                                        ensureQuizCode();
+                                                    }
+                                                }}
+                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                            />
+                                            <label className="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-300">
+                                                {t('examEditor.settings.kidsMode.enable')}
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {watch('settings.child_mode_enabled') && (
+                                        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.kidsMode.attemptLimit')}</label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                    {...register('settings.attempt_limit', { valueAsNumber: true })}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.kidsMode.leaderboardVisibility')}</label>
+                                                <select
+                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                    {...register('settings.leaderboard_visibility')}
+                                                >
+                                                    <option value="hidden">{t('examEditor.settings.kidsMode.visibilityHidden')}</option>
+                                                    <option value="after_submit">{t('examEditor.settings.kidsMode.visibilityAfterSubmit')}</option>
+                                                    <option value="always">{t('examEditor.settings.kidsMode.visibilityAlways')}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    )}
+                                
+                                    <div className="mt-4 p-4 rounded-lg border border-indigo-200 bg-indigo-50/50 dark:border-indigo-800 dark:bg-indigo-900/20">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div>
+                                                <p className="text-sm font-medium text-indigo-900 dark:text-indigo-200">
+                                                    {t('examEditor.settings.kidsMode.shareTitle', 'Share with kids')}
+                                                </p>
+                                                <p className="text-xs text-gray-600 dark:text-gray-300">
+                                                    {t('examEditor.settings.kidsMode.shareDesc', 'Kids open the kids page and enter the code.')}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                            <div className="rounded-md bg-white/80 dark:bg-gray-800/60 border border-indigo-100 dark:border-indigo-800 p-3">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                        {t('examEditor.settings.kidsMode.kidsPage', 'Kids page')}
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => copyText(kidsLandingUrl)}
+                                                        className="text-xs font-medium text-indigo-700 hover:text-indigo-900 dark:text-indigo-300"
+                                                    >
+                                                        {t('common.copy', 'Copy')}
+                                                    </button>
+                                                </div>
+                                                <div className="mt-2 text-sm font-mono text-gray-700 dark:text-gray-200 break-all">{kidsLandingUrl}</div>
+                                            </div>
+
+                                            <div className="rounded-md bg-white/80 dark:bg-gray-800/60 border border-indigo-100 dark:border-indigo-800 p-3">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                        {t('examEditor.settings.kidsMode.quizCode', 'Quiz code')}
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const next = generateQuizCode();
+                                                                setSavedQuizCode(next);
+                                                                toast.success(t('examEditor.settings.kidsMode.newCodeToast', 'New code generated'));
+                                                            }}
+                                                            className="text-xs font-medium text-indigo-700 hover:text-indigo-900 dark:text-indigo-300"
+                                                        >
+                                                            {t('common.new', 'New')}
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => copyText(ensureQuizCode())}
+                                                            className="text-xs font-medium text-indigo-700 hover:text-indigo-900 dark:text-indigo-300"
+                                                        >
+                                                            {t('common.copy', 'Copy')}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div className="mt-2 text-lg font-bold tracking-wider text-gray-900 dark:text-gray-100">{ensureQuizCode()}</div>
+                                                <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                                                    {t('examEditor.settings.kidsMode.saveToStore', 'Save the exam to store the code in the database.')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div></div>
                             </div>
                         </div>
 
@@ -880,13 +1033,13 @@ export default function ExamEditor() {
                                                                     const corr = (questionsWatch?.[index]?.correct_answer ?? '') as string;
                                                                     return (
                                                                         <>
-                                                                            {opts.map((optValue: string, optionIndex: number) => (
+                                                                            {opts.map((_optValue: string, optionIndex: number) => (
                                                                                 <div key={optionIndex} className="flex items-center space-x-2">
                                                                                     <input
                                                                                         type="radio"
-                                                                                        value={optValue}
-                                                                                        checked={corr === optValue && optValue !== ''}
-                                                                                        onChange={() => setValue(`questions.${index}.correct_answer`, optValue)}
+                                                                                        value={opts[optionIndex] || ''}
+                                                                                        checked={corr === (opts[optionIndex] || '') && (opts[optionIndex] || '') !== ''}
+                                                                                        onChange={() => setValue(`questions.${index}.correct_answer`, opts[optionIndex] || '')}
                                                                                         className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                                                                                     />
                                                                                     <input
@@ -925,17 +1078,17 @@ export default function ExamEditor() {
                                                                     const currentCorrect = (questionsWatch?.[index]?.correct_answer as string[]) ?? [];
                                                                     return (
                                                                         <>
-                                                                            {opts.map((optValue: string, optionIndex: number) => (
+                                                                            {opts.map((_optValue: string, optionIndex: number) => (
                                                                                 <div key={optionIndex} className="flex items-center space-x-2">
                                                                                     <input
                                                                                         type="checkbox"
-                                                                                        checked={optValue ? currentCorrect.includes(optValue) : false}
+                                                                                        checked={_optValue ? currentCorrect.includes(_optValue) : false}
                                                                                         onChange={(e: ChangeEvent<HTMLInputElement>) => {
                                                                                             const arr = [...currentCorrect];
                                                                                             if (e.target.checked) {
-                                                                                                if (optValue && !arr.includes(optValue)) arr.push(optValue);
+                                                                                                if (_optValue && !arr.includes(_optValue)) arr.push(_optValue);
                                                                                             } else {
-                                                                                                const idx = arr.indexOf(optValue);
+                                                                                                const idx = arr.indexOf(_optValue);
                                                                                                 if (idx !== -1) arr.splice(idx, 1);
                                                                                             }
                                                                                             setValue(`questions.${index}.correct_answer`, arr);
@@ -952,7 +1105,7 @@ export default function ExamEditor() {
                                                                                             const optsNow = (questionsWatch?.[index]?.options ?? []) as string[];
                                                                                             const newOpt = optsNow[optionIndex] ?? '';
                                                                                             const corr = (questionsWatch?.[index]?.correct_answer as string[]) ?? [];
-                                                                                            const updated = corr.map(a => (a === optValue ? newOpt : a)).filter(Boolean);
+                                                                                            const updated = corr.map(a => (a === _optValue ? newOpt : a)).filter(Boolean);
                                                                                             setValue(`questions.${index}.correct_answer`, updated);
                                                                                         }}
                                                                                     />
@@ -1129,3 +1282,7 @@ export default function ExamEditor() {
         </div>
     );
 }
+
+
+
+

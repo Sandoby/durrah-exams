@@ -10,6 +10,17 @@ const corsHeaders = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+type GradedAnswerRow = {
+    question_id: string
+    answer: string | null
+    is_correct: boolean
+}
+
+const getEnv = (key: string): string => {
+    const deno = (globalThis as any).Deno
+    return (deno?.env?.get?.(key) ?? '') as string
+}
+
 serve(async (req) => {
     // Handle CORS preflight requests
     if (req.method === 'OPTIONS') {
@@ -22,8 +33,8 @@ serve(async (req) => {
     try {
         // Create Supabase client with service role
         const supabaseClient = createClient(
-            Deno.env.get('SUPABASE_URL') ?? '',
-            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+            getEnv('SUPABASE_URL'),
+            getEnv('SUPABASE_SERVICE_ROLE_KEY'),
             {
                 auth: {
                     autoRefreshToken: false,
@@ -33,7 +44,22 @@ serve(async (req) => {
         )
 
         // Parse request body
-        const { exam_id, student_data, answers, violations, browser_info, time_taken } = await req.json()
+        // Kids Mode additions: child_mode, nickname, quiz_code
+        const {
+            exam_id,
+            student_data,
+            answers,
+            violations,
+            browser_info,
+            time_taken,
+            child_mode,
+            nickname,
+            quiz_code,
+        } = await req.json()
+
+        const isChildMode = child_mode === true || child_mode === 'true'
+        const safeNickname = typeof nickname === 'string' ? nickname.trim().slice(0, 40) : null
+        const safeQuizCode = typeof quiz_code === 'string' ? quiz_code.trim().toUpperCase().replace(/\s+/g, '') : null
 
         // Validate required fields
         if (!exam_id || !student_data || !Array.isArray(answers)) {
@@ -51,6 +77,13 @@ serve(async (req) => {
             )
         }
 
+        if (isChildMode && !safeNickname) {
+            return new Response(
+                JSON.stringify({ error: 'Missing nickname for kids mode' }),
+                { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+        }
+
         // Fetch exam and questions (with correct answers)
         const { data: exam, error: examError } = await supabaseClient
             .from('exams')
@@ -62,6 +95,15 @@ serve(async (req) => {
             return new Response(
                 JSON.stringify({ error: 'Exam not found' }),
                 { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+        }
+
+        // If quiz_code is provided (kids flow), validate it matches the exam's quiz_code when available.
+        // We only enforce when exam.quiz_code exists to avoid breaking older DB schemas.
+        if (safeQuizCode && exam.quiz_code && String(exam.quiz_code).toUpperCase() !== safeQuizCode) {
+            return new Response(
+                JSON.stringify({ error: 'Invalid quiz code' }),
+                { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
             )
         }
 
@@ -89,10 +131,56 @@ serve(async (req) => {
             }
         }
 
+        // Kids Mode: attempt limiting (server-side enforcement)
+        // Only enforce when:
+        // - child_mode is enabled on exam settings
+        // - attempt_limit is a positive number
+        // - nickname is present
+        const childModeEnabled = settings.child_mode_enabled === true || settings.child_mode_enabled === 'true'
+        const attemptLimitRaw = settings.attempt_limit
+        const attemptLimit = typeof attemptLimitRaw === 'number'
+            ? attemptLimitRaw
+            : (typeof attemptLimitRaw === 'string' ? parseInt(attemptLimitRaw, 10) : null)
+
+        if (isChildMode && childModeEnabled && safeNickname && attemptLimit && attemptLimit > 0) {
+            // Prefer counting by dedicated columns if the DB has them. If not, safely fall back to student_name.
+            // This is best-effort and will become strict once DB columns are added.
+            const { count: cntNickname, error: cntNicknameErr } = await supabaseClient
+                .from('submissions')
+                .select('id', { count: 'exact', head: true })
+                .eq('exam_id', exam_id)
+                .eq('nickname', safeNickname)
+
+            const nicknameCount = !cntNicknameErr && typeof cntNickname === 'number' ? cntNickname : null
+
+            let attemptsSoFar: number | null = nicknameCount
+            if (attemptsSoFar === null) {
+                const { count: cntName, error: cntNameErr } = await supabaseClient
+                    .from('submissions')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('exam_id', exam_id)
+                    .eq('student_name', safeNickname)
+
+                attemptsSoFar = !cntNameErr && typeof cntName === 'number' ? cntName : 0
+            }
+
+            if ((attemptsSoFar ?? 0) >= attemptLimit) {
+                return new Response(
+                    JSON.stringify({
+                        error: 'Attempt limit reached',
+                        code: 'ATTEMPT_LIMIT',
+                        attempt_limit: attemptLimit,
+                        attempts: attemptsSoFar ?? 0
+                    }),
+                    { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                )
+            }
+        }
+
         // Grade the exam
         let totalScore = 0
         let maxScore = 0
-        const gradedAnswers = []
+        const gradedAnswers: GradedAnswerRow[] = []
 
         for (const question of exam.questions) {
             // Skip short answer questions (manual grading required)
@@ -106,7 +194,7 @@ serve(async (req) => {
             const studentAnswer = answers.find((a: any) => a.question_id === question.id)
             if (!studentAnswer) {
                 gradedAnswers.push({
-                    question_id: question.id,
+                    question_id: String(question.id),
                     answer: null,
                     is_correct: false
                 })
@@ -166,10 +254,10 @@ serve(async (req) => {
             }
 
             gradedAnswers.push({
-                question_id: question.id,
+                question_id: String(question.id),
                 answer: typeof studentAnswer.answer === 'object'
                     ? JSON.stringify(studentAnswer.answer)
-                    : studentAnswer.answer,
+                    : String(studentAnswer.answer ?? ''),
                 is_correct: isCorrect
             })
         }
@@ -177,8 +265,8 @@ serve(async (req) => {
         const percentage = maxScore > 0 ? (totalScore / maxScore) * 100 : 0
 
         // Prepare student info
-        const studentName = student_data.name || student_data.student_id || 'Anonymous'
-        const studentEmail = student_data.email || `${student_data.student_id || 'student'}@example.com`
+        const studentName = student_data.name || student_data.student_id || (safeNickname ?? 'Anonymous')
+        const studentEmail = student_data.email || `${student_data.student_id || safeNickname || 'student'}@example.com`
 
         // Insert submission
         const { data: submission, error: submissionError } = await supabaseClient
@@ -193,7 +281,11 @@ serve(async (req) => {
                 violations: violations || [],
                 browser_info: browser_info || {},
                 student_data: student_data || {},
-                time_taken: typeof time_taken === 'number' ? time_taken : null
+                time_taken: typeof time_taken === 'number' ? time_taken : null,
+                // Kids Mode (optional columns)
+                child_mode: isChildMode ? true : false,
+                nickname: isChildMode ? safeNickname : null,
+                quiz_code: safeQuizCode
             })
             .select()
             .single()
@@ -207,7 +299,7 @@ serve(async (req) => {
         }
 
         // Insert graded answers
-        const answersToInsert = gradedAnswers.map(a => ({
+        const answersToInsert = gradedAnswers.map((a) => ({
             ...a,
             submission_id: submission.id
         }))
