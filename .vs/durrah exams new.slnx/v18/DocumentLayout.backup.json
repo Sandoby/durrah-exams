@@ -1,0 +1,445 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\DEFINITIVE_MANUAL_FIX.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:DEFINITIVE_MANUAL_FIX.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\frontend\\src\\pages\\ExamView.tsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\pages\\ExamView.tsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\SAFE_MANUAL_PATCH.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:SAFE_MANUAL_PATCH.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\FINAL_IMPLEMENTATION_FOR_YOUR_STRUCTURE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:FINAL_IMPLEMENTATION_FOR_YOUR_STRUCTURE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\ALMOST_DONE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ALMOST_DONE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\FEATURE_COMPARISON.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:FEATURE_COMPARISON.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\frontend\\src\\styles\\exam-animations.css||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\styles\\exam-animations.css||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\QUICK_IMPLEMENTATION_GUIDE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:QUICK_IMPLEMENTATION_GUIDE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\EXAM_VIEW_IMPROVEMENTS.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:EXAM_VIEW_IMPROVEMENTS.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\frontend\\src\\pages\\AgentSetup.tsx||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\pages\\AgentSetup.tsx||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\IMPLEMENTATION_SUMMARY.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:IMPLEMENTATION_SUMMARY.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\MANUAL_IMPLEMENTATION_REQUIRED.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:MANUAL_IMPLEMENTATION_REQUIRED.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\IMPLEMENTATION_STATUS.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:IMPLEMENTATION_STATUS.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\COPY_PASTE_CHANGES.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:COPY_PASTE_CHANGES.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\BUILD_STATUS.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:BUILD_STATUS.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\BUILD_FIX_ACTION_PLAN.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:BUILD_FIX_ACTION_PLAN.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\IMPLEMENTATION_REALITY_CHECK.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:IMPLEMENTATION_REALITY_CHECK.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\APPLY_CHANGES.ps1||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:APPLY_CHANGES.ps1||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\apply-changes.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:apply-changes.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\IMPLEMENTATION_STATUS_FINAL.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:IMPLEMENTATION_STATUS_FINAL.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\QUICK_FIX_NEEDED.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:QUICK_FIX_NEEDED.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\FINAL_TOUCHES_NEEDED.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:FINAL_TOUCHES_NEEDED.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\complete-fix.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:complete-fix.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\apply-all-changes.ps1||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:apply-all-changes.ps1||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\add-modals-final.ps1||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:add-modals-final.ps1||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "add-modals-final.ps1",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\add-modals-final.ps1",
+              "RelativeDocumentMoniker": "add-modals-final.ps1",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\add-modals-final.ps1",
+              "RelativeToolTip": "add-modals-final.ps1",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGwAAAAAAAAAAAAAAA==",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAANOSURBVDhPjVRLTBtXFD1jsEmgBBMwhFQKICtNUEJWXaTKrpG6aJAiISRWWXaTqs2KLmBXKatIEeomUqTumixY5NcqqyiNEhXk8IlCim3ANr/BgAf/xjOeYT7Pve/ZBCchlCOdee/emXvm3vs\u002BEggzMzOMjwfBNM3C6Ojoj2NjYw/ILJa9H6FUKokxGo2y/8Paygr788mTRH9//zWfz9ckAveBpzIK8YN4vLUVx1tauoaGhob7\u002Bvquejyehkrop\u002BAZuq57IHVdZ5OTk8wwDBYKhRYHBgauUWh9WWEP7zM8DBRFwcTEBFRVDQ4ODt4mVxfRJ15Wg2foOM6hqGkak2WZzc7O8oW8QmwWIhUcuoe7rKurQ3t7O3p6engYL7mGT3Yhtk00GmHBYFA4dlEsGthStuGpKX/P9wPp0ciFy/bwyMh9msQd2y68fP7sj3wuuykEI5EPBWmXYHlVhlLQ0dDkh0sKqulAkiR4az1wyOY\u002Bl9GjJEFZX2XD13/4ZjURm6paFJGDIBdc30qBNbch3diG5foAHq7bsBv8\u002BC1m4pFWj0dmIx4UjkpT1hEpqxWZZVk8eP8ecsGUqiPFahE3GJZ0Fyb17lzrF7j8ZRP\u002BWVIwny5iKVOEkisgmdxMO7a1w3WqBKtIdo7E1kgsrtlY0Cy8y1n4PZzCd93N8PtqEE2piCkq1GwB6c2NiGtbea6zb8lqQUMGXizoDP\u002BqFibiCvq6/LjY0Yhb4wksbuaRzWgwNAMeU4eWUV7TltrmKhXBvXI55\u002BNLkO0aTGouprI7sDUd356ox/NYCt\u002BfDuDmpU4EPAyOYRI1FotG1oq6bnClqgz3sCBvIF0sIaCkcEHdwkkvw69/z2NKzuJOKIF7b1bQfQT4utkHW82ZamZbp\u002BMpYmv5o9w7Xm4ZjmXjlx4vWo\u002BVjyrfLrSK1AoV2XweLYEA5sKLOH/2DB6/yGyNG3pSfEgQgh8jTyW\u002BWVwGP1sS2/1RSYhm0xmc7KAFScjIW3CTyfV5e8eMVj4qn5RwOMw6O08JB0fo7RzvKs0kSO8z36tAlERZ//zTjbumrv21Ia885bcRfyUEe3t7r9Kl\u002BRVNP3/H7YPp6elXfCDmhIMgBAlcyE/0Cuvw0IlczBYWgP8Ad15o\u002B6vo50EAAAAASUVORK5CYII=",
+              "WhenOpened": "2025-12-13T01:24:41.297Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "apply-all-changes.ps1",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\apply-all-changes.ps1",
+              "RelativeDocumentMoniker": "apply-all-changes.ps1",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\apply-all-changes.ps1",
+              "RelativeToolTip": "apply-all-changes.ps1",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAOgAAAAAAAAAAAAAAA==",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAANOSURBVDhPjVRLTBtXFD1jsEmgBBMwhFQKICtNUEJWXaTKrpG6aJAiISRWWXaTqs2KLmBXKatIEeomUqTumixY5NcqqyiNEhXk8IlCim3ANr/BgAf/xjOeYT7Pve/ZBCchlCOdee/emXvm3vs\u002BEggzMzOMjwfBNM3C6Ojoj2NjYw/ILJa9H6FUKokxGo2y/8Paygr788mTRH9//zWfz9ckAveBpzIK8YN4vLUVx1tauoaGhob7\u002Bvquejyehkrop\u002BAZuq57IHVdZ5OTk8wwDBYKhRYHBgauUWh9WWEP7zM8DBRFwcTEBFRVDQ4ODt4mVxfRJ15Wg2foOM6hqGkak2WZzc7O8oW8QmwWIhUcuoe7rKurQ3t7O3p6engYL7mGT3Yhtk00GmHBYFA4dlEsGthStuGpKX/P9wPp0ciFy/bwyMh9msQd2y68fP7sj3wuuykEI5EPBWmXYHlVhlLQ0dDkh0sKqulAkiR4az1wyOY\u002Bl9GjJEFZX2XD13/4ZjURm6paFJGDIBdc30qBNbch3diG5foAHq7bsBv8\u002BC1m4pFWj0dmIx4UjkpT1hEpqxWZZVk8eP8ecsGUqiPFahE3GJZ0Fyb17lzrF7j8ZRP\u002BWVIwny5iKVOEkisgmdxMO7a1w3WqBKtIdo7E1kgsrtlY0Cy8y1n4PZzCd93N8PtqEE2piCkq1GwB6c2NiGtbea6zb8lqQUMGXizoDP\u002BqFibiCvq6/LjY0Yhb4wksbuaRzWgwNAMeU4eWUV7TltrmKhXBvXI55\u002BNLkO0aTGouprI7sDUd356ox/NYCt\u002BfDuDmpU4EPAyOYRI1FotG1oq6bnClqgz3sCBvIF0sIaCkcEHdwkkvw69/z2NKzuJOKIF7b1bQfQT4utkHW82ZamZbp\u002BMpYmv5o9w7Xm4ZjmXjlx4vWo\u002BVjyrfLrSK1AoV2XweLYEA5sKLOH/2DB6/yGyNG3pSfEgQgh8jTyW\u002BWVwGP1sS2/1RSYhm0xmc7KAFScjIW3CTyfV5e8eMVj4qn5RwOMw6O08JB0fo7RzvKs0kSO8z36tAlERZ//zTjbumrv21Ia885bcRfyUEe3t7r9Kl\u002BRVNP3/H7YPp6elXfCDmhIMgBAlcyE/0Cuvw0IlczBYWgP8Ad15o\u002B6vo50EAAAAASUVORK5CYII=",
+              "WhenOpened": "2025-12-13T01:03:06.695Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DEFINITIVE_MANUAL_FIX.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\DEFINITIVE_MANUAL_FIX.md",
+              "RelativeDocumentMoniker": "DEFINITIVE_MANUAL_FIX.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\DEFINITIVE_MANUAL_FIX.md",
+              "RelativeToolTip": "DEFINITIVE_MANUAL_FIX.md",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-13T00:57:29.251Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "complete-fix.js",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\complete-fix.js",
+              "RelativeDocumentMoniker": "complete-fix.js",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\complete-fix.js",
+              "RelativeToolTip": "complete-fix.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAJwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-12-13T00:47:12.005Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "FINAL_TOUCHES_NEEDED.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\FINAL_TOUCHES_NEEDED.md",
+              "RelativeDocumentMoniker": "FINAL_TOUCHES_NEEDED.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\FINAL_TOUCHES_NEEDED.md",
+              "RelativeToolTip": "FINAL_TOUCHES_NEEDED.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAK8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-13T00:45:28.974Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "APPLY_CHANGES.ps1",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\APPLY_CHANGES.ps1",
+              "RelativeDocumentMoniker": "APPLY_CHANGES.ps1",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\APPLY_CHANGES.ps1",
+              "RelativeToolTip": "APPLY_CHANGES.ps1",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAIwAAAAAAAAAAAAAAA==",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAANOSURBVDhPjVRLTBtXFD1jsEmgBBMwhFQKICtNUEJWXaTKrpG6aJAiISRWWXaTqs2KLmBXKatIEeomUqTumixY5NcqqyiNEhXk8IlCim3ANr/BgAf/xjOeYT7Pve/ZBCchlCOdee/emXvm3vs\u002BEggzMzOMjwfBNM3C6Ojoj2NjYw/ILJa9H6FUKokxGo2y/8Paygr788mTRH9//zWfz9ckAveBpzIK8YN4vLUVx1tauoaGhob7\u002Bvquejyehkrop\u002BAZuq57IHVdZ5OTk8wwDBYKhRYHBgauUWh9WWEP7zM8DBRFwcTEBFRVDQ4ODt4mVxfRJ15Wg2foOM6hqGkak2WZzc7O8oW8QmwWIhUcuoe7rKurQ3t7O3p6engYL7mGT3Yhtk00GmHBYFA4dlEsGthStuGpKX/P9wPp0ciFy/bwyMh9msQd2y68fP7sj3wuuykEI5EPBWmXYHlVhlLQ0dDkh0sKqulAkiR4az1wyOY\u002Bl9GjJEFZX2XD13/4ZjURm6paFJGDIBdc30qBNbch3diG5foAHq7bsBv8\u002BC1m4pFWj0dmIx4UjkpT1hEpqxWZZVk8eP8ecsGUqiPFahE3GJZ0Fyb17lzrF7j8ZRP\u002BWVIwny5iKVOEkisgmdxMO7a1w3WqBKtIdo7E1kgsrtlY0Cy8y1n4PZzCd93N8PtqEE2piCkq1GwB6c2NiGtbea6zb8lqQUMGXizoDP\u002BqFibiCvq6/LjY0Yhb4wksbuaRzWgwNAMeU4eWUV7TltrmKhXBvXI55\u002BNLkO0aTGouprI7sDUd356ox/NYCt\u002BfDuDmpU4EPAyOYRI1FotG1oq6bnClqgz3sCBvIF0sIaCkcEHdwkkvw69/z2NKzuJOKIF7b1bQfQT4utkHW82ZamZbp\u002BMpYmv5o9w7Xm4ZjmXjlx4vWo\u002BVjyrfLrSK1AoV2XweLYEA5sKLOH/2DB6/yGyNG3pSfEgQgh8jTyW\u002BWVwGP1sS2/1RSYhm0xmc7KAFScjIW3CTyfV5e8eMVj4qn5RwOMw6O08JB0fo7RzvKs0kSO8z36tAlERZ//zTjbumrv21Ia885bcRfyUEe3t7r9Kl\u002BRVNP3/H7YPp6elXfCDmhIMgBAlcyE/0Cuvw0IlczBYWgP8Ad15o\u002B6vo50EAAAAASUVORK5CYII=",
+              "WhenOpened": "2025-12-13T00:28:29.179Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ExamView.tsx",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\frontend\\src\\pages\\ExamView.tsx",
+              "RelativeDocumentMoniker": "frontend\\src\\pages\\ExamView.tsx",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\frontend\\src\\pages\\ExamView.tsx",
+              "RelativeToolTip": "frontend\\src\\pages\\ExamView.tsx",
+              "ViewState": "AgIAAFQAAAAAAAAAAAAcwBoCAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-12-12T23:12:13.077Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "IMPLEMENTATION_REALITY_CHECK.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\IMPLEMENTATION_REALITY_CHECK.md",
+              "RelativeDocumentMoniker": "IMPLEMENTATION_REALITY_CHECK.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\IMPLEMENTATION_REALITY_CHECK.md",
+              "RelativeToolTip": "IMPLEMENTATION_REALITY_CHECK.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAF8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-13T00:25:56.313Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "apply-changes.js",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\apply-changes.js",
+              "RelativeDocumentMoniker": "apply-changes.js",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\apply-changes.js",
+              "RelativeToolTip": "apply-changes.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-12-13T00:29:21.694Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "IMPLEMENTATION_STATUS_FINAL.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\IMPLEMENTATION_STATUS_FINAL.md",
+              "RelativeDocumentMoniker": "IMPLEMENTATION_STATUS_FINAL.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\IMPLEMENTATION_STATUS_FINAL.md",
+              "RelativeToolTip": "IMPLEMENTATION_STATUS_FINAL.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-13T00:31:12.236Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "SAFE_MANUAL_PATCH.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\SAFE_MANUAL_PATCH.md",
+              "RelativeDocumentMoniker": "SAFE_MANUAL_PATCH.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\SAFE_MANUAL_PATCH.md",
+              "RelativeToolTip": "SAFE_MANUAL_PATCH.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFwBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-13T00:04:32.8Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "QUICK_FIX_NEEDED.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\QUICK_FIX_NEEDED.md",
+              "RelativeDocumentMoniker": "QUICK_FIX_NEEDED.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\QUICK_FIX_NEEDED.md",
+              "RelativeToolTip": "QUICK_FIX_NEEDED.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-13T00:39:21.504Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "BUILD_FIX_ACTION_PLAN.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\BUILD_FIX_ACTION_PLAN.md",
+              "RelativeDocumentMoniker": "BUILD_FIX_ACTION_PLAN.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\BUILD_FIX_ACTION_PLAN.md",
+              "RelativeToolTip": "BUILD_FIX_ACTION_PLAN.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAI4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-12T23:58:00.117Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "BUILD_STATUS.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\BUILD_STATUS.md",
+              "RelativeDocumentMoniker": "BUILD_STATUS.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\BUILD_STATUS.md",
+              "RelativeToolTip": "BUILD_STATUS.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-12T23:51:09.796Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ALMOST_DONE.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\ALMOST_DONE.md",
+              "RelativeDocumentMoniker": "ALMOST_DONE.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\ALMOST_DONE.md",
+              "RelativeToolTip": "ALMOST_DONE.md",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABkAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-12T23:37:32.424Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "FINAL_IMPLEMENTATION_FOR_YOUR_STRUCTURE.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\FINAL_IMPLEMENTATION_FOR_YOUR_STRUCTURE.md",
+              "RelativeDocumentMoniker": "FINAL_IMPLEMENTATION_FOR_YOUR_STRUCTURE.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\FINAL_IMPLEMENTATION_FOR_YOUR_STRUCTURE.md",
+              "RelativeToolTip": "FINAL_IMPLEMENTATION_FOR_YOUR_STRUCTURE.md",
+              "ViewState": "AgIAAJYAAAAAAAAAAAAAAMkBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-12T23:32:06.965Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "IMPLEMENTATION_STATUS.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\IMPLEMENTATION_STATUS.md",
+              "RelativeDocumentMoniker": "IMPLEMENTATION_STATUS.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\IMPLEMENTATION_STATUS.md",
+              "RelativeToolTip": "IMPLEMENTATION_STATUS.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAPgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-12T23:32:46.946Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "COPY_PASTE_CHANGES.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\COPY_PASTE_CHANGES.md",
+              "RelativeDocumentMoniker": "COPY_PASTE_CHANGES.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\COPY_PASTE_CHANGES.md",
+              "RelativeToolTip": "COPY_PASTE_CHANGES.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8BAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-12T23:34:47.597Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "MANUAL_IMPLEMENTATION_REQUIRED.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\MANUAL_IMPLEMENTATION_REQUIRED.md",
+              "RelativeDocumentMoniker": "MANUAL_IMPLEMENTATION_REQUIRED.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\MANUAL_IMPLEMENTATION_REQUIRED.md",
+              "RelativeToolTip": "MANUAL_IMPLEMENTATION_REQUIRED.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADkBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-12T23:29:09.486Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "IMPLEMENTATION_SUMMARY.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\IMPLEMENTATION_SUMMARY.md",
+              "RelativeDocumentMoniker": "IMPLEMENTATION_SUMMARY.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\IMPLEMENTATION_SUMMARY.md",
+              "RelativeToolTip": "IMPLEMENTATION_SUMMARY.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAALQBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-12T23:20:31.579Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "FEATURE_COMPARISON.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\FEATURE_COMPARISON.md",
+              "RelativeDocumentMoniker": "FEATURE_COMPARISON.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\FEATURE_COMPARISON.md",
+              "RelativeToolTip": "FEATURE_COMPARISON.md",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAAAL4BAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-12T23:19:29.963Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "QUICK_IMPLEMENTATION_GUIDE.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\QUICK_IMPLEMENTATION_GUIDE.md",
+              "RelativeDocumentMoniker": "QUICK_IMPLEMENTATION_GUIDE.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\QUICK_IMPLEMENTATION_GUIDE.md",
+              "RelativeToolTip": "QUICK_IMPLEMENTATION_GUIDE.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHgBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-12T23:18:19.709Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "exam-animations.css",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\frontend\\src\\styles\\exam-animations.css",
+              "RelativeDocumentMoniker": "frontend\\src\\styles\\exam-animations.css",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\frontend\\src\\styles\\exam-animations.css",
+              "RelativeToolTip": "frontend\\src\\styles\\exam-animations.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAK0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-12-12T23:17:29.249Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "EXAM_VIEW_IMPROVEMENTS.md",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\EXAM_VIEW_IMPROVEMENTS.md",
+              "RelativeDocumentMoniker": "EXAM_VIEW_IMPROVEMENTS.md",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\EXAM_VIEW_IMPROVEMENTS.md",
+              "RelativeToolTip": "EXAM_VIEW_IMPROVEMENTS.md",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAGwCAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-12-12T23:17:01.328Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "AgentSetup.tsx",
+              "DocumentMoniker": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\frontend\\src\\pages\\AgentSetup.tsx",
+              "RelativeDocumentMoniker": "frontend\\src\\pages\\AgentSetup.tsx",
+              "ToolTip": "C:\\Users\\Elsaid Ahmed\\Desktop\\durrah exams new\\frontend\\src\\pages\\AgentSetup.tsx",
+              "RelativeToolTip": "frontend\\src\\pages\\AgentSetup.tsx",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-12-12T22:12:52.067Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

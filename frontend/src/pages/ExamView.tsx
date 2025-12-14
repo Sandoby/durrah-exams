@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Sun, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Sun, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
@@ -97,7 +97,7 @@ export default function ExamView() {
 
     const containerRef = useRef<HTMLDivElement>(null);
     const isSubmittingRef = useRef(false);
-    
+
     const [showUnansweredModal, setShowUnansweredModal] = useState(false);
     const [unansweredQuestions, setUnansweredQuestions] = useState<number[]>([]);
     const [showAutoSubmitWarning, setShowAutoSubmitWarning] = useState(false);
@@ -482,22 +482,22 @@ export default function ExamView() {
 
     const handleSubmitWithCheck = () => {
         if (!exam) return;
-        
+
         const unanswered: number[] = [];
         exam.questions.forEach((q, index) => {
             const answerData = answers[q.id];
-            if (!answerData || answerData.answer === undefined || answerData.answer === '' || 
+            if (!answerData || answerData.answer === undefined || answerData.answer === '' ||
                 (Array.isArray(answerData.answer) && answerData.answer.length === 0)) {
                 unanswered.push(index);
             }
         });
-        
+
         if (unanswered.length > 0) {
             setUnansweredQuestions(unanswered);
             setShowUnansweredModal(true);
             return;
         }
-        
+
         handleSubmit();
     };
 
@@ -801,8 +801,8 @@ export default function ExamView() {
 
     const answeredCount = Object.keys(answers).filter(key => {
         const ans = answers[key];
-        return ans && ans.answer !== undefined && ans.answer !== '' && 
-               !(Array.isArray(ans.answer) && ans.answer.length === 0);
+        return ans && ans.answer !== undefined && ans.answer !== '' &&
+            !(Array.isArray(ans.answer) && ans.answer.length === 0);
     }).length;
     const totalQuestions = exam?.questions.length || 0;
     const progress = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
@@ -1630,8 +1630,8 @@ export default function ExamView() {
                                 <div className="flex justify-center">
                                     <div className="relative w-32 h-32">
                                         <svg className="w-32 h-32 transform -rotate-90">
-                                            <circle cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="8" fill="none" className="text-gray-200 dark:text-gray-700"/>
-                                            <circle cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="8" fill="none" strokeDasharray={`${2 * Math.PI * 60}`} strokeDashoffset={`${2 * Math.PI * 60 * (1 - autoSubmitCountdown / 5)}`} className="text-red-500 transition-all duration-1000" strokeLinecap="round"/>
+                                            <circle cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="8" fill="none" className="text-gray-200 dark:text-gray-700" />
+                                            <circle cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="8" fill="none" strokeDasharray={`${2 * Math.PI * 60}`} strokeDashoffset={`${2 * Math.PI * 60 * (1 - autoSubmitCountdown / 5)}`} className="text-red-500 transition-all duration-1000" strokeLinecap="round" />
                                         </svg>
                                         <div className="absolute inset-0 flex items-center justify-center">
                                             <span className="text-5xl font-bold text-red-600 dark:text-red-500">{autoSubmitCountdown}</span>
@@ -1644,7 +1644,7 @@ export default function ExamView() {
                                 </div>
                                 <div className="flex justify-center gap-2">
                                     {[1, 2, 3, 4, 5].map((dot) => (
-                                        <div key={dot} className={`w-2 h-2 rounded-full transition-all duration-300 ${dot > autoSubmitCountdown ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'}`}/>
+                                        <div key={dot} className={`w-2 h-2 rounded-full transition-all duration-300 ${dot > autoSubmitCountdown ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'}`} />
                                     ))}
                                 </div>
                             </div>

@@ -1,0 +1,620 @@
+﻿// helper: get user session or attempt background anonymous sign-in (non-blocking)
+import { useEffect, useState, useRef } from 'react';
+import * as React from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Sun, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle, X } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { ViolationModal } from '../components/ViolationModal';
+import { Logo } from '../components/Logo';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { Calculator } from '../components/Calculator';
+
+interface Question {
+    id: string;
+    type: string;
+    question_text: string;
+    options?: string[];
+    points: number;
+    correct_answer?: string | string[] | null;
+    media_url?: string | null;
+    media_type?: 'image' | 'audio' | 'video' | null;
+}
+
+interface Violation {
+    type: string;
+    timestamp: string;
+    question_id?: string;
+}
+
+interface Exam {
+    id: string;
+    title: string;
+    description: string;
+    questions: Question[];
+    required_fields?: string[];
+    settings: {
+        require_fullscreen: boolean;
+        detect_tab_switch: boolean;
+        disable_copy_paste: boolean;
+        disable_right_click: boolean;
+        max_violations: number;
+        time_limit_minutes: number | null;
+        randomize_questions?: boolean;
+        show_results_immediately?: boolean;
+        show_detailed_results?: boolean; // NEW
+        // optional scheduling fields (back-end and editor may use either naming)
+        start_time?: string | null;
+        end_time?: string | null;
+        start_date?: string | null;
+        end_date?: string | null;
+        // email whitelist
+        restrict_by_email?: boolean;
+        allowed_emails?: string[];
+    };
+}
+
+export default function ExamView() {
+    const { t } = useTranslation();
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const submissionId = searchParams.get('submission');
+    const isReviewMode = !!submissionId;
+    const [exam, setExam] = useState<Exam | null>(null);
+    const [studentData, setStudentData] = useState<Record<string, string>>({});
+    const [started, setStarted] = useState(false);
+    const [answers, setAnswers] = useState<Record<string, any>>({});
+    const [violations, setViolations] = useState<Violation[]>([]);
+    const [timeLeft, setTimeLeft] = useState<number | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [score, setScore] = useState<{ score: number; max_score: number; percentage: number; submission_id?: string } | null>(null);
+
+    const [showViolationModal, setShowViolationModal] = useState(false);
+    const [violationMessage, setViolationMessage] = useState({ title: '', message: '' });
+    const [hasPreviousSession, setHasPreviousSession] = useState(false);
+    const [isAvailable, setIsAvailable] = useState(true);
+    const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
+    const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set());
+
+    const [showQuestionGrid, setShowQuestionGrid] = useState(false);
+    const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
+    const [highContrast, setHighContrast] = useState(false);
+    const [showCalculator, setShowCalculator] = useState(false);
+    const [startedAt, setStartedAt] = useState<number | null>(null);
+
+    // New State for View Modes
+    const [viewMode, setViewMode] = useState<'list' | 'single'>('single'); // Default to single question per page
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [isZenMode, setIsZenMode] = useState(false);
+
+    // Review Mode State
+    const [reviewData, setReviewData] = useState<{
+        submission: any;
+        submissionAnswers: any[];
+    } | null>(null);
+
+    // NEW: State for unanswered questions warning
+    const [showUnansweredModal, setShowUnansweredModal] = useState(false);
+    const [unansweredQuestions, setUnansweredQuestions] = useState<number[]>([]);
+    
+    // NEW: State for auto-submit warning
+    const [showAutoSubmitWarning, setShowAutoSubmitWarning] = useState(false);
+    const [autoSubmitCountdown, setAutoSubmitCountdown] = useState(5);
+
+    const containerRef = useRef<HTMLDivElement>(null);
+    const isSubmittingRef = useRef(false);
+
+    // Load exam data or review data
+    useEffect(() => {
+        if (id) {
+            fetchExam();
+            if (isReviewMode && submissionId) {
+                fetchReviewData(submissionId);
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id, isReviewMode, submissionId]);
+
+    // Check for existing session and submitted status on mount
+    useEffect(() => {
+        if (!id) return;
+
+        // Check if already submitted on this device
+        const submittedFlag = localStorage.getItem(`durrah_exam_${id}_submitted`);
+        if (submittedFlag) {
+            setSubmitted(true);
+            // Optionally try to load the score if we saved it
+            const savedScore = localStorage.getItem(`durrah_exam_${id}_score`);
+            if (savedScore) {
+                const parsed = JSON.parse(savedScore);
+                setScore(parsed);
+
+            }
+            return;
+        }
+
+        // Check for active session to restore
+        const savedState = localStorage.getItem(`durrah_exam_${id}_state`);
+        if (savedState) {
+            try {
+                const parsed = JSON.parse(savedState);
+                setStudentData(parsed.studentData || {});
+                setAnswers(parsed.answers || {});
+                setViolations(parsed.violations || []);
+                if (parsed.flaggedQuestions) {
+                    setFlaggedQuestions(new Set(parsed.flaggedQuestions));
+                }
+                setStarted(parsed.started || false);
+                setStartedAt(parsed.startedAt || null);
+                setTimeLeft(parsed.timeLeft || null);
+                setViewMode(parsed.viewMode || 'single');
+                setCurrentQuestionIndex(parsed.currentQuestionIndex || 0);
+                setHighContrast(parsed.highContrast || false);
+                setIsZenMode(parsed.isZenMode || false);
+
+                // Check for unfinished business
+                if (parsed.started && !isReviewMode) {
+                    setHasPreviousSession(true);
+                    setShowViolationModal(true);
+                }
+
+                // Check availability
+                checkAvailability(parsed.startedAt, parsed.timeLeft);
+
+            } catch (error) {
+                console.error('Error parsing saved state', error);
+            }
+        }
+    }, [id, isReviewMode]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            if (started && !submitted) {
+                // Prompt the user with a custom message (most browsers will show a generic message)
+                const confirmationMessage = t('exam.exitWarning');
+                event.returnValue = confirmationMessage; // Standard way to show confirm dialog
+                return confirmationMessage; // For some browsers
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [started, submitted, t]);
+
+    const fetchExam = async () => {
+        if (!id) return;
+
+        const { data, error } = await supabase
+            .from('exams')
+            .select('*, questions(*)')
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            toast.error(t('exam.fetchError'));
+            console.error('Error fetching exam:', error);
+        } else {
+            setExam(data);
+            // If there's a review data submission ID, fetch the review data
+            if (isReviewMode && submissionId) {
+                fetchReviewData(submissionId);
+            }
+        }
+    };
+
+    const fetchReviewData = async (submissionId: string) => {
+        const { data, error } = await supabase
+            .from('submissions')
+            .select('*, exam_id, question_id, given_answer')
+            .eq('id', submissionId)
+            .single();
+
+        if (error) {
+            toast.error(t('exam.fetchReviewError'));
+            console.error('Error fetching review data:', error);
+        } else {
+            setReviewData(data);
+            setSubmitted(true);
+            setScore({
+                score: data.score,
+                max_score: data.max_score,
+                percentage: data.percentage,
+                submission_id: data.id,
+            });
+        }
+    };
+
+    const saveProgress = async (override?: boolean) => {
+        if (!id) return;
+
+        // For dev: allow overriding submitted exams
+        if (override) {
+            localStorage.setItem(`durrah_exam_${id}_submitted`, 'true');
+            setSubmitted(true);
+            return;
+        }
+
+        const { data, error } = await supabase
+            .from('submissions')
+            .insert([
+                {
+                    exam_id: id,
+                    user_id: supabase.auth.user()?.id,
+                    answers,
+                    violations,
+                    flagged_questions: Array.from(flaggedQuestions),
+                    // include score breakdown if available
+                    score: score?.score || null,
+                    max_score: score?.max_score || null,
+                    percentage: score?.percentage || null,
+                    // capture student data and other relevant info
+                    // TODO: review what data to include here
+                    student_data: studentData,
+                },
+            ])
+            .single();
+
+        if (error) {
+            toast.error(t('exam.submitError'));
+            console.error('Error submitting exam:', error);
+        } else {
+            toast.success(t('exam.submitSuccess'));
+            setSubmitted(true);
+            setScore({
+                score: data.score,
+                max_score: data.max_score,
+                percentage: data.percentage,
+                submission_id: data.id,
+            });
+
+            // Also save a copy of the score in localStorage for quick access
+            localStorage.setItem(`durrah_exam_${id}_score`, JSON.stringify({
+                score: data.score,
+                max_score: data.max_score,
+                percentage: data.percentage,
+                submission_id: data.id,
+            }));
+
+            // Clear the exam state from localStorage
+            localStorage.removeItem(`durrah_exam_${id}_state`);
+            localStorage.setItem(`durrah_exam_${id}_submitted`, 'true');
+        }
+    };
+
+    const handleAnswerChange = (questionId: string, answer: any) => {
+        setAnswers({
+            ...answers,
+            [questionId]: answer,
+        });
+    };
+
+    const handleFlagQuestion = (questionId: string) => {
+        const newFlaggedQuestions = new Set(flaggedQuestions);
+        if (newFlaggedQuestions.has(questionId)) {
+            newFlaggedQuestions.delete(questionId);
+        } else {
+            newFlaggedQuestions.add(questionId);
+        }
+        setFlaggedQuestions(newFlaggedQuestions);
+    };
+
+    const handleViolation = (violation: Violation) => {
+        const newViolations = [...violations, violation];
+        setViolations(newViolations);
+
+        // Immediately show the violation modal if in exam mode
+        if (!isReviewMode) {
+            setViolationMessage({ title: t('exam.violationOccurred'), message: t('exam.violations.' + violation.type) });
+            setShowViolationModal(true);
+        }
+    };
+
+    const handleContinue = () => {
+        setShowViolationModal(false);
+    };
+
+    const handleViewViolations = () => {
+        setShowViolationModal(false);
+        navigate('/violations');
+    };
+
+    const handleStartExam = () => {
+        setStarted(true);
+        setStartedAt(Date.now());
+        // Clear any previous violations for a fresh start
+        setViolations([]);
+        setFlaggedQuestions(new Set());
+
+        // Navigate to the first question
+        if (viewMode === 'single') {
+            navigate(`./question/${exam?.questions[0].id}`);
+        } else {
+            setShowQuestionGrid(true);
+        }
+    };
+
+    const handleSubmitExam = async () => {
+        setIsSubmitting(true);
+
+        // If in dev mode, allow submission bypassing checks
+        if (import.meta.env.VITE_APP_STAGE === 'development') {
+            toast(`Dev mode: Exam submitted!`, { icon: '🐱‍👤' });
+            setIsSubmitting(false);
+            return;
+        }
+
+        // Check for violations before submitting
+        if (violations.length >= (exam?.settings.max_violations || 0)) {
+            setShowViolationModal(true);
+            setViolationMessage({ title: t('exam.tooManyViolations'), message: t('exam.submitViolationWarning') });
+            setIsSubmitting(false);
+            return;
+        }
+
+        // Check for unanswered questions
+        if (exam?.required_fields?.length && !isReviewMode) {
+            const unanswered = exam.required_fields.filter((qid) => !answers[qid]);
+            if (unanswered.length > 0) {
+                setUnansweredQuestions(unanswered);
+                setShowUnansweredModal(true);
+                setIsSubmitting(false);
+                return;
+            }
+        }
+
+        // All checks passed, proceed to submit
+        await saveProgress();
+        setIsSubmitting(false);
+    };
+
+    const handleAutoSubmit = async () => {
+        setShowAutoSubmitWarning(false);
+        // Automatically submit with violations if time runs out
+        await saveProgress(true);
+        toast(t('exam.autoSubmitSuccess'));
+        navigate('/');
+    };
+
+    const checkAvailability = (startedAt: number | null, timeLeft: number | null) => {
+        if (!startedAt || !timeLeft) return true; // Cannot determine availability
+
+        const now = Date.now();
+        const endTime = startedAt + timeLeft * 60 * 1000; // Convert to milliseconds
+
+        if (now > endTime) {
+            setIsAvailable(false);
+            setAvailabilityMessage(t('exam.availability.ended'));
+            return false;
+        }
+
+        setIsAvailable(true);
+        setAvailabilityMessage(null);
+        return true;
+    };
+
+    // const checkAutoSubmit = () => {
+    //     if (timeLeft !== null && timeLeft <= 1 && !submitted) {
+    //         setShowAutoSubmitWarning(true);
+    //     } else {
+    //         setShowAutoSubmitWarning(false);
+    //     }
+    // };
+
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         if (started && !submitted) {
+    //             setTimeLeft((prev) => {
+    //                 if (prev === null) return null;
+    //                 const newTime = prev - 1;
+    //                 // checkAutoSubmit();
+    //                 return newTime > 0 ? newTime : 0;
+    //             });
+    //         }
+    //     }, 1000);
+
+    //     return () => clearInterval(interval);
+    // }, [started, submitted]);
+
+    // TODO: Sync timer with server time to prevent cheating
+    // useEffect(() => {
+    //     if (startedAt && timeLeft !== null) {
+    //         const now = Date.now();
+    //         const endTime = startedAt + timeLeft * 60 * 1000;
+    //         const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+    //         setTimeLeft(remaining);
+    //     }
+    // }, [startedAt, timeLeft]);
+
+    // DEBUG: Simulate fetching exam with fixed data
+    // useEffect(() => {
+    //     setTimeout(() => {
+    //         setExam({
+    //             id: '1',
+    //             title: 'Sample Exam',
+    //             description: 'This is a sample exam description.',
+    //             questions: [
+    //                 {
+    //                     id: '1',
+    //                     type: 'multiple_choice',
+    //                     question_text: 'What is 2 + 2?',
+    //                     options: ['1', '2', '3', '4'],
+    //                     points: 1,
+    //                     correct_answer: '4',
+    //                 },
+    //                 {
+    //                     id: '2',
+    //                     type: 'true_false',
+    //                     question_text: 'The earth is flat.',
+    //                     options: ['True', 'False'],
+    //                     points: 1,
+    //                     correct_answer: 'False',
+    //                 },
+    //             ],
+    //             required_fields: ['1', '2'],
+    //             settings: {
+    //                 require_fullscreen: false,
+    //                 detect_tab_switch: false,
+    //                 disable_copy_paste: false,
+    //                 disable_right_click: false,
+    //                 max_violations: 3,
+    //                 time_limit_minutes: 10,
+    //                 randomize_questions: false,
+    //                 show_results_immediately: false,
+    //                 show_detailed_results: true,
+    //             },
+    //         });
+    //     }, 1000);
+    // }, []);
+
+    // For development: force show violation modal
+    // useEffect(() => {
+    //     setShowViolationModal(true);
+    //     setViolationMessage({ title: 'Debug Violation', message: 'This is a forced violation message for debugging.' });
+    // }, []);
+
+    return (
+        <div className={`exam-view ${highContrast ? 'high-contrast' : ''}`} ref={containerRef}>
+            <div className="header">
+                <Logo />
+                <div className="actions">
+                    <LanguageSwitcher />
+                    {/* Add a debug button to force show the violation modal */}
+                    {import.meta.env.VITE_APP_STAGE === 'development' && (
+                        <button onClick={() => {
+                            setShowViolationModal(true);
+                            setViolationMessage({ title: 'Debug Violation', message: 'This is a forced violation message for debugging.' });
+                        }}>
+                            Debug Violation
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            <div className="exam-content">
+                {exam && (
+                    <>
+                        <h1 className="exam-title">{exam.title}</h1>
+                        <p className="exam-description">{exam.description}</p>
+
+                        {/* Show timer only in exam mode */}
+                        {!isReviewMode && (
+                            <div className="timer">
+                                {submitted ? (
+                                    <div className="submitted-message">
+                                        {t('exam.submittedMessage')}
+                                        <br />
+                                        {t('exam.finalScore', { score: score?.score, max_score: score?.max_score, percentage: score?.percentage })}
+
+                                        {/* If in development mode, show the raw score data for debugging */}
+                                        {import.meta.env.VITE_APP_STAGE === 'development' && score && (
+                                            <pre className="debug-score-data">{JSON.stringify(score, null, 2)}</pre>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="time-left">
+                                        <span>{t('exam.timeLeft')}: </span>
+                                        <strong>{timeLeft !== null ? `${Math.floor(timeLeft / 60)}:${('0' + (timeLeft % 60)).slice(-2)}` : '∞'}</strong>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Question Navigation - show only in list view mode */}
+                        {viewMode === 'list' && !submitted && (
+                            <div className="question-navigation">
+                                <button disabled={currentQuestionIndex === 0} onClick={() => setCurrentQuestionIndex((prev) => Math.max(prev - 1, 0))}>
+                                    <X /> {t('exam.prevQuestion')}
+                                </button>
+                                <button
+                                    disabled={currentQuestionIndex >= (exam.questions.length - 1)}
+                                    onClick={() => setCurrentQuestionIndex((prev) => Math.min(prev + 1, exam.questions.length - 1))}
+                                >
+                                    {t('exam.nextQuestion')} <CalcIcon />
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Question Grid - show only in grid view mode */}
+                        {showQuestionGrid && !submitted && (
+                            <div className="question-grid">
+                                {exam.questions.map((question, index) => (
+                                    <div
+                                        key={question.id}
+                                        className={`question-card ${answers[question.id] !== undefined ? 'answered' : ''} ${flaggedQuestions.has(question.id) ? 'flagged' : ''}`}
+                                        onClick={() => {
+                                            // In single view mode, navigate directly to the question
+                                            if (viewMode === 'single') {
+                                                navigate(`./question/${question.id}`);
+                                            } else {
+                                                // In grid view mode, toggle the answered state
+                                                setAnswers({
+                                                    ...answers,
+                                                    [question.id]: answers[question.id] === undefined ? null : answers[question.id],
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        <div className="question-index">{index + 1}</div>
+                                        <div className="question-info">
+                                            <div className="question-text" dangerouslySetInnerHTML={{ __html: question.question_text }} />
+                                            {/* Show a check icon if answered */}
+                                            {answers[question.id] !== undefined && (
+                                                <div className="answered-indicator">
+                                                    <CheckCircle />
+                                                </div>
+                                            )}
+                                            {/* Show a flag icon if flagged */}
+                                            {flaggedQuestions.has(question.id) && (
+                                                <div className="flagged-indicator">
+                                                    <Flag />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Questions - show detail view for each question */}
+                        {exam.questions.map((question, index) => {
+                            const isActive = viewMode === 'single' ? currentQuestionIndex === index : true;
+                            return (
+                                <div key={question.id} className={`question-wrapper ${isActive ? 'active' : ''}`}>
+                                    <div className="question-header">
+                                        {viewMode === 'single' && (
+                                            <>
+                                                <button className="back-button" onClick={() => {
+                                                    setViewMode('list');
+                                                    setCurrentQuestionIndex(0);
+                                                }}>
+                                                    <X /> {t('exam.backToList')}
+                                                </button>
+                                                <h2 className="question-title">
+                                                    {t('exam.question')} {index + 1}
+                                                </h2>
+                                            </>
+                                        )}
+
+                                        {/* Flag and Mark as Unread buttons */}
+                                        <div className="question-actions">
+                                            <button className="flag-button" onClick={() => handleFlagQuestion(question.id)}>
+                                                {flaggedQuestions.has(question.id) ? <Flag /> : <Sun />} {t('exam.flag')}
+                                            </button>
+                                            <button className="mark-unread-button" onClick={() => handleAnswerChange(question.id, undefined)}>
+                                                <Moon /> {t('exam.markUnread')}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="question-body">
+                                        <div className="question-text" dangerouslySetInnerHTML={{ __html: question.question_text }} />
+
+                                        {/* Media support */}
+                                        {question.media_url && (
+                                            <div className="media-container">
+                                                {question.media_type === 'image' && <img src={question.media_url} alt="" className="question-image" />}

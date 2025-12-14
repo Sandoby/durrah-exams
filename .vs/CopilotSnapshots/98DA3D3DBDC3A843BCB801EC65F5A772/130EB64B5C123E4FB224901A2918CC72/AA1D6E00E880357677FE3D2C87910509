@@ -1,0 +1,638 @@
+﻿// helper: get user session or attempt background anonymous sign-in (non-blocking)
+import { useEffect, useState, useRef } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Sun, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle, X } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { ViolationModal } from '../components/ViolationModal';
+import { Logo } from '../components/Logo';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { Calculator } from '../components/Calculator';
+
+interface Question {
+    id: string;
+    type: string;
+    question_text: string;
+    options?: string[];
+    points: number;
+    correct_answer?: string | string[] | null;
+    media_url?: string | null;
+    media_type?: 'image' | 'audio' | 'video' | null;
+}
+
+interface Violation {
+    type: string;
+    timestamp: string;
+}
+
+interface Exam {
+    id: string;
+    title: string;
+    description: string;
+    questions: Question[];
+    required_fields?: string[];
+    settings: {
+        require_fullscreen: boolean;
+        detect_tab_switch: boolean;
+        disable_copy_paste: boolean;
+        disable_right_click: boolean;
+        max_violations: number;
+        time_limit_minutes: number | null;
+        randomize_questions?: boolean;
+        show_results_immediately?: boolean;
+        show_detailed_results?: boolean; // NEW
+        // optional scheduling fields (back-end and editor may use either naming)
+        start_time?: string | null;
+        end_time?: string | null;
+        start_date?: string | null;
+        end_date?: string | null;
+        // email whitelist
+        restrict_by_email?: boolean;
+        allowed_emails?: string[];
+    };
+}
+
+export default function ExamView() {
+    const { t } = useTranslation();
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const submissionId = searchParams.get('submission');
+    const isReviewMode = !!submissionId;
+    const [exam, setExam] = useState<Exam | null>(null);
+    const [studentData, setStudentData] = useState<Record<string, string>>({});
+    const [started, setStarted] = useState(false);
+    const [answers, setAnswers] = useState<Record<string, any>>({});
+    const [violations, setViolations] = useState<Violation[]>([]);
+    const [timeLeft, setTimeLeft] = useState<number | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [score, setScore] = useState<{ score: number; max_score: number; percentage: number; submission_id?: string } | null>(null);
+
+    const [showViolationModal, setShowViolationModal] = useState(false);
+    const [violationMessage, setViolationMessage] = useState({ title: '', message: '' });
+    const [hasPreviousSession, setHasPreviousSession] = useState(false);
+    const [isAvailable, setIsAvailable] = useState(true);
+    const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
+    const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set());
+
+    const [showQuestionGrid, setShowQuestionGrid] = useState(false);
+    const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
+    const [highContrast, setHighContrast] = useState(false);
+    const [showCalculator, setShowCalculator] = useState(false);
+    const [startedAt, setStartedAt] = useState<number | null>(null);
+
+    // New State for View Modes
+    const [viewMode, setViewMode] = useState<'list' | 'single'>('single'); // Default to single question per page
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [isZenMode, setIsZenMode] = useState(false);
+
+    // Review Mode State
+    const [reviewData, setReviewData] = useState<{
+        submission: any;
+        submissionAnswers: any[];
+    } | null>(null);
+
+    // NEW: State for unanswered questions warning
+    const [showUnansweredModal, setShowUnansweredModal] = useState(false);
+    const [unansweredQuestions, setUnansweredQuestions] = useState<number[]>([]);
+    
+    // NEW: State for auto-submit warning
+    const [showAutoSubmitWarning, setShowAutoSubmitWarning] = useState(false);
+    const [autoSubmitCountdown, setAutoSubmitCountdown] = useState(5);
+
+    const containerRef = useRef<HTMLDivElement>(null);
+    const isSubmittingRef = useRef(false);
+
+    // Load exam data or review data
+    useEffect(() => {
+        if (id) {
+            fetchExam();
+            if (isReviewMode && submissionId) {
+                fetchReviewData(submissionId);
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id, isReviewMode, submissionId]);
+
+    // Check for existing session and submitted status on mount
+    useEffect(() => {
+        if (!id) return;
+
+        // Check if already submitted on this device
+        const submittedFlag = localStorage.getItem(`durrah_exam_${id}_submitted`);
+        if (submittedFlag) {
+            setSubmitted(true);
+            // Optionally try to load the score if we saved it
+            const savedScore = localStorage.getItem(`durrah_exam_${id}_score`);
+            if (savedScore) {
+                const parsed = JSON.parse(savedScore);
+                setScore(parsed);
+
+            }
+            return;
+        }
+
+        // Check for active session to restore
+        const savedState = localStorage.getItem(`durrah_exam_${id}_state`);
+        if (savedState) {
+            try {
+                const parsed = JSON.parse(savedState);
+                setStudentData(parsed.studentData || {});
+                setAnswers(parsed.answers || {});
+                setViolations(parsed.violations || []);
+                if (parsed.flaggedQuestions) {
+                    setFlaggedQuestions(new Set(parsed.flaggedQuestions));
+                }
+                setStarted(parsed.started || false);
+                if (parsed.timeLeft !== null && parsed.timeLeft !== undefined) {
+                    setTimeLeft(parsed.timeLeft);
+                }
+                setHasPreviousSession(true);
+                setHasPreviousSession(true);
+                toast.success(t('examView.previousSession'));
+            } catch (e) {
+                console.error('Failed to restore session', e);
+            }
+        }
+    }, [id]);
+
+    // Save state to localStorage whenever it changes
+    useEffect(() => {
+        if (!id || submitted) return;
+
+        // Only save if we have started or have entered some data
+        if (started || Object.keys(studentData).length > 0) {
+            const stateToSave = {
+                studentData,
+                answers,
+                violations,
+                flaggedQuestions: Array.from(flaggedQuestions),
+                timeLeft,
+                started,
+                startedAt,
+                lastUpdated: Date.now()
+            };
+            localStorage.setItem(`durrah_exam_${id}_state`, JSON.stringify(stateToSave));
+        }
+    }, [id, studentData, answers, violations, timeLeft, started, startedAt, submitted, flaggedQuestions]);
+
+    const fetchExam = async () => {
+        try {
+            // Securely fetch exam data (exclude correct_answer for security)
+            const { data: examData, error } = await supabase.from('exams').select('*').eq('id', id).single();
+            if (error) throw error;
+
+            // Fetch questions WITHOUT correct_answer column
+            const { data: qData, error: qError } = await supabase
+                .from('questions')
+                .select('id, type, question_text, options, points, randomize_options, exam_id, created_at, media_url, media_type')
+                .eq('exam_id', id);
+
+            if (qError) throw qError;
+
+            const settings = examData.settings || {};
+            const normalizedSettings: any = { ...settings };
+            // support both naming conventions
+            if (!normalizedSettings.start_time && settings.start_date) normalizedSettings.start_time = settings.start_date;
+            if (!normalizedSettings.end_time && settings.end_date) normalizedSettings.end_time = settings.end_date;
+
+            setExam({ ...examData, questions: qData || [], settings: normalizedSettings });
+
+            // Apply Randomization if enabled
+            let processedQuestions = [...(qData || [])];
+
+            // 1. Randomize Questions Order
+            if (normalizedSettings.randomize_questions) {
+                for (let i = processedQuestions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [processedQuestions[i], processedQuestions[j]] = [processedQuestions[j], processedQuestions[i]];
+                }
+            }
+
+            // 2. Randomize Options Order for each question
+            if (normalizedSettings.randomize_options) {
+                processedQuestions = processedQuestions.map(q => {
+                    const randomizedOptions = q.options ? [...q.options] : [];
+                    for (let i = randomizedOptions.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [randomizedOptions[i], randomizedOptions[j]] = [randomizedOptions[j], randomizedOptions[i]];
+                    }
+                    return { ...q, options: randomizedOptions };
+                });
+            }
+
+            setExam(prev => prev ? { ...prev, questions: processedQuestions } : prev);
+        } catch (error) {
+            toast.error(t('examView.loadError'));
+            console.error('Error fetching exam:', error);
+        }
+    };
+
+    const fetchReviewData = async (submissionId: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('submissions')
+                .select('*, answers:submission_answers(*)')
+                .eq('id', submissionId)
+                .single();
+
+            if (error) throw error;
+
+            setReviewData(data);
+        } catch (error) {
+            toast.error(t('examView.loadError'));
+            console.error('Error fetching review data:', error);
+        }
+    };
+
+    const handleStart = () => {
+        if (exam) {
+            setStarted(true);
+            setStartedAt(Date.now());
+
+            // Navigate to first question immediately
+            if (viewMode === 'single') {
+                navigate(`/exam/${id}/question/0`);
+            } else {
+                // For list mode, navigate to the exam overview or first question
+                navigate(`/exam/${id}`);
+            }
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (isSubmitting || submitted) return;
+
+        setIsSubmitting(true);
+        isSubmittingRef.current = true;
+
+        try {
+            // Prepare submission data
+            const submissionData = {
+                exam_id: id,
+                answers: Object.entries(answers).map(([questionId, userAnswer]) => ({
+                    question_id: questionId,
+                    user_answer: userAnswer,
+                    violated_rules: violations.filter(v => v.question_id === questionId).map(v => v.type),
+                    points: calculatePoints(questionId, userAnswer),
+                })),
+                total_points: calculateTotalPoints(),
+                started_at: startedAt ? new Date(startedAt) : null,
+                completed_at: new Date(),
+                status: 'submitted',
+            };
+
+            // Submit to Supabase
+            const { data, error } = await supabase
+                .from('submissions')
+                .insert([submissionData])
+                .select('id')
+                .single();
+
+            if (error) throw error;
+
+            // Handle successful submission
+            setSubmitted(true);
+            localStorage.setItem(`durrah_exam_${id}_submitted`, 'true');
+            localStorage.setItem(`durrah_exam_${id}_score`, JSON.stringify({ score: submissionData.total_points }));
+
+            // Navigate to result page or show success message
+            toast.success(t('examView.submitSuccess'));
+            if (data.id) {
+                navigate(`/exam/${id}/result`);
+            }
+        } catch (error) {
+            toast.error(t('examView.submitError'));
+            console.error('Error submitting exam:', error);
+        } finally {
+            setIsSubmitting(false);
+            isSubmittingRef.current = false;
+        }
+    };
+
+    const calculatePoints = (questionId: string, userAnswer: any) => {
+        const question = exam?.questions.find(q => q.id === questionId);
+        if (!question) return 0;
+
+        // For now, let's assume 1 point per question, adjust logic here if needed
+        return question.points || 0;
+    };
+
+    const calculateTotalPoints = () => {
+        // Total points is simply the sum of all question points
+        return exam?.questions.reduce((total, q) => total + (q.points || 0), 0) || 0;
+    };
+
+    const handleReattempt = () => {
+        setSubmitted(false);
+        setAnswers({});
+        setViolations([]);
+        setFlaggedQuestions(new Set());
+        setTimeLeft(exam?.settings.time_limit_minutes ? exam.settings.time_limit_minutes * 60 : null);
+        setStartedAt(Date.now());
+        localStorage.removeItem(`durrah_exam_${id}_submitted`);
+        localStorage.removeItem(`durrah_exam_${id}_score`);
+        localStorage.removeItem(`durrah_exam_${id}_state`);
+
+        // Optionally, navigate to the first question directly
+        navigate(`/exam/${id}/question/0`);
+    };
+
+    const handleViolationAcknowledge = () => {
+        setShowViolationModal(false);
+    };
+
+    const handleFlagQuestion = (questionId: string) => {
+        setFlaggedQuestions(prev => {
+            const newFlagged = new Set(prev);
+            if (newFlagged.has(questionId)) {
+                newFlagged.delete(questionId);
+            } else {
+                newFlagged.add(questionId);
+            }
+            return newFlagged;
+        });
+    };
+
+    const handleViewModeChange = (mode: 'list' | 'single') => {
+        setViewMode(mode);
+        if (mode === 'single') {
+            // In single question mode, navigate to the current question directly
+            navigate(`/exam/${id}/question/${currentQuestionIndex}`);
+        } else {
+            // In list mode, navigate to the exam overview
+            navigate(`/exam/${id}`);
+        }
+    };
+
+    const startExam = async () => {
+        const required = exam?.required_fields || ['name', 'email'];
+        const missing = required.filter((f: string) => !studentData[f]);
+        if (missing.length) {
+            toast.error(t('examView.fillRequired'));
+            return;
+        }
+
+        // Check email whitelist if enabled
+        if (exam?.settings.restrict_by_email && exam?.settings.allowed_emails) {
+            const studentEmail = studentData.email?.toLowerCase().trim();
+            const allowedEmails = exam.settings.allowed_emails.map(e => e.toLowerCase().trim());
+
+            if (!studentEmail || !allowedEmails.includes(studentEmail)) {
+                toast.error(t('examView.accessDenied'));
+                return;
+            }
+        }
+
+        // Prevent starting if exam not available
+        if (!isAvailable) {
+            toast.error(availabilityMessage || t('examView.notAvailable'));
+            return;
+        }
+        if (exam?.settings.require_fullscreen) {
+            // Attempt fullscreen for all devices, but don't block if it fails
+            try {
+                await document.documentElement.requestFullscreen();
+            } catch (e) {
+                // Silently fail or just log warning, but allow exam to start
+                console.warn('Fullscreen request failed or not supported', e);
+            }
+        }
+        setStarted(true);
+        setStartedAt(Date.now());
+    };
+
+    // NEW: Check for unanswered questions before submission
+    const handleSubmitWithCheck = () => {
+        if (!exam) return;
+        
+        // Check for unanswered questions
+        const unanswered: number[] = [];
+        exam.questions.forEach((q, index) => {
+            const answer = answers[q.id];
+            if (!answer || answer.answer === undefined || answer.answer === '' || 
+                (Array.isArray(answer.answer) && answer.answer.length === 0)) {
+                unanswered.push(index);
+            }
+        });
+        
+        if (unanswered.length > 0) {
+            setUnansweredQuestions(unanswered);
+            setShowUnansweredModal(true);
+            return;
+        }
+        
+        // No unanswered questions, proceed with submission
+        handleSubmit();
+    };
+
+    // Effect to handle countdown timer and auto-submit logic
+    useEffect(() => {
+        if (!started || !exam) return;
+        if (timeLeft !== null && timeLeft > 0) {
+            const timer = setInterval(() => setTimeLeft((p: number | null) => (p && p > 0 ? p - 1 : 0)), 1000);
+            return () => clearInterval(timer);
+        } else if (timeLeft === 0 && !submitted && !isSubmitting && !showAutoSubmitWarning) {
+            // NEW: Show auto-submit warning instead of immediate submission
+            setShowAutoSubmitWarning(true);
+        }
+    }, [started, timeLeft, exam, submitted, isSubmitting, showAutoSubmitWarning]);
+
+    // NEW: Auto-submit countdown effect
+    useEffect(() => {
+        if (showAutoSubmitWarning && autoSubmitCountdown > 0) {
+            const timer = setTimeout(() => {
+                setAutoSubmitCountdown(prev => prev - 1);
+            }, 1000);
+            return () => clearTimeout(timer);
+        } else if (showAutoSubmitWarning && autoSubmitCountdown === 0) {
+            setShowAutoSubmitWarning(false);
+            setAutoSubmitCountdown(5); // Reset for next time
+            handleSubmit();
+        }
+    }, [showAutoSubmitWarning, autoSubmitCountdown]);
+
+    // NEW: Calculate progress percentage
+    const answeredCount = Object.keys(answers).filter(key => {
+        const ans = answers[key];
+        return ans && ans.answer !== undefined && ans.answer !== '' && 
+               !(Array.isArray(ans.answer) && ans.answer.length === 0);
+    }).length;
+    const totalQuestions = exam?.questions.length || 0;
+    const progress = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+
+    return (
+        <div className={`exam-view ${isZenMode ? 'zen-mode' : ''}`} ref={containerRef}>
+            <header>
+                <Logo />
+                <div className="actions">
+                    <LanguageSwitcher />
+                    <button onClick={() => window.location.reload()} title={t('common.reload')}>
+                        <Loader2 />
+                    </button>
+                </div>
+            </header>
+
+            <main>
+                {submitted && score ? (
+                    <div className="result-summary">
+                        <h2>{t('examView.resultTitle')}</h2>
+                        <p>{t('examView.score', { score: score.score, total: score.max_score })}</p>
+                        <p>{t('examView.percentage', { percentage: score.percentage })}</p>
+                        <button onClick={handleReattempt}>{t('examView.reattempt')}</button>
+                        <button onClick={() => navigate(`/exam/${id}/result`)}>{t('examView.viewResults')}</button>
+                    </div>
+                ) : (
+                    <>
+                        <div className="exam-header">
+                            <h1>{exam?.title}</h1>
+                            <p className="description">{exam?.description}</p>
+
+                            {/* New: Exam Availability Message */}
+                            {!isAvailable && availabilityMessage && (
+                                <div className="availability-message">
+                                    {availabilityMessage}
+                                </div>
+                            )}
+
+                            <div className="actions">
+                                {/* New Button for View Mode: List/Single */}
+                                {started && (
+                                    <>
+                                        <button className={`view-mode ${viewMode}`} onClick={() => handleViewModeChange('single')}>
+                                            <Eye /> {t('examView.viewSingle')}
+                                        </button>
+                                        <button className={`view-mode ${viewMode}`} onClick={() => handleViewModeChange('list')}>
+                                            <LayoutGrid /> {t('examView.viewList')}
+                                        </button>
+                                    </>
+                                )}
+
+                                {!submitted && !started && (
+                                    <button className="start-exam" onClick={startExam}>
+                                        {t('examView.startExam')}
+                                    </button>
+                                )}
+
+                                {started && (
+                                    <div className="timer">
+                                        {t('examView.timeLeft')}: {timeLeft !== null ? `${Math.floor(timeLeft / 60)}:${('0' + (timeLeft % 60)).slice(-2)}` : '∞'}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Progress Bar */}
+                        {started && (
+                            <div className="progress-bar" style={{ width: '100%' }}>
+                                <div className="progress" style={{ width: `${progress}%` }} />
+                            </div>
+                        )}
+
+                        {/* Questions Grid for List View */}
+                        {viewMode === 'list' && (
+                            <div className="questions-grid">
+                                {exam?.questions.map((question, index) => (
+                                    <div key={question.id} className="question-card">
+                                        <div className="question-header">
+                                            <span className="question-index">{index + 1}</span>
+                                            <h3 className="question-title">{question.question_text}</h3>
+                                        </div>
+                                        <div className="question-actions">
+                                            <button onClick={() => navigate(`/exam/${id}/question/${index}`)} className="btn-view">
+                                                {t('common.view')}
+                                            </button>
+                                            <button onClick={() => handleFlagQuestion(question.id)} className={`btn-flag ${flaggedQuestions.has(question.id) ? 'flagged' : ''}`}>
+                                                <Flag /> {t('examView.flag')}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Single Question View */}
+                        {viewMode === 'single' && exam && (
+                            <div className="question-view">
+                                {exam.questions.length > 0 ? (
+                                    <>
+                                        {/* Question Component Render */}
+                                        {React.createElement(QuestionComponent, {
+                                            question: exam.questions[currentQuestionIndex],
+                                            index: currentQuestionIndex,
+                                            total: exam.questions.length,
+                                            onBack: () => {
+                                                if (currentQuestionIndex > 0) {
+                                                    setCurrentQuestionIndex(currentQuestionIndex - 1);
+                                                } else {
+                                                    // Optionally, navigate back to exam overview or prevent going back
+                                                    navigate(`/exam/${id}`);
+                                                }
+                                            },
+                                            onNext: () => {
+                                                if (currentQuestionIndex < exam.questions.length - 1) {
+                                                    setCurrentQuestionIndex(currentQuestionIndex + 1);
+                                                } else {
+                                                    // Optionally, navigate to results or complete exam
+                                                    handleSubmitWithCheck();
+                                                }
+                                            },
+                                            onChangeAnswer: (answer) => {
+                                                setAnswers(prev => ({ ...prev, [exam.questions[currentQuestionIndex].id]: answer }));
+                                            },
+                                            onFlag: () => handleFlagQuestion(exam.questions[currentQuestionIndex].id),
+                                            isFlagged: flaggedQuestions.has(exam.questions[currentQuestionIndex].id),
+                                        })}
+                                    </>
+                                ) : (
+                                    <p>{t('examView.noQuestions')}</p>
+                                )}
+                            </div>
+                        )}
+                    </>
+                )}
+            </main>
+
+            {/* Modals */}
+
+            {/* Violation Modal */}
+            <ViolationModal
+                open={showViolationModal}
+                onClose={() => setShowViolationModal(false)}
+                message={violationMessage}
+            />
+
+            {/* Unanswered Questions Modal */}
+            <Modal
+                open={showUnansweredModal}
+                onClose={() => setShowUnansweredModal(false)}
+                title={t('examView.unansweredQuestions')}
+            >
+                <div className="unanswered-content">
+                    <p>{t('examView.unansweredQuestionsMessage')}</p>
+                    <ul>
+                        {unansweredQuestions.map((qIndex) => (
+                            <li key={qIndex}>
+                                {t('examView.question')} {qIndex + 1}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+                <div className="modal-actions">
+                    <button onClick={() => setShowUnansweredModal(false)} className="btn-primary">
+                        {t('common.ok')}
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Auto-Submit Warning */}
+            {showAutoSubmitWarning && (
+                <div className="auto-submit-warning">
+                    <p>{t('examView.autoSubmitWarning', { seconds: autoSubmitCountdown })}</p>
+                </div>
+            )}
+        </div>
+    );
+}
