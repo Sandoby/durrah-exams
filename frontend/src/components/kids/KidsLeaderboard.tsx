@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Trophy, Medal, Loader2 } from 'lucide-react';
+import { Trophy, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 export type LeaderboardVisibility = 'hidden' | 'after_submit' | 'always';
@@ -13,13 +13,6 @@ type Row = {
   submitted_at: string;
   submission_id: string;
 };
-
-function medalIcon(rank: number) {
-  if (rank === 1) return <Medal className="h-4 w-4 text-yellow-400" />;
-  if (rank === 2) return <Medal className="h-4 w-4 text-gray-300" />;
-  if (rank === 3) return <Medal className="h-4 w-4 text-amber-700" />;
-  return <span className="inline-flex h-4 w-4 items-center justify-center text-xs font-bold text-white/80">{rank}</span>;
-}
 
 export function KidsLeaderboard(props: {
   examId: string;
@@ -75,14 +68,18 @@ export function KidsLeaderboard(props: {
   }, [rows, safeNick]);
 
   return (
-    <div className="mt-4 rounded-2xl border border-white/15 bg-white/10 p-4 text-white shadow-xl backdrop-blur">
-      <div className="flex items-center gap-2">
-        <Trophy className="h-5 w-5 text-yellow-300" />
-        <h3 className="text-base font-extrabold">Leaderboard</h3>
-        {myRank && (
-          <span className="ml-auto rounded-full bg-white/15 px-3 py-1 text-xs font-bold">Your rank: #{myRank}</span>
-        )}
+    <div className="mt-4 rounded-3xl border-4 border-yellow-300 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 p-6 text-white shadow-2xl">
+      <div className="flex items-center gap-3 justify-center">
+        <Trophy className="h-8 w-8 text-yellow-300 animate-pulse" />
+        <h3 className="text-2xl font-black">🏆 Leaderboard</h3>
       </div>
+      {myRank && (
+        <div className="mt-3 text-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/30 backdrop-blur border-2 border-white px-4 py-2 text-sm font-black">
+            ⭐ Your Rank: #{myRank}
+          </span>
+        </div>
+      )}
 
       {loading && (
         <div className="mt-4 flex items-center gap-2 text-white/80">
@@ -96,25 +93,45 @@ export function KidsLeaderboard(props: {
       {!loading && !error && rows.length === 0 && <div className="mt-3 text-sm text-white/80">No scores yet.</div>}
 
       {!loading && !error && rows.length > 0 && (
-        <ol className="mt-3 space-y-2">
+        <ol className="mt-4 space-y-3">
           {rows.map((r, i) => {
             const rank = i + 1;
             const isMe = safeNick && r.nickname?.trim() === safeNick;
+            const displayName = r.nickname?.trim() || 'Player';
             return (
               <li
                 key={r.submission_id}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2 ${isMe ? 'bg-white/20' : 'bg-white/10'}`}
+                className={`flex items-center gap-4 rounded-2xl p-4 transform transition-all ${
+                  isMe 
+                    ? 'bg-white border-4 border-yellow-300 scale-105 shadow-xl' 
+                    : rank <= 3
+                    ? 'bg-white/90 border-2 border-white shadow-lg'
+                    : 'bg-white/80 border-2 border-white/50'
+                }`}
               >
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-black/20">
-                  {medalIcon(rank)}
+                <div className={`flex h-12 w-12 items-center justify-center rounded-full text-xl font-black ${
+                  rank === 1 ? 'bg-gradient-to-br from-yellow-300 to-yellow-500 text-yellow-900' :
+                  rank === 2 ? 'bg-gradient-to-br from-gray-200 to-gray-400 text-gray-700' :
+                  rank === 3 ? 'bg-gradient-to-br from-orange-300 to-orange-500 text-orange-900' :
+                  'bg-gradient-to-br from-purple-200 to-purple-400 text-purple-900'
+                }`}>
+                  {rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : rank}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-bold">{r.nickname || 'Anonymous'}</div>
-                  <div className="text-xs text-white/70">
-                    {Math.round(r.percentage)}% ({r.score}/{r.max_score})
+                  <div className={`truncate font-black ${
+                    isMe ? 'text-purple-900 text-lg' : 'text-gray-900 text-base'
+                  }`}>
+                    {displayName} {isMe && '(You!)'}
+                  </div>
+                  <div className="text-sm font-bold text-gray-700">
+                    {r.score} / {r.max_score} points
                   </div>
                 </div>
-                <div className="text-sm font-extrabold">{Math.round(r.percentage)}%</div>
+                <div className={`text-right ${
+                  isMe ? 'text-2xl' : 'text-xl'
+                } font-black bg-gradient-to-br from-purple-600 to-pink-600 bg-clip-text text-transparent`}>
+                  {Math.round(r.percentage)}%
+                </div>
               </li>
             );
           })}

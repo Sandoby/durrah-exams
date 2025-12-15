@@ -403,7 +403,16 @@ export default function KidsExamView() {
             >
               Back
             </button>
-          </div>
+            {/* Show leaderboard if visibility is always */}
+            {leaderboardVisibility === 'always' && (
+              <div className="mt-6">
+                <KidsLeaderboard
+                  examId={id!}
+                  nickname={safeNick}
+                  refreshKey="pre-start"
+                />
+              </div>
+            )}          </div>
         ) : (
           <div className="mt-6">
             {/* Question card */}

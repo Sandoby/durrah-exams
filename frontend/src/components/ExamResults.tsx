@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, FileDown } from 'lucide-react';
+import { Loader2, FileDown, Trophy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import * as XLSX from 'xlsx';
 import { TableSkeleton } from './skeletons';
+import { KidsLeaderboard } from './kids/KidsLeaderboard';
 
 
 interface ExamResultsProps {
@@ -21,6 +22,9 @@ interface Submission {
     max_score: number;
     created_at: string;
     violations: any[];
+    child_mode?: boolean;
+    nickname?: string;
+    quiz_code?: string;
     browser_info?: {
         student_data?: Record<string, string>;
     };
@@ -35,6 +39,7 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
     const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
     const [detailedAnswers, setDetailedAnswers] = useState<any[]>([]);
     const [questionMap, setQuestionMap] = useState<Record<string, any>>({});
+    const [isKidsMode, setIsKidsMode] = useState(false);
 
 
     const fieldLabels: Record<string, string> = {
@@ -50,15 +55,18 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
 
     const fetchExamAndSubmissions = async () => {
         try {
-            // Fetch exam to get required_fields
+            // Fetch exam to get required_fields and check Kids Mode
             const { data: examData, error: examError } = await supabase
                 .from('exams')
-                .select('required_fields')
+                .select('required_fields, settings')
                 .eq('id', examId)
                 .eq('tutor_id', user?.id)
                 .single();
 
             if (examError) throw examError;
+            const settings = examData.settings || {};
+            const kidsMode = Boolean(settings.child_mode_enabled);
+            setIsKidsMode(kidsMode);
             setRequiredFields(examData.required_fields || ['name', 'email']);
 
             // Fetch submissions
@@ -80,6 +88,10 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
     };
 
     const getStudentFieldValue = (submission: Submission, field: string): string => {
+        // For Kids Mode, show nickname
+        if (submission.child_mode && field === 'name') {
+            return submission.nickname || 'Kid Player';
+        }
         // Try to get from browser_info.student_data first
         if (submission.browser_info?.student_data?.[field]) {
             return submission.browser_info.student_data[field];
@@ -268,11 +280,22 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
                 </button>
             </div>
 
+            {isKidsMode && (
+                <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 border-2 border-purple-300 dark:border-purple-700">
+                    <div className="flex items-center gap-2 text-purple-900 dark:text-purple-200">
+                        <span className="text-2xl">🎈</span>
+                        <span className="font-bold">Kids Mode Exam</span>
+                        <span className="text-sm">• Shows nicknames instead of email addresses</span>
+                    </div>
+                </div>
+            )}
+
             {submissions.length === 0 ? (
                 <div className="text-center py-12">
                     <p className="text-gray-500 dark:text-gray-400">No submissions yet</p>
                 </div>
             ) : (
+                <>
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead className="bg-gray-50 dark:bg-gray-900">
@@ -326,6 +349,26 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
                         </tbody>
                     </table>
                 </div>
+
+                {/* Kids Mode Leaderboard */}
+                {isKidsMode && (
+                    <div className="mt-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Trophy className="h-6 w-6 text-yellow-500" />
+                            <h4 className="text-lg font-bold text-gray-900 dark:text-white">Kids Leaderboard</h4>
+                        </div>
+                        <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 p-1 rounded-3xl">
+                            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6">
+                                <KidsLeaderboard
+                                    examId={examId}
+                                    maxRows={20}
+                                    refreshKey={submissions.length}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+                </>
             )}
 
             {selectedSubmission && (

@@ -729,73 +729,89 @@ export default function ExamEditor() {
                             </div>
                         </div>
 
-                        {/* Email Access Control */}
-                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('examEditor.emailAccess.title')}</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            {t('examEditor.emailAccess.desc')}
-                                        </p>
+                        {/* Email Access Control - Hidden in Kids Mode */}
+                        {!watch('settings.child_mode_enabled') && (
+                            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('examEditor.emailAccess.title')}</h3>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                {t('examEditor.emailAccess.desc')}
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={watch('settings.restrict_by_email')}
+                                                onChange={(e) => {
+                                                    setValue('settings.restrict_by_email', e.target.checked);
+                                                    if (e.target.checked && !watch('required_fields')?.includes('email')) {
+                                                        // Automatically add email to required fields
+                                                        const current = watch('required_fields') || [];
+                                                        setValue('required_fields', [...current, 'email']);
+                                                    }
+                                                }}
+                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                            />
+                                            <label className="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-300">
+                                                {t('examEditor.emailAccess.enable')}
+                                            </label>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={watch('settings.restrict_by_email')}
-                                            onChange={(e) => {
-                                                setValue('settings.restrict_by_email', e.target.checked);
-                                                if (e.target.checked && !watch('required_fields')?.includes('email')) {
-                                                    // Automatically add email to required fields
-                                                    const current = watch('required_fields') || [];
-                                                    setValue('required_fields', [...current, 'email']);
-                                                }
-                                            }}
-                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                        />
-                                        <label className="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-300">
-                                            {t('examEditor.emailAccess.enable')}
-                                        </label>
-                                    </div>
-                                </div>
 
-                                {watch('settings.restrict_by_email') && (
-                                    <EmailWhitelist
-                                        emails={watch('settings.allowed_emails') || []}
-                                        onChange={(emails) => setValue('settings.allowed_emails', emails)}
-                                    />
-                                )}
+                                    {watch('settings.restrict_by_email') && (
+                                        <EmailWhitelist
+                                            emails={watch('settings.allowed_emails') || []}
+                                            onChange={(emails) => setValue('settings.allowed_emails', emails)}
+                                        />
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Settings */}
                         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6" id="exam-settings">
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('examEditor.settings.title')}</h3>
                             <div className="grid grid-cols-1 gap-y-4 gap-x-8 sm:grid-cols-2">
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                        {...register('settings.require_fullscreen')}
-                                    />
-                                    <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.fullscreen')}</label>
-                                </div>
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                        {...register('settings.detect_tab_switch')}
-                                    />
-                                    <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.tabSwitch')}</label>
-                                </div>
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                        {...register('settings.disable_copy_paste')}
-                                    />
-                                    <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.copyPaste')}</label>
-                                </div>
+                                {/* Hide anti-cheating settings in Kids Mode */}
+                                {!watch('settings.child_mode_enabled') && (
+                                    <>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                {...register('settings.require_fullscreen')}
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.fullscreen')}</label>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                {...register('settings.detect_tab_switch')}
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.tabSwitch')}</label>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                {...register('settings.disable_copy_paste')}
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.copyPaste')}</label>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.maxViolations')}</label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                {...register('settings.max_violations', { valueAsNumber: true })}
+                                            />
+                                        </div>
+                                    </>
+                                )}
                                 <div className="flex items-center">
                                     <input
                                         type="checkbox"
@@ -814,15 +830,6 @@ export default function ExamEditor() {
                                         Show answers after submission
                                         <span className="block text-xs text-gray-500">Students can see which questions they got wrong.</span>
                                     </label>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.maxViolations')}</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                        {...register('settings.max_violations', { valueAsNumber: true })}
-                                    />
                                 </div>
                                 <div id="time-settings">
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.timeLimit')}</label>
