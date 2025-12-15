@@ -457,36 +457,21 @@ export default function KidsExamView() {
                     </button>
                   );
                 })}
-                {q.type === 'kids_emoji_reaction' && (
-                  <div className="grid grid-cols-3 gap-3">
-                    {(q.options || []).map((emj: string, i: number) => {
-                      const isSelected = answers[q.id] === emj;
-                      return (
-                        <button
-                          type="button"
-                          key={`${q.id}_emoji_${i}`}
-                          onClick={() => setAnswer(q.id, emj)}
-                          className={`rounded-2xl border p-4 text-3xl ${isSelected ? 'border-purple-600 bg-purple-50' : 'border-gray-200 bg-white'}`}
-                        >
-                          {emj || '🙂'}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
 
                 {q.type === 'kids_color_picker' && (
-                  <div className="grid grid-cols-5 gap-3">
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-4">
                     {(q.options || []).map((clr: string, i: number) => {
                       const isSelected = answers[q.id] === clr;
+                      const safeColor = /^#([0-9A-Fa-f]{3}){1,2}$/.test(clr) ? clr : '#ffffff';
                       return (
                         <button
                           type="button"
                           key={`${q.id}_color_${i}`}
                           onClick={() => setAnswer(q.id, clr)}
-                          className={`rounded-full h-12 w-12 border ${isSelected ? 'ring-2 ring-purple-500' : 'border-gray-300'}`}
-                          style={{ background: clr || '#ffffff' }}
-                          aria-label={clr}
+                          className={`rounded-full h-16 w-16 border-4 transition-all ${isSelected ? 'ring-4 ring-offset-2 ring-yellow-400 scale-110' : 'border-gray-300'}`}
+                          style={{ background: safeColor }}
+                          aria-label={`Color ${i + 1}`}
+                          title={clr}
                         />
                       );
                     })}
@@ -494,7 +479,7 @@ export default function KidsExamView() {
                 )}
 
                 {q.type === 'kids_odd_one_out' && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {Array.from({ length: 4 }).map((_, i: number) => {
                       const isSelected = answers[q.id] === String(i);
                       const val = (q.options || [])[i] || '';
@@ -503,12 +488,12 @@ export default function KidsExamView() {
                           type="button"
                           key={`${q.id}_odd_${i}`}
                           onClick={() => setAnswer(q.id, String(i))}
-                          className={`rounded-xl border p-4 text-center ${isSelected ? 'border-purple-600 bg-purple-50' : 'border-gray-200 bg-white'}`}
+                          className={`rounded-2xl border-4 p-4 transition-all text-center overflow-hidden ${isSelected ? 'border-green-500 bg-green-50 ring-4 ring-green-300 scale-105' : 'border-gray-200 bg-white hover:border-gray-300'}`}
                         >
                           {val.startsWith('http') ? (
-                            <img src={val} alt={`item-${i+1}`} className="h-20 w-full object-cover rounded" />
+                            <img src={val} alt={`item-${i + 1}`} className="h-24 w-full object-cover rounded" />
                           ) : (
-                            <span className="font-bold">{val || 'Item'}</span>
+                            <span className="font-bold text-lg">{val || 'Item'}</span>
                           )}
                         </button>
                       );
@@ -517,73 +502,100 @@ export default function KidsExamView() {
                 )}
 
                 {q.type === 'kids_picture_pairing' && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs font-bold text-purple-600 mb-3">Select from left</p>
-                      <div className="space-y-2">
-                        {Array.from({ length: 4 }).map((_, i: number) => {
-                          const val = (q.options || [])[i] || '';
-                          const pairs = (answers[q.id] || []) as number[];
-                          const isSelected = pairs.some((_, idx) => idx % 2 === 0 && pairs[idx] === i);
-                          return (
-                            <button
-                              type="button"
-                              key={`pair_left_${i}`}
-                              onClick={() => {
-                                const current = (answers[q.id] || []) as number[];
-                                if (current.length % 2 === 0) {
-                                  setAnswer(q.id, [...current, i]);
-                                }
-                              }}
-                              className={`w-full rounded-lg border p-3 text-sm font-bold ${isSelected ? 'border-purple-600 bg-purple-50' : 'border-gray-200 bg-white'}`}
-                            >
-                              {val.startsWith('http') ? <img src={val} alt={`left-${i}`} className="h-12 w-full object-cover rounded" /> : val}
-                            </button>
-                          );
-                        })}
-                      </div>
+                  <div className="space-y-4">
+                    <div className="text-sm font-bold text-gray-700 bg-amber-50 rounded-lg p-3">
+                      👈 Tap an item on the left, then tap its match on the right
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-blue-600 mb-3">Select match</p>
-                      <div className="space-y-2">
-                        {Array.from({ length: 4 }).map((_, i: number) => {
-                          const val = (q.options || [])[i + 4] || '';
-                          const pairs = (answers[q.id] || []) as number[];
-                          const isSelected = pairs.some((_, idx) => idx % 2 === 1 && pairs[idx] === i);
-                          return (
-                            <button
-                              type="button"
-                              key={`pair_right_${i}`}
-                              onClick={() => {
-                                const current = (answers[q.id] || []) as number[];
-                                if (current.length % 2 === 1) {
-                                  setAnswer(q.id, [...current, i]);
-                                }
-                              }}
-                              className={`w-full rounded-lg border p-3 text-sm font-bold ${isSelected ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white'}`}
-                            >
-                              {val.startsWith('http') ? <img src={val} alt={`right-${i}`} className="h-12 w-full object-cover rounded" /> : val}
-                            </button>
-                          );
-                        })}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs font-bold text-purple-600 mb-3 bg-purple-50 rounded p-2">LEFT</p>
+                        <div className="space-y-2">
+                          {Array.from({ length: 4 }).map((_, i: number) => {
+                            const val = (q.options || [])[i] || '';
+                            const pairs = (answers[q.id] || []) as number[];
+                            const isSelected = pairs.some((_, idx) => idx % 2 === 0 && pairs[idx] === i);
+                            const isPaired = pairs.some((p) => p === i);
+                            return (
+                              <button
+                                type="button"
+                                key={`pair_left_${i}`}
+                                onClick={() => {
+                                  const current = (answers[q.id] || []) as number[];
+                                  if (current.length % 2 === 0) {
+                                    setAnswer(q.id, [...current, i]);
+                                  }
+                                }}
+                                disabled={isPaired && !isSelected}
+                                className={`w-full rounded-2xl border-4 p-4 text-sm font-bold transition-all ${
+                                  isSelected ? 'border-purple-600 bg-purple-100 ring-4 ring-purple-300' : isPaired ? 'opacity-50 cursor-default border-gray-200' : 'border-purple-200 bg-white hover:border-purple-300'
+                                }`}
+                              >
+                                {val.startsWith('http') ? (
+                                  <img src={val} alt={`left-${i}`} className="h-16 w-full object-cover rounded" />
+                                ) : (
+                                  val || `Item ${i + 1}`
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-blue-600 mb-3 bg-blue-50 rounded p-2">RIGHT</p>
+                        <div className="space-y-2">
+                          {Array.from({ length: 4 }).map((_, i: number) => {
+                            const val = (q.options || [])[i + 4] || '';
+                            const pairs = (answers[q.id] || []) as number[];
+                            const isSelected = pairs.some((_, idx) => idx % 2 === 1 && pairs[idx] === i);
+                            const isPaired = pairs.some((p) => p === i);
+                            return (
+                              <button
+                                type="button"
+                                key={`pair_right_${i}`}
+                                onClick={() => {
+                                  const current = (answers[q.id] || []) as number[];
+                                  if (current.length % 2 === 1) {
+                                    setAnswer(q.id, [...current, i]);
+                                  }
+                                }}
+                                disabled={isPaired && !isSelected}
+                                className={`w-full rounded-2xl border-4 p-4 text-sm font-bold transition-all ${
+                                  isSelected ? 'border-blue-600 bg-blue-100 ring-4 ring-blue-300' : isPaired ? 'opacity-50 cursor-default border-gray-200' : 'border-blue-200 bg-white hover:border-blue-300'
+                                }`}
+                              >
+                                {val.startsWith('http') ? (
+                                  <img src={val} alt={`right-${i}`} className="h-16 w-full object-cover rounded" />
+                                ) : (
+                                  val || `Match ${i + 1}`
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {q.type === 'kids_story_sequence' && (
-                  <div className="space-y-3">
-                    <p className="text-sm font-bold text-gray-700">Drag to arrange in order</p>
-                    <div className="space-y-2">
+                  <div className="space-y-4">
+                    <div className="text-sm font-bold text-gray-700 bg-amber-50 rounded-lg p-3">
+                      🎬 Drag the cards below to arrange them in the correct order
+                    </div>
+                    <div className="space-y-3">
                       {((answers[q.id] || (q.options || []).map((_, i) => i)) as number[]).map((idx: number, pos: number) => {
                         const val = (q.options || [])[idx] || '';
                         return (
                           <div
                             key={`seq_${pos}`}
-                            className="rounded-lg border-2 border-purple-300 bg-purple-50 p-3 text-center font-bold text-sm cursor-grab active:cursor-grabbing"
+                            className="rounded-2xl border-4 border-purple-300 bg-gradient-to-r from-purple-50 to-purple-100 p-4 text-center font-bold cursor-grab active:cursor-grabbing transition-all hover:shadow-lg"
                             draggable
                             onDragStart={(e) => {
                               e.dataTransfer?.setData('dragIdx', String(pos));
+                              e.currentTarget.style.opacity = '0.5';
+                            }}
+                            onDragEnd={(e) => {
+                              e.currentTarget.style.opacity = '1';
                             }}
                             onDragOver={(e) => e.preventDefault()}
                             onDrop={(e) => {
@@ -596,7 +608,12 @@ export default function KidsExamView() {
                               }
                             }}
                           >
-                            {val.startsWith('http') ? <img src={val} alt={`card-${pos}`} className="h-24 w-full object-cover rounded" /> : val}
+                            <div className="text-2xl font-black text-purple-600 mb-2">{pos + 1}</div>
+                            {val.startsWith('http') ? (
+                              <img src={val} alt={`card-${pos}`} className="h-28 w-full object-cover rounded-lg" />
+                            ) : (
+                              <div className="text-lg">{val}</div>
+                            )}
                           </div>
                         );
                       })}

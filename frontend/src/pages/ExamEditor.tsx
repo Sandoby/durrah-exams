@@ -389,7 +389,6 @@ export default function ExamEditor() {
                     'multiple_choice',
                     'multiple_select',
                     'dropdown',
-                    'kids_emoji_reaction',
                     'kids_color_picker',
                     'kids_odd_one_out',
                     'kids_picture_pairing',
@@ -427,7 +426,6 @@ export default function ExamEditor() {
                         'multiple_choice',
                         'multiple_select',
                         'dropdown',
-                        'kids_emoji_reaction',
                         'kids_color_picker',
                         'kids_odd_one_out',
                         'kids_picture_pairing',
@@ -984,7 +982,6 @@ export default function ExamEditor() {
                                                                     <option value="true_false">{t('examEditor.questions.types.trueFalse')}</option>
                                                                     {watch('settings.child_mode_enabled') && (
                                                                         <>
-                                                                            <option value="kids_emoji_reaction">Kids: Emoji Reaction</option>
                                                                             <option value="kids_color_picker">Kids: Color Picker</option>
                                                                             <option value="kids_odd_one_out">Kids: Odd One Out</option>
                                                                             <option value="kids_picture_pairing">Kids: Picture Pairing</option>
@@ -1087,48 +1084,7 @@ export default function ExamEditor() {
                                                             </div>
                                                         )}
 
-                                                        {questionsWatch?.[index]?.type === 'kids_emoji_reaction' && (
-                                                            <div className="space-y-2">
-                                                                <label className="block text-sm font-medium text-purple-700">Emoji options</label>
-                                                                {(() => {
-                                                                    const opts = (questionsWatch?.[index]?.options ?? []) as string[];
-                                                                    const corr = (questionsWatch?.[index]?.correct_answer ?? '') as string;
-                                                                    return (
-                                                                        <>
-                                                                            {opts.map((_val: string, optionIndex: number) => (
-                                                                                <div key={optionIndex} className="flex items-center gap-2">
-                                                                                    <input
-                                                                                        type="radio"
-                                                                                        value={opts[optionIndex] || ''}
-                                                                                        checked={corr === (opts[optionIndex] || '') && (opts[optionIndex] || '') !== ''}
-                                                                                        onChange={() => setValue(`questions.${index}.correct_answer`, opts[optionIndex] || '')}
-                                                                                    />
-                                                                                    <input
-                                                                                        type="text"
-                                                                                        placeholder={`Emoji ${optionIndex + 1} e.g. 😊`}
-                                                                                        className="flex-1 rounded-md border p-2"
-                                                                                        {...register(`questions.${index}.options.${optionIndex}`)}
-                                                                                    />
-                                                                                    <button type="button" className="text-xs text-red-600" onClick={() => {
-                                                                                        const arr = [...(questionsWatch?.[index]?.options ?? [])];
-                                                                                        const removed = arr.splice(optionIndex, 1);
-                                                                                        setValue(`questions.${index}.options`, arr);
-                                                                                        if ((questionsWatch?.[index]?.correct_answer ?? '') === removed[0]) setValue(`questions.${index}.correct_answer`, '');
-                                                                                    }}>Remove</button>
-                                                                                </div>
-                                                                            ))}
-                                                                            <div className="mt-2">
-                                                                                <button type="button" onClick={() => {
-                                                                                    const arr = [...(questionsWatch?.[index]?.options ?? [])];
-                                                                                    arr.push('');
-                                                                                    setValue(`questions.${index}.options`, arr);
-                                                                                }} className="inline-flex items-center px-2 py-1 border rounded text-sm bg-white hover:bg-gray-50">Add Emoji</button>
-                                                                            </div>
-                                                                        </>
-                                                                    );
-                                                                })()}
-                                                            </div>
-                                                        )}
+
 
                                                         {questionsWatch?.[index]?.type === 'kids_color_picker' && (
                                                             <div className="space-y-2">
