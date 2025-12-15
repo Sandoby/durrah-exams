@@ -515,6 +515,94 @@ export default function KidsExamView() {
                     })}
                   </div>
                 )}
+
+                {q.type === 'kids_picture_pairing' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs font-bold text-purple-600 mb-3">Select from left</p>
+                      <div className="space-y-2">
+                        {Array.from({ length: 4 }).map((_, i: number) => {
+                          const val = (q.options || [])[i] || '';
+                          const pairs = (answers[q.id] || []) as number[];
+                          const isSelected = pairs.some((_, idx) => idx % 2 === 0 && pairs[idx] === i);
+                          return (
+                            <button
+                              type="button"
+                              key={`pair_left_${i}`}
+                              onClick={() => {
+                                const current = (answers[q.id] || []) as number[];
+                                if (current.length % 2 === 0) {
+                                  setAnswer(q.id, [...current, i]);
+                                }
+                              }}
+                              className={`w-full rounded-lg border p-3 text-sm font-bold ${isSelected ? 'border-purple-600 bg-purple-50' : 'border-gray-200 bg-white'}`}
+                            >
+                              {val.startsWith('http') ? <img src={val} alt={`left-${i}`} className="h-12 w-full object-cover rounded" /> : val}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-blue-600 mb-3">Select match</p>
+                      <div className="space-y-2">
+                        {Array.from({ length: 4 }).map((_, i: number) => {
+                          const val = (q.options || [])[i + 4] || '';
+                          const pairs = (answers[q.id] || []) as number[];
+                          const isSelected = pairs.some((_, idx) => idx % 2 === 1 && pairs[idx] === i);
+                          return (
+                            <button
+                              type="button"
+                              key={`pair_right_${i}`}
+                              onClick={() => {
+                                const current = (answers[q.id] || []) as number[];
+                                if (current.length % 2 === 1) {
+                                  setAnswer(q.id, [...current, i]);
+                                }
+                              }}
+                              className={`w-full rounded-lg border p-3 text-sm font-bold ${isSelected ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white'}`}
+                            >
+                              {val.startsWith('http') ? <img src={val} alt={`right-${i}`} className="h-12 w-full object-cover rounded" /> : val}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {q.type === 'kids_story_sequence' && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-bold text-gray-700">Drag to arrange in order</p>
+                    <div className="space-y-2">
+                      {((answers[q.id] || (q.options || []).map((_, i) => i)) as number[]).map((idx: number, pos: number) => {
+                        const val = (q.options || [])[idx] || '';
+                        return (
+                          <div
+                            key={`seq_${pos}`}
+                            className="rounded-lg border-2 border-purple-300 bg-purple-50 p-3 text-center font-bold text-sm cursor-grab active:cursor-grabbing"
+                            draggable
+                            onDragStart={(e) => {
+                              e.dataTransfer?.setData('dragIdx', String(pos));
+                            }}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              const dragIdx = parseInt(e.dataTransfer?.getData('dragIdx') || '-1');
+                              if (dragIdx !== -1 && dragIdx !== pos) {
+                                const current = (answers[q.id] || (q.options || []).map((_, i) => i)) as number[];
+                                [current[dragIdx], current[pos]] = [current[pos], current[dragIdx]];
+                                setAnswer(q.id, current);
+                              }
+                            }}
+                          >
+                            {val.startsWith('http') ? <img src={val} alt={`card-${pos}`} className="h-24 w-full object-cover rounded" /> : val}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">

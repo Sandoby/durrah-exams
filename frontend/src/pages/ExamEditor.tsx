@@ -958,6 +958,8 @@ export default function ExamEditor() {
                                                                             <option value="kids_emoji_reaction">Kids: Emoji Reaction</option>
                                                                             <option value="kids_color_picker">Kids: Color Picker</option>
                                                                             <option value="kids_odd_one_out">Kids: Odd One Out</option>
+                                                                            <option value="kids_picture_pairing">Kids: Picture Pairing</option>
+                                                                            <option value="kids_story_sequence">Kids: Story Sequence</option>
                                                                         </>
                                                                     )}
                                                                 </select>
@@ -1141,6 +1143,55 @@ export default function ExamEditor() {
                                                                         </>
                                                                     );
                                                                 })()}
+                                                            </div>
+                                                        )}
+
+                                                        {questionsWatch?.[index]?.type === 'kids_picture_pairing' && (
+                                                            <div className="space-y-2">
+                                                                <label className="block text-sm font-medium text-purple-700">Left & Right Items (pairs)</label>
+                                                                <div className="grid grid-cols-2 gap-4">
+                                                                    <div>
+                                                                        <p className="text-xs font-bold text-purple-600 mb-2">Left Column</p>
+                                                                        {Array.from({ length: 4 }).map((_, i: number) => (
+                                                                            <input
+                                                                                key={`left_${i}`}
+                                                                                type="text"
+                                                                                placeholder={`Item ${i + 1} (URL or text)`}
+                                                                                className="w-full rounded-md border p-2 mb-2"
+                                                                                {...register(`questions.${index}.options.${i}`)}
+                                                                            />
+                                                                        ))}
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-xs font-bold text-purple-600 mb-2">Right Column</p>
+                                                                        {Array.from({ length: 4 }).map((_, i: number) => (
+                                                                            <input
+                                                                                key={`right_${i}`}
+                                                                                type="text"
+                                                                                placeholder={`Match ${i + 1} (URL or text)`}
+                                                                                className="w-full rounded-md border p-2 mb-2"
+                                                                                {...register(`questions.${index}.options.${i + 4}`)}
+                                                                            />
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                                <p className="text-xs text-gray-600 mt-2">Pairs are matched by position (item 1 pairs with match 1, etc.)</p>
+                                                            </div>
+                                                        )}
+
+                                                        {questionsWatch?.[index]?.type === 'kids_story_sequence' && (
+                                                            <div className="space-y-2">
+                                                                <label className="block text-sm font-medium text-purple-700">Story Cards (3 items in order)</label>
+                                                                {Array.from({ length: 3 }).map((_, i: number) => (
+                                                                    <input
+                                                                        key={i}
+                                                                        type="text"
+                                                                        placeholder={`Card ${i + 1} (text or image URL)`}
+                                                                        className="w-full rounded-md border p-2"
+                                                                        {...register(`questions.${index}.options.${i}`)}
+                                                                    />
+                                                                ))}
+                                                                <p className="text-xs text-gray-600 mt-2">Kids must arrange these 3 cards in the correct order</p>
                                                             </div>
                                                         )}
 
