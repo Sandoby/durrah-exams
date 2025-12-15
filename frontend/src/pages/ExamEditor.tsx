@@ -4,7 +4,7 @@ import type { ChangeEvent } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
@@ -14,6 +14,7 @@ import { EmailWhitelist } from '../components/EmailWhitelist';
 import { useDemoTour } from '../hooks/useDemoTour';
 import { SortableQuestionItem } from '../components/SortableQuestionItem';
 import { ExamPreviewPanel } from '../components/ExamPreviewPanel';
+import { ImageUploader } from '../components/ImageUploader';
 
 interface Question {
     id?: string;
@@ -24,6 +25,8 @@ interface Question {
     correct_answer?: string | string[];
     points: number;
     randomize_options: boolean;
+    media_url?: string | null;
+    media_type?: string | null;
 }
 
 interface ExamForm {
@@ -382,14 +385,27 @@ export default function ExamEditor() {
             const existingQuestionsToUpdate = data.questions.filter(q => q.id);
 
             if (newQuestions.length > 0) {
+                const optionTypes = [
+                    'multiple_choice',
+                    'multiple_select',
+                    'dropdown',
+                    'kids_emoji_reaction',
+                    'kids_color_picker',
+                    'kids_odd_one_out',
+                    'kids_picture_pairing',
+                    'kids_story_sequence',
+                ];
+
                 const questionsToInsert = newQuestions.map(q => {
                     const base: any = {
                         exam_id: examId,
                         type: q.type,
                         question_text: q.question_text,
-                        options: q.type === 'multiple_choice' || q.type === 'multiple_select' || q.type === 'dropdown' ? q.options : [],
+                        options: optionTypes.includes(q.type) ? (q.options || []) : [],
                         points: q.points,
-                        randomize_options: q.randomize_options
+                        randomize_options: q.randomize_options,
+                        media_url: q.media_url || null,
+                        media_type: q.media_type || (q.media_url ? 'image' : null),
                     };
                     // only include correct_answer for auto-graded types
                     if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'numeric'].includes(q.type)) {
@@ -407,12 +423,25 @@ export default function ExamEditor() {
 
             if (existingQuestionsToUpdate.length > 0) {
                 for (const q of existingQuestionsToUpdate) {
+                    const optionTypes = [
+                        'multiple_choice',
+                        'multiple_select',
+                        'dropdown',
+                        'kids_emoji_reaction',
+                        'kids_color_picker',
+                        'kids_odd_one_out',
+                        'kids_picture_pairing',
+                        'kids_story_sequence',
+                    ];
+
                     const updatePayload: any = {
                         type: q.type,
                         question_text: q.question_text,
-                        options: q.type === 'multiple_choice' || q.type === 'multiple_select' || q.type === 'dropdown' ? q.options : [],
+                        options: optionTypes.includes(q.type) ? (q.options || []) : [],
                         points: q.points,
-                        randomize_options: q.randomize_options
+                        randomize_options: q.randomize_options,
+                        media_url: q.media_url || null,
+                        media_type: q.media_type || (q.media_url ? 'image' : null),
                     };
                     if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'numeric'].includes(q.type)) {
                         updatePayload.correct_answer = q.correct_answer || null;
@@ -983,6 +1012,34 @@ export default function ExamEditor() {
                                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
                                                                 {...register(`questions.${index}.question_text`)}
                                                             />
+                                                            {/* Question image uploader */}
+                                                            <div className="mt-3">
+                                                                <div className="flex items-center justify-between">
+                                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Question Image (optional)</label>
+                                                                    {questionsWatch?.[index]?.media_url ? (
+                                                                        <button
+                                                                            type="button"
+                                                                            className="text-xs text-red-600 inline-flex items-center gap-1"
+                                                                            onClick={() => {
+                                                                                setValue(`questions.${index}.media_url`, null);
+                                                                                setValue(`questions.${index}.media_type`, null);
+                                                                            }}
+                                                                        >
+                                                                            <X className="h-3 w-3" /> Remove
+                                                                        </button>
+                                                                    ) : null}
+                                                                </div>
+                                                                <div className="mt-1">
+                                                                    <ImageUploader
+                                                                        userId={user?.id || 'anon'}
+                                                                        value={questionsWatch?.[index]?.media_url || ''}
+                                                                        onChange={(url) => {
+                                                                            setValue(`questions.${index}.media_url`, url);
+                                                                            setValue(`questions.${index}.media_type`, 'image');
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </div>
                                                         </div>
 
                                                         {['multiple_choice', 'dropdown'].includes(questionsWatch?.[index]?.type) && (
@@ -1090,10 +1147,17 @@ export default function ExamEditor() {
                                                                                         onChange={() => setValue(`questions.${index}.correct_answer`, opts[optionIndex] || '')}
                                                                                     />
                                                                                     <input
+                                                                                        type="color"
+                                                                                        className="h-10 w-10 p-0 border rounded"
+                                                                                        value={/^#([0-9A-Fa-f]{3}){1,2}$/.test(opts[optionIndex] || '') ? (opts[optionIndex] as string) : '#ffffff'}
+                                                                                        onChange={(e) => setValue(`questions.${index}.options.${optionIndex}`, e.target.value)}
+                                                                                    />
+                                                                                    <input
                                                                                         type="text"
-                                                                                        placeholder={`Color ${optionIndex + 1} e.g. #FF0000 or red`}
+                                                                                        placeholder={`#FF0000`}
                                                                                         className="flex-1 rounded-md border p-2"
-                                                                                        {...register(`questions.${index}.options.${optionIndex}`)}
+                                                                                        value={opts[optionIndex] || ''}
+                                                                                        onChange={(e) => setValue(`questions.${index}.options.${optionIndex}`, e.target.value)}
                                                                                     />
                                                                                     <span className="h-6 w-6 rounded-full border" style={{ background: questionsWatch?.[index]?.options?.[optionIndex] || '#ffffff' }}></span>
                                                                                     <button type="button" className="text-xs text-red-600" onClick={() => {
@@ -1138,6 +1202,11 @@ export default function ExamEditor() {
                                                                                         className="flex-1 rounded-md border p-2"
                                                                                         {...register(`questions.${index}.options.${optionIndex}`)}
                                                                                     />
+                                                                                    <ImageUploader
+                                                                                        userId={user?.id || 'anon'}
+                                                                                        compact
+                                                                                        onChange={(url) => setValue(`questions.${index}.options.${optionIndex}`, url)}
+                                                                                    />
                                                                                 </div>
                                                                             ))}
                                                                         </>
@@ -1153,25 +1222,37 @@ export default function ExamEditor() {
                                                                     <div>
                                                                         <p className="text-xs font-bold text-purple-600 mb-2">Left Column</p>
                                                                         {Array.from({ length: 4 }).map((_, i: number) => (
-                                                                            <input
-                                                                                key={`left_${i}`}
-                                                                                type="text"
-                                                                                placeholder={`Item ${i + 1} (URL or text)`}
-                                                                                className="w-full rounded-md border p-2 mb-2"
-                                                                                {...register(`questions.${index}.options.${i}`)}
-                                                                            />
+                                                                            <div key={`left_${i}`} className="flex items-center gap-2 mb-2">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    placeholder={`Item ${i + 1} (URL or text)`}
+                                                                                    className="w-full rounded-md border p-2"
+                                                                                    {...register(`questions.${index}.options.${i}`)}
+                                                                                />
+                                                                                <ImageUploader
+                                                                                    userId={user?.id || 'anon'}
+                                                                                    compact
+                                                                                    onChange={(url) => setValue(`questions.${index}.options.${i}`, url)}
+                                                                                />
+                                                                            </div>
                                                                         ))}
                                                                     </div>
                                                                     <div>
                                                                         <p className="text-xs font-bold text-purple-600 mb-2">Right Column</p>
                                                                         {Array.from({ length: 4 }).map((_, i: number) => (
-                                                                            <input
-                                                                                key={`right_${i}`}
-                                                                                type="text"
-                                                                                placeholder={`Match ${i + 1} (URL or text)`}
-                                                                                className="w-full rounded-md border p-2 mb-2"
-                                                                                {...register(`questions.${index}.options.${i + 4}`)}
-                                                                            />
+                                                                            <div key={`right_${i}`} className="flex items-center gap-2 mb-2">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    placeholder={`Match ${i + 1} (URL or text)`}
+                                                                                    className="w-full rounded-md border p-2"
+                                                                                    {...register(`questions.${index}.options.${i + 4}`)}
+                                                                                />
+                                                                                <ImageUploader
+                                                                                    userId={user?.id || 'anon'}
+                                                                                    compact
+                                                                                    onChange={(url) => setValue(`questions.${index}.options.${i + 4}`, url)}
+                                                                                />
+                                                                            </div>
                                                                         ))}
                                                                     </div>
                                                                 </div>
@@ -1183,13 +1264,19 @@ export default function ExamEditor() {
                                                             <div className="space-y-2">
                                                                 <label className="block text-sm font-medium text-purple-700">Story Cards (3 items in order)</label>
                                                                 {Array.from({ length: 3 }).map((_, i: number) => (
-                                                                    <input
-                                                                        key={i}
-                                                                        type="text"
-                                                                        placeholder={`Card ${i + 1} (text or image URL)`}
-                                                                        className="w-full rounded-md border p-2"
-                                                                        {...register(`questions.${index}.options.${i}`)}
-                                                                    />
+                                                                    <div key={i} className="flex items-center gap-2">
+                                                                        <input
+                                                                            type="text"
+                                                                            placeholder={`Card ${i + 1} (text or image URL)`}
+                                                                            className="w-full rounded-md border p-2"
+                                                                            {...register(`questions.${index}.options.${i}`)}
+                                                                        />
+                                                                        <ImageUploader
+                                                                            userId={user?.id || 'anon'}
+                                                                            compact
+                                                                            onChange={(url) => setValue(`questions.${index}.options.${i}`, url)}
+                                                                        />
+                                                                    </div>
                                                                 ))}
                                                                 <p className="text-xs text-gray-600 mt-2">Kids must arrange these 3 cards in the correct order</p>
                                                             </div>
