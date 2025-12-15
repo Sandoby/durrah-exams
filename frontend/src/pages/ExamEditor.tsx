@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useMemo } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ChangeEvent } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -79,7 +79,6 @@ export default function ExamEditor() {
 
     // Kids Mode helpers
     const [savedQuizCode, setSavedQuizCode] = useState<string | null>(null);
-    const kidsLandingUrl = useMemo(() => `${window.location.origin}/kids`, []);
 
     const generateQuizCode = () => {
         const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -94,14 +93,6 @@ export default function ExamEditor() {
         return next;
     };
 
-    const copyText = async (text: string) => {
-        try {
-            await navigator.clipboard.writeText(text);
-            toast.success(t?.('common.copied') ?? 'Copied');
-        } catch {
-            toast.error(t?.('common.copyFailed') ?? 'Copy failed');
-        }
-    };
     useDemoTour('create-exam', startTour && isDemo);
 
 
