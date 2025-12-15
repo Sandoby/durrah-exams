@@ -565,16 +565,40 @@ export default function ExamEditor() {
             <div className="bg-white dark:bg-gray-800 shadow">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-4">
                             <button
                                 onClick={() => navigate(new URLSearchParams(window.location.search).get('demo') === 'true' ? '/demo' : '/dashboard')}
-                                className="mr-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                             >
                                 <ArrowLeft className="h-6 w-6" />
                             </button>
                             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                                 {id ? t('examEditor.editTitle') : t('examEditor.createTitle')}
                             </h1>
+                            {/* Kids Mode Toggle at Top */}
+                            <div className="flex items-center gap-2 ml-4 px-3 py-1.5 rounded-md bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700">
+                                <label className="flex items-center cursor-pointer gap-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={watch('settings.child_mode_enabled')}
+                                        onChange={(e) => {
+                                            setValue('settings.child_mode_enabled', e.target.checked);
+                                            if (e.target.checked) {
+                                                setValue('settings.attempt_limit', 1);
+                                                setValue('settings.leaderboard_visibility', 'after_submit');
+                                                ensureQuizCode();
+                                                toast.success('Kids Mode enabled');
+                                            } else {
+                                                toast.success('Kids Mode disabled');
+                                            }
+                                        }}
+                                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                                    />
+                                    <span className="text-sm font-medium text-purple-900 dark:text-purple-200">
+                                        🎈 Kids Mode
+                                    </span>
+                                </label>
+                            </div>
                         </div>
                         <div className="flex items-center gap-2">
                             <button

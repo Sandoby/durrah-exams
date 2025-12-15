@@ -19,6 +19,11 @@ interface Exam {
     description: string;
     created_at: string;
     is_active: boolean;
+    quiz_code?: string | null;
+    settings?: {
+        child_mode_enabled?: boolean;
+        [key: string]: any;
+    };
 }
 
 export default function Dashboard() {
@@ -315,6 +320,28 @@ export default function Dashboard() {
     };
 
     const copyExamLink = (examId: string) => {
+        const exam = exams.find(e => e.id === examId);
+        
+        // Kids Mode: show quiz code and kids landing page link
+        if (exam?.settings?.child_mode_enabled && exam.quiz_code) {
+            const kidsUrl = `${window.location.origin}/kids`;
+            const message = `🎈 Kids Quiz\n\n📍 Page: ${kidsUrl}\n🔑 Code: ${exam.quiz_code}\n\nKids should visit the page and enter the code!`;
+            
+            try {
+                navigator.clipboard.writeText(message);
+                toast.success('Kids quiz info copied!');
+            } catch (e) {
+                const input = document.createElement('textarea');
+                input.value = message;
+                document.body.appendChild(input);
+                input.select();
+                try { document.execCommand('copy'); toast.success('Kids quiz info copied!'); } catch { toast.error('Failed to copy'); }
+                document.body.removeChild(input);
+            }
+            return;
+        }
+        
+        // Normal mode: copy exam link
         const examUrl = `${window.location.origin}/exam/${examId}`;
         try {
             navigator.clipboard.writeText(examUrl);
