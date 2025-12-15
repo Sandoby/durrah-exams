@@ -949,7 +949,8 @@ export default function ExamEditor() {
                                                 </p>
                                             </div>
                                         </div>
-                                    </div></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1101,13 +1102,6 @@ export default function ExamEditor() {
                                                                                         placeholder={`Option ${optionIndex + 1}`}
                                                                                         className="ml-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
                                                                                         {...register(`questions.${index}.options.${optionIndex}`)}
-                                                                                        onBlur={() => {
-                                                                                            const optsNow = (questionsWatch?.[index]?.options ?? []) as string[];
-                                                                                            const newOpt = optsNow[optionIndex] ?? '';
-                                                                                            const corr = (questionsWatch?.[index]?.correct_answer as string[]) ?? [];
-                                                                                            const updated = corr.map(a => (a === _optValue ? newOpt : a)).filter(Boolean);
-                                                                                            setValue(`questions.${index}.correct_answer`, updated);
-                                                                                        }}
                                                                                     />
                                                                                     <button type="button" className="ml-2 text-sm text-red-600" onClick={() => {
                                                                                         const arrOpts = [...(questionsWatch?.[index]?.options ?? [])] as string[];

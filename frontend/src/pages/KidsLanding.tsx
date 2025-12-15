@@ -76,133 +76,100 @@ export default function KidsLanding() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-rose-200 via-sky-100 to-lime-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-      {/* Confetti dots */}
-      <div className="pointer-events-none absolute inset-0 opacity-40">
-        <div className="absolute left-6 top-10 h-3 w-3 rounded-full bg-pink-500" />
-        <div className="absolute left-24 top-24 h-2 w-2 rounded-full bg-indigo-500" />
-        <div className="absolute left-1/3 top-16 h-2.5 w-2.5 rounded-full bg-yellow-400" />
-        <div className="absolute right-10 top-20 h-3 w-3 rounded-full bg-emerald-400" />
-        <div className="absolute right-24 top-40 h-2 w-2 rounded-full bg-purple-500" />
-        <div className="absolute left-16 bottom-24 h-3 w-3 rounded-full bg-sky-500" />
-        <div className="absolute left-1/2 bottom-12 h-2 w-2 rounded-full bg-orange-400" />
-        <div className="absolute right-16 bottom-20 h-3 w-3 rounded-full bg-rose-500" />
-      </div>
+    <div className="min-h-screen overflow-hidden bg-[#7C3AED]">
+      <div className="mx-auto max-w-6xl px-4 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+          {/* Left hero (matches the reference vibe) */}
+          <div>
+            <div className="text-yellow-300 font-extrabold tracking-wide text-sm sm:text-base">DURRAH KIDS MODE</div>
+            <h1 className="mt-4 text-yellow-300 font-extrabold leading-[0.95] text-5xl sm:text-6xl lg:text-7xl">
+              Kids Quiz
+              <br />
+              Challenge
+            </h1>
+            <p className="mt-4 text-white/90 text-base sm:text-lg max-w-xl">
+              Enter your nickname and the quiz code from your tutor to start playing.
+            </p>
 
-      {/* Big soft blobs */}
-      <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-pink-400/35 blur-3xl" />
-      <div className="pointer-events-none absolute top-10 -right-24 h-[28rem] w-[28rem] rounded-full bg-indigo-500/25 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-28 left-1/3 h-[28rem] w-[28rem] rounded-full bg-lime-400/25 blur-3xl" />
+            {/* Decorative underline */}
+            <div className="mt-8 h-1.5 w-40 rounded-full bg-white/25" />
 
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
-          {/* Left: Hero */}
-          <div className="order-2 lg:order-1">
-            <div className="bg-white/75 dark:bg-gray-900/60 backdrop-blur border border-white/60 dark:border-gray-800 rounded-3xl shadow-2xl p-6 sm:p-10">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow">
-                  <Gamepad2 className="h-6 w-6" />
-                </div>
-                <div>
-                  <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white leading-tight">
-                    Kids Quiz Time!
-                  </h1>
-                  <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
-                    Pick a nickname, enter the code, and play.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="rounded-2xl bg-pink-50 border border-pink-200 p-4">
-                  <div className="flex items-center gap-2 text-pink-700 font-extrabold">
-                    <PartyPopper className="h-5 w-5" />
-                    Fun
-                  </div>
-                  <p className="mt-1 text-xs text-pink-700/80">Bright & friendly</p>
-                </div>
-                <div className="rounded-2xl bg-indigo-50 border border-indigo-200 p-4">
-                  <div className="flex items-center gap-2 text-indigo-700 font-extrabold">
-                    <Stars className="h-5 w-5" />
-                    Stars
-                  </div>
-                  <p className="mt-1 text-xs text-indigo-700/80">Beat your score</p>
-                </div>
-                <div className="rounded-2xl bg-yellow-50 border border-yellow-200 p-4">
-                  <div className="flex items-center gap-2 text-yellow-800 font-extrabold">
-                    <Sparkles className="h-5 w-5" />
-                    Go!
-                  </div>
-                  <p className="mt-1 text-xs text-yellow-800/80">Enter and play</p>
-                </div>
-              </div>
-
-              {/* Sticker row */}
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/60 dark:border-gray-800 bg-white/60 dark:bg-gray-950/20 p-4">
-                <div className="flex items-center gap-2 rounded-xl bg-pink-100/80 border border-pink-200 px-3 py-2">
-                  <PartyPopper className="h-5 w-5 text-pink-700" />
-                  <span className="text-sm font-extrabold text-pink-800">High score!</span>
-                </div>
-                <div className="flex items-center gap-2 rounded-xl bg-indigo-100/80 border border-indigo-200 px-3 py-2">
-                  <Stars className="h-5 w-5 text-indigo-700" />
-                  <span className="text-sm font-extrabold text-indigo-800">Collect stars</span>
-                </div>
-                <div className="flex items-center gap-2 rounded-xl bg-yellow-100/80 border border-yellow-200 px-3 py-2">
-                  <Sparkles className="h-5 w-5 text-yellow-700" />
-                  <span className="text-sm font-extrabold text-yellow-800">Let’s go!</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Form */}
-          <div className="order-1 lg:order-2">
-            <div className="bg-white/85 dark:bg-gray-900/70 backdrop-blur border border-white/60 dark:border-gray-800 rounded-3xl shadow-2xl p-6 sm:p-10">
-              <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Enter the game</h2>
-              <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">Nickname shows on leaderboard (if tutor allows).</p>
-
-              <div className="space-y-4 mt-6">
-                <div>
-                  <label className="block text-sm font-extrabold text-gray-800 dark:text-gray-200 mb-1">Nickname</label>
+            {/* Form card */}
+            <div className="mt-8 rounded-3xl bg-white/10 backdrop-blur border border-white/20 p-5 sm:p-6 max-w-xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-extrabold text-white mb-1">Nickname</label>
                   <input
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
-                    className="w-full rounded-2xl border-2 border-pink-200 focus:border-pink-400 focus:ring-pink-300/40 dark:border-gray-700 dark:focus:border-pink-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-white px-4 py-3 focus:outline-none focus:ring-4"
+                    className="w-full rounded-2xl bg-white/95 text-gray-900 px-4 py-3 font-semibold border-2 border-transparent focus:border-yellow-300 focus:outline-none"
                     placeholder="e.g. SuperTiger"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-extrabold text-gray-800 dark:text-gray-200 mb-1">Quiz Code</label>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-extrabold text-white mb-1">Quiz Code</label>
                   <div className="relative">
-                    <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-indigo-600" />
+                    <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#7C3AED]" />
                     <input
                       value={code}
                       onChange={(e) => setCode(e.target.value)}
-                      className="w-full rounded-2xl border-2 border-indigo-200 focus:border-indigo-400 focus:ring-indigo-300/40 dark:border-gray-700 dark:focus:border-indigo-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-white pl-12 pr-4 py-3 tracking-wider uppercase focus:outline-none focus:ring-4"
+                      className="w-full rounded-2xl bg-white/95 text-gray-900 pl-12 pr-4 py-3 font-extrabold tracking-wider uppercase border-2 border-transparent focus:border-yellow-300 focus:outline-none"
                       placeholder="KID-ABC123"
                     />
                   </div>
                   {normalizedCode && (
-                    <p className="mt-2 text-xs text-gray-700 dark:text-gray-300">
+                    <p className="mt-2 text-xs text-white/85">
                       Using code: <span className="font-mono font-extrabold">{normalizedCode}</span>
                     </p>
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleEnter}
-                  disabled={isLoading}
-                  className="w-full rounded-2xl bg-gradient-to-r from-pink-500 via-indigo-600 to-purple-600 hover:from-pink-600 hover:via-indigo-700 hover:to-purple-700 text-white font-extrabold py-3 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  <Sparkles className="h-5 w-5" />
-                  {isLoading ? 'Opening…' : 'Play Now'}
-                </button>
+                <div className="sm:col-span-2">
+                  <button
+                    type="button"
+                    onClick={handleEnter}
+                    disabled={isLoading}
+                    className="w-full rounded-2xl bg-yellow-300 text-[#4C1D95] hover:bg-yellow-200 font-extrabold py-3 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <Sparkles className="h-5 w-5" />
+                    {isLoading ? 'Opening…' : 'Start لعبة!'}
+                  </button>
+                  <p className="mt-3 text-xs text-white/85">
+                    Ask your tutor for the code if you don’t have it.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                <p className="text-xs text-gray-700 dark:text-gray-300">
-                  If you can’t enter, ask your tutor for the correct code.
-                </p>
+          {/* Right “illustration” area */}
+          <div className="relative">
+            <div className="absolute -top-10 -left-10 h-28 w-28 rounded-full bg-yellow-300/30 blur-2xl" />
+            <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-white/15 blur-3xl" />
+
+            <div className="rounded-3xl bg-white/10 border border-white/20 backdrop-blur p-6 sm:p-8">
+              <div className="text-white/80 font-extrabold tracking-wider">PLAY • LEARN • WIN</div>
+              <div className="mt-6 aspect-[16/10] rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/20 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="mx-auto h-14 w-14 rounded-2xl bg-yellow-300 flex items-center justify-center shadow">
+                    <Gamepad2 className="h-7 w-7 text-[#4C1D95]" />
+                  </div>
+                  <p className="mt-4 text-white font-extrabold">Your illustration goes here</p>
+                  <p className="text-white/75 text-sm">(We can replace this with a real image later)</p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <span className="inline-flex items-center gap-2 rounded-xl bg-white/10 border border-white/15 px-3 py-2 text-white font-semibold">
+                  <Stars className="h-4 w-4" /> Stars
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-xl bg-white/10 border border-white/15 px-3 py-2 text-white font-semibold">
+                  <PartyPopper className="h-4 w-4" /> Leaderboard
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-xl bg-white/10 border border-white/15 px-3 py-2 text-white font-semibold">
+                  <Sparkles className="h-4 w-4" /> Fun
+                </span>
               </div>
             </div>
           </div>
