@@ -212,6 +212,19 @@ export default function ExamEditor() {
     // Keep a reactive watch of questions so options and correct answers update immediately
     const questionsWatch = watch('questions');
 
+    // Auto-set correct_answer for kids_picture_pairing and kids_story_sequence
+    useEffect(() => {
+        questionsWatch?.forEach((q, index) => {
+            if (q?.type === 'kids_picture_pairing' && !q?.correct_answer) {
+                // For picture pairing, correct answer is implicit: [0, 1, 2, 3] (which items pair with which)
+                setValue(`questions.${index}.correct_answer`, ['0', '1', '2', '3'] as string[]);
+            } else if (q?.type === 'kids_story_sequence' && !q?.correct_answer) {
+                // For story sequence, correct answer is implicit: [0, 1, 2] (the original order)
+                setValue(`questions.${index}.correct_answer`, ['0', '1', '2'] as string[]);
+            }
+        });
+    }, [questionsWatch, setValue]);
+
     const fetchExam = async () => {
         try {
             // Fetch exam details
@@ -407,7 +420,7 @@ export default function ExamEditor() {
                         media_type: q.media_type || (q.media_url ? 'image' : null),
                     };
                     // only include correct_answer for auto-graded types
-                    if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'kids_color_picker', 'kids_odd_one_out'].includes(q.type)) {
+                    if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'kids_color_picker', 'kids_odd_one_out', 'kids_picture_pairing', 'kids_story_sequence'].includes(q.type)) {
                         base.correct_answer = q.correct_answer || null;
                     }
                     return base;
@@ -441,7 +454,7 @@ export default function ExamEditor() {
                         media_url: q.media_url || null,
                         media_type: q.media_type || (q.media_url ? 'image' : null),
                     };
-                    if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'kids_color_picker', 'kids_odd_one_out'].includes(q.type)) {
+                    if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'kids_color_picker', 'kids_odd_one_out', 'kids_picture_pairing', 'kids_story_sequence'].includes(q.type)) {
                         updatePayload.correct_answer = q.correct_answer || null;
                     }
 

@@ -206,28 +206,75 @@ serve(async (req) => {
             // Handle kids question types with special grading
             if (question.type === 'kids_picture_pairing') {
                 // Picture pairing: pairs is an array [leftIdx, rightIdx, leftIdx, rightIdx, ...]
-                // Correct answer is positional: left[0] pairs with right[0], left[1] pairs with right[1], etc.
+                // Correct pairing is when left[i] pairs with right[i]
                 const studentPairs = Array.isArray(studentAnswer.answer) ? studentAnswer.answer : []
-                const pairCount = Math.floor(studentPairs.length / 2)
                 let correctPairs = 0
-                for (let i = 0; i < pairCount; i++) {
-                    const leftIdx = studentPairs[i * 2]
-                    const rightIdx = studentPairs[i * 2 + 1]
-                    if (leftIdx === rightIdx) correctPairs++
+                let totalPairs = 0
+                
+                // Process pairs in groups of 2
+                for (let i = 0; i < studentPairs.length; i += 2) {
+                    if (i + 1 < studentPairs.length) {
+                        totalPairs++
+                        const leftIdx = studentPairs[i]
+                        const rightIdx = studentPairs[i + 1]
+                        // Correct if left index equals right index (positional matching)
+                        if (leftIdx === rightIdx) {
+                            correctPairs++
+                        }
+                    }
                 }
+                
                 // Award partial credit: each correct pair gets proportional points
-                if (pairCount > 0) {
-                    const pairScore = (question.points || 0) / 4 // Assuming 4 pairs max
-                    totalScore += correctPairs * pairScore
+                if (totalPairs > 0) {
+                    const pointsPerPair = (question.points || 0) / totalPairs
+                    totalScore += correctPairs * pointsPerPair
+                    isCorrect = correctPairs === totalPairs
+                } else {
+                    isCorrect = false
                 }
-                isCorrect = correctPairs === 4
             } else if (question.type === 'kids_story_sequence') {
-                // Story sequence: answer is an array of indices representing the order
-                // Correct answer is [0, 1, 2] (original order)
+                // Story sequence: answer is array of indices in the order student arranged them
+                // Correct answer should be [0, 1, 2] (the original/intended order)
                 const studentOrder = Array.isArray(studentAnswer.answer) ? studentAnswer.answer : []
-                const correctOrder = [0, 1, 2]
-                isCorrect = studentOrder.length === 3 &&
-                    studentOrder.every((val: number, idx: number) => val === correctOrder[idx])
+                
+                // Parse correct_answer: it might be stored as JSON string or array
+                let correctOrder: number[] = [0, 1, 2]
+                if (question.correct_answer) {
+                    if (Array.isArray(question.correct_answer)) {
+                        correctOrder = question.correct_answer.map(x => typeof x === 'number' ? x : parseInt(String(x), 10))
+                    } else if (typeof question.correct_answer === 'string') {
+                        try {
+                            const parsed = JSON.parse(question.correct_answer)
+                            correctOrder = Array.isArray(parsed) ? parsed.map(x => typeof x === 'number' ? x : parseInt(String(x), 10)) : [0, 1, 2]
+                        } catch (e) {
+                            correctOrder = [0, 1, 2]
+                        }
+                    }
+                }
+                
+                // Convert student order to numbers for comparison
+                const studentOrderNums = studentOrder.map(x => typeof x === 'number' ? x : parseInt(String(x), 10))
+                
+                isCorrect = studentOrderNums.length === correctOrder.length &&
+                    studentOrderNums.every((val: number, idx: number) => val === correctOrder[idx])
+            } else if (question.type === 'kids_color_picker') {
+                // Color picker: compare hex colors (normalize for comparison)
+                const normalizeColor = (color: any) => {
+                    const str = String(color).trim().toLowerCase();
+                    // Ensure color is in #RRGGBB format
+                    if (str.startsWith('#') && (str.length === 7 || str.length === 4)) {
+                        return str;
+                    }
+                    return str;
+                };
+                const correctAnswer = question.correct_answer ? normalizeColor(question.correct_answer) : '';
+                const studentAnswerColor = normalizeColor(studentAnswer.answer);
+                isCorrect = correctAnswer === studentAnswerColor && correctAnswer !== '';
+            } else if (question.type === 'kids_odd_one_out') {
+                // Odd one out: compare indices
+                const correctIdx = String(question.correct_answer || '').trim();
+                const studentIdx = String(studentAnswer.answer || '').trim();
+                isCorrect = correctIdx === studentIdx && correctIdx !== ''
             } else if (Array.isArray(question.correct_answer)) {
                 // Handle multiple select (array answers)
                 let studentArr: string[] = []
