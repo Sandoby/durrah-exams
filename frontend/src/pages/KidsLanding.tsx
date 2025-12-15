@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Sparkles, Ticket, Lock, Smile, BookOpenCheck, Trophy } from 'lucide-react';
+import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
 
 type LeaderboardVisibility = 'hidden' | 'after_submit' | 'always';
@@ -81,7 +82,7 @@ export default function KidsLanding() {
       <header className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/illustrations/logo.jpeg" alt="Durrah Logo" className="h-10 w-auto" />
+            <Logo size="md" />
             <span className="inline-flex items-center gap-2 text-xs font-semibold text-purple-700 bg-purple-50 px-3 py-1 rounded-full">
               <Sparkles className="h-3 w-3" /> Kids Mode
             </span>
