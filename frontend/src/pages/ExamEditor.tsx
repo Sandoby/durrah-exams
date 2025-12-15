@@ -774,94 +774,8 @@ export default function ExamEditor() {
                         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6" id="exam-settings">
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('examEditor.settings.title')}</h3>
                             <div className="grid grid-cols-1 gap-y-4 gap-x-8 sm:grid-cols-2">
-                                {/* Hide anti-cheating settings in Kids Mode */}
-                                {!watch('settings.child_mode_enabled') && (
-                                    <>
-                                        <div className="flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                                {...register('settings.require_fullscreen')}
-                                            />
-                                            <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.fullscreen')}</label>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                                {...register('settings.detect_tab_switch')}
-                                            />
-                                            <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.tabSwitch')}</label>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                                {...register('settings.disable_copy_paste')}
-                                            />
-                                            <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.copyPaste')}</label>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.maxViolations')}</label>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                {...register('settings.max_violations', { valueAsNumber: true })}
-                                            />
-                                        </div>
-                                    </>
-                                )}
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                        {...register('settings.show_results_immediately')}
-                                    />
-                                    <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.showResults')}</label>
-                                </div>
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                        {...register('settings.show_detailed_results')}
-                                    />
-                                    <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                                        Show answers after submission
-                                        <span className="block text-xs text-gray-500">Students can see which questions they got wrong.</span>
-                                    </label>
-                                </div>
-                                <div id="time-settings">
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.timeLimit')}</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        placeholder="No limit"
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                        {...register('settings.time_limit_minutes', { valueAsNumber: true })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.startTime')}</label>
-                                    <input
-                                        type="datetime-local"
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                        {...register('settings.start_time')}
-                                    />
-                                    <p className="mt-1 text-xs text-gray-500">{t('examEditor.settings.startTimeDesc')}</p>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.endTime')}</label>
-                                    <input
-                                        type="datetime-local"
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                        {...register('settings.end_time')}
-                                    />
-                                    <p className="mt-1 text-xs text-gray-500">{t('examEditor.settings.endTimeDesc')}</p>
-                                </div>
-
-                                {/* Kids Mode Settings */}
-                                {watch('settings.child_mode_enabled') && (
+                                {watch('settings.child_mode_enabled') ? (
+                                    // Kids Mode: show ONLY kids options
                                     <div className="col-span-2">
                                         <div className="p-5 rounded-lg border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 dark:border-purple-700">
                                             <div className="flex items-center gap-2 mb-4">
@@ -900,6 +814,90 @@ export default function ExamEditor() {
                                             </div>
                                         </div>
                                     </div>
+                                ) : (
+                                    // Normal mode: show full settings (anti-cheating, visibility, timing)
+                                    <>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                {...register('settings.require_fullscreen')}
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.fullscreen')}</label>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                {...register('settings.detect_tab_switch')}
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.tabSwitch')}</label>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                {...register('settings.disable_copy_paste')}
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.copyPaste')}</label>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.maxViolations')}</label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                {...register('settings.max_violations', { valueAsNumber: true })}
+                                            />
+                                        </div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                {...register('settings.show_results_immediately')}
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.settings.showResults')}</label>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                {...register('settings.show_detailed_results')}
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                                                Show answers after submission
+                                                <span className="block text-xs text-gray-500">Students can see which questions they got wrong.</span>
+                                            </label>
+                                        </div>
+                                        <div id="time-settings">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.timeLimit')}</label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                placeholder="No limit"
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                {...register('settings.time_limit_minutes', { valueAsNumber: true })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.startTime')}</label>
+                                            <input
+                                                type="datetime-local"
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                {...register('settings.start_time')}
+                                            />
+                                            <p className="mt-1 text-xs text-gray-500">{t('examEditor.settings.startTimeDesc')}</p>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.endTime')}</label>
+                                            <input
+                                                type="datetime-local"
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                {...register('settings.end_time')}
+                                            />
+                                            <p className="mt-1 text-xs text-gray-500">{t('examEditor.settings.endTimeDesc')}</p>
+                                        </div>
+                                    </>
                                 )}
                             </div>
                         </div>

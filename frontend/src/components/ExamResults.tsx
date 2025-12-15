@@ -255,6 +255,27 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
         );
     }
 
+    // Kids Mode: show ONLY the leaderboard
+    if (isKidsMode) {
+        return (
+            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                <div className="flex items-center gap-2 mb-4">
+                    <Trophy className="h-6 w-6 text-yellow-500" />
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-white">Kids Leaderboard</h4>
+                </div>
+                <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 p-1 rounded-3xl">
+                    <div className="bg-white dark:bg-gray-800 rounded-3xl p-6">
+                        <KidsLeaderboard
+                            examId={examId}
+                            maxRows={20}
+                            refreshKey={submissions.length}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
             <div className="flex items-center justify-between mb-6">
@@ -280,15 +301,7 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
                 </button>
             </div>
 
-            {isKidsMode && (
-                <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 border-2 border-purple-300 dark:border-purple-700">
-                    <div className="flex items-center gap-2 text-purple-900 dark:text-purple-200">
-                        <span className="text-2xl">🎈</span>
-                        <span className="font-bold">Kids Mode Exam</span>
-                        <span className="text-sm">• Shows nicknames instead of email addresses</span>
-                    </div>
-                </div>
-            )}
+            {/* Kids banner removed in non-kids view to keep UI focused */}
 
             {submissions.length === 0 ? (
                 <div className="text-center py-12">
@@ -350,24 +363,7 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
                     </table>
                 </div>
 
-                {/* Kids Mode Leaderboard */}
-                {isKidsMode && (
-                    <div className="mt-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Trophy className="h-6 w-6 text-yellow-500" />
-                            <h4 className="text-lg font-bold text-gray-900 dark:text-white">Kids Leaderboard</h4>
-                        </div>
-                        <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 p-1 rounded-3xl">
-                            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6">
-                                <KidsLeaderboard
-                                    examId={examId}
-                                    maxRows={20}
-                                    refreshKey={submissions.length}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                )}
+                {/* Leaderboard is not shown here; only in Kids Mode branch above */}
                 </>
             )}
 
