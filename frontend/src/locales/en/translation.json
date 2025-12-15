@@ -323,7 +323,16 @@
             "startTime": "Start Time",
             "startTimeDesc": "When students can start the exam",
             "endTime": "End Time",
-            "endTimeDesc": "When the exam closes (no new submissions)"
+            "endTimeDesc": "When the exam closes (no new submissions)",
+            "kidsMode": {
+                "title": "Kids Mode Settings",
+                "enable": "Enable Kids Mode",
+                "attemptLimit": "Number of Attempts",
+                "leaderboardVisibility": "Leaderboard Visibility",
+                "visibilityHidden": "Hidden",
+                "visibilityAfterSubmit": "After Submit",
+                "visibilityAlways": "Always Visible"
+            }
         },
         "questions": {
             "title": "Questions",
