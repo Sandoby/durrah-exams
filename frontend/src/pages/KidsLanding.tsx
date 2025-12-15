@@ -1,7 +1,7 @@
 ﻿import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Sparkles, Gamepad2, Ticket, Stars, PartyPopper } from 'lucide-react';
+import { Sparkles, Ticket, Stars, PartyPopper } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 type LeaderboardVisibility = 'hidden' | 'after_submit' | 'always';
@@ -76,104 +76,117 @@ export default function KidsLanding() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#7C3AED]">
-      <div className="mx-auto max-w-6xl px-4 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-          {/* Left hero (matches the reference vibe) */}
-          <div>
-            <div className="text-yellow-300 font-extrabold tracking-wide text-sm sm:text-base">DURRAH KIDS MODE</div>
-            <h1 className="mt-4 text-yellow-300 font-extrabold leading-[0.95] text-5xl sm:text-6xl lg:text-7xl">
-              Kids Quiz
-              <br />
-              Challenge
-            </h1>
-            <p className="mt-4 text-white/90 text-base sm:text-lg max-w-xl">
-              Enter your nickname and the quiz code from your tutor to start playing.
-            </p>
+    <div className="min-h-screen overflow-hidden bg-gradient-to-br from-[#FF6B9D] via-[#C94FF9] to-[#7C3AED]">
+      <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
+        {/* Vertical centered layout */}
+        <div className="flex flex-col items-center text-center">
+          {/* Top badge */}
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur border border-white/30 px-4 py-2">
+            <Sparkles className="h-4 w-4 text-yellow-300" />
+            <span className="text-white font-extrabold tracking-wide text-xs sm:text-sm">DURRAH KIDS MODE</span>
+            <Sparkles className="h-4 w-4 text-yellow-300" />
+          </div>
 
-            {/* Decorative underline */}
-            <div className="mt-8 h-1.5 w-40 rounded-full bg-white/25" />
+          {/* Main title */}
+          <h1 className="mt-6 text-white font-black leading-tight text-5xl sm:text-6xl md:text-7xl drop-shadow-lg">
+            🎈 Kids Quiz
+            <br />
+            <span className="text-yellow-300">Challenge!</span>
+          </h1>
 
-            {/* Form card */}
-            <div className="mt-8 rounded-3xl bg-white/10 backdrop-blur border border-white/20 p-5 sm:p-6 max-w-xl">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-extrabold text-white mb-1">Nickname</label>
+          <p className="mt-4 text-white/95 text-lg sm:text-xl font-semibold max-w-md">
+            Enter your nickname and quiz code to start playing! 🎮
+          </p>
+
+          {/* Decorative stars */}
+          <div className="mt-4 flex gap-3">
+            <Stars className="h-8 w-8 text-yellow-300 animate-pulse" />
+            <PartyPopper className="h-8 w-8 text-pink-300 animate-bounce" />
+            <Stars className="h-8 w-8 text-yellow-300 animate-pulse" style={{ animationDelay: '0.5s' }} />
+          </div>
+
+          {/* Form card - colorful gradient */}
+          <div className="mt-8 w-full max-w-md rounded-3xl bg-gradient-to-br from-white/95 to-white/90 backdrop-blur border-4 border-white shadow-2xl p-6 sm:p-8">
+            <div className="space-y-5">
+              {/* Nickname input */}
+              <div>
+                <label className="block text-left text-sm font-black text-purple-900 mb-2 flex items-center gap-2">
+                  <span className="text-2xl">🦁</span>
+                  Your Cool Nickname
+                </label>
+                <input
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  className="w-full rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 text-gray-900 px-5 py-4 font-bold text-lg border-3 border-purple-300 focus:border-purple-500 focus:outline-none focus:ring-4 focus:ring-purple-200 shadow-inner"
+                  placeholder="SuperTiger 🐯"
+                />
+              </div>
+
+              {/* Quiz code input */}
+              <div>
+                <label className="block text-left text-sm font-black text-purple-900 mb-2 flex items-center gap-2">
+                  <span className="text-2xl">🎫</span>
+                  Quiz Code
+                </label>
+                <div className="relative">
+                  <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-6 w-6 text-purple-600" />
                   <input
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                    className="w-full rounded-2xl bg-white/95 text-gray-900 px-4 py-3 font-semibold border-2 border-transparent focus:border-yellow-300 focus:outline-none"
-                    placeholder="e.g. SuperTiger"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    className="w-full rounded-2xl bg-gradient-to-r from-yellow-50 to-orange-50 text-gray-900 pl-14 pr-5 py-4 font-black text-lg tracking-wider uppercase border-3 border-yellow-300 focus:border-yellow-500 focus:outline-none focus:ring-4 focus:ring-yellow-200 shadow-inner"
+                    placeholder="KID-ABC123"
                   />
                 </div>
-
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-extrabold text-white mb-1">Quiz Code</label>
-                  <div className="relative">
-                    <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#7C3AED]" />
-                    <input
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      className="w-full rounded-2xl bg-white/95 text-gray-900 pl-12 pr-4 py-3 font-extrabold tracking-wider uppercase border-2 border-transparent focus:border-yellow-300 focus:outline-none"
-                      placeholder="KID-ABC123"
-                    />
-                  </div>
-                  {normalizedCode && (
-                    <p className="mt-2 text-xs text-white/85">
-                      Using code: <span className="font-mono font-extrabold">{normalizedCode}</span>
-                    </p>
-                  )}
-                </div>
-
-                <div className="sm:col-span-2">
-                  <button
-                    type="button"
-                    onClick={handleEnter}
-                    disabled={isLoading}
-                    className="w-full rounded-2xl bg-yellow-300 text-[#4C1D95] hover:bg-yellow-200 font-extrabold py-3 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    <Sparkles className="h-5 w-5" />
-                    {isLoading ? 'Opening…' : 'Start لعبة!'}
-                  </button>
-                  <p className="mt-3 text-xs text-white/85">
-                    Ask your tutor for the code if you don’t have it.
+                {normalizedCode && (
+                  <p className="mt-2 text-xs text-purple-700 font-bold text-left">
+                    ✅ Code: <span className="font-mono bg-purple-100 px-2 py-1 rounded">{normalizedCode}</span>
                   </p>
-                </div>
+                )}
               </div>
+
+              {/* Start button - big and colorful */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleEnter}
+                  disabled={isLoading}
+                  className="w-full rounded-2xl bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 hover:from-yellow-300 hover:via-orange-300 hover:to-pink-400 text-white font-black py-5 text-xl shadow-2xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3 transform hover:scale-105 transition-transform"
+                >
+                  <Sparkles className="h-6 w-6" />
+                  {isLoading ? 'Loading...' : 'START QUIZ! 🚀'}
+                </button>
+              </div>
+
+              <p className="text-xs text-purple-600 font-semibold">
+                💡 Ask your teacher for the code if you don't have it!
+              </p>
             </div>
           </div>
 
-          {/* Right “illustration” area */}
-          <div className="relative">
-            <div className="absolute -top-10 -left-10 h-28 w-28 rounded-full bg-yellow-300/30 blur-2xl" />
-            <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-white/15 blur-3xl" />
-
-            <div className="rounded-3xl bg-white/10 border border-white/20 backdrop-blur p-6 sm:p-8">
-              <div className="text-white/80 font-extrabold tracking-wider">PLAY • LEARN • WIN</div>
-              <div className="mt-6 aspect-[16/10] rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/20 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="mx-auto h-14 w-14 rounded-2xl bg-yellow-300 flex items-center justify-center shadow">
-                    <Gamepad2 className="h-7 w-7 text-[#4C1D95]" />
-                  </div>
-                  <p className="mt-4 text-white font-extrabold">Your illustration goes here</p>
-                  <p className="text-white/75 text-sm">(We can replace this with a real image later)</p>
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <span className="inline-flex items-center gap-2 rounded-xl bg-white/10 border border-white/15 px-3 py-2 text-white font-semibold">
-                  <Stars className="h-4 w-4" /> Stars
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-xl bg-white/10 border border-white/15 px-3 py-2 text-white font-semibold">
-                  <PartyPopper className="h-4 w-4" /> Leaderboard
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-xl bg-white/10 border border-white/15 px-3 py-2 text-white font-semibold">
-                  <Sparkles className="h-4 w-4" /> Fun
-                </span>
-              </div>
-            </div>
+          {/* Bottom fun badges */}
+          <div className="mt-8 flex flex-wrap gap-3 justify-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur border border-white/30 px-4 py-2 text-white font-bold text-sm">
+              ⭐ Earn Stars
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur border border-white/30 px-4 py-2 text-white font-bold text-sm">
+              🏆 Win Prizes
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur border border-white/30 px-4 py-2 text-white font-bold text-sm">
+              🎉 Have Fun
+            </span>
           </div>
+
+          {/* Decorative elements */}
+          <div className="mt-8 text-6xl animate-bounce">🎮</div>
         </div>
+      </div>
+
+      {/* Background decorative blobs */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 left-10 h-32 w-32 rounded-full bg-yellow-300/30 blur-3xl" />
+        <div className="absolute top-1/4 right-20 h-40 w-40 rounded-full bg-pink-300/20 blur-3xl" />
+        <div className="absolute bottom-20 left-1/4 h-36 w-36 rounded-full bg-purple-300/25 blur-3xl" />
+        <div className="absolute bottom-10 right-10 h-44 w-44 rounded-full bg-white/10 blur-3xl" />
       </div>
     </div>
   );
