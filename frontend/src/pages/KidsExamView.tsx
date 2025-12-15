@@ -276,40 +276,64 @@ export default function KidsExamView() {
     const showResults = Boolean(exam?.settings?.show_results_immediately);
     const showLeaderboard = leaderboardVisibility === 'always' || (leaderboardVisibility === 'after_submit' && submitted);
 
+    const getRewardEmoji = (percentage: number) => {
+      if (percentage >= 90) return { emoji: '🏆', msg: 'SUPERSTAR!', color: 'from-yellow-400 to-orange-400' }
+      if (percentage >= 75) return { emoji: '⭐', msg: 'Great Job!', color: 'from-blue-400 to-indigo-400' }
+      if (percentage >= 60) return { emoji: '👍', msg: 'Well Done!', color: 'from-green-400 to-teal-400' }
+      return { emoji: '💪', msg: 'Keep Trying!', color: 'from-purple-400 to-pink-400' }
+    }
+
+    const reward = score ? getRewardEmoji(score.percentage) : null
+
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-indigo-200 via-pink-100 to-yellow-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-        <div className="w-full max-w-2xl bg-white/80 dark:bg-gray-900/70 backdrop-blur border border-white/60 dark:border-gray-800 rounded-3xl shadow-2xl p-8 text-center">
-          <div className="mx-auto h-16 w-16 rounded-2xl bg-green-100 text-green-700 flex items-center justify-center">
-            <CheckCircle className="h-10 w-10" />
+        <div className="w-full max-w-2xl bg-white/90 dark:bg-gray-900/80 backdrop-blur border border-white/60 dark:border-gray-800 rounded-3xl shadow-2xl p-8 text-center">
+          {/* Animated Success Icon */}
+          <div className="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 text-white flex items-center justify-center animate-bounce">
+            <CheckCircle className="h-16 w-16" />
           </div>
-          <h1 className="mt-4 text-3xl font-extrabold text-gray-900 dark:text-white">Mission Complete!</h1>
-          <p className="mt-1 text-gray-700 dark:text-gray-300">Amazing work, {safeNick}!</p>
+          
+          <h1 className="mt-6 text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            Mission Complete!
+          </h1>
+          <p className="mt-2 text-xl text-gray-700 dark:text-gray-300 font-bold">Amazing work, {safeNick}! 🎉</p>
 
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="rounded-2xl bg-yellow-50 border border-yellow-200 p-4">
-              <div className="flex items-center justify-center gap-2 text-yellow-800 font-extrabold"><Star className="h-5 w-5" />Stars</div>
-              <div className="mt-1 text-2xl font-black text-yellow-900">{stars}</div>
-            </div>
-            <div className="rounded-2xl bg-indigo-50 border border-indigo-200 p-4">
-              <div className="flex items-center justify-center gap-2 text-indigo-800 font-extrabold"><Sparkles className="h-5 w-5" />Streak</div>
-              <div className="mt-1 text-2xl font-black text-indigo-900">{streak}</div>
-            </div>
-            <div className="rounded-2xl bg-pink-50 border border-pink-200 p-4">
-              <div className="flex items-center justify-center gap-2 text-pink-800 font-extrabold"><Trophy className="h-5 w-5" />Badge</div>
-              <div className="mt-1 text-sm font-black text-pink-900">Brave Quizzer</div>
-            </div>
-          </div>
-
-          {showResults && score ? (
-            <div className="mt-6">
-              <p className="text-5xl font-black text-indigo-700 dark:text-indigo-300">{score.percentage.toFixed(1)}%</p>
-              <p className="mt-1 text-gray-700 dark:text-gray-300 font-semibold">{score.score} / {score.max_score} points</p>
+          {/* Score Display with Celebration */}
+          {showResults && score && reward ? (
+            <div className="mt-8 relative">
+              {/* Large Emoji Celebration */}
+              <div className="text-8xl animate-pulse">{reward.emoji}</div>
+              <div className={`mt-4 inline-block px-8 py-4 rounded-3xl bg-gradient-to-r ${reward.color} text-white shadow-2xl`}>
+                <p className="text-3xl font-black mb-1">{reward.msg}</p>
+                <p className="text-6xl font-black">{score.percentage.toFixed(0)}%</p>
+                <p className="mt-2 text-lg font-bold opacity-90">{score.score} out of {score.max_score} points</p>
+              </div>
             </div>
           ) : (
-            <div className="mt-6 p-4 rounded-2xl bg-white/60 dark:bg-gray-900/30 border border-white/60 dark:border-gray-800 text-gray-700 dark:text-gray-300">
-              Results will be ready soon.
+            <div className="mt-8 p-6 rounded-3xl bg-white/60 dark:bg-gray-900/30 border-2 border-dashed border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+              <p className="font-bold">Getting your results...</p>
             </div>
           )}
+
+          {/* Fun Stats */}
+          <div className="mt-8 grid grid-cols-3 gap-4">
+            <div className="rounded-2xl bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-300 p-4 transform hover:scale-105 transition-transform">
+              <Star className="h-8 w-8 mx-auto text-yellow-600 mb-2" />
+              <div className="text-3xl font-black text-yellow-900">{stars}</div>
+              <div className="text-xs font-bold text-yellow-700 uppercase">Stars</div>
+            </div>
+            <div className="rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 border-2 border-indigo-300 p-4 transform hover:scale-105 transition-transform">
+              <Sparkles className="h-8 w-8 mx-auto text-indigo-600 mb-2" />
+              <div className="text-3xl font-black text-indigo-900">{streak}</div>
+              <div className="text-xs font-bold text-indigo-700 uppercase">Streak</div>
+            </div>
+            <div className="rounded-2xl bg-gradient-to-br from-pink-50 to-pink-100 border-2 border-pink-300 p-4 transform hover:scale-105 transition-transform">
+              <Trophy className="h-8 w-8 mx-auto text-pink-600 mb-2" />
+              <div className="text-lg font-black text-pink-900">Brave</div>
+              <div className="text-xs font-bold text-pink-700 uppercase">Quizzer</div>
+            </div>
+          </div>
 
           {showLeaderboard && (
             <KidsLeaderboard

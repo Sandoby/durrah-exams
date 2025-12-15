@@ -312,7 +312,7 @@ export default function ExamEditor() {
             }
 
             // Validation: Correct Answers
-            if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'numeric'].includes(q.type)) {
+            if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown'].includes(q.type)) {
                 if (Array.isArray(q.correct_answer)) {
                     if (q.correct_answer.length === 0) {
                         toast.error(t('examEditor.validation.correctAnswer', { num: qNum }));
@@ -407,7 +407,7 @@ export default function ExamEditor() {
                         media_type: q.media_type || (q.media_url ? 'image' : null),
                     };
                     // only include correct_answer for auto-graded types
-                    if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'numeric'].includes(q.type)) {
+                    if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'kids_color_picker', 'kids_odd_one_out'].includes(q.type)) {
                         base.correct_answer = q.correct_answer || null;
                     }
                     return base;
@@ -441,7 +441,7 @@ export default function ExamEditor() {
                         media_url: q.media_url || null,
                         media_type: q.media_type || (q.media_url ? 'image' : null),
                     };
-                    if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'numeric'].includes(q.type)) {
+                    if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown', 'kids_color_picker', 'kids_odd_one_out'].includes(q.type)) {
                         updatePayload.correct_answer = q.correct_answer || null;
                     }
 
@@ -978,7 +978,6 @@ export default function ExamEditor() {
                                                                     <option value="multiple_choice">{t('examEditor.questions.types.multipleChoice')}</option>
                                                                     <option value="multiple_select">{t('examEditor.questions.types.multipleSelect')}</option>
                                                                     <option value="dropdown">{t('examEditor.questions.types.dropdown')}</option>
-                                                                    <option value="numeric">{t('examEditor.questions.types.numeric')}</option>
                                                                     <option value="true_false">{t('examEditor.questions.types.trueFalse')}</option>
                                                                     {watch('settings.child_mode_enabled') && (
                                                                         <>
@@ -1319,18 +1318,7 @@ export default function ExamEditor() {
                                                             </div>
                                                         )}
 
-                                                        {watch(`questions.${index}.type`) === 'numeric' && (
-                                                            <div>
-                                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.numericAnswer')}</label>
-                                                                <input
-                                                                    type="number"
-                                                                    step="any"
-                                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                                    {...register(`questions.${index}.correct_answer`)}
-                                                                />
-                                                                <p className="text-xs text-gray-500 mt-1">{t('examEditor.questions.numericNote')}</p>
-                                                            </div>
-                                                        )}
+
 
                                                         {/* short_answer removed from supported types */}
                                                     </div>

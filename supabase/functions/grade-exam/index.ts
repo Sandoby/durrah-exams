@@ -203,8 +203,33 @@ serve(async (req) => {
 
             let isCorrect = false
 
-            // Handle multiple select (array answers)
-            if (Array.isArray(question.correct_answer)) {
+            // Handle kids question types with special grading
+            if (question.type === 'kids_picture_pairing') {
+                // Picture pairing: pairs is an array [leftIdx, rightIdx, leftIdx, rightIdx, ...]
+                // Correct answer is positional: left[0] pairs with right[0], left[1] pairs with right[1], etc.
+                const studentPairs = Array.isArray(studentAnswer.answer) ? studentAnswer.answer : []
+                const pairCount = Math.floor(studentPairs.length / 2)
+                let correctPairs = 0
+                for (let i = 0; i < pairCount; i++) {
+                    const leftIdx = studentPairs[i * 2]
+                    const rightIdx = studentPairs[i * 2 + 1]
+                    if (leftIdx === rightIdx) correctPairs++
+                }
+                // Award partial credit: each correct pair gets proportional points
+                if (pairCount > 0) {
+                    const pairScore = (question.points || 0) / 4 // Assuming 4 pairs max
+                    totalScore += correctPairs * pairScore
+                }
+                isCorrect = correctPairs === 4
+            } else if (question.type === 'kids_story_sequence') {
+                // Story sequence: answer is an array of indices representing the order
+                // Correct answer is [0, 1, 2] (original order)
+                const studentOrder = Array.isArray(studentAnswer.answer) ? studentAnswer.answer : []
+                const correctOrder = [0, 1, 2]
+                isCorrect = studentOrder.length === 3 &&
+                    studentOrder.every((val: number, idx: number) => val === correctOrder[idx])
+            } else if (Array.isArray(question.correct_answer)) {
+                // Handle multiple select (array answers)
                 let studentArr: string[] = []
 
                 if (Array.isArray(studentAnswer.answer)) {
@@ -236,17 +261,7 @@ serve(async (req) => {
                 const correctAnswer = normalizeString(question.correct_answer);
                 const studentAnswerStr = normalizeString(studentAnswer.answer);
 
-                if (question.type === 'numeric') {
-                    try {
-                        const correctNum = parseFloat(question.correct_answer)
-                        const studentNum = parseFloat(studentAnswer.answer)
-                        isCorrect = !isNaN(correctNum) && !isNaN(studentNum) && correctNum === studentNum
-                    } catch {
-                        isCorrect = correctAnswer === studentAnswerStr
-                    }
-                } else {
-                    isCorrect = correctAnswer === studentAnswerStr
-                }
+                isCorrect = correctAnswer === studentAnswerStr
             }
 
             if (isCorrect) {
