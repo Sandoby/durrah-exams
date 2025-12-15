@@ -457,14 +457,63 @@ export default function KidsExamView() {
                     </button>
                   );
                 })}
+                {q.type === 'kids_emoji_reaction' && (
+                  <div className="grid grid-cols-3 gap-3">
+                    {(q.options || []).map((emj: string, i: number) => {
+                      const isSelected = answers[q.id] === emj;
+                      return (
+                        <button
+                          type="button"
+                          key={`${q.id}_emoji_${i}`}
+                          onClick={() => setAnswer(q.id, emj)}
+                          className={`rounded-2xl border p-4 text-3xl ${isSelected ? 'border-purple-600 bg-purple-50' : 'border-gray-200 bg-white'}`}
+                        >
+                          {emj || '🙂'}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
 
-                {q.type !== 'multiple_choice' && q.type !== 'true_false' && (
-                  <textarea
-                    value={answers[q.id] || ''}
-                    onChange={(e) => setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
-                    className="w-full min-h-28 rounded-2xl border-2 border-indigo-200 focus:border-indigo-400 focus:ring-indigo-300/40 bg-white/80 dark:bg-gray-900/60 text-gray-900 dark:text-white p-4 focus:outline-none focus:ring-4"
-                    placeholder="Type your answer…"
-                  />
+                {q.type === 'kids_color_picker' && (
+                  <div className="grid grid-cols-5 gap-3">
+                    {(q.options || []).map((clr: string, i: number) => {
+                      const isSelected = answers[q.id] === clr;
+                      return (
+                        <button
+                          type="button"
+                          key={`${q.id}_color_${i}`}
+                          onClick={() => setAnswer(q.id, clr)}
+                          className={`rounded-full h-12 w-12 border ${isSelected ? 'ring-2 ring-purple-500' : 'border-gray-300'}`}
+                          style={{ background: clr || '#ffffff' }}
+                          aria-label={clr}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+
+                {q.type === 'kids_odd_one_out' && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {Array.from({ length: 4 }).map((_, i: number) => {
+                      const isSelected = answers[q.id] === String(i);
+                      const val = (q.options || [])[i] || '';
+                      return (
+                        <button
+                          type="button"
+                          key={`${q.id}_odd_${i}`}
+                          onClick={() => setAnswer(q.id, String(i))}
+                          className={`rounded-xl border p-4 text-center ${isSelected ? 'border-purple-600 bg-purple-50' : 'border-gray-200 bg-white'}`}
+                        >
+                          {val.startsWith('http') ? (
+                            <img src={val} alt={`item-${i+1}`} className="h-20 w-full object-cover rounded" />
+                          ) : (
+                            <span className="font-bold">{val || 'Item'}</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
 
