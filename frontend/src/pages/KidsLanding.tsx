@@ -1,7 +1,7 @@
 ﻿import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Sparkles, Ticket, Lock } from 'lucide-react';
+import { Sparkles, Ticket, Lock, Smile, BookOpenCheck, Trophy } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 type LeaderboardVisibility = 'hidden' | 'after_submit' | 'always';
@@ -76,143 +76,118 @@ export default function KidsLanding() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
-
-      <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Header with logo */}
-        <div className="pt-6 sm:pt-8 pb-4">
-          <div className="max-w-2xl mx-auto px-4 flex flex-col items-center">
-            {/* Logo */}
-            <img 
-              src="/illustrations/logo.jpeg" 
-              alt="Durrah Logo" 
-              className="h-16 sm:h-20 w-auto drop-shadow-lg"
-            />
-            
-            {/* Kids Mode Badge */}
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500/20 to-blue-500/20 backdrop-blur border border-emerald-500/30 px-4 py-2">
-              <Sparkles className="h-4 w-4 text-emerald-400 animate-spin" style={{ animationDuration: '3s' }} />
-              <span className="text-emerald-300 font-bold text-xs sm:text-sm tracking-wide">KIDS QUIZ MODE</span>
-              <Sparkles className="h-4 w-4 text-emerald-400 animate-spin" style={{ animationDuration: '3s', animationDirection: 'reverse' }} />
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Top header with logo and nav style chips */}
+      <header className="bg-white border-b">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img src="/illustrations/logo.jpeg" alt="Durrah Logo" className="h-10 w-auto" />
+            <span className="inline-flex items-center gap-2 text-xs font-semibold text-purple-700 bg-purple-50 px-3 py-1 rounded-full">
+              <Sparkles className="h-3 w-3" /> Kids Mode
+            </span>
+          </div>
+          <div className="hidden sm:flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-500">Safe • Fun • Learning</span>
           </div>
         </div>
+      </header>
 
-        {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center px-4 py-8">
-          <div className="max-w-xl w-full">
-            {/* Headline */}
-            <div className="text-center mb-8">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-2 leading-tight">
-                Ready to Take the
-                <span className="block bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  Challenge?
-                </span>
+      {/* Hero */}
+      <section className="bg-white">
+        <div className="max-w-6xl mx-auto px-4 py-10">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-gray-900">
+                Unlock the Secrets of <span className="text-purple-700">Fun Education</span>
               </h1>
-              <p className="text-gray-400 text-lg sm:text-xl max-w-md mx-auto mt-4">
-                Enter your details below and show us what you've got! 🎯
+              <p className="mt-4 text-gray-600 text-sm sm:text-base max-w-md">
+                From bubble math to science crafts and karaoke, explore fun skills-based
+                lessons tailored for smart kids.
               </p>
+
+              {/* Feature cards inline like reference */}
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="rounded-2xl p-4 shadow-sm bg-orange-50 border border-orange-200">
+                  <Smile className="h-5 w-5 text-orange-600" />
+                  <p className="mt-2 text-sm font-bold text-orange-700">Learning Astronomy</p>
+                  <p className="text-xs text-orange-700/80">Discover stars and space</p>
+                </div>
+                <div className="rounded-2xl p-4 shadow-sm bg-yellow-50 border border-yellow-200">
+                  <BookOpenCheck className="h-5 w-5 text-yellow-600" />
+                  <p className="mt-2 text-sm font-bold text-yellow-700">Museum Visit</p>
+                  <p className="text-xs text-yellow-700/80">Explore history together</p>
+                </div>
+                <div className="rounded-2xl p-4 shadow-sm bg-purple-50 border border-purple-200">
+                  <Trophy className="h-5 w-5 text-purple-600" />
+                  <p className="mt-2 text-sm font-bold text-purple-700">Camping & Singing</p>
+                  <p className="text-xs text-purple-700/80">Team fun activities</p>
+                </div>
+              </div>
             </div>
 
-            {/* Form Card */}
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 sm:p-10 shadow-2xl">
-              <div className="space-y-6">
-                {/* Nickname Input */}
+            {/* Entry Form Card */}
+            <div className="rounded-3xl border border-gray-200 bg-white shadow-sm p-6 md:p-8">
+              <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-bold text-emerald-300 mb-3 flex items-center gap-2">
-                    <span className="text-xl">🎭</span>
-                    Choose Your Player Name
-                  </label>
+                  <label className="block text-xs font-bold text-gray-700 mb-2">Your Nickname</label>
                   <input
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
-                    className="w-full rounded-2xl bg-white/5 border-2 border-emerald-500/30 hover:border-emerald-500/50 focus:border-emerald-500 focus:bg-white/10 text-white px-6 py-3.5 font-semibold text-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all"
-                    placeholder="Enter your nickname"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    placeholder="e.g., SuperTiger"
                   />
-                  <p className="mt-2 text-xs text-gray-400">Make it fun and unique! 🌟</p>
                 </div>
-
-                {/* Quiz Code Input */}
                 <div>
-                  <label className="block text-sm font-bold text-blue-300 mb-3 flex items-center gap-2">
-                    <span className="text-xl">🎟️</span>
-                    Quiz Code
-                  </label>
+                  <label className="block text-xs font-bold text-gray-700 mb-2">Quiz Code</label>
                   <div className="relative">
-                    <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-400" />
+                    <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-600" />
                     <input
                       value={code}
                       onChange={(e) => setCode(e.target.value)}
-                      className="w-full rounded-2xl bg-white/5 border-2 border-blue-500/30 hover:border-blue-500/50 focus:border-blue-500 focus:bg-white/10 text-white pl-14 pr-6 py-3.5 font-black text-lg tracking-wider uppercase placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
+                      className="w-full rounded-xl border border-gray-300 pl-10 pr-4 py-3 text-gray-900 placeholder-gray-400 tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-purple-400"
                       placeholder="KID-ABC123"
                     />
                   </div>
                   {normalizedCode && (
-                    <div className="mt-3 flex items-center gap-2 text-sm text-emerald-400">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="font-mono">{normalizedCode}</span>
-                    </div>
+                    <p className="mt-2 text-xs text-purple-700 font-semibold">
+                      Code: <span className="font-mono bg-purple-100 px-2 py-1 rounded">{normalizedCode}</span>
+                    </p>
                   )}
                 </div>
-
-                {/* Start Button */}
                 <button
                   type="button"
                   onClick={handleEnter}
                   disabled={isLoading || !nickname.trim() || !normalizedCode}
-                  className="w-full mt-8 rounded-2xl bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500 hover:from-emerald-400 hover:via-blue-400 hover:to-purple-400 disabled:from-gray-600 disabled:via-gray-600 disabled:to-gray-600 text-white font-black py-4 text-lg shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transform hover:scale-105 active:scale-95 transition-all duration-200"
+                  className="w-full rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? (
-                    <>
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      Starting...
-                    </>
-                  ) : (
-                    <>
-                      <span>🚀 START QUIZ</span>
-                    </>
-                  )}
+                  {isLoading ? 'Starting...' : 'Start Quiz'}
                 </button>
-
-                {/* Helper text */}
-                <p className="text-center text-sm text-gray-400">
-                  <Lock className="inline h-4 w-4 mr-1" />
-                  Ask your teacher if you need the code
-                </p>
-              </div>
-            </div>
-
-            {/* Info Cards */}
-            <div className="mt-10 grid grid-cols-3 gap-3">
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
-                <div className="text-3xl mb-2">⭐</div>
-                <p className="text-xs font-bold text-emerald-300">Earn Points</p>
-              </div>
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
-                <div className="text-3xl mb-2">🏆</div>
-                <p className="text-xs font-bold text-blue-300">Get Ranked</p>
-              </div>
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
-                <div className="text-3xl mb-2">🎉</div>
-                <p className="text-xs font-bold text-purple-300">Have Fun</p>
+                <p className="text-xs text-gray-500"><Lock className="inline h-3 w-3 mr-1" /> Ask your teacher for the code</p>
               </div>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Footer */}
-        <div className="py-6 text-center">
-          <p className="text-gray-500 text-xs">
-            Powered by <span className="text-emerald-400 font-bold">Durrah</span> • Professional Learning Platform
-          </p>
+      {/* Secondary content like reference */}
+      <section className="bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <h2 className="text-xl font-black text-gray-900">Fun Games & Activities for Smart Kids</h2>
+          <ul className="mt-3 grid sm:grid-cols-2 gap-3 text-sm text-gray-700">
+            <li className="rounded-xl bg-white border border-gray-200 p-4">Math puzzles, creative writing, and science crafts</li>
+            <li className="rounded-xl bg-white border border-gray-200 p-4">Reading class, vocabulary games, and pronunciation</li>
+            <li className="rounded-xl bg-white border border-gray-200 p-4">Team activities, music & rhythm, and memory games</li>
+            <li className="rounded-xl bg-white border border-gray-200 p-4">Safe, engaging, and tutor-approved content</li>
+          </ul>
         </div>
-      </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-white border-t">
+        <div className="max-w-6xl mx-auto px-4 py-6 text-center text-xs text-gray-500">
+          © {new Date().getFullYear()} Durrah. Fun education for kids.
+        </div>
+      </footer>
     </div>
   );
 }
