@@ -657,7 +657,8 @@ export default function ExamEditor() {
                             </div>
                         </div>
 
-                        {/* Student Fields */}
+                        {/* Student Fields - Hidden in Kids Mode */}
+                        {!watch('settings.child_mode_enabled') && (
                         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6" id="required-fields">
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('examEditor.studentInfo.title')}</h3>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('examEditor.studentInfo.desc')}</p>
@@ -728,6 +729,7 @@ export default function ExamEditor() {
                                 </div>
                             </div>
                         </div>
+                        )}
 
                         {/* Email Access Control - Hidden in Kids Mode */}
                         {!watch('settings.child_mode_enabled') && (

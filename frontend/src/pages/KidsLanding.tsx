@@ -1,7 +1,7 @@
 ﻿import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Sparkles, Ticket, Stars, PartyPopper } from 'lucide-react';
+import { Sparkles, Ticket, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 type LeaderboardVisibility = 'hidden' | 'after_submit' | 'always';
@@ -76,117 +76,142 @@ export default function KidsLanding() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden bg-gradient-to-br from-[#FF6B9D] via-[#C94FF9] to-[#7C3AED]">
-      <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
-        {/* Vertical centered layout */}
-        <div className="flex flex-col items-center text-center">
-          {/* Top badge */}
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur border border-white/30 px-4 py-2">
-            <Sparkles className="h-4 w-4 text-yellow-300" />
-            <span className="text-white font-extrabold tracking-wide text-xs sm:text-sm">DURRAH KIDS MODE</span>
-            <Sparkles className="h-4 w-4 text-yellow-300" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Header with logo */}
+        <div className="pt-6 sm:pt-8 pb-4">
+          <div className="max-w-2xl mx-auto px-4 flex flex-col items-center">
+            {/* Logo */}
+            <img 
+              src="/illustrations/logo.jpeg" 
+              alt="Durrah Logo" 
+              className="h-16 sm:h-20 w-auto drop-shadow-lg"
+            />
+            
+            {/* Kids Mode Badge */}
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500/20 to-blue-500/20 backdrop-blur border border-emerald-500/30 px-4 py-2">
+              <Sparkles className="h-4 w-4 text-emerald-400 animate-spin" style={{ animationDuration: '3s' }} />
+              <span className="text-emerald-300 font-bold text-xs sm:text-sm tracking-wide">KIDS QUIZ MODE</span>
+              <Sparkles className="h-4 w-4 text-emerald-400 animate-spin" style={{ animationDuration: '3s', animationDirection: 'reverse' }} />
+            </div>
           </div>
+        </div>
 
-          {/* Main title */}
-          <h1 className="mt-6 text-white font-black leading-tight text-5xl sm:text-6xl md:text-7xl drop-shadow-lg">
-            🎈 Kids Quiz
-            <br />
-            <span className="text-yellow-300">Challenge!</span>
-          </h1>
+        {/* Main Content */}
+        <div className="flex-1 flex items-center justify-center px-4 py-8">
+          <div className="max-w-xl w-full">
+            {/* Headline */}
+            <div className="text-center mb-8">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-2 leading-tight">
+                Ready to Take the
+                <span className="block bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  Challenge?
+                </span>
+              </h1>
+              <p className="text-gray-400 text-lg sm:text-xl max-w-md mx-auto mt-4">
+                Enter your details below and show us what you've got! 🎯
+              </p>
+            </div>
 
-          <p className="mt-4 text-white/95 text-lg sm:text-xl font-semibold max-w-md">
-            Enter your nickname and quiz code to start playing! 🎮
-          </p>
-
-          {/* Decorative stars */}
-          <div className="mt-4 flex gap-3">
-            <Stars className="h-8 w-8 text-yellow-300 animate-pulse" />
-            <PartyPopper className="h-8 w-8 text-pink-300 animate-bounce" />
-            <Stars className="h-8 w-8 text-yellow-300 animate-pulse" style={{ animationDelay: '0.5s' }} />
-          </div>
-
-          {/* Form card - colorful gradient */}
-          <div className="mt-8 w-full max-w-md rounded-3xl bg-gradient-to-br from-white/95 to-white/90 backdrop-blur border-4 border-white shadow-2xl p-6 sm:p-8">
-            <div className="space-y-5">
-              {/* Nickname input */}
-              <div>
-                <label className="block text-left text-sm font-black text-purple-900 mb-2 flex items-center gap-2">
-                  <span className="text-2xl">🦁</span>
-                  Your Cool Nickname
-                </label>
-                <input
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  className="w-full rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 text-gray-900 px-5 py-4 font-bold text-lg border-3 border-purple-300 focus:border-purple-500 focus:outline-none focus:ring-4 focus:ring-purple-200 shadow-inner"
-                  placeholder="SuperTiger 🐯"
-                />
-              </div>
-
-              {/* Quiz code input */}
-              <div>
-                <label className="block text-left text-sm font-black text-purple-900 mb-2 flex items-center gap-2">
-                  <span className="text-2xl">🎫</span>
-                  Quiz Code
-                </label>
-                <div className="relative">
-                  <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-6 w-6 text-purple-600" />
+            {/* Form Card */}
+            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 sm:p-10 shadow-2xl">
+              <div className="space-y-6">
+                {/* Nickname Input */}
+                <div>
+                  <label className="block text-sm font-bold text-emerald-300 mb-3 flex items-center gap-2">
+                    <span className="text-xl">🎭</span>
+                    Choose Your Player Name
+                  </label>
                   <input
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    className="w-full rounded-2xl bg-gradient-to-r from-yellow-50 to-orange-50 text-gray-900 pl-14 pr-5 py-4 font-black text-lg tracking-wider uppercase border-3 border-yellow-300 focus:border-yellow-500 focus:outline-none focus:ring-4 focus:ring-yellow-200 shadow-inner"
-                    placeholder="KID-ABC123"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    className="w-full rounded-2xl bg-white/5 border-2 border-emerald-500/30 hover:border-emerald-500/50 focus:border-emerald-500 focus:bg-white/10 text-white px-6 py-3.5 font-semibold text-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all"
+                    placeholder="Enter your nickname"
                   />
+                  <p className="mt-2 text-xs text-gray-400">Make it fun and unique! 🌟</p>
                 </div>
-                {normalizedCode && (
-                  <p className="mt-2 text-xs text-purple-700 font-bold text-left">
-                    ✅ Code: <span className="font-mono bg-purple-100 px-2 py-1 rounded">{normalizedCode}</span>
-                  </p>
-                )}
-              </div>
 
-              {/* Start button - big and colorful */}
-              <div className="pt-2">
+                {/* Quiz Code Input */}
+                <div>
+                  <label className="block text-sm font-bold text-blue-300 mb-3 flex items-center gap-2">
+                    <span className="text-xl">🎟️</span>
+                    Quiz Code
+                  </label>
+                  <div className="relative">
+                    <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-400" />
+                    <input
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      className="w-full rounded-2xl bg-white/5 border-2 border-blue-500/30 hover:border-blue-500/50 focus:border-blue-500 focus:bg-white/10 text-white pl-14 pr-6 py-3.5 font-black text-lg tracking-wider uppercase placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
+                      placeholder="KID-ABC123"
+                    />
+                  </div>
+                  {normalizedCode && (
+                    <div className="mt-3 flex items-center gap-2 text-sm text-emerald-400">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="font-mono">{normalizedCode}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Start Button */}
                 <button
                   type="button"
                   onClick={handleEnter}
-                  disabled={isLoading}
-                  className="w-full rounded-2xl bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 hover:from-yellow-300 hover:via-orange-300 hover:to-pink-400 text-white font-black py-5 text-xl shadow-2xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3 transform hover:scale-105 transition-transform"
+                  disabled={isLoading || !nickname.trim() || !normalizedCode}
+                  className="w-full mt-8 rounded-2xl bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500 hover:from-emerald-400 hover:via-blue-400 hover:to-purple-400 disabled:from-gray-600 disabled:via-gray-600 disabled:to-gray-600 text-white font-black py-4 text-lg shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transform hover:scale-105 active:scale-95 transition-all duration-200"
                 >
-                  <Sparkles className="h-6 w-6" />
-                  {isLoading ? 'Loading...' : 'START QUIZ! 🚀'}
+                  {isLoading ? (
+                    <>
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      Starting...
+                    </>
+                  ) : (
+                    <>
+                      <span>🚀 START QUIZ</span>
+                    </>
+                  )}
                 </button>
-              </div>
 
-              <p className="text-xs text-purple-600 font-semibold">
-                💡 Ask your teacher for the code if you don't have it!
-              </p>
+                {/* Helper text */}
+                <p className="text-center text-sm text-gray-400">
+                  <Lock className="inline h-4 w-4 mr-1" />
+                  Ask your teacher if you need the code
+                </p>
+              </div>
+            </div>
+
+            {/* Info Cards */}
+            <div className="mt-10 grid grid-cols-3 gap-3">
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+                <div className="text-3xl mb-2">⭐</div>
+                <p className="text-xs font-bold text-emerald-300">Earn Points</p>
+              </div>
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+                <div className="text-3xl mb-2">🏆</div>
+                <p className="text-xs font-bold text-blue-300">Get Ranked</p>
+              </div>
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+                <div className="text-3xl mb-2">🎉</div>
+                <p className="text-xs font-bold text-purple-300">Have Fun</p>
+              </div>
             </div>
           </div>
-
-          {/* Bottom fun badges */}
-          <div className="mt-8 flex flex-wrap gap-3 justify-center">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur border border-white/30 px-4 py-2 text-white font-bold text-sm">
-              ⭐ Earn Stars
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur border border-white/30 px-4 py-2 text-white font-bold text-sm">
-              🏆 Win Prizes
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur border border-white/30 px-4 py-2 text-white font-bold text-sm">
-              🎉 Have Fun
-            </span>
-          </div>
-
-          {/* Decorative elements */}
-          <div className="mt-8 text-6xl animate-bounce">🎮</div>
         </div>
-      </div>
 
-      {/* Background decorative blobs */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 h-32 w-32 rounded-full bg-yellow-300/30 blur-3xl" />
-        <div className="absolute top-1/4 right-20 h-40 w-40 rounded-full bg-pink-300/20 blur-3xl" />
-        <div className="absolute bottom-20 left-1/4 h-36 w-36 rounded-full bg-purple-300/25 blur-3xl" />
-        <div className="absolute bottom-10 right-10 h-44 w-44 rounded-full bg-white/10 blur-3xl" />
+        {/* Footer */}
+        <div className="py-6 text-center">
+          <p className="text-gray-500 text-xs">
+            Powered by <span className="text-emerald-400 font-bold">Durrah</span> • Professional Learning Platform
+          </p>
+        </div>
       </div>
     </div>
   );
