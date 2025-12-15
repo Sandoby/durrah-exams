@@ -863,118 +863,46 @@ export default function ExamEditor() {
                                 </div>
 
                                 {/* Kids Mode Settings */}
-                                <div className="col-span-2">
-                                    <div className="flex items-center justify-between">
-                                        <h4 className="text-md font-medium text-gray-900 dark:text-white">{t('examEditor.settings.kidsMode.title')}</h4>
-                                        <div className="flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                checked={watch('settings.child_mode_enabled')}
-                                                onChange={(e) => {
-                                                    setValue('settings.child_mode_enabled', e.target.checked);
-                                                    if (e.target.checked) {
-                                                        // Set default values for Kids Mode
-                                                        setValue('settings.attempt_limit', 1);
-                                                        setValue('settings.leaderboard_visibility', 'after_submit');
-                                                        ensureQuizCode();
-                                                    }
-                                                }}
-                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                            />
-                                            <label className="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-300">
-                                                {t('examEditor.settings.kidsMode.enable')}
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    {watch('settings.child_mode_enabled') && (
-                                        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.kidsMode.attemptLimit')}</label>
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                    {...register('settings.attempt_limit', { valueAsNumber: true })}
-                                                />
+                                {watch('settings.child_mode_enabled') && (
+                                    <div className="col-span-2">
+                                        <div className="p-5 rounded-lg border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 dark:border-purple-700">
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <span className="text-2xl">🎈</span>
+                                                <h4 className="text-lg font-semibold text-purple-900 dark:text-purple-200">{t('examEditor.settings.kidsMode.title')}</h4>
                                             </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.settings.kidsMode.leaderboardVisibility')}</label>
-                                                <select
-                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                                                    {...register('settings.leaderboard_visibility')}
-                                                >
-                                                    <option value="hidden">{t('examEditor.settings.kidsMode.visibilityHidden')}</option>
-                                                    <option value="after_submit">{t('examEditor.settings.kidsMode.visibilityAfterSubmit')}</option>
-                                                    <option value="always">{t('examEditor.settings.kidsMode.visibilityAlways')}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    )}
-                                
-                                    <div className="mt-4 p-4 rounded-lg border border-indigo-200 bg-indigo-50/50 dark:border-indigo-800 dark:bg-indigo-900/20">
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div>
-                                                <p className="text-sm font-medium text-indigo-900 dark:text-indigo-200">
-                                                    {t('examEditor.settings.kidsMode.shareTitle', 'Share with kids')}
-                                                </p>
-                                                <p className="text-xs text-gray-600 dark:text-gray-300">
-                                                    {t('examEditor.settings.kidsMode.shareDesc', 'Kids open the kids page and enter the code.')}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                            <div className="rounded-md bg-white/80 dark:bg-gray-800/60 border border-indigo-100 dark:border-indigo-800 p-3">
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                        {t('examEditor.settings.kidsMode.kidsPage', 'Kids page')}
-                                                    </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => copyText(kidsLandingUrl)}
-                                                        className="text-xs font-medium text-indigo-700 hover:text-indigo-900 dark:text-indigo-300"
+                                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-purple-100 dark:border-purple-800 shadow-sm">
+                                                    <label className="flex items-center gap-2 text-sm font-medium text-purple-900 dark:text-purple-200 mb-2">
+                                                        <span className="text-lg">🎯</span>
+                                                        {t('examEditor.settings.kidsMode.attemptLimit')}
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        className="block w-full rounded-md border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm p-2.5 border"
+                                                        {...register('settings.attempt_limit', { valueAsNumber: true })}
+                                                    />
+                                                    <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">How many tries kids get</p>
+                                                </div>
+                                                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-purple-100 dark:border-purple-800 shadow-sm">
+                                                    <label className="flex items-center gap-2 text-sm font-medium text-purple-900 dark:text-purple-200 mb-2">
+                                                        <span className="text-lg">🏆</span>
+                                                        {t('examEditor.settings.kidsMode.leaderboardVisibility')}
+                                                    </label>
+                                                    <select
+                                                        className="block w-full rounded-md border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm p-2.5 border"
+                                                        {...register('settings.leaderboard_visibility')}
                                                     >
-                                                        {t('common.copy', 'Copy')}
-                                                    </button>
+                                                        <option value="hidden">{t('examEditor.settings.kidsMode.visibilityHidden')}</option>
+                                                        <option value="after_submit">{t('examEditor.settings.kidsMode.visibilityAfterSubmit')}</option>
+                                                        <option value="always">{t('examEditor.settings.kidsMode.visibilityAlways')}</option>
+                                                    </select>
+                                                    <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">When kids see the leaderboard</p>
                                                 </div>
-                                                <div className="mt-2 text-sm font-mono text-gray-700 dark:text-gray-200 break-all">{kidsLandingUrl}</div>
-                                            </div>
-
-                                            <div className="rounded-md bg-white/80 dark:bg-gray-800/60 border border-indigo-100 dark:border-indigo-800 p-3">
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                        {t('examEditor.settings.kidsMode.quizCode', 'Quiz code')}
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                const next = generateQuizCode();
-                                                                setSavedQuizCode(next);
-                                                                toast.success(t('examEditor.settings.kidsMode.newCodeToast', 'New code generated'));
-                                                            }}
-                                                            className="text-xs font-medium text-indigo-700 hover:text-indigo-900 dark:text-indigo-300"
-                                                        >
-                                                            {t('common.new', 'New')}
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => copyText(ensureQuizCode())}
-                                                            className="text-xs font-medium text-indigo-700 hover:text-indigo-900 dark:text-indigo-300"
-                                                        >
-                                                            {t('common.copy', 'Copy')}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                <div className="mt-2 text-lg font-bold tracking-wider text-gray-900 dark:text-gray-100">{ensureQuizCode()}</div>
-                                                <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
-                                                    {t('examEditor.settings.kidsMode.saveToStore', 'Save the exam to store the code in the database.')}
-                                                </p>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </div>
 
