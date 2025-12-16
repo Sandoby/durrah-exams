@@ -1,4 +1,5 @@
 ﻿import { useMemo, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Sparkles, Ticket, Lock, Rocket, Trophy, Gamepad2 } from 'lucide-react';
@@ -75,6 +76,36 @@ export default function KidsLanding() {
 
   return (
     <div dir="ltr" className="min-h-screen bg-gradient-to-b from-sky-400 via-sky-300 to-amber-100 overflow-hidden relative">
+      {/* SEO Helmet */}
+      <Helmet>
+        <title>Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah</title>
+        <meta name="description" content="Start your quiz adventure! Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors." />
+        <meta name="keywords" content="kids quiz, fun quizzes for kids, safe kids exams, anti cheating quiz, child mode, secure quiz platform, learning for children" />
+        <meta property="og:title" content="Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah" />
+        <meta property="og:description" content="Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://tutors.durrahsystem.tech/kids" />
+        <meta property="og:image" content="https://tutors.durrahsystem.tech/illustrations/og-kids.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah" />
+        <meta name="twitter:description" content="Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors." />
+        <meta name="twitter:image" content="https://tutors.durrahsystem.tech/illustrations/og-kids.png" />
+        <link rel="canonical" href="https://tutors.durrahsystem.tech/kids" />
+        <script type="application/ld+json">{`
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "Kids Quiz Adventure",
+            "url": "https://tutors.durrahsystem.tech/kids",
+            "description": "Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors.",
+            "inLanguage": "en",
+            "publisher": {
+              "@type": "Organization",
+              "name": "Durrah for Tutors"
+            }
+          }
+        `}</script>
+      </Helmet>
       {/* Custom animations */}
       <style>{`
         @keyframes float {
