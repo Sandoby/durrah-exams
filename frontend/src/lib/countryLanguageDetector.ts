@@ -59,14 +59,12 @@ export default {
     name: 'countryDetector',
     
     lookup() {
-        // Always try to detect and set the best language on first visit or if browser language changes
+        // Only set language if user has never chosen one
         detectLanguageFromCountry().then(lang => {
             const userSet = localStorage.getItem('i18nextLng');
-            if (lang && (!userSet || userSet === 'en' || userSet === 'ar' || userSet === 'fr' || userSet === 'es')) {
-                if (userSet !== lang) {
-                    localStorage.setItem('i18nextLng', lang);
-                    window.location.reload();
-                }
+            if (lang && (!userSet || userSet === '')) {
+                localStorage.setItem('i18nextLng', lang);
+                window.location.reload();
             }
         });
         return undefined;

@@ -137,7 +137,7 @@ export default function KidsLanding() {
       `}</style>
 
       {/* Decorative clouds */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 overflow-hidden" style={{ pointerEvents: 'none' }}>
         {/* Fluffy clouds */}
         <div className="absolute top-10 left-10 w-32 h-16 bg-white/60 rounded-full blur-sm" />
         <div className="absolute top-8 left-20 w-24 h-12 bg-white/50 rounded-full blur-sm" />
@@ -192,7 +192,7 @@ export default function KidsLanding() {
             <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
             <span className="text-xs sm:text-sm font-bold text-white">{t('kids.header.fun', 'Fun Learning')}</span>
           </div>
-          <div className="ml-2"><LanguageSwitcher /></div>
+          <div className="ml-2" style={{ pointerEvents: 'auto', zIndex: 200 }}><LanguageSwitcher /></div>
         </div>
       </header>
 
