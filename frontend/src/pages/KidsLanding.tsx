@@ -112,6 +112,12 @@ export default function KidsLanding() {
         <div className="absolute -top-20 right-1/4 w-60 h-60 bg-yellow-300/40 rounded-full blur-3xl" />
         
         {/* Floating Illustrations */}
+                <img 
+                  src="/kids/image-1765886162298.png" 
+                  alt="" 
+                  className="absolute left-4 sm:left-16 top-24 w-20 sm:w-28 md:w-32 animate-float drop-shadow-xl hidden md:block"
+                  style={{ animationDelay: '0.7s' }}
+                />
         <img 
           src="/kids/image-1765886162298.png" 
           alt="" 
