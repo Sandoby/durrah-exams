@@ -189,8 +189,13 @@ export default function KidsLanding() {
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-200/50 rounded-full blur-2xl" />
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-sky-200/50 rounded-full blur-2xl" />
             
-            {/* Corner decoration */}
-            {/* Removed corrupted illustration from credentials window */}
+            {/* Corner badge illustration */}
+            <img
+              src="/kids/image-1765886214428.png"
+              alt=""
+              className="absolute -top-6 -left-6 w-16 h-16 sm:w-20 sm:h-20"
+              style={{ zIndex: 2 }}
+            />
 
             <div className="relative space-y-4 sm:space-y-5">
               {/* Nickname Input */}
