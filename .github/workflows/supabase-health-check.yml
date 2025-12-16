@@ -1,0 +1,58 @@
+name: Supabase Health Check & Keep-Alive
+
+on:
+  schedule:
+    # Run at 06:30 UTC every day
+    - cron: '30 6 * * *'
+  workflow_dispatch: # Allow manual run from GitHub actions tab
+
+jobs:
+  maintenance:
+    name: Daily System Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Database Connectivity (Keep-Alive)
+        env:
+          # You must add these to your GitHub Repository Secrets
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "::error::SUPABASE_URL secret is not set!"
+            exit 1
+          fi
+
+          echo "🔍 Checking Supabase Status..."
+          
+          # 1. Root Health Check (Basic Connectivity)
+          # We use the REST API root to verify the service is up
+          HTTP_CODE=$(curl --write-out "%{http_code}" --silent --output /dev/null \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY" \
+            "$SUPABASE_URL/rest/v1/")
+
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "✅ Supabase is ONLINE (HTTP 200)"
+          else
+            echo "::error::Supabase returned unexpected status: $HTTP_CODE"
+            exit 1
+          fi
+
+      - name: Fetch Daily Stats (Useful Activity)
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          echo "📊 Fetching Usage Statistics..."
+          
+          # 2. Activity Generation: Read from 'exams' table (Head request or limit 1)
+          # This counts as database usage, preventing the 7-day inactivity pause.
+          # We also log the result to make this a useful "Audit Log" in GitHub Actions history.
+          
+          RESPONSE=$(curl -s -X GET "$SUPABASE_URL/rest/v1/exams?select=id&limit=1" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY" \
+            -H "Range: 0-0")
+            
+          echo "Query Result (Snippet): $RESPONSE"
+          echo "✅ Daily activity logged successfully."
