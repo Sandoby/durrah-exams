@@ -77,7 +77,17 @@ export default function KidsLanding() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 overflow-hidden relative">
+      {/* Custom float animation */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-15px); }
+        }
+        .animate-float {
+          animation: float 4s ease-in-out infinite;
+        }
+      `}</style>
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-20 h-20 bg-yellow-300/30 rounded-full blur-2xl animate-pulse" />
@@ -91,6 +101,26 @@ export default function KidsLanding() {
         <Star className="absolute bottom-32 left-1/3 h-5 w-5 text-yellow-300/50 animate-bounce" style={{ animationDelay: '0.8s' }} />
         <Sparkles className="absolute top-1/3 left-10 h-5 w-5 text-white/40 animate-pulse" />
         <Sparkles className="absolute bottom-40 right-10 h-6 w-6 text-white/40 animate-pulse" style={{ animationDelay: '500ms' }} />
+        
+        {/* Floating illustration characters - hidden on mobile, shown on larger screens */}
+        <img 
+          src="https://illustrations.popsy.co/amber/student-going-to-school.svg" 
+          alt="" 
+          className="absolute -left-4 bottom-20 w-32 sm:w-40 md:w-52 opacity-90 hidden md:block animate-float"
+          style={{ animationDuration: '4s' }}
+        />
+        <img 
+          src="https://illustrations.popsy.co/violet/girl-reading.svg" 
+          alt="" 
+          className="absolute -right-4 top-32 w-28 sm:w-36 md:w-44 opacity-90 hidden lg:block animate-float"
+          style={{ animationDuration: '5s', animationDelay: '1s' }}
+        />
+        <img 
+          src="https://illustrations.popsy.co/rose/question-mark.svg" 
+          alt="" 
+          className="absolute right-10 bottom-40 w-20 sm:w-24 md:w-28 opacity-70 hidden lg:block animate-bounce"
+          style={{ animationDuration: '3s' }}
+        />
       </div>
 
       {/* Header */}
@@ -133,7 +163,14 @@ export default function KidsLanding() {
           </div>
 
           {/* Entry Card */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-5 sm:p-8 border-4 border-white/50">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-5 sm:p-8 border-4 border-white/50 relative">
+            {/* Corner decorations */}
+            <img 
+              src="https://illustrations.popsy.co/amber/rocket.svg" 
+              alt="" 
+              className="absolute -top-6 -right-6 w-14 h-14 sm:w-16 sm:h-16 rotate-12 hidden sm:block"
+            />
+            
             {/* Fun decorative elements */}
             <div className="flex justify-center gap-3 mb-6">
               <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg transform -rotate-6 hover:rotate-0 transition-transform">
@@ -215,24 +252,59 @@ export default function KidsLanding() {
             </div>
           </div>
 
-          {/* Fun Facts Cards */}
+          {/* Fun Facts Cards with Illustrations */}
           <div className="mt-6 sm:mt-8 grid grid-cols-2 gap-3 sm:gap-4">
-            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform">
-              <div className="text-2xl sm:text-3xl mb-1">🎯</div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-3 sm:p-4 text-center transform hover:scale-105 transition-transform group">
+              <img 
+                src="https://illustrations.popsy.co/amber/target.svg" 
+                alt="Fun Quizzes" 
+                className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 group-hover:scale-110 transition-transform"
+              />
               <p className="text-white font-bold text-xs sm:text-sm">Fun Quizzes</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform">
-              <div className="text-2xl sm:text-3xl mb-1">🏆</div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-3 sm:p-4 text-center transform hover:scale-105 transition-transform group">
+              <img 
+                src="https://illustrations.popsy.co/amber/trophy.svg" 
+                alt="Win Rewards" 
+                className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 group-hover:scale-110 transition-transform"
+              />
               <p className="text-white font-bold text-xs sm:text-sm">Win Rewards</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform">
-              <div className="text-2xl sm:text-3xl mb-1">🎨</div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-3 sm:p-4 text-center transform hover:scale-105 transition-transform group">
+              <img 
+                src="https://illustrations.popsy.co/violet/app-launch.svg" 
+                alt="Cool Games" 
+                className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 group-hover:scale-110 transition-transform"
+              />
               <p className="text-white font-bold text-xs sm:text-sm">Cool Games</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform">
-              <div className="text-2xl sm:text-3xl mb-1">⭐</div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-3 sm:p-4 text-center transform hover:scale-105 transition-transform group">
+              <img 
+                src="https://illustrations.popsy.co/rose/star-struck.svg" 
+                alt="Be a Star" 
+                className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 group-hover:scale-110 transition-transform"
+              />
               <p className="text-white font-bold text-xs sm:text-sm">Be a Star</p>
             </div>
+          </div>
+
+          {/* Character Illustrations Row - Mobile visible */}
+          <div className="mt-6 flex justify-center gap-2 sm:gap-4 md:hidden">
+            <img 
+              src="https://illustrations.popsy.co/amber/student-going-to-school.svg" 
+              alt="" 
+              className="w-20 h-20 sm:w-24 sm:h-24"
+            />
+            <img 
+              src="https://illustrations.popsy.co/violet/girl-reading.svg" 
+              alt="" 
+              className="w-20 h-20 sm:w-24 sm:h-24"
+            />
+            <img 
+              src="https://illustrations.popsy.co/rose/question-mark.svg" 
+              alt="" 
+              className="w-16 h-16 sm:w-20 sm:h-20"
+            />
           </div>
         </div>
       </main>
