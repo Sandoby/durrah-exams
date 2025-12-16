@@ -166,13 +166,8 @@ export default function KidsLanding() {
       {/* Main Content */}
       <main className="relative z-10 px-4 pb-8">
         <div className="max-w-md mx-auto">
-          {/* Hero Section with Illustration */}
+          {/* Hero Section */}
           <div className="text-center mb-6">
-            <img 
-              src="/kids/image-1765886205296.png" 
-              alt="Kids Learning" 
-              className="w-36 sm:w-44 md:w-52 mx-auto mb-4 drop-shadow-xl animate-float"
-            />
             <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-md rounded-full px-5 py-2.5 mb-4 shadow-md border border-white/50">
               <Gamepad2 className="h-5 w-5 text-sky-500" />
               <span className="text-sm font-bold text-sky-700">Ready to Play?</span>
@@ -198,7 +193,7 @@ export default function KidsLanding() {
             <img 
               src="/kids/image-1765886214428.png" 
               alt="" 
-              className="absolute -top-6 -right-6 w-16 h-16 sm:w-20 sm:h-20"
+              className="absolute -top-6 -left-6 w-16 h-16 sm:w-20 sm:h-20"
             />
 
             <div className="relative space-y-4 sm:space-y-5">
@@ -206,7 +201,7 @@ export default function KidsLanding() {
               <div>
                 <label className="block text-sm font-bold text-sky-700 mb-2 flex items-center gap-2">
                   <span className="w-7 h-7 bg-gradient-to-br from-sky-400 to-blue-500 rounded-lg flex items-center justify-center shadow-md">
-                    <span className="text-sm">👤</span>
+                    <Sparkles className="h-4 w-4 text-white" />
                   </span>
                   Your Super Name
                 </label>
