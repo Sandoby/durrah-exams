@@ -142,6 +142,11 @@ export default function KidsLanding() {
           className="absolute right-1/4 top-1/4 w-20 sm:w-28 md:w-32 animate-float drop-shadow-xl hidden lg:block"
           style={{ animationDelay: '1.5s' }}
         />
+        <img
+          src="/kids/image-1765886214428.png"
+          alt=""
+          className="absolute right-2 bottom-8 w-16 sm:w-24 md:w-28 animate-float-reverse drop-shadow-xl opacity-80"
+        />
       </div>
 
       {/* Header */}
