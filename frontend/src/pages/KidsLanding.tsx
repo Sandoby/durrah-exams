@@ -77,6 +77,8 @@ export default function KidsLanding() {
     }
   };
 
+  // Force language detection on mount (for kids landing page)
+  import('../lib/countryLanguageDetector').then(mod => mod.default.lookup());
   const isRTL = i18n.language === 'ar';
   return (
     <div dir={isRTL ? 'rtl' : 'ltr'} className="min-h-screen bg-gradient-to-b from-sky-400 via-sky-300 to-amber-100 overflow-hidden relative">

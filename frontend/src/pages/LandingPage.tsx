@@ -14,6 +14,8 @@ export default function LandingPage() {
     const { user, loading } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const registrationUrl = 'https://tutors.durrahsystem.tech/register';
+    // Force language detection on mount (for main landing page)
+    import('../lib/countryLanguageDetector').then(mod => mod.default.lookup());
     const isRTL = i18n.language === 'ar';
 
     // No auto-redirect - show authenticated UI instead
