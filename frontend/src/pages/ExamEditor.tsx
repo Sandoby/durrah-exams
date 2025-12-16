@@ -594,20 +594,20 @@ export default function ExamEditor() {
                 </div>
             )}
             <div className="bg-white dark:bg-gray-800 shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+                        <div className="flex items-center gap-2 sm:gap-4">
                             <button
                                 onClick={() => navigate(new URLSearchParams(window.location.search).get('demo') === 'true' ? '/demo' : '/dashboard')}
-                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1"
                             >
-                                <ArrowLeft className="h-6 w-6" />
+                                <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />
                             </button>
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                            <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white truncate">
                                 {id ? t('examEditor.editTitle') : t('examEditor.createTitle')}
                             </h1>
                             {/* Kids Mode Toggle at Top */}
-                            <div className="flex items-center gap-2 ml-4 px-3 py-1.5 rounded-md bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700">
+                            <div className="flex items-center gap-1.5 sm:gap-2 ml-auto sm:ml-4 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700">
                                 <label className="flex items-center cursor-pointer gap-2">
                                     <input
                                         type="checkbox"
@@ -631,14 +631,14 @@ export default function ExamEditor() {
                                 </label>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap justify-end">
                             <button
                                 onClick={() => setShowImportModal(true)}
                                 type="button"
-                                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                                className="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 shadow-sm text-xs sm:text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                             >
-                                <BookOpen className="h-4 w-4 mr-2" />
-                                Import from Bank
+                                <BookOpen className="h-4 w-4 sm:mr-2" />
+                                <span className="hidden sm:inline">Import from Bank</span>
                             </button>
                             {new URLSearchParams(window.location.search).get('demo') === 'true' ? (
                                 <Link
@@ -669,12 +669,12 @@ export default function ExamEditor() {
                 </div>
             </div>
 
-            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex flex-col xl:flex-row gap-8 items-start">
+            <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+                <div className="flex flex-col xl:flex-row gap-4 sm:gap-8 items-start">
                     {/* Left Column: Form Editor */}
-                    <div className="flex-1 w-full space-y-8 min-w-0">
+                    <div className="flex-1 w-full space-y-4 sm:space-y-8 min-w-0">
                         {/* Basic Info */}
-                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6" id="exam-title">
+                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6" id="exam-title">
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('examEditor.basicInfo.title')}</h3>
                             <div className="space-y-4">
                                 <div>
@@ -699,7 +699,7 @@ export default function ExamEditor() {
 
                         {/* Student Fields - Hidden in Kids Mode */}
                         {!watch('settings.child_mode_enabled') && (
-                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6" id="required-fields">
+                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6" id="required-fields">
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('examEditor.studentInfo.title')}</h3>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('examEditor.studentInfo.desc')}</p>
                             <div className="grid grid-cols-1 gap-y-3 sm:grid-cols-2">
@@ -773,7 +773,7 @@ export default function ExamEditor() {
 
                         {/* Email Access Control - Hidden in Kids Mode */}
                         {!watch('settings.child_mode_enabled') && (
-                            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6">
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -813,7 +813,7 @@ export default function ExamEditor() {
                         )}
 
                         {/* Settings */}
-                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6" id="exam-settings">
+                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6" id="exam-settings">
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('examEditor.settings.title')}</h3>
                             <div className="grid grid-cols-1 gap-y-4 gap-x-8 sm:grid-cols-2">
                                 {watch('settings.child_mode_enabled') ? (
@@ -946,30 +946,30 @@ export default function ExamEditor() {
 
                         {/* Questions */}
                         <div className="w-full" id="questions-section">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('examEditor.questions.title')}</h3>
+                            <div className="flex items-center justify-between mb-4 sm:mb-6">
+                                <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white">{t('examEditor.questions.title')}</h3>
                                 <div className="flex gap-2">
                                     <button
                                         type="button"
                                         onClick={() => append(defaultQuestion)}
-                                        className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                                        className="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 shadow-sm text-xs sm:text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                                     >
-                                        <Plus className="h-4 w-4 mr-2" />
-                                        {t('examEditor.questions.add')}
+                                        <Plus className="h-4 w-4 sm:mr-2" />
+                                        <span className="hidden sm:inline">{t('examEditor.questions.add')}</span>
                                     </button>
                                 </div>
 
                                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                                     <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
-                                        <div className="space-y-6 w-full">
+                                        <div className="space-y-4 sm:space-y-6 w-full">
                                             {fields.map((field, index) => (
                                                 <SortableQuestionItem key={field.id} id={field.id}>
-                                                    <div className="flex items-center justify-between mb-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-800 font-bold text-sm">
+                                                    <div className="flex items-center justify-between mb-3 sm:mb-4">
+                                                        <div className="flex items-center gap-2 sm:gap-3">
+                                                            <span className="flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-indigo-100 text-indigo-800 font-bold text-xs sm:text-sm">
                                                                 {index + 1}
                                                             </span>
-                                                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Question {index + 1}</span>
+                                                            <span className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Q{index + 1}</span>
                                                         </div>
                                                         <button
                                                             type="button"
@@ -980,12 +980,12 @@ export default function ExamEditor() {
                                                         </button>
                                                     </div>
 
-                                                    <div className="space-y-4">
-                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <div className="space-y-3 sm:space-y-4">
+                                                        <div className="grid grid-cols-2 gap-2 sm:gap-4">
                                                             <div>
-                                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.type')}</label>
+                                                                <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.type')}</label>
                                                                 <select
-                                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs sm:text-sm p-2 border"
                                                                     {...register(`questions.${index}.type`)}
                                                                 >
                                                                     <option value="multiple_choice">{t('examEditor.questions.types.multipleChoice')}</option>
@@ -1003,11 +1003,11 @@ export default function ExamEditor() {
                                                                 </select>
                                                             </div>
                                                             <div>
-                                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.points')}</label>
+                                                                <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{t('examEditor.questions.points')}</label>
                                                                 <input
                                                                     type="number"
                                                                     min="1"
-                                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs sm:text-sm p-2 border"
                                                                     {...register(`questions.${index}.points`, { valueAsNumber: true })}
                                                                 />
                                                             </div>
@@ -1060,22 +1060,22 @@ export default function ExamEditor() {
                                                                     return (
                                                                         <>
                                                                             {opts.map((_optValue: string, optionIndex: number) => (
-                                                                                <div key={optionIndex} className="flex items-center space-x-2">
+                                                                                <div key={optionIndex} className="flex items-center gap-1.5 sm:gap-2">
                                                                                     <input
                                                                                         type="radio"
                                                                                         value={opts[optionIndex] || ''}
                                                                                         checked={corr === (opts[optionIndex] || '') && (opts[optionIndex] || '') !== ''}
                                                                                         onChange={() => setValue(`questions.${index}.correct_answer`, opts[optionIndex] || '')}
-                                                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 flex-shrink-0"
                                                                                     />
                                                                                     <input
                                                                                         type="text"
                                                                                         required
                                                                                         placeholder={`Option ${optionIndex + 1}`}
-                                                                                        className="ml-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                                                                        className="block flex-1 min-w-0 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs sm:text-sm p-2 border"
                                                                                         {...register(`questions.${index}.options.${optionIndex}`)}
                                                                                     />
-                                                                                    <button type="button" className="ml-2 text-sm text-red-600" onClick={() => {
+                                                                                    <button type="button" className="text-xs text-red-600 flex-shrink-0 p-1" onClick={() => {
                                                                                         const arr = [...(questionsWatch?.[index]?.options ?? [])];
                                                                                         const removed = arr.splice(optionIndex, 1);
                                                                                         setValue(`questions.${index}.options`, arr);
@@ -1186,15 +1186,15 @@ export default function ExamEditor() {
                                                         {questionsWatch?.[index]?.type === 'kids_picture_pairing' && (
                                                             <div className="space-y-2">
                                                                 <label className="block text-sm font-medium text-purple-700">Left & Right Items (pairs)</label>
-                                                                <div className="grid grid-cols-2 gap-4">
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                                     <div>
                                                                         <p className="text-xs font-bold text-purple-600 mb-2">Left Column</p>
                                                                         {Array.from({ length: 4 }).map((_, i: number) => (
-                                                                            <div key={`left_${i}`} className="flex items-center gap-2 mb-2">
+                                                                            <div key={`left_${i}`} className="flex items-center gap-1.5 sm:gap-2 mb-2">
                                                                                 <input
                                                                                     type="text"
-                                                                                    placeholder={`Item ${i + 1} (URL or text)`}
-                                                                                    className="w-full rounded-md border p-2"
+                                                                                    placeholder={`Item ${i + 1}`}
+                                                                                    className="flex-1 min-w-0 rounded-md border p-2 text-xs sm:text-sm"
                                                                                     {...register(`questions.${index}.options.${i}`)}
                                                                                 />
                                                                                 <ImageUploader
@@ -1208,11 +1208,11 @@ export default function ExamEditor() {
                                                                     <div>
                                                                         <p className="text-xs font-bold text-purple-600 mb-2">Right Column</p>
                                                                         {Array.from({ length: 4 }).map((_, i: number) => (
-                                                                            <div key={`right_${i}`} className="flex items-center gap-2 mb-2">
+                                                                            <div key={`right_${i}`} className="flex items-center gap-1.5 sm:gap-2 mb-2">
                                                                                 <input
                                                                                     type="text"
-                                                                                    placeholder={`Match ${i + 1} (URL or text)`}
-                                                                                    className="w-full rounded-md border p-2"
+                                                                                    placeholder={`Match ${i + 1}`}
+                                                                                    className="flex-1 min-w-0 rounded-md border p-2 text-xs sm:text-sm"
                                                                                     {...register(`questions.${index}.options.${i + 4}`)}
                                                                                 />
                                                                                 <ImageUploader
@@ -1232,7 +1232,7 @@ export default function ExamEditor() {
                                                             <div className="space-y-2">
                                                                 <label className="block text-sm font-medium text-purple-700">Story Cards (3 items in order)</label>
                                                                 {Array.from({ length: 3 }).map((_, i: number) => (
-                                                                    <div key={i} className="flex items-center gap-2">
+                                                                    <div key={i} className="flex items-center gap-1.5 sm:gap-2">
                                                                         <input
                                                                             type="text"
                                                                             placeholder={`Card ${i + 1} (text or image URL)`}

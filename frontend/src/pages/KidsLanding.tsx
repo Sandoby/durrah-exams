@@ -1,7 +1,7 @@
 ﻿import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Sparkles, Ticket, Lock, Smile, BookOpenCheck, Trophy } from 'lucide-react';
+import { Sparkles, Ticket, Lock, Rocket, Star, Zap, Heart, Trophy, Gamepad2 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
 
@@ -77,117 +77,171 @@ export default function KidsLanding() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top header with logo and nav style chips */}
-      <header className="bg-white border-b">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Logo size="md" />
-            <span className="inline-flex items-center gap-2 text-xs font-semibold text-purple-700 bg-purple-50 px-3 py-1 rounded-full">
-              <Sparkles className="h-3 w-3" /> Kids Mode
-            </span>
+    <div className="min-h-screen bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 left-10 w-20 h-20 bg-yellow-300/30 rounded-full blur-2xl animate-pulse" />
+        <div className="absolute top-1/4 right-10 w-32 h-32 bg-pink-300/30 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '300ms' }} />
+        <div className="absolute bottom-1/4 left-1/4 w-24 h-24 bg-cyan-300/30 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '500ms' }} />
+        <div className="absolute bottom-20 right-1/4 w-28 h-28 bg-green-300/30 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '700ms' }} />
+        
+        {/* Floating stars */}
+        <Star className="absolute top-20 left-1/4 h-6 w-6 text-yellow-300/50 animate-bounce" style={{ animationDelay: '0.2s' }} />
+        <Star className="absolute top-40 right-1/3 h-4 w-4 text-yellow-300/50 animate-bounce" style={{ animationDelay: '0.5s' }} />
+        <Star className="absolute bottom-32 left-1/3 h-5 w-5 text-yellow-300/50 animate-bounce" style={{ animationDelay: '0.8s' }} />
+        <Sparkles className="absolute top-1/3 left-10 h-5 w-5 text-white/40 animate-pulse" />
+        <Sparkles className="absolute bottom-40 right-10 h-6 w-6 text-white/40 animate-pulse" style={{ animationDelay: '500ms' }} />
+      </div>
+
+      {/* Header */}
+      <header className="relative z-10 px-4 py-4 sm:py-6">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2">
+              <Logo size="sm" />
+            </div>
+            <div className="hidden sm:flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5">
+              <Sparkles className="h-4 w-4 text-yellow-300" />
+              <span className="text-xs font-bold text-white">Kids Zone</span>
+            </div>
           </div>
-          <div className="hidden sm:flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-500">Safe • Fun • Learning</span>
+          <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5">
+            <Trophy className="h-4 w-4 text-yellow-300" />
+            <span className="text-xs font-medium text-white hidden sm:inline">Fun Learning</span>
           </div>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="bg-white">
-        <div className="max-w-6xl mx-auto px-4 py-10">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-gray-900">
-                Unlock the Secrets of <span className="text-purple-700">Fun Education</span>
-              </h1>
-              <p className="mt-4 text-gray-600 text-sm sm:text-base max-w-md">
-                From bubble math to science crafts and karaoke, explore fun skills-based
-                lessons tailored for smart kids.
-              </p>
+      {/* Main Content */}
+      <main className="relative z-10 px-4 pb-8">
+        <div className="max-w-lg mx-auto">
+          {/* Hero Text */}
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-4">
+              <Gamepad2 className="h-5 w-5 text-yellow-300" />
+              <span className="text-sm font-bold text-white">Ready to Play?</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white drop-shadow-lg mb-3">
+              Let's Start the
+              <span className="block bg-gradient-to-r from-yellow-300 via-pink-300 to-cyan-300 bg-clip-text text-transparent">
+                Quiz Adventure!
+              </span>
+            </h1>
+            <p className="text-white/80 text-sm sm:text-base max-w-sm mx-auto">
+              Enter your nickname and the secret code from your teacher
+            </p>
+          </div>
 
-              {/* Feature cards inline like reference */}
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="rounded-2xl p-4 shadow-sm bg-orange-50 border border-orange-200">
-                  <Smile className="h-5 w-5 text-orange-600" />
-                  <p className="mt-2 text-sm font-bold text-orange-700">Learning Astronomy</p>
-                  <p className="text-xs text-orange-700/80">Discover stars and space</p>
-                </div>
-                <div className="rounded-2xl p-4 shadow-sm bg-yellow-50 border border-yellow-200">
-                  <BookOpenCheck className="h-5 w-5 text-yellow-600" />
-                  <p className="mt-2 text-sm font-bold text-yellow-700">Museum Visit</p>
-                  <p className="text-xs text-yellow-700/80">Explore history together</p>
-                </div>
-                <div className="rounded-2xl p-4 shadow-sm bg-purple-50 border border-purple-200">
-                  <Trophy className="h-5 w-5 text-purple-600" />
-                  <p className="mt-2 text-sm font-bold text-purple-700">Camping & Singing</p>
-                  <p className="text-xs text-purple-700/80">Team fun activities</p>
-                </div>
+          {/* Entry Card */}
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-5 sm:p-8 border-4 border-white/50">
+            {/* Fun decorative elements */}
+            <div className="flex justify-center gap-3 mb-6">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg transform -rotate-6 hover:rotate-0 transition-transform">
+                <Rocket className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+              </div>
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-pink-400 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg transform rotate-6 hover:rotate-0 transition-transform">
+                <Heart className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+              </div>
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg transform -rotate-3 hover:rotate-0 transition-transform">
+                <Zap className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
             </div>
 
-            {/* Entry Form Card */}
-            <div className="rounded-3xl border border-gray-200 bg-white shadow-sm p-6 md:p-8">
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-2">Your Nickname</label>
+            <div className="space-y-4 sm:space-y-5">
+              {/* Nickname Input */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <span className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 text-xs">👤</span>
+                  Your Super Name
+                </label>
+                <input
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  className="w-full rounded-2xl border-2 border-purple-200 px-4 py-3.5 sm:py-4 text-gray-900 text-base sm:text-lg font-medium placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all"
+                  placeholder="e.g., SuperStar"
+                />
+              </div>
+
+              {/* Code Input */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <span className="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 text-xs">🎟️</span>
+                  Secret Code
+                </label>
+                <div className="relative">
+                  <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
                   <input
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
-                    placeholder="e.g., SuperTiger"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    className="w-full rounded-2xl border-2 border-purple-200 pl-12 sm:pl-14 pr-4 py-3.5 sm:py-4 text-gray-900 text-base sm:text-lg font-bold tracking-widest uppercase placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all"
+                    placeholder="KID-ABC123"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-2">Quiz Code</label>
-                  <div className="relative">
-                    <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-600" />
-                    <input
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      className="w-full rounded-xl border border-gray-300 pl-10 pr-4 py-3 text-gray-900 placeholder-gray-400 tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-purple-400"
-                      placeholder="KID-ABC123"
-                    />
+                {normalizedCode && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-xs text-purple-600 font-semibold">Code:</span>
+                    <span className="font-mono text-sm bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-3 py-1 rounded-lg font-bold">
+                      {normalizedCode}
+                    </span>
                   </div>
-                  {normalizedCode && (
-                    <p className="mt-2 text-xs text-purple-700 font-semibold">
-                      Code: <span className="font-mono bg-purple-100 px-2 py-1 rounded">{normalizedCode}</span>
-                    </p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleEnter}
-                  disabled={isLoading || !nickname.trim() || !normalizedCode}
-                  className="w-full rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? 'Starting...' : 'Start Quiz'}
-                </button>
-                <p className="text-xs text-gray-500"><Lock className="inline h-3 w-3 mr-1" /> Ask your teacher for the code</p>
+                )}
+              </div>
+
+              {/* Start Button */}
+              <button
+                type="button"
+                onClick={handleEnter}
+                disabled={isLoading || !nickname.trim() || !normalizedCode}
+                className="w-full rounded-2xl bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white font-black text-lg sm:text-xl py-4 sm:py-5 shadow-xl shadow-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Getting Ready...</span>
+                  </>
+                ) : (
+                  <>
+                    <Rocket className="h-6 w-6" />
+                    <span>Start Adventure!</span>
+                  </>
+                )}
+              </button>
+
+              {/* Help text */}
+              <div className="flex items-center justify-center gap-2 text-gray-500">
+                <Lock className="h-4 w-4" />
+                <span className="text-xs sm:text-sm">Ask your teacher for the secret code</span>
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Secondary content like reference */}
-      <section className="bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          <h2 className="text-xl font-black text-gray-900">Fun Games & Activities for Smart Kids</h2>
-          <ul className="mt-3 grid sm:grid-cols-2 gap-3 text-sm text-gray-700">
-            <li className="rounded-xl bg-white border border-gray-200 p-4">Math puzzles, creative writing, and science crafts</li>
-            <li className="rounded-xl bg-white border border-gray-200 p-4">Reading class, vocabulary games, and pronunciation</li>
-            <li className="rounded-xl bg-white border border-gray-200 p-4">Team activities, music & rhythm, and memory games</li>
-            <li className="rounded-xl bg-white border border-gray-200 p-4">Safe, engaging, and tutor-approved content</li>
-          </ul>
+          {/* Fun Facts Cards */}
+          <div className="mt-6 sm:mt-8 grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform">
+              <div className="text-2xl sm:text-3xl mb-1">🎯</div>
+              <p className="text-white font-bold text-xs sm:text-sm">Fun Quizzes</p>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform">
+              <div className="text-2xl sm:text-3xl mb-1">🏆</div>
+              <p className="text-white font-bold text-xs sm:text-sm">Win Rewards</p>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform">
+              <div className="text-2xl sm:text-3xl mb-1">🎨</div>
+              <p className="text-white font-bold text-xs sm:text-sm">Cool Games</p>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform">
+              <div className="text-2xl sm:text-3xl mb-1">⭐</div>
+              <p className="text-white font-bold text-xs sm:text-sm">Be a Star</p>
+            </div>
+          </div>
         </div>
-      </section>
+      </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t">
-        <div className="max-w-6xl mx-auto px-4 py-6 text-center text-xs text-gray-500">
-          © {new Date().getFullYear()} Durrah. Fun education for kids.
-        </div>
+      <footer className="relative z-10 px-4 py-4 sm:py-6 text-center">
+        <p className="text-white/60 text-xs sm:text-sm">
+          © {new Date().getFullYear()} Durrah • Safe & Fun Learning
+        </p>
       </footer>
     </div>
   );
