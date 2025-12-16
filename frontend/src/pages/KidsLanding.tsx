@@ -113,7 +113,7 @@ export default function KidsLanding() {
         
         {/* Floating Illustrations */}
                 <img 
-                  src="/kids/image-1765886162298.png" 
+                  src="/kids/image-1765886149420.png" 
                   alt="" 
                   className="absolute left-4 sm:left-16 top-24 w-20 sm:w-28 md:w-32 animate-float drop-shadow-xl hidden md:block"
                   style={{ animationDelay: '0.7s' }}
