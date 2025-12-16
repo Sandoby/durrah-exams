@@ -1,7 +1,7 @@
 ﻿import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Sparkles, Ticket, Lock, Rocket, Star, Trophy, Gamepad2 } from 'lucide-react';
+import { Sparkles, Ticket, Lock, Rocket, Trophy, Gamepad2 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
 
@@ -127,35 +127,36 @@ export default function KidsLanding() {
           />
         ))}
         
-        {/* Floating Space Elements */}
+        {/* Floating Illustrations */}
         <img 
-          src="/kids/astronaut-balloon.png" 
+          src="/kids/image-1765886149420.png" 
           alt="" 
-          className="absolute left-4 sm:left-10 top-20 w-24 sm:w-32 md:w-40 animate-float opacity-90 drop-shadow-2xl"
+          className="absolute left-2 sm:left-8 top-20 w-28 sm:w-36 md:w-44 animate-float opacity-90 drop-shadow-2xl"
           style={{ animationDelay: '0s' }}
         />
         <img 
-          src="/kids/moon.png" 
+          src="/kids/image-1765886162298.png" 
           alt="" 
-          className="absolute right-4 sm:right-10 top-16 w-16 sm:w-20 md:w-28 animate-float-reverse opacity-80 drop-shadow-xl"
+          className="absolute right-2 sm:right-8 top-16 w-20 sm:w-28 md:w-36 animate-float-reverse opacity-90 drop-shadow-xl"
           style={{ animationDelay: '1s' }}
         />
         <img 
-          src="/kids/rocket.png" 
+          src="/kids/image-1765886176188.png" 
           alt="" 
-          className="absolute right-10 sm:right-20 bottom-32 w-16 sm:w-20 md:w-24 animate-rocket opacity-90 drop-shadow-2xl hidden sm:block"
+          className="absolute right-4 sm:right-16 bottom-28 w-24 sm:w-32 md:w-40 animate-float opacity-90 drop-shadow-2xl hidden sm:block"
+          style={{ animationDelay: '0.5s' }}
         />
         <img 
-          src="/kids/planet-blue.png" 
+          src="/kids/image-1765886185739.png" 
           alt="" 
-          className="absolute left-4 sm:left-20 bottom-20 w-14 sm:w-20 md:w-24 animate-float opacity-70 drop-shadow-xl hidden md:block"
+          className="absolute left-4 sm:left-16 bottom-24 w-24 sm:w-32 md:w-40 animate-float-reverse opacity-85 drop-shadow-xl hidden md:block"
           style={{ animationDelay: '2s' }}
         />
         <img 
-          src="/kids/astronaut-saturn.png" 
+          src="/kids/image-1765886195936.png" 
           alt="" 
-          className="absolute right-2 sm:right-10 bottom-1/3 w-20 sm:w-28 md:w-36 animate-float-reverse opacity-85 drop-shadow-2xl hidden lg:block"
-          style={{ animationDelay: '0.5s' }}
+          className="absolute right-1/4 top-1/4 w-20 sm:w-28 md:w-32 animate-float opacity-80 drop-shadow-2xl hidden lg:block"
+          style={{ animationDelay: '1.5s' }}
         />
       </div>
 
@@ -181,12 +182,12 @@ export default function KidsLanding() {
       {/* Main Content */}
       <main className="relative z-10 px-4 pb-8">
         <div className="max-w-md mx-auto">
-          {/* Hero Section with Astronaut */}
+          {/* Hero Section with Illustration */}
           <div className="text-center mb-6">
             <img 
-              src="/kids/astronaut-planets.png" 
-              alt="Astronaut" 
-              className="w-32 sm:w-40 md:w-48 mx-auto mb-4 drop-shadow-2xl animate-float"
+              src="/kids/image-1765886205296.png" 
+              alt="Kids Learning" 
+              className="w-36 sm:w-44 md:w-52 mx-auto mb-4 drop-shadow-2xl animate-float"
             />
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500/40 to-purple-500/40 backdrop-blur-md rounded-full px-5 py-2.5 mb-4 border border-white/20">
               <Gamepad2 className="h-5 w-5 text-cyan-300" />
@@ -211,9 +212,9 @@ export default function KidsLanding() {
             
             {/* Corner decoration */}
             <img 
-              src="/kids/rocket.png" 
+              src="/kids/image-1765886214428.png" 
               alt="" 
-              className="absolute -top-4 -right-4 w-14 h-14 sm:w-16 sm:h-16 rotate-45 opacity-80"
+              className="absolute -top-6 -right-6 w-16 h-16 sm:w-20 sm:h-20 opacity-90"
             />
 
             <div className="relative space-y-4 sm:space-y-5">
@@ -291,26 +292,26 @@ export default function KidsLanding() {
           {/* Feature Cards */}
           <div className="mt-6 sm:mt-8 grid grid-cols-2 gap-3 sm:gap-4">
             <div className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform border border-cyan-400/20 group">
-              <div className="w-14 h-14 mx-auto mb-2 relative">
-                <img src="/kids/astronaut-rocket.png" alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+              <div className="w-16 h-16 mx-auto mb-2 relative">
+                <img src="/kids/image-1765886629120.png" alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-white font-bold text-xs sm:text-sm">Fun Quizzes</p>
             </div>
             <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform border border-amber-400/20 group">
-              <div className="w-14 h-14 mx-auto mb-2 relative">
-                <Trophy className="w-10 h-10 mx-auto text-amber-400 group-hover:scale-110 transition-transform" />
+              <div className="w-16 h-16 mx-auto mb-2 relative">
+                <img src="/kids/image-1765886635294.png" alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-white font-bold text-xs sm:text-sm">Win Rewards</p>
             </div>
             <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform border border-purple-400/20 group">
-              <div className="w-14 h-14 mx-auto mb-2 relative">
-                <Gamepad2 className="w-10 h-10 mx-auto text-purple-400 group-hover:scale-110 transition-transform" />
+              <div className="w-16 h-16 mx-auto mb-2 relative">
+                <img src="/kids/image-1765886645584.png" alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-white font-bold text-xs sm:text-sm">Cool Games</p>
             </div>
             <div className="bg-gradient-to-br from-rose-500/20 to-red-500/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform border border-rose-400/20 group">
-              <div className="w-14 h-14 mx-auto mb-2 relative">
-                <Star className="w-10 h-10 mx-auto text-rose-400 fill-rose-400 group-hover:scale-110 transition-transform" />
+              <div className="w-16 h-16 mx-auto mb-2 relative">
+                <img src="/kids/image-1765886652001.png" alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-white font-bold text-xs sm:text-sm">Be a Star</p>
             </div>
