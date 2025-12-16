@@ -111,17 +111,17 @@ export default function KidsLanding() {
         {/* Sun glow */}
         <div className="absolute -top-20 right-1/4 w-60 h-60 bg-yellow-300/40 rounded-full blur-3xl" />
         
-        {/* Floating Illustrations - hidden on very small screens, smaller on mobile */}
+        {/* Floating Illustrations */}
         <img 
           src="/kids/image-1765886149420.png" 
           alt="" 
-          className="absolute left-1 top-16 w-16 sm:w-28 md:w-36 lg:w-44 animate-float drop-shadow-xl opacity-70 sm:opacity-100 hidden xs:block sm:left-4 md:left-8"
+          className="absolute left-1 sm:left-4 md:left-8 top-16 w-20 sm:w-28 md:w-36 lg:w-44 animate-float drop-shadow-xl opacity-60 sm:opacity-100"
           style={{ animationDelay: '0s' }}
         />
         <img 
           src="/kids/image-1765886162298.png" 
           alt="" 
-          className="absolute right-1 top-14 w-14 sm:w-24 md:w-32 lg:w-36 animate-float-reverse drop-shadow-xl opacity-70 sm:opacity-100 hidden xs:block sm:right-4 md:right-8"
+          className="absolute right-1 sm:right-4 md:right-8 top-14 w-16 sm:w-24 md:w-32 lg:w-36 animate-float-reverse drop-shadow-xl opacity-60 sm:opacity-100"
           style={{ animationDelay: '1s' }}
         />
         <img 
