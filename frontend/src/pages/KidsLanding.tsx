@@ -147,14 +147,9 @@ export default function KidsLanding() {
       {/* Header */}
       <header className="relative z-10 px-4 py-4 sm:py-6">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="bg-white/90 backdrop-blur-md rounded-xl p-2 shadow-lg border border-white/50">
-              <Logo size="sm" />
-            </div>
-            <div className="hidden sm:flex items-center gap-2 bg-white/80 backdrop-blur-md rounded-full px-4 py-2 shadow-md border border-white/50">
-              <Sparkles className="h-4 w-4 text-amber-500" />
-              <span className="text-sm font-bold text-sky-700">Kids Quiz</span>
-            </div>
+          <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md rounded-full px-4 py-2 shadow-md border border-white/50">
+            <Sparkles className="h-4 w-4 text-amber-500" />
+            <span className="text-sm font-bold text-sky-700">Kids Quiz</span>
           </div>
           <div className="flex items-center gap-2 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full px-4 py-2 shadow-lg">
             <Trophy className="h-4 w-4 text-white" />
@@ -299,10 +294,11 @@ export default function KidsLanding() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 px-4 py-4 sm:py-6 text-center">
-        <p className="text-sky-600/60 text-xs sm:text-sm">
-          © {new Date().getFullYear()} Durrah • Safe & Fun Learning
-        </p>
+      <footer className="relative z-10 px-4 py-6 sm:py-8 text-center">
+        <div className="inline-flex items-center gap-2 bg-white/70 backdrop-blur-md rounded-full px-5 py-2.5 shadow-md border border-white/50">
+          <span className="text-xs sm:text-sm text-sky-600">Powered by</span>
+          <Logo size="sm" />
+        </div>
       </footer>
     </div>
   );
