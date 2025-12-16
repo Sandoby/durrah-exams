@@ -295,8 +295,8 @@ export default function KidsLanding() {
 
       {/* Footer */}
       <footer className="relative z-10 px-4 py-6 sm:py-8 text-center">
-        <div className="inline-flex items-center gap-2 bg-white/70 backdrop-blur-md rounded-full px-5 py-2.5 shadow-md border border-white/50">
-          <span className="text-xs sm:text-sm text-sky-600">Powered by</span>
+        <div className="inline-flex flex-row-reverse items-center gap-2 bg-white/70 backdrop-blur-md rounded-full px-5 py-2.5 shadow-md border border-white/50">
+          <span className="text-xs sm:text-sm text-sky-600 font-medium">Powered by</span>
           <Logo size="sm" />
         </div>
       </footer>
