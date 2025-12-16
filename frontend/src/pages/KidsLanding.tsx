@@ -74,7 +74,7 @@ export default function KidsLanding() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-400 via-sky-300 to-amber-100 overflow-hidden relative">
+    <div dir="ltr" className="min-h-screen bg-gradient-to-b from-sky-400 via-sky-300 to-amber-100 overflow-hidden relative">
       {/* Custom animations */}
       <style>{`
         @keyframes float {
@@ -264,30 +264,37 @@ export default function KidsLanding() {
           </div>
 
           {/* Feature Cards */}
-          <div className="mt-6 sm:mt-8 grid grid-cols-2 gap-3 sm:gap-4">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform shadow-lg border-2 border-sky-200 group">
-              <div className="w-16 h-16 mx-auto mb-2 relative">
-                <img src="/kids/image-1765886629120.png" alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+          <div className="mt-8 sm:mt-10">
+            <h2 className="text-center text-lg sm:text-xl font-bold text-sky-800 mb-4">✨ What's Waiting For You ✨</h2>
+            <div className="grid grid-cols-2 gap-4 sm:gap-5">
+              <div className="bg-gradient-to-br from-sky-50 to-sky-100 rounded-3xl p-5 text-center transform hover:scale-105 hover:-rotate-1 transition-all duration-300 shadow-lg border-2 border-sky-300 group cursor-pointer">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 relative">
+                  <div className="absolute inset-0 bg-sky-400/20 rounded-full blur-xl group-hover:bg-sky-400/40 transition-all" />
+                  <img src="/kids/image-1765886629120.png" alt="" className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform drop-shadow-lg" />
+                </div>
+                <p className="text-sky-700 font-black text-sm sm:text-base">🎯 Fun Quizzes</p>
               </div>
-              <p className="text-sky-700 font-bold text-xs sm:text-sm">Fun Quizzes</p>
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform shadow-lg border-2 border-amber-200 group">
-              <div className="w-16 h-16 mx-auto mb-2 relative">
-                <img src="/kids/image-1765886635294.png" alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+              <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-3xl p-5 text-center transform hover:scale-105 hover:rotate-1 transition-all duration-300 shadow-lg border-2 border-amber-300 group cursor-pointer">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 relative">
+                  <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-xl group-hover:bg-amber-400/40 transition-all" />
+                  <img src="/kids/image-1765886635294.png" alt="" className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform drop-shadow-lg" />
+                </div>
+                <p className="text-amber-700 font-black text-sm sm:text-base">🏆 Win Rewards</p>
               </div>
-              <p className="text-amber-700 font-bold text-xs sm:text-sm">Win Rewards</p>
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform shadow-lg border-2 border-pink-200 group">
-              <div className="w-16 h-16 mx-auto mb-2 relative">
-                <img src="/kids/image-1765886645584.png" alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+              <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-3xl p-5 text-center transform hover:scale-105 hover:rotate-1 transition-all duration-300 shadow-lg border-2 border-pink-300 group cursor-pointer">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 relative">
+                  <div className="absolute inset-0 bg-pink-400/20 rounded-full blur-xl group-hover:bg-pink-400/40 transition-all" />
+                  <img src="/kids/image-1765886645584.png" alt="" className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform drop-shadow-lg" />
+                </div>
+                <p className="text-pink-700 font-black text-sm sm:text-base">🎮 Cool Games</p>
               </div>
-              <p className="text-pink-700 font-bold text-xs sm:text-sm">Cool Games</p>
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform shadow-lg border-2 border-green-200 group">
-              <div className="w-16 h-16 mx-auto mb-2 relative">
-                <img src="/kids/image-1765886652001.png" alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-3xl p-5 text-center transform hover:scale-105 hover:-rotate-1 transition-all duration-300 shadow-lg border-2 border-emerald-300 group cursor-pointer">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 relative">
+                  <div className="absolute inset-0 bg-emerald-400/20 rounded-full blur-xl group-hover:bg-emerald-400/40 transition-all" />
+                  <img src="/kids/image-1765886652001.png" alt="" className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform drop-shadow-lg" />
+                </div>
+                <p className="text-emerald-700 font-black text-sm sm:text-base">⭐ Be a Star</p>
               </div>
-              <p className="text-green-700 font-bold text-xs sm:text-sm">Be a Star</p>
             </div>
           </div>
         </div>
