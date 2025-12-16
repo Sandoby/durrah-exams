@@ -433,4 +433,39 @@
             "submitted": "Exam submitted successfully!"
         }
     }
+    ,
+    "kids": {
+        "seo": {
+            "title": "Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah",
+            "description": "Start your quiz adventure! Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors.",
+            "keywords": "kids quiz, fun quizzes for kids, safe kids exams, anti cheating quiz, child mode, secure quiz platform, learning for children"
+        },
+        "header": {
+            "title": "Kids Quiz",
+            "fun": "Fun Learning"
+        },
+        "hero": {
+            "ready": "Ready to Play?",
+            "title": "Let's Start the",
+            "adventure": "Quiz Adventure!",
+            "desc": "Enter your name and the secret code to begin your fun journey!"
+        },
+        "form": {
+            "nickname": "Your Super Name",
+            "nicknamePlaceholder": "e.g., SuperStar",
+            "code": "Secret Code",
+            "codePlaceholder": "KID-ABC123",
+            "codeLabel": "Code:",
+            "loading": "Getting Ready...",
+            "start": "Start Adventure!",
+            "help": "Ask your teacher for the secret code"
+        },
+        "features": {
+            "title": "✨ What's Waiting For You ✨",
+            "fun": "🎯 Fun Quizzes",
+            "rewards": "🏆 Win Rewards",
+            "games": "🎮 Cool Games",
+            "star": "⭐ Be a Star"
+        }
+    }
 }

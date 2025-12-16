@@ -427,4 +427,39 @@
             "submitted": "Examen soumis avec succès !"
         }
     }
+    ,
+    "kids": {
+        "seo": {
+            "title": "Aventure Quiz Enfants | Sûr, Amusant, Anti-Triche | Durrah",
+            "description": "Commence ton aventure quiz ! Quiz en ligne sûr, amusant et sécurisé pour les enfants avec anti-triche et mode enfant. Propulsé par Durrah for Tutors.",
+            "keywords": "quiz enfants, quiz amusants, quiz sûrs, anti-triche, mode enfant, plateforme quiz sécurisée, apprentissage pour enfants"
+        },
+        "header": {
+            "title": "Quiz Enfants",
+            "fun": "Apprentissage Amusant"
+        },
+        "hero": {
+            "ready": "Prêt à jouer ?",
+            "title": "Commençons",
+            "adventure": "l'Aventure Quiz !",
+            "desc": "Entre ton nom et le code secret pour commencer ton aventure amusante !"
+        },
+        "form": {
+            "nickname": "Ton super nom",
+            "nicknamePlaceholder": "ex : SuperStar",
+            "code": "Code secret",
+            "codePlaceholder": "KID-ABC123",
+            "codeLabel": "Code :",
+            "loading": "Préparation...",
+            "start": "Commencer l'aventure !",
+            "help": "Demande le code secret à ton enseignant"
+        },
+        "features": {
+            "title": "✨ Ce qui t'attend ✨",
+            "fun": "🎯 Quiz amusants",
+            "rewards": "🏆 Gagne des récompenses",
+            "games": "🎮 Jeux sympas",
+            "star": "⭐ Deviens une star"
+        }
+    }
 }
