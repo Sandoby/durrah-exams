@@ -1,4 +1,6 @@
 ﻿import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -9,6 +11,7 @@ import { supabase } from '../lib/supabase';
 type LeaderboardVisibility = 'hidden' | 'after_submit' | 'always';
 
 export default function KidsLanding() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [nickname, setNickname] = useState('');
   const [code, setCode] = useState('');
@@ -74,21 +77,22 @@ export default function KidsLanding() {
     }
   };
 
+  const isRTL = i18n.language === 'ar';
   return (
-    <div dir="ltr" className="min-h-screen bg-gradient-to-b from-sky-400 via-sky-300 to-amber-100 overflow-hidden relative">
+    <div dir={isRTL ? 'rtl' : 'ltr'} className="min-h-screen bg-gradient-to-b from-sky-400 via-sky-300 to-amber-100 overflow-hidden relative">
       {/* SEO Helmet */}
       <Helmet>
-        <title>Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah</title>
-        <meta name="description" content="Start your quiz adventure! Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors." />
-        <meta name="keywords" content="kids quiz, fun quizzes for kids, safe kids exams, anti cheating quiz, child mode, secure quiz platform, learning for children" />
-        <meta property="og:title" content="Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah" />
-        <meta property="og:description" content="Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors." />
+        <title>{t('kids.seo.title', 'Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah')}</title>
+        <meta name="description" content={t('kids.seo.description', 'Start your quiz adventure! Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors.')} />
+        <meta name="keywords" content={t('kids.seo.keywords', 'kids quiz, fun quizzes for kids, safe kids exams, anti cheating quiz, child mode, secure quiz platform, learning for children')} />
+        <meta property="og:title" content={t('kids.seo.title', 'Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah')} />
+        <meta property="og:description" content={t('kids.seo.description', 'Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors.')} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://tutors.durrahsystem.tech/kids" />
         <meta property="og:image" content="https://tutors.durrahsystem.tech/illustrations/og-kids.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah" />
-        <meta name="twitter:description" content="Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors." />
+        <meta name="twitter:title" content={t('kids.seo.title', 'Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah')} />
+        <meta name="twitter:description" content={t('kids.seo.description', 'Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors.')} />
         <meta name="twitter:image" content="https://tutors.durrahsystem.tech/illustrations/og-kids.png" />
         <link rel="canonical" href="https://tutors.durrahsystem.tech/kids" />
         <script type="application/ld+json">{`
@@ -98,7 +102,7 @@ export default function KidsLanding() {
             "name": "Kids Quiz Adventure",
             "url": "https://tutors.durrahsystem.tech/kids",
             "description": "Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors.",
-            "inLanguage": "en",
+            "inLanguage": "${i18n.language}",
             "publisher": {
               "@type": "Organization",
               "name": "Durrah for Tutors"
@@ -180,12 +184,13 @@ export default function KidsLanding() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-1.5 sm:gap-2 bg-white/80 backdrop-blur-md rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shadow-md border border-white/50">
             <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500" />
-            <span className="text-xs sm:text-sm font-bold text-sky-700">Kids Quiz</span>
+            <span className="text-xs sm:text-sm font-bold text-sky-700">{t('kids.header.title', 'Kids Quiz')}</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shadow-lg">
             <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
-            <span className="text-xs sm:text-sm font-bold text-white">Fun Learning</span>
+            <span className="text-xs sm:text-sm font-bold text-white">{t('kids.header.fun', 'Fun Learning')}</span>
           </div>
+          <div className="ml-2"><LanguageSwitcher /></div>
         </div>
       </header>
 
@@ -196,16 +201,16 @@ export default function KidsLanding() {
           <div className="text-center mb-4 sm:mb-6">
             <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-white/80 backdrop-blur-md rounded-full px-3 sm:px-5 py-2 sm:py-2.5 mb-3 sm:mb-4 shadow-md border border-white/50">
               <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5 text-sky-500" />
-              <span className="text-xs sm:text-sm font-bold text-sky-700">Ready to Play?</span>
+              <span className="text-xs sm:text-sm font-bold text-sky-700">{t('kids.hero.ready', 'Ready to Play?')}</span>
             </div>
             <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-sky-800 drop-shadow-sm mb-2 sm:mb-3 leading-tight">
-              Let's Start the
+              {t('kids.hero.title', "Let's Start the")}
               <span className="block bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-                Quiz Adventure!
+                {t('kids.hero.adventure', 'Quiz Adventure!')}
               </span>
             </h1>
             <p className="text-sky-700/80 text-xs sm:text-base max-w-sm mx-auto px-2">
-              Enter your name and the secret code to begin your fun journey!
+              {t('kids.hero.desc', 'Enter your name and the secret code to begin your fun journey!')}
             </p>
           </div>
 
@@ -223,13 +228,13 @@ export default function KidsLanding() {
                   <span className="w-7 h-7 bg-gradient-to-br from-sky-400 to-blue-500 rounded-lg flex items-center justify-center shadow-md">
                     <Sparkles className="h-4 w-4 text-white" />
                   </span>
-                  Your Super Name
+                  {t('kids.form.nickname', 'Your Super Name')}
                 </label>
                 <input
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   className="w-full rounded-2xl border-2 border-sky-200 bg-sky-50/50 px-4 py-3.5 sm:py-4 text-sky-800 text-base sm:text-lg font-medium placeholder-sky-400 focus:outline-none focus:border-sky-400 focus:ring-4 focus:ring-sky-100 transition-all"
-                  placeholder="e.g., SuperStar"
+                  placeholder={t('kids.form.nicknamePlaceholder', 'e.g., SuperStar')}
                 />
               </div>
 
@@ -239,7 +244,7 @@ export default function KidsLanding() {
                   <span className="w-7 h-7 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center shadow-md">
                     <span className="text-sm">🎟️</span>
                   </span>
-                  Secret Code
+                  {t('kids.form.code', 'Secret Code')}
                 </label>
                 <div className="relative">
                   <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 sm:h-6 sm:w-6 text-amber-500" />
@@ -247,12 +252,12 @@ export default function KidsLanding() {
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     className="w-full rounded-2xl border-2 border-amber-200 bg-amber-50/50 pl-12 sm:pl-14 pr-4 py-3.5 sm:py-4 text-sky-800 text-base sm:text-lg font-bold tracking-widest uppercase placeholder-amber-400 focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all"
-                    placeholder="KID-ABC123"
+                    placeholder={t('kids.form.codePlaceholder', 'KID-ABC123')}
                   />
                 </div>
                 {normalizedCode && (
                   <div className="mt-2 flex items-center gap-2">
-                    <span className="text-xs text-sky-600 font-semibold">Code:</span>
+                    <span className="text-xs text-sky-600 font-semibold">{t('kids.form.codeLabel', 'Code:')}</span>
                     <span className="font-mono text-sm bg-gradient-to-r from-sky-100 to-amber-100 text-sky-700 px-3 py-1 rounded-lg font-bold border border-sky-200">
                       {normalizedCode}
                     </span>
@@ -270,12 +275,12 @@ export default function KidsLanding() {
                 {isLoading ? (
                   <>
                     <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Getting Ready...</span>
+                    <span>{t('kids.form.loading', 'Getting Ready...')}</span>
                   </>
                 ) : (
                   <>
                     <Rocket className="h-6 w-6" />
-                    <span>Start Adventure!</span>
+                    <span>{t('kids.form.start', 'Start Adventure!')}</span>
                   </>
                 )}
               </button>
@@ -283,42 +288,42 @@ export default function KidsLanding() {
               {/* Help text */}
               <div className="flex items-center justify-center gap-2 text-sky-500">
                 <Lock className="h-4 w-4" />
-                <span className="text-xs sm:text-sm">Ask your teacher for the secret code</span>
+                <span className="text-xs sm:text-sm">{t('kids.form.help', 'Ask your teacher for the secret code')}</span>
               </div>
             </div>
           </div>
 
           {/* Feature Cards */}
           <div className="mt-6 sm:mt-10">
-            <h2 className="text-center text-base sm:text-xl font-bold text-sky-800 mb-3 sm:mb-4">✨ What's Waiting For You ✨</h2>
+            <h2 className="text-center text-base sm:text-xl font-bold text-sky-800 mb-3 sm:mb-4">{t('kids.features.title', "✨ What's Waiting For You ✨")}</h2>
             <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
               <div className="bg-gradient-to-br from-sky-50 to-sky-100 rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-center transform active:scale-95 sm:hover:scale-105 sm:hover:-rotate-1 transition-all duration-300 shadow-md sm:shadow-lg border-2 border-sky-300 group cursor-pointer">
                 <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-2 sm:mb-3 relative">
                   <div className="absolute inset-0 bg-sky-400/20 rounded-full blur-lg sm:blur-xl group-hover:bg-sky-400/40 transition-all" />
                   <img src="/kids/image-1765886629120.png" alt="" className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform drop-shadow-md sm:drop-shadow-lg" />
                 </div>
-                <p className="text-sky-700 font-bold sm:font-black text-xs sm:text-sm md:text-base">🎯 Fun Quizzes</p>
+                <p className="text-sky-700 font-bold sm:font-black text-xs sm:text-sm md:text-base">{t('kids.features.fun', '🎯 Fun Quizzes')}</p>
               </div>
               <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-center transform active:scale-95 sm:hover:scale-105 sm:hover:rotate-1 transition-all duration-300 shadow-md sm:shadow-lg border-2 border-amber-300 group cursor-pointer">
                 <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-2 sm:mb-3 relative">
                   <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-lg sm:blur-xl group-hover:bg-amber-400/40 transition-all" />
                   <img src="/kids/image-1765886635294.png" alt="" className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform drop-shadow-md sm:drop-shadow-lg" />
                 </div>
-                <p className="text-amber-700 font-bold sm:font-black text-xs sm:text-sm md:text-base">🏆 Win Rewards</p>
+                <p className="text-amber-700 font-bold sm:font-black text-xs sm:text-sm md:text-base">{t('kids.features.rewards', '🏆 Win Rewards')}</p>
               </div>
               <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-center transform active:scale-95 sm:hover:scale-105 sm:hover:rotate-1 transition-all duration-300 shadow-md sm:shadow-lg border-2 border-pink-300 group cursor-pointer">
                 <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-2 sm:mb-3 relative">
                   <div className="absolute inset-0 bg-pink-400/20 rounded-full blur-lg sm:blur-xl group-hover:bg-pink-400/40 transition-all" />
                   <img src="/kids/image-1765886645584.png" alt="" className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform drop-shadow-md sm:drop-shadow-lg" />
                 </div>
-                <p className="text-pink-700 font-bold sm:font-black text-xs sm:text-sm md:text-base">🎮 Cool Games</p>
+                <p className="text-pink-700 font-bold sm:font-black text-xs sm:text-sm md:text-base">{t('kids.features.games', '🎮 Cool Games')}</p>
               </div>
               <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-center transform active:scale-95 sm:hover:scale-105 sm:hover:-rotate-1 transition-all duration-300 shadow-md sm:shadow-lg border-2 border-emerald-300 group cursor-pointer">
                 <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-2 sm:mb-3 relative">
                   <div className="absolute inset-0 bg-emerald-400/20 rounded-full blur-lg sm:blur-xl group-hover:bg-emerald-400/40 transition-all" />
                   <img src="/kids/image-1765886652001.png" alt="" className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform drop-shadow-md sm:drop-shadow-lg" />
                 </div>
-                <p className="text-emerald-700 font-bold sm:font-black text-xs sm:text-sm md:text-base">⭐ Be a Star</p>
+                <p className="text-emerald-700 font-bold sm:font-black text-xs sm:text-sm md:text-base">{t('kids.features.star', '⭐ Be a Star')}</p>
               </div>
             </div>
           </div>
