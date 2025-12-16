@@ -119,12 +119,6 @@ export default function KidsLanding() {
                   style={{ animationDelay: '0.7s' }}
                 />
         <img 
-          src="/kids/image-1765886162298.png" 
-          alt="" 
-          className="absolute right-1 sm:right-4 md:right-8 top-14 w-16 sm:w-24 md:w-32 lg:w-36 animate-float-reverse drop-shadow-xl opacity-60 sm:opacity-100"
-          style={{ animationDelay: '1s' }}
-        />
-        <img 
           src="/kids/image-1765886176188.png" 
           alt="" 
           className="absolute right-4 sm:right-16 bottom-28 w-24 sm:w-32 md:w-40 animate-float drop-shadow-xl hidden sm:block"
@@ -141,11 +135,6 @@ export default function KidsLanding() {
           alt="" 
           className="absolute right-1/4 top-1/4 w-20 sm:w-28 md:w-32 animate-float drop-shadow-xl hidden lg:block"
           style={{ animationDelay: '1.5s' }}
-        />
-        <img
-          src="/kids/image-1765886214428.png"
-          alt=""
-          className="absolute right-2 bottom-8 w-16 sm:w-24 md:w-28 animate-float-reverse drop-shadow-xl opacity-80"
         />
       </div>
 
@@ -189,13 +178,6 @@ export default function KidsLanding() {
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-200/50 rounded-full blur-2xl" />
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-sky-200/50 rounded-full blur-2xl" />
             
-            {/* Corner badge illustration */}
-            <img
-              src="/kids/image-1765886214428.png"
-              alt=""
-              className="absolute -top-6 -left-6 w-16 h-16 sm:w-20 sm:h-20"
-              style={{ zIndex: 2 }}
-            />
 
             <div className="relative space-y-4 sm:space-y-5">
               {/* Nickname Input */}
