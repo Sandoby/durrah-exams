@@ -74,7 +74,7 @@ export default function KidsLanding() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-950 via-purple-900 to-indigo-950 overflow-hidden relative">
+    <div className="min-h-screen bg-gradient-to-b from-sky-400 via-sky-300 to-amber-100 overflow-hidden relative">
       {/* Custom animations */}
       <style>{`
         @keyframes float {
@@ -85,77 +85,61 @@ export default function KidsLanding() {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
           50% { transform: translateY(-15px) rotate(-3deg); }
         }
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.2); }
+        @keyframes bounce-soft {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
         }
-        @keyframes rocket-fly {
-          0%, 100% { transform: translateY(0px) rotate(-45deg); }
-          50% { transform: translateY(-30px) rotate(-45deg); }
+        @keyframes wiggle {
+          0%, 100% { transform: rotate(-3deg); }
+          50% { transform: rotate(3deg); }
         }
         .animate-float { animation: float 4s ease-in-out infinite; }
         .animate-float-reverse { animation: float-reverse 5s ease-in-out infinite; }
-        .animate-twinkle { animation: twinkle 2s ease-in-out infinite; }
-        .animate-rocket { animation: rocket-fly 3s ease-in-out infinite; }
+        .animate-bounce-soft { animation: bounce-soft 2s ease-in-out infinite; }
+        .animate-wiggle { animation: wiggle 3s ease-in-out infinite; }
       `}</style>
 
-      {/* Starry Background */}
+      {/* Decorative clouds */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Stars */}
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-white rounded-full animate-twinkle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              opacity: Math.random() * 0.7 + 0.3,
-            }}
-          />
-        ))}
-        {/* Larger glowing stars */}
-        {[...Array(15)].map((_, i) => (
-          <div
-            key={`big-${i}`}
-            className="absolute w-2 h-2 bg-yellow-200 rounded-full animate-twinkle blur-[1px]"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 2}s`,
-            }}
-          />
-        ))}
+        {/* Fluffy clouds */}
+        <div className="absolute top-10 left-10 w-32 h-16 bg-white/60 rounded-full blur-sm" />
+        <div className="absolute top-8 left-20 w-24 h-12 bg-white/50 rounded-full blur-sm" />
+        <div className="absolute top-20 right-20 w-40 h-20 bg-white/50 rounded-full blur-sm hidden sm:block" />
+        <div className="absolute top-16 right-32 w-28 h-14 bg-white/40 rounded-full blur-sm hidden sm:block" />
+        <div className="absolute bottom-40 left-1/4 w-36 h-18 bg-white/30 rounded-full blur-md hidden md:block" />
+        
+        {/* Sun glow */}
+        <div className="absolute -top-20 right-1/4 w-60 h-60 bg-yellow-300/40 rounded-full blur-3xl" />
         
         {/* Floating Illustrations */}
         <img 
           src="/kids/image-1765886149420.png" 
           alt="" 
-          className="absolute left-2 sm:left-8 top-20 w-28 sm:w-36 md:w-44 animate-float opacity-90 drop-shadow-2xl"
+          className="absolute left-2 sm:left-8 top-20 w-28 sm:w-36 md:w-44 animate-float drop-shadow-xl"
           style={{ animationDelay: '0s' }}
         />
         <img 
           src="/kids/image-1765886162298.png" 
           alt="" 
-          className="absolute right-2 sm:right-8 top-16 w-20 sm:w-28 md:w-36 animate-float-reverse opacity-90 drop-shadow-xl"
+          className="absolute right-2 sm:right-8 top-16 w-20 sm:w-28 md:w-36 animate-float-reverse drop-shadow-xl"
           style={{ animationDelay: '1s' }}
         />
         <img 
           src="/kids/image-1765886176188.png" 
           alt="" 
-          className="absolute right-4 sm:right-16 bottom-28 w-24 sm:w-32 md:w-40 animate-float opacity-90 drop-shadow-2xl hidden sm:block"
+          className="absolute right-4 sm:right-16 bottom-28 w-24 sm:w-32 md:w-40 animate-float drop-shadow-xl hidden sm:block"
           style={{ animationDelay: '0.5s' }}
         />
         <img 
           src="/kids/image-1765886185739.png" 
           alt="" 
-          className="absolute left-4 sm:left-16 bottom-24 w-24 sm:w-32 md:w-40 animate-float-reverse opacity-85 drop-shadow-xl hidden md:block"
+          className="absolute left-4 sm:left-16 bottom-24 w-24 sm:w-32 md:w-40 animate-float-reverse drop-shadow-xl hidden md:block"
           style={{ animationDelay: '2s' }}
         />
         <img 
           src="/kids/image-1765886195936.png" 
           alt="" 
-          className="absolute right-1/4 top-1/4 w-20 sm:w-28 md:w-32 animate-float opacity-80 drop-shadow-2xl hidden lg:block"
+          className="absolute right-1/4 top-1/4 w-20 sm:w-28 md:w-32 animate-float drop-shadow-xl hidden lg:block"
           style={{ animationDelay: '1.5s' }}
         />
       </div>
@@ -164,17 +148,17 @@ export default function KidsLanding() {
       <header className="relative z-10 px-4 py-4 sm:py-6">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-2 border border-white/20">
+            <div className="bg-white/90 backdrop-blur-md rounded-xl p-2 shadow-lg border border-white/50">
               <Logo size="sm" />
             </div>
-            <div className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
-              <Sparkles className="h-4 w-4 text-yellow-300" />
-              <span className="text-sm font-bold text-white">Space Quiz</span>
+            <div className="hidden sm:flex items-center gap-2 bg-white/80 backdrop-blur-md rounded-full px-4 py-2 shadow-md border border-white/50">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <span className="text-sm font-bold text-sky-700">Kids Quiz</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-gradient-to-r from-amber-500/30 to-orange-500/30 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
-            <Trophy className="h-4 w-4 text-yellow-300" />
-            <span className="text-xs sm:text-sm font-medium text-white">Fun Learning</span>
+          <div className="flex items-center gap-2 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full px-4 py-2 shadow-lg">
+            <Trophy className="h-4 w-4 text-white" />
+            <span className="text-xs sm:text-sm font-bold text-white">Fun Learning</span>
           </div>
         </div>
       </header>
@@ -187,74 +171,74 @@ export default function KidsLanding() {
             <img 
               src="/kids/image-1765886205296.png" 
               alt="Kids Learning" 
-              className="w-36 sm:w-44 md:w-52 mx-auto mb-4 drop-shadow-2xl animate-float"
+              className="w-36 sm:w-44 md:w-52 mx-auto mb-4 drop-shadow-xl animate-float"
             />
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500/40 to-purple-500/40 backdrop-blur-md rounded-full px-5 py-2.5 mb-4 border border-white/20">
-              <Gamepad2 className="h-5 w-5 text-cyan-300" />
-              <span className="text-sm font-bold text-white">Ready for Liftoff?</span>
+            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-md rounded-full px-5 py-2.5 mb-4 shadow-md border border-white/50">
+              <Gamepad2 className="h-5 w-5 text-sky-500" />
+              <span className="text-sm font-bold text-sky-700">Ready to Play?</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white drop-shadow-lg mb-3 leading-tight">
-              Blast Off to
-              <span className="block bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">
-                Quiz Galaxy!
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-sky-800 drop-shadow-sm mb-3 leading-tight">
+              Let's Start the
+              <span className="block bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+                Quiz Adventure!
               </span>
             </h1>
-            <p className="text-purple-200 text-sm sm:text-base max-w-sm mx-auto">
-              Enter your space name and mission code to begin your adventure!
+            <p className="text-sky-700/80 text-sm sm:text-base max-w-sm mx-auto">
+              Enter your name and the secret code to begin your fun journey!
             </p>
           </div>
 
           {/* Entry Card */}
-          <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-3xl shadow-2xl p-5 sm:p-8 border border-white/20 relative overflow-hidden">
-            {/* Card glow effect */}
-            <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500/30 rounded-full blur-3xl" />
-            <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-cyan-500/30 rounded-full blur-3xl" />
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-5 sm:p-8 border-4 border-white relative overflow-hidden">
+            {/* Card decorations */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-200/50 rounded-full blur-2xl" />
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-sky-200/50 rounded-full blur-2xl" />
             
             {/* Corner decoration */}
             <img 
               src="/kids/image-1765886214428.png" 
               alt="" 
-              className="absolute -top-6 -right-6 w-16 h-16 sm:w-20 sm:h-20 opacity-90"
+              className="absolute -top-6 -right-6 w-16 h-16 sm:w-20 sm:h-20"
             />
 
             <div className="relative space-y-4 sm:space-y-5">
               {/* Nickname Input */}
               <div>
-                <label className="block text-sm font-bold text-purple-200 mb-2 flex items-center gap-2">
-                  <span className="w-7 h-7 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-lg flex items-center justify-center shadow-lg">
-                    <span className="text-sm">🚀</span>
+                <label className="block text-sm font-bold text-sky-700 mb-2 flex items-center gap-2">
+                  <span className="w-7 h-7 bg-gradient-to-br from-sky-400 to-blue-500 rounded-lg flex items-center justify-center shadow-md">
+                    <span className="text-sm">👤</span>
                   </span>
-                  Your Space Name
+                  Your Super Name
                 </label>
                 <input
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
-                  className="w-full rounded-2xl border-2 border-purple-400/30 bg-white/10 backdrop-blur-sm px-4 py-3.5 sm:py-4 text-white text-base sm:text-lg font-medium placeholder-purple-300/50 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20 transition-all"
-                  placeholder="e.g., StarPilot"
+                  className="w-full rounded-2xl border-2 border-sky-200 bg-sky-50/50 px-4 py-3.5 sm:py-4 text-sky-800 text-base sm:text-lg font-medium placeholder-sky-400 focus:outline-none focus:border-sky-400 focus:ring-4 focus:ring-sky-100 transition-all"
+                  placeholder="e.g., SuperStar"
                 />
               </div>
 
               {/* Code Input */}
               <div>
-                <label className="block text-sm font-bold text-purple-200 mb-2 flex items-center gap-2">
-                  <span className="w-7 h-7 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center shadow-lg">
+                <label className="block text-sm font-bold text-sky-700 mb-2 flex items-center gap-2">
+                  <span className="w-7 h-7 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center shadow-md">
                     <span className="text-sm">🎟️</span>
                   </span>
-                  Mission Code
+                  Secret Code
                 </label>
                 <div className="relative">
-                  <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 sm:h-6 sm:w-6 text-amber-400" />
+                  <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 sm:h-6 sm:w-6 text-amber-500" />
                   <input
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    className="w-full rounded-2xl border-2 border-purple-400/30 bg-white/10 backdrop-blur-sm pl-12 sm:pl-14 pr-4 py-3.5 sm:py-4 text-white text-base sm:text-lg font-bold tracking-widest uppercase placeholder-purple-300/50 focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 transition-all"
+                    className="w-full rounded-2xl border-2 border-amber-200 bg-amber-50/50 pl-12 sm:pl-14 pr-4 py-3.5 sm:py-4 text-sky-800 text-base sm:text-lg font-bold tracking-widest uppercase placeholder-amber-400 focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all"
                     placeholder="KID-ABC123"
                   />
                 </div>
                 {normalizedCode && (
                   <div className="mt-2 flex items-center gap-2">
-                    <span className="text-xs text-cyan-300 font-semibold">Code:</span>
-                    <span className="font-mono text-sm bg-gradient-to-r from-cyan-500/30 to-purple-500/30 text-cyan-200 px-3 py-1 rounded-lg font-bold border border-cyan-400/30">
+                    <span className="text-xs text-sky-600 font-semibold">Code:</span>
+                    <span className="font-mono text-sm bg-gradient-to-r from-sky-100 to-amber-100 text-sky-700 px-3 py-1 rounded-lg font-bold border border-sky-200">
                       {normalizedCode}
                     </span>
                   </div>
@@ -266,54 +250,54 @@ export default function KidsLanding() {
                 type="button"
                 onClick={handleEnter}
                 disabled={isLoading || !nickname.trim() || !normalizedCode}
-                className="w-full rounded-2xl bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 hover:from-cyan-400 hover:via-purple-400 hover:to-pink-400 text-white font-black text-lg sm:text-xl py-4 sm:py-5 shadow-xl shadow-purple-500/40 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3 border border-white/20"
+                className="w-full rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 hover:from-amber-500 hover:via-orange-600 hover:to-pink-600 text-white font-black text-lg sm:text-xl py-4 sm:py-5 shadow-xl shadow-orange-300/50 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3"
               >
                 {isLoading ? (
                   <>
                     <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Preparing Launch...</span>
+                    <span>Getting Ready...</span>
                   </>
                 ) : (
                   <>
                     <Rocket className="h-6 w-6" />
-                    <span>Launch Mission!</span>
+                    <span>Start Adventure!</span>
                   </>
                 )}
               </button>
 
               {/* Help text */}
-              <div className="flex items-center justify-center gap-2 text-purple-300/70">
+              <div className="flex items-center justify-center gap-2 text-sky-500">
                 <Lock className="h-4 w-4" />
-                <span className="text-xs sm:text-sm">Ask your teacher for the mission code</span>
+                <span className="text-xs sm:text-sm">Ask your teacher for the secret code</span>
               </div>
             </div>
           </div>
 
           {/* Feature Cards */}
           <div className="mt-6 sm:mt-8 grid grid-cols-2 gap-3 sm:gap-4">
-            <div className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform border border-cyan-400/20 group">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform shadow-lg border-2 border-sky-200 group">
               <div className="w-16 h-16 mx-auto mb-2 relative">
                 <img src="/kids/image-1765886629120.png" alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
               </div>
-              <p className="text-white font-bold text-xs sm:text-sm">Fun Quizzes</p>
+              <p className="text-sky-700 font-bold text-xs sm:text-sm">Fun Quizzes</p>
             </div>
-            <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform border border-amber-400/20 group">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform shadow-lg border-2 border-amber-200 group">
               <div className="w-16 h-16 mx-auto mb-2 relative">
                 <img src="/kids/image-1765886635294.png" alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
               </div>
-              <p className="text-white font-bold text-xs sm:text-sm">Win Rewards</p>
+              <p className="text-amber-700 font-bold text-xs sm:text-sm">Win Rewards</p>
             </div>
-            <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform border border-purple-400/20 group">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform shadow-lg border-2 border-pink-200 group">
               <div className="w-16 h-16 mx-auto mb-2 relative">
                 <img src="/kids/image-1765886645584.png" alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
               </div>
-              <p className="text-white font-bold text-xs sm:text-sm">Cool Games</p>
+              <p className="text-pink-700 font-bold text-xs sm:text-sm">Cool Games</p>
             </div>
-            <div className="bg-gradient-to-br from-rose-500/20 to-red-500/20 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform border border-rose-400/20 group">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 text-center transform hover:scale-105 transition-transform shadow-lg border-2 border-green-200 group">
               <div className="w-16 h-16 mx-auto mb-2 relative">
                 <img src="/kids/image-1765886652001.png" alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
               </div>
-              <p className="text-white font-bold text-xs sm:text-sm">Be a Star</p>
+              <p className="text-green-700 font-bold text-xs sm:text-sm">Be a Star</p>
             </div>
           </div>
         </div>
@@ -321,8 +305,8 @@ export default function KidsLanding() {
 
       {/* Footer */}
       <footer className="relative z-10 px-4 py-4 sm:py-6 text-center">
-        <p className="text-purple-300/50 text-xs sm:text-sm">
-          © {new Date().getFullYear()} Durrah • Safe Space Adventures
+        <p className="text-sky-600/60 text-xs sm:text-sm">
+          © {new Date().getFullYear()} Durrah • Safe & Fun Learning
         </p>
       </footer>
     </div>
