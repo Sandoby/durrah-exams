@@ -43,9 +43,18 @@ export default function QuestionBank() {
     const [isAdding, setIsAdding] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [exportMenuOpen, setExportMenuOpen] = useState<string | null>(null);
-    
+
     // New question form state
-    const [newQuestion, setNewQuestion] = useState({
+    const [newQuestion, setNewQuestion] = useState<{
+        question_text: string;
+        type: string;
+        options: string[];
+        correct_answer: string | string[];
+        points: number;
+        difficulty: 'easy' | 'medium' | 'hard';
+        category: string;
+        tags: string;
+    }>({
         question_text: '',
         type: 'multiple_choice',
         options: ['', '', '', ''],
@@ -245,6 +254,8 @@ export default function QuestionBank() {
         }
     };
 
+
+
     const handleAddQuestion = async () => {
         if (isDemo) {
             toast('Demo mode: Sign up to add your own questions');
@@ -262,14 +273,19 @@ export default function QuestionBank() {
         setIsAdding(true);
         try {
             // Validate based on question type
-            if (newQuestion.type === 'multiple_choice' || newQuestion.type === 'multiple_select') {
+            if (['multiple_choice', 'multiple_select', 'dropdown'].includes(newQuestion.type)) {
                 const validOptions = newQuestion.options.filter(o => o.trim());
                 if (validOptions.length < 2) {
                     toast.error('Please provide at least 2 options');
                     setIsAdding(false);
                     return;
                 }
-                if (!newQuestion.correct_answer) {
+
+                const hasCorrect = Array.isArray(newQuestion.correct_answer)
+                    ? newQuestion.correct_answer.length > 0
+                    : !!newQuestion.correct_answer;
+
+                if (!hasCorrect) {
                     toast.error('Please select a correct answer');
                     setIsAdding(false);
                     return;
@@ -281,8 +297,8 @@ export default function QuestionBank() {
                 bank_id: selectedBank.id,
                 question_text: newQuestion.question_text.trim(),
                 type: newQuestion.type,
-                options: newQuestion.type === 'short_answer' || newQuestion.type === 'numeric' 
-                    ? [] 
+                options: ['short_answer', 'numeric'].includes(newQuestion.type)
+                    ? []
                     : newQuestion.options.filter(o => o.trim()),
                 correct_answer: newQuestion.correct_answer,
                 points: newQuestion.points,
@@ -301,7 +317,7 @@ export default function QuestionBank() {
             if (error) throw error;
 
             toast.success('Question added successfully!');
-            
+
             // Reset form
             setNewQuestion({
                 question_text: '',
@@ -442,17 +458,16 @@ export default function QuestionBank() {
                             <div className="space-y-2">
                                 {banks.length === 0 ? (
                                     <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
-                                        No question banks yet.<br/>Create your first one!
+                                        No question banks yet.<br />Create your first one!
                                     </p>
                                 ) : (
                                     banks.map(bank => (
                                         <div
                                             key={bank.id}
-                                            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                                                selectedBank?.id === bank.id
-                                                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
-                                                    : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300'
-                                            }`}
+                                            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedBank?.id === bank.id
+                                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                                                : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                                                }`}
                                             onClick={() => setSelectedBank(bank)}
                                         >
                                             <div className="flex items-start justify-between">
@@ -479,7 +494,7 @@ export default function QuestionBank() {
                                                             <Download className="h-4 w-4" />
                                                             <ChevronDown className="h-3 w-3" />
                                                         </button>
-                                                        
+
                                                         {/* Export dropdown menu */}
                                                         {exportMenuOpen === bank.id && (
                                                             <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50">
@@ -586,11 +601,10 @@ export default function QuestionBank() {
                                                                 {question.type.replace('_', ' ')}
                                                             </span>
                                                             {question.difficulty && (
-                                                                <span className={`px-2 py-1 text-xs font-medium rounded ${
-                                                                    question.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
+                                                                <span className={`px-2 py-1 text-xs font-medium rounded ${question.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
                                                                     question.difficulty === 'hard' ? 'bg-red-100 text-red-800' :
-                                                                    'bg-yellow-100 text-yellow-800'
-                                                                }`}>
+                                                                        'bg-yellow-100 text-yellow-800'
+                                                                    }`}>
                                                                     {question.difficulty}
                                                                 </span>
                                                             )}
@@ -689,7 +703,7 @@ export default function QuestionBank() {
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
-                        
+
                         <div className="space-y-4 max-h-[70vh] overflow-y-auto">
                             {/* Question Text */}
                             <div>
@@ -698,7 +712,7 @@ export default function QuestionBank() {
                                 </label>
                                 <textarea
                                     value={newQuestion.question_text}
-                                    onChange={(e) => setNewQuestion({...newQuestion, question_text: e.target.value})}
+                                    onChange={(e) => setNewQuestion({ ...newQuestion, question_text: e.target.value })}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                     rows={3}
                                     placeholder="Enter your question here..."
@@ -718,54 +732,121 @@ export default function QuestionBank() {
                                             ...newQuestion,
                                             type: newType,
                                             options: (newType === 'short_answer' || newType === 'numeric') ? [] : ['', '', '', ''],
-                                            correct_answer: ''
+                                            correct_answer: newType === 'multiple_select' ? [] : ''
                                         });
                                     }}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 >
                                     <option value="multiple_choice">Multiple Choice</option>
+                                    <option value="multiple_select">Multiple Select</option>
+                                    <option value="dropdown">Dropdown</option>
                                     <option value="true_false">True / False</option>
                                     <option value="short_answer">Short Answer</option>
                                     <option value="numeric">Numeric Answer</option>
-                                    <option value="multiple_select">Multiple Select</option>
                                 </select>
                             </div>
 
-                            {/* Options (for MCQ, True/False, Multiple Select) */}
-                            {(newQuestion.type === 'multiple_choice' || newQuestion.type === 'true_false' || newQuestion.type === 'multiple_select') && (
+                            {/* Options (for MCQ, True/False, Multiple Select, Dropdown) */}
+                            {['multiple_choice', 'multiple_select', 'true_false', 'dropdown'].includes(newQuestion.type) && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         Options {newQuestion.type !== 'true_false' ? '*' : ''}
                                     </label>
-                                    <div className="space-y-2">
+                                    <div className="space-y-3">
                                         {(newQuestion.type === 'true_false' ? ['True', 'False'] : newQuestion.options).map((option, index) => (
-                                            <div key={index} className="flex gap-2">
+                                            <div key={index} className="flex items-center gap-2">
+                                                {/* Selection Input (Radio or Checkbox) */}
+                                                <input
+                                                    type={newQuestion.type === 'multiple_select' ? 'checkbox' : 'radio'}
+                                                    name="correct_answer"
+                                                    value={option}
+                                                    checked={
+                                                        newQuestion.type === 'multiple_select'
+                                                            ? (Array.isArray(newQuestion.correct_answer) && newQuestion.correct_answer.includes(option))
+                                                            : newQuestion.correct_answer === option
+                                                    }
+                                                    onChange={() => {
+                                                        if (newQuestion.type === 'multiple_select') {
+                                                            const current = Array.isArray(newQuestion.correct_answer) ? [...newQuestion.correct_answer] : [];
+                                                            if (current.includes(option)) {
+                                                                setNewQuestion({ ...newQuestion, correct_answer: current.filter(c => c !== option) });
+                                                            } else {
+                                                                setNewQuestion({ ...newQuestion, correct_answer: [...current, option] });
+                                                            }
+                                                        } else {
+                                                            setNewQuestion({ ...newQuestion, correct_answer: option });
+                                                        }
+                                                    }}
+                                                    className={`h-4 w-4 cursor-pointer text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded ${newQuestion.type !== 'multiple_select' ? 'rounded-full' : ''}`}
+                                                />
+
+                                                {/* Text Input (Disabled for True/False) */}
                                                 <input
                                                     type="text"
                                                     value={option}
                                                     onChange={(e) => {
                                                         if (newQuestion.type !== 'true_false') {
                                                             const newOptions = [...newQuestion.options];
+                                                            const oldVal = newOptions[index];
                                                             newOptions[index] = e.target.value;
-                                                            setNewQuestion({...newQuestion, options: newOptions});
+
+                                                            // Update correct_answer reference if it was selected
+                                                            let newCorrect = newQuestion.correct_answer;
+                                                            if (newQuestion.type === 'multiple_select' && Array.isArray(newCorrect)) {
+                                                                if (newCorrect.includes(oldVal)) {
+                                                                    newCorrect = newCorrect.map(c => c === oldVal ? e.target.value : c);
+                                                                }
+                                                            } else if (newCorrect === oldVal) {
+                                                                newCorrect = e.target.value;
+                                                            }
+
+                                                            setNewQuestion({ ...newQuestion, options: newOptions, correct_answer: newCorrect });
                                                         }
                                                     }}
                                                     disabled={newQuestion.type === 'true_false'}
                                                     placeholder={`Option ${index + 1}`}
                                                     className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50"
                                                 />
-                                                <input
-                                                    type="radio"
-                                                    name="correct_answer"
-                                                    value={option}
-                                                    checked={newQuestion.correct_answer === option}
-                                                    onChange={() => setNewQuestion({...newQuestion, correct_answer: option})}
-                                                    className="mt-3 h-4 w-4 cursor-pointer"
-                                                />
+
+                                                {/* Remove Button */}
+                                                {newQuestion.type !== 'true_false' && (
+                                                    <button
+                                                        onClick={() => {
+                                                            const newOptions = newQuestion.options.filter((_, i) => i !== index);
+                                                            // Cleanup correct answer if removed
+                                                            let newCorrect = newQuestion.correct_answer;
+                                                            if (newQuestion.type === 'multiple_select' && Array.isArray(newCorrect)) {
+                                                                newCorrect = newCorrect.filter(c => c !== option);
+                                                            } else if (newCorrect === option) {
+                                                                newCorrect = '';
+                                                            }
+                                                            setNewQuestion({ ...newQuestion, options: newOptions, correct_answer: newCorrect });
+                                                        }}
+                                                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                                        title="Remove option"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                )}
                                             </div>
                                         ))}
+
+                                        {/* Add Option Button */}
+                                        {newQuestion.type !== 'true_false' && (
+                                            <button
+                                                onClick={() => setNewQuestion({ ...newQuestion, options: [...newQuestion.options, ''] })}
+                                                className="mt-2 text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                                Add Option
+                                            </button>
+                                        )}
                                     </div>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Select the radio button for the correct answer</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                        {newQuestion.type === 'multiple_select'
+                                            ? 'Check all that apply.'
+                                            : 'Select the radio button for the correct answer.'}
+                                    </p>
                                 </div>
                             )}
 
@@ -777,8 +858,8 @@ export default function QuestionBank() {
                                     </label>
                                     <input
                                         type={newQuestion.type === 'numeric' ? 'number' : 'text'}
-                                        value={newQuestion.correct_answer}
-                                        onChange={(e) => setNewQuestion({...newQuestion, correct_answer: e.target.value})}
+                                        value={newQuestion.correct_answer as string}
+                                        onChange={(e) => setNewQuestion({ ...newQuestion, correct_answer: e.target.value })}
                                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                         placeholder="Enter the correct answer..."
                                     />
@@ -795,7 +876,7 @@ export default function QuestionBank() {
                                     min="1"
                                     max="100"
                                     value={newQuestion.points}
-                                    onChange={(e) => setNewQuestion({...newQuestion, points: parseInt(e.target.value) || 1})}
+                                    onChange={(e) => setNewQuestion({ ...newQuestion, points: parseInt(e.target.value) || 1 })}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 />
                             </div>
@@ -807,7 +888,7 @@ export default function QuestionBank() {
                                 </label>
                                 <select
                                     value={newQuestion.difficulty}
-                                    onChange={(e) => setNewQuestion({...newQuestion, difficulty: e.target.value})}
+                                    onChange={(e) => setNewQuestion({ ...newQuestion, difficulty: e.target.value as 'easy' | 'medium' | 'hard' })}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 >
                                     <option value="easy">Easy</option>
@@ -824,7 +905,7 @@ export default function QuestionBank() {
                                 <input
                                     type="text"
                                     value={newQuestion.category}
-                                    onChange={(e) => setNewQuestion({...newQuestion, category: e.target.value})}
+                                    onChange={(e) => setNewQuestion({ ...newQuestion, category: e.target.value })}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                     placeholder="e.g., Biology, Chapter 3"
                                 />
@@ -838,7 +919,7 @@ export default function QuestionBank() {
                                 <input
                                     type="text"
                                     value={newQuestion.tags}
-                                    onChange={(e) => setNewQuestion({...newQuestion, tags: e.target.value})}
+                                    onChange={(e) => setNewQuestion({ ...newQuestion, tags: e.target.value })}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                     placeholder="e.g., important, exam2024"
                                 />
