@@ -437,6 +437,18 @@ export default function LandingPage() {
                             </Link>
                         </div>
                         <div className="order-1 lg:order-2 relative">
+                            {/* Floating Astronauts/Kids Decorations */}
+                            <img
+                                src="/kids/image-1765886162298.png"
+                                alt=""
+                                className="absolute -top-12 -left-12 w-24 h-24 animate-float opacity-80"
+                            />
+                            <img
+                                src="/kids/image-1765886195936.png"
+                                alt=""
+                                className="absolute -bottom-8 -right-8 w-28 h-28 animate-float-reverse opacity-80"
+                            />
+
                             <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-500 blur-3xl opacity-20 animate-pulse"></div>
                             <img
                                 src="/kids/image-1765886669181.png"
@@ -526,7 +538,7 @@ export default function LandingPage() {
                         </div>
                     </div>
                     <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-                        <p>&copy; 2024 Durrah. All rights reserved.</p>
+                        <p>&copy; 2025 Durrah. All rights reserved.</p>
                     </div>
                 </div>
             </footer>
