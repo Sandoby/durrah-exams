@@ -131,6 +131,7 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
                 p_user_id: user.id,
                 p_agent_id: agentId,
                 p_days: days,
+                p_plan: subscriptionPlan,
                 p_reason: `Activated ${subscriptionPlan} plan from admin panel`
             });
 
@@ -171,6 +172,7 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
                 p_user_id: user.id,
                 p_agent_id: agentId,
                 p_days: days,
+                p_plan: user.subscription_plan || 'pro',
                 p_reason: 'Extended from admin panel'
             });
 
