@@ -54,6 +54,17 @@ interface Exam {
 }
 
 export default function ExamView() {
+    // Check if exam was accessed via portal (code entry)
+    useEffect(() => {
+        // Allow review mode and submission view
+        if (window.location.search.includes('submission=')) return;
+        // Only check for normal exams (not kids mode)
+        const portalFlag = sessionStorage.getItem('durrah_exam_portal_access');
+        if (!portalFlag) {
+            // Not accessed via portal, redirect
+            navigate('/student-portal');
+        }
+    }, []);
     const { t } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
@@ -181,6 +192,10 @@ export default function ExamView() {
             // Securely fetch exam data (exclude correct_answer for security)
             const { data: examData, error } = await supabase.from('exams').select('*').eq('id', id).single();
             if (error) throw error;
+            // If kids mode, skip portal check
+            if (examData.settings?.child_mode_enabled) {
+                sessionStorage.setItem('durrah_exam_portal_access', '1');
+            }
 
             // Fetch questions WITHOUT correct_answer column
             const { data: qData, error: qError } = await supabase
@@ -260,6 +275,10 @@ export default function ExamView() {
             // Only set initial time if not restored from session
             if (!localStorage.getItem(`durrah_exam_${id}_state`) && examData.settings?.time_limit_minutes) {
                 setTimeLeft(examData.settings.time_limit_minutes * 60);
+            }
+            // If not kids mode, clear portal flag after loading
+            if (!examData.settings?.child_mode_enabled) {
+                sessionStorage.removeItem('durrah_exam_portal_access');
             }
         } catch (err: any) {
             console.error(err);
@@ -666,6 +685,8 @@ export default function ExamView() {
                     duration: 5000,
                     icon: '✅'
                 });
+                // Notify StudentPortal to refresh previous exams
+                window.dispatchEvent(new Event('durrah_exam_submitted'));
             } else {
                 throw new Error(result.error || 'Submission failed');
             }
