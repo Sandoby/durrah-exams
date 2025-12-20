@@ -329,26 +329,13 @@ export default function Dashboard() {
             setKidsShareModal({ url: kidsUrl, code: exam.quiz_code, title: exam.title });
             return;
         }
-        // Normal mode: open modal with student portal link + code
-        if (exam?.quiz_code) {
-            const portalUrl = `${window.location.origin}/student-portal`;
-            setShareModal({ url: portalUrl, code: exam.quiz_code, title: exam.title });
-            return;
+        // Normal mode: always open modal with student portal link + code (even if code missing)
+        const portalUrl = `${window.location.origin}/student-portal`;
+        setShareModal({ url: portalUrl, code: exam?.quiz_code || '', title: exam?.title });
+        if (!exam?.quiz_code) {
+            toast.error('No exam code set for this exam. Please add a code in the exam editor.');
         }
-        // fallback: just copy exam link
-        const examUrl = `${window.location.origin}/exam/${examId}`;
-        try {
-            navigator.clipboard.writeText(examUrl);
-            toast.success(t('dashboard.linkCopied'));
-        } catch (e) {
-            // fallback
-            const input = document.createElement('textarea');
-            input.value = examUrl;
-            document.body.appendChild(input);
-            input.select();
-            try { document.execCommand('copy'); toast.success(t('dashboard.linkCopied')); } catch { toast.error('Failed to copy link'); }
-            document.body.removeChild(input);
-        }
+        return;
     };
 
     const copyValue = (value: string, message = 'Copied!') => {
@@ -825,10 +812,16 @@ export default function Dashboard() {
                                     <button
                                         onClick={() => copyValue(shareModal.code, 'Exam code copied')}
                                         className="px-3 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
+                                        disabled={!shareModal.code}
                                     >
                                         Copy
                                     </button>
                                 </div>
+                                {!shareModal.code && (
+                                    <div className="text-xs text-red-700 bg-red-100 border border-red-300 rounded px-2 py-1 mt-2">
+                                        <b>Warning:</b> No exam code set for this exam. Please add a code in the exam editor.
+                                    </div>
+                                )}
                             </div>
                             <div className="flex flex-col gap-2 pt-2">
                                 <div className="text-xs text-yellow-700 bg-yellow-100 border border-yellow-300 rounded px-2 py-1 mb-1">
@@ -838,6 +831,7 @@ export default function Dashboard() {
                                     <button
                                         onClick={() => copyValue(`Page: ${shareModal.url}\nCode: ${shareModal.code}`, 'Exam info copied')}
                                         className="px-3 py-2 text-sm font-medium rounded-md bg-green-600 text-white hover:bg-green-700"
+                                        disabled={!shareModal.code}
                                     >
                                         Copy Both
                                     </button>
