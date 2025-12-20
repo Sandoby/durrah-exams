@@ -133,6 +133,8 @@ export default function StudentPortal() {
       }
 
       if (examId) {
+        // Set flag to allow access in ExamView
+        sessionStorage.setItem('durrah_exam_portal_access', 'true');
         navigate(`/exam/${examId}`);
       } else {
         toast.error(t('Exam not found. Please check the code.'));
