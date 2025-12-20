@@ -943,6 +943,7 @@ export default function AdminPanel() {
                                             key={user.id}
                                             user={user}
                                             onUpdate={fetchUsers}
+                                            agentId={currentAgentId || (userRole === 'super_admin' && supportAgents.length > 0 ? supportAgents[0].id : null)}
                                         />
                                     ))
                                 )}

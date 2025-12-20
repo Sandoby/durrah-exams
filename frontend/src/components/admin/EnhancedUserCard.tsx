@@ -36,9 +36,10 @@ interface SupportNote {
 interface EnhancedUserCardProps {
     user: User;
     onUpdate: () => void;
+    agentId?: string | null;
 }
 
-export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
+export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [stats, setStats] = useState<UserStats | null>(null);
     const [notes, setNotes] = useState<SupportNote[]>([]);
@@ -128,6 +129,7 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
 
             const { data, error } = await supabase.rpc('extend_subscription', {
                 p_user_id: user.id,
+                p_agent_id: agentId,
                 p_days: days,
                 p_reason: `Activated ${subscriptionPlan} plan from admin panel`
             });
@@ -167,6 +169,7 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
 
             const { data, error } = await supabase.rpc('extend_subscription', {
                 p_user_id: user.id,
+                p_agent_id: agentId,
                 p_days: days,
                 p_reason: 'Extended from admin panel'
             });
@@ -188,8 +191,9 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
 
     const deactivateSubscription = async () => {
         try {
-            const { data, error } = await supabase.rpc('deactivate_subscription', {
+            const { data, error } = await supabase.rpc('cancel_subscription', {
                 p_user_id: user.id,
+                p_agent_id: agentId,
                 p_reason: 'Deactivated from admin panel'
             });
 
