@@ -83,10 +83,11 @@ export default function ExamEditor() {
     // Kids Mode helpers
     const [savedQuizCode, setSavedQuizCode] = useState<string | null>(null);
 
+    // Generate a unique exam code for all exams (not just kids)
     const generateQuizCode = () => {
         const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
         const chunk = (n: number) => Array.from({ length: n }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
-        return `KID-${chunk(3)}${chunk(3)}`;
+        return `${chunk(3)}-${chunk(3)}`;
     };
 
     const ensureQuizCode = () => {
@@ -313,7 +314,7 @@ export default function ExamEditor() {
                 return;
             }
 
-            if (['multiple_choice', 'multiple_select', 'dropdown'].includes(q.type)) {
+            if (["multiple_choice", "multiple_select", "dropdown"].includes(q.type)) {
                 if (!q.options || q.options.length < 2) {
                     toast.error(t('examEditor.validation.minOptions', { num: qNum }));
                     return;
@@ -325,7 +326,7 @@ export default function ExamEditor() {
             }
 
             // Validation: Correct Answers
-            if (['multiple_choice', 'true_false', 'multiple_select', 'dropdown'].includes(q.type)) {
+            if (["multiple_choice", "true_false", "multiple_select", "dropdown"].includes(q.type)) {
                 if (Array.isArray(q.correct_answer)) {
                     if (q.correct_answer.length === 0) {
                         toast.error(t('examEditor.validation.correctAnswer', { num: qNum }));
@@ -342,8 +343,9 @@ export default function ExamEditor() {
         try {
             let examId = id;
 
-            const finalQuizCode = data.settings?.child_mode_enabled ? (savedQuizCode || generateQuizCode()) : null;
-            if (data.settings?.child_mode_enabled && !savedQuizCode && finalQuizCode) {
+            // Always ensure a quiz code for all exams
+            const finalQuizCode = savedQuizCode || generateQuizCode();
+            if (!savedQuizCode && finalQuizCode) {
                 setSavedQuizCode(finalQuizCode);
             }
 

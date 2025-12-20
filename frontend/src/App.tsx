@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import LandingPage from './pages/LandingPage';
+import StudentPortal from './pages/StudentPortal';
 import DemoPage from './pages/DemoPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -77,6 +78,7 @@ function App() {
             <Route path="/exam/new" element={<ExamEditor />} />
             <Route path="/exam/:id/edit" element={<ExamEditor />} />
             <Route path="/exam/:id" element={<ExamView />} />
+            <Route path="/student-portal" element={<StudentPortal />} />
             <Route path="/exam/:examId/analytics" element={<ExamAnalyticsDashboard />} />
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/super-admin" element={<SuperAdminPanel />} />
