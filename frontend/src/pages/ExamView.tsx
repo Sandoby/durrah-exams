@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { Calculator } from '../components/Calculator';
 
@@ -66,6 +67,7 @@ export default function ExamView() {
         }
     }, []);
     const { t } = useTranslation();
+    const { user } = useAuth();
     const { id } = useParams();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -141,6 +143,15 @@ export default function ExamView() {
 
             }
             return;
+        }
+
+        // Auto-fill student data from logged-in user if not already set
+        if (user && !studentData.email) {
+            setStudentData(prev => ({
+                ...prev,
+                name: user.user_metadata?.full_name || '',
+                email: user.email || ''
+            }));
         }
 
         // Check for active session to restore

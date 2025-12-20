@@ -97,44 +97,46 @@ export default function StudentPortal() {
 
   const handleJoinExam = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!examCode.trim()) return;
+    const code = examCode.trim();
+    if (!code) return;
 
     setJoining(true);
     try {
-      // Try to find exam by ID first (if UUID provided)
-      let { data: exam } = await supabase
-        .from('exams')
-        .select('id')
-        .eq('id', examCode.trim())
-        .single();
+      // Check if input is a valid UUID
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(code);
 
-      // If not found by ID, try by quiz_code (if column exists) or handle as error
-      if (!exam) {
-        // Fallback or secondary check if you have a quiz_code column
-        // For now, assuming exact UUID or handling "Exam Not Found"
-        throw new Error('Exam not found');
-      }
+      let examId = null;
 
-      if (exam) {
-        navigate(`/exam/${exam.id}`);
-      }
-    } catch (err) {
-      // If UUID check fails, maybe it's a "quiz_code". 
-      // Let's try searching by quiz_code if the previous query failed.
-      try {
-        const { data: codeExam } = await supabase
+      if (isUUID) {
+        // If it looks like a UUID, check ID first
+        const { data } = await supabase
           .from('exams')
           .select('id')
-          .eq('quiz_code', examCode.trim())
-          .single();
+          .eq('id', code)
+          .maybeSingle(); // Use maybeSingle to avoid 406/404 errors throwing immediately
 
-        if (codeExam) {
-          navigate(`/exam/${codeExam.id}`);
-          return;
-        }
-      } catch (ignore) { }
+        if (data) examId = data.id;
+      }
 
-      toast.error(t('Exam not found. Please check the code.'));
+      // If not a UUID or not found by ID, check quiz_code
+      if (!examId) {
+        const { data } = await supabase
+          .from('exams')
+          .select('id')
+          .eq('quiz_code', code)
+          .maybeSingle();
+
+        if (data) examId = data.id;
+      }
+
+      if (examId) {
+        navigate(`/exam/${examId}`);
+      } else {
+        toast.error(t('Exam not found. Please check the code.'));
+      }
+    } catch (err: any) {
+      console.error('Join exam error:', err);
+      toast.error(t('An error occurred. Please try again.'));
     } finally {
       setJoining(false);
     }
