@@ -127,6 +127,10 @@ create policy "Tutors can view submissions for own exams" on public.submissions
     exists (select 1 from public.exams where id = submissions.exam_id and tutor_id = auth.uid())
   );
 
+-- Allow students to view their own submissions
+create policy "Students can view own submissions" on public.submissions
+  for select using (auth.uid() = submissions.student_email);
+
 -- Submission Answers: Students can insert, Tutors can view
 create policy "Students can insert answers" on public.submission_answers
   for insert with check (true);
@@ -150,6 +154,15 @@ begin
 end;
 $$ language plpgsql security definer;
 
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+-- Check if the trigger already exists before creating it
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger
+    WHERE tgname = 'on_auth_user_created'
+  ) THEN
+    CREATE TRIGGER on_auth_user_created
+      AFTER INSERT ON auth.users
+      FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+  END IF;
+END $$;
