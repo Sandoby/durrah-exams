@@ -400,45 +400,6 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="bg-slate-900 text-gray-300 py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid md:grid-cols-4 gap-8 mb-8">
-                        <div>
-                            <div className="flex items-center gap-2 mb-4">
-                                <Logo className="h-8 w-8" showText={false} />
-                                <span className="text-xl font-bold text-white">Durrah</span>
-                            </div>
-                            <p className="text-gray-400">Modern exam platform for educators</p>
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-white mb-4">Product</h3>
-                            <ul className="space-y-2">
-                                <li><a href="#features" className="hover:text-white transition">Features</a></li>
-                                <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
-                                <li><Link to="/blog" className="hover:text-white transition">Blog</Link></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-white mb-4">Company</h3>
-                            <ul className="space-y-2">
-                                <li><Link to="/about" className="hover:text-white transition">About</Link></li>
-                                <li><Link to="/contact" className="hover:text-white transition">Contact</Link></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-white mb-4">Legal</h3>
-                            <ul className="space-y-2">
-                                <li><Link to="/privacy" className="hover:text-white transition">Privacy</Link></li>
-                                <li><Link to="/terms" className="hover:text-white transition">Terms</Link></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-                        <p>&copy; 2024 Durrah. All rights reserved.</p>
-                    </div>
-                </div>
-            </footer>
             {/* Kids Mode & Student Portal Sections */}
             <section className="py-24 relative overflow-hidden bg-white dark:bg-slate-900">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -478,7 +439,7 @@ export default function LandingPage() {
                         <div className="order-1 lg:order-2 relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-500 blur-3xl opacity-20 animate-pulse"></div>
                             <img
-                                src="file:///C:/Users/Elsaid%20Ahmed/.gemini/antigravity/brain/8b689b61-3429-43e0-a122-92f6b0b82d60/kids_mode_marketing_1766238313818.png"
+                                src="/kids/image-1765886669181.png"
                                 alt="Kids Mode Marketing"
                                 className="relative z-10 rounded-3xl shadow-2xl animate-float"
                             />
@@ -490,7 +451,7 @@ export default function LandingPage() {
                         <div className="relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 to-violet-500 blur-3xl opacity-20 animate-pulse"></div>
                             <img
-                                src="file:///C:/Users/Elsaid%20Ahmed/.gemini/antigravity/brain/8b689b61-3429-43e0-a122-92f6b0b82d60/student_portal_marketing_1766238329499.png"
+                                src="/illustrations/techny-standardized-test-as-method-of-assessment.png"
                                 alt="Student Portal Marketing"
                                 className="relative z-10 rounded-3xl shadow-2xl animate-float animation-delay-2000"
                             />
@@ -530,7 +491,45 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Existing Footer (moved down if necessary, or just keeping it here) */}
+            {/* Footer */}
+            <footer className="bg-slate-900 text-gray-300 py-12 px-4 sm:px-6 lg:px-8 relative z-10">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-4 gap-8 mb-8">
+                        <div>
+                            <div className="flex items-center gap-2 mb-4">
+                                <Logo className="h-8 w-8" showText={false} />
+                                <span className="text-xl font-bold text-white">Durrah</span>
+                            </div>
+                            <p className="text-gray-400">Modern exam platform for educators</p>
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-white mb-4">Product</h3>
+                            <ul className="space-y-2">
+                                <li><a href="#features" className="hover:text-white transition">Features</a></li>
+                                <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
+                                <li><Link to="/blog" className="hover:text-white transition">Blog</Link></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-white mb-4">Company</h3>
+                            <ul className="space-y-2">
+                                <li><Link to="/about" className="hover:text-white transition">About</Link></li>
+                                <li><Link to="/contact" className="hover:text-white transition">Contact</Link></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-white mb-4">Legal</h3>
+                            <ul className="space-y-2">
+                                <li><Link to="/privacy" className="hover:text-white transition">Privacy</Link></li>
+                                <li><Link to="/terms" className="hover:text-white transition">Terms</Link></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
+                        <p>&copy; 2024 Durrah. All rights reserved.</p>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 }
