@@ -483,7 +483,7 @@ export default function LandingPage() {
                                     className="w-full px-6 py-5 text-left flex justify-between items-center group"
                                 >
                                     <span className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                        {faq.question}
+                                        {t(`faq.q${index + 1}.question`, faq.question)}
                                     </span>
                                     <motion.div
                                         animate={{ rotate: activeFaq === index ? 180 : 0 }}
@@ -501,7 +501,7 @@ export default function LandingPage() {
                                             transition={{ duration: 0.3, ease: 'easeInOut' }}
                                         >
                                             <div className="px-6 pb-5 text-gray-600 dark:text-gray-400 text-sm leading-relaxed border-t border-gray-100 dark:border-slate-700/50 pt-4">
-                                                {faq.answer}
+                                                {t(`faq.q${index + 1}.answer`, faq.answer)}
                                             </div>
                                         </motion.div>
                                     )}
@@ -544,7 +544,7 @@ export default function LandingPage() {
                                 className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-full px-4 py-2 mb-6"
                             >
                                 <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                                <span className="text-sm font-medium text-amber-600 dark:text-amber-400">Playful & Safe</span>
+                                <span className="text-sm font-medium text-amber-600 dark:text-amber-400">{t('landing.marketing.kids.badge', 'Playful & Safe')}</span>
                             </motion.div>
                             <motion.h2
                                 initial={{ opacity: 0, y: 20 }}
@@ -553,7 +553,9 @@ export default function LandingPage() {
                                 transition={{ delay: 0.1 }}
                                 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight"
                             >
-                                Kids Mode: The <span className="text-amber-500">Ultimate</span> Quiz Adventure
+                                {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').replace(t('landing.marketing.kids.titleSpan', 'Ultimate'), '')}
+                                <span className="text-amber-500">{t('landing.marketing.kids.titleSpan', 'Ultimate')}</span>
+                                {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[1]}
                             </motion.h2>
                             <motion.p
                                 initial={{ opacity: 0, y: 20 }}
@@ -562,7 +564,7 @@ export default function LandingPage() {
                                 transition={{ delay: 0.2 }}
                                 className="text-lg text-gray-600 dark:text-gray-300 mb-8"
                             >
-                                Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.
+                                {t('landing.marketing.kids.desc', 'Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.')}
                             </motion.p>
                             <motion.ul
                                 variants={staggerContainer}
@@ -571,23 +573,18 @@ export default function LandingPage() {
                                 viewport={{ once: true }}
                                 className="space-y-4 mb-8"
                             >
-                                {[
-                                    'Fun & Engaging UI designed for children',
-                                    'Automated Anti-Cheating & Proctoring',
-                                    'Interactive Rewards & Nicknames',
-                                    'Safe & Secure Environment'
-                                ].map((item, i) => (
+                                {[0, 1, 2, 3].map((i) => (
                                     <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
                                         <div className="bg-amber-100 dark:bg-amber-900/50 p-1 rounded-full">
                                             <Check className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                                         </div>
-                                        <span className="text-gray-700 dark:text-gray-300 font-medium">{item}</span>
+                                        <span className="text-gray-700 dark:text-gray-300 font-medium">{t(`landing.marketing.kids.features.${i}`)}</span>
                                     </motion.li>
                                 ))}
                             </motion.ul>
                             <Link to="/kids" className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-amber-500/30 transition-all hover:scale-105 active:scale-95">
-                                Try Kids Mode Now
-                                <ArrowRight className="w-5 h-5" />
+                                {t('landing.marketing.kids.cta', 'Try Kids Mode Now')}
+                                <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
                             </Link>
                         </div>
                         <div className="order-1 lg:order-2 relative">
@@ -642,7 +639,7 @@ export default function LandingPage() {
                                 className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-6"
                             >
                                 <Trophy className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Track & Grow</span>
+                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('landing.marketing.student.badge', 'Track & Grow')}</span>
                             </motion.div>
                             <motion.h2
                                 initial={{ opacity: 0, y: 20 }}
@@ -651,7 +648,8 @@ export default function LandingPage() {
                                 transition={{ delay: 0.1 }}
                                 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight"
                             >
-                                Empower Students with a <span className="text-indigo-600">Unified Portal</span>
+                                {t('landing.marketing.student.title', 'Empower Students with a Unified Portal').replace(t('landing.marketing.student.titleSpan', 'Unified Portal'), '')}
+                                <span className="text-indigo-600">{t('landing.marketing.student.titleSpan', 'Unified Portal')}</span>
                             </motion.h2>
                             <motion.p
                                 initial={{ opacity: 0, y: 20 }}
@@ -660,7 +658,7 @@ export default function LandingPage() {
                                 transition={{ delay: 0.2 }}
                                 className="text-lg text-gray-600 dark:text-gray-300 mb-8"
                             >
-                                Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.
+                                {t('landing.marketing.student.desc', 'Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.')}
                             </motion.p>
                             <motion.ul
                                 variants={staggerContainer}
@@ -669,23 +667,18 @@ export default function LandingPage() {
                                 viewport={{ once: true }}
                                 className="space-y-4 mb-8"
                             >
-                                {[
-                                    'One-Click Exam Participation',
-                                    'Complete History & Performance Tracking',
-                                    'Instant Feedback & Result Reviews',
-                                    'Personalized Academic Insights'
-                                ].map((item, i) => (
+                                {[0, 1, 2, 3].map((i) => (
                                     <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
                                         <div className="bg-indigo-100 dark:bg-indigo-900/50 p-1 rounded-full">
                                             <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                                         </div>
-                                        <span className="text-gray-700 dark:text-gray-300 font-medium">{item}</span>
+                                        <span className="text-gray-700 dark:text-gray-300 font-medium">{t(`landing.marketing.student.features.${i}`)}</span>
                                     </motion.li>
                                 ))}
                             </motion.ul>
                             <Link to="/student-portal" className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95">
-                                Visit Student Portal
-                                <ArrowRight className="w-5 h-5" />
+                                {t('landing.marketing.student.cta', 'Visit Student Portal')}
+                                <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
                             </Link>
                         </div>
                     </motion.div>
