@@ -863,6 +863,7 @@ export default function ExamView() {
                 <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-2xl w-full mb-8">
                     <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
                     <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white">{t('examView.submitted.title')}</h2>
+
                     {showResults && score ? (
                         <div className="mt-4">
                             <p className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">{score.percentage.toFixed(1)}%</p>
@@ -870,11 +871,23 @@ export default function ExamView() {
                         </div>
                     ) : (
                         <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-md">
-                            <p>{t('examView.submitted.message')}</p>
-                            <p className="text-sm mt-2">{t('examView.submitted.resultsPending')}</p>
+                            <p>{t('examView.submitted.message', 'Submission Received')}</p>
+                            <p className="text-sm mt-2">{t('examView.submitted.resultsPending', 'Results will be released by your tutor.')}</p>
                         </div>
                     )}
-                    <p className="mt-4 text-sm text-gray-500">{t('examView.submitted.recorded')}</p>
+                    <p className="mt-4 text-sm text-gray-500">{t('examView.submitted.recorded', 'Your submission has been recorded.')}</p>
+
+                    <div className="mt-8">
+                        <button
+                            onClick={() => {
+                                sessionStorage.removeItem('durrah_exam_portal_access');
+                                window.location.href = '/student-portal';
+                            }}
+                            className="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm transition-all"
+                        >
+                            {t('Return to Student Portal')}
+                        </button>
+                    </div>
 
                     {/* View Answers Button */}
                     {/* View Answers Button */}
