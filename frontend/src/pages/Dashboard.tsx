@@ -39,7 +39,7 @@ export default function Dashboard() {
     const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
     const [startDemoTour, setStartDemoTour] = useState(false);
     const [kidsShareModal, setKidsShareModal] = useState<{ url: string; code: string; title?: string } | null>(null);
-    const [shareModal, setShareModal] = useState<{ url: string; code: string; title?: string } | null>(null);
+    const [shareModal, setShareModal] = useState<{ id?: string; url: string; code: string; title?: string; directUrl?: string } | null>(null);
 
     useDemoTour(new URLSearchParams(window.location.search).get('showSharing') === 'true' ? 'share-monitor' : new URLSearchParams(window.location.search).get('showAnalytics') === 'true' ? 'view-analytics' : null, startDemoTour && isDemo);
 
@@ -90,7 +90,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         const demoMode = new URLSearchParams(window.location.search).get('demo') === 'true';
-        
+
         if (demoMode) {
             // Load demo data without fetching from DB
             setExams([
@@ -331,7 +331,8 @@ export default function Dashboard() {
         }
         // Normal mode: always open modal with student portal link + code (even if code missing)
         const portalUrl = `${window.location.origin}/student-portal`;
-        setShareModal({ url: portalUrl, code: exam?.quiz_code || '', title: exam?.title });
+        const directUrl = `${window.location.origin}/exam/${examId}`;
+        setShareModal({ url: portalUrl, code: exam?.quiz_code || '', title: exam?.title, directUrl });
         if (!exam?.quiz_code) {
             toast.error('No exam code set for this exam. Please add a code in the exam editor.');
         }
@@ -823,17 +824,35 @@ export default function Dashboard() {
                                     </div>
                                 )}
                             </div>
+                            {shareModal.directUrl && (
+                                <div className="space-y-2">
+                                    <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">Direct Exam Link (Bypasses Portal)</label>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            readOnly
+                                            value={shareModal.directUrl}
+                                            className="flex-1 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm px-3 py-2 text-gray-800 dark:text-gray-100"
+                                        />
+                                        <button
+                                            onClick={() => copyValue(shareModal.directUrl!, 'Direct exam link copied')}
+                                            className="px-3 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
+                                        >
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                             <div className="flex flex-col gap-2 pt-2">
                                 <div className="text-xs text-yellow-700 bg-yellow-100 border border-yellow-300 rounded px-2 py-1 mb-1">
                                     <b>Note:</b> Share this portal link and code with your students. They will enter the code at the portal to access the exam. Make sure students are registered and ready before the exam.
                                 </div>
                                 <div className="flex gap-2">
                                     <button
-                                        onClick={() => copyValue(`Page: ${shareModal.url}\nCode: ${shareModal.code}`, 'Exam info copied')}
+                                        onClick={() => copyValue(`Portal: ${shareModal.url}\nCode: ${shareModal.code}\nDirect: ${shareModal.directUrl}`, 'All exam info copied')}
                                         className="px-3 py-2 text-sm font-medium rounded-md bg-green-600 text-white hover:bg-green-700"
                                         disabled={!shareModal.code}
                                     >
-                                        Copy Both
+                                        Copy All
                                     </button>
                                     <button
                                         onClick={() => setShareModal(null)}

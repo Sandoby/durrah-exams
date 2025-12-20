@@ -56,15 +56,17 @@ interface Exam {
 
 export default function ExamView() {
     // Check if exam was accessed via portal (code entry)
+    const [isPortalAccess, setIsPortalAccess] = useState(false);
+
     useEffect(() => {
         // Allow review mode and submission view
         if (window.location.search.includes('submission=')) return;
-        // Only check for normal exams (not kids mode)
+
         const portalFlag = sessionStorage.getItem('durrah_exam_portal_access');
-        if (!portalFlag) {
-            // Not accessed via portal, redirect
-            navigate('/student-portal');
+        if (portalFlag) {
+            setIsPortalAccess(true);
         }
+        // Removed strict redirect to allow direct links from tutors
     }, []);
     const { t } = useTranslation();
     const { user } = useAuth();
@@ -877,17 +879,19 @@ export default function ExamView() {
                     )}
                     <p className="mt-4 text-sm text-gray-500">{t('examView.submitted.recorded', 'Your submission has been recorded.')}</p>
 
-                    <div className="mt-8">
-                        <button
-                            onClick={() => {
-                                sessionStorage.removeItem('durrah_exam_portal_access');
-                                window.location.href = '/student-portal';
-                            }}
-                            className="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm transition-all"
-                        >
-                            {t('Return to Student Portal')}
-                        </button>
-                    </div>
+                    {isPortalAccess && (
+                        <div className="mt-8">
+                            <button
+                                onClick={() => {
+                                    sessionStorage.removeItem('durrah_exam_portal_access');
+                                    window.location.href = '/student-portal';
+                                }}
+                                className="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm transition-all"
+                            >
+                                {t('Return to Student Portal')}
+                            </button>
+                        </div>
+                    )}
 
                     {/* View Answers Button */}
                     {/* View Answers Button */}
