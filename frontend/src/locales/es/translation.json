@@ -426,5 +426,111 @@
         "success": {
             "submitted": "¡Examen enviado con éxito!"
         }
+    },
+    "kids": {
+        "seo": {
+            "title": "Aventura de Quiz para Niños | Seguro, Divertido, Anti-Trampa | Durrah",
+            "description": "¡Comienza tu aventura de quiz! Quizzes en línea seguros y divertidos para niños con modo infantil y anti-trampa. Desarrollado por Durrah para Tutores.",
+            "keywords": "quiz para niños, cuestionarios divertidos, exámenes seguros, anti trampa, modo niño, plataforma de quiz segura, aprendizaje infantil"
+        },
+        "header": {
+            "title": "Quiz para Niños",
+            "fun": "Aprendizaje Divertido"
+        },
+        "hero": {
+            "ready": "¿Listo para Jugar?",
+            "title": "Comencemos la",
+            "adventure": "¡Aventura de Quiz!",
+            "desc": "¡Ingresa tu nombre y el código secreto para comenzar tu divertido viaje!"
+        },
+        "form": {
+            "nickname": "Tu Súper Nombre",
+            "nicknamePlaceholder": "ej., SúperEstrella",
+            "code": "Código Secreto",
+            "codePlaceholder": "KID-ABC123",
+            "codeLabel": "Código:",
+            "loading": "Preparándote...",
+            "start": "¡Iniciar Aventura!",
+            "help": "Pide a tu profesor el código secreto"
+        },
+        "features": {
+            "title": "✨ Lo que te espera ✨",
+            "fun": "🎯 Quizzes Divertidos",
+            "rewards": "🏆 Gana Premios",
+            "games": "🎮 Juegos Geniales",
+            "star": "⭐ Sé una Estrella"
+        }
+    },
+    "faq": {
+        "title": "Preguntas Frecuentes",
+        "subtitle": "Todo lo que necesitas saber sobre Durrah",
+        "q1": {
+            "question": "¿Es Durrah realmente seguro para los niños?",
+            "answer": "¡Sí! Priorizamos la seguridad con contenido filtrado, opciones de inicio de sesión solo con apodo y nunca vendemos los datos de los estudiantes."
+        },
+        "q2": {
+            "question": "¿Cómo funciona el sistema anti-trampa?",
+            "answer": "Nuestro sistema detecta cambios de pestaña, salidas de pantalla completa y patrones de comportamiento sospechosos mediante IA sin necesidad de software complejo."
+        },
+        "q3": {
+            "question": "¿Puedo usar Durrah para grupos escolares grandes?",
+            "answer": "Absolutamente. Nuestros planes 'Pro' y 'Anual' están diseñados para exámenes de alta capacidad con análisis detallados."
+        },
+        "q4": {
+            "question": "¿Necesitan los estudiantes una cuenta?",
+            "answer": "Los estudiantes pueden unirse solo con un código y apodo, o usar el Portal del Estudiante para rastrear su progreso a largo plazo."
+        }
+    },
+    "landing": {
+        "marketing": {
+            "kids": {
+                "badge": "Divertido y Seguro",
+                "title": "Modo Niños: La Aventura de Quiz Definitiva",
+                "titleSpan": "Definitiva",
+                "desc": "Transforma las evaluaciones en un viaje divertido. Nuestro Modo Niños cuenta con visuales vibrantes, navegación simplificada y un sistema anti-trampa de nivel mundial que se siente como un juego, no como una prueba.",
+                "features": {
+                    "0": "Interfaz divertida y atractiva diseñada para niños",
+                    "1": "Anti-trampa y supervisión automatizados",
+                    "2": "Recompensas interactivas y apodos",
+                    "3": "Entorno seguro y protegido"
+                },
+                "cta": "Prueba el Modo Niños ahora"
+            },
+            "student": {
+                "badge": "Rastrea y Crece",
+                "title": "Empodera a los estudiantes con un portal unificado",
+                "titleSpan": "portal unificado",
+                "desc": "Ofrece a tu estudiantes un centro central para gestionar su trayectoria académica. Desde unirse a exámenes con un simple código hasta realizar un seguimiento de los desempeños pasados.",
+                "features": {
+                    "0": "Participación en exámenes con un solo clic",
+                    "1": "Historial completo y seguimiento del desempeño",
+                    "2": "Comentarios instantáneos y revisión de resultados",
+                    "3": "Perspectivas académicas personalizadas"
+                },
+                "cta": "Visitar Portal del Estudiante"
+            }
+        }
+    },
+    "studentPortal": {
+        "title": "Portal del Estudiante",
+        "signIn": "Iniciar sesión en el Portal del Estudiante",
+        "createAccount": "Crear cuenta de estudiante",
+        "welcome": "¡Bienvenido de nuevo!",
+        "regSuccess": "¡Registro exitoso! Por favor revisa tu correo electrónico.",
+        "joinExam": "Unirse a un examen",
+        "joinDesc": "Ingresa el código de examen proporcionado por tu tutor para comenzar una nueva evaluación.",
+        "enterCode": "Ingresa el código o ID del examen",
+        "joining": "Uniéndote...",
+        "start": "Comenzar",
+        "performance": "Tu Desempeño",
+        "examsTaken": "Exámenes realizados",
+        "avgScore": "Puntaje promedio",
+        "recentActivity": "Actividad reciente",
+        "noExams": "No se encontraron exámenes todavía. ¡Únete a tu primer examen arriba!",
+        "untitled": "Examen sin título",
+        "noDesc": "Sin descripción",
+        "signOut": "Cerrar sesión",
+        "notFound": "Examen no encontrado. Por favor revisa el código.",
+        "error": "Ocurrió un error. Por favor intenta de nuevo."
     }
 }

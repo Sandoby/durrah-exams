@@ -553,7 +553,7 @@ export default function LandingPage() {
                                 transition={{ delay: 0.1 }}
                                 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight"
                             >
-                                {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').replace(t('landing.marketing.kids.titleSpan', 'Ultimate'), '')}
+                                {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[0]}
                                 <span className="text-amber-500">{t('landing.marketing.kids.titleSpan', 'Ultimate')}</span>
                                 {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[1]}
                             </motion.h2>
@@ -648,8 +648,9 @@ export default function LandingPage() {
                                 transition={{ delay: 0.1 }}
                                 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight"
                             >
-                                {t('landing.marketing.student.title', 'Empower Students with a Unified Portal').replace(t('landing.marketing.student.titleSpan', 'Unified Portal'), '')}
+                                {t('landing.marketing.student.title', 'Empower Students with a Unified Portal').split(t('landing.marketing.student.titleSpan', 'Unified Portal'))[0]}
                                 <span className="text-indigo-600">{t('landing.marketing.student.titleSpan', 'Unified Portal')}</span>
+                                {t('landing.marketing.student.title', 'Empower Students with a Unified Portal').split(t('landing.marketing.student.titleSpan', 'Unified Portal'))[1]}
                             </motion.h2>
                             <motion.p
                                 initial={{ opacity: 0, y: 20 }}
