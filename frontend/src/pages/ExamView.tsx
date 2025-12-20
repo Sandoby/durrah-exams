@@ -253,24 +253,37 @@ export default function ExamView() {
             setExam({ ...examData, questions: processedQuestions, settings: normalizedSettings });
 
             // Availability checks
-            const now = new Date();
-            let start: Date | null = null;
-            let end: Date | null = null;
-            if (normalizedSettings.start_time) {
-                const d = new Date(normalizedSettings.start_time);
-                if (!isNaN(d.getTime())) start = d;
-            }
-            if (normalizedSettings.end_time) {
-                const d = new Date(normalizedSettings.end_time);
-                if (!isNaN(d.getTime())) end = d;
-            }
+            const timezone = normalizedSettings.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-            if (start && now < start) {
+            const getWallClockString = (date: Date, tz: string) => {
+                try {
+                    const parts = new Intl.DateTimeFormat('en-US', {
+                        timeZone: tz,
+                        year: 'numeric',
+                        month: 'numeric',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: 'numeric',
+                        hour12: false
+                    }).formatToParts(date);
+                    const getV = (type: string) => parts.find(p => p.type === type)?.value || '';
+                    return `${getV('year')}-${getV('month').padStart(2, '0')}-${getV('day').padStart(2, '0')}T${getV('hour').padStart(2, '0')}:${getV('minute').padStart(2, '0')}`;
+                } catch (e) {
+                    // Fallback to local if timezone invalid
+                    return date.toISOString().slice(0, 16);
+                }
+            };
+
+            const nowWallClock = getWallClockString(new Date(), timezone);
+            const startTime = normalizedSettings.start_time;
+            const endTime = normalizedSettings.end_time;
+
+            if (startTime && nowWallClock < startTime) {
                 setIsAvailable(false);
-                setAvailabilityMessage(`${t('examView.startsAt')} ${start.toLocaleString()}`);
-            } else if (end && now > end) {
+                setAvailabilityMessage(`${t('examView.startsAt')} ${startTime.replace('T', ' ')} (${timezone})`);
+            } else if (endTime && nowWallClock > endTime) {
                 setIsAvailable(false);
-                setAvailabilityMessage(`${t('examView.endedAt')} ${end.toLocaleString()}`);
+                setAvailabilityMessage(`${t('examView.endedAt')} ${endTime.replace('T', ' ')} (${timezone})`);
             } else {
                 setIsAvailable(true);
                 setAvailabilityMessage(null);

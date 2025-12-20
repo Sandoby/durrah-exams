@@ -46,6 +46,7 @@ interface ExamForm {
         time_limit_minutes: number | null;
         start_time: string | null;
         end_time: string | null;
+        timezone?: string; // NEW: Timezone selection
         restrict_by_email: boolean;
         allowed_emails: string[];
 
@@ -127,6 +128,7 @@ export default function ExamEditor() {
                 time_limit_minutes: null,
                 start_time: null,
                 end_time: null,
+                timezone: typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'UTC',
                 restrict_by_email: false,
                 allowed_emails: [],
             },
@@ -701,76 +703,76 @@ export default function ExamEditor() {
 
                         {/* Student Fields - Hidden in Kids Mode */}
                         {!watch('settings.child_mode_enabled') && (
-                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6" id="required-fields">
-                            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('examEditor.studentInfo.title')}</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('examEditor.studentInfo.desc')}</p>
-                            <div className="grid grid-cols-1 gap-y-3 sm:grid-cols-2">
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={watch('required_fields')?.includes('name')}
-                                        onChange={(e) => {
-                                            const current = watch('required_fields') || [];
-                                            if (e.target.checked) {
-                                                setValue('required_fields', [...current, 'name']);
-                                            } else {
-                                                setValue('required_fields', current.filter(f => f !== 'name'));
-                                            }
-                                        }}
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                    />
-                                    <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.studentInfo.name')}</label>
-                                </div>
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={watch('required_fields')?.includes('email')}
-                                        onChange={(e) => {
-                                            const current = watch('required_fields') || [];
-                                            if (e.target.checked) {
-                                                setValue('required_fields', [...current, 'email']);
-                                            } else {
-                                                setValue('required_fields', current.filter(f => f !== 'email'));
-                                            }
-                                        }}
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                    />
-                                    <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.studentInfo.email')}</label>
-                                </div>
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={watch('required_fields')?.includes('student_id')}
-                                        onChange={(e) => {
-                                            const current = watch('required_fields') || [];
-                                            if (e.target.checked) {
-                                                setValue('required_fields', [...current, 'student_id']);
-                                            } else {
-                                                setValue('required_fields', current.filter(f => f !== 'student_id'));
-                                            }
-                                        }}
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                    />
-                                    <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.studentInfo.studentId')}</label>
-                                </div>
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={watch('required_fields')?.includes('phone')}
-                                        onChange={(e) => {
-                                            const current = watch('required_fields') || [];
-                                            if (e.target.checked) {
-                                                setValue('required_fields', [...current, 'phone']);
-                                            } else {
-                                                setValue('required_fields', current.filter(f => f !== 'phone'));
-                                            }
-                                        }}
-                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                    />
-                                    <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.studentInfo.phone')}</label>
+                            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6" id="required-fields">
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('examEditor.studentInfo.title')}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('examEditor.studentInfo.desc')}</p>
+                                <div className="grid grid-cols-1 gap-y-3 sm:grid-cols-2">
+                                    <div className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={watch('required_fields')?.includes('name')}
+                                            onChange={(e) => {
+                                                const current = watch('required_fields') || [];
+                                                if (e.target.checked) {
+                                                    setValue('required_fields', [...current, 'name']);
+                                                } else {
+                                                    setValue('required_fields', current.filter(f => f !== 'name'));
+                                                }
+                                            }}
+                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                        />
+                                        <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.studentInfo.name')}</label>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={watch('required_fields')?.includes('email')}
+                                            onChange={(e) => {
+                                                const current = watch('required_fields') || [];
+                                                if (e.target.checked) {
+                                                    setValue('required_fields', [...current, 'email']);
+                                                } else {
+                                                    setValue('required_fields', current.filter(f => f !== 'email'));
+                                                }
+                                            }}
+                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                        />
+                                        <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.studentInfo.email')}</label>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={watch('required_fields')?.includes('student_id')}
+                                            onChange={(e) => {
+                                                const current = watch('required_fields') || [];
+                                                if (e.target.checked) {
+                                                    setValue('required_fields', [...current, 'student_id']);
+                                                } else {
+                                                    setValue('required_fields', current.filter(f => f !== 'student_id'));
+                                                }
+                                            }}
+                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                        />
+                                        <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.studentInfo.studentId')}</label>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={watch('required_fields')?.includes('phone')}
+                                            onChange={(e) => {
+                                                const current = watch('required_fields') || [];
+                                                if (e.target.checked) {
+                                                    setValue('required_fields', [...current, 'phone']);
+                                                } else {
+                                                    setValue('required_fields', current.filter(f => f !== 'phone'));
+                                                }
+                                            }}
+                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                        />
+                                        <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('examEditor.studentInfo.phone')}</label>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         )}
 
                         {/* Email Access Control - Hidden in Kids Mode */}
@@ -940,6 +942,32 @@ export default function ExamEditor() {
                                                 {...register('settings.end_time')}
                                             />
                                             <p className="mt-1 text-xs text-gray-500">{t('examEditor.settings.endTimeDesc')}</p>
+                                        </div>
+                                        <div className="col-span-2">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                {t('examEditor.settings.timezone', 'Timezone')}
+                                            </label>
+                                            <select
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border bg-white dark:bg-gray-700 dark:text-white"
+                                                {...register('settings.timezone')}
+                                            >
+                                                {typeof Intl !== 'undefined' && 'supportedValuesOf' in Intl ? (
+                                                    (Intl as any).supportedValuesOf('timeZone').map((tz: string) => (
+                                                        <option key={tz} value={tz}>{tz}</option>
+                                                    ))
+                                                ) : (
+                                                    <>
+                                                        <option value="UTC">UTC</option>
+                                                        <option value="America/New_York">America/New_York</option>
+                                                        <option value="Europe/London">Europe/London</option>
+                                                        <option value="Asia/Tokyo">Asia/Tokyo</option>
+                                                        {/* Fallback list if supportedValuesOf is not available */}
+                                                    </>
+                                                )}
+                                            </select>
+                                            <p className="mt-1 text-xs text-gray-500">
+                                                Select the timezone for the exam schedule. Current: {watch('settings.timezone')}
+                                            </p>
                                         </div>
                                     </>
                                 )}
