@@ -1,7 +1,7 @@
 ﻿import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X } from 'lucide-react';
+import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, Trophy } from 'lucide-react';
 import { useState } from 'react';
 import { Logo } from '../components/Logo';
 import { LottiePlayer } from '../components/LottiePlayer';
@@ -24,22 +24,22 @@ export default function LandingPage() {
     const { price: yearlyPrice } = useCurrency(2000);
 
     return (
-                <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" dir={isRTL ? 'rtl' : 'ltr'}>
-                        <Helmet>
-                                <title>Fun, Secure Online Quizzes for Kids & Tutors | Durrah</title>
-                                <meta name="description" content="Durrah for Tutors: Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
-                                <meta name="keywords" content="kids online quiz, safe kids exams, anti cheating online exam, child mode, secure quiz platform, fun learning for children, quiz for schools, quiz for tutors" />
-                                <meta property="og:title" content="Fun, Secure Online Quizzes for Kids & Tutors | Durrah" />
-                                <meta property="og:description" content="Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
-                                <meta property="og:type" content="website" />
-                                <meta property="og:url" content="https://tutors.durrahsystem.tech/" />
-                                <meta property="og:image" content="https://tutors.durrahsystem.tech/illustrations/og-image.png" />
-                                <meta name="twitter:card" content="summary_large_image" />
-                                <meta name="twitter:title" content="Fun, Secure Online Quizzes for Kids & Tutors | Durrah" />
-                                <meta name="twitter:description" content="Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
-                                <meta name="twitter:image" content="https://tutors.durrahsystem.tech/illustrations/og-image.png" />
-                                <link rel="canonical" href="https://tutors.durrahsystem.tech/" />
-                                <script type="application/ld+json">{`
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" dir={isRTL ? 'rtl' : 'ltr'}>
+            <Helmet>
+                <title>Fun, Secure Online Quizzes for Kids & Tutors | Durrah</title>
+                <meta name="description" content="Durrah for Tutors: Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
+                <meta name="keywords" content="kids online quiz, safe kids exams, anti cheating online exam, child mode, secure quiz platform, fun learning for children, quiz for schools, quiz for tutors" />
+                <meta property="og:title" content="Fun, Secure Online Quizzes for Kids & Tutors | Durrah" />
+                <meta property="og:description" content="Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://tutors.durrahsystem.tech/" />
+                <meta property="og:image" content="https://tutors.durrahsystem.tech/illustrations/og-image.png" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Fun, Secure Online Quizzes for Kids & Tutors | Durrah" />
+                <meta name="twitter:description" content="Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
+                <meta name="twitter:image" content="https://tutors.durrahsystem.tech/illustrations/og-image.png" />
+                <link rel="canonical" href="https://tutors.durrahsystem.tech/" />
+                <script type="application/ld+json">{`
                                     {
                                         "@context": "https://schema.org",
                                         "@type": "WebSite",
@@ -53,8 +53,8 @@ export default function LandingPage() {
                                         }
                                     }
                                 `}</script>
-                                <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-                        </Helmet>
+                <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+            </Helmet>
 
             <style>{`
                 @keyframes blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
@@ -102,7 +102,7 @@ export default function LandingPage() {
                                 )}
                             </div>
                         </div>
-                        
+
                         {/* Mobile Menu Button */}
                         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
                             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -116,7 +116,7 @@ export default function LandingPage() {
                 <>
                     {/* Backdrop */}
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setMobileMenuOpen(false)} />
-                    
+
                     {/* Menu Drawer */}
                     <div className={`fixed top-20 ${isRTL ? 'left-4' : 'right-4'} w-[calc(100%-2rem)] max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl z-50 lg:hidden border border-gray-200 dark:border-gray-700 overflow-hidden animate-in slide-in-from-top duration-300`}>
                         <div className="p-6 space-y-4">
@@ -132,7 +132,7 @@ export default function LandingPage() {
                             <Link to="/blog" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-colors">
                                 Blog
                             </Link>
-                            
+
                             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <div className="mb-4">
                                     <LanguageSwitcher />
@@ -167,7 +167,7 @@ export default function LandingPage() {
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
                 <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
                 <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-purple-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
-                
+
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         <div className="text-center lg:text-left">
@@ -175,16 +175,16 @@ export default function LandingPage() {
                                 <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                                 <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('hero.trustedBadge')}</span>
                             </div>
-                            
+
                             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 dark:text-white mb-6 leading-[1.1]">
                                 {t('hero.title')}<br />
                                 <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">{t('hero.titleHighlight')}</span>
                             </h1>
-                            
+
                             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0">
                                 {t('hero.subtitle')}
                             </p>
-                            
+
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
                                 <a href={registrationUrl} target="_blank" rel="noreferrer" className="group relative bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-2xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center">
                                     <span className="relative z-10 flex items-center gap-2">
@@ -200,7 +200,7 @@ export default function LandingPage() {
                                     </svg>
                                 </Link>
                             </div>
-                            
+
                             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-gray-600 dark:text-gray-400">
                                 <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>{t('hero.features.noCreditCard')}</span></div>
                                 <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>{t('hero.features.freeExams')}</span></div>
@@ -211,7 +211,7 @@ export default function LandingPage() {
                         <div className="relative">
                             <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl shadow-indigo-500/10 p-8 border border-gray-100 dark:border-slate-700">
                                 <LottiePlayer src="/illustrations/juicy-woman-focused-on-online-learning.json" background="transparent" speed={1} className="w-full h-80" autoplay loop />
-                                
+
                                 <div className="absolute -top-6 -left-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-indigo-500/10 p-4 border border-gray-100 dark:border-slate-700 animate-float">
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
@@ -223,7 +223,7 @@ export default function LandingPage() {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="absolute -bottom-6 -right-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-violet-500/10 p-4 border border-gray-100 dark:border-slate-700 animate-float animation-delay-2000">
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl flex items-center justify-center">
@@ -236,7 +236,7 @@ export default function LandingPage() {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full">
                                 <div className="absolute top-0 right-0 w-72 h-72 bg-indigo-300/30 dark:bg-indigo-600/20 rounded-full filter blur-3xl"></div>
                                 <div className="absolute bottom-0 left-0 w-72 h-72 bg-violet-300/30 dark:bg-violet-600/20 rounded-full filter blur-3xl"></div>
@@ -439,6 +439,98 @@ export default function LandingPage() {
                     </div>
                 </div>
             </footer>
+            {/* Kids Mode & Student Portal Sections */}
+            <section className="py-24 relative overflow-hidden bg-white dark:bg-slate-900">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Kids Mode Feature */}
+                    <div className="grid lg:grid-cols-2 gap-16 items-center mb-32">
+                        <div className="order-2 lg:order-1">
+                            <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-full px-4 py-2 mb-6">
+                                <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                                <span className="text-sm font-medium text-amber-600 dark:text-amber-400">Playful & Safe</span>
+                            </div>
+                            <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight">
+                                Kids Mode: The <span className="text-amber-500">Ultimate</span> Quiz Adventure
+                            </h2>
+                            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+                                Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.
+                            </p>
+                            <ul className="space-y-4 mb-8">
+                                {[
+                                    'Fun & Engaging UI designed for children',
+                                    'Automated Anti-Cheating & Proctoring',
+                                    'Interactive Rewards & Nicknames',
+                                    'Safe & Secure Environment'
+                                ].map((item, i) => (
+                                    <li key={i} className="flex items-center gap-3">
+                                        <div className="bg-amber-100 dark:bg-amber-900/50 p-1 rounded-full">
+                                            <Check className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                                        </div>
+                                        <span className="text-gray-700 dark:text-gray-300 font-medium">{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                            <Link to="/kids" className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-amber-500/30 transition-all hover:scale-105">
+                                Try Kids Mode Now
+                                <ArrowRight className="w-5 h-5" />
+                            </Link>
+                        </div>
+                        <div className="order-1 lg:order-2 relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-500 blur-3xl opacity-20 animate-pulse"></div>
+                            <img
+                                src="file:///C:/Users/Elsaid%20Ahmed/.gemini/antigravity/brain/8b689b61-3429-43e0-a122-92f6b0b82d60/kids_mode_marketing_1766238313818.png"
+                                alt="Kids Mode Marketing"
+                                className="relative z-10 rounded-3xl shadow-2xl animate-float"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Student Portal Feature */}
+                    <div className="grid lg:grid-cols-2 gap-16 items-center">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 to-violet-500 blur-3xl opacity-20 animate-pulse"></div>
+                            <img
+                                src="file:///C:/Users/Elsaid%20Ahmed/.gemini/antigravity/brain/8b689b61-3429-43e0-a122-92f6b0b82d60/student_portal_marketing_1766238329499.png"
+                                alt="Student Portal Marketing"
+                                className="relative z-10 rounded-3xl shadow-2xl animate-float animation-delay-2000"
+                            />
+                        </div>
+                        <div>
+                            <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-6">
+                                <Trophy className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Track & Grow</span>
+                            </div>
+                            <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight">
+                                Empower Students with a <span className="text-indigo-600">Unified Portal</span>
+                            </h2>
+                            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+                                Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.
+                            </p>
+                            <ul className="space-y-4 mb-8">
+                                {[
+                                    'One-Click Exam Participation',
+                                    'Complete History & Performance Tracking',
+                                    'Instant Feedback & Result Reviews',
+                                    'Personalized Academic Insights'
+                                ].map((item, i) => (
+                                    <li key={i} className="flex items-center gap-3">
+                                        <div className="bg-indigo-100 dark:bg-indigo-900/50 p-1 rounded-full">
+                                            <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                        </div>
+                                        <span className="text-gray-700 dark:text-gray-300 font-medium">{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                            <Link to="/student-portal" className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-indigo-500/30 transition-all hover:scale-105">
+                                Visit Student Portal
+                                <ArrowRight className="w-5 h-5" />
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Existing Footer (moved down if necessary, or just keeping it here) */}
         </div>
     );
 }

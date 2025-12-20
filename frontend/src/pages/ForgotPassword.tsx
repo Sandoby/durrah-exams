@@ -55,10 +55,14 @@ export default function ForgotPassword() {
                         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                             We have sent a password reset link to your email address.
                         </p>
-                        <div className="mt-6">
+                        <div className="mt-6 space-y-3">
                             <Link to="/login" className="text-indigo-600 hover:text-indigo-500 font-medium flex items-center justify-center">
                                 <ArrowLeft className="h-4 w-4 mr-2" />
                                 Back to sign in
+                            </Link>
+                            <Link to="/student-portal" className="text-gray-600 hover:text-gray-500 text-sm flex items-center justify-center">
+                                <ArrowLeft className="h-3 w-3 mr-2" />
+                                Go to Student Portal
                             </Link>
                         </div>
                     </div>

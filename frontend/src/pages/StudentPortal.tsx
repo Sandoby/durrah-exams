@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
-import { LogOut, BookOpen, Clock, Trophy, Search, User, Key, ArrowRight, History } from 'lucide-react';
+import { LogOut, BookOpen, Clock, Trophy, Search, User, ArrowRight, History } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function StudentPortal() {
@@ -199,19 +199,29 @@ export default function StudentPortal() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('Password')}</label>
-                <div className="mt-1 relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Key className="h-5 w-5 text-gray-400" />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t('Password')}
+                  </label>
                   <input
                     type="password"
                     required
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white py-3"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all"
                     placeholder="••••••••"
                   />
+                  {authMode === 'login' && (
+                    <div className="mt-2 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => navigate('/forgot-password')}
+                        className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
+                      >
+                        {t('Forgot password?')}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
