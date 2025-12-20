@@ -1,12 +1,13 @@
 ﻿import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, Trophy } from 'lucide-react';
+import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, Trophy, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { Logo } from '../components/Logo';
 import { LottiePlayer } from '../components/LottiePlayer';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
 export default function LandingPage() {
@@ -22,6 +23,40 @@ export default function LandingPage() {
 
     const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(200);
     const { price: yearlyPrice } = useCurrency(2000);
+
+    const [activeFaq, setActiveFaq] = useState<number | null>(null);
+
+    const faqs = [
+        {
+            question: t('faq.q1.question', 'Is Durrah really safe for kids?'),
+            answer: t('faq.q1.answer', 'Yes! We prioritize safety with filtered content, secure nickname-only access options, and zero data selling.')
+        },
+        {
+            question: t('faq.q2.question', 'How does the anti-cheating system work?'),
+            answer: t('faq.q2.answer', 'Our system uses AI to detect tab switching, fullscreen escapes, and suspicious behavior patterns without intrusive software.')
+        },
+        {
+            question: t('faq.q3.question', 'Can I use Durrah for large school groups?'),
+            answer: t('faq.q3.answer', 'Absolutely. Our "Professional" and "Yearly" plans are designed for high-capacity testing with detailed analytics.')
+        },
+        {
+            question: t('faq.q4.question', 'Do students need an account?'),
+            answer: t('faq.q4.answer', 'Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress.')
+        }
+    ];
+
+    const fadeIn = {
+        initial: { opacity: 0, y: 20 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true },
+        transition: { duration: 0.6 }
+    };
+
+    const staggerContainer = {
+        initial: {},
+        whileInView: { transition: { staggerChildren: 0.1 } },
+        viewport: { once: true }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -281,7 +316,13 @@ export default function LandingPage() {
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('features.title')}</h2>
                         <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">{t('features.subtitle')}</p>
                     </div>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    >
                         {[
                             { icon: Zap, title: t('features.fastCreation.title'), desc: t('features.fastCreation.desc', 'Create professional exams in minutes'), gradient: 'from-yellow-400 to-orange-500' },
                             { icon: Shield, title: t('features.antiCheating.title'), desc: t('features.antiCheating.desc', 'Fullscreen mode, tab detection, violation tracking'), gradient: 'from-indigo-400 to-violet-500' },
@@ -290,15 +331,19 @@ export default function LandingPage() {
                             { icon: MessageCircle, title: t('features.support.title'), desc: t('features.support.desc', 'Always here to help you succeed'), gradient: 'from-blue-400 to-cyan-500' },
                             { icon: Layout, title: t('features.interface.title'), desc: t('features.interface.desc', 'Easy to use, powerful features'), gradient: 'from-purple-400 to-fuchsia-500' }
                         ].map((feature, index) => (
-                            <div key={index} className="group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-slate-700 p-8">
+                            <motion.div
+                                key={index}
+                                variants={fadeIn}
+                                className="group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-slate-700 p-8"
+                            >
                                 <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
                                     <feature.icon className="w-7 h-7 text-white" />
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
                                 <p className="text-gray-600 dark:text-gray-400">{feature.desc}</p>
-                            </div>
+                            </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
@@ -313,8 +358,14 @@ export default function LandingPage() {
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('pricing.title')}</h2>
                         <p className="text-xl text-gray-600 dark:text-gray-300">{t('pricing.subtitle')}</p>
                     </div>
-                    <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-200 dark:border-slate-700 p-8">
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+                    >
+                        <motion.div variants={fadeIn} className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-200 dark:border-slate-700 p-8">
                             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('pricing.starter.title')}</h3>
                             <div className="mb-6"><span className="text-5xl font-bold text-gray-900 dark:text-white">{t('pricing.starter.price')}</span></div>
                             <ul className="space-y-4 mb-8">
@@ -323,8 +374,11 @@ export default function LandingPage() {
                                 <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.starter.features.2')}</span></li>
                             </ul>
                             <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-slate-600 transition">{t('pricing.starter.cta')}</a>
-                        </div>
-                        <div className="relative bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 rounded-3xl shadow-2xl p-8 transform hover:scale-105 transition-all duration-300">
+                        </motion.div>
+                        <motion.div
+                            variants={fadeIn}
+                            className="relative bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 rounded-3xl shadow-2xl p-8 transform hover:scale-105 transition-all duration-300"
+                        >
                             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-gray-900 px-4 py-1 rounded-full font-bold text-sm shadow-lg">{t('pricing.professional.badge')}</div>
                             <h3 className="text-2xl font-bold text-white mb-2">{t('pricing.professional.title')}</h3>
                             <div className="mb-6">
@@ -338,8 +392,8 @@ export default function LandingPage() {
                                 <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">{t('pricing.professional.features.3')}</span></li>
                             </ul>
                             <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-white text-indigo-600 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition shadow-lg">{t('pricing.professional.cta')}</a>
-                        </div>
-                        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-indigo-200 dark:border-indigo-800 p-8">
+                        </motion.div>
+                        <motion.div variants={fadeIn} className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-indigo-200 dark:border-indigo-800 p-8">
                             <div className="inline-block bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full font-semibold text-sm mb-4">{t('pricing.yearly.badge')}</div>
                             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('pricing.yearly.title')}</h3>
                             <div className="mb-6">
@@ -352,8 +406,8 @@ export default function LandingPage() {
                                 <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.yearly.features.2')}</span></li>
                             </ul>
                             <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition">{t('pricing.yearly.cta')}</a>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 </div>
             </section>
 
@@ -364,13 +418,23 @@ export default function LandingPage() {
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('testimonials.title')}</h2>
                         <p className="text-xl text-gray-600 dark:text-gray-300">{t('testimonials.subtitle')}</p>
                     </div>
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="grid md:grid-cols-3 gap-8"
+                    >
                         {[
                             { name: t('testimonials.t1.name'), role: t('testimonials.t1.role'), content: t('testimonials.t1.content'), rating: 5 },
                             { name: t('testimonials.t2.name'), role: t('testimonials.t2.role'), content: t('testimonials.t2.content'), rating: 5 },
                             { name: t('testimonials.t3.name'), role: t('testimonials.t3.role'), content: t('testimonials.t3.content'), rating: 5 }
                         ].map((testimonial, index) => (
-                            <div key={index} className="group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-slate-700 p-8">
+                            <motion.div
+                                key={index}
+                                variants={fadeIn}
+                                className="group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-slate-700 p-8"
+                            >
                                 <div className="flex mb-4">
                                     {[...Array(testimonial.rating)].map((_, i) => (
                                         <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
@@ -381,7 +445,68 @@ export default function LandingPage() {
                                     <div className="font-bold text-gray-900 dark:text-white">{testimonial.name}</div>
                                     <div className="text-sm text-gray-500 dark:text-gray-400">{testimonial.role}</div>
                                 </div>
-                            </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* FAQ Section */}
+            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900/50">
+                <div className="max-w-3xl mx-auto">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-16"
+                    >
+                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                            {t('faq.title', 'Frequently Asked Questions')}
+                        </h2>
+                        <p className="text-gray-600 dark:text-gray-400">
+                            {t('faq.subtitle', 'Everything you need to know about Durrah')}
+                        </p>
+                    </motion.div>
+
+                    <div className="space-y-4">
+                        {faqs.map((faq, index) => (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 }}
+                                className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                            >
+                                <button
+                                    onClick={() => setActiveFaq(activeFaq === index ? null : index)}
+                                    className="w-full px-6 py-5 text-left flex justify-between items-center group"
+                                >
+                                    <span className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                        {faq.question}
+                                    </span>
+                                    <motion.div
+                                        animate={{ rotate: activeFaq === index ? 180 : 0 }}
+                                        className="text-gray-400"
+                                    >
+                                        <ChevronDown className="w-5 h-5" />
+                                    </motion.div>
+                                </button>
+                                <AnimatePresence>
+                                    {activeFaq === index && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                        >
+                                            <div className="px-6 pb-5 text-gray-600 dark:text-gray-400 text-sm leading-relaxed border-t border-gray-100 dark:border-slate-700/50 pt-4">
+                                                {faq.answer}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
@@ -404,102 +529,166 @@ export default function LandingPage() {
             <section className="py-24 relative overflow-hidden bg-white dark:bg-slate-900">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Kids Mode Feature */}
-                    <div className="grid lg:grid-cols-2 gap-16 items-center mb-32">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8 }}
+                        className="grid lg:grid-cols-2 gap-16 items-center mb-32"
+                    >
                         <div className="order-2 lg:order-1">
-                            <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-full px-4 py-2 mb-6">
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-full px-4 py-2 mb-6"
+                            >
                                 <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                                 <span className="text-sm font-medium text-amber-600 dark:text-amber-400">Playful & Safe</span>
-                            </div>
-                            <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight">
+                            </motion.div>
+                            <motion.h2
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.1 }}
+                                className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight"
+                            >
                                 Kids Mode: The <span className="text-amber-500">Ultimate</span> Quiz Adventure
-                            </h2>
-                            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+                            </motion.h2>
+                            <motion.p
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.2 }}
+                                className="text-lg text-gray-600 dark:text-gray-300 mb-8"
+                            >
                                 Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.
-                            </p>
-                            <ul className="space-y-4 mb-8">
+                            </motion.p>
+                            <motion.ul
+                                variants={staggerContainer}
+                                initial="initial"
+                                whileInView="whileInView"
+                                viewport={{ once: true }}
+                                className="space-y-4 mb-8"
+                            >
                                 {[
                                     'Fun & Engaging UI designed for children',
                                     'Automated Anti-Cheating & Proctoring',
                                     'Interactive Rewards & Nicknames',
                                     'Safe & Secure Environment'
                                 ].map((item, i) => (
-                                    <li key={i} className="flex items-center gap-3">
+                                    <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
                                         <div className="bg-amber-100 dark:bg-amber-900/50 p-1 rounded-full">
                                             <Check className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                                         </div>
                                         <span className="text-gray-700 dark:text-gray-300 font-medium">{item}</span>
-                                    </li>
+                                    </motion.li>
                                 ))}
-                            </ul>
-                            <Link to="/kids" className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-amber-500/30 transition-all hover:scale-105">
+                            </motion.ul>
+                            <Link to="/kids" className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-amber-500/30 transition-all hover:scale-105 active:scale-95">
                                 Try Kids Mode Now
                                 <ArrowRight className="w-5 h-5" />
                             </Link>
                         </div>
                         <div className="order-1 lg:order-2 relative">
                             {/* Floating Astronauts/Kids Decorations overlapping the main image */}
-                            <img
+                            <motion.img
+                                animate={{ y: [0, -20, 0] }}
+                                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886149420.png"
                                 alt=""
-                                className="absolute -top-16 -left-12 w-32 h-32 animate-float z-20 drop-shadow-2xl"
+                                className="absolute -top-16 -left-12 w-32 h-32 z-20 drop-shadow-2xl"
                             />
-                            <img
+                            <motion.img
+                                animate={{ y: [0, 20, 0] }}
+                                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886176188.png"
                                 alt=""
-                                className="absolute -bottom-12 -right-12 w-36 h-36 animate-float-reverse z-20 drop-shadow-2xl"
+                                className="absolute -bottom-12 -right-12 w-36 h-36 z-20 drop-shadow-2xl"
                             />
 
                             <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-500 blur-3xl opacity-20 animate-pulse"></div>
                             <img
                                 src="/kids/image-1765886669181.png"
                                 alt="Kids Mode Marketing"
-                                className="relative z-10 rounded-3xl shadow-2xl animate-float"
+                                className="relative z-10 rounded-3xl shadow-2xl"
                             />
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Student Portal Feature */}
-                    <div className="grid lg:grid-cols-2 gap-16 items-center">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8 }}
+                        className="grid lg:grid-cols-2 gap-16 items-center"
+                    >
                         <div className="relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 to-violet-500 blur-3xl opacity-20 animate-pulse"></div>
-                            <img
+                            <motion.img
+                                animate={{ y: [0, -10, 0] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/illustrations/techny-standardized-test-as-method-of-assessment.png"
                                 alt="Student Portal Marketing"
-                                className="relative z-10 rounded-3xl shadow-2xl animate-float animation-delay-2000"
+                                className="relative z-10 rounded-3xl shadow-2xl"
                             />
                         </div>
                         <div>
-                            <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-6">
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-6"
+                            >
                                 <Trophy className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                                 <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Track & Grow</span>
-                            </div>
-                            <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight">
+                            </motion.div>
+                            <motion.h2
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.1 }}
+                                className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight"
+                            >
                                 Empower Students with a <span className="text-indigo-600">Unified Portal</span>
-                            </h2>
-                            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+                            </motion.h2>
+                            <motion.p
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.2 }}
+                                className="text-lg text-gray-600 dark:text-gray-300 mb-8"
+                            >
                                 Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.
-                            </p>
-                            <ul className="space-y-4 mb-8">
+                            </motion.p>
+                            <motion.ul
+                                variants={staggerContainer}
+                                initial="initial"
+                                whileInView="whileInView"
+                                viewport={{ once: true }}
+                                className="space-y-4 mb-8"
+                            >
                                 {[
                                     'One-Click Exam Participation',
                                     'Complete History & Performance Tracking',
                                     'Instant Feedback & Result Reviews',
                                     'Personalized Academic Insights'
                                 ].map((item, i) => (
-                                    <li key={i} className="flex items-center gap-3">
+                                    <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
                                         <div className="bg-indigo-100 dark:bg-indigo-900/50 p-1 rounded-full">
                                             <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                                         </div>
                                         <span className="text-gray-700 dark:text-gray-300 font-medium">{item}</span>
-                                    </li>
+                                    </motion.li>
                                 ))}
-                            </ul>
-                            <Link to="/student-portal" className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-indigo-500/30 transition-all hover:scale-105">
+                            </motion.ul>
+                            <Link to="/student-portal" className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95">
                                 Visit Student Portal
                                 <ArrowRight className="w-5 h-5" />
                             </Link>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
