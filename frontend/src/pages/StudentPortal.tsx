@@ -97,13 +97,13 @@ export default function StudentPortal() {
 
   const handleJoinExam = async (e: React.FormEvent) => {
     e.preventDefault();
-    const code = examCode.trim();
-    if (!code) return;
+    const rawCode = examCode.trim();
+    if (!rawCode) return;
 
     setJoining(true);
     try {
       // Check if input is a valid UUID
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(code);
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawCode);
 
       let examId = null;
 
@@ -112,18 +112,21 @@ export default function StudentPortal() {
         const { data } = await supabase
           .from('exams')
           .select('id')
-          .eq('id', code)
-          .maybeSingle(); // Use maybeSingle to avoid 406/404 errors throwing immediately
+          .eq('id', rawCode)
+          .maybeSingle();
 
         if (data) examId = data.id;
       }
 
       // If not a UUID or not found by ID, check quiz_code
       if (!examId) {
+        // Normalize code: uppercase and remove spaces (matching backend logic)
+        const normalizedCode = rawCode.toUpperCase().replace(/\s+/g, '');
+
         const { data } = await supabase
           .from('exams')
           .select('id')
-          .eq('quiz_code', code)
+          .eq('quiz_code', normalizedCode)
           .maybeSingle();
 
         if (data) examId = data.id;
