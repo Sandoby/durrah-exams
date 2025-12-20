@@ -899,25 +899,6 @@ export default function AdminPanel() {
                     <AdminAnalyticsDashboard />
                 )}
 
-                {/* Analytics Tab */}
-                {activeTab === 'analytics' && (
-                    <AdminAnalyticsDashboard />
-                )}
-
-                {/* Analytics Tab */}
-                {activeTab === 'analytics' && (
-                    <AdminAnalyticsDashboard />
-                )}
-
-                {/* Analytics Tab */}
-                {activeTab === 'analytics' && (
-                    <AdminAnalyticsDashboard />
-                )}
-
-                {/* Analytics Tab */}
-                {activeTab === 'analytics' && (
-                    <AdminAnalyticsDashboard />
-                )}
 
                 {/* Users Tab */}
                 {activeTab === 'users' && (

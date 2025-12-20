@@ -126,19 +126,21 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
             const endDate = new Date();
             endDate.setDate(endDate.getDate() + days);
 
-            const { error } = await supabase
-                .from('profiles')
-                .update({
-                    subscription_status: 'active',
-                    subscription_plan: subscriptionPlan,
-                    subscription_end_date: endDate.toISOString()
-                })
-                .eq('id', user.id);
+            const { data, error } = await supabase.rpc('extend_subscription', {
+                p_user_id: user.id,
+                p_days: days,
+                p_reason: `Activated ${subscriptionPlan} plan from admin panel`
+            });
 
             if (error) throw error;
-            toast.success(`Subscription activated: ${subscriptionPlan} (${days} days)`);
-            setShowSubscriptionModal(false);
-            onUpdate();
+
+            if (data?.success) {
+                toast.success(`Subscription activated: ${subscriptionPlan} (${days} days)`);
+                setShowSubscriptionModal(false);
+                onUpdate();
+            } else {
+                throw new Error(data?.error || 'Failed to activate subscription');
+            }
         } catch (error) {
             console.error('Error activating subscription:', error);
             toast.error('Failed to activate subscription');
@@ -163,18 +165,21 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
             const newEnd = new Date(currentEnd);
             newEnd.setDate(newEnd.getDate() + days);
 
-            const { error } = await supabase
-                .from('profiles')
-                .update({
-                    subscription_status: 'active',
-                    subscription_end_date: newEnd.toISOString()
-                })
-                .eq('id', user.id);
+            const { data, error } = await supabase.rpc('extend_subscription', {
+                p_user_id: user.id,
+                p_days: days,
+                p_reason: 'Extended from admin panel'
+            });
 
             if (error) throw error;
-            toast.success(`Subscription extended by ${days} days`);
-            setShowSubscriptionModal(false);
-            onUpdate();
+
+            if (data?.success) {
+                toast.success(`Subscription extended by ${days} days`);
+                setShowSubscriptionModal(false);
+                onUpdate();
+            } else {
+                throw new Error(data?.error || 'Failed to extend subscription');
+            }
         } catch (error) {
             console.error('Error extending subscription:', error);
             toast.error('Failed to extend subscription');
@@ -183,19 +188,20 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
 
     const deactivateSubscription = async () => {
         try {
-            const { error } = await supabase
-                .from('profiles')
-                .update({
-                    subscription_status: null,
-                    subscription_plan: null,
-                    subscription_end_date: null
-                })
-                .eq('id', user.id);
+            const { data, error } = await supabase.rpc('deactivate_subscription', {
+                p_user_id: user.id,
+                p_reason: 'Deactivated from admin panel'
+            });
 
             if (error) throw error;
-            toast.success('Subscription deactivated');
-            setShowSubscriptionModal(false);
-            onUpdate();
+
+            if (data?.success) {
+                toast.success('Subscription deactivated');
+                setShowSubscriptionModal(false);
+                onUpdate();
+            } else {
+                throw new Error(data?.error || 'Failed to deactivate subscription');
+            }
         } catch (error) {
             console.error('Error deactivating subscription:', error);
             toast.error('Failed to deactivate subscription');
@@ -513,8 +519,8 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
                                                 <button
                                                     onClick={() => setSubscriptionPlan('pro')}
                                                     className={`px-4 py-2 rounded border-2 transition-colors ${subscriptionPlan === 'pro'
-                                                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
-                                                            : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                                                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                                                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
                                                         }`}
                                                 >
                                                     Pro
@@ -522,8 +528,8 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
                                                 <button
                                                     onClick={() => setSubscriptionPlan('basic')}
                                                     className={`px-4 py-2 rounded border-2 transition-colors ${subscriptionPlan === 'basic'
-                                                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
-                                                            : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                                                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                                                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
                                                         }`}
                                                 >
                                                     Basic
@@ -541,8 +547,8 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
                                             <button
                                                 onClick={() => setSubscriptionDuration('monthly')}
                                                 className={`px-4 py-2 rounded border-2 transition-colors ${subscriptionDuration === 'monthly'
-                                                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
-                                                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                                                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                                                    : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
                                                     }`}
                                             >
                                                 Monthly
@@ -550,8 +556,8 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
                                             <button
                                                 onClick={() => setSubscriptionDuration('yearly')}
                                                 className={`px-4 py-2 rounded border-2 transition-colors ${subscriptionDuration === 'yearly'
-                                                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
-                                                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                                                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                                                    : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
                                                     }`}
                                             >
                                                 Yearly
@@ -559,8 +565,8 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
                                             <button
                                                 onClick={() => setSubscriptionDuration('custom')}
                                                 className={`px-4 py-2 rounded border-2 transition-colors ${subscriptionDuration === 'custom'
-                                                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
-                                                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                                                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                                                    : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
                                                     }`}
                                             >
                                                 Custom
@@ -608,8 +614,8 @@ export function EnhancedUserCard({ user, onUpdate }: EnhancedUserCardProps) {
                             <button
                                 onClick={handleSubscriptionAction}
                                 className={`flex-1 px-4 py-2 text-white rounded transition-colors ${subscriptionAction === 'deactivate'
-                                        ? 'bg-red-600 hover:bg-red-700'
-                                        : 'bg-indigo-600 hover:bg-indigo-700'
+                                    ? 'bg-red-600 hover:bg-red-700'
+                                    : 'bg-indigo-600 hover:bg-indigo-700'
                                     }`}
                             >
                                 Confirm
