@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
@@ -79,6 +79,7 @@ export default function ExamEditor() {
     const [isImporting, setIsImporting] = useState(false);
     const [startTour] = useState(new URLSearchParams(window.location.search).get('demo') === 'true');
     const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
+    const [profile, setProfile] = useState<any>(null);
 
     // Kids Mode helpers
     const [savedQuizCode, setSavedQuizCode] = useState<string | null>(null);
@@ -98,6 +99,25 @@ export default function ExamEditor() {
     };
 
     useDemoTour('create-exam', startTour && isDemo);
+
+    useEffect(() => {
+        if (user) {
+            fetchProfile();
+        }
+    }, [user]);
+
+    const fetchProfile = async () => {
+        try {
+            const { data } = await supabase
+                .from('profiles')
+                .select('subscription_status, subscription_plan')
+                .eq('id', user?.id)
+                .single();
+            setProfile(data);
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+        }
+    };
 
 
 
@@ -1400,10 +1420,22 @@ export default function ExamEditor() {
                                             <BookOpen className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                                                Import Questions
-                                            </h2>
-                                            <p className="text-xs font-bold text-gray-400">Select from your existing question banks</p>
+                                            <div className="flex items-center gap-3">
+                                                <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                                                    Import Questions
+                                                </h2>
+                                                {profile?.subscription_status !== 'active' && (
+                                                    <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 text-[10px] font-black rounded-lg border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+                                                        <Crown className="w-3 h-3" />
+                                                        PRO
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs font-bold text-gray-400">
+                                                {profile?.subscription_status !== 'active'
+                                                    ? 'Subscribe to unlock question bank imports'
+                                                    : 'Select from your existing question banks'}
+                                            </p>
                                         </div>
                                     </div>
                                     <button

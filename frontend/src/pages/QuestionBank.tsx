@@ -441,14 +441,14 @@ export default function QuestionBank() {
                         </div>
 
                         {/* Desktop Navigation */}
-                        <div className="hidden md:flex items-center space-x-4">
-                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        <div className="hidden md:flex items-center space-x-6">
+                            <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
                                 {user?.user_metadata?.full_name || user?.email}
                             </span>
                             {profile?.subscription_status !== 'active' && (
                                 <Link
                                     to="/checkout"
-                                    className="inline-flex items-center px-4 py-2 text-sm font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 rounded-full hover:bg-indigo-100 transition-all"
+                                    className="inline-flex items-center px-6 py-2.5 text-xs font-black text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl hover:scale-105 transition-all shadow-sm"
                                 >
                                     <Crown className="h-4 w-4 mr-2" />
                                     {t('settings.subscription.upgrade')}
@@ -456,14 +456,14 @@ export default function QuestionBank() {
                             )}
                             <Link
                                 to="/settings"
-                                className="p-2 text-gray-500 hover:text-indigo-600 transition-colors"
+                                className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-indigo-600 border border-transparent hover:border-indigo-100 transition-all"
                                 title={t('settings.title')}
                             >
                                 <Settings className="h-5 w-5" />
                             </Link>
                             <button
                                 onClick={handleLogout}
-                                className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+                                className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-red-600 border border-transparent hover:border-red-100 transition-all"
                                 title={t('nav.logout', 'Logout')}
                             >
                                 <LogOut className="h-5 w-5" />
@@ -474,7 +474,7 @@ export default function QuestionBank() {
                         <div className="flex items-center md:hidden">
                             <button
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                className="p-2 rounded-xl text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                                className="p-3 rounded-xl text-gray-400 hover:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent hover:border-gray-100 transition-all"
                             >
                                 {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                             </button>
@@ -484,16 +484,16 @@ export default function QuestionBank() {
 
                 {/* Mobile menu */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-b border-gray-100 dark:border-gray-800">
-                        <div className="px-4 py-6 space-y-4">
-                            <div className="flex items-center px-3 py-2 text-sm text-gray-600 dark:text-gray-400 font-medium">
+                    <div className="md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 p-4">
+                        <div className="space-y-3">
+                            <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-2xl text-sm font-bold text-gray-700 dark:text-gray-300">
                                 {user?.user_metadata?.full_name || user?.email}
                             </div>
-                            <Link to="/settings" className="flex items-center px-4 py-3 rounded-2xl text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
-                                <Settings className="h-5 w-5 mr-3" />
+                            <Link to="/settings" className="flex items-center px-5 py-4 rounded-2xl text-base font-bold text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all">
+                                <Settings className="h-5 w-5 mr-3 text-gray-400" />
                                 {t('settings.title')}
                             </Link>
-                            <button onClick={handleLogout} className="flex items-center w-full px-4 py-3 rounded-2xl text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
+                            <button onClick={handleLogout} className="flex items-center w-full px-5 py-4 rounded-2xl text-base font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
                                 <LogOut className="h-5 w-5 mr-3" />
                                 {t('nav.logout', 'Logout')}
                             </button>
@@ -503,36 +503,43 @@ export default function QuestionBank() {
             </nav>
 
             {isDemo && (
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-6 lg:px-8 py-3">
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-6 lg:px-8 py-3 shadow-lg shadow-blue-100 dark:shadow-none relative z-10">
                     <div className="max-w-7xl mx-auto flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Sparkles className="w-5 h-5" />
-                            <span className="text-sm font-medium">Demo Mode - Explore the question bank. Sign up to save your own.</span>
+                            <span className="text-sm font-black uppercase tracking-tight">Demo Mode: Build Your Perfect Question Library</span>
                         </div>
-                        <Link to="/demo" className="text-sm font-bold bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-all">Back to Demo</Link>
+                        <Link to="/demo" className="text-xs font-black bg-white/20 hover:bg-white/30 px-4 py-1.5 rounded-full transition-all border border-white/20">Back to Demo</Link>
                     </div>
                 </div>
             )}
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-16">
                     <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <Link to="/dashboard" className="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-400 hover:text-indigo-600 shadow-sm border border-gray-100 dark:border-gray-700 transition-all">
-                                <ArrowLeft className="w-5 h-5" />
+                        <div className="flex items-center gap-4 mb-3">
+                            <Link to="/dashboard" className="p-3 rounded-2xl bg-white dark:bg-gray-800 text-gray-400 hover:text-indigo-600 shadow-sm border border-gray-100 dark:border-gray-700 transition-all group">
+                                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                             </Link>
-                            <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">
+                            <h1 className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter">
                                 Question <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Banks</span>
                             </h1>
                         </div>
-                        <p className="text-lg text-gray-600 dark:text-gray-400 font-medium ml-12">Create and manage reusable question collections</p>
+                        <p className="text-lg text-gray-500 dark:text-gray-400 font-bold ml-[72px]">Centralize and reuse your expertise effectively</p>
                     </div>
 
                     <button
-                        onClick={() => setShowCreateModal(true)}
-                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all ml-12 md:ml-0"
+                        onClick={() => {
+                            if (profile?.subscription_status !== 'active' && banks.length >= 1) {
+                                toast.error("Free users are limited to 1 Question Bank.");
+                                navigate('/checkout');
+                                return;
+                            }
+                            setShowCreateModal(true);
+                        }}
+                        className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-[2rem] font-black shadow-2xl shadow-indigo-200 dark:shadow-none hover:scale-105 active:scale-95 transition-all ml-[72px] md:ml-0 group"
                     >
-                        <Plus className="h-5 w-5" />
+                        <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform" />
                         Create New Bank
                     </button>
                 </div>

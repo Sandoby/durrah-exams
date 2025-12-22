@@ -151,232 +151,227 @@ export default function Settings() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            {/* Header */}
-            <div className="bg-white dark:bg-gray-800 shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                            <button
-                                onClick={() => navigate('/dashboard')}
-                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                            >
-                                <ArrowLeft className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                            </button>
-                            <Logo size="md" />
-                        </div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('settings.title')}</h1>
-                    </div>
-                </div>
+        <div className="min-h-screen bg-[#f8fafc] dark:bg-gray-950 font-sans relative overflow-x-hidden">
+            {/* Background Decorative Elements */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/5 blur-[120px] rounded-full"></div>
+                <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-500/5 blur-[120px] rounded-full"></div>
             </div>
 
+            {/* Header */}
+            <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 h-24 flex items-center justify-between">
+                    <div className="flex items-center gap-8">
+                        <button
+                            onClick={() => navigate('/dashboard')}
+                            className="group p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-2xl transition-all"
+                        >
+                            <ArrowLeft className="h-6 w-6 text-gray-400 group-hover:text-indigo-600 transition-colors" />
+                        </button>
+                        <Logo />
+                    </div>
+                    <div className="hidden sm:block">
+                        <div className="flex items-center gap-3">
+                            <div className="h-1.5 w-8 bg-indigo-600 rounded-full"></div>
+                            <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight uppercase">
+                                System <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Preferences</span>
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
             {/* Main Content */}
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="space-y-6">
+            <main className="max-w-4xl mx-auto px-6 lg:px-8 py-16 relative">
+                <div className="space-y-12">
                     {/* Profile Settings */}
-                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                            <div className="flex items-center space-x-2">
-                                <User className="h-5 w-5 text-indigo-600" />
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('settings.profile.title')}</h2>
+                    <section className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-[3rem] border border-white dark:border-gray-800 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700">
+                        <div className="px-10 py-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-transparent dark:from-gray-800/50">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-100 dark:shadow-none">
+                                    <User className="h-6 w-6 text-white" />
+                                </div>
+                                <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Identity Profile</h2>
                             </div>
                         </div>
-                        <form onSubmit={handleProfileUpdate} className="p-6 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {t('settings.profile.fullName')}
-                                </label>
-                                <input
-                                    type="text"
-                                    value={profile.full_name}
-                                    onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                                    required
-                                />
-                            </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {t('settings.profile.email')}
-                                </label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <form onSubmit={handleProfileUpdate} className="p-10 space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-3">
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">
+                                        Account Holder Name
+                                    </label>
                                     <input
-                                        type="email"
-                                        value={profile.email}
-                                        disabled
-                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                                        type="text"
+                                        value={profile.full_name}
+                                        onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+                                        className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-indigo-500/50 rounded-[1.5rem] outline-none transition-all font-bold text-gray-900 dark:text-white"
+                                        required
                                     />
                                 </div>
-                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t('settings.profile.emailNote')}</p>
+
+                                <div className="space-y-3">
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">
+                                        Primary Email Identifier
+                                    </label>
+                                    <div className="relative">
+                                        <Mail className="absolute left-6 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                        <input
+                                            type="email"
+                                            value={profile.email}
+                                            disabled
+                                            className="w-full pl-16 pr-6 py-4 bg-gray-100 dark:bg-gray-900 border-2 border-transparent rounded-[1.5rem] text-gray-400 font-bold cursor-not-allowed"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">
+                                        Contact Number
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        value={profile.phone}
+                                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                                        className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-indigo-500/50 rounded-[1.5rem] outline-none transition-all font-bold text-gray-900 dark:text-white"
+                                        placeholder="+1 000 000 000"
+                                    />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">
+                                        Educational Institution
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={profile.institution}
+                                        onChange={(e) => setProfile({ ...profile, institution: e.target.value })}
+                                        className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-indigo-500/50 rounded-[1.5rem] outline-none transition-all font-bold text-gray-900 dark:text-white"
+                                        placeholder="Organization Name"
+                                    />
+                                </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {t('settings.profile.phone')}
-                                </label>
-                                <input
-                                    type="tel"
-                                    value={profile.phone}
-                                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                                    placeholder="+1234567890"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {t('settings.profile.institution')}
-                                </label>
-                                <input
-                                    type="text"
-                                    value={profile.institution}
-                                    onChange={(e) => setProfile({ ...profile, institution: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                                    placeholder="University or School Name"
-                                />
-                            </div>
-
-                            <div className="flex justify-end pt-4">
+                            <div className="flex justify-end border-t border-gray-100 dark:border-gray-800 pt-8">
                                 <button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="flex items-center space-x-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="group relative px-10 py-4 bg-indigo-600 text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest overflow-hidden transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
                                 >
-                                    {isSaving ? (
-                                        <>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-violet-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                    <span className="relative flex items-center justify-center gap-3">
+                                        {isSaving ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
-                                            <span>{t('settings.profile.saving')}</span>
-                                        </>
-                                    ) : (
-                                        <>
+                                        ) : (
                                             <Save className="h-4 w-4" />
-                                            <span>{t('settings.profile.save')}</span>
-                                        </>
-                                    )}
+                                        )}
+                                        {isSaving ? 'Synching...' : 'Commit Changes'}
+                                    </span>
                                 </button>
                             </div>
                         </form>
-                    </div>
+                    </section>
 
-                    {/* Password Change */}
-                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                            <div className="flex items-center space-x-2">
-                                <Lock className="h-5 w-5 text-indigo-600" />
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('settings.password.title')}</h2>
+                    {/* Security & Subscription Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        {/* Security */}
+                        <section className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-[3rem] border border-white dark:border-gray-800 shadow-xl overflow-hidden flex flex-col animate-in fade-in slide-in-from-bottom-12 duration-1000">
+                            <div className="px-8 py-6 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4 bg-gradient-to-r from-red-50/50 to-transparent dark:from-red-900/10">
+                                <div className="p-2.5 bg-red-500 rounded-xl text-white">
+                                    <Lock className="h-5 w-5" />
+                                </div>
+                                <h2 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight">Security</h2>
                             </div>
-                        </div>
-                        <form onSubmit={handlePasswordChange} className="p-6 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {t('settings.password.new')}
-                                </label>
-                                <input
-                                    type="password"
-                                    value={passwordData.newPassword}
-                                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                                    placeholder="Enter new password"
-                                    minLength={6}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {t('settings.password.confirm')}
-                                </label>
-                                <input
-                                    type="password"
-                                    value={passwordData.confirmPassword}
-                                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                                    placeholder="Confirm new password"
-                                    minLength={6}
-                                />
-                            </div>
-
-                            <div className="flex justify-end pt-4">
+                            <form onSubmit={handlePasswordChange} className="p-8 flex-1 space-y-6">
+                                <div className="space-y-3">
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">
+                                        New Security Key
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={passwordData.newPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                        className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-red-500/30 rounded-[1.5rem] outline-none transition-all font-bold text-gray-900 dark:text-white"
+                                        placeholder="••••••••"
+                                        minLength={6}
+                                    />
+                                </div>
+                                <div className="space-y-3">
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">
+                                        Confirm Key
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={passwordData.confirmPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                        className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-red-500/30 rounded-[1.5rem] outline-none transition-all font-bold text-gray-900 dark:text-white"
+                                        placeholder="••••••••"
+                                        minLength={6}
+                                    />
+                                </div>
                                 <button
                                     type="submit"
-                                    disabled={isChangingPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                                    className="flex items-center space-x-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    disabled={isChangingPassword || !passwordData.newPassword}
+                                    className="w-full py-4 bg-gray-950 dark:bg-gray-800 text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest hover:bg-gray-900 transition-colors flex items-center justify-center gap-3"
                                 >
-                                    {isChangingPassword ? (
-                                        <>
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                            <span>{t('settings.password.updating')}</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Lock className="h-4 w-4" />
-                                            <span>{t('settings.password.update')}</span>
-                                        </>
-                                    )}
+                                    {isChangingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
+                                    Update Security
                                 </button>
-                            </div>
-                        </form>
-                    </div>
+                            </form>
+                        </section>
 
-                    {/* Subscription Status */}
-                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                            <div className="flex items-center space-x-2">
-                                <Crown className="h-5 w-5 text-indigo-600" />
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('settings.subscription.title')}</h2>
+                        {/* Subscription */}
+                        <section className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-[3rem] border border-white dark:border-gray-800 shadow-xl overflow-hidden flex flex-col animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-100">
+                            <div className="px-8 py-6 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4 bg-gradient-to-r from-amber-50/50 to-transparent dark:from-amber-900/10">
+                                <div className="p-2.5 bg-amber-500 rounded-xl text-white">
+                                    <Crown className="h-5 w-5" />
+                                </div>
+                                <h2 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight">Active Plan</h2>
                             </div>
-                        </div>
-                        <div className="p-6">
-                            {profile.subscription_status === 'active' ? (
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.subscription.status')}</span>
-                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                            {t('settings.subscription.active')}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.subscription.plan')}</span>
-                                        <span className="text-sm text-gray-900 dark:text-white font-semibold">
-                                            {profile.subscription_plan || 'Professional'}
-                                        </span>
-                                    </div>
-                                    {profile.subscription_end_date && (
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.subscription.validUntil')}</span>
-                                            <span className="text-sm text-gray-900 dark:text-white">
-                                                {new Date(profile.subscription_end_date).toLocaleDateString()}
-                                            </span>
+                            <div className="p-8 flex-1 flex flex-col justify-center items-center text-center">
+                                {profile.subscription_status === 'active' ? (
+                                    <div className="w-full space-y-6">
+                                        <div className="p-6 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-[2rem] text-white">
+                                            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-1">Current Tier</p>
+                                            <h3 className="text-2xl font-black">{profile.subscription_plan || 'PRO'}</h3>
                                         </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="text-center py-4">
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                                        {t('settings.subscription.freeMessage')}
-                                    </p>
-                                    <Link
-                                        to="/checkout"
-                                        className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                                    >
-                                        <Crown className="h-4 w-4 mr-2" />
-                                        {t('settings.subscription.upgrade')}
-                                    </Link>
-                                </div>
-                            )}
-                        </div>
+                                        <div className="space-y-2">
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Expiration Protocol</p>
+                                            <p className="text-sm font-black text-gray-900 dark:text-white">
+                                                {profile.subscription_end_date ? new Date(profile.subscription_end_date).toLocaleDateString(undefined, { dateStyle: 'long' }) : 'Never'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-gray-700">
+                                            <p className="text-sm font-bold text-gray-500 dark:text-gray-400">Unlock complete platform potential with our Professional Tier.</p>
+                                        </div>
+                                        <Link
+                                            to="/checkout"
+                                            className="w-full block py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-lg shadow-indigo-100 dark:shadow-none hover:scale-105 transition-all text-center"
+                                        >
+                                            Elevate Account
+                                        </Link>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
                     </div>
 
-                    {/* Account Info */}
-                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('settings.account.title')}</h3>
-                        <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                            <p>{t('settings.account.userId')} <span className="font-mono text-xs">{user?.id}</span></p>
-                            <p>{t('settings.account.created')} {new Date(user?.created_at || '').toLocaleDateString()}</p>
+                    {/* Metadata Footer */}
+                    <div className="flex flex-col sm:flex-row justify-between items-center px-10 py-6 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] gap-4">
+                        <div className="text-center sm:text-left">
+                            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Digital Fingerprint</p>
+                            <code className="text-[10px] font-bold text-gray-400 truncate max-w-[200px] block">{user?.id}</code>
+                        </div>
+                        <div className="text-center sm:text-right">
+                            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Creation Timestamp</p>
+                            <p className="text-xs font-black text-gray-400">{new Date(user?.created_at || '').toLocaleDateString(undefined, { dateStyle: 'medium' })}</p>
                         </div>
                     </div>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }
