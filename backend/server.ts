@@ -1,9 +1,11 @@
 import express, { Request, Response } from 'express';
+import cors from 'cors';
 import bodyParser from 'body-parser';
 import { createKashierSession, CreateSessionParams } from './kashier';
 import webhookRouter from './webhook';
 
 const app = express();
+app.use(cors({ origin: 'https://tutors.durrahsystem.tech', credentials: true }));
 app.use(bodyParser.json());
 
 const MERCHANT_ID = 'your_merchant_id';
