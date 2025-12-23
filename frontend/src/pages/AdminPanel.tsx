@@ -751,53 +751,52 @@ export default function AdminPanel() {
 
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen bg-[#f8fafc] dark:bg-gray-950 flex items-center justify-center p-6 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,#4f46e51a_0%,transparent_50%),radial-gradient(circle_at_70%_80%,#7c3aed1a_0%,transparent_50%)]"></div>
-                <div className="relative w-full max-w-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-10 rounded-[3rem] border border-white dark:border-gray-800 shadow-2xl animate-in fade-in zoom-in-95 duration-500">
-                    <div className="flex justify-center mb-10">
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-6">
+                <div className="w-full max-w-md bg-white dark:bg-gray-900 p-8 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <div className="flex justify-center mb-8">
                         <Logo />
                     </div>
                     <div className="text-center mb-8">
-                        <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-2 uppercase">
-                            Admin <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Terminal</span>
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                            Admin Access
                         </h2>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Authorized Access Only</p>
+                        <p className="text-sm text-gray-500">Please authenticate to continue</p>
                     </div>
 
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div className="space-y-2">
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">
+                            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 ml-1">
                                 Master Key (Super Admin)
                             </label>
-                            <div className="relative group">
-                                <Lock className="absolute left-6 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                                 <input
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-16 pr-6 py-5 bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-indigo-500/50 rounded-[1.5rem] outline-none transition-all font-bold text-gray-900 dark:text-white"
+                                    className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white"
                                     placeholder="••••••••"
                                 />
                             </div>
                         </div>
 
                         <div className="relative flex items-center py-2">
-                            <div className="flex-grow border-t border-gray-100 dark:border-gray-800"></div>
-                            <span className="flex-shrink mx-4 text-[10px] font-black text-gray-300 uppercase tracking-widest">or</span>
-                            <div className="flex-grow border-t border-gray-100 dark:border-gray-800"></div>
+                            <div className="flex-grow border-t border-gray-100 dark:border-gray-700"></div>
+                            <span className="flex-shrink mx-4 text-xs text-gray-400">OR</span>
+                            <div className="flex-grow border-t border-gray-100 dark:border-gray-700"></div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">
+                            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 ml-1">
                                 Agent Access Code
                             </label>
-                            <div className="relative group">
-                                <UserPlus className="absolute left-6 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                            <div className="relative">
+                                <UserPlus className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                                 <input
                                     type="text"
                                     value={accessCode}
                                     onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-                                    className="w-full pl-16 pr-6 py-5 bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-indigo-500/50 rounded-[1.5rem] outline-none transition-all font-black text-gray-900 dark:text-white uppercase tracking-widest"
+                                    className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white uppercase tracking-wider"
                                     placeholder="AGENT-ID"
                                     maxLength={8}
                                 />
@@ -806,10 +805,10 @@ export default function AdminPanel() {
 
                         <button
                             type="submit"
-                            className="w-full py-5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-100 dark:shadow-none hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+                            className="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
                         >
                             <Lock className="h-4 w-4" />
-                            Initialize Session
+                            Sign In
                         </button>
                     </form>
                 </div>
@@ -818,690 +817,257 @@ export default function AdminPanel() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            {/* Header */}
-            <div className="bg-white dark:bg-gray-800 shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                            <Logo />
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Panel</h1>
-                        </div>
-                        <button
-                            onClick={handleLogout}
-                            className="inline-flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                        >
-                            <LogOut className="h-4 w-4 mr-2" />
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-                    <nav className="-mb-px flex space-x-8">
-                        <button
-                            onClick={() => setActiveTab('analytics')}
-                            className={`${activeTab === 'analytics'
-                                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-                        >
-                            <BarChart3 className="h-5 w-5 mr-2" />
-                            Analytics
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('users')}
-                            className={`${activeTab === 'users'
-                                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-                        >
-                            <Users className="h-5 w-5 mr-2" />
-                            Users & Subscriptions
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('coupons')}
-                            className={`${activeTab === 'coupons'
-                                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-                        >
-                            <Tag className="h-5 w-5 mr-2" />
-                            Coupon Codes
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('chat')}
-                            className={`${activeTab === 'chat'
-                                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-                        >
-                            <MessageCircle className="h-5 w-5 mr-2" />
-                            Customer Chat
-                        </button>
-                        {userRole === 'super_admin' && (
-                            <button
-                                onClick={() => setActiveTab('agents')}
-                                className={`${activeTab === 'agents'
-                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-                            >
-                                <UserPlus className="h-5 w-5 mr-2" />
-                                Support Agents
-                            </button>
-                        )}
-                    </nav>
+        <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
+            {/* Sidebar */}
+            <aside className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col sticky top-0 h-screen">
+                <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
+                    <Logo />
+                    <span className="font-bold text-gray-900 dark:text-white">Admin</span>
                 </div>
 
-                {/* Analytics Tab */}
-                {activeTab === 'analytics' && (
-                    <AdminAnalyticsDashboard />
-                )}
+                <nav className="flex-1 p-4 space-y-2">
+                    <button
+                        onClick={() => setActiveTab('analytics')}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'analytics'
+                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            }`}
+                    >
+                        <BarChart3 className="w-5 h-5" />
+                        Analytics
+                    </button>
+
+                    <button
+                        onClick={() => setActiveTab('users')}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'users'
+                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            }`}
+                    >
+                        <Users className="w-5 h-5" />
+                        Users
+                    </button>
+
+                    <button
+                        onClick={() => setActiveTab('coupons')}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'coupons'
+                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            }`}
+                    >
+                        <Tag className="w-5 h-5" />
+                        Coupons
+                    </button>
+
+                    <button
+                        onClick={() => setActiveTab('chat')}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'chat'
+                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            }`}
+                    >
+                        <MessageCircle className="w-5 h-5" />
+                        Support Chat
+                    </button>
+
+                    {userRole === 'super_admin' && (
+                        <button
+                            onClick={() => setActiveTab('agents')}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'agents'
+                                ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                                }`}
+                        >
+                            <UserPlus className="w-5 h-5" />
+                            Agents
+                        </button>
+                    )}
+                </nav>
+
+                <div className="p-4 border-t border-gray-100 dark:border-gray-800">
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                    >
+                        <LogOut className="w-5 h-5" />
+                        Logout
+                    </button>
+                </div>
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1 min-w-0 overflow-y-auto">
+                <div className="p-8">
+
+                    {/* Analytics Tab */}
+                    {activeTab === 'analytics' && (
+                        <AdminAnalyticsDashboard />
+                    )}
 
 
-                {/* Users Tab */}
-                {activeTab === 'users' && (
-                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                Users Management
-                            </h2>
-                            <div className="flex items-center gap-2">
-                                <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-300">
-                                    Total: {users.length}
-                                </span>
-                                <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
-                                    Showing: {filteredUsers.length}
-                                </span>
-                            </div>
-                        </div>
-
-                        <UserFiltersComponent
-                            filters={filters}
-                            onFiltersChange={setFilters}
-                            totalResults={filteredUsers.length}
-                        />
-
-                        {isLoadingUsers ? (
-                            <div className="flex justify-center py-12">
-                                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {filteredUsers.length === 0 ? (
-                                    <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">
-                                        <Users className="mx-auto h-12 w-12 text-gray-400" />
-                                        <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No users found</h3>
-                                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                            Try adjusting your search or filters.
-                                        </p>
-                                    </div>
-                                ) : (
-                                    filteredUsers.map((user) => (
-                                        <EnhancedUserCard
-                                            key={user.id}
-                                            user={user}
-                                            onUpdate={fetchUsers}
-                                            agentId={currentAgentId || (userRole === 'super_admin' && supportAgents.length > 0 ? supportAgents[0].id : null)}
-                                        />
-                                    ))
-                                )}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Coupons Tab */}
-                {activeTab === 'coupons' && (
-                    <div className="space-y-6">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                Coupon Codes
-                            </h2>
-                            <button
-                                onClick={() => setShowCouponForm(!showCouponForm)}
-                                className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                            >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Create Coupon
-                            </button>
-                        </div>
-
-                        {showCouponForm && (
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                    New Coupon
-                                </h3>
-                                <form onSubmit={createCoupon} className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Coupon Code
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={newCoupon.code}
-                                                onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white uppercase"
-                                                placeholder="SUMMER2024"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Discount Type
-                                            </label>
-                                            <select
-                                                value={newCoupon.discount_type}
-                                                onChange={(e) => setNewCoupon({ ...newCoupon, discount_type: e.target.value as any })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                            >
-                                                <option value="percentage">Percentage</option>
-                                                <option value="fixed">Fixed Amount</option>
-                                                <option value="free">Free Subscription</option>
-                                            </select>
-                                        </div>
-                                        {newCoupon.discount_type === 'free' && (
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                    Duration
-                                                </label>
-                                                <select
-                                                    value={newCoupon.duration}
-                                                    onChange={(e) => setNewCoupon({ ...newCoupon, duration: e.target.value as 'monthly' | 'annual' })}
-                                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                                >
-                                                    <option value="monthly">Monthly</option>
-                                                    <option value="annual">Annual</option>
-                                                </select>
-                                            </div>
-                                        )}
-                                        {newCoupon.discount_type !== 'free' && (
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                    Discount Value {newCoupon.discount_type === 'percentage' ? '(%)' : '(EGP)'}
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    value={newCoupon.discount_value}
-                                                    onChange={(e) => setNewCoupon({ ...newCoupon, discount_value: Number(e.target.value) })}
-                                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                                    min="0"
-                                                    max={newCoupon.discount_type === 'percentage' ? 100 : undefined}
-                                                    required
-                                                />
-                                            </div>
-                                        )}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Max Uses
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={newCoupon.max_uses}
-                                                onChange={(e) => setNewCoupon({ ...newCoupon, max_uses: Number(e.target.value) })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                                min="1"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Valid Until
-                                            </label>
-                                            <input
-                                                type="date"
-                                                value={newCoupon.valid_until}
-                                                onChange={(e) => setNewCoupon({ ...newCoupon, valid_until: e.target.value })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-end space-x-3">
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowCouponForm(false)}
-                                            className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                                        >
-                                            Create Coupon
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        )}
-
+                    {/* Users Tab */}
+                    {activeTab === 'users' && (
                         <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                            {isLoadingCoupons ? (
-                                <div className="flex items-center justify-center p-8">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    Users Management
+                                </h2>
+                                <div className="flex items-center gap-2">
+                                    <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-300">
+                                        Total: {users.length}
+                                    </span>
+                                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
+                                        Showing: {filteredUsers.length}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <UserFiltersComponent
+                                filters={filters}
+                                onFiltersChange={setFilters}
+                                totalResults={filteredUsers.length}
+                            />
+
+                            {isLoadingUsers ? (
+                                <div className="flex justify-center py-12">
                                     <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
                                 </div>
-                            ) : coupons.length === 0 ? (
-                                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                                    No coupons created yet
-                                </div>
                             ) : (
-                                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                    <thead className="bg-gray-50 dark:bg-gray-700">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                                Code
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                                Discount
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                                Uses
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                                Valid Until
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                                Status
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {coupons.map((coupon) => (
-                                            <tr key={coupon.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className="font-mono font-semibold text-gray-900 dark:text-white">
-                                                        {coupon.code}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                    {coupon.discount_type === 'free'
-                                                        ? 'Free Subscription'
-                                                        : coupon.discount_type === 'percentage'
-                                                            ? `${coupon.discount_value}%`
-                                                            : `${coupon.discount_value} EGP`
-                                                    }
-                                                    {coupon.discount_type === 'free' && coupon.duration && (
-                                                        <span className="ml-2 text-xs text-gray-500">
-                                                            ({coupon.duration})
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                    {coupon.used_count} / {coupon.max_uses}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                    {new Date(coupon.valid_until).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {(() => {
-                                                        const isExpired = new Date(coupon.valid_until) < new Date();
-                                                        const isMaxedOut = coupon.used_count >= coupon.max_uses;
-
-                                                        if (isExpired) {
-                                                            return (
-                                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                                                    Expired
-                                                                </span>
-                                                            );
-                                                        } else if (isMaxedOut) {
-                                                            return (
-                                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                                                    Max Uses Reached
-                                                                </span>
-                                                            );
-                                                        } else if (coupon.is_active) {
-                                                            return (
-                                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                                    Active
-                                                                </span>
-                                                            );
-                                                        } else {
-                                                            return (
-                                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                                                    Inactive
-                                                                </span>
-                                                            );
-                                                        }
-                                                    })()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm space-x-3">
-                                                    <button
-                                                        onClick={() => toggleCouponStatus(coupon.id, coupon.is_active)}
-                                                        className="text-indigo-600 hover:text-indigo-900"
-                                                    >
-                                                        {coupon.is_active ? 'Deactivate' : 'Activate'}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => deleteCoupon(coupon.id)}
-                                                        className="text-red-600 hover:text-red-900"
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* Chat Tab */}
-                {activeTab === 'chat' && (
-                    <div className="space-y-4">
-                        {/* Chat Filter Tabs */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-                            <div className="border-b border-gray-200 dark:border-gray-700">
-                                <nav className="-mb-px flex space-x-8 px-6" aria-label="Chat Filters">
-                                    <button
-                                        onClick={() => setChatFilter('new')}
-                                        className={`${chatFilter === 'new'
-                                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                            : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-                                    >
-                                        <span className="mr-2">🆕</span>
-                                        New Chat Orders
-                                        <span className="ml-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 py-0.5 px-2 rounded-full text-xs font-semibold">
-                                            {chatUsers.filter(userId => {
-                                                const assignment = chatAssignments.find(a => a.user_id === userId);
-                                                return !assignment || assignment.assigned_agent_id === null;
-                                            }).length}
-                                        </span>
-                                    </button>
-                                    <button
-                                        onClick={() => setChatFilter('current')}
-                                        className={`${chatFilter === 'current'
-                                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                            : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-                                    >
-                                        <span className="mr-2">💬</span>
-                                        Current Chats
-                                        <span className="ml-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 py-0.5 px-2 rounded-full text-xs font-semibold">
-                                            {chatUsers.filter(userId => {
-                                                const assignment = chatAssignments.find(a => a.user_id === userId);
-                                                return assignment && assignment.assigned_agent_id !== null && assignment.status === 'open';
-                                            }).length}
-                                        </span>
-                                    </button>
-                                    <button
-                                        onClick={() => setChatFilter('ended')}
-                                        className={`${chatFilter === 'ended'
-                                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                            : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-                                    >
-                                        <span className="mr-2">✅</span>
-                                        Ended Chats
-                                        <span className="ml-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 py-0.5 px-2 rounded-full text-xs font-semibold">
-                                            {chatUsers.filter(userId => {
-                                                const assignment = chatAssignments.find(a => a.user_id === userId);
-                                                return assignment && assignment.status === 'closed';
-                                            }).length}
-                                        </span>
-                                    </button>
-                                </nav>
-                            </div>
-                        </div>
-
-                        {/* Chat Interface */}
-                        <div className="grid grid-cols-3 gap-6 h-[600px]">
-                            {/* Users List */}
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-                                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                                        {chatFilter === 'new' && 'New Conversations'}
-                                        {chatFilter === 'current' && 'Active Conversations'}
-                                        {chatFilter === 'ended' && 'Closed Conversations'}
-                                    </h3>
-                                </div>
-                                <div className="overflow-y-auto h-full">
-                                    {getFilteredChatUsers().length === 0 ? (
-                                        <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
-                                            No {chatFilter} conversations
+                                <div className="space-y-4">
+                                    {filteredUsers.length === 0 ? (
+                                        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">
+                                            <Users className="mx-auto h-12 w-12 text-gray-400" />
+                                            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No users found</h3>
+                                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                Try adjusting your search or filters.
+                                            </p>
                                         </div>
                                     ) : (
-                                        getFilteredChatUsers().map((userId) => (
-                                            <button
-                                                key={userId}
-                                                onClick={() => setSelectedChatUser(userId)}
-                                                className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-700 ${selectedChatUser === userId ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
-                                                    }`}
-                                            >
-                                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                                    {userId.substring(0, 8)}...
-                                                </p>
-                                            </button>
+                                        filteredUsers.map((user) => (
+                                            <EnhancedUserCard
+                                                key={user.id}
+                                                user={user}
+                                                onUpdate={fetchUsers}
+                                                agentId={currentAgentId || (userRole === 'super_admin' && supportAgents.length > 0 ? supportAgents[0].id : null)}
+                                            />
                                         ))
                                     )}
                                 </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Coupons Tab */}
+                    {activeTab === 'coupons' && (
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    Coupon Codes
+                                </h2>
+                                <button
+                                    onClick={() => setShowCouponForm(!showCouponForm)}
+                                    className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                >
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Create Coupon
+                                </button>
                             </div>
 
-                            {/* Chat Messages */}
-                            <div className="col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow flex flex-col">
-                                {selectedChatUser ? (
-                                    <>
-                                        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex-1">
-                                                    <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
-                                                        {selectedUserInfo?.full_name || chatMessages[0]?.user_email || 'User Chat'}
-                                                    </h3>
-                                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                        {selectedUserInfo?.email || chatMessages[0]?.user_email}
-                                                    </p>
-
-                                                    {/* User Details Grid */}
-                                                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                                                        {selectedUserInfo?.phone && (
-                                                            <div>
-                                                                <span className="text-gray-500 dark:text-gray-400">Phone:</span>
-                                                                <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.phone}</span>
-                                                            </div>
-                                                        )}
-                                                        {selectedUserInfo?.institution && (
-                                                            <div>
-                                                                <span className="text-gray-500 dark:text-gray-400">Institution:</span>
-                                                                <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.institution}</span>
-                                                            </div>
-                                                        )}
-                                                        <div>
-                                                            <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                                                            <span className={`ml-1 font-medium ${selectedUserInfo?.subscription_status === 'active'
-                                                                ? 'text-green-600 dark:text-green-400'
-                                                                : 'text-gray-600 dark:text-gray-400'
-                                                                }`}>
-                                                                {selectedUserInfo?.subscription_status === 'active' ? 'Subscribed' : 'Free'}
-                                                            </span>
-                                                        </div>
-                                                        {selectedUserInfo?.subscription_plan && (
-                                                            <div>
-                                                                <span className="text-gray-500 dark:text-gray-400">Plan:</span>
-                                                                <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.subscription_plan}</span>
-                                                            </div>
-                                                        )}
-                                                        {selectedUserInfo?.created_at && (
-                                                            <div className="col-span-2">
-                                                                <span className="text-gray-500 dark:text-gray-400">Member since:</span>
-                                                                <span className="ml-1 text-gray-900 dark:text-white">
-                                                                    {new Date(selectedUserInfo.created_at).toLocaleDateString()}
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex justify-end">
-                                            <button
-                                                onClick={async () => {
-                                                    if (!selectedChatUser) return;
-
-                                                    try {
-                                                        // Send system message to trigger rating on user side
-                                                        await supabase
-                                                            .from('chat_messages')
-                                                            .insert({
-                                                                user_id: selectedChatUser,
-                                                                user_email: selectedUserInfo?.email || 'admin',
-                                                                message: 'CHAT_CLOSED_BY_ADMIN',
-                                                                is_admin: true
-                                                            });
-
-                                                        // Close the chat assignment
-                                                        await closeChat();
-                                                    } catch (error) {
-                                                        console.error('Error closing chat:', error);
-                                                        toast.error('Failed to close chat properly');
-                                                    }
-                                                }}
-                                                className="text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 px-3 py-1 rounded-full transition-colors"
-                                            >
-                                                Close Chat & Request Rating
-                                            </button>
-                                        </div>
-                                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                                            {chatMessages.map((msg) => (
-                                                <div
-                                                    key={msg.id}
-                                                    className={`flex ${msg.is_admin ? 'justify-end' : 'justify-start'}`}
-                                                >
-                                                    <div
-                                                        className={`max-w-[70%] rounded-lg p-3 ${msg.is_admin
-                                                            ? 'bg-indigo-600 text-white'
-                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                                                            }`}
-                                                    >
-                                                        <p className="text-sm">{msg.message}</p>
-                                                        <p className={`text-xs mt-1 ${msg.is_admin ? 'text-indigo-200' : 'text-gray-500'}`}>
-                                                            {new Date(msg.created_at).toLocaleTimeString()}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            <div ref={chatMessagesEndRef} />
-                                        </div>
-                                        <form onSubmit={sendChatMessage} className="p-4 border-t border-gray-200 dark:border-gray-700">
-                                            <div className="flex space-x-2">
+                            {showCouponForm && (
+                                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                        New Coupon
+                                    </h3>
+                                    <form onSubmit={createCoupon} className="space-y-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Coupon Code
+                                                </label>
                                                 <input
                                                     type="text"
-                                                    value={newChatMessage}
-                                                    onChange={(e) => setNewChatMessage(e.target.value)}
-                                                    placeholder="Type your response..."
-                                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                    value={newCoupon.code}
+                                                    onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
+                                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white uppercase"
+                                                    placeholder="SUMMER2024"
+                                                    required
                                                 />
-                                                <button
-                                                    type="submit"
-                                                    className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700"
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Discount Type
+                                                </label>
+                                                <select
+                                                    value={newCoupon.discount_type}
+                                                    onChange={(e) => setNewCoupon({ ...newCoupon, discount_type: e.target.value as any })}
+                                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
                                                 >
-                                                    <Send className="h-5 w-5" />
-                                                </button>
+                                                    <option value="percentage">Percentage</option>
+                                                    <option value="fixed">Fixed Amount</option>
+                                                    <option value="free">Free Subscription</option>
+                                                </select>
                                             </div>
-                                        </form>
-                                    </>
-                                ) : (
-                                    <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
-                                        Select a conversation to start chatting
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Agents Tab (Super Admin Only) */}
-                {activeTab === 'agents' && userRole === 'super_admin' && (
-                    <div className="space-y-6">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                Support Agents
-                            </h2>
-                            <button
-                                onClick={() => {
-                                    setShowAgentForm(!showAgentForm);
-                                    setGeneratedCode(null);
-                                }}
-                                className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                            >
-                                <UserPlus className="h-4 w-4 mr-2" />
-                                Add Support Agent
-                            </button>
-                        </div>
-
-                        {showAgentForm && (
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                    New Support Agent
-                                </h3>
-                                {generatedCode ? (
-                                    <div className="space-y-4">
-                                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                                            <p className="text-sm text-green-800 dark:text-green-200 mb-2">
-                                                Support agent created successfully!
-                                            </p>
-                                            <p className="text-xs text-green-700 dark:text-green-300 mb-3">
-                                                Share this access code with the agent. They can use it to login.
-                                            </p>
-                                            <div className="bg-white dark:bg-gray-900 p-3 rounded border border-green-300 dark:border-green-700">
-                                                <p className="text-2xl font-mono font-bold text-center text-gray-900 dark:text-white tracking-wider">
-                                                    {generatedCode}
-                                                </p>
+                                            {newCoupon.discount_type === 'free' && (
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                        Duration
+                                                    </label>
+                                                    <select
+                                                        value={newCoupon.duration}
+                                                        onChange={(e) => setNewCoupon({ ...newCoupon, duration: e.target.value as 'monthly' | 'annual' })}
+                                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                    >
+                                                        <option value="monthly">Monthly</option>
+                                                        <option value="annual">Annual</option>
+                                                    </select>
+                                                </div>
+                                            )}
+                                            {newCoupon.discount_type !== 'free' && (
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                        Discount Value {newCoupon.discount_type === 'percentage' ? '(%)' : '(EGP)'}
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        value={newCoupon.discount_value}
+                                                        onChange={(e) => setNewCoupon({ ...newCoupon, discount_value: Number(e.target.value) })}
+                                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                        min="0"
+                                                        max={newCoupon.discount_type === 'percentage' ? 100 : undefined}
+                                                        required
+                                                    />
+                                                </div>
+                                            )}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Max Uses
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={newCoupon.max_uses}
+                                                    onChange={(e) => setNewCoupon({ ...newCoupon, max_uses: Number(e.target.value) })}
+                                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                    min="1"
+                                                    required
+                                                />
                                             </div>
-                                        </div>
-                                        <button
-                                            onClick={() => {
-                                                setShowAgentForm(false);
-                                                setGeneratedCode(null);
-                                                setNewAgent({ name: '', email: '' });
-                                            }}
-                                            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                                        >
-                                            Done
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <form onSubmit={createSupportAgent} className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Agent Name
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={newAgent.name}
-                                                onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                                placeholder="John Doe"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Email
-                                            </label>
-                                            <input
-                                                type="email"
-                                                value={newAgent.email}
-                                                onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                                placeholder="agent@example.com"
-                                                required
-                                            />
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Valid Until
+                                                </label>
+                                                <input
+                                                    type="date"
+                                                    value={newCoupon.valid_until}
+                                                    onChange={(e) => setNewCoupon({ ...newCoupon, valid_until: e.target.value })}
+                                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                    required
+                                                />
+                                            </div>
                                         </div>
                                         <div className="flex justify-end space-x-3">
                                             <button
                                                 type="button"
-                                                onClick={() => setShowAgentForm(false)}
+                                                onClick={() => setShowCouponForm(false)}
                                                 className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                                             >
                                                 Cancel
@@ -1510,68 +1076,505 @@ export default function AdminPanel() {
                                                 type="submit"
                                                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
                                             >
-                                                Create Agent
+                                                Create Coupon
                                             </button>
                                         </div>
                                     </form>
+                                </div>
+                            )}
+
+                            <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+                                {isLoadingCoupons ? (
+                                    <div className="flex items-center justify-center p-8">
+                                        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                                    </div>
+                                ) : coupons.length === 0 ? (
+                                    <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                                        No coupons created yet
+                                    </div>
+                                ) : (
+                                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                        <thead className="bg-gray-50 dark:bg-gray-700">
+                                            <tr>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                    Code
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                    Discount
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                    Uses
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                    Valid Until
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                    Status
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                            {coupons.map((coupon) => (
+                                                <tr key={coupon.id}>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <span className="font-mono font-semibold text-gray-900 dark:text-white">
+                                                            {coupon.code}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                        {coupon.discount_type === 'free'
+                                                            ? 'Free Subscription'
+                                                            : coupon.discount_type === 'percentage'
+                                                                ? `${coupon.discount_value}%`
+                                                                : `${coupon.discount_value} EGP`
+                                                        }
+                                                        {coupon.discount_type === 'free' && coupon.duration && (
+                                                            <span className="ml-2 text-xs text-gray-500">
+                                                                ({coupon.duration})
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                        {coupon.used_count} / {coupon.max_uses}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                        {new Date(coupon.valid_until).toLocaleDateString()}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        {(() => {
+                                                            const isExpired = new Date(coupon.valid_until) < new Date();
+                                                            const isMaxedOut = coupon.used_count >= coupon.max_uses;
+
+                                                            if (isExpired) {
+                                                                return (
+                                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                                        Expired
+                                                                    </span>
+                                                                );
+                                                            } else if (isMaxedOut) {
+                                                                return (
+                                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                                        Max Uses Reached
+                                                                    </span>
+                                                                );
+                                                            } else if (coupon.is_active) {
+                                                                return (
+                                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                                        Active
+                                                                    </span>
+                                                                );
+                                                            } else {
+                                                                return (
+                                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                                        Inactive
+                                                                    </span>
+                                                                );
+                                                            }
+                                                        })()}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm space-x-3">
+                                                        <button
+                                                            onClick={() => toggleCouponStatus(coupon.id, coupon.is_active)}
+                                                            className="text-indigo-600 hover:text-indigo-900"
+                                                        >
+                                                            {coupon.is_active ? 'Deactivate' : 'Activate'}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => deleteCoupon(coupon.id)}
+                                                            className="text-red-600 hover:text-red-900"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 )}
                             </div>
-                        )}
-
-                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead className="bg-gray-50 dark:bg-gray-700">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                            Name
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                            Email
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                            Access Code
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                            Created
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                    {supportAgents.map((agent) => (
-                                        <tr key={agent.id}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                                {agent.name}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                {agent.email}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="font-mono text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                                                    {agent.access_code}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                {new Date(agent.created_at).toLocaleDateString()}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                <button
-                                                    onClick={() => deleteSupportAgent(agent.id)}
-                                                    className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                >
-                                                    Remove
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
                         </div>
-                    </div>
-                )}
-            </div>
+                    )}
+
+                    {/* Chat Tab */}
+                    {activeTab === 'chat' && (
+                        <div className="space-y-4">
+                            {/* Chat Filter Tabs */}
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+                                <div className="border-b border-gray-200 dark:border-gray-700">
+                                    <nav className="-mb-px flex space-x-8 px-6" aria-label="Chat Filters">
+                                        <button
+                                            onClick={() => setChatFilter('new')}
+                                            className={`${chatFilter === 'new'
+                                                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                                        >
+                                            <span className="mr-2">🆕</span>
+                                            New Chat Orders
+                                            <span className="ml-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 py-0.5 px-2 rounded-full text-xs font-semibold">
+                                                {chatUsers.filter(userId => {
+                                                    const assignment = chatAssignments.find(a => a.user_id === userId);
+                                                    return !assignment || assignment.assigned_agent_id === null;
+                                                }).length}
+                                            </span>
+                                        </button>
+                                        <button
+                                            onClick={() => setChatFilter('current')}
+                                            className={`${chatFilter === 'current'
+                                                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                                        >
+                                            <span className="mr-2">💬</span>
+                                            Current Chats
+                                            <span className="ml-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 py-0.5 px-2 rounded-full text-xs font-semibold">
+                                                {chatUsers.filter(userId => {
+                                                    const assignment = chatAssignments.find(a => a.user_id === userId);
+                                                    return assignment && assignment.assigned_agent_id !== null && assignment.status === 'open';
+                                                }).length}
+                                            </span>
+                                        </button>
+                                        <button
+                                            onClick={() => setChatFilter('ended')}
+                                            className={`${chatFilter === 'ended'
+                                                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                                        >
+                                            <span className="mr-2">✅</span>
+                                            Ended Chats
+                                            <span className="ml-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 py-0.5 px-2 rounded-full text-xs font-semibold">
+                                                {chatUsers.filter(userId => {
+                                                    const assignment = chatAssignments.find(a => a.user_id === userId);
+                                                    return assignment && assignment.status === 'closed';
+                                                }).length}
+                                            </span>
+                                        </button>
+                                    </nav>
+                                </div>
+                            </div>
+
+                            {/* Chat Interface */}
+                            <div className="grid grid-cols-3 gap-6 h-[600px]">
+                                {/* Users List */}
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                                            {chatFilter === 'new' && 'New Conversations'}
+                                            {chatFilter === 'current' && 'Active Conversations'}
+                                            {chatFilter === 'ended' && 'Closed Conversations'}
+                                        </h3>
+                                    </div>
+                                    <div className="overflow-y-auto h-full">
+                                        {getFilteredChatUsers().length === 0 ? (
+                                            <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
+                                                No {chatFilter} conversations
+                                            </div>
+                                        ) : (
+                                            getFilteredChatUsers().map((userId) => (
+                                                <button
+                                                    key={userId}
+                                                    onClick={() => setSelectedChatUser(userId)}
+                                                    className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-700 ${selectedChatUser === userId ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
+                                                        }`}
+                                                >
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                        {userId.substring(0, 8)}...
+                                                    </p>
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Chat Messages */}
+                                <div className="col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow flex flex-col">
+                                    {selectedChatUser ? (
+                                        <>
+                                            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-1">
+                                                        <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
+                                                            {selectedUserInfo?.full_name || chatMessages[0]?.user_email || 'User Chat'}
+                                                        </h3>
+                                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                            {selectedUserInfo?.email || chatMessages[0]?.user_email}
+                                                        </p>
+
+                                                        {/* User Details Grid */}
+                                                        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                                            {selectedUserInfo?.phone && (
+                                                                <div>
+                                                                    <span className="text-gray-500 dark:text-gray-400">Phone:</span>
+                                                                    <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.phone}</span>
+                                                                </div>
+                                                            )}
+                                                            {selectedUserInfo?.institution && (
+                                                                <div>
+                                                                    <span className="text-gray-500 dark:text-gray-400">Institution:</span>
+                                                                    <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.institution}</span>
+                                                                </div>
+                                                            )}
+                                                            <div>
+                                                                <span className="text-gray-500 dark:text-gray-400">Status:</span>
+                                                                <span className={`ml-1 font-medium ${selectedUserInfo?.subscription_status === 'active'
+                                                                    ? 'text-green-600 dark:text-green-400'
+                                                                    : 'text-gray-600 dark:text-gray-400'
+                                                                    }`}>
+                                                                    {selectedUserInfo?.subscription_status === 'active' ? 'Subscribed' : 'Free'}
+                                                                </span>
+                                                            </div>
+                                                            {selectedUserInfo?.subscription_plan && (
+                                                                <div>
+                                                                    <span className="text-gray-500 dark:text-gray-400">Plan:</span>
+                                                                    <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.subscription_plan}</span>
+                                                                </div>
+                                                            )}
+                                                            {selectedUserInfo?.created_at && (
+                                                                <div className="col-span-2">
+                                                                    <span className="text-gray-500 dark:text-gray-400">Member since:</span>
+                                                                    <span className="ml-1 text-gray-900 dark:text-white">
+                                                                        {new Date(selectedUserInfo.created_at).toLocaleDateString()}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex justify-end">
+                                                <button
+                                                    onClick={async () => {
+                                                        if (!selectedChatUser) return;
+
+                                                        try {
+                                                            // Send system message to trigger rating on user side
+                                                            await supabase
+                                                                .from('chat_messages')
+                                                                .insert({
+                                                                    user_id: selectedChatUser,
+                                                                    user_email: selectedUserInfo?.email || 'admin',
+                                                                    message: 'CHAT_CLOSED_BY_ADMIN',
+                                                                    is_admin: true
+                                                                });
+
+                                                            // Close the chat assignment
+                                                            await closeChat();
+                                                        } catch (error) {
+                                                            console.error('Error closing chat:', error);
+                                                            toast.error('Failed to close chat properly');
+                                                        }
+                                                    }}
+                                                    className="text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 px-3 py-1 rounded-full transition-colors"
+                                                >
+                                                    Close Chat & Request Rating
+                                                </button>
+                                            </div>
+                                            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                                {chatMessages.map((msg) => (
+                                                    <div
+                                                        key={msg.id}
+                                                        className={`flex ${msg.is_admin ? 'justify-end' : 'justify-start'}`}
+                                                    >
+                                                        <div
+                                                            className={`max-w-[70%] rounded-lg p-3 ${msg.is_admin
+                                                                ? 'bg-indigo-600 text-white'
+                                                                : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                                                                }`}
+                                                        >
+                                                            <p className="text-sm">{msg.message}</p>
+                                                            <p className={`text-xs mt-1 ${msg.is_admin ? 'text-indigo-200' : 'text-gray-500'}`}>
+                                                                {new Date(msg.created_at).toLocaleTimeString()}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                <div ref={chatMessagesEndRef} />
+                                            </div>
+                                            <form onSubmit={sendChatMessage} className="p-4 border-t border-gray-200 dark:border-gray-700">
+                                                <div className="flex space-x-2">
+                                                    <input
+                                                        type="text"
+                                                        value={newChatMessage}
+                                                        onChange={(e) => setNewChatMessage(e.target.value)}
+                                                        placeholder="Type your response..."
+                                                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                    />
+                                                    <button
+                                                        type="submit"
+                                                        className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700"
+                                                    >
+                                                        <Send className="h-5 w-5" />
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </>
+                                    ) : (
+                                        <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                                            Select a conversation to start chatting
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Agents Tab (Super Admin Only) */}
+                    {activeTab === 'agents' && userRole === 'super_admin' && (
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    Support Agents
+                                </h2>
+                                <button
+                                    onClick={() => {
+                                        setShowAgentForm(!showAgentForm);
+                                        setGeneratedCode(null);
+                                    }}
+                                    className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                >
+                                    <UserPlus className="h-4 w-4 mr-2" />
+                                    Add Support Agent
+                                </button>
+                            </div>
+
+                            {showAgentForm && (
+                                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                        New Support Agent
+                                    </h3>
+                                    {generatedCode ? (
+                                        <div className="space-y-4">
+                                            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                                                <p className="text-sm text-green-800 dark:text-green-200 mb-2">
+                                                    Support agent created successfully!
+                                                </p>
+                                                <p className="text-xs text-green-700 dark:text-green-300 mb-3">
+                                                    Share this access code with the agent. They can use it to login.
+                                                </p>
+                                                <div className="bg-white dark:bg-gray-900 p-3 rounded border border-green-300 dark:border-green-700">
+                                                    <p className="text-2xl font-mono font-bold text-center text-gray-900 dark:text-white tracking-wider">
+                                                        {generatedCode}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    setShowAgentForm(false);
+                                                    setGeneratedCode(null);
+                                                    setNewAgent({ name: '', email: '' });
+                                                }}
+                                                className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                            >
+                                                Done
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <form onSubmit={createSupportAgent} className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Agent Name
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={newAgent.name}
+                                                    onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
+                                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                    placeholder="John Doe"
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Email
+                                                </label>
+                                                <input
+                                                    type="email"
+                                                    value={newAgent.email}
+                                                    onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })}
+                                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                    placeholder="agent@example.com"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="flex justify-end space-x-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowAgentForm(false)}
+                                                    className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                                >
+                                                    Create Agent
+                                                </button>
+                                            </div>
+                                        </form>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+                                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead className="bg-gray-50 dark:bg-gray-700">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                Name
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                Email
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                Access Code
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                Created
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                        {supportAgents.map((agent) => (
+                                            <tr key={agent.id}>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                                    {agent.name}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                    {agent.email}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className="font-mono text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                                        {agent.access_code}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                    {new Date(agent.created_at).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                    <button
+                                                        onClick={() => deleteSupportAgent(agent.id)}
+                                                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </main>
         </div>
     );
 }
