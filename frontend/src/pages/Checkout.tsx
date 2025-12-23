@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
 import { paySkyIntegration } from '../lib/paysky';
-// Removed old Kashier integration
+import { kashierIntegration } from '../lib/kashier';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 
@@ -18,8 +18,6 @@ export default function Checkout() {
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [selectedPaymentProvider, setSelectedPaymentProvider] = useState<'paysky' | 'kashier'>('paysky');
-    const [kashierSessionUrl, setKashierSessionUrl] = useState<string | null>(null);
-    const [isSessionLoading, setIsSessionLoading] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [couponCode, setCouponCode] = useState('');
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
@@ -206,32 +204,15 @@ export default function Checkout() {
         
         try {
             if (selectedPaymentProvider === 'kashier') {
-                // New Kashier session-based integration
-                setIsSessionLoading(true);
-                try {
-                    const response = await fetch('/api/create-payment-session', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            orderId: `ORDER-${Date.now()}`,
-                            amount: finalPrice,
-                            currency: 'EGP',
-                            customerEmail: user?.email,
-                            customerReference: user?.id
-                        })
-                    });
-                    const data = await response.json();
-                    if (data.sessionUrl) {
-                        setKashierSessionUrl(data.sessionUrl);
-                    } else {
-                        toast.error('Failed to create Kashier session');
-                    }
-                } catch (err) {
-                    toast.error('Kashier session error');
-                } finally {
-                    setIsSessionLoading(false);
-                }
-                return;
+                // Kashier will redirect to hosted checkout, then callback handles success
+                await kashierIntegration.pay({
+                    amount: finalPrice,
+                    planId: plan.id,
+                    userId: user?.id || '',
+                    userEmail: user?.email || '',
+                    billingCycle,
+                });
+                // User will be redirected - no code after this runs
             } else {
                 // PaySky opens iframe/lightbox - handle callback
                 const result = await paySkyIntegration.pay({
@@ -512,22 +493,13 @@ export default function Checkout() {
                             )}
 
                             {/* Action button */}
-                            {selectedPaymentProvider === 'kashier' && kashierSessionUrl ? (
-                                <iframe
-                                    src={kashierSessionUrl + '?brandColor=%236366f1&lang=en&methods=card,wallet&successUrl=https://yourdomain.com/success&failUrl=https://yourdomain.com/fail'}
-                                    title="Kashier Payment"
-                                    style={{ width: '100%', height: '600px', border: 'none', borderRadius: '12px' }}
-                                    allow="payment"
-                                />
-                            ) : (
-                                <button
-                                    onClick={handlePayment}
-                                    disabled={isProcessing || isSessionLoading}
-                                    className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 flex items-center justify-center"
-                                >
-                                    {(isProcessing || isSessionLoading) ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />{t('checkout.processing')}</> : t('checkout.proceed')}
-                                </button>
-                            )}
+                            <button
+                                onClick={handlePayment}
+                                disabled={isProcessing}
+                                className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 flex items-center justify-center"
+                            >
+                                {isProcessing ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />{t('checkout.processing')}</> : t('checkout.proceed')}
+                            </button>
                         </div>
                     </div>
                 )}
