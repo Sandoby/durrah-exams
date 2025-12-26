@@ -1,7 +1,8 @@
+
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { CheckCircle, Loader2, Sparkles, Star, Trophy } from 'lucide-react';
+import { CheckCircle, Loader2, Sparkles, Star, Trophy, AlertCircle } from 'lucide-react';
 
 import { supabase } from '../lib/supabase';
 import { KidsLeaderboard } from '../components/kids/KidsLeaderboard';
@@ -23,6 +24,7 @@ type Exam = {
   title: string;
   description?: string;
   questions: Question[];
+  is_active?: boolean;
   settings?: any;
 };
 
@@ -264,10 +266,24 @@ export default function KidsExamView() {
     }
   };
 
+
   if (isLoading || !exam) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  // Block access if exam is not active
+  if (exam.is_active === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
+          <AlertCircle className="mx-auto h-16 w-16 text-red-500" />
+          <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white">Exam Not Available</h2>
+          <p className="mt-2 text-gray-600 dark:text-gray-300">This exam is currently deactivated by the tutor. Please check back later or contact your tutor for more information.</p>
+        </div>
       </div>
     );
   }

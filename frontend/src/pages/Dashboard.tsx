@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, Globe, AlertTriangle } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, Globe, AlertTriangle, Power } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -383,6 +383,34 @@ export default function Dashboard() {
         }
     };
 
+    const handleToggleStatus = async (examId: string, currentStatus: boolean, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (isDemo) {
+            toast.error('Cannot change status in demo mode');
+            return;
+        }
+
+        try {
+            const { error } = await supabase
+                .from('exams')
+                .update({ is_active: !currentStatus })
+                .eq('id', examId);
+
+            if (error) throw error;
+
+            setExams(prev => prev.map(ex =>
+                ex.id === examId ? { ...ex, is_active: !currentStatus } : ex
+            ));
+
+            toast.success(currentStatus ? t('dashboard.status.deactivated', 'Exam Deactivated') : t('dashboard.status.activated', 'Exam Activated'));
+        } catch (error) {
+            console.error(error);
+            toast.error('Failed to update status');
+        }
+    };
+
     const handleLogout = async () => {
         await signOut();
         navigate('/login');
@@ -655,9 +683,14 @@ export default function Dashboard() {
                                                     {exam.description}
                                                 </p>
                                             </div>
-                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${exam.is_active ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' : 'bg-gradient-to-r from-red-500 to-rose-500 text-white'}`}>
+                                            <button
+                                                onClick={(e) => handleToggleStatus(exam.id, exam.is_active, e)}
+                                                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${exam.is_active ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md shadow-green-500/20' : 'bg-gradient-to-r from-gray-500 to-slate-500 text-white'} hover:shadow-lg hover:scale-105 transition-all cursor-pointer`}
+                                                title={exam.is_active ? t('dashboard.status.clickToDeactivate', "Click to Deactivate") : t('dashboard.status.clickToActivate', "Click to Activate")}
+                                            >
                                                 {exam.is_active ? t('dashboard.status.active') : t('dashboard.status.inactive')}
-                                            </span>
+                                                <Power className="h-3 w-3 ml-1.5" />
+                                            </button>
                                         </div>
                                         <div className="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
                                             <div className="flex items-center justify-between mb-3">

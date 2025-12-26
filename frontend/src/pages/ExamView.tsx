@@ -7,7 +7,6 @@ import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../context/AuthContext';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { Calculator } from '../components/Calculator';
 
@@ -33,6 +32,7 @@ interface Exam {
     description: string;
     questions: Question[];
     required_fields?: string[];
+    is_active?: boolean;
     settings: {
         require_fullscreen: boolean;
         detect_tab_switch: boolean;
@@ -56,20 +56,17 @@ interface Exam {
 
 export default function ExamView() {
     // Check if exam was accessed via portal (code entry)
-    const [isPortalAccess, setIsPortalAccess] = useState(false);
-
     useEffect(() => {
         // Allow review mode and submission view
         if (window.location.search.includes('submission=')) return;
-
+        // Only check for normal exams (not kids mode)
         const portalFlag = sessionStorage.getItem('durrah_exam_portal_access');
-        if (portalFlag) {
-            setIsPortalAccess(true);
+        if (!portalFlag) {
+            // Not accessed via portal, redirect
+            navigate('/student-portal');
         }
-        // Removed strict redirect to allow direct links from tutors
     }, []);
     const { t } = useTranslation();
-    const { user } = useAuth();
     const { id } = useParams();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -145,15 +142,6 @@ export default function ExamView() {
 
             }
             return;
-        }
-
-        // Auto-fill student data from logged-in user if not already set
-        if (user && !studentData.email) {
-            setStudentData(prev => ({
-                ...prev,
-                name: user.user_metadata?.full_name || '',
-                email: user.email || ''
-            }));
         }
 
         // Check for active session to restore
@@ -253,37 +241,24 @@ export default function ExamView() {
             setExam({ ...examData, questions: processedQuestions, settings: normalizedSettings });
 
             // Availability checks
-            const timezone = normalizedSettings.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const now = new Date();
+            let start: Date | null = null;
+            let end: Date | null = null;
+            if (normalizedSettings.start_time) {
+                const d = new Date(normalizedSettings.start_time);
+                if (!isNaN(d.getTime())) start = d;
+            }
+            if (normalizedSettings.end_time) {
+                const d = new Date(normalizedSettings.end_time);
+                if (!isNaN(d.getTime())) end = d;
+            }
 
-            const getWallClockString = (date: Date, tz: string) => {
-                try {
-                    const parts = new Intl.DateTimeFormat('en-US', {
-                        timeZone: tz,
-                        year: 'numeric',
-                        month: 'numeric',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: 'numeric',
-                        hour12: false
-                    }).formatToParts(date);
-                    const getV = (type: string) => parts.find(p => p.type === type)?.value || '';
-                    return `${getV('year')}-${getV('month').padStart(2, '0')}-${getV('day').padStart(2, '0')}T${getV('hour').padStart(2, '0')}:${getV('minute').padStart(2, '0')}`;
-                } catch (e) {
-                    // Fallback to local if timezone invalid
-                    return date.toISOString().slice(0, 16);
-                }
-            };
-
-            const nowWallClock = getWallClockString(new Date(), timezone);
-            const startTime = normalizedSettings.start_time;
-            const endTime = normalizedSettings.end_time;
-
-            if (startTime && nowWallClock < startTime) {
+            if (start && now < start) {
                 setIsAvailable(false);
-                setAvailabilityMessage(`${t('examView.startsAt')} ${startTime.replace('T', ' ')} (${timezone})`);
-            } else if (endTime && nowWallClock > endTime) {
+                setAvailabilityMessage(`${t('examView.startsAt')} ${start.toLocaleString()}`);
+            } else if (end && now > end) {
                 setIsAvailable(false);
-                setAvailabilityMessage(`${t('examView.endedAt')} ${endTime.replace('T', ' ')} (${timezone})`);
+                setAvailabilityMessage(`${t('examView.endedAt')} ${end.toLocaleString()}`);
             } else {
                 setIsAvailable(true);
                 setAvailabilityMessage(null);
@@ -854,11 +829,25 @@ export default function ExamView() {
     const totalQuestions = exam?.questions.length || 0;
     const progress = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
 
+
     if (!exam) return (
         <div className="min-h-screen flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
         </div>
     );
+
+    // Block access if exam is not active
+    if (exam.is_active === false) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+                <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
+                    <AlertCircle className="mx-auto h-16 w-16 text-red-500" />
+                    <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white">{t('examView.inactive.title', 'Exam Not Available')}</h2>
+                    <p className="mt-2 text-gray-600 dark:text-gray-300">{t('examView.inactive.message', 'This exam is currently deactivated by the tutor. Please check back later or contact your tutor for more information.')}</p>
+                </div>
+            </div>
+        );
+    }
 
     // Initial loading for review data
     if (isReviewMode && !reviewData) {
@@ -878,7 +867,6 @@ export default function ExamView() {
                 <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-2xl w-full mb-8">
                     <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
                     <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white">{t('examView.submitted.title')}</h2>
-
                     {showResults && score ? (
                         <div className="mt-4">
                             <p className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">{score.percentage.toFixed(1)}%</p>
@@ -886,25 +874,11 @@ export default function ExamView() {
                         </div>
                     ) : (
                         <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-md">
-                            <p>{t('examView.submitted.message', 'Submission Received')}</p>
-                            <p className="text-sm mt-2">{t('examView.submitted.resultsPending', 'Results will be released by your tutor.')}</p>
+                            <p>{t('examView.submitted.message')}</p>
+                            <p className="text-sm mt-2">{t('examView.submitted.resultsPending')}</p>
                         </div>
                     )}
-                    <p className="mt-4 text-sm text-gray-500">{t('examView.submitted.recorded', 'Your submission has been recorded.')}</p>
-
-                    {isPortalAccess && (
-                        <div className="mt-8">
-                            <button
-                                onClick={() => {
-                                    sessionStorage.removeItem('durrah_exam_portal_access');
-                                    window.location.href = '/student-portal';
-                                }}
-                                className="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm transition-all"
-                            >
-                                {t('Return to Student Portal')}
-                            </button>
-                        </div>
-                    )}
+                    <p className="mt-4 text-sm text-gray-500">{t('examView.submitted.recorded')}</p>
 
                     {/* View Answers Button */}
                     {/* View Answers Button */}
