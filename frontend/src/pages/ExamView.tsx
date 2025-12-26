@@ -1,5 +1,6 @@
 // helper: get user session or attempt background anonymous sign-in (non-blocking)
 import { useEffect, useState, useRef } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Sun, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle } from 'lucide-react';
@@ -55,17 +56,21 @@ interface Exam {
 }
 
 export default function ExamView() {
+    const { user, loading } = useAuth();
     // Check if exam was accessed via portal (code entry)
     useEffect(() => {
         // Allow review mode and submission view
         if (window.location.search.includes('submission=')) return;
+        // Wait for auth to load
+        if (loading) return;
         // Only check for normal exams (not kids mode)
         const portalFlag = sessionStorage.getItem('durrah_exam_portal_access');
-        if (!portalFlag) {
-            // Not accessed via portal, redirect
+        if (!portalFlag && !user) {
+            // Not accessed via portal and not logged in, redirect
             navigate('/student-portal');
         }
-    }, []);
+        // If logged in or portalFlag, allow access
+    }, [loading, user]);
     const { t } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
