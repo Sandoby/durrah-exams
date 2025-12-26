@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, User, Mail, Lock, Save, Loader2, Crown } from 'lucide-react';
+import { ArrowLeft, User, Mail, Lock, Save, Loader2, Crown, Menu, X, LogOut, Settings as SettingsIcon } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -34,6 +34,17 @@ export default function Settings() {
         confirmPassword: '',
     });
     const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const handleLogout = async () => {
+        try {
+            await supabase.auth.signOut();
+            navigate('/login');
+        } catch (error) {
+            console.error('Logout error:', error);
+            toast.error('Error logging out');
+        }
+    };
 
     useEffect(() => {
         fetchProfile();
@@ -151,30 +162,108 @@ export default function Settings() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-            <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
-                <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => navigate('/dashboard')}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all"
-                        >
-                            <ArrowLeft className="h-5 w-5 text-gray-500" />
-                        </button>
-                        <Logo />
-                    </div>
-                    <div className="hidden sm:block">
-                        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                            {t('settings.title', 'Settings')}
-                        </h1>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 font-sans pb-20 relative overflow-hidden">
+            {/* Animated background blobs */}
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+            <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-purple-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+
+            <style>{`
+                @keyframes blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
+                .animate-blob { animation: blob 7s infinite; }
+                .animation-delay-2000 { animation-delay: 2s; }
+                .animation-delay-4000 { animation-delay: 4s; }
+            `}</style>
+
+            {/* Navbar */}
+            <nav className="sticky top-4 z-50 px-4 sm:px-6 lg:px-8 mb-8">
+                <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
+                    <div className="flex justify-between h-16 px-6">
+                        <div className="flex items-center gap-3">
+                            <Logo className="h-9 w-9" showText={false} />
+                            <div className="flex flex-col">
+                                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
+                            </div>
+                        </div>
+
+                        {/* Desktop Navigation */}
+                        <div className="hidden md:flex items-center space-x-3">
+                            <span className="hidden lg:inline text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
+                                {user?.user_metadata?.full_name || user?.email}
+                            </span>
+
+                            <div className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 cursor-default transition-colors">
+                                <SettingsIcon className="h-4 w-4 lg:mr-2" />
+                                <span className="hidden lg:inline">{t('settings.title', 'Settings')}</span>
+                            </div>
+                            <button
+                                onClick={handleLogout}
+                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                <LogOut className="h-4 w-4 lg:mr-2" />
+                                <span className="hidden lg:inline">{t('nav.logout', 'Logout')}</span>
+                            </button>
+                        </div>
+
+                        {/* Mobile menu button */}
+                        <div className="flex items-center md:hidden">
+                            <button
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+                            >
+                                {isMobileMenuOpen ? (
+                                    <X className="h-6 w-6" />
+                                ) : (
+                                    <Menu className="h-6 w-6" />
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </header>
 
-            <main className="max-w-4xl mx-auto px-6 lg:px-8 py-12">
+                {/* Mobile menu */}
+                {isMobileMenuOpen && (
+                    <div className="md:hidden mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 mx-auto max-w-7xl">
+                        <div className="px-4 py-3 space-y-2">
+                            <div className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700 font-medium">
+                                {user?.user_metadata?.full_name || user?.email}
+                            </div>
+                            <div className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20">
+                                <SettingsIcon className="h-5 w-5 mr-3" />
+                                {t('settings.title', 'Settings')}
+                            </div>
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                                <LogOut className="h-5 w-5 mr-3" />
+                                {t('nav.logout', 'Logout')}
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </nav>
+
+            {/* Page Header */}
+            <div className="max-w-4xl mx-auto px-6 lg:px-8 py-2 relative z-10">
+                <div className="flex items-center gap-4 mb-8">
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        className="p-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-all shadow-sm"
+                    >
+                        <ArrowLeft className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                    </button>
+                    <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                        {t('settings.title', 'Settings')}
+                    </h1>
+                </div>
+            </div>
+
+            <main className="max-w-4xl mx-auto px-6 lg:px-8 pb-12 relative z-10">
                 <div className="space-y-8">
                     {/* Profile Settings */}
-                    <section className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                    <section className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
                             <User className="h-5 w-5 text-indigo-600" />
                             <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('settings.profile.title', 'Profile Settings')}</h2>
@@ -265,7 +354,7 @@ export default function Settings() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Security */}
-                        <section className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col">
+                        <section className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col">
                             <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
                                 <Lock className="h-5 w-5 text-red-600" />
                                 <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('settings.security.title', 'Security')}</h2>
@@ -309,7 +398,7 @@ export default function Settings() {
                         </section>
 
                         {/* Subscription */}
-                        <section className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col">
+                        <section className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col">
                             <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
                                 <Crown className="h-5 w-5 text-amber-600" />
                                 <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('settings.subscription.title', 'Subscription')}</h2>
