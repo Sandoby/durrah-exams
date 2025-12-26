@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, BarChart3, Users, Activity, Trophy, TrendingUp, Calendar } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { ArrowLeft, Download, BarChart3, Users, Activity, Trophy, TrendingUp, Calendar, LogOut, Settings, Menu, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../context/AuthContext';
+import { Logo } from '../Logo';
 import toast from 'react-hot-toast';
 import {
     BarChart, Bar, AreaChart, Area,
@@ -32,6 +35,8 @@ interface QuestionStats {
 }
 
 export function ExamAnalyticsDashboard() {
+    const { t } = useTranslation();
+    const { user } = useAuth();
     const { examId } = useParams();
     const navigate = useNavigate();
     const [exam, setExam] = useState<any>(null);
@@ -39,12 +44,23 @@ export function ExamAnalyticsDashboard() {
     const [isLoading, setIsLoading] = useState(true);
     const [scoreDistribution, setScoreDistribution] = useState<any[]>([]);
     const [questionStats, setQuestionStats] = useState<QuestionStats[]>([]);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         if (examId) {
             fetchAnalytics();
         }
     }, [examId]);
+
+    const handleLogout = async () => {
+        try {
+            await supabase.auth.signOut();
+            navigate('/login');
+        } catch (error) {
+            console.error('Logout error:', error);
+            toast.error('Error logging out');
+        }
+    };
 
     const fetchAnalytics = async () => {
         try {
@@ -239,7 +255,83 @@ export function ExamAnalyticsDashboard() {
             <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent pointer-events-none" />
             <div className="absolute top-20 right-20 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-8">
+            {/* Navbar */}
+            <nav className="sticky top-4 z-50 px-4 sm:px-6 lg:px-8 mb-8">
+                <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
+                    <div className="flex justify-between h-16 px-6">
+                        <div className="flex items-center gap-3">
+                            <Logo className="h-9 w-9" showText={false} />
+                            <div className="flex flex-col">
+                                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
+                            </div>
+                        </div>
+
+                        {/* Desktop Navigation */}
+                        <div className="hidden md:flex items-center space-x-3">
+                            <span className="hidden lg:inline text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
+                                {user?.user_metadata?.full_name || user?.email}
+                            </span>
+
+                            <Link
+                                to="/settings"
+                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                <Settings className="h-4 w-4 lg:mr-2" />
+                                <span className="hidden lg:inline">{t('settings.title', 'Settings')}</span>
+                            </Link>
+                            <button
+                                onClick={handleLogout}
+                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                <LogOut className="h-4 w-4 lg:mr-2" />
+                                <span className="hidden lg:inline">{t('nav.logout', 'Logout')}</span>
+                            </button>
+                        </div>
+
+                        {/* Mobile menu button */}
+                        <div className="flex items-center md:hidden">
+                            <button
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+                            >
+                                {isMobileMenuOpen ? (
+                                    <X className="h-6 w-6" />
+                                ) : (
+                                    <Menu className="h-6 w-6" />
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Mobile menu */}
+                {isMobileMenuOpen && (
+                    <div className="md:hidden mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 mx-auto max-w-7xl">
+                        <div className="px-4 py-3 space-y-2">
+                            <div className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700 font-medium">
+                                {user?.user_metadata?.full_name || user?.email}
+                            </div>
+                            <Link
+                                to="/settings"
+                                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                                <Settings className="h-5 w-5 mr-3" />
+                                {t('settings.title', 'Settings')}
+                            </Link>
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                                <LogOut className="h-5 w-5 mr-3" />
+                                {t('nav.logout', 'Logout')}
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </nav>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                     <div className="flex items-center gap-4">
