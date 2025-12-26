@@ -4,6 +4,13 @@ import {
     Users, MessageCircle, Tag, Lock, LogOut,
     Loader2, Plus, Send, UserPlus, BarChart3
 } from 'lucide-react';
+import KidsLanding from './KidsLanding';
+import ExamEditor from './ExamEditor';
+import { ExamAnalyticsDashboard } from '../components/analytics/ExamAnalyticsDashboard';
+import { MockDashboard } from '../components/demo/MockDashboard';
+import ExamView from './ExamView';
+import KidsExamView from './KidsExamView';
+import StudentPortal from './StudentPortal';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
@@ -84,7 +91,7 @@ export default function AdminPanel() {
     const [accessCode, setAccessCode] = useState('');
     const [userRole, setUserRole] = useState<'super_admin' | 'support_agent' | null>(null);
     const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'coupons' | 'chat' | 'agents'>('analytics');
+    const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'coupons' | 'chat' | 'agents' | 'mockups'>('analytics');
 
     // Users
     const [users, setUsers] = useState<User[]>([]);
@@ -871,6 +878,7 @@ export default function AdminPanel() {
                     </button>
 
                     {userRole === 'super_admin' && (
+                        <>
                         <button
                             onClick={() => setActiveTab('agents')}
                             className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'agents'
@@ -881,6 +889,17 @@ export default function AdminPanel() {
                             <UserPlus className="w-5 h-5" />
                             Agents
                         </button>
+                        <button
+                            onClick={() => setActiveTab('mockups')}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'mockups'
+                                ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                                }`}
+                        >
+                            <Lock className="w-5 h-5" />
+                            Mockups
+                        </button>
+                        </>
                     )}
                 </nav>
 
@@ -1422,7 +1441,212 @@ export default function AdminPanel() {
                         </div>
                     )}
 
-                    {/* Agents Tab (Super Admin Only) */}
+                    {/* Mockups Tab (Super Admin Only) */}
+                    {activeTab === 'mockups' && userRole === 'super_admin' && (
+                        <div className="space-y-6">
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Project Mockups & Screenshots</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                {/* Kids Landing Page Mockup */}
+                                <div id="mockup-KidsLanding" className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col items-center">
+                                    <div className="w-full mb-4">
+                                        <div className="border rounded-lg overflow-hidden">
+                                            <div style={{ pointerEvents: 'none' }}>
+                                                {/* Use KidsLanding in demo mode if available */}
+                                                <KidsLanding />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={async () => {
+                                            const html2canvas = (await import('html2canvas')).default;
+                                            const card = document.getElementById('mockup-KidsLanding');
+                                            if (card) {
+                                                html2canvas(card).then(canvas => {
+                                                    const link = document.createElement('a');
+                                                    link.download = `KidsLanding-mockup.png`;
+                                                    link.href = canvas.toDataURL();
+                                                    link.click();
+                                                });
+                                            }
+                                        }}
+                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 mt-2"
+                                    >
+                                        Download Screenshot
+                                    </button>
+                                </div>
+                                {/* Dashboard Mockup */}
+                                                                {/* Exam Editor Mockup */}
+                                                                <div id="mockup-ExamEditor" className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col items-center">
+                                                                    <div className="w-full mb-4">
+                                                                        <div className="border rounded-lg overflow-hidden">
+                                                                            <div style={{ pointerEvents: 'none' }}>
+                                                                                {/* Use ExamEditor in demo mode if available */}
+                                                                                <ExamEditor />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            const html2canvas = (await import('html2canvas')).default;
+                                                                            const card = document.getElementById('mockup-ExamEditor');
+                                                                            if (card) {
+                                                                                html2canvas(card).then(canvas => {
+                                                                                    const link = document.createElement('a');
+                                                                                    link.download = `ExamEditor-mockup.png`;
+                                                                                    link.href = canvas.toDataURL();
+                                                                                    link.click();
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 mt-2"
+                                                                    >
+                                                                        Download Screenshot
+                                                                    </button>
+                                                                </div>
+                                                                {/* Exam Analytics Mockup */}
+                                                                <div id="mockup-ExamAnalytics" className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col items-center">
+                                                                    <div className="w-full mb-4">
+                                                                        <div className="border rounded-lg overflow-hidden">
+                                                                            <div style={{ pointerEvents: 'none' }}>
+                                                                                {/* Use ExamAnalyticsDashboard in demo mode if available */}
+                                                                                <ExamAnalyticsDashboard />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            const html2canvas = (await import('html2canvas')).default;
+                                                                            const card = document.getElementById('mockup-ExamAnalytics');
+                                                                            if (card) {
+                                                                                html2canvas(card).then(canvas => {
+                                                                                    const link = document.createElement('a');
+                                                                                    link.download = `ExamAnalytics-mockup.png`;
+                                                                                    link.href = canvas.toDataURL();
+                                                                                    link.click();
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 mt-2"
+                                                                    >
+                                                                        Download Screenshot
+                                                                    </button>
+                                                                </div>
+                                <div id="mockup-Dashboard" className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col items-center">
+                                    <div className="w-full mb-4">
+                                        {/* Real dashboard demo */}
+                                        <div className="border rounded-lg overflow-hidden">
+                                            <div style={{ pointerEvents: 'none' }}>
+                                                {/* Use demo dashboard component */}
+                                                <MockDashboard />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={async () => {
+                                            const html2canvas = (await import('html2canvas')).default;
+                                            const card = document.getElementById('mockup-Dashboard');
+                                            if (card) {
+                                                html2canvas(card).then(canvas => {
+                                                    const link = document.createElement('a');
+                                                    link.download = `Dashboard-mockup.png`;
+                                                    link.href = canvas.toDataURL();
+                                                    link.click();
+                                                });
+                                            }
+                                        }}
+                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 mt-2"
+                                    >
+                                        Download Screenshot
+                                    </button>
+                                </div>
+                                {/* ExamView Mockup */}
+                                <div id="mockup-ExamView" className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col items-center">
+                                    <div className="w-full mb-4">
+                                        <div className="border rounded-lg overflow-hidden">
+                                            <div style={{ pointerEvents: 'none' }}>
+                                                {/* Use ExamView in demo mode if available */}
+                                                <ExamView />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={async () => {
+                                            const html2canvas = (await import('html2canvas')).default;
+                                            const card = document.getElementById('mockup-ExamView');
+                                            if (card) {
+                                                html2canvas(card).then(canvas => {
+                                                    const link = document.createElement('a');
+                                                    link.download = `ExamView-mockup.png`;
+                                                    link.href = canvas.toDataURL();
+                                                    link.click();
+                                                });
+                                            }
+                                        }}
+                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 mt-2"
+                                    >
+                                        Download Screenshot
+                                    </button>
+                                </div>
+                                {/* KidsExamView Mockup */}
+                                <div id="mockup-KidsExamView" className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col items-center">
+                                    <div className="w-full mb-4">
+                                        <div className="border rounded-lg overflow-hidden">
+                                            <div style={{ pointerEvents: 'none' }}>
+                                                {/* Use KidsExamView in demo mode if available */}
+                                                <KidsExamView />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={async () => {
+                                            const html2canvas = (await import('html2canvas')).default;
+                                            const card = document.getElementById('mockup-KidsExamView');
+                                            if (card) {
+                                                html2canvas(card).then(canvas => {
+                                                    const link = document.createElement('a');
+                                                    link.download = `KidsExamView-mockup.png`;
+                                                    link.href = canvas.toDataURL();
+                                                    link.click();
+                                                });
+                                            }
+                                        }}
+                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 mt-2"
+                                    >
+                                        Download Screenshot
+                                    </button>
+                                </div>
+                                {/* Student Portal Mockup */}
+                                <div id="mockup-StudentPortal" className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col items-center">
+                                    <div className="w-full mb-4">
+                                        <div className="border rounded-lg overflow-hidden">
+                                            <div style={{ pointerEvents: 'none' }}>
+                                                {/* Use StudentPortal in demo mode if available */}
+                                                <StudentPortal />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={async () => {
+                                            const html2canvas = (await import('html2canvas')).default;
+                                            const card = document.getElementById('mockup-StudentPortal');
+                                            if (card) {
+                                                html2canvas(card).then(canvas => {
+                                                    const link = document.createElement('a');
+                                                    link.download = `StudentPortal-mockup.png`;
+                                                    link.href = canvas.toDataURL();
+                                                    link.click();
+                                                });
+                                            }
+                                        }}
+                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 mt-2"
+                                    >
+                                        Download Screenshot
+                                    </button>
+                                </div>
+                            </div>
+                            <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">You can download screenshots of all main pages for ads and future posts. For real data, use the app in demo mode.</p>
+                        </div>
+                    )}
                     {activeTab === 'agents' && userRole === 'super_admin' && (
                         <div className="space-y-6">
                             <div className="flex justify-between items-center">
