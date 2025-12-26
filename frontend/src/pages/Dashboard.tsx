@@ -649,34 +649,57 @@ export default function Dashboard() {
                                                 {exam.is_active ? t('dashboard.status.active') : t('dashboard.status.inactive')}
                                             </span>
                                         </div>
-                                        <div className="mt-6 flex items-center justify-between">
-                                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                                                {new Date(exam.created_at).toLocaleDateString()}
+                                        <div className="mt-6 flex items-center justify-between border-t border-gray-100 dark:border-slate-700 pt-4">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                    {new Date(exam.created_at).toLocaleDateString()}
+                                                </span>
+                                                {exam.quiz_code && (
+                                                    <span className="px-2 py-0.5 text-xs font-mono bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded">
+                                                        {exam.quiz_code}
+                                                    </span>
+                                                )}
                                             </div>
-                                            <div className="flex space-x-2">
+                                            <div className="flex items-center gap-1">
+                                                {/* Share Button */}
                                                 <button
                                                     onClick={() => copyExamLink(exam.id)}
                                                     data-tour={index === 0 ? "copy-link" : undefined}
-                                                    className="p-2 text-gray-400 hover:text-green-600 transition-colors"
-                                                    title={t('dashboard.actions.copyLink')}
+                                                    className="group relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-green-500 hover:to-emerald-500 transition-all duration-200"
+                                                    title="Share exam"
                                                 >
-                                                    <Share2 className="h-5 w-5" />
+                                                    <Share2 className="h-4 w-4" />
+                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                                        Share
+                                                    </span>
                                                 </button>
+
+                                                {/* Print Button */}
                                                 <button
                                                     onClick={() => downloadExamPDF(exam.id)}
-                                                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                                                    title={t('dashboard.actions.print')}
+                                                    className="group relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-500 hover:to-cyan-500 transition-all duration-200"
+                                                    title="Download PDF"
                                                 >
-                                                    <FileText className="h-5 w-5" />
+                                                    <FileText className="h-4 w-4" />
+                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                                        Print
+                                                    </span>
                                                 </button>
+
+                                                {/* Results Button */}
                                                 <button
                                                     onClick={() => setSelectedExamForResults(exam)}
                                                     data-tour={index === 0 ? "results" : undefined}
-                                                    className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                                                    title={t('dashboard.actions.results')}
+                                                    className="group relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-orange-500 hover:to-amber-500 transition-all duration-200"
+                                                    title="View results"
                                                 >
-                                                    <BarChart3 className="h-5 w-5" />
+                                                    <BarChart3 className="h-4 w-4" />
+                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                                        Results
+                                                    </span>
                                                 </button>
+
+                                                {/* Analytics Button */}
                                                 <button
                                                     onClick={() => {
                                                         if (profile?.subscription_status === 'active') {
@@ -686,31 +709,47 @@ export default function Dashboard() {
                                                             navigate('/checkout');
                                                         }
                                                     }}
-                                                    className={`p-2 transition-colors ${profile?.subscription_status === 'active'
-                                                        ? 'text-gray-400 hover:text-purple-600'
-                                                        : 'text-gray-300 hover:text-gray-400'
+                                                    className={`group relative p-2 rounded-lg transition-all duration-200 ${profile?.subscription_status === 'active'
+                                                            ? 'text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500'
+                                                            : 'text-gray-300 cursor-not-allowed'
                                                         }`}
-                                                    title={profile?.subscription_status === 'active' ? t('dashboard.actions.analytics') : t('dashboard.actions.analyticsLocked')}
+                                                    title={profile?.subscription_status === 'active' ? 'Advanced analytics' : 'Upgrade for analytics'}
                                                 >
                                                     {profile?.subscription_status === 'active' ? (
-                                                        <TrendingUp className="h-5 w-5" />
+                                                        <TrendingUp className="h-4 w-4" />
                                                     ) : (
-                                                        <Lock className="h-5 w-5" />
+                                                        <Lock className="h-4 w-4" />
                                                     )}
+                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                                        {profile?.subscription_status === 'active' ? 'Analytics' : 'Locked'}
+                                                    </span>
                                                 </button>
+
+                                                {/* Separator */}
+                                                <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+                                                {/* Edit Button */}
                                                 <Link
                                                     to={`/exam/${exam.id}/edit`}
-                                                    className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
-                                                    title={t('dashboard.actions.edit')}
+                                                    className="group relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-indigo-500 hover:to-violet-500 transition-all duration-200"
+                                                    title="Edit exam"
                                                 >
-                                                    <Edit className="h-5 w-5" />
+                                                    <Edit className="h-4 w-4" />
+                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                                        Edit
+                                                    </span>
                                                 </Link>
+
+                                                {/* Delete Button */}
                                                 <button
                                                     onClick={() => handleDelete(exam.id)}
-                                                    className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                                                    title={t('dashboard.actions.delete')}
+                                                    className="group relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-rose-500 transition-all duration-200"
+                                                    title="Delete exam"
                                                 >
-                                                    <Trash2 className="h-5 w-5" />
+                                                    <Trash2 className="h-4 w-4" />
+                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                                        Delete
+                                                    </span>
                                                 </button>
                                             </div>
                                         </div>
