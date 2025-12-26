@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown, LogOut, Menu } from 'lucide-react';
+import { Logo } from '../components/Logo';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
@@ -80,6 +81,17 @@ export default function ExamEditor() {
     const [startTour] = useState(new URLSearchParams(window.location.search).get('demo') === 'true');
     const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
     const [profile, setProfile] = useState<any>(null);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const handleLogout = async () => {
+        try {
+            await supabase.auth.signOut();
+            navigate('/login');
+        } catch (error) {
+            console.error('Logout error:', error);
+            toast.error('Error logging out');
+        }
+    };
 
     // Kids Mode helpers
     const [savedQuizCode, setSavedQuizCode] = useState<string | null>(null);
@@ -604,7 +616,95 @@ export default function ExamEditor() {
     }
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] dark:bg-gray-950 font-sans pb-20 relative">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 font-sans pb-20 relative overflow-hidden">
+            {/* Animated background blobs */}
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+            <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-purple-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+
+            <style>{`
+                @keyframes blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
+                .animate-blob { animation: blob 7s infinite; }
+                .animation-delay-2000 { animation-delay: 2s; }
+                .animation-delay-4000 { animation-delay: 4s; }
+            `}</style>
+
+            {/* Navbar */}
+            <nav className="sticky top-4 z-50 px-4 sm:px-6 lg:px-8 mb-8">
+                <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
+                    <div className="flex justify-between h-16 px-6">
+                        <div className="flex items-center gap-3">
+                            <Logo className="h-9 w-9" showText={false} />
+                            <div className="flex flex-col">
+                                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
+                            </div>
+                        </div>
+
+                        {/* Desktop Navigation */}
+                        <div className="hidden md:flex items-center space-x-3">
+                            <span className="hidden lg:inline text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
+                                {user?.user_metadata?.full_name || user?.email}
+                            </span>
+
+                            <Link
+                                to="/settings"
+                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                <Settings className="h-4 w-4 lg:mr-2" />
+                                <span className="hidden lg:inline">{t('settings.title', 'Settings')}</span>
+                            </Link>
+                            <button
+                                onClick={handleLogout}
+                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                <LogOut className="h-4 w-4 lg:mr-2" />
+                                <span className="hidden lg:inline">{t('nav.logout', 'Logout')}</span>
+                            </button>
+                        </div>
+
+                        {/* Mobile menu button */}
+                        <div className="flex items-center md:hidden">
+                            <button
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+                            >
+                                {isMobileMenuOpen ? (
+                                    <X className="h-6 w-6" />
+                                ) : (
+                                    <Menu className="h-6 w-6" />
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Mobile menu */}
+                {isMobileMenuOpen && (
+                    <div className="md:hidden mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 mx-auto max-w-7xl">
+                        <div className="px-4 py-3 space-y-2">
+                            <div className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700 font-medium">
+                                {user?.user_metadata?.full_name || user?.email}
+                            </div>
+                            <Link
+                                to="/settings"
+                                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                                <Settings className="h-5 w-5 mr-3" />
+                                {t('settings.title', 'Settings')}
+                            </Link>
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                                <LogOut className="h-5 w-5 mr-3" />
+                                {t('nav.logout', 'Logout')}
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </nav>
+
             {isDemo && (
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-6 lg:px-8 py-3">
                     <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -618,7 +718,7 @@ export default function ExamEditor() {
             )}
 
             {/* Sticky Header */}
-            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50">
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 sticky top-24 z-40 transition-all">
                 <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
                         <div className="flex items-center gap-4">
