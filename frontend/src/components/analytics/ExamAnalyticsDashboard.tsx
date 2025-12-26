@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, BarChart3, Users, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Download, BarChart3, Users, Activity, Trophy, TrendingUp, Calendar } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import {
@@ -157,6 +157,16 @@ export function ExamAnalyticsDashboard() {
         }
     };
 
+    const studentFields = (exam?.required_fields || []).length
+        ? exam.required_fields || []
+        : ['name'];
+
+    const resolveFieldValue = (s: SubmissionData, field: string) => {
+        if (field === 'name') return s.student_data?.name || s.student_name || '-';
+        if (field === 'email') return s.student_data?.email || s.student_email || '-';
+        return s.student_data?.[field] ?? (s as any)[field] ?? '-';
+    };
+
     const exportResults = async (format: 'csv' | 'pdf') => {
         try {
             if (format === 'csv') {
@@ -193,7 +203,7 @@ export function ExamAnalyticsDashboard() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
                 <div className="text-center">
                     <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
                     <p className="text-gray-600 dark:text-gray-400">Loading analytics...</p>
@@ -206,147 +216,252 @@ export function ExamAnalyticsDashboard() {
         ? (submissions.reduce((sum, s) => {
             const maxScore = s.max_score || s.total_points || 1;
             return sum + ((s.score || 0) / maxScore);
-        }, 0) / submissions.length * 100).toFixed(2)
+        }, 0) / submissions.length * 100).toFixed(1)
         : 0;
 
     const highestScore = submissions.length > 0
         ? Math.max(...submissions.map(s => {
             const maxScore = s.max_score || s.total_points || 1;
             return ((s.score || 0) / maxScore) * 100;
-        })).toFixed(2)
-        : 'N/A';
+        })).toFixed(1)
+        : '0';
 
-    const studentFields = (exam?.required_fields || []).length
-        ? exam.required_fields || []
-        : ['name'];
-
-    const resolveFieldValue = (s: SubmissionData, field: string) => {
-        if (field === 'name') return s.student_data?.name || s.student_name || '-';
-        if (field === 'email') return s.student_data?.email || s.student_email || '-';
-        return s.student_data?.[field] ?? (s as any)[field] ?? '-';
-    };
+    const passRate = submissions.length > 0
+        ? ((submissions.filter(s => {
+            const max = s.max_score || s.total_points || 1;
+            return ((s.score || 0) / max) >= 0.5;
+        }).length / submissions.length) * 100).toFixed(0)
+        : '0';
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12 font-sans relative overflow-hidden">
+            {/* Background Gradients */}
+            <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent pointer-events-none" />
+            <div className="absolute top-20 right-20 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-8">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => navigate('/dashboard')}
-                            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition"
+                            className="p-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-all shadow-sm"
                         >
-                            <ArrowLeft className="h-5 w-5" />
+                            <ArrowLeft className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                         </button>
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{exam?.title}</h1>
-                            <p className="text-gray-600 dark:text-gray-400 mt-1">Analytics & Results</p>
+                            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-indigo-800 to-indigo-900 dark:from-white dark:via-indigo-200 dark:to-indigo-400">
+                                {exam?.title}
+                            </h1>
+                            <div className="flex items-center gap-2 mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+                                <Activity className="h-4 w-4 text-indigo-500" />
+                                <span>Analytics Dashboard</span>
+                                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+                                <span>Updated {new Date().toLocaleDateString()}</span>
+                            </div>
                         </div>
                     </div>
                     <button
                         onClick={() => exportResults('csv')}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                        className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95 font-medium"
                     >
-                        <Download className="h-4 w-4" />
-                        Export CSV
+                        <Download className="h-5 w-5" />
+                        <span>Export CSV</span>
                     </button>
                 </div>
 
-                {/* Key Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Total Submissions</p>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{submissions.length}</p>
+                {/* Metrics Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    {/* Card 1: Total Candidates */}
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Users className="h-20 w-20 text-blue-600" />
+                        </div>
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                                <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                             </div>
-                            <Users className="h-8 w-8 text-indigo-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Candidates</p>
+                            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{submissions.length}</h3>
+                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-2 font-medium">Participants</p>
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Average Score</p>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{avgScore}%</p>
+                    {/* Card 2: Avg Score */}
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <BarChart3 className="h-20 w-20 text-indigo-600" />
+                        </div>
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
+                                <BarChart3 className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
                             </div>
-                            <BarChart3 className="h-8 w-8 text-green-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Average Score</p>
+                            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{avgScore}%</h3>
+                            <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-2 font-medium">Performance</p>
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Highest Score</p>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                                    {highestScore}%
-                                </p>
+                    {/* Card 3: Pass Rate */}
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <TrendingUp className="h-20 w-20 text-emerald-600" />
+                        </div>
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                                <TrendingUp className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                             </div>
-                            <CheckCircle className="h-8 w-8 text-blue-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Pass Rate</p>
+                            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{passRate}%</h3>
+                            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium">Success</p>
+                        </div>
+                    </div>
+
+                    {/* Card 4: Top Score */}
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Trophy className="h-20 w-20 text-amber-500" />
+                        </div>
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
+                                <Trophy className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                            </div>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Highest Score</p>
+                            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{highestScore}%</h3>
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 font-medium">Top Performer</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Charts */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    {/* Score Distribution */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Score Distribution</h2>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={scoreDistribution}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="range" />
-                                <YAxis />
-                                <Tooltip />
-                                <Bar dataKey="students" fill="#4f46e5" />
-                            </BarChart>
-                        </ResponsiveContainer>
+                {/* Main Charts Area */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    {/* Score Distribution Chart */}
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Score Distribution</h3>
+                                <p className="text-sm text-gray-500">How students performed across ranges</p>
+                            </div>
+                            <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <BarChart3 className="h-5 w-5 text-gray-400" />
+                            </div>
+                        </div>
+                        <div className="h-[300px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={scoreDistribution}>
+                                    <defs>
+                                        <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.8} />
+                                            <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.2} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                    <XAxis dataKey="range" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                                    <Tooltip
+                                        cursor={{ fill: 'transparent' }}
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                    />
+                                    <Bar dataKey="students" fill="url(#colorScore)" radius={[6, 6, 0, 0]} barSize={40} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
 
-                    {/* Score Trend */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Submission Timeline</h2>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <AreaChart data={submissions.map((s, idx) => ({
-                                index: idx + 1,
-                                score: (() => {
-                                    const maxScore = s.max_score || s.total_points || 1;
-                                    return ((s.score || 0) / maxScore) * 100;
-                                })()
-                            }))}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="index" />
-                                <YAxis />
-                                <Tooltip />
-                                <Area type="monotone" dataKey="score" fill="#4f46e5" />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                    {/* Timeline Chart */}
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Submission Timeline</h3>
+                                <p className="text-sm text-gray-500">Performance trend over time</p>
+                            </div>
+                            <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <Calendar className="h-5 w-5 text-gray-400" />
+                            </div>
+                        </div>
+                        <div className="h-[300px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={submissions.map((s, idx) => ({
+                                    index: idx + 1,
+                                    score: s.max_score ? ((s.score / s.max_score) * 100) : 0,
+                                    date: new Date(s.submitted_at).toLocaleDateString()
+                                }))}>
+                                    <defs>
+                                        <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                    <XAxis dataKey="index" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                                    <Tooltip
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                    />
+                                    <Area type="monotone" dataKey="score" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorTrend)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
                 </div>
 
                 {/* Question Performance */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow mb-8">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Question Performance</h2>
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-8 overflow-hidden">
+                    <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">Question Analysis</h2>
+                        <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">View detailed report</button>
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead>
-                                <tr className="border-b border-gray-200 dark:border-gray-700">
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Question</th>
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Correct</th>
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Incorrect</th>
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Success Rate</th>
+                            <thead className="bg-gray-50/50 dark:bg-gray-800">
+                                <tr>
+                                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Question</th>
+                                    <th className="text-center py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Correct</th>
+                                    <th className="text-center py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Incorrect</th>
+                                    <th className="text-right py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Success Rate</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                                 {questionStats.map((q, idx) => {
                                     const total = q.correct_count + q.incorrect_count;
                                     const successRate = total > 0 ? ((q.correct_count / total) * 100).toFixed(2) : 0;
                                     return (
-                                        <tr key={idx} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                            <td className="py-3 px-4 text-sm text-gray-900 dark:text-white truncate max-w-md">{q.question_text}</td>
-                                            <td className="py-3 px-4 text-sm text-green-600 font-medium">{q.correct_count}</td>
-                                            <td className="py-3 px-4 text-sm text-red-600 font-medium">{q.incorrect_count}</td>
-                                            <td className="py-3 px-4 text-sm font-medium text-indigo-600">{successRate}%</td>
+                                        <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                            <td className="py-4 px-6 text-sm font-medium text-gray-900 dark:text-white max-w-md truncate">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-xs text-gray-500 font-mono">Q{idx + 1}</span>
+                                                    <span className="truncate">{q.question_text}</span>
+                                                </div>
+                                            </td>
+                                            <td className="py-4 px-6 text-sm text-center">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                                    {q.correct_count}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-6 text-sm text-center">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                                    {q.incorrect_count}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-6 text-right">
+                                                <div className="flex items-center justify-end gap-3">
+                                                    <span className="text-sm font-bold text-gray-900 dark:text-white">{successRate}%</span>
+                                                    <div className="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                                        <div
+                                                            className={`h-full rounded-full ${Number(successRate) >= 70 ? 'bg-green-500' : Number(successRate) >= 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                                            style={{ width: `${successRate}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </td>
                                         </tr>
                                     );
                                 })}
@@ -356,39 +471,48 @@ export function ExamAnalyticsDashboard() {
                 </div>
 
                 {/* Submissions List */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Student Submissions</h2>
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">Student Submissions</h2>
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead>
-                                <tr className="border-b border-gray-200 dark:border-gray-700">
+                            <thead className="bg-gray-50/50 dark:bg-gray-800">
+                                <tr>
                                     {studentFields.map((field: string) => (
-                                        <th key={field} className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <th key={field} className="text-left py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                             {field.replace(/_/g, ' ')}
                                         </th>
                                     ))}
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Score</th>
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Percentage</th>
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Submitted</th>
+                                    <th className="text-center py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Score</th>
+                                    <th className="text-center py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Result</th>
+                                    <th className="text-right py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Submitted</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                                 {submissions.map((s) => {
                                     const maxScore = s.max_score || s.total_points || 1;
-                                    const percentage = s.percentage || ((s.score || 0) / maxScore) * 100;
+                                    const percentage = s.percentage ? s.percentage : ((s.score || 0) / maxScore) * 100;
+                                    const passed = percentage >= 50;
+
                                     return (
-                                        <tr key={s.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                        <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                             {studentFields.map((field: string) => (
-                                                <td key={field} className="py-3 px-4 text-sm text-gray-900 dark:text-white">
+                                                <td key={field} className="py-4 px-6 text-sm font-medium text-gray-900 dark:text-white">
                                                     {resolveFieldValue(s, field)}
                                                 </td>
                                             ))}
-                                            <td className="py-3 px-4 text-sm font-medium text-gray-900 dark:text-white">{s.score || 0}/{maxScore}</td>
-                                            <td className="py-3 px-4 text-sm font-medium text-indigo-600">
-                                                {percentage.toFixed(2)}%
+                                            <td className="py-4 px-6 text-sm text-center">
+                                                <div className="font-bold text-gray-900 dark:text-white">{s.score || 0} <span className="text-gray-400 font-normal">/ {maxScore}</span></div>
                                             </td>
-                                            <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
-                                                {new Date(s.submitted_at || s.created_at || new Date()).toLocaleString()}
+                                            <td className="py-4 px-6 text-center">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${passed ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'}`}>
+                                                    {percentage.toFixed(1)}% {passed ? 'Pass' : 'Fail'}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-6 text-sm text-gray-500 dark:text-gray-400 text-right font-mono">
+                                                {new Date(s.submitted_at || s.created_at || new Date()).toLocaleDateString()}
+                                                <span className="ml-2 text-xs text-gray-400">{new Date(s.submitted_at || s.created_at || new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                             </td>
                                         </tr>
                                     );
