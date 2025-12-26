@@ -406,7 +406,18 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 relative overflow-hidden">
+            {/* Animated background blobs */}
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+            <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-purple-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+
+            <style>{`
+                @keyframes blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
+                .animate-blob { animation: blob 7s infinite; }
+                .animation-delay-2000 { animation-delay: 2s; }
+                .animation-delay-4000 { animation-delay: 4s; }
+            `}</style>
             {/* Interactive Tutorial Tour */}
             <Joyride
                 steps={tourSteps}
@@ -444,21 +455,25 @@ export default function Dashboard() {
                 }}
             />
 
-            <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <Logo />
+            <nav className="sticky top-4 z-50 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
+                    <div className="flex justify-between h-16 px-6">
+                        <div className="flex items-center gap-3">
+                            <Logo className="h-9 w-9" showText={false} />
+                            <div className="flex flex-col">
+                                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
+                            </div>
                         </div>
 
                         {/* Desktop Navigation */}
-                        <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
+                        <div className="hidden md:flex items-center space-x-3">
                             <span className="hidden lg:inline text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
                                 {user?.user_metadata?.full_name || user?.email}
                             </span>
                             <button
                                 onClick={startTour}
-                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 focus:outline-none transition"
+                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
                                 title={t('dashboard.tour.startTour', 'Tutorial')}
                             >
                                 <svg className="h-4 w-4 lg:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -469,7 +484,7 @@ export default function Dashboard() {
                             {profile?.subscription_status !== 'active' && (
                                 <Link
                                     to="/checkout"
-                                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 focus:outline-none transition"
+                                    className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-500/30 hover:shadow-xl transition-all"
                                 >
                                     <Crown className="h-4 w-4 lg:mr-2" />
                                     <span className="hidden lg:inline">{t('settings.subscription.upgrade')}</span>
@@ -478,14 +493,14 @@ export default function Dashboard() {
                             <Link
                                 to="/settings"
                                 data-tour="settings"
-                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition"
+                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                             >
                                 <Settings className="h-4 w-4 lg:mr-2" />
                                 <span className="hidden lg:inline">{t('settings.title')}</span>
                             </Link>
                             <button
                                 onClick={handleLogout}
-                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition"
+                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                             >
                                 <LogOut className="h-4 w-4 lg:mr-2" />
                                 <span className="hidden lg:inline">{t('nav.logout', 'Logout')}</span>
@@ -566,15 +581,20 @@ export default function Dashboard() {
                 </div>
             )}
 
-            <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
-                <div className="space-y-6">
+            <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 relative z-10">
+                <div className="space-y-8">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white">{t('dashboard.title')}</h1>
+                        <div>
+                            <h1 className="text-3xl sm:text-4xl font-bold">
+                                <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">{t('dashboard.title')}</span>
+                            </h1>
+                            <p className="mt-2 text-gray-600 dark:text-gray-400">Manage and monitor your exams</p>
+                        </div>
                         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                             <Link
                                 to="/question-bank"
                                 data-tour="question-bank"
-                                className="inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full sm:w-auto min-h-[44px]"
+                                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg transition-all w-full sm:w-auto"
                             >
                                 <BookOpen className="h-5 w-5 mr-2" />
                                 {t('dashboard.questionBank')}
@@ -582,44 +602,50 @@ export default function Dashboard() {
                             <button
                                 onClick={handleCreateExam}
                                 data-tour="create-exam"
-                                className="inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full sm:w-auto min-h-[44px]"
+                                className="group relative inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300 w-full sm:w-auto"
                             >
-                                <Plus className="h-5 w-5 mr-2" />
-                                {t('dashboard.createExam')}
+                                <span className="relative z-10 flex items-center">
+                                    <Plus className="h-5 w-5 mr-2" />
+                                    {t('dashboard.createExam')}
+                                </span>
+                                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </button>
                         </div>
                     </div>
 
                     {exams.length === 0 ? (
-                        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">
-                            <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">{t('dashboard.noExams.title')}</h3>
-                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('dashboard.noExams.desc')}</p>
-                            <div className="mt-6">
-                                <button
-                                    onClick={handleCreateExam}
-                                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                >
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    {t('dashboard.noExams.button')}
-                                </button>
+                        <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700">
+                            <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 flex items-center justify-center mb-6">
+                                <FileText className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
                             </div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('dashboard.noExams.title')}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">{t('dashboard.noExams.desc')}</p>
+                            <button
+                                onClick={handleCreateExam}
+                                className="group relative inline-flex items-center px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300"
+                            >
+                                <span className="relative z-10 flex items-center">
+                                    <Plus className="h-5 w-5 mr-2" />
+                                    {t('dashboard.noExams.button')}
+                                </span>
+                                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            </button>
                         </div>
                     ) : (
-                        <div className="grid gap-4 sm:gap-6 mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                        <div className="grid gap-6 mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                             {exams.map((exam, index) => (
-                                <div key={exam.id} data-tour={index === 0 ? "exam-card" : undefined} className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow duration-200">
+                                <div key={exam.id} data-tour={index === 0 ? "exam-card" : undefined} className="group bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-lg hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-2 transition-all duration-300">
                                     <div className="p-6">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <h3 className="text-lg font-medium text-gray-900 dark:text-white truncate max-w-[200px]">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                                                     {exam.title}
                                                 </h3>
-                                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2 h-10">
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
                                                     {exam.description}
                                                 </p>
                                             </div>
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${exam.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${exam.is_active ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' : 'bg-gradient-to-r from-red-500 to-rose-500 text-white'}`}>
                                                 {exam.is_active ? t('dashboard.status.active') : t('dashboard.status.inactive')}
                                             </span>
                                         </div>
