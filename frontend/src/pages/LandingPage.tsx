@@ -84,8 +84,20 @@ export default function LandingPage() {
                                         "inLanguage": "en",
                                         "publisher": {
                                             "@type": "Organization",
-                                            "name": "Durrah for Tutors"
+                                            "name": "Durrah for Tutors",
+                                            "logo": "https://tutors.durrahsystem.tech/logo.png",
+                                            "url": "https://tutors.durrahsystem.tech"
                                         }
+                                    }
+                                `}</script>
+                <script type="application/ld+json">{`
+                                    {
+                                        "@context": "https://schema.org",
+                                        "@type": "Organization",
+                                        "name": "Durrah for Tutors",
+                                        "url": "https://tutors.durrahsystem.tech",
+                                        "logo": "https://tutors.durrahsystem.tech/logo.png",
+                                        "description": "Create secure, professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide."
                                     }
                                 `}</script>
                 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
