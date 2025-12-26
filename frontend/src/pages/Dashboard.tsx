@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, Smartphone, Globe, AlertTriangle } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -40,6 +40,7 @@ export default function Dashboard() {
     const [startDemoTour, setStartDemoTour] = useState(false);
     const [kidsShareModal, setKidsShareModal] = useState<{ url: string; code: string; title?: string } | null>(null);
     const [shareModal, setShareModal] = useState<{ id?: string; url: string; code: string; title?: string; directUrl?: string } | null>(null);
+    const [deleteConfirmModal, setDeleteConfirmModal] = useState<{ id: string; title: string } | null>(null);
 
     useDemoTour(new URLSearchParams(window.location.search).get('showSharing') === 'true' ? 'share-monitor' : new URLSearchParams(window.location.search).get('showAnalytics') === 'true' ? 'view-analytics' : null, startDemoTour && isDemo);
 
@@ -354,7 +355,15 @@ export default function Dashboard() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm(t('dashboard.deleteConfirm'))) return;
+        const exam = exams.find(e => e.id === id);
+        if (exam) {
+            setDeleteConfirmModal({ id, title: exam.title });
+        }
+    };
+
+    const executeDelete = async () => {
+        if (!deleteConfirmModal) return;
+        const id = deleteConfirmModal.id;
 
         try {
             const { error } = await supabase
@@ -367,6 +376,7 @@ export default function Dashboard() {
 
             toast.success(t('dashboard.deleteSuccess'));
             setExams(prev => prev.filter(exam => exam.id !== id));
+            setDeleteConfirmModal(null);
         } catch (error: any) {
             console.error(error);
             toast.error('Failed to delete exam');
@@ -649,54 +659,49 @@ export default function Dashboard() {
                                                 {exam.is_active ? t('dashboard.status.active') : t('dashboard.status.inactive')}
                                             </span>
                                         </div>
-                                        <div className="mt-6 flex items-center justify-between border-t border-gray-100 dark:border-slate-700 pt-4">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm text-gray-500 dark:text-gray-400">
-                                                    {new Date(exam.created_at).toLocaleDateString()}
-                                                </span>
-                                                {exam.quiz_code && (
-                                                    <span className="px-2 py-0.5 text-xs font-mono bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded">
-                                                        {exam.quiz_code}
+                                        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                        {new Date(exam.created_at).toLocaleDateString()}
                                                     </span>
-                                                )}
+                                                    {exam.quiz_code && (
+                                                        <span className="px-2 py-0.5 text-xs font-mono bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded border border-indigo-200 dark:border-indigo-800">
+                                                            {exam.quiz_code}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-1">
+
+                                            {/* Action Buttons */}
+                                            <div className="grid grid-cols-6 gap-2">
                                                 {/* Share Button */}
                                                 <button
                                                     onClick={() => copyExamLink(exam.id)}
                                                     data-tour={index === 0 ? "copy-link" : undefined}
-                                                    className="group relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-green-500 hover:to-emerald-500 transition-all duration-200"
-                                                    title="Share exam"
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
                                                 >
-                                                    <Share2 className="h-4 w-4" />
-                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                                                        Share
-                                                    </span>
+                                                    <Share2 className="h-5 w-5 text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform" />
+                                                    <span className="text-xs font-semibold text-green-700 dark:text-green-300">Share</span>
                                                 </button>
 
                                                 {/* Print Button */}
                                                 <button
                                                     onClick={() => downloadExamPDF(exam.id)}
-                                                    className="group relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-500 hover:to-cyan-500 transition-all duration-200"
-                                                    title="Download PDF"
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
                                                 >
-                                                    <FileText className="h-4 w-4" />
-                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                                                        Print
-                                                    </span>
+                                                    <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
+                                                    <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Print</span>
                                                 </button>
 
                                                 {/* Results Button */}
                                                 <button
                                                     onClick={() => setSelectedExamForResults(exam)}
                                                     data-tour={index === 0 ? "results" : undefined}
-                                                    className="group relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-orange-500 hover:to-amber-500 transition-all duration-200"
-                                                    title="View results"
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
                                                 >
-                                                    <BarChart3 className="h-4 w-4" />
-                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                                                        Results
-                                                    </span>
+                                                    <BarChart3 className="h-5 w-5 text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform" />
+                                                    <span className="text-xs font-semibold text-orange-700 dark:text-orange-300">Results</span>
                                                 </button>
 
                                                 {/* Analytics Button */}
@@ -709,47 +714,41 @@ export default function Dashboard() {
                                                             navigate('/checkout');
                                                         }
                                                     }}
-                                                    className={`group relative p-2 rounded-lg transition-all duration-200 ${profile?.subscription_status === 'active'
-                                                            ? 'text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500'
-                                                            : 'text-gray-300 cursor-not-allowed'
-                                                        }`}
-                                                    title={profile?.subscription_status === 'active' ? 'Advanced analytics' : 'Upgrade for analytics'}
+                                                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl ${profile?.subscription_status === 'active'
+                                                        ? 'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 hover:shadow-lg hover:scale-105'
+                                                        : 'bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 opacity-60 cursor-not-allowed'
+                                                        } transition-all duration-200 group`}
+                                                    disabled={profile?.subscription_status !== 'active'}
                                                 >
                                                     {profile?.subscription_status === 'active' ? (
-                                                        <TrendingUp className="h-4 w-4" />
+                                                        <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" />
                                                     ) : (
-                                                        <Lock className="h-4 w-4" />
+                                                        <Lock className="h-5 w-5 text-gray-400" />
                                                     )}
-                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                                                        {profile?.subscription_status === 'active' ? 'Analytics' : 'Locked'}
+                                                    <span className={`text-xs font-semibold ${profile?.subscription_status === 'active'
+                                                        ? 'text-purple-700 dark:text-purple-300'
+                                                        : 'text-gray-500'
+                                                        }`}>
+                                                        Stats
                                                     </span>
                                                 </button>
-
-                                                {/* Separator */}
-                                                <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
                                                 {/* Edit Button */}
                                                 <Link
                                                     to={`/exam/${exam.id}/edit`}
-                                                    className="group relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-indigo-500 hover:to-violet-500 transition-all duration-200"
-                                                    title="Edit exam"
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 border border-indigo-200 dark:border-indigo-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
                                                 >
-                                                    <Edit className="h-4 w-4" />
-                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                                                        Edit
-                                                    </span>
+                                                    <Edit className="h-5 w-5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                                                    <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">Edit</span>
                                                 </Link>
 
                                                 {/* Delete Button */}
                                                 <button
                                                     onClick={() => handleDelete(exam.id)}
-                                                    className="group relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-rose-500 transition-all duration-200"
-                                                    title="Delete exam"
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border border-red-200 dark:border-red-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
-                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                                                        Delete
-                                                    </span>
+                                                    <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400 group-hover:scale-110 transition-transform" />
+                                                    <span className="text-xs font-semibold text-red-700 dark:text-red-300">Delete</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -763,70 +762,75 @@ export default function Dashboard() {
 
             {/* Kids Share Modal */}
             {kidsShareModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-lg">
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-                            <div>
-                                <p className="text-xs uppercase tracking-wide text-indigo-500 font-semibold">Kids Mode Sharing</p>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{kidsShareModal.title || 'Kids Exam'}</h3>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 p-6 text-white text-center relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4">
+                                <button
+                                    onClick={() => setKidsShareModal(null)}
+                                    className="text-white/70 hover:text-white transition-colors"
+                                >
+                                    <X className="h-6 w-6" />
+                                </button>
                             </div>
-                            <button
-                                onClick={() => setKidsShareModal(null)}
-                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
+                            <h3 className="text-2xl font-bold mb-1">{kidsShareModal.title || 'Kids Exam'}</h3>
+                            <p className="text-indigo-100 text-sm">Kids Mode • Single Question View</p>
                         </div>
-                        <div className="px-5 py-4 space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">Student Portal Link</label>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        readOnly
-                                        value={kidsShareModal.url}
-                                        className="flex-1 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm px-3 py-2 text-gray-800 dark:text-gray-100"
+
+                        <div className="p-6 space-y-6">
+                            {/* QR Code */}
+                            <div className="flex justify-center">
+                                <div className="p-3 bg-white rounded-xl shadow-lg border border-gray-100">
+                                    <img
+                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(kidsShareModal.url)}&color=4f46e5`}
+                                        alt="Exam QR Code"
+                                        className="w-32 h-32"
                                     />
-                                    <button
-                                        onClick={() => copyValue(kidsShareModal.url, 'Student portal link copied')}
-                                        className="px-3 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
-                                    >
-                                        Copy
-                                    </button>
+                                    <p className="text-center text-xs text-gray-500 mt-2 font-medium">Scan to join</p>
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">Exam Access Code</label>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        readOnly
-                                        value={kidsShareModal.code}
-                                        className="flex-1 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm px-3 py-2 text-gray-800 dark:text-gray-100"
-                                    />
-                                    <button
-                                        onClick={() => copyValue(kidsShareModal.code, 'Exam code copied')}
-                                        className="px-3 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
-                                    >
-                                        Copy
-                                    </button>
+
+                            <div className="space-y-4">
+                                <div className="group">
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Student Portal Link</label>
+                                    <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 group-focus-within:border-indigo-500 dark:group-focus-within:border-indigo-500 transition-colors">
+                                        <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                                            <Globe className="h-4 w-4 text-indigo-600" />
+                                        </div>
+                                        <input
+                                            readOnly
+                                            value={kidsShareModal.url}
+                                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium text-gray-700 dark:text-gray-200"
+                                        />
+                                        <button
+                                            onClick={() => copyValue(kidsShareModal.url, 'Student portal link copied')}
+                                            className="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                                            title="Copy Link"
+                                        >
+                                            <Copy className="h-4 w-4" />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex flex-col gap-2 pt-2">
-                                <div className="text-xs text-yellow-700 bg-yellow-100 border border-yellow-300 rounded px-2 py-1 mb-1">
-                                    <b>Note:</b> Make sure all your students have signed up and have their accounts ready before the exam. Share both the portal link and the code with them.
-                                </div>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => copyValue(`Page: ${kidsShareModal.url}\nCode: ${kidsShareModal.code}`, 'Kids info copied')}
-                                        className="px-3 py-2 text-sm font-medium rounded-md bg-green-600 text-white hover:bg-green-700"
-                                    >
-                                        Copy Both
-                                    </button>
-                                    <button
-                                        onClick={() => setKidsShareModal(null)}
-                                        className="px-3 py-2 text-sm font-medium rounded-md border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                    >
-                                        Done
-                                    </button>
+
+                                <div className="group">
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Access Code</label>
+                                    <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 group-focus-within:border-indigo-500 dark:group-focus-within:border-indigo-500 transition-colors">
+                                        <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                                            <Lock className="h-4 w-4 text-indigo-600" />
+                                        </div>
+                                        <input
+                                            readOnly
+                                            value={kidsShareModal.code}
+                                            className="flex-1 bg-transparent border-none focus:ring-0 text-lg font-mono font-bold tracking-widest text-indigo-600"
+                                        />
+                                        <button
+                                            onClick={() => copyValue(kidsShareModal.code, 'Access code copied')}
+                                            className="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                                            title="Copy Code"
+                                        >
+                                            <Copy className="h-4 w-4" />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -834,99 +838,147 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {/* Normal Exam Share Modal */}
+            {/* Redesigned Share Modal */}
             {shareModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-lg">
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100 dark:border-gray-700">
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-700">
                             <div>
-                                <p className="text-xs uppercase tracking-wide text-indigo-500 font-semibold">Exam Sharing</p>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{shareModal.title || 'Exam'}</h3>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Share Exam</h3>
+                                <p className="text-sm text-gray-500">{shareModal.title}</p>
                             </div>
                             <button
                                 onClick={() => setShareModal(null)}
-                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
                             >
-                                <X className="h-5 w-5" />
+                                <X className="h-5 w-5 text-gray-500" />
                             </button>
                         </div>
-                        <div className="px-5 py-4 space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">Student Portal Link</label>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        readOnly
-                                        value={shareModal.url}
-                                        className="flex-1 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm px-3 py-2 text-gray-800 dark:text-gray-100"
+
+                        <div className="p-6 space-y-6">
+                            {/* QR Code Centerpiece */}
+                            <div className="flex flex-col items-center">
+                                <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-200">
+                                    <img
+                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(shareModal.url)}&color=4f46e5`}
+                                        alt="QR Code"
+                                        className="w-32 h-32"
                                     />
-                                    <button
-                                        onClick={() => copyValue(shareModal.url, 'Student portal link copied')}
-                                        className="px-3 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
-                                    >
-                                        Copy
-                                    </button>
                                 </div>
+                                <p className="mt-2 text-xs text-gray-500 font-medium tracking-wide">SCAN TO START</p>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">Exam Access Code</label>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        readOnly
-                                        value={shareModal.code}
-                                        className="flex-1 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm px-3 py-2 text-gray-800 dark:text-gray-100"
-                                    />
-                                    <button
-                                        onClick={() => copyValue(shareModal.code, 'Exam code copied')}
-                                        className="px-3 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
-                                        disabled={!shareModal.code}
-                                    >
-                                        Copy
-                                    </button>
-                                </div>
-                                {!shareModal.code && (
-                                    <div className="text-xs text-red-700 bg-red-100 border border-red-300 rounded px-2 py-1 mt-2">
-                                        <b>Warning:</b> No exam code set for this exam. Please add a code in the exam editor.
-                                    </div>
-                                )}
-                            </div>
-                            {shareModal.directUrl && (
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">Direct Exam Link (Bypasses Portal)</label>
-                                    <div className="flex items-center gap-2">
+
+                            <div className="space-y-4">
+                                {/* Link Input */}
+                                <div className="group">
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Student Portal Link</label>
+                                    <div className="flex items-center gap-2 p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 group-focus-within:border-indigo-500 dark:group-focus-within:border-indigo-500 transition-colors">
+                                        <div className="p-1.5 bg-white dark:bg-gray-800 rounded-md shadow-sm">
+                                            <Globe className="h-4 w-4 text-indigo-600" />
+                                        </div>
                                         <input
                                             readOnly
-                                            value={shareModal.directUrl}
-                                            className="flex-1 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm px-3 py-2 text-gray-800 dark:text-gray-100"
+                                            value={shareModal.url}
+                                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-gray-700 dark:text-gray-200 font-medium"
                                         />
                                         <button
-                                            onClick={() => copyValue(shareModal.directUrl!, 'Direct exam link copied')}
-                                            className="px-3 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
+                                            onClick={() => copyValue(shareModal.url, 'Link copied')}
+                                            className="p-1.5 hover:bg-white dark:hover:bg-gray-800 rounded-md text-gray-400 hover:text-indigo-600 transition-all"
                                         >
-                                            Copy
+                                            <Copy className="h-4 w-4" />
                                         </button>
                                     </div>
                                 </div>
-                            )}
-                            <div className="flex flex-col gap-2 pt-2">
-                                <div className="text-xs text-yellow-700 bg-yellow-100 border border-yellow-300 rounded px-2 py-1 mb-1">
-                                    <b>Note:</b> Share this portal link and code with your students. They will enter the code at the portal to access the exam. Make sure students are registered and ready before the exam.
+
+                                {/* Code Input */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="group">
+                                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Access Code</label>
+                                        <div className="flex items-center gap-2 p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+                                            <div className="p-1.5 bg-white dark:bg-gray-800 rounded-md shadow-sm">
+                                                <Lock className="h-4 w-4 text-indigo-600" />
+                                            </div>
+                                            <input
+                                                readOnly
+                                                value={shareModal.code || 'NO CODE'}
+                                                className={`flex-1 bg-transparent border-none focus:ring-0 text-sm font-mono font-bold ${shareModal.code ? 'text-gray-900 dark:text-white' : 'text-red-400'}`}
+                                            />
+                                            {shareModal.code && (
+                                                <button
+                                                    onClick={() => copyValue(shareModal.code, 'Code copied')}
+                                                    className="p-1.5 hover:bg-white dark:hover:bg-gray-800 rounded-md text-gray-400 hover:text-indigo-600 transition-all"
+                                                >
+                                                    <Copy className="h-4 w-4" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex items-end gap-2">
+                                        <button
+                                            onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Take this exam: ${shareModal.url} \nCode: ${shareModal.code}`)}`, '_blank')}
+                                            className="flex-1 h-[46px] flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded-xl transition-colors shadow-sm"
+                                            title="Share on WhatsApp"
+                                        >
+                                            <Smartphone className="h-5 w-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => copyValue(`Exam Link: ${shareModal.url}\nAccess Code: ${shareModal.code}`, 'All details copied')}
+                                            className="flex-1 h-[46px] flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors shadow-sm"
+                                            title="Copy All Details"
+                                        >
+                                            <Copy className="h-5 w-5" />
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => copyValue(`Portal: ${shareModal.url}\nCode: ${shareModal.code}\nDirect: ${shareModal.directUrl}`, 'All exam info copied')}
-                                        className="px-3 py-2 text-sm font-medium rounded-md bg-green-600 text-white hover:bg-green-700"
-                                        disabled={!shareModal.code}
-                                    >
-                                        Copy All
-                                    </button>
-                                    <button
-                                        onClick={() => setShareModal(null)}
-                                        className="px-3 py-2 text-sm font-medium rounded-md border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                    >
-                                        Done
-                                    </button>
-                                </div>
+
+                                {shareModal.directUrl && (
+                                    <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
+                                        <p className="text-xs text-gray-400 mb-2">Direct Link (No Code Required)</p>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                readOnly
+                                                value={shareModal.directUrl}
+                                                className="flex-1 text-xs text-gray-500 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded px-2 py-1"
+                                            />
+                                            <button onClick={() => copyValue(shareModal.directUrl!, 'Direct link copied')} className="text-gray-400 hover:text-indigo-600">
+                                                <Copy className="h-3 w-3" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteConfirmModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 text-center border border-gray-100 dark:border-gray-700">
+                        <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-500" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Delete Exam?</h3>
+                        <p className="text-gray-500 dark:text-gray-400 mb-6">
+                            Are you sure you want to delete <span className="font-semibold text-gray-700 dark:text-gray-300">"{deleteConfirmModal.title}"</span>? This action cannot be undone and all student results will be lost.
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setDeleteConfirmModal(null)}
+                                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={executeDelete}
+                                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all hover:scale-[1.02]"
+                            >
+                                Yes, Delete
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -934,19 +986,20 @@ export default function Dashboard() {
 
             {/* Results Modal */}
             {selectedExamForResults && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                                Results: {selectedExamForResults.title}
-                            </h2>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto border border-gray-100 dark:border-gray-700">
+                        <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                                    {selectedExamForResults.title}
+                                </h2>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Results & Performance Analytics</p>
+                            </div>
                             <button
                                 onClick={() => setSelectedExamForResults(null)}
-                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors group"
                             >
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                                <X className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200" />
                             </button>
                         </div>
                         <div className="p-6">
