@@ -52,6 +52,18 @@
   }
 }
 
+/* Fade In Up Animation - For checkout sections */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Pulse Animation - For progress completion */
 @keyframes pulse-soft {
   0%, 100% {
@@ -77,6 +89,10 @@
 
 .animate-slide-in-top {
   animation: slide-in-top 0.4s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out;
 }
 
 .animate-pulse-soft {
@@ -151,7 +167,8 @@
   .animate-fade-in,
   .animate-scale-in,
   .animate-bounce-in,
-  .animate-slide-in-top {
+  .animate-slide-in-top,
+  .animate-fade-in-up {
     animation: none;
     transition: none;
   }

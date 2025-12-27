@@ -260,55 +260,55 @@ export default function Checkout() {
 
     // ---------- UI ----------
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 font-sans">
             {/* Header */}
-            <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
-                        <Logo className="h-8 w-8 text-indigo-600" showText={false} />
-                        <div className="ml-2 flex items-baseline">
-                            <span className="text-2xl font-bold text-indigo-600">Durrah</span>
-                            <span className="ml-1.5 text-2xl font-light text-gray-500 dark:text-gray-300">for Tutors</span>
+            <header className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl z-50 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl shadow-xl shadow-indigo-500/5">
+                <div className="px-6 py-3 flex items-center justify-between">
+                    <div className="flex items-center cursor-pointer gap-3" onClick={() => navigate('/dashboard')}>
+                        <Logo className="h-9 w-9" showText={false} />
+                        <div className="flex flex-col">
+                            <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
                         </div>
                     </div>
                     <button
                         onClick={() => navigate('/dashboard')}
-                        className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white text-sm font-medium"
+                        className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm font-medium transition-colors"
                     >
                         {t('checkout.back')}
                     </button>
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
                 <div className="text-center max-w-3xl mx-auto mb-12">
-                    <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl mb-4">
+                    <h1 className="text-4xl font-extrabold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent sm:text-5xl mb-4">
                         {t('checkout.title')}
                     </h1>
-                    <p className="text-xl text-gray-500 dark:text-gray-400">
+                    <p className="text-xl text-gray-600 dark:text-gray-300">
                         {t('checkout.subtitle')}
                     </p>
                 </div>
 
                 {/* Billing toggle */}
                 <div className="flex justify-center mb-12">
-                    <div className="bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 inline-flex relative">
+                    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-1.5 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg shadow-indigo-500/5 inline-flex relative">
                         <button
                             onClick={() => handleBillingCycleChange('monthly')}
-                            className={`relative z-10 px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${billingCycle === 'monthly'
-                                ? 'bg-indigo-600 text-white shadow-md'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                            className={`relative z-10 px-8 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${billingCycle === 'monthly'
+                                ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                                : 'text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'}`}
                         >
                             {t('checkout.monthly')}
                         </button>
                         <button
                             onClick={() => handleBillingCycleChange('yearly')}
-                            className={`relative z-10 px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${billingCycle === 'yearly'
-                                ? 'bg-indigo-600 text-white shadow-md'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                            className={`relative z-10 px-8 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${billingCycle === 'yearly'
+                                ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                                : 'text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'}`}
                         >
                             {t('checkout.yearly')}
-                            <span className="ml-2 bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                            <span className="bg-gradient-to-r from-green-400 to-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide shadow-sm">
                                 {t('checkout.save20')}
                             </span>
                         </button>
@@ -320,48 +320,53 @@ export default function Checkout() {
                     {plans.map(plan => (
                         <div
                             key={plan.id}
-                            className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border ${selectedPlan === plan.id
-                                ? 'border-indigo-600 ring-2 ring-indigo-600 ring-opacity-50'
+                            className={`relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl border-2 ${selectedPlan === plan.id
+                                ? 'border-indigo-500 ring-4 ring-indigo-500/20 scale-105'
                                 : plan.recommended
-                                    ? 'border-indigo-200 dark:border-indigo-900'
-                                    : 'border-gray-200 dark:border-gray-700'} flex flex-col`}
+                                    ? 'border-indigo-200 dark:border-indigo-800 hover:border-indigo-300 dark:hover:border-indigo-700'
+                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'} flex flex-col overflow-hidden`}
                             onClick={() => setSelectedPlan(plan.id)}
                         >
                             {plan.recommended && (
-                                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                                    <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">
+                                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+                                    <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wide shadow-lg shadow-indigo-500/30">
                                         {t('checkout.mostPopular')}
                                     </span>
                                 </div>
                             )}
+                            {plan.recommended && (
+                                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600"></div>
+                            )}
                             <div className="p-8 flex-1">
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{plan.description}</p>
+                                <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-2">{plan.name}</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">{plan.description}</p>
                                 <div className="flex items-baseline mb-6">
-                                    <span className="text-4xl font-extrabold text-gray-900 dark:text-white">
+                                    <span className="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">
                                         {isCurrencyLoading ? (
                                             <span className="animate-pulse">...</span>
                                         ) : (
                                             plan.price === 0 ? t('pricing.starter.price') : `${plan.currency} ${plan.displayPrice}`
                                         )}
                                     </span>
-                                    <span className="ml-2 text-gray-500 dark:text-gray-400">{billingCycle === 'monthly' ? t('pricing.professional.period') : t('pricing.yearly.period')}</span>
+                                    <span className="ml-2 text-gray-500 dark:text-gray-400 text-sm">{billingCycle === 'monthly' ? t('pricing.professional.period') : t('pricing.yearly.period')}</span>
                                 </div>
                                 <ul className="space-y-4 mb-8">
                                     {plan.features.map((f, i) => (
                                         <li key={i} className="flex items-start">
-                                            <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                                            <span className="text-sm text-gray-600 dark:text-gray-300">{f}</span>
+                                            <div className="mt-0.5 mr-3 flex-shrink-0">
+                                                <Check className="h-5 w-5 text-green-500 bg-green-50 dark:bg-green-900/20 rounded-full p-0.5" />
+                                            </div>
+                                            <span className="text-sm text-gray-700 dark:text-gray-300">{f}</span>
                                         </li>
                                     ))}
                                 </ul>
                             </div>
                             <div className="p-8 pt-0 mt-auto">
                                 <button
-                                    className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-colors duration-200 ${selectedPlan === plan.id
-                                        ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200 dark:shadow-none'
+                                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm transition-all duration-300 ${selectedPlan === plan.id
+                                        ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white hover:shadow-lg hover:shadow-indigo-500/30 hover:scale-105'
                                         : plan.recommended
-                                            ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50'
+                                            ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 text-indigo-700 dark:text-indigo-300 hover:from-indigo-100 hover:to-purple-100 dark:hover:from-indigo-900/50 dark:hover:to-purple-900/50'
                                             : 'bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600'}`}
                                 >
                                     {selectedPlan === plan.id ? t('checkout.selected') : t('checkout.choose') + ' ' + plan.name}
@@ -373,66 +378,73 @@ export default function Checkout() {
 
                 {/* Checkout section */}
                 {selectedPlan && selectedPlan !== 'basic' && (
-                    <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in-up">
-                        <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex justify-between items-center">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                    <div className="max-w-2xl mx-auto bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-indigo-200/50 dark:border-indigo-800/50 overflow-hidden animate-fade-in-up">
+                        <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-indigo-50/50 via-violet-50/50 to-purple-50/50 dark:from-indigo-900/20 dark:via-violet-900/20 dark:to-purple-900/20 flex justify-between items-center">
+                            <h3 className="text-lg font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent flex items-center">
                                 <CreditCard className="h-5 w-5 mr-2 text-indigo-600" />
                                 {t('checkout.secureCheckout')}
                             </h3>
                             <div className="flex space-x-2">
-                                <div className="h-6 w-10 bg-gray-200 dark:bg-gray-700 rounded" />
-                                <div className="h-6 w-10 bg-gray-200 dark:bg-gray-700 rounded" />
-                                <div className="h-6 w-10 bg-gray-200 dark:bg-gray-700 rounded" />
+                                <div className="h-6 w-10 bg-gradient-to-r from-indigo-400 to-purple-400 rounded shadow-sm" />
+                                <div className="h-6 w-10 bg-gradient-to-r from-violet-400 to-pink-400 rounded shadow-sm" />
+                                <div className="h-6 w-10 bg-gradient-to-r from-purple-400 to-indigo-400 rounded shadow-sm" />
                             </div>
                         </div>
                         <div className="p-8">
                             <div className="text-center py-8">
-                                <div className="bg-indigo-50 dark:bg-indigo-900/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Shield className="h-8 w-8 text-indigo-600" />
+                                <div className="relative mx-auto mb-4 w-20 h-20">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 rounded-full opacity-20 blur-xl"></div>
+                                    <div className="relative bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 w-20 h-20 rounded-full flex items-center justify-center">
+                                        <Shield className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
+                                    </div>
                                 </div>
-                                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('checkout.securePayment')}</h4>
-                                <p className="text-gray-500 dark:text-gray-400 mb-2">
-                                    Proceed to pay securely with PaySky.<br />
-                                    Selected Plan: <span className="font-semibold text-indigo-600">{plans.find(p => p.id === selectedPlan)?.name}</span> ({billingCycle})
+                                <h4 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent mb-2">{t('checkout.securePayment')}</h4>
+                                <p className="text-gray-600 dark:text-gray-300 mb-2">
+                                    Proceed to pay securely with {selectedPaymentProvider === 'paysky' ? 'PaySky' : 'Kashier'}.<br />
+                                    Selected Plan: <span className="font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{plans.find(p => p.id === selectedPlan)?.name}</span> ({billingCycle})
                                 </p>
-                                <p className="text-xs text-gray-400 dark:text-gray-500 italic">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                                     * Payment will be processed in Egyptian Pounds (EGP). Displayed prices are converted for reference only.
                                 </p>
                             </div>
 
                             {/* Coupon section */}
                             <div className="mb-6 max-w-md mx-auto">
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('checkout.coupon.label')}</label>
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{t('checkout.coupon.label')}</label>
                                 {appliedCoupon ? (
-                                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                                        <div className="flex items-center">
-                                            <Check className="h-5 w-5 text-green-600 mr-2" />
-                                            <span className="font-mono font-semibold text-green-700 dark:text-green-400">{appliedCoupon.code}</span>
-                                            <span className="ml-2 text-sm text-green-600 dark:text-green-400">
-                                                {appliedCoupon.discount_type === 'free'
-                                                    ? t('checkout.coupon.free')
-                                                    : appliedCoupon.discount_type === 'percentage'
-                                                        ? `${appliedCoupon.discount_value}% ${t('checkout.coupon.off')}`
-                                                        : `${appliedCoupon.discount_value} EGP ${t('checkout.coupon.off')}`}
-                                            </span>
+                                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl shadow-sm">
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-green-500 rounded-full p-1">
+                                                <Check className="h-4 w-4 text-white" />
+                                            </div>
+                                            <div>
+                                                <span className="font-mono font-bold text-green-700 dark:text-green-400 block">{appliedCoupon.code}</span>
+                                                <span className="text-sm text-green-600 dark:text-green-400">
+                                                    {appliedCoupon.discount_type === 'free'
+                                                        ? t('checkout.coupon.free')
+                                                        : appliedCoupon.discount_type === 'percentage'
+                                                            ? `${appliedCoupon.discount_value}% ${t('checkout.coupon.off')}`
+                                                            : `${appliedCoupon.discount_value} EGP ${t('checkout.coupon.off')}`}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <button onClick={removeCoupon} className="text-red-600 hover:text-red-800 dark:text-red-400">
+                                        <button onClick={removeCoupon} className="text-red-600 hover:text-red-800 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg p-1 transition-colors">
                                             <X className="h-5 w-5" />
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="flex space-x-2">
+                                    <div className="flex gap-2">
                                         <input
                                             type="text"
                                             value={couponCode}
                                             onChange={e => setCouponCode(e.target.value)}
                                             placeholder={t('checkout.coupon.placeholder')}
-                                            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white uppercase"
+                                            className="flex-1 px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white uppercase font-mono text-sm transition-all"
                                         />
                                         <button
                                             onClick={validateCoupon}
                                             disabled={isValidatingCoupon}
-                                            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                                            className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:shadow-lg hover:shadow-indigo-500/30 hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 font-semibold"
                                         >
                                             {isValidatingCoupon ? <Loader2 className="h-5 w-5 animate-spin" /> : t('checkout.coupon.apply')}
                                         </button>
@@ -442,18 +454,20 @@ export default function Checkout() {
 
                             {/* Price summary */}
                             {appliedCoupon && (
-                                <div className="mb-6 max-w-md mx-auto space-y-2 text-sm">
-                                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                                        <span>{t('checkout.summary.original')}</span>
-                                        <span>EGP {plans.find(p => p.id === selectedPlan)?.price}</span>
+                                <div className="mb-6 max-w-md mx-auto bg-gradient-to-r from-gray-50 to-indigo-50/30 dark:from-slate-800/50 dark:to-indigo-900/20 p-5 rounded-xl border border-gray-200/50 dark:border-gray-700/50 space-y-3">
+                                    <div className="flex justify-between text-sm text-gray-700 dark:text-gray-300">
+                                        <span className="font-medium">{t('checkout.summary.original')}</span>
+                                        <span className="font-semibold">EGP {plans.find(p => p.id === selectedPlan)?.price}</span>
                                     </div>
-                                    <div className="flex justify-between text-green-600 dark:text-green-400">
-                                        <span>{t('checkout.summary.discount')}</span>
-                                        <span>- EGP {(plans.find(p => p.id === selectedPlan)?.price || 0) - calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}</span>
+                                    <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
+                                        <span className="font-medium">{t('checkout.summary.discount')}</span>
+                                        <span className="font-bold">- EGP {(plans.find(p => p.id === selectedPlan)?.price || 0) - calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}</span>
                                     </div>
-                                    <div className="flex justify-between font-bold text-lg text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-700 pt-2">
-                                        <span>{t('checkout.summary.final')}</span>
-                                        <span>{calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0) === 0 ? t('checkout.summary.free') : `EGP ${calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}`}</span>
+                                    <div className="flex justify-between font-bold text-lg pt-3 border-t-2 border-gray-200 dark:border-gray-700">
+                                        <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{t('checkout.summary.final')}</span>
+                                        <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                                            {calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0) === 0 ? t('checkout.summary.free') : `EGP ${calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}`}
+                                        </span>
                                     </div>
                                 </div>
                             )}
@@ -461,17 +475,17 @@ export default function Checkout() {
                             {/* Payment Provider Selection */}
                             {selectedPlan && plans.find(p => p.id === selectedPlan)?.price !== 0 && (
                                 <div className="mb-8 max-w-md mx-auto">
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                                        <CreditCard className="inline h-4 w-4 mr-2" />
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+                                        <CreditCard className="inline h-4 w-4 mr-2 text-indigo-600" />
                                         Payment Method
                                     </label>
                                     <div className="grid grid-cols-2 gap-3">
                                         <button
                                             onClick={() => setSelectedPaymentProvider('paysky')}
-                                            className={`p-4 rounded-lg border-2 transition-all ${
+                                            className={`p-4 rounded-xl border-2 transition-all ${
                                                 selectedPaymentProvider === 'paysky'
-                                                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
-                                                    : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400'
+                                                    ? 'border-indigo-600 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 shadow-md shadow-indigo-500/20'
+                                                    : 'border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                                             }`}
                                         >
                                             <div className="font-bold text-gray-900 dark:text-white">PaySky</div>
@@ -479,10 +493,10 @@ export default function Checkout() {
                                         </button>
                                         <button
                                             onClick={() => setSelectedPaymentProvider('kashier')}
-                                            className={`p-4 rounded-lg border-2 transition-all ${
+                                            className={`p-4 rounded-xl border-2 transition-all ${
                                                 selectedPaymentProvider === 'kashier'
-                                                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
-                                                    : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400'
+                                                    ? 'border-indigo-600 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 shadow-md shadow-indigo-500/20'
+                                                    : 'border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                                             }`}
                                         >
                                             <div className="font-bold text-gray-900 dark:text-white">Kashier</div>
@@ -496,9 +510,12 @@ export default function Checkout() {
                             <button
                                 onClick={handlePayment}
                                 disabled={isProcessing}
-                                className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 flex items-center justify-center"
+                                className="group relative w-full py-4 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white rounded-xl font-bold hover:shadow-xl hover:shadow-indigo-500/30 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-lg flex items-center justify-center overflow-hidden"
                             >
-                                {isProcessing ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />{t('checkout.processing')}</> : t('checkout.proceed')}
+                                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <span className="relative z-10 flex items-center">
+                                    {isProcessing ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />{t('checkout.processing')}</> : t('checkout.proceed')}
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -506,43 +523,43 @@ export default function Checkout() {
 
                 {/* Features grid */}
                 <div className="mt-24">
-                    <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">Why top educators choose Durrah</h2>
+                    <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent mb-12">Why top educators choose Durrah</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
-                                <Zap className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl flex items-center justify-center mb-4 shadow-sm">
+                                <Zap className="h-7 w-7 text-blue-600 dark:text-blue-400" />
                             </div>
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{t('checkout.features.fast.title')}</h3>
-                            <p className="text-gray-500 dark:text-gray-400">{t('checkout.features.fast.desc')}</p>
+                            <p className="text-gray-600 dark:text-gray-400">{t('checkout.features.fast.desc')}</p>
                         </div>
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4">
-                                <Shield className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-900/30 dark:to-violet-900/30 rounded-xl flex items-center justify-center mb-4 shadow-sm">
+                                <Shield className="h-7 w-7 text-purple-600 dark:text-purple-400" />
                             </div>
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{t('checkout.features.antiCheat.title')}</h3>
-                            <p className="text-gray-500 dark:text-gray-400">{t('checkout.features.antiCheat.desc')}</p>
+                            <p className="text-gray-600 dark:text-gray-400">{t('checkout.features.antiCheat.desc')}</p>
                         </div>
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                            <div className="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center mb-4">
-                                <Layout className="h-6 w-6 text-pink-600 dark:text-pink-400" />
+                        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div className="w-14 h-14 bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900/30 dark:to-rose-900/30 rounded-xl flex items-center justify-center mb-4 shadow-sm">
+                                <Layout className="h-7 w-7 text-pink-600 dark:text-pink-400" />
                             </div>
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{t('checkout.features.interface.title')}</h3>
-                            <p className="text-gray-500 dark:text-gray-400">{t('checkout.features.interface.desc')}</p>
+                            <p className="text-gray-600 dark:text-gray-400">{t('checkout.features.interface.desc')}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Footer with refund policy link */}
-                <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
-                    <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-                        <p className="mb-2">
+                <div className="mt-16 pt-8 border-t border-gray-200/50 dark:border-gray-700/50">
+                    <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                        <p className="mb-3">
                             By proceeding with payment, you agree to our terms and conditions. All payments are processed in Egyptian Pounds (EGP).
                         </p>
                         <p>
                             Questions about our refund policy?{' '}
                             <button
                                 onClick={() => navigate('/refund-policy')}
-                                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 underline font-medium"
+                                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 underline font-semibold transition-colors"
                             >
                                 View Refund Policy
                             </button>
