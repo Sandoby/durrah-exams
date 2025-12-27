@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Users, MessageCircle, Tag, Lock, LogOut,
-    Loader2, Plus, Send, UserPlus, BarChart3
+    Loader2, Plus, Send, UserPlus, BarChart3, Bell
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
@@ -84,7 +84,7 @@ export default function AdminPanel() {
     const [accessCode, setAccessCode] = useState('');
     const [userRole, setUserRole] = useState<'super_admin' | 'support_agent' | null>(null);
     const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'coupons' | 'chat' | 'agents'>('analytics');
+    const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'coupons' | 'chat' | 'agents' | 'notifications'>('analytics');
 
     // Users
     const [users, setUsers] = useState<User[]>([]);
@@ -882,6 +882,17 @@ export default function AdminPanel() {
                             Agents
                         </button>
                     )}
+
+                    <button
+                        onClick={() => setActiveTab('notifications')}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'notifications'
+                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            }`}
+                    >
+                        <Bell className="w-5 h-5" />
+                        Push Notifications
+                    </button>
                 </nav>
 
                 <div className="p-4 border-t border-gray-100 dark:border-gray-800">
@@ -1574,7 +1585,137 @@ export default function AdminPanel() {
                         </div>
                     )}
                 </div>
+
+                {activeTab === 'notifications' && (
+                    <div className="p-6">
+                        <NotificationManager />
+                    </div>
+                )}
+
             </main>
         </div>
     );
 }
+
+const NotificationManager = () => {
+    const [title, setTitle] = useState('');
+    const [body, setBody] = useState('');
+    const [targetUserId, setTargetUserId] = useState('all');
+    const [isSending, setIsSending] = useState(false);
+
+    const handleSend = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSending(true);
+
+        try {
+            const { data, error } = await supabase.functions.invoke('send-push-notification', {
+                body: {
+                    title,
+                    body,
+                    targetUserId
+                }
+            });
+
+            if (error) throw error;
+
+            if (data?.error) {
+                toast.error('Server Error: ' + data.error);
+            } else {
+                toast.success('Notification sent successfully!');
+                setTitle('');
+                setBody('');
+            }
+        } catch (error: any) {
+            console.error('Error sending push:', error);
+            toast.error('Failed to send notification');
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Push Notifications</h2>
+                    <p className="text-sm text-gray-500 mt-1">Send mobile alerts to your users</p>
+                </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 max-w-2xl">
+                <form onSubmit={handleSend} className="space-y-6">
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Target Audience
+                        </label>
+                        <select
+                            value={targetUserId}
+                            onChange={(e) => setTargetUserId(e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white"
+                        >
+                            <option value="all">All Users (Broadcast)</option>
+                            <option value="custom">Specific User ID (Enter manually)</option>
+                        </select>
+                        {targetUserId !== 'all' && (
+                            <input
+                                type="text"
+                                placeholder="Enter User UUID"
+                                value={targetUserId === 'custom' ? '' : targetUserId}
+                                onChange={(e) => setTargetUserId(e.target.value)}
+                                className="mt-2 w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white"
+                            />
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Notification Title
+                        </label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white font-bold"
+                            placeholder="e.g., New Exam Available!"
+                            required
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Message Body
+                        </label>
+                        <textarea
+                            value={body}
+                            onChange={(e) => setBody(e.target.value)}
+                            rows={4}
+                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white resize-none"
+                            placeholder="e.g., Check out the new Physics mock test..."
+                            required
+                        />
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <button
+                            type="submit"
+                            disabled={isSending}
+                            className="w-full flex items-center justify-center gap-2 py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isSending ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Sending...
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="h-4 w-4" />
+                                    Send Notification
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
