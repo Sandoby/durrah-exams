@@ -303,90 +303,67 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
 
             {/* Kids banner removed in non-kids view to keep UI focused */}
 
-            {submissions.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-800">
-                        <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400 mb-1">Average Score</div>
-                        <div className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
-                            {(submissions.reduce((acc, s) => acc + (s.max_score > 0 ? (s.score / s.max_score) * 100 : 0), 0) / submissions.length).toFixed(1)}%
-                        </div>
-                    </div>
-                    <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-xl border border-green-100 dark:border-green-800">
-                        <div className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">Pass Rate</div>
-                        <div className="text-2xl font-bold text-green-700 dark:text-green-300">
-                            {((submissions.filter(s => (s.score / s.max_score) >= 0.5).length / submissions.length) * 100).toFixed(0)}%
-                        </div>
-                    </div>
-                    <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-100 dark:border-amber-800">
-                        <div className="text-sm font-medium text-amber-600 dark:text-amber-400 mb-1">Top Score</div>
-                        <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">
-                            {Math.max(...submissions.map(s => s.max_score > 0 ? (s.score / s.max_score) * 100 : 0)).toFixed(1)}%
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {submissions.length === 0 ? (
                 <div className="text-center py-12">
                     <p className="text-gray-500 dark:text-gray-400">No submissions yet</p>
                 </div>
             ) : (
                 <>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead className="bg-gray-50 dark:bg-gray-900">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">#</th>
-                                    {requiredFields.map(field => (
-                                        <th key={field} className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                            {fieldLabels[field] || field}
-                                        </th>
-                                    ))}
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Score</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Percentage</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Submitted</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                {submissions.map((submission, index) => (
-                                    <tr key={submission.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{index + 1}</td>
-                                        {requiredFields.map(field => (
-                                            <td key={field} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                {getStudentFieldValue(submission, field)}
-                                            </td>
-                                        ))}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                            <div className="flex items-center space-x-2">
-                                                <div>{submission.score} / {submission.max_score}</div>
-                                                <button
-                                                    onClick={() => openSubmissionDetail(submission)}
-                                                    className="text-sm text-indigo-600 hover:text-indigo-800"
-                                                >
-                                                    View
-                                                </button>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${(submission.score / submission.max_score) >= 0.7
-                                                ? 'bg-green-100 text-green-800'
-                                                : (submission.score / submission.max_score) >= 0.5
-                                                    ? 'bg-yellow-100 text-yellow-800'
-                                                    : 'bg-red-100 text-red-800'
-                                                }`}>
-                                                {submission.max_score > 0 ? ((submission.score / submission.max_score) * 100).toFixed(1) : 0}%
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {new Date(submission.created_at).toLocaleDateString()}
-                                        </td>
-                                    </tr>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-900">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">#</th>
+                                {requiredFields.map(field => (
+                                    <th key={field} className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        {fieldLabels[field] || field}
+                                    </th>
                                 ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Score</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Percentage</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Submitted</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            {submissions.map((submission, index) => (
+                                <tr key={submission.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{index + 1}</td>
+                                    {requiredFields.map(field => (
+                                        <td key={field} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                            {getStudentFieldValue(submission, field)}
+                                        </td>
+                                    ))}
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                        <div className="flex items-center space-x-2">
+                                            <div>{submission.score} / {submission.max_score}</div>
+                                            <button
+                                                onClick={() => openSubmissionDetail(submission)}
+                                                className="text-sm text-indigo-600 hover:text-indigo-800"
+                                            >
+                                                View
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${(submission.score / submission.max_score) >= 0.7
+                                            ? 'bg-green-100 text-green-800'
+                                            : (submission.score / submission.max_score) >= 0.5
+                                                ? 'bg-yellow-100 text-yellow-800'
+                                                : 'bg-red-100 text-red-800'
+                                            }`}>
+                                            {submission.max_score > 0 ? ((submission.score / submission.max_score) * 100).toFixed(1) : 0}%
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        {new Date(submission.created_at).toLocaleDateString()}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
 
-                    {/* Leaderboard is not shown here; only in Kids Mode branch above */}
+                {/* Leaderboard is not shown here; only in Kids Mode branch above */}
                 </>
             )}
 

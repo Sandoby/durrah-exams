@@ -432,7 +432,8 @@
         "success": {
             "submitted": "Exam submitted successfully!"
         }
-    },
+    }
+    ,
     "kids": {
         "seo": {
             "title": "Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah",
@@ -466,77 +467,5 @@
             "games": "🎮 Cool Games",
             "star": "⭐ Be a Star"
         }
-    },
-    "faq": {
-        "title": "Frequently Asked Questions",
-        "subtitle": "Everything you need to know about Durrah",
-        "q1": {
-            "question": "Is Durrah really safe for kids?",
-            "answer": "Yes! We prioritize safety with filtered content, nickname-only login options, and we never sell student data."
-        },
-        "q2": {
-            "question": "How does the anti-cheating system work?",
-            "answer": "Our system detects tab switching, fullscreen exits, and suspicious behavior patterns using AI without requiring complex software."
-        },
-        "q3": {
-            "question": "Can I use Durrah for large school groups?",
-            "answer": "Absolutely. Our 'Pro' and 'Annual' plans are designed for high-capacity exams with detailed analytics."
-        },
-        "q4": {
-            "question": "Do students need an account?",
-            "answer": "Students can join with just a code and nickname, or use the Student Portal to track their long-term progress."
-        }
-    },
-    "landing": {
-        "marketing": {
-            "kids": {
-                "badge": "Playful & Safe",
-                "title": "Kids Mode: The Ultimate Quiz Adventure",
-                "titleSpan": "Ultimate",
-                "desc": "Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.",
-                "features": {
-                    "0": "Fun & Engaging UI designed for children",
-                    "1": "Automated Anti-Cheating & Proctoring",
-                    "2": "Interactive Rewards & Nicknames",
-                    "3": "Safe & Secure Environment"
-                },
-                "cta": "Try Kids Mode Now"
-            },
-            "student": {
-                "badge": "Track & Grow",
-                "title": "Empower Students with a Unified Portal",
-                "titleSpan": "Unified Portal",
-                "desc": "Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.",
-                "features": {
-                    "0": "One-Click Exam Participation",
-                    "1": "Complete History & Performance Tracking",
-                    "2": "Instant Feedback & Result Reviews",
-                    "3": "Personalized Academic Insights"
-                },
-                "cta": "Visit Student Portal"
-            }
-        }
-    },
-    "studentPortal": {
-        "title": "Student Portal",
-        "signIn": "Sign in to Student Portal",
-        "createAccount": "Create Student Account",
-        "welcome": "Welcome back!",
-        "regSuccess": "Registration successful! Please check your email.",
-        "joinExam": "Join an Exam",
-        "joinDesc": "Enter the Exam Code provided by your tutor to start a new assessment.",
-        "enterCode": "Enter Exam Code or ID",
-        "joining": "Joining...",
-        "start": "Start",
-        "performance": "Your Performance",
-        "examsTaken": "Exams Taken",
-        "avgScore": "Avg. Score",
-        "recentActivity": "Recent Activity",
-        "noExams": "No exams found yet. Join your first exam above!",
-        "untitled": "Untitled Exam",
-        "noDesc": "No description",
-        "signOut": "Sign Out",
-        "notFound": "Exam not found. Please check the code.",
-        "error": "An error occurred. Please try again."
     }
 }

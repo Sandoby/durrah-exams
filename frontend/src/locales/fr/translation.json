@@ -426,7 +426,8 @@
         "success": {
             "submitted": "Examen soumis avec succès !"
         }
-    },
+    }
+    ,
     "kids": {
         "seo": {
             "title": "Aventure Quiz Enfants | Sûr, Amusant, Anti-Triche | Durrah",
@@ -460,77 +461,5 @@
             "games": "🎮 Jeux sympas",
             "star": "⭐ Deviens une star"
         }
-    },
-    "faq": {
-        "title": "Questions Fréquemment Posées",
-        "subtitle": "Tout ce que vous devez savoir sur Durrah",
-        "q1": {
-            "question": "Durrah est-il vraiment sûr pour les enfants ?",
-            "answer": "Oui ! Nous accordons la priorité à la sécurité avec un contenu filtré, des options de connexion par pseudonyme uniquement, et nous ne vendons jamais les données des étudiants."
-        },
-        "q2": {
-            "question": "Comment fonctionne le système anti-triche ?",
-            "answer": "Notre système détecte le changement d'onglet, les sorties du mode plein écran et les comportements suspects grâce à l'IA, sans logiciel complexe."
-        },
-        "q3": {
-            "question": "Puis-je utiliser Durrah pour de grands groupes scolaires ?",
-            "answer": "Absolument. Nos forfaits 'Pro' et 'Annuel' sont conçus pour des examens à haute capacité avec des analyses détaillées."
-        },
-        "q4": {
-            "question": "Les étudiants ont-ils besoin d'un compte ?",
-            "answer": "Les étudiants peuvent s'inscrire avec juste un code et un pseudo, ou utiliser le Portail Étudiant pour suivre leurs progrès à long terme."
-        }
-    },
-    "landing": {
-        "marketing": {
-            "kids": {
-                "badge": "Ludique & Sûr",
-                "title": "Mode Enfant: L'Aventure Quiz Ultime",
-                "titleSpan": "Ultime",
-                "desc": "Transformez les évaluations en un voyage amusant. Notre mode enfant propose des visuels vibrants, une navigation simplifiée et un système anti-triche de classe mondiale qui ressemble à un jeu, pas à un test.",
-                "features": {
-                    "0": "Interface ludique et engageante conçue pour les enfants",
-                    "1": "Anti-triche et surveillance automatisés",
-                    "2": "Récompenses interactives et surnoms",
-                    "3": "Environnement sûr et sécurisé"
-                },
-                "cta": "Essayer le Mode Enfant maintenant"
-            },
-            "student": {
-                "badge": "Suivre & Grandir",
-                "title": "Donnez du pouvoir aux étudiants avec un portail unifié",
-                "titleSpan": "portail unifié",
-                "desc": "Offrez à vos étudiants un hub central pour gérer leur parcours académique. De l'inscription aux examens avec un simple code au suivi des performances passées.",
-                "features": {
-                    "0": "Participation aux examens en un clic",
-                    "1": "Historique complet et suivi des performances",
-                    "2": "Feedback instantané et révision des résultats",
-                    "3": "Analyses académiques personnalisées"
-                },
-                "cta": "Visiter le Portail Étudiant"
-            }
-        }
-    },
-    "studentPortal": {
-        "title": "Portail Étudiant",
-        "signIn": "Se connecter au Portail Étudiant",
-        "createAccount": "Créer un compte étudiant",
-        "welcome": "Bon retour !",
-        "regSuccess": "Inscription réussie ! Veuillez vérifier votre e-mail.",
-        "joinExam": "Rejoindre un examen",
-        "joinDesc": "Entrez le code d'examen fourni par votre tuteur pour commencer une nouvelle évaluation.",
-        "enterCode": "Entrez le code ou l'ID de l'examen",
-        "joining": "Connexion...",
-        "start": "Commencer",
-        "performance": "Votre Performance",
-        "examsTaken": "Examens passés",
-        "avgScore": "Score moyen",
-        "recentActivity": "Activité récente",
-        "noExams": "Aucun examen trouvé pour le moment. Rejoignez votre premier examen ci-dessus !",
-        "untitled": "Examen sans titre",
-        "noDesc": "Pas de description",
-        "signOut": "Se déconnecter",
-        "notFound": "Examen non trouvé. Veuillez vérifier le code.",
-        "error": "Une erreur est survenue. Veuillez réessayer."
     }
 }

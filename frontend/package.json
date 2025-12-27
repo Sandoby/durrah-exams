@@ -31,6 +31,7 @@
     "mammoth": "^1.6.0",
     "papaparse": "^5.5.3",
     "pdfjs-dist": "^4.4.168",
+    "puppeteer": "^24.34.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-helmet-async": "^2.0.5",
