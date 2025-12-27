@@ -139,10 +139,9 @@ export default function KidsLanding() {
     }
   };
 
-  const isRTL = i18n.language === 'ar';
 
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'} className="min-h-screen bg-[#050616] overflow-hidden relative font-sans">
+    <div dir={i18n.language === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen bg-[#050616] overflow-hidden relative font-sans">
       <Helmet>
         <title>{t('kids.seo.title', 'Quiz Space Adventure | Durrah')}</title>
       </Helmet>
@@ -160,6 +159,11 @@ export default function KidsLanding() {
         .animate-float { animation: float 6s ease-in-out infinite; }
         .animate-glow { animation: glow 3s ease-in-out infinite; }
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .slant { transform: skewX(-20deg); }
+        .animate-spin-slow { animation: spin 8s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-gradient { background-size: 200% auto; animation: gradient 4s linear infinite; }
+        @keyframes gradient { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
       `}</style>
 
       {/* Futuristic Header */}
@@ -174,143 +178,133 @@ export default function KidsLanding() {
       </header>
 
       <main className="relative z-10 px-6 pt-8 pb-20">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-12">
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
 
           {/* Hero Content */}
-          <div className="flex-1 text-center md:text-left">
+          <div className="flex-1 text-center lg:text-left order-2 lg:order-1">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-6">
-              <Zap className="h-4 w-4 fill-current" />
+              <Zap className="h-4 w-4 fill-current animate-pulse" />
               MISSION STARTING SOON
             </div>
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight uppercase tracking-tight">
               Ready for <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 animate-gradient">Takeoff?</span>
             </h1>
-            <p className="text-indigo-200/60 text-lg mb-8 max-w-lg leading-relaxed">
+            <p className="text-indigo-200/60 text-base sm:text-lg mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
               Join the galaxy's smartest kids! Enter your secret access code and nickname to start your planetary quiz mission.
             </p>
 
             {/* Visual Indicators */}
-            <div className="flex flex-wrap justify-center md:justify-start gap-4">
-              <div className="glass-panel p-4 rounded-2xl flex items-center gap-3">
-                <div className="h-10 w-10 bg-indigo-500/20 rounded-xl flex items-center justify-center">
+            <div className="flex flex-wrap justify-center lg:justify-start gap-4">
+              <div className="glass-panel p-4 rounded-2xl flex items-center gap-3 group hover:border-indigo-500/50 transition-all cursor-default">
+                <div className="h-10 w-10 bg-indigo-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Cpu className="text-indigo-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-indigo-300/50 font-bold">SMART TECH</p>
-                  <p className="text-sm text-white font-bold">Anti-Cheat AI</p>
+                  <p className="text-[10px] text-indigo-300/50 font-black tracking-widest uppercase">Smart Tech</p>
+                  <p className="text-sm text-white font-black uppercase">Anti-Cheat AI</p>
                 </div>
               </div>
-              <div className="glass-panel p-4 rounded-2xl flex items-center gap-3">
-                <div className="h-10 w-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+              <div className="glass-panel p-4 rounded-2xl flex items-center gap-3 group hover:border-emerald-500/50 transition-all cursor-default">
+                <div className="h-10 w-10 bg-emerald-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Trophy className="text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-emerald-300/50 font-bold">REWARDS</p>
-                  <p className="text-sm text-white font-bold">Earn Space XP</p>
+                  <p className="text-[10px] text-emerald-300/50 font-black tracking-widest uppercase">Rewards</p>
+                  <p className="text-sm text-white font-black uppercase">Earn Space XP</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Entry Card */}
-          <div className="w-full max-w-md relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2.5rem] blur opacity-20" />
-            <div className="glass-panel relative rounded-[2.5rem] p-8 md:p-10 border-white/10 shadow-3xl">
+          {/* Entry Card & Hero Illustration */}
+          <div className="flex-1 w-full max-w-md relative mt-4 lg:mt-0 order-1 lg:order-2">
+            {/* Hero Illustration - Astronaut on Cloud with planets */}
+            <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-64 h-64 sm:w-80 sm:h-80 pointer-events-none z-0">
+              <img
+                src="/kids/image-1765886214428.png"
+                className="w-full h-full object-contain animate-float"
+                alt="Space Explorer"
+              />
+            </div>
 
-              <div className="flex justify-center mb-8">
-                <div className="h-20 w-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center animate-glow">
-                  <Rocket className="h-10 w-10 text-indigo-400" />
-                </div>
-              </div>
+            <div className="relative z-10">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2.5rem] blur opacity-20" />
+              <div className="glass-panel relative rounded-[2.5rem] p-8 sm:p-10 border-white/10 shadow-3xl">
 
-              <div className="space-y-6">
-                <div>
-                  <label className="text-xs font-black text-indigo-400/70 tracking-[0.2em] uppercase mb-3 block">Explorer Nickname</label>
-                  <div className="relative group">
-                    <input
-                      value={nickname}
-                      onChange={(e) => setNickname(e.target.value)}
-                      className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-5 py-4 text-white text-lg placeholder-white/20 focus:outline-none focus:border-indigo-500/50 transition-all focus:ring-4 focus:ring-indigo-500/10 group-hover:border-white/20"
-                      placeholder="e.g. CaptainCosmos"
-                    />
+                <div className="flex justify-center mb-8">
+                  <div className="h-20 w-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center animate-glow">
+                    <Rocket className="h-10 w-10 text-indigo-400" />
                   </div>
                 </div>
 
-                <div>
-                  <label className="text-xs font-black text-indigo-400/70 tracking-[0.2em] uppercase mb-3 block">Access Code</label>
-                  <div className="relative">
-                    <Ticket className="absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 text-indigo-500/50" />
-                    <input
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      className="w-full bg-white/5 border-2 border-white/10 rounded-2xl pl-14 pr-5 py-4 text-white text-lg font-bold tracking-[0.3em] uppercase placeholder-white/20 focus:outline-none focus:border-indigo-500/50 transition-all focus:ring-4 focus:ring-indigo-500/10"
-                      placeholder="ST-000"
-                    />
+                <div className="space-y-6">
+                  <div>
+                    <label className="text-[10px] font-black text-indigo-400/70 tracking-[0.2em] uppercase mb-3 block">Explorer Nickname</label>
+                    <div className="relative group">
+                      <input
+                        value={nickname}
+                        onChange={(e) => setNickname(e.target.value)}
+                        className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-5 py-4 text-white text-lg placeholder-white/20 focus:outline-none focus:border-indigo-500/50 transition-all focus:ring-4 focus:ring-indigo-500/10 group-hover:border-white/20 font-bold"
+                        placeholder="e.g. CaptainCosmos"
+                      />
+                    </div>
                   </div>
+
+                  <div>
+                    <label className="text-[10px] font-black text-indigo-400/70 tracking-[0.2em] uppercase mb-3 block">Access Code</label>
+                    <div className="relative">
+                      <Ticket className="absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 text-indigo-500/50" />
+                      <input
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                        className="w-full bg-white/5 border-2 border-white/10 rounded-2xl pl-14 pr-5 py-4 text-white text-lg font-black tracking-[0.3em] uppercase placeholder-white/20 focus:outline-none focus:border-indigo-500/50 transition-all focus:ring-4 focus:ring-indigo-500/10"
+                        placeholder="ST-000"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleEnter}
+                    disabled={isLoading}
+                    className="w-full py-5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-2xl text-white font-black text-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group overflow-hidden relative"
+                  >
+                    <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 slant" />
+                    {isLoading ? <div className="h-6 w-6 border-3 border-white/30 border-t-white rounded-full animate-spin" /> : (
+                      <>
+                        <span>BLAST OFF!</span>
+                        <Rocket className="h-6 w-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      </>
+                    )}
+                  </button>
+
+                  <p className="text-center text-indigo-100/30 text-[10px] flex items-center justify-center gap-2 font-black tracking-widest uppercase">
+                    <MousePointer2 className="h-3 w-3" />
+                    Interactive Starfield Active
+                  </p>
                 </div>
-
-                <button
-                  onClick={handleEnter}
-                  disabled={isLoading}
-                  className="w-full py-5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-2xl text-white font-black text-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group overflow-hidden relative"
-                >
-                  <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 slant" />
-                  {isLoading ? <Loader2 className="animate-spin h-6 w-6" /> : (
-                    <>
-                      <span>BLAST OFF!</span>
-                      <Rocket className="h-6 w-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                    </>
-                  )}
-                </button>
-
-                <p className="text-center text-indigo-100/30 text-xs flex items-center justify-center gap-2">
-                  <MousePointer2 className="h-3 w-3" />
-                  Interactive Starfield Active
-                </p>
               </div>
-            </div>
-
-            {/* Float Decorations */}
-            <div className="absolute -top-12 -right-12 w-24 h-24 animate-float opacity-40">
-              <img src="/kids/image-1765886162298.png" className="w-full h-full object-contain" />
-            </div>
-            <div className="absolute -bottom-20 -left-20 w-40 h-40 animate-float opacity-20 pointer-events-none hidden lg:block" style={{ animationDelay: '1.5s' }}>
-              <img src="/kids/image-1765886149420.png" className="w-full h-full object-contain" />
-            </div>
-            <div className="absolute top-1/2 -right-40 w-32 h-32 animate-float opacity-10 pointer-events-none hidden xl:block" style={{ animationDelay: '3s' }}>
-              <img src="/kids/image-1765886176188.png" className="w-full h-full object-contain" />
             </div>
           </div>
         </div>
 
         {/* Brand Bar */}
-        <div className="max-w-4xl mx-auto mt-20 flex justify-center">
-          <div className="glass-panel px-6 py-3 rounded-2xl flex items-center gap-4">
-            <span className="text-indigo-400/50 text-xs font-bold tracking-widest uppercase">System Powered By</span>
-            <a href="/" className="hover:opacity-80 transition-opacity">
-              <Logo showText={true} className="scale-75 origin-left" />
+        <div className="max-w-6xl mx-auto mt-24 sm:mt-32 flex justify-center">
+          <div className="glass-panel px-6 py-4 rounded-3xl flex flex-col sm:flex-row items-center gap-4 border-white/5 shadow-2xl">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
+              <span className="text-indigo-400/70 text-[10px] font-black tracking-[0.2em] uppercase">System Powered By</span>
+            </div>
+            <div className="h-4 w-[1px] bg-white/10 hidden sm:block" />
+            <a href="/" className="group flex items-center gap-3">
+              <Logo showText={false} size="sm" />
+              <div className="flex flex-col">
+                <span className="text-white font-black text-sm tracking-tight leading-none group-hover:text-indigo-400 transition-colors">Durrah <span className="text-indigo-500">for Tutors</span></span>
+                <span className="text-indigo-300/30 text-[9px] font-bold tracking-tighter uppercase">Professional Exam Systems</span>
+              </div>
             </a>
           </div>
         </div>
       </main>
-
-      <style>{`
-        .slant { transform: skewX(-20deg); }
-        .animate-spin-slow { animation: spin 8s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .animate-gradient { background-size: 200% auto; animation: gradient 4s linear infinite; }
-        @keyframes gradient { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
-      `}</style>
     </div>
   );
 }
-
-const Loader2 = ({ className }: { className?: string }) => (
-  <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
-);
-
-
-
-
-
-
