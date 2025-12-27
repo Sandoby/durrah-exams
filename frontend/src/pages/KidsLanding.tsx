@@ -153,6 +153,20 @@ export default function KidsLanding() {
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 animate-pulse" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 animate-pulse delay-700" />
 
+      {/* Floating Space Illustrations */}
+      <div className="absolute top-[15%] left-[5%] w-24 sm:w-32 lg:w-40 opacity-40 animate-float pointer-events-none z-0">
+        <img src="/kids/image-1765886162298.png" className="w-full h-full object-contain" alt="" />
+      </div>
+      <div className="absolute top-[60%] right-[3%] w-28 sm:w-36 lg:w-48 opacity-30 animate-float pointer-events-none z-0" style={{ animationDelay: '2s' }}>
+        <img src="/kids/image-1765886176188.png" className="w-full h-full object-contain rotate-12" alt="" />
+      </div>
+      <div className="absolute bottom-[10%] right-[15%] w-20 sm:w-28 lg:w-32 opacity-40 animate-float pointer-events-none z-0" style={{ animationDelay: '1s' }}>
+        <img src="/kids/image-1765886185739.png" className="w-full h-full object-contain -rotate-12" alt="" />
+      </div>
+      <div className="absolute top-[40%] left-[8%] w-16 sm:w-24 lg:w-28 opacity-25 animate-float pointer-events-none z-0" style={{ animationDelay: '3s' }}>
+        <img src="/kids/image-1765886205296.png" className="w-full h-full object-contain" alt="" />
+      </div>
+
       <style>{`
         @keyframes float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-20px) rotate(2deg); } }
         @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.5)); } 50% { filter: drop-shadow(0 0 25px rgba(99, 102, 241, 0.8)); } }
