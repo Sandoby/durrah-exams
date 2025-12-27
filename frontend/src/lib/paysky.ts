@@ -110,6 +110,22 @@ export class PaySkyIntegration {
     }
 
     /**
+     * Store payment metadata for callback page
+     */
+    private storePaymentMetadata(orderId: string, metadata: any) {
+        try {
+            const key = `paysky_payment_${orderId}`;
+            localStorage.setItem(key, JSON.stringify({
+                ...metadata,
+                storedAt: Date.now()
+            }));
+            console.log('✅ PaySky metadata stored:', key);
+        } catch (error) {
+            console.error('❌ Error storing PaySky metadata:', error);
+        }
+    }
+
+    /**
      * Main payment method returning a Promise
      */
     async pay({ amount, planId, userId, userEmail, billingCycle }: PayParams): Promise<PayResult> {
@@ -123,21 +139,25 @@ export class PaySkyIntegration {
                     throw new Error('PAYSKY Lightbox not available after initialization');
                 }
 
-                // Convert EGP to piasters (1 EGP = 100 piasters)
-                // Ensure amount is treated as the final discounted price
                 const amountInPiasters = Math.round(amount * 100);
                 const merchantRef = `DURRAH_${Date.now()}`;
                 const trxDateTime = new Date().toUTCString();
                 const secureHash = this.generateSecureHash(amountInPiasters, merchantRef, trxDateTime);
 
-                // Define global variables that PAYSKY Lightbox expects
+                // Store metadata so PaymentCallback can show order details
+                this.storePaymentMetadata(merchantRef, {
+                    userId,
+                    planId,
+                    billingCycle,
+                    userEmail,
+                    amount,
+                });
+
                 window.isPayOnDelivery = false;
                 window.TransactionType = 'SALE';
 
-                // Create payment record in Supabase
                 await this.createPaymentRecord(planId, amount, merchantRef, userEmail);
 
-                // Configure PAYSKY Lightbox
                 window.Lightbox.Checkout.configure = {
                     MID: this.MID,
                     TID: this.TID,
@@ -149,16 +169,23 @@ export class PaySkyIntegration {
                         console.log('🎉 Payment successful!', data);
                         await this.updatePaymentRecord(merchantRef, 'completed', data);
                         await this.updateUserProfile(userId, planId, billingCycle);
+
+                        // Unified navigation to callback page
+                        window.location.href = `/payment-callback?paymentStatus=success&orderId=${merchantRef}&provider=paysky`;
                         resolve({ success: true, data });
                     },
                     errorCallback: async (error: any) => {
                         console.error('❌ Payment error:', error);
                         await this.updatePaymentRecord(merchantRef, 'failed', { error });
+
+                        window.location.href = `/payment-callback?paymentStatus=error&orderId=${merchantRef}&provider=paysky`;
                         resolve({ success: false, error });
                     },
                     cancelCallback: async () => {
                         console.log('⚠️ Payment cancelled by user');
                         await this.updatePaymentRecord(merchantRef, 'cancelled', { reason: 'user_cancelled' });
+
+                        window.location.href = `/payment-callback?paymentStatus=cancelled&orderId=${merchantRef}&provider=paysky`;
                         resolve({ success: false, error: 'Cancelled by user' });
                     }
                 };

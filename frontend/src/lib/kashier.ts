@@ -45,7 +45,7 @@ export class KashierIntegration {
     try {
       const key = `kashier_payment_${orderId}`;
       const sessionKey = `${key}_session_${Date.now()}`;
-      
+
       // Store with timestamp for cache busting
       const dataToStore = {
         ...metadata,
@@ -55,7 +55,7 @@ export class KashierIntegration {
 
       localStorage.setItem(key, JSON.stringify(dataToStore));
       localStorage.setItem(sessionKey, JSON.stringify(dataToStore));
-      
+
       console.log('✅ Payment metadata stored:', { key, sessionKey });
       return key;
     } catch (error) {
@@ -103,10 +103,10 @@ export class KashierIntegration {
   private clearPaymentMetadata(orderId: string): void {
     try {
       const key = `kashier_payment_${orderId}`;
-      
+
       // Clear main key
       localStorage.removeItem(key);
-      
+
       // Clear any session-based keys
       for (let i = 0; i < localStorage.length; i++) {
         const storageKey = localStorage.key(i);
@@ -114,7 +114,7 @@ export class KashierIntegration {
           localStorage.removeItem(storageKey);
         }
       }
-      
+
       console.log('✅ Payment metadata cleared:', key);
     } catch (error) {
       console.error('❌ Error clearing payment metadata:', error);
@@ -160,7 +160,7 @@ export class KashierIntegration {
       }
 
       // Build Kashier hosted checkout URL
-      const callbackUrl = `${window.location.origin}/payment-callback`;
+      const callbackUrl = `${window.location.origin}/payment-callback?provider=kashier`;
       const metadata = encodeURIComponent(JSON.stringify({
         userId,
         planId,
@@ -181,7 +181,7 @@ export class KashierIntegration {
         `&redirectMethod=get`;
 
       console.log('🔗 Redirecting to Kashier hosted checkout...');
-      
+
       // Redirect to Kashier hosted payment page
       window.location.href = checkoutUrl;
 
