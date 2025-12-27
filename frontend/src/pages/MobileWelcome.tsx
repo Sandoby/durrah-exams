@@ -1,10 +1,25 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { GraduationCap, Users, Rocket, ArrowRight } from 'lucide-react';
 import { Logo } from '../components/Logo';
 
 export default function MobileWelcome() {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // Check for saved preference
+        const savedPath = localStorage.getItem('durrah_mobile_path');
+        if (savedPath) {
+            navigate(savedPath);
+        }
+    }, [navigate]);
+
+    const handleNavigation = (path: string) => {
+        localStorage.setItem('durrah_mobile_path', path);
+        navigate(path);
+    };
+
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -61,7 +76,7 @@ export default function MobileWelcome() {
                     <motion.button
                         variants={itemVariants}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => navigate('/login')}
+                        onClick={() => handleNavigation('/login')} // Changed onClick
                         className="w-full bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-4 group hover:border-indigo-500/50 transition-colors"
                     >
                         <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
@@ -78,7 +93,7 @@ export default function MobileWelcome() {
                     <motion.button
                         variants={itemVariants}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => navigate('/student-portal')}
+                        onClick={() => handleNavigation('/student-portal')} // Changed onClick
                         className="w-full bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-4 group hover:border-emerald-500/50 transition-colors"
                     >
                         <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
@@ -95,7 +110,7 @@ export default function MobileWelcome() {
                     <motion.button
                         variants={itemVariants}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => navigate('/kids')}
+                        onClick={() => handleNavigation('/kids')} // Changed onClick
                         className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 p-5 rounded-2xl shadow-lg shadow-indigo-200 dark:shadow-none text-white flex items-center gap-4 group relative overflow-hidden"
                     >
                         <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-2xl" />

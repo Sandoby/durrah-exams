@@ -39,6 +39,7 @@ import { Capacitor } from '@capacitor/core';
 import MobileWelcome from './pages/MobileWelcome';
 import { PushNotificationHandler } from './components/PushNotificationHandler';
 import { LocationLanguageHandler } from './components/LocationLanguageHandler';
+import { BackButtonHandler } from './components/BackButtonHandler';
 
 function App() {
   const { i18n } = useTranslation();
@@ -60,6 +61,7 @@ function App() {
     <AuthProvider>
       <PushNotificationHandler />
       <LocationLanguageHandler />
+      <BackButtonHandler />
       <SubmissionSync />
       <Router>
         <div className="min-h-screen bg-background text-foreground font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
