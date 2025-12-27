@@ -45,7 +45,7 @@ class ConnectionManager {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-            const response = await fetch(this.supabaseUrl, {
+            await fetch(this.supabaseUrl, {
                 method: 'GET',
                 signal: controller.signal,
                 mode: 'no-cors' // Use no-cors to avoid preflight issues during a simple reachability check
@@ -70,7 +70,7 @@ class ConnectionManager {
      * Start listening for connection changes
      */
     public onStatusChange(callback: (status: ConnectionStatus) => void) {
-        Network.addListener('networkStatusChange', async (netStatus) => {
+        Network.addListener('networkStatusChange', async () => {
             const fullStatus = await this.checkConnection();
             callback(fullStatus);
         });
