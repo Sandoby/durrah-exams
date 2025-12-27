@@ -11,18 +11,18 @@ serve(async (req) => {
     const now = new Date()
     const sevenDaysFromNow = new Date(now)
     sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7)
-    
+
     const threeDaysFromNow = new Date(now)
     threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3)
-    
+
     const threeDaysAgo = new Date(now)
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)
 
     // Get all profiles with upcoming or past expiry dates
     const { data: profiles, error } = await supabase
       .from('profiles')
-      .select('id, email, full_name, subscription_expires_at, last_reminder_sent_at, email_notifications_enabled')
-      .not('subscription_expires_at', 'is', null)
+      .select('id, email, full_name, subscription_end_date, last_reminder_sent_at, email_notifications_enabled')
+      .not('subscription_end_date', 'is', null)
       .eq('email_notifications_enabled', true)
 
     if (error) {
@@ -91,7 +91,7 @@ serve(async (req) => {
             results.failed++
             const errorData = await response.text()
             console.error(`Failed to send ${emailType} to ${profile.email}:`, errorData)
-            
+
             // Log failed attempt
             await supabase.from('email_logs').insert({
               user_id: profile.id,
@@ -104,7 +104,7 @@ serve(async (req) => {
         } catch (error) {
           results.failed++
           console.error(`Error sending ${emailType} to ${profile.email}:`, error)
-          
+
           // Log failed attempt
           await supabase.from('email_logs').insert({
             user_id: profile.id,
@@ -129,7 +129,7 @@ serve(async (req) => {
     )
   } catch (error) {
     console.error('Cron job error:', error)
-    
+
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

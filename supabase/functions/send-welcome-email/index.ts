@@ -428,23 +428,23 @@ serve(async (req: Request) => {
     // Get user profile for subscription info if needed
     let expiryDate = undefined
     let resetUrl = undefined
-    
+
     // Handle password reset and email verification URLs
     if (emailType === 'password_reset' && resetToken) {
       resetUrl = `https://tutors.durrahsystem.tech/update-password?token=${resetToken}`
     } else if (emailType === 'email_verification' && verificationToken) {
       resetUrl = `https://tutors.durrahsystem.tech/verify-email?token=${verificationToken}`
     }
-    
+
     if (emailType !== 'welcome' && emailType !== 'password_reset' && emailType !== 'email_verification' && userId) {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('subscription_expires_at')
+        .select('subscription_end_date')
         .eq('id', userId)
         .single()
 
-      if (profile?.subscription_expires_at) {
-        expiryDate = new Date(profile.subscription_expires_at).toLocaleDateString('en-US', {
+      if (profile?.subscription_end_date) {
+        expiryDate = new Date(profile.subscription_end_date).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'

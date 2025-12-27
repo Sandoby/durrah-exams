@@ -14,7 +14,7 @@ serve(async (req) => {
 
   try {
     const { type, email, data } = await req.json()
-    
+
     let subject = ''
     let html = ''
 
@@ -61,11 +61,11 @@ serve(async (req) => {
                     </div>
                     <div class="details-row">
                       <span><strong>Date:</strong></span>
-                      <span>${new Date(data.date).toLocaleDateString()}</span>
+                      <span>${data.date ? new Date(data.date).toLocaleDateString() : new Date().toLocaleDateString()}</span>
                     </div>
                     <div class="details-row">
                       <span><strong>Subscription Valid Until:</strong></span>
-                      <span>${new Date(data.subscriptionEndDate).toLocaleDateString()}</span>
+                      <span>${data.subscriptionEndDate ? new Date(data.subscriptionEndDate).toLocaleDateString() : 'N/A'}</span>
                     </div>
                   </div>
 

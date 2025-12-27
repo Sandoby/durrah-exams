@@ -78,28 +78,7 @@ export default function PaymentCallback() {
               } catch (e) { console.warn('Coupon error:', e); }
             }
 
-            // Send confirmation email
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('email, full_name')
-              .eq('id', userId)
-              .single();
-
-            if (profile?.email) {
-              supabase.functions.invoke('send-payment-email', {
-                body: {
-                  type: 'payment_success',
-                  email: profile.email,
-                  data: {
-                    userName: profile.full_name || profile.email,
-                    plan: planId === 'pro' ? 'Professional' : 'Starter',
-                    amount: metadata.amount,
-                    currency: 'EGP',
-                    orderId,
-                  },
-                }
-              });
-            }
+            // Confirmation email is now handled server-side by webhooks for better reliability
           }
 
           // Cleanup

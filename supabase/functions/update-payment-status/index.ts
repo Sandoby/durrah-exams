@@ -116,8 +116,9 @@ serve(async (req) => {
               amount: payment.amount,
               currency: payment.currency,
               orderId,
+              dashboardUrl: `https://tutors.durrahsystem.tech/dashboard`,
               date: new Date().toISOString(),
-              dashboardUrl: `https://durrahsystem.tech/dashboard`
+              subscriptionEndDate: endDate.toISOString()
             }
           }
         })

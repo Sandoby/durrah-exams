@@ -12,7 +12,7 @@ async function verifyHmacSHA256(message: string, key: string, signature: string)
     const encoder = new TextEncoder()
     const keyData = encoder.encode(key)
     const messageData = encoder.encode(message)
-    
+
     const importedKey = await crypto.subtle.importKey(
       'raw',
       keyData,
@@ -20,12 +20,12 @@ async function verifyHmacSHA256(message: string, key: string, signature: string)
       false,
       ['sign']
     )
-    
+
     const sig = await crypto.subtle.sign('HMAC', importedKey, messageData)
     const expectedSignature = Array.from(new Uint8Array(sig))
       .map(b => b.toString(16).padStart(2, '0'))
       .join('')
-    
+
     return signature === expectedSignature
   } catch (error) {
     console.error('HMAC verification error:', error)
@@ -111,6 +111,27 @@ serve(async (req) => {
           console.error('Error updating profile:', profileError)
         }
 
+        // Send success email notification
+        try {
+          await supabaseClient.functions.invoke('send-payment-email', {
+            body: {
+              type: 'payment_success',
+              email: payment.user_email,
+              data: {
+                userName: payment.user_email,
+                plan: payment.plan,
+                amount: payment.amount,
+                currency: payment.currency,
+                orderId: MerchantReference,
+                date: new Date().toISOString(),
+                subscriptionEndDate: endDate.toISOString(),
+                dashboardUrl: `https://tutors.durrahsystem.tech/dashboard`
+              }
+            }
+          })
+        } catch (emailError) {
+          console.warn('Failed to send email:', emailError)
+        }
         console.log('✅ Subscription activated for:', payment.user_email)
       }
     }
