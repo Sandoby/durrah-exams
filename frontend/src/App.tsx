@@ -61,9 +61,9 @@ function App() {
     <AuthProvider>
       <PushNotificationHandler />
       <LocationLanguageHandler />
-      <BackButtonHandler />
       <SubmissionSync />
       <Router>
+        <BackButtonHandler />
         <div className="min-h-screen bg-background text-foreground font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
           <Routes>
             <Route path="/" element={isNative ? <MobileWelcome /> : <LandingPage />} />
