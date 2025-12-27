@@ -8,6 +8,7 @@ import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { useTranslation } from 'react-i18next';
+import { Capacitor } from '@capacitor/core';
 
 const loginSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -38,6 +39,18 @@ export default function Login() {
     const onSubmit = async (data: LoginForm) => {
         setIsLoading(true);
         try {
+            // Mobile pre-check
+            if (Capacitor.isNativePlatform()) {
+                const { connectionManager } = await import('../lib/ConnectionManager');
+                const status = await connectionManager.checkConnection();
+                if (!status.connected) {
+                    throw new Error(status.error || 'No internet connection');
+                }
+                if (!status.supabaseReachable) {
+                    throw new Error(status.error || 'Cannot reach server. Please check your connection.');
+                }
+            }
+
             const { error } = await supabase.auth.signInWithPassword({
                 email: data.email,
                 password: data.password,
@@ -48,7 +61,10 @@ export default function Login() {
             toast.success('Logged in successfully');
             navigate('/dashboard');
         } catch (error: any) {
-            toast.error(error.message || 'Invalid email or password');
+            console.error('Login error:', error);
+            toast.error(error.message || 'Invalid email or password', {
+                duration: 5000 // Show longer for connection errors
+            });
         } finally {
             setIsLoading(false);
         }
