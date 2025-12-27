@@ -228,6 +228,11 @@
             <div class="email-label">💔 3 Days Expired</div>
             <div class="email-desc">Win-back email</div>
           </label>
+          <label class="email-option">
+            <input type="radio" name="emailType" value="password_reset">
+            <div class="email-label">🔑 Password Reset</div>
+            <div class="email-desc">Security & access</div>
+          </label>
           <label class="email-option" style="grid-column: span 2; border-color: #059669; background: #ecfdf5;">
             <input type="radio" name="emailType" value="payment_success">
             <div class="email-label" style="color: #059669;">💰 Payment Success (Invoice)</div>
@@ -281,7 +286,8 @@
           userId,
           email,
           name,
-          emailType
+          emailType,
+          resetToken: emailType === 'password_reset' ? 'test-token-' + Math.random().toString(36).substring(7) : undefined
         };
 
         // If it's the invoice, use a different function and payload
@@ -359,7 +365,9 @@
         'subscription_reminder_7d',
         'subscription_reminder_3d',
         'subscription_expired',
-        'subscription_expired_3d'
+        'subscription_expired_3d',
+        'password_reset',
+        'email_verification'
       ];
 
       const resultDiv = document.getElementById('result');
@@ -371,18 +379,26 @@
 
       for (const type of emailTypes) {
         try {
+          const payload = {
+            userId,
+            email,
+            name,
+            emailType: type
+          };
+
+          if (type === 'password_reset') {
+            payload.resetToken = 'test-reset-token';
+          } else if (type === 'email_verification') {
+            payload.verificationToken = 'test-verify-token';
+          }
+
           const response = await fetch(`${supabaseUrl}/functions/v1/send-welcome-email`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${supabaseKey}`,
             },
-            body: JSON.stringify({
-              userId,
-              email,
-              name,
-              emailType: type
-            })
+            body: JSON.stringify(payload)
           });
 
           const data = await response.json();

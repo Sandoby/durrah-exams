@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -30,6 +30,16 @@ export default function Register() {
         resolver: zodResolver(registerSchema),
     });
 
+    useEffect(() => {
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                navigate('/dashboard');
+            }
+        };
+        checkSession();
+    }, [navigate]);
+
     const onSubmit = async (data: RegisterForm) => {
         setIsLoading(true);
         try {
@@ -44,6 +54,14 @@ export default function Register() {
             });
 
             if (error) throw error;
+
+            // Handle existing user (enumeration protection)
+            // If user exists but no identities, they are already registered
+            if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
+                toast.error('This email is already registered. Please sign in instead.');
+                setIsLoading(false);
+                return;
+            }
 
             // Send welcome email (don't block on this)
             if (authData.user) {

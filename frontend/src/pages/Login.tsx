@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,6 +24,16 @@ export default function Login() {
     const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
         resolver: zodResolver(loginSchema),
     });
+
+    useEffect(() => {
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                navigate('/dashboard');
+            }
+        };
+        checkSession();
+    }, [navigate]);
 
     const onSubmit = async (data: LoginForm) => {
         setIsLoading(true);
