@@ -261,28 +261,28 @@ export default function Checkout() {
     // ---------- UI ----------
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans">
-            {/* Header */}
-            <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
+            {/* Header with violet background fading */}
+            <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl bg-gradient-to-r from-violet-50/80 via-purple-50/80 to-indigo-50/80 dark:from-violet-950/80 dark:via-purple-950/80 dark:to-indigo-950/80 backdrop-blur-xl z-50 border border-violet-200/50 dark:border-violet-800/50 rounded-2xl shadow-xl shadow-violet-500/10">
+                <div className="px-6 py-3">
+                    <div className="flex justify-between items-center">
                         <div className="flex items-center cursor-pointer gap-3" onClick={() => navigate('/dashboard')}>
-                            <Logo className="h-8 w-8" showText={false} />
+                            <Logo className="h-9 w-9" showText={false} />
                             <div className="flex flex-col">
-                                <span className="text-lg font-semibold text-gray-900 dark:text-white">Durrah</span>
+                                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
                                 <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
                             </div>
                         </div>
                         <button
                             onClick={() => navigate('/dashboard')}
-                            className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                         >
                             {t('checkout.back')}
                         </button>
                     </div>
                 </div>
-            </header>
+            </nav>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
                 <div className="text-center max-w-2xl mx-auto mb-16">
                     <h1 className="text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl mb-4">
                         {t('checkout.title')}
@@ -545,22 +545,53 @@ export default function Checkout() {
                 </div>
 
                 {/* Footer with refund policy link */}
-                <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
-                    <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-                        <p className="mb-2">
-                            By proceeding with payment, you agree to our terms and conditions. All payments are processed in Egyptian Pounds (EGP).
-                        </p>
-                        <p>
-                            Questions about our refund policy?{' '}
-                            <button
-                                onClick={() => navigate('/refund-policy')}
-                                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 underline font-medium transition-colors"
-                            >
-                                View Refund Policy
-                            </button>
-                        </p>
+                <footer className="mt-20 pt-12 pb-8 border-t border-gray-200 dark:border-gray-700">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                            <div>
+                                <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Payment Security</h4>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    All transactions are encrypted and secure. We use industry-standard SSL encryption to protect your data.
+                                </p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Support</h4>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                    Need help? Contact our support team for assistance with your subscription.
+                                </p>
+                                <p className="text-sm text-indigo-600 dark:text-indigo-400">
+                                    support@durrahsystem.tech
+                                </p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Refund Policy</h4>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                                    Questions about refunds? Review our comprehensive refund policy.
+                                </p>
+                                <button
+                                    onClick={() => navigate('/refund-policy')}
+                                    className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors"
+                                >
+                                    View Refund Policy →
+                                </button>
+                            </div>
+                        </div>
+                        <div className="pt-8 border-t border-gray-200 dark:border-gray-700">
+                            <div className="text-center">
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                    By proceeding with payment, you agree to our{' '}
+                                    <button className="text-indigo-600 dark:text-indigo-400 hover:underline">terms and conditions</button>.
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-500">
+                                    All payments are processed in Egyptian Pounds (EGP). Displayed prices are converted for reference only.
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-4">
+                                    © {new Date().getFullYear()} Durrah for Tutors. All rights reserved.
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </footer>
             </main>
         </div>
     );
