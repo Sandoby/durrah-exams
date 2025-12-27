@@ -1,7 +1,7 @@
 ﻿import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, Trophy, ChevronDown } from 'lucide-react';
+import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, Trophy, ChevronDown, Rocket, Orbit } from 'lucide-react';
 import { useState } from 'react';
 import { Logo } from '../components/Logo';
 import { LottiePlayer } from '../components/LottiePlayer';
@@ -107,11 +107,17 @@ export default function LandingPage() {
                 @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
                 @keyframes blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
                 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+                @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.5)); } 50% { filter: drop-shadow(0 0 25px rgba(99, 102, 241, 0.8)); } }
+                @keyframes gradient { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
                 .animate-blob { animation: blob 7s infinite; }
                 .animate-float { animation: float 3s ease-in-out infinite; }
+                .animate-glow { animation: glow 3s ease-in-out infinite; }
+                .animate-gradient { background-size: 200% auto; animation: gradient 4s linear infinite; }
                 .animation-delay-2000 { animation-delay: 2s; }
                 .animation-delay-4000 { animation-delay: 4s; }
                 .star-field { position: absolute; inset: 0; background-image: radial-gradient(1px 1px at 10% 10%, white, transparent), radial-gradient(1px 1px at 25% 35%, white, transparent), radial-gradient(1.5px 1.5px at 45% 15%, white, transparent), radial-gradient(1px 1px at 65% 45%, white, transparent), radial-gradient(1px 1px at 85% 25%, white, transparent), radial-gradient(1px 1px at 15% 75%, white, transparent), radial-gradient(1.5px 1.5px at 35% 85%, white, transparent), radial-gradient(1px 1px at 55% 65%, white, transparent), radial-gradient(1px 1px at 75% 95%, white, transparent), radial-gradient(1px 1px at 95% 55%, white, transparent); background-size: 50% 50%; animation: twinkle 4s infinite ease-in-out; }
+                .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+                .slant { transform: skewX(-20deg); }
             `}</style>
 
             {/* Navigation */}
@@ -553,6 +559,13 @@ export default function LandingPage() {
                 </div>
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="flex justify-center mb-12">
+                        <div className="glass-panel px-6 py-2 rounded-full flex items-center gap-2 border-indigo-500/30">
+                            <Orbit className="h-5 w-5 text-indigo-400 animate-spin-slow" />
+                            <span className="text-sm font-bold text-indigo-100/80 tracking-widest uppercase">Mission Center</span>
+                        </div>
+                    </div>
+
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
@@ -565,78 +578,82 @@ export default function LandingPage() {
                                 initial={{ opacity: 0, x: -20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
-                                className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-400/20 rounded-full px-4 py-2 mb-6 backdrop-blur-sm"
+                                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-6"
                             >
-                                <Sparkles className="w-4 h-4 text-indigo-400" />
-                                <span className="text-sm font-medium text-indigo-300">{t('landing.marketing.kids.badge', 'Playful & Safe')}</span>
+                                <Zap className="h-4 w-4 fill-current animate-pulse" />
+                                <span>SYSTEM READY FOR TAKEOFF</span>
                             </motion.div>
-                            <motion.h2
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: 0.1 }}
-                                className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight"
-                            >
-                                {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[0]}
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400">{t('landing.marketing.kids.titleSpan', 'Ultimate')}</span>
-                                {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[1]}
-                            </motion.h2>
-                            <motion.p
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: 0.2 }}
-                                className="text-lg text-indigo-100/70 mb-8"
-                            >
-                                {t('landing.marketing.kids.desc', 'Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.')}
-                            </motion.p>
-                            <motion.ul
-                                variants={staggerContainer}
-                                initial="initial"
-                                whileInView="whileInView"
-                                viewport={{ once: true }}
-                                className="grid sm:grid-cols-2 gap-4 mb-8"
-                            >
-                                {[0, 1, 2, 3].map((i) => (
-                                    <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
-                                        <div className="bg-indigo-500/20 p-1 rounded-full border border-indigo-400/20">
-                                            <Check className="w-4 h-4 text-indigo-400" />
-                                        </div>
-                                        <span className="text-indigo-100 font-medium">{t(`landing.marketing.kids.features.${i}`)}</span>
-                                    </motion.li>
-                                ))}
-                            </motion.ul>
-                            <Link to="/kids" className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 via-blue-600 to-violet-600 hover:from-indigo-500 hover:via-blue-500 hover:to-violet-500 text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 group">
-                                {t('landing.marketing.kids.cta', 'Try Kids Mode Now')}
-                                <ArrowRight className={`w-5 h-5 group-hover:translate-x-1 transition-transform ${isRTL ? 'rotate-180' : ''}`} />
-                            </Link>
+
+                            <div className="glass-panel p-8 sm:p-10 rounded-[2.5rem] border-white/10 shadow-3xl">
+                                <motion.h2
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: 0.1 }}
+                                    className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight uppercase"
+                                >
+                                    {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[0]}
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 animate-gradient">{t('landing.marketing.kids.titleSpan', 'Ultimate')}</span>
+                                    {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[1]}
+                                </motion.h2>
+                                <motion.p
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: 0.2 }}
+                                    className="text-lg text-indigo-100/70 mb-8 font-medium"
+                                >
+                                    {t('landing.marketing.kids.desc', 'Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.')}
+                                </motion.p>
+                                <motion.ul
+                                    variants={staggerContainer}
+                                    initial="initial"
+                                    whileInView="whileInView"
+                                    viewport={{ once: true }}
+                                    className="grid sm:grid-cols-2 gap-4 mb-8"
+                                >
+                                    {[0, 1, 2, 3].map((i) => (
+                                        <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
+                                            <div className="bg-indigo-500/20 p-1 rounded-full border border-indigo-400/20">
+                                                <Check className="w-4 h-4 text-indigo-400" />
+                                            </div>
+                                            <span className="text-indigo-100 font-medium">{t(`landing.marketing.kids.features.${i}`)}</span>
+                                        </motion.li>
+                                    ))}
+                                </motion.ul>
+                                <Link
+                                    to="/kids"
+                                    className="w-full py-5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-2xl text-white font-black text-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group overflow-hidden relative"
+                                >
+                                    <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 slant" />
+                                    <span className="tracking-widest uppercase">{t('landing.marketing.kids.cta', 'Blast Off!')}</span>
+                                    <Rocket className="h-6 w-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                </Link>
+                            </div>
                         </div>
-                        <div className="order-1 lg:order-2 relative">
-                            {/* Floating Space Assets */}
+                        <div className="order-1 lg:order-2 relative flex justify-center items-center h-[400px]">
+                            {/* Animated Space Assets without the main image */}
                             <motion.img
-                                animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
-                                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                                animate={{ y: [0, -30, 0], rotate: [0, 8, 0], scale: [1, 1.05, 1] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886149420.png"
                                 alt=""
-                                className="absolute -top-16 -left-12 w-32 h-32 z-20 drop-shadow-[0_0_20px_rgba(129,140,248,0.3)]"
+                                className="absolute w-64 h-64 z-20 drop-shadow-[0_0_30px_rgba(129,140,248,0.5)] animate-glow"
                             />
                             <motion.img
-                                animate={{ y: [0, 20, 0], rotate: [0, -5, 0] }}
-                                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                                animate={{ y: [0, 40, 0], rotate: [0, -12, 0] }}
+                                transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886176188.png"
                                 alt=""
-                                className="absolute -bottom-12 -right-12 w-36 h-36 z-20 drop-shadow-[0_0_25px_rgba(167,139,250,0.3)]"
+                                className="absolute -bottom-10 right-0 w-48 h-48 z-10 opacity-60 filter blur-[1px]"
                             />
-
-                            <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl group">
-                                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                                <img
-                                    src="/kids/image-1765886669181.png"
-                                    alt="Kids Mode Marketing"
-                                    className="relative z-10 w-full rounded-3xl transform group-hover:scale-105 transition-transform duration-700 font-serif"
-                                />
-                                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/80 to-transparent z-15"></div>
-                            </div>
+                            <motion.img
+                                animate={{ x: [0, 20, 0], y: [0, -20, 0] }}
+                                transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+                                src="/kids/image-1765886214428.png"
+                                alt=""
+                                className="absolute -top-20 -left-10 w-40 h-40 z-10 opacity-40 filter blur-[2px]"
+                            />
                         </div>
                     </motion.div>
                 </div>
