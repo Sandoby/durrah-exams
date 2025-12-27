@@ -162,8 +162,11 @@ export default function PaymentCallback() {
             {/* Logo */}
             <div className="flex justify-center mb-10">
               <div className="flex items-center gap-3">
-                <Logo className="h-10 w-10 text-indigo-600" showText={false} />
-                <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent italic">Durrah</span>
+                <Logo className="h-10 w-10" showText={false} />
+                <div className="flex flex-col">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Durrah</span>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 font-bold tracking-[0.2em] uppercase">for Tutors</span>
+                </div>
               </div>
             </div>
 

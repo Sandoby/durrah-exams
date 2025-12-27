@@ -280,7 +280,7 @@ export default function Checkout() {
                             <Logo className="h-9 w-9" showText={false} />
                             <div className="flex flex-col">
                                 <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
+                                <span className="text-[10px] text-gray-500 dark:text-gray-400 font-bold tracking-[0.2em] uppercase leading-none">for Tutors</span>
                             </div>
                         </div>
                         <button
@@ -501,8 +501,8 @@ export default function Checkout() {
                                                 <button
                                                     onClick={() => setSelectedPaymentProvider('paysky')}
                                                     className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'paysky'
-                                                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
-                                                            : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                                                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
+                                                        : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
                                                         }`}
                                                 >
                                                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'paysky' ? 'border-indigo-600' : 'border-gray-300'}`}>
@@ -516,8 +516,8 @@ export default function Checkout() {
                                                 <button
                                                     onClick={() => setSelectedPaymentProvider('kashier')}
                                                     className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'kashier'
-                                                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
-                                                            : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                                                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
+                                                        : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
                                                         }`}
                                                 >
                                                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'kashier' ? 'border-indigo-600' : 'border-gray-300'}`}>
