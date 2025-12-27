@@ -432,8 +432,7 @@
         "success": {
             "submitted": "Exam submitted successfully!"
         }
-    }
-    ,
+    },
     "kids": {
         "seo": {
             "title": "Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah",
@@ -466,6 +465,36 @@
             "rewards": "🏆 Win Rewards",
             "games": "🎮 Cool Games",
             "star": "⭐ Be a Star"
+        }
+    },
+    "landing": {
+        "marketing": {
+            "kids": {
+                "badge": "Playful & Safe",
+                "title": "Kids Mode: The Ultimate Quiz Adventure",
+                "titleSpan": "Ultimate",
+                "desc": "Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.",
+                "features": [
+                    "Gaming Psychology",
+                    "Safe Community",
+                    "Interactive Worlds",
+                    "Rewards System"
+                ],
+                "cta": "Try Kids Mode Now"
+            },
+            "student": {
+                "badge": "Track & Grow",
+                "title": "Empower Students with a Unified Portal",
+                "titleSpan": "Unified Portal",
+                "desc": "Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.",
+                "features": [
+                    "Performance Tracking",
+                    "Personalized Dashboards",
+                    "Growth Insights",
+                    "Secure Access"
+                ],
+                "cta": "Visit Student Portal"
+            }
         }
     }
 }

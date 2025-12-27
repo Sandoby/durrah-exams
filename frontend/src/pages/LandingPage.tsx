@@ -104,12 +104,14 @@ export default function LandingPage() {
             </Helmet>
 
             <style>{`
+                @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
                 @keyframes blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
                 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
                 .animate-blob { animation: blob 7s infinite; }
                 .animate-float { animation: float 3s ease-in-out infinite; }
                 .animation-delay-2000 { animation-delay: 2s; }
                 .animation-delay-4000 { animation-delay: 4s; }
+                .star-field { position: absolute; inset: 0; background-image: radial-gradient(1px 1px at 10% 10%, white, transparent), radial-gradient(1px 1px at 25% 35%, white, transparent), radial-gradient(1.5px 1.5px at 45% 15%, white, transparent), radial-gradient(1px 1px at 65% 45%, white, transparent), radial-gradient(1px 1px at 85% 25%, white, transparent), radial-gradient(1px 1px at 15% 75%, white, transparent), radial-gradient(1.5px 1.5px at 35% 85%, white, transparent), radial-gradient(1px 1px at 55% 65%, white, transparent), radial-gradient(1px 1px at 75% 95%, white, transparent), radial-gradient(1px 1px at 95% 55%, white, transparent); background-size: 50% 50%; animation: twinkle 4s infinite ease-in-out; }
             `}</style>
 
             {/* Navigation */}
@@ -537,36 +539,46 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Kids Mode & Student Portal Sections */}
-            <section className="py-24 relative overflow-hidden bg-white dark:bg-slate-900">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Kids Mode Feature */}
+            {/* Kids Mode Feature Section - Enhanced Space Theme */}
+            <section className="py-32 relative overflow-hidden bg-[#050616] text-white">
+                {/* Space Atmosphere Background */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="star-field opacity-40"></div>
+                    <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-purple-900/40 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#050616] to-transparent"></div>
+
+                    {/* Nebula Glows */}
+                    <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse"></div>
+                    <div className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+                </div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8 }}
-                        className="grid lg:grid-cols-2 gap-16 items-center mb-32"
+                        className="grid lg:grid-cols-2 gap-16 items-center"
                     >
                         <div className="order-2 lg:order-1">
                             <motion.div
                                 initial={{ opacity: 0, x: -20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
-                                className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-full px-4 py-2 mb-6"
+                                className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-400/20 rounded-full px-4 py-2 mb-6 backdrop-blur-sm"
                             >
-                                <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                                <span className="text-sm font-medium text-amber-600 dark:text-amber-400">{t('landing.marketing.kids.badge', 'Playful & Safe')}</span>
+                                <Sparkles className="w-4 h-4 text-indigo-400" />
+                                <span className="text-sm font-medium text-indigo-300">{t('landing.marketing.kids.badge', 'Playful & Safe')}</span>
                             </motion.div>
                             <motion.h2
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.1 }}
-                                className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight"
+                                className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight"
                             >
                                 {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[0]}
-                                <span className="text-amber-500">{t('landing.marketing.kids.titleSpan', 'Ultimate')}</span>
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400">{t('landing.marketing.kids.titleSpan', 'Ultimate')}</span>
                                 {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[1]}
                             </motion.h2>
                             <motion.p
@@ -574,7 +586,7 @@ export default function LandingPage() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.2 }}
-                                className="text-lg text-gray-600 dark:text-gray-300 mb-8"
+                                className="text-lg text-indigo-100/70 mb-8"
                             >
                                 {t('landing.marketing.kids.desc', 'Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.')}
                             </motion.p>
@@ -583,49 +595,56 @@ export default function LandingPage() {
                                 initial="initial"
                                 whileInView="whileInView"
                                 viewport={{ once: true }}
-                                className="space-y-4 mb-8"
+                                className="grid sm:grid-cols-2 gap-4 mb-8"
                             >
                                 {[0, 1, 2, 3].map((i) => (
                                     <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
-                                        <div className="bg-amber-100 dark:bg-amber-900/50 p-1 rounded-full">
-                                            <Check className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                                        <div className="bg-indigo-500/20 p-1 rounded-full border border-indigo-400/20">
+                                            <Check className="w-4 h-4 text-indigo-400" />
                                         </div>
-                                        <span className="text-gray-700 dark:text-gray-300 font-medium">{t(`landing.marketing.kids.features.${i}`)}</span>
+                                        <span className="text-indigo-100 font-medium">{t(`landing.marketing.kids.features.${i}`)}</span>
                                     </motion.li>
                                 ))}
                             </motion.ul>
-                            <Link to="/kids" className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-amber-500/30 transition-all hover:scale-105 active:scale-95">
+                            <Link to="/kids" className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 via-blue-600 to-violet-600 hover:from-indigo-500 hover:via-blue-500 hover:to-violet-500 text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 group">
                                 {t('landing.marketing.kids.cta', 'Try Kids Mode Now')}
-                                <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+                                <ArrowRight className={`w-5 h-5 group-hover:translate-x-1 transition-transform ${isRTL ? 'rotate-180' : ''}`} />
                             </Link>
                         </div>
                         <div className="order-1 lg:order-2 relative">
-                            {/* Floating Astronauts/Kids Decorations overlapping the main image */}
+                            {/* Floating Space Assets */}
                             <motion.img
-                                animate={{ y: [0, -20, 0] }}
+                                animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
                                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886149420.png"
                                 alt=""
-                                className="absolute -top-16 -left-12 w-32 h-32 z-20 drop-shadow-2xl"
+                                className="absolute -top-16 -left-12 w-32 h-32 z-20 drop-shadow-[0_0_20px_rgba(129,140,248,0.3)]"
                             />
                             <motion.img
-                                animate={{ y: [0, 20, 0] }}
+                                animate={{ y: [0, 20, 0], rotate: [0, -5, 0] }}
                                 transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886176188.png"
                                 alt=""
-                                className="absolute -bottom-12 -right-12 w-36 h-36 z-20 drop-shadow-2xl"
+                                className="absolute -bottom-12 -right-12 w-36 h-36 z-20 drop-shadow-[0_0_25px_rgba(167,139,250,0.3)]"
                             />
 
-                            <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-500 blur-3xl opacity-20 animate-pulse"></div>
-                            <img
-                                src="/kids/image-1765886669181.png"
-                                alt="Kids Mode Marketing"
-                                className="relative z-10 rounded-3xl shadow-2xl"
-                            />
+                            <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl group">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                                <img
+                                    src="/kids/image-1765886669181.png"
+                                    alt="Kids Mode Marketing"
+                                    className="relative z-10 w-full rounded-3xl transform group-hover:scale-105 transition-transform duration-700 font-serif"
+                                />
+                                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/80 to-transparent z-15"></div>
+                            </div>
                         </div>
                     </motion.div>
+                </div>
+            </section>
 
-                    {/* Student Portal Feature */}
+            {/* Student Portal Section - Modern Dashboard Style */}
+            <section className="py-24 relative overflow-hidden bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
@@ -737,6 +756,6 @@ export default function LandingPage() {
                     </div>
                 </div>
             </footer>
-        </div>
+        </div >
     );
 }
