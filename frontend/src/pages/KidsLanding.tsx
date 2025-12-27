@@ -1,14 +1,12 @@
-﻿import { useMemo, useState } from 'react';
+﻿import { useMemo, useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Sparkles, Ticket, Lock, Rocket, Trophy, Gamepad2 } from 'lucide-react';
+import { Ticket, Rocket, Trophy, Orbit, Zap, Cpu, MousePointer2 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
-
-type LeaderboardVisibility = 'hidden' | 'after_submit' | 'always';
 
 export default function KidsLanding() {
   const { t, i18n } = useTranslation();
@@ -16,8 +14,90 @@ export default function KidsLanding() {
   const [nickname, setNickname] = useState('');
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const normalizedCode = useMemo(() => code.trim().toUpperCase().replace(/\s+/g, ''), [code]);
+
+  // Interactive Particle Background
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let particles: any[] = [];
+    const particleCount = 100;
+    let mouse = { x: -100, y: -100 };
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    class Particle {
+      x: number; y: number; size: number; speedX: number; speedY: number; color: string;
+      constructor() {
+        this.x = Math.random() * canvas!.width;
+        this.y = Math.random() * canvas!.height;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = Math.random() * 1 - 0.5;
+        this.speedY = Math.random() * 1 - 0.5;
+        const colors = ['#6366f1', '#a855f7', '#ec4899', '#f59e0b', '#06b6d4'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x > canvas!.width) this.x = 0;
+        if (this.x < 0) this.x = canvas!.width;
+        if (this.y > canvas!.height) this.y = 0;
+        if (this.y < 0) this.y = canvas!.height;
+
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 150) {
+          const forceDirectionX = dx / distance;
+          const forceDirectionY = dy / distance;
+          const force = (150 - distance) / 150;
+          this.x -= forceDirectionX * force * 5;
+          this.y -= forceDirectionY * force * 5;
+        }
+      }
+      draw() {
+        ctx!.fillStyle = this.color;
+        ctx!.beginPath();
+        ctx!.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx!.fill();
+      }
+    }
+
+    const init = () => {
+      particles = [];
+      for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+    };
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animate);
+    };
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.x;
+      mouse.y = e.y;
+    });
+
+    resize();
+    init();
+    animate();
+
+    return () => window.removeEventListener('resize', resize);
+  }, []);
 
   const handleEnter = async () => {
     const nick = nickname.trim();
@@ -50,24 +130,6 @@ export default function KidsLanding() {
         return;
       }
 
-      const attemptLimit: number | null = settings.attempt_limit ?? null;
-
-      if (attemptLimit && attemptLimit > 0) {
-        const { count, error: countError } = await supabase
-          .from('submissions')
-          .select('id', { count: 'exact', head: true })
-          .eq('exam_id', exam.id)
-          .eq('child_mode', true)
-          .eq('nickname', nick);
-
-        if (!countError && typeof count === 'number' && count >= attemptLimit) {
-          toast.error(`No attempts left (limit: ${attemptLimit})`);
-          const visibility: LeaderboardVisibility = settings.leaderboard_visibility || 'hidden';
-          navigate(`/kids/quiz/${exam.id}?code=${encodeURIComponent(normalizedCode)}&nick=${encodeURIComponent(nick)}&kid=1&locked=1&lb=${encodeURIComponent(visibility)}`);
-          return;
-        }
-      }
-
       navigate(`/kids/quiz/${exam.id}?code=${encodeURIComponent(normalizedCode)}&nick=${encodeURIComponent(nick)}&kid=1`);
     } catch (e) {
       console.error(e);
@@ -77,273 +139,176 @@ export default function KidsLanding() {
     }
   };
 
-  // Force language detection on mount (for kids landing page)
-  import('../lib/countryLanguageDetector').then(mod => mod.default.lookup());
   const isRTL = i18n.language === 'ar';
+
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'} className="min-h-screen bg-gradient-to-b from-sky-400 via-sky-300 to-amber-100 overflow-hidden relative">
-      {/* SEO Helmet */}
+    <div dir={isRTL ? 'rtl' : 'ltr'} className="min-h-screen bg-[#050616] overflow-hidden relative font-sans">
       <Helmet>
-        <title>{t('kids.seo.title', 'Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah')}</title>
-        <meta name="description" content={t('kids.seo.description', 'Start your quiz adventure! Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors.')} />
-        <meta name="keywords" content={t('kids.seo.keywords', 'kids quiz, fun quizzes for kids, safe kids exams, anti cheating quiz, child mode, secure quiz platform, learning for children')} />
-        <meta property="og:title" content={t('kids.seo.title', 'Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah')} />
-        <meta property="og:description" content={t('kids.seo.description', 'Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors.')} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://tutors.durrahsystem.tech/kids" />
-        <meta property="og:image" content="https://tutors.durrahsystem.tech/illustrations/og-kids.png" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={t('kids.seo.title', 'Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah')} />
-        <meta name="twitter:description" content={t('kids.seo.description', 'Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors.')} />
-        <meta name="twitter:image" content="https://tutors.durrahsystem.tech/illustrations/og-kids.png" />
-        <link rel="canonical" href="https://tutors.durrahsystem.tech/kids" />
-        <script type="application/ld+json">{`
-          {
-            "@context": "https://schema.org",
-            "@type": "WebPage",
-            "name": "Kids Quiz Adventure",
-            "url": "https://tutors.durrahsystem.tech/kids",
-            "description": "Safe, fun, and secure online quizzes for kids with anti-cheating and child mode. Powered by Durrah for Tutors.",
-            "inLanguage": "${i18n.language}",
-            "publisher": {
-              "@type": "Organization",
-              "name": "Durrah for Tutors"
-            }
-          }
-        `}</script>
+        <title>{t('kids.seo.title', 'Quiz Space Adventure | Durrah')}</title>
       </Helmet>
-      {/* Custom animations */}
+
+      {/* Particle Canvas */}
+      <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none opacity-60" />
+
+      {/* Background Blobs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 animate-pulse" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 animate-pulse delay-700" />
+
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(3deg); }
-        }
-        @keyframes float-reverse {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-15px) rotate(-3deg); }
-        }
-        @keyframes bounce-soft {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        @keyframes wiggle {
-          0%, 100% { transform: rotate(-3deg); }
-          50% { transform: rotate(3deg); }
-        }
-        .animate-float { animation: float 4s ease-in-out infinite; }
-        .animate-float-reverse { animation: float-reverse 5s ease-in-out infinite; }
-        .animate-bounce-soft { animation: bounce-soft 2s ease-in-out infinite; }
-        .animate-wiggle { animation: wiggle 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-20px) rotate(2deg); } }
+        @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.5)); } 50% { filter: drop-shadow(0 0 25px rgba(99, 102, 241, 0.8)); } }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-glow { animation: glow 3s ease-in-out infinite; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
       `}</style>
 
-      {/* Decorative clouds */}
-      <div className="absolute inset-0 overflow-hidden z-0" style={{ pointerEvents: 'none' }}>
-        {/* Fluffy clouds */}
-        <div className="absolute top-10 left-10 w-32 h-16 bg-white/60 rounded-full blur-sm" />
-        <div className="absolute top-8 left-20 w-24 h-12 bg-white/50 rounded-full blur-sm" />
-        <div className="absolute top-20 right-20 w-40 h-20 bg-white/50 rounded-full blur-sm hidden sm:block" />
-        <div className="absolute top-16 right-32 w-28 h-14 bg-white/40 rounded-full blur-sm hidden sm:block" />
-        <div className="absolute bottom-40 left-1/4 w-36 h-18 bg-white/30 rounded-full blur-md hidden md:block" />
-        
-        {/* Sun glow */}
-        <div className="absolute -top-20 right-1/4 w-60 h-60 bg-yellow-300/40 rounded-full blur-3xl" />
-        
-        {/* Floating Illustrations */}
-                        <img 
-                          src="/kids/image-1765886162298.png" 
-                          alt="" 
-                          className="absolute right-2 top-8 w-16 sm:w-24 md:w-32 lg:w-36 animate-float-reverse drop-shadow-xl opacity-80"
-                          style={{ animationDelay: '1s' }}
-                        />
-                <img 
-                  src="/kids/image-1765886149420.png" 
-                  alt="" 
-                  className="absolute left-4 sm:left-16 top-24 w-20 sm:w-28 md:w-32 animate-float drop-shadow-xl"
-                  style={{ animationDelay: '0.7s' }}
-                />
-        <img 
-          src="/kids/image-1765886176188.png" 
-          alt="" 
-          className="absolute right-4 sm:right-16 bottom-28 w-24 sm:w-32 md:w-40 animate-float drop-shadow-xl hidden sm:block"
-          style={{ animationDelay: '0.5s' }}
-        />
-        <img 
-          src="/kids/image-1765886185739.png" 
-          alt="" 
-          className="absolute left-4 sm:left-16 bottom-24 w-24 sm:w-32 md:w-40 animate-float-reverse drop-shadow-xl hidden md:block"
-          style={{ animationDelay: '2s' }}
-        />
-        <img 
-          src="/kids/image-1765886195936.png" 
-          alt="" 
-          className="absolute right-1/4 top-1/4 w-20 sm:w-28 md:w-32 animate-float drop-shadow-xl hidden lg:block"
-          style={{ animationDelay: '1.5s' }}
-        />
-      </div>
-
-      {/* Header */}
-      <header className="relative z-50 px-3 sm:px-4 py-3 sm:py-6">
+      {/* Futuristic Header */}
+      <header className="relative z-50 p-6">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-1.5 sm:gap-2 bg-white/80 backdrop-blur-md rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shadow-md border border-white/50">
-            <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500" />
-            <span className="text-xs sm:text-sm font-bold text-sky-700">{t('kids.header.title', 'Kids Quiz')}</span>
+          <div className="glass-panel px-4 py-2 rounded-full flex items-center gap-2 border-indigo-500/30">
+            <Orbit className="h-5 w-5 text-indigo-400 animate-spin-slow" />
+            <span className="text-sm font-bold text-indigo-100/80 tracking-widest uppercase">Space Comm Center</span>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shadow-lg">
-            <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
-            <span className="text-xs sm:text-sm font-bold text-white">{t('kids.header.fun', 'Fun Learning')}</span>
-          </div>
-          <div className="ml-2 z-50" style={{ pointerEvents: 'auto' }}><LanguageSwitcher /></div>
+          <LanguageSwitcher />
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="relative z-10 px-3 sm:px-4 pb-6 sm:pb-8">
-        <div className="max-w-md mx-auto">
-          {/* Hero Section */}
-          <div className="text-center mb-4 sm:mb-6">
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-white/80 backdrop-blur-md rounded-full px-3 sm:px-5 py-2 sm:py-2.5 mb-3 sm:mb-4 shadow-md border border-white/50">
-              <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5 text-sky-500" />
-              <span className="text-xs sm:text-sm font-bold text-sky-700">{t('kids.hero.ready', 'Ready to Play?')}</span>
+      <main className="relative z-10 px-6 pt-8 pb-20">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-12">
+
+          {/* Hero Content */}
+          <div className="flex-1 text-center md:text-left">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-6">
+              <Zap className="h-4 w-4 fill-current" />
+              MISSION STARTING SOON
             </div>
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-sky-800 drop-shadow-sm mb-2 sm:mb-3 leading-tight">
-              {t('kids.hero.title', "Let's Start the")}
-              <span className="block bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-                {t('kids.hero.adventure', 'Quiz Adventure!')}
-              </span>
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
+              Ready for <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 animate-gradient">Takeoff?</span>
             </h1>
-            <p className="text-sky-700/80 text-xs sm:text-base max-w-sm mx-auto px-2">
-              {t('kids.hero.desc', 'Enter your name and the secret code to begin your fun journey!')}
+            <p className="text-indigo-200/60 text-lg mb-8 max-w-lg leading-relaxed">
+              Join the galaxy's smartest kids! Enter your secret access code and nickname to start your planetary quiz mission.
             </p>
+
+            {/* Visual Indicators */}
+            <div className="flex flex-wrap justify-center md:justify-start gap-4">
+              <div className="glass-panel p-4 rounded-2xl flex items-center gap-3">
+                <div className="h-10 w-10 bg-indigo-500/20 rounded-xl flex items-center justify-center">
+                  <Cpu className="text-indigo-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-indigo-300/50 font-bold">SMART TECH</p>
+                  <p className="text-sm text-white font-bold">Anti-Cheat AI</p>
+                </div>
+              </div>
+              <div className="glass-panel p-4 rounded-2xl flex items-center gap-3">
+                <div className="h-10 w-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+                  <Trophy className="text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-emerald-300/50 font-bold">REWARDS</p>
+                  <p className="text-sm text-white font-bold">Earn Space XP</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Entry Card */}
-          <div className="bg-white/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-8 border-2 sm:border-4 border-white relative overflow-hidden">
-            {/* Card decorations */}
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-200/50 rounded-full blur-2xl" />
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-sky-200/50 rounded-full blur-2xl" />
-            
+          <div className="w-full max-w-md relative">
+            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2.5rem] blur opacity-20" />
+            <div className="glass-panel relative rounded-[2.5rem] p-8 md:p-10 border-white/10 shadow-3xl">
 
-            <div className="relative space-y-4 sm:space-y-5">
-              {/* Nickname Input */}
-              <div>
-                <label className="block text-sm font-bold text-sky-700 mb-2 flex items-center gap-2">
-                  <span className="w-7 h-7 bg-gradient-to-br from-sky-400 to-blue-500 rounded-lg flex items-center justify-center shadow-md">
-                    <Sparkles className="h-4 w-4 text-white" />
-                  </span>
-                  {t('kids.form.nickname', 'Your Super Name')}
-                </label>
-                <input
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  className="w-full rounded-2xl border-2 border-sky-200 bg-sky-50/50 px-4 py-3.5 sm:py-4 text-sky-800 text-base sm:text-lg font-medium placeholder-sky-400 focus:outline-none focus:border-sky-400 focus:ring-4 focus:ring-sky-100 transition-all"
-                  placeholder={t('kids.form.nicknamePlaceholder', 'e.g., SuperStar')}
-                />
-              </div>
-
-              {/* Code Input */}
-              <div>
-                <label className="block text-sm font-bold text-sky-700 mb-2 flex items-center gap-2">
-                  <span className="w-7 h-7 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center shadow-md">
-                    <span className="text-sm">🎟️</span>
-                  </span>
-                  {t('kids.form.code', 'Secret Code')}
-                </label>
-                <div className="relative">
-                  <Ticket className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 sm:h-6 sm:w-6 text-amber-500" />
-                  <input
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    className="w-full rounded-2xl border-2 border-amber-200 bg-amber-50/50 pl-12 sm:pl-14 pr-4 py-3.5 sm:py-4 text-sky-800 text-base sm:text-lg font-bold tracking-widest uppercase placeholder-amber-400 focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all"
-                    placeholder={t('kids.form.codePlaceholder', 'KID-ABC123')}
-                  />
+              <div className="flex justify-center mb-8">
+                <div className="h-20 w-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center animate-glow">
+                  <Rocket className="h-10 w-10 text-indigo-400" />
                 </div>
-                {normalizedCode && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="text-xs text-sky-600 font-semibold">{t('kids.form.codeLabel', 'Code:')}</span>
-                    <span className="font-mono text-sm bg-gradient-to-r from-sky-100 to-amber-100 text-sky-700 px-3 py-1 rounded-lg font-bold border border-sky-200">
-                      {normalizedCode}
-                    </span>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="text-xs font-black text-indigo-400/70 tracking-[0.2em] uppercase mb-3 block">Explorer Nickname</label>
+                  <div className="relative group">
+                    <input
+                      value={nickname}
+                      onChange={(e) => setNickname(e.target.value)}
+                      className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-5 py-4 text-white text-lg placeholder-white/20 focus:outline-none focus:border-indigo-500/50 transition-all focus:ring-4 focus:ring-indigo-500/10 group-hover:border-white/20"
+                      placeholder="e.g. CaptainCosmos"
+                    />
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Launch Button */}
-              <button
-                type="button"
-                onClick={handleEnter}
-                disabled={isLoading || !nickname.trim() || !normalizedCode}
-                className="w-full rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 hover:from-amber-500 hover:via-orange-600 hover:to-pink-600 text-white font-black text-lg sm:text-xl py-4 sm:py-5 shadow-xl shadow-orange-300/50 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>{t('kids.form.loading', 'Getting Ready...')}</span>
-                  </>
-                ) : (
-                  <>
-                    <Rocket className="h-6 w-6" />
-                    <span>{t('kids.form.start', 'Start Adventure!')}</span>
-                  </>
-                )}
-              </button>
+                <div>
+                  <label className="text-xs font-black text-indigo-400/70 tracking-[0.2em] uppercase mb-3 block">Access Code</label>
+                  <div className="relative">
+                    <Ticket className="absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 text-indigo-500/50" />
+                    <input
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      className="w-full bg-white/5 border-2 border-white/10 rounded-2xl pl-14 pr-5 py-4 text-white text-lg font-bold tracking-[0.3em] uppercase placeholder-white/20 focus:outline-none focus:border-indigo-500/50 transition-all focus:ring-4 focus:ring-indigo-500/10"
+                      placeholder="ST-000"
+                    />
+                  </div>
+                </div>
 
-              {/* Help text */}
-              <div className="flex items-center justify-center gap-2 text-sky-500">
-                <Lock className="h-4 w-4" />
-                <span className="text-xs sm:text-sm">{t('kids.form.help', 'Ask your teacher for the secret code')}</span>
+                <button
+                  onClick={handleEnter}
+                  disabled={isLoading}
+                  className="w-full py-5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-2xl text-white font-black text-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group overflow-hidden relative"
+                >
+                  <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 slant" />
+                  {isLoading ? <Loader2 className="animate-spin h-6 w-6" /> : (
+                    <>
+                      <span>BLAST OFF!</span>
+                      <Rocket className="h-6 w-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                    </>
+                  )}
+                </button>
+
+                <p className="text-center text-indigo-100/30 text-xs flex items-center justify-center gap-2">
+                  <MousePointer2 className="h-3 w-3" />
+                  Interactive Starfield Active
+                </p>
               </div>
+            </div>
+
+            {/* Float Decorations */}
+            <div className="absolute -top-12 -right-12 w-24 h-24 animate-float opacity-40">
+              <img src="/kids/image-1765886162298.png" className="w-full h-full object-contain" />
+            </div>
+            <div className="absolute -bottom-20 -left-20 w-40 h-40 animate-float opacity-20 pointer-events-none hidden lg:block" style={{ animationDelay: '1.5s' }}>
+              <img src="/kids/image-1765886149420.png" className="w-full h-full object-contain" />
+            </div>
+            <div className="absolute top-1/2 -right-40 w-32 h-32 animate-float opacity-10 pointer-events-none hidden xl:block" style={{ animationDelay: '3s' }}>
+              <img src="/kids/image-1765886176188.png" className="w-full h-full object-contain" />
             </div>
           </div>
+        </div>
 
-          {/* Feature Cards */}
-          <div className="mt-6 sm:mt-10">
-            <h2 className="text-center text-base sm:text-xl font-bold text-sky-800 mb-3 sm:mb-4">{t('kids.features.title', "✨ What's Waiting For You ✨")}</h2>
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
-              <div className="bg-gradient-to-br from-sky-50 to-sky-100 rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-center transform active:scale-95 sm:hover:scale-105 sm:hover:-rotate-1 transition-all duration-300 shadow-md sm:shadow-lg border-2 border-sky-300 group cursor-pointer">
-                <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-2 sm:mb-3 relative">
-                  <div className="absolute inset-0 bg-sky-400/20 rounded-full blur-lg sm:blur-xl group-hover:bg-sky-400/40 transition-all" />
-                  <img src="/kids/image-1765886629120.png" alt="" className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform drop-shadow-md sm:drop-shadow-lg" />
-                </div>
-                <p className="text-sky-700 font-bold sm:font-black text-xs sm:text-sm md:text-base">{t('kids.features.fun', '🎯 Fun Quizzes')}</p>
-              </div>
-              <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-center transform active:scale-95 sm:hover:scale-105 sm:hover:rotate-1 transition-all duration-300 shadow-md sm:shadow-lg border-2 border-amber-300 group cursor-pointer">
-                <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-2 sm:mb-3 relative">
-                  <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-lg sm:blur-xl group-hover:bg-amber-400/40 transition-all" />
-                  <img src="/kids/image-1765886635294.png" alt="" className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform drop-shadow-md sm:drop-shadow-lg" />
-                </div>
-                <p className="text-amber-700 font-bold sm:font-black text-xs sm:text-sm md:text-base">{t('kids.features.rewards', '🏆 Win Rewards')}</p>
-              </div>
-              <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-center transform active:scale-95 sm:hover:scale-105 sm:hover:rotate-1 transition-all duration-300 shadow-md sm:shadow-lg border-2 border-pink-300 group cursor-pointer">
-                <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-2 sm:mb-3 relative">
-                  <div className="absolute inset-0 bg-pink-400/20 rounded-full blur-lg sm:blur-xl group-hover:bg-pink-400/40 transition-all" />
-                  <img src="/kids/image-1765886645584.png" alt="" className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform drop-shadow-md sm:drop-shadow-lg" />
-                </div>
-                <p className="text-pink-700 font-bold sm:font-black text-xs sm:text-sm md:text-base">{t('kids.features.games', '🎮 Cool Games')}</p>
-              </div>
-              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-center transform active:scale-95 sm:hover:scale-105 sm:hover:-rotate-1 transition-all duration-300 shadow-md sm:shadow-lg border-2 border-emerald-300 group cursor-pointer">
-                <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-2 sm:mb-3 relative">
-                  <div className="absolute inset-0 bg-emerald-400/20 rounded-full blur-lg sm:blur-xl group-hover:bg-emerald-400/40 transition-all" />
-                  <img src="/kids/image-1765886652001.png" alt="" className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform drop-shadow-md sm:drop-shadow-lg" />
-                </div>
-                <p className="text-emerald-700 font-bold sm:font-black text-xs sm:text-sm md:text-base">{t('kids.features.star', '⭐ Be a Star')}</p>
-              </div>
-            </div>
+        {/* Brand Bar */}
+        <div className="max-w-4xl mx-auto mt-20 flex justify-center">
+          <div className="glass-panel px-6 py-3 rounded-2xl flex items-center gap-4">
+            <span className="text-indigo-400/50 text-xs font-bold tracking-widest uppercase">System Powered By</span>
+            <a href="/" className="hover:opacity-80 transition-opacity">
+              <Logo showText={true} className="scale-75 origin-left" />
+            </a>
           </div>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 px-4 py-6 sm:py-8 text-center">
-        <div dir="ltr" className="inline-flex items-center gap-2 bg-white/70 backdrop-blur-md rounded-full px-5 py-2.5 shadow-md border border-white/50">
-          <span className="text-xs sm:text-sm text-sky-600 font-medium">Powered by</span>
-          <a href="/" aria-label="Go to main landing page">
-            <Logo size="sm" />
-          </a>
-        </div>
-      </footer>
+      <style>{`
+        .slant { transform: skewX(-20deg); }
+        .animate-spin-slow { animation: spin 8s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-gradient { background-size: 200% auto; animation: gradient 4s linear infinite; }
+        @keyframes gradient { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+      `}</style>
     </div>
   );
 }
+
+const Loader2 = ({ className }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
+);
+
 
 
 
