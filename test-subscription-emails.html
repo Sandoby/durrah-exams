@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,30 +13,37 @@
       padding: 20px;
       background: #f1f5f9;
     }
+
     .container {
       background: white;
       border-radius: 12px;
       padding: 30px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
+
     h1 {
       color: #0f172a;
       margin-bottom: 10px;
     }
+
     .subtitle {
       color: #64748b;
       margin-bottom: 30px;
     }
+
     .form-group {
       margin-bottom: 20px;
     }
+
     label {
       display: block;
       margin-bottom: 8px;
       color: #1e293b;
       font-weight: 600;
     }
-    input, select {
+
+    input,
+    select {
       width: 100%;
       padding: 12px;
       border: 1px solid #e2e8f0;
@@ -43,15 +51,19 @@
       font-size: 16px;
       box-sizing: border-box;
     }
-    input:focus, select:focus {
+
+    input:focus,
+    select:focus {
       outline: none;
       border-color: #1d4ed8;
     }
+
     .button-group {
       display: grid;
       gap: 12px;
       margin-top: 30px;
     }
+
     button {
       padding: 14px;
       border: none;
@@ -61,21 +73,26 @@
       cursor: pointer;
       transition: all 0.2s;
     }
+
     .primary {
       background: linear-gradient(120deg, #0f172a 0%, #1d4ed8 100%);
       color: white;
     }
+
     .primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
     }
+
     .secondary {
       background: #f1f5f9;
       color: #0f172a;
     }
+
     .secondary:hover {
       background: #e2e8f0;
     }
+
     .info {
       background: #eff6ff;
       border-left: 4px solid #1d4ed8;
@@ -84,28 +101,33 @@
       border-radius: 4px;
       font-size: 14px;
     }
+
     .result {
       margin-top: 20px;
       padding: 16px;
       border-radius: 8px;
       display: none;
     }
+
     .success {
       background: #d1fae5;
       border-left: 4px solid #10b981;
       color: #065f46;
     }
+
     .error {
       background: #fee2e2;
       border-left: 4px solid #ef4444;
       color: #991b1b;
     }
+
     .email-type {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
       margin-bottom: 20px;
     }
+
     .email-option {
       padding: 16px;
       border: 2px solid #e2e8f0;
@@ -114,28 +136,34 @@
       transition: all 0.2s;
       text-align: center;
     }
+
     .email-option:hover {
       border-color: #1d4ed8;
       background: #eff6ff;
     }
+
     .email-option.selected {
       border-color: #1d4ed8;
       background: #eff6ff;
     }
+
     .email-option input[type="radio"] {
       display: none;
     }
+
     .email-label {
       font-weight: 600;
       color: #0f172a;
       margin-bottom: 4px;
     }
+
     .email-desc {
       font-size: 12px;
       color: #64748b;
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h1>📧 Test Subscription Emails</h1>
@@ -148,54 +176,28 @@
     <form id="emailForm">
       <div class="form-group">
         <label for="supabaseUrl">Supabase Project URL</label>
-        <input 
-          type="url" 
-          id="supabaseUrl" 
-          placeholder="https://your-project.supabase.co"
-          value="https://khogxhpnuhhebkevaqlg.supabase.co"
-          required
-        >
+        <input type="url" id="supabaseUrl" placeholder="https://your-project.supabase.co"
+          value="https://khogxhpnuhhebkevaqlg.supabase.co" required>
       </div>
 
       <div class="form-group">
         <label for="supabaseKey">Supabase Anon Key</label>
-        <input 
-          type="text" 
-          id="supabaseKey" 
-          placeholder="Your anon key"
-          required
-        >
+        <input type="text" id="supabaseKey" placeholder="Your anon key" required>
       </div>
 
       <div class="form-group">
         <label for="userId">Your User ID (from Supabase Auth)</label>
-        <input 
-          type="text" 
-          id="userId" 
-          placeholder="e.g., 123e4567-e89b-12d3-a456-426614174000"
-          required
-        >
+        <input type="text" id="userId" placeholder="e.g., 123e4567-e89b-12d3-a456-426614174000" required>
       </div>
 
       <div class="form-group">
         <label for="email">Test Email Address</label>
-        <input 
-          type="email" 
-          id="email" 
-          placeholder="your@email.com"
-          required
-        >
+        <input type="email" id="email" placeholder="your@email.com" required>
       </div>
 
       <div class="form-group">
         <label for="name">Name</label>
-        <input 
-          type="text" 
-          id="name" 
-          placeholder="Your Name"
-          value="Test User"
-          required
-        >
+        <input type="text" id="name" placeholder="Your Name" value="Test User" required>
       </div>
 
       <div class="form-group">
@@ -226,6 +228,11 @@
             <div class="email-label">💔 3 Days Expired</div>
             <div class="email-desc">Win-back email</div>
           </label>
+          <label class="email-option" style="grid-column: span 2; border-color: #059669; background: #ecfdf5;">
+            <input type="radio" name="emailType" value="payment_success">
+            <div class="email-label" style="color: #059669;">💰 Payment Success (Invoice)</div>
+            <div class="email-desc">The new invoice template</div>
+          </label>
         </div>
       </div>
 
@@ -251,14 +258,14 @@
     // Handle form submission
     document.getElementById('emailForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const supabaseUrl = document.getElementById('supabaseUrl').value;
       const supabaseKey = document.getElementById('supabaseKey').value;
       const userId = document.getElementById('userId').value;
       const email = document.getElementById('email').value;
       const name = document.getElementById('name').value;
       const emailType = document.querySelector('input[name="emailType"]:checked').value;
-      
+
       await sendEmail(supabaseUrl, supabaseKey, userId, email, name, emailType);
     });
 
@@ -269,18 +276,40 @@
       resultDiv.innerHTML = '⏳ Sending email...';
 
       try {
-        const response = await fetch(`${supabaseUrl}/functions/v1/send-welcome-email`, {
+        let endpoint = `${supabaseUrl}/functions/v1/send-welcome-email`;
+        let payload = {
+          userId,
+          email,
+          name,
+          emailType
+        };
+
+        // If it's the invoice, use a different function and payload
+        if (emailType === 'payment_success') {
+          endpoint = `${supabaseUrl}/functions/v1/send-payment-email`;
+          payload = {
+            type: 'payment_success',
+            email: email,
+            data: {
+              userName: name,
+              plan: 'Professional Yearly',
+              amount: '1200',
+              currency: 'EGP',
+              orderId: 'TEST-' + Math.floor(Math.random() * 100000),
+              date: new Date().toISOString(),
+              subscriptionEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+              dashboardUrl: 'https://tutors.durrahsystem.tech/dashboard'
+            }
+          };
+        }
+
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${supabaseKey}`,
           },
-          body: JSON.stringify({
-            userId,
-            email,
-            name,
-            emailType
-          })
+          body: JSON.stringify(payload)
         });
 
         const data = await response.json();
@@ -375,7 +404,7 @@
       }
 
       const successCount = results.filter(r => r.success).length;
-      const resultHtml = results.map(r => 
+      const resultHtml = results.map(r =>
         `${r.success ? '✅' : '❌'} ${r.type}: ${r.message}`
       ).join('<br>');
 
@@ -387,4 +416,5 @@
     }
   </script>
 </body>
+
 </html>

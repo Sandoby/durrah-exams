@@ -20,68 +20,96 @@ serve(async (req) => {
 
     switch (type) {
       case 'payment_success':
-        subject = '✅ Payment Successful - Durrah for Tutors'
+        subject = 'Invoice & Payment Confirmation: Durrah for Tutors'
+        const logoUrl = 'https://tutors.durrahsystem.tech/Picture1.png'
         html = `
           <!DOCTYPE html>
           <html>
             <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-                .button { display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-                .details { background: white; padding: 20px; border-radius: 5px; margin: 20px 0; }
-                .details-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-                .footer { text-align: center; color: #666; margin-top: 20px; font-size: 12px; }
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+                body { 
+                  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                  margin: 0; padding: 0; background-color: #f9fbfc; color: #1a202c;
+                }
+                .wrapper { width: 100%; table-layout: fixed; background-color: #f9fbfc; padding: 60px 0; }
+                .container {
+                  max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; 
+                  overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+                }
+                .header { padding: 40px 0; text-align: center; border-bottom: 1px solid #f1f5f9; }
+                .logo-img { width: 44px; height: 44px; vertical-align: middle; display: inline-block; }
+                .logo-text { font-size: 24px; font-weight: 700; color: #6366f1; margin-left: 10px; display: inline-block; vertical-align: middle; }
+                .logo-text span { color: #64748b; font-weight: 300; margin-left: 4px; }
+                
+                .content { padding: 48px; }
+                .title { font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 16px; text-align: center; }
+                .text { color: #475569; line-height: 1.6; font-size: 16px; margin-bottom: 32px; text-align: center; }
+                
+                .invoice-box {
+                  background: #f8fafc; border-radius: 8px; padding: 24px; border: 1px solid #f1f5f9; margin-bottom: 32px;
+                }
+                .invoice-item {
+                  display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eef2f7; font-size: 14px;
+                }
+                .invoice-item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+                .invoice-item.total { padding-top: 16px; margin-top: 12px; border-top: 2px solid #eef2f7; font-weight: 700; font-size: 16px; color: #6366f1; }
+                .label { color: #64748b; font-weight: 500; }
+                .value { color: #0f172a; }
+
+                .action-container { text-align: center; margin-top: 32px; }
+                .btn {
+                  background: #6366f1; color: #ffffff !important; padding: 14px 32px; border-radius: 8px;
+                  text-decoration: none; font-weight: 600; display: inline-block; font-size: 15px;
+                }
+                
+                .footer { padding-bottom: 40px; text-align: center; color: #94a3b8; font-size: 12px; }
               </style>
             </head>
             <body>
-              <div class="container">
-                <div class="header">
-                  <h1>🎉 Payment Successful!</h1>
-                </div>
-                <div class="content">
-                  <p>Dear ${data.userName || 'Valued Customer'},</p>
-                  <p>Thank you for subscribing to Durrah for Tutors! Your payment has been processed successfully.</p>
-                  
-                  <div class="details">
-                    <h3>Payment Details</h3>
-                    <div class="details-row">
-                      <span><strong>Plan:</strong></span>
-                      <span>${data.plan}</span>
+              <div class="wrapper">
+                <div class="container">
+                  <div class="header">
+                    <img src="${logoUrl}" class="logo-img" alt="Durrah Logo">
+                    <div class="logo-text">Durrah<span>for Tutors</span></div>
+                  </div>
+                  <div class="content">
+                    <h1 class="title">Payment Successful</h1>
+                    <p class="text">Hello ${data.userName || 'Tutor'}, your payment has been processed and your account is ready. You can find your invoice details below.</p>
+                    
+                    <div class="invoice-box">
+                      <div class="invoice-item">
+                        <span class="label">Invoice ID</span>
+                        <span class="value">${data.orderId}</span>
+                      </div>
+                      <div class="invoice-item">
+                        <span class="label">Date</span>
+                        <span class="value">${data.date ? new Date(data.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : new Date().toLocaleDateString()}</span>
+                      </div>
+                      <div class="invoice-item">
+                        <span class="label">Service</span>
+                        <span class="value">${data.plan}</span>
+                      </div>
+                      <div class="invoice-item">
+                        <span class="label">Valid Until</span>
+                        <span class="value">${data.subscriptionEndDate ? new Date(data.subscriptionEndDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Active'}</span>
+                      </div>
+                      <div class="invoice-item total">
+                        <span class="label">Amount Paid</span>
+                        <span class="value">${data.currency || 'EGP'} ${data.amount}</span>
+                      </div>
                     </div>
-                    <div class="details-row">
-                      <span><strong>Amount:</strong></span>
-                      <span>${data.currency} ${data.amount}</span>
-                    </div>
-                    <div class="details-row">
-                      <span><strong>Order ID:</strong></span>
-                      <span>${data.orderId}</span>
-                    </div>
-                    <div class="details-row">
-                      <span><strong>Date:</strong></span>
-                      <span>${data.date ? new Date(data.date).toLocaleDateString() : new Date().toLocaleDateString()}</span>
-                    </div>
-                    <div class="details-row">
-                      <span><strong>Subscription Valid Until:</strong></span>
-                      <span>${data.subscriptionEndDate ? new Date(data.subscriptionEndDate).toLocaleDateString() : 'N/A'}</span>
+
+                    <div class="action-container">
+                      <a href="${data.dashboardUrl}" class="btn">Go to Dashboard</a>
                     </div>
                   </div>
-
-                  <p style="text-align: center;">
-                    <a href="${data.dashboardUrl}" class="button">Go to Dashboard</a>
-                  </p>
-
-                  <p>Your subscription is now active and you can access all premium features.</p>
-                  
-                  <p>If you have any questions, please don't hesitate to contact our support team.</p>
-                  
-                  <p>Best regards,<br>The Durrah Team</p>
                 </div>
                 <div class="footer">
-                  <p>© ${new Date().getFullYear()} Durrah for Tutors. All rights reserved.</p>
-                  <p>This is an automated email. Please do not reply.</p>
+                  <p>© ${new Date().getFullYear()} Durrah Systems. All rights reserved.</p>
+                  <p>Building the future of secure education.</p>
                 </div>
               </div>
             </body>
