@@ -55,17 +55,23 @@ serve(async (req) => {
 
       // 1. Check for Status Update (Deactivation)
       // If expired and still marked as active, deactivate it
+      console.log(`[${profile.email}] Expiry: ${expiryDate.toISOString()}, Status: ${profile.subscription_status}, Now: ${now.toISOString()}, Expired: ${expiryDate <= now}`)
+
       if (expiryDate <= now && profile.subscription_status === 'active') {
-        const { error: updateError } = await supabase
+        console.log(`[${profile.email}] Attempting deactivation (ID: ${profile.id})...`)
+
+        const { data: updateData, error: updateError } = await supabase
           .from('profiles')
           .update({ subscription_status: 'expired' })
           .eq('id', profile.id)
+          .select()
 
         if (!updateError) {
           results.status_updated++
-          console.log(`Deactivated subscription for ${profile.email}`)
+          console.log(`✅ [${profile.email}] Deactivated successfully:`, updateData)
         } else {
-          console.error(`Failed to deactivate ${profile.email}:`, updateError)
+          results.failed++
+          console.error(`❌ [${profile.email}] Deactivation failed:`, JSON.stringify(updateError))
         }
       }
 

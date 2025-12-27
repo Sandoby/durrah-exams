@@ -1,0 +1,22 @@
+name: Daily Subscription Expiry Check
+
+on:
+  schedule:
+    # Runs every day at 2:00 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allows manual triggering from GitHub Actions tab
+
+jobs:
+  check-subscriptions:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Trigger Subscription Expiry Check
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            https://khogxhpnuhhebkevaqlg.supabase.co/functions/v1/check-expiring-subscriptions
+        
+      - name: Log completion
+        run: echo "Subscription expiry check completed at $(date)"
