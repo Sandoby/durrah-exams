@@ -60,8 +60,8 @@ export default function MobileWelcome() {
             >
                 {/* Header / Logo */}
                 <motion.div variants={itemVariants} className="flex flex-col items-center text-center space-y-4 mb-4">
-                    <div className="bg-white dark:bg-gray-900 p-4 rounded-3xl shadow-xl shadow-indigo-100 dark:shadow-none border border-gray-100 dark:border-gray-800">
-                        <Logo className="h-16 w-16" />
+                    <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl shadow-xl shadow-indigo-100 dark:shadow-none border border-gray-100 dark:border-gray-800">
+                        <Logo size="lg" />
                     </div>
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-4">Durrah Tutors</h1>
@@ -76,7 +76,7 @@ export default function MobileWelcome() {
                     <motion.button
                         variants={itemVariants}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => handleNavigation('/login')} // Changed onClick
+                        onClick={() => handleNavigation('/login')}
                         className="w-full bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-4 group hover:border-indigo-500/50 transition-colors"
                     >
                         <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
@@ -93,7 +93,7 @@ export default function MobileWelcome() {
                     <motion.button
                         variants={itemVariants}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => handleNavigation('/student-portal')} // Changed onClick
+                        onClick={() => handleNavigation('/student-portal')}
                         className="w-full bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-4 group hover:border-emerald-500/50 transition-colors"
                     >
                         <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
@@ -110,21 +110,17 @@ export default function MobileWelcome() {
                     <motion.button
                         variants={itemVariants}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => handleNavigation('/kids')} // Changed onClick
-                        className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 p-5 rounded-2xl shadow-lg shadow-indigo-200 dark:shadow-none text-white flex items-center gap-4 group relative overflow-hidden"
+                        onClick={() => handleNavigation('/kids')}
+                        className="w-full bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-4 group hover:border-violet-500/50 transition-colors"
                     >
-                        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
-
-                        <div className="p-3 bg-white/20 rounded-xl text-white backdrop-blur-sm">
+                        <div className="p-3 bg-violet-50 dark:bg-violet-900/30 rounded-xl text-violet-600 dark:text-violet-400 group-hover:bg-violet-600 group-hover:text-white transition-colors">
                             <Rocket className="w-6 h-6" />
                         </div>
-                        <div className="flex-1 text-left relative z-10">
-                            <h3 className="font-bold text-white text-lg">Kids Adventure</h3>
-                            <p className="text-sm text-indigo-100">Fun learning & games</p>
+                        <div className="flex-1 text-left">
+                            <h3 className="font-bold text-gray-900 dark:text-white text-lg">Kids Adventure</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Fun learning & games</p>
                         </div>
-                        <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
-                            <ArrowRight className="w-5 h-5 text-white" />
-                        </div>
+                        <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-violet-600 transition-colors" />
                     </motion.button>
 
                 </div>
