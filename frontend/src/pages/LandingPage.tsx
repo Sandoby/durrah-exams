@@ -1,12 +1,13 @@
 ﻿import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X } from 'lucide-react';
+import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, Trophy, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { Logo } from '../components/Logo';
 import { LottiePlayer } from '../components/LottiePlayer';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
 export default function LandingPage() {
@@ -23,23 +24,57 @@ export default function LandingPage() {
     const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(200);
     const { price: yearlyPrice } = useCurrency(2000);
 
+    const [activeFaq, setActiveFaq] = useState<number | null>(null);
+
+    const faqs = [
+        {
+            question: t('faq.q1.question', 'Is Durrah really safe for kids?'),
+            answer: t('faq.q1.answer', 'Yes! We prioritize safety with filtered content, secure nickname-only access options, and zero data selling.')
+        },
+        {
+            question: t('faq.q2.question', 'How does the anti-cheating system work?'),
+            answer: t('faq.q2.answer', 'Our system uses AI to detect tab switching, fullscreen escapes, and suspicious behavior patterns without intrusive software.')
+        },
+        {
+            question: t('faq.q3.question', 'Can I use Durrah for large school groups?'),
+            answer: t('faq.q3.answer', 'Absolutely. Our "Professional" and "Yearly" plans are designed for high-capacity testing with detailed analytics.')
+        },
+        {
+            question: t('faq.q4.question', 'Do students need an account?'),
+            answer: t('faq.q4.answer', 'Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress.')
+        }
+    ];
+
+    const fadeIn = {
+        initial: { opacity: 0, y: 20 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true },
+        transition: { duration: 0.6 }
+    };
+
+    const staggerContainer = {
+        initial: {},
+        whileInView: { transition: { staggerChildren: 0.1 } },
+        viewport: { once: true }
+    };
+
     return (
-                <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" dir={isRTL ? 'rtl' : 'ltr'}>
-                        <Helmet>
-                                <title>Fun, Secure Online Quizzes for Kids & Tutors | Durrah</title>
-                                <meta name="description" content="Durrah for Tutors: Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
-                                <meta name="keywords" content="kids online quiz, safe kids exams, anti cheating online exam, child mode, secure quiz platform, fun learning for children, quiz for schools, quiz for tutors" />
-                                <meta property="og:title" content="Fun, Secure Online Quizzes for Kids & Tutors | Durrah" />
-                                <meta property="og:description" content="Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
-                                <meta property="og:type" content="website" />
-                                <meta property="og:url" content="https://tutors.durrahsystem.tech/" />
-                                <meta property="og:image" content="https://tutors.durrahsystem.tech/illustrations/og-image.png" />
-                                <meta name="twitter:card" content="summary_large_image" />
-                                <meta name="twitter:title" content="Fun, Secure Online Quizzes for Kids & Tutors | Durrah" />
-                                <meta name="twitter:description" content="Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
-                                <meta name="twitter:image" content="https://tutors.durrahsystem.tech/illustrations/og-image.png" />
-                                <link rel="canonical" href="https://tutors.durrahsystem.tech/" />
-                                <script type="application/ld+json">{`
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" dir={isRTL ? 'rtl' : 'ltr'}>
+            <Helmet>
+                <title>Fun, Secure Online Quizzes for Kids & Tutors | Durrah</title>
+                <meta name="description" content="Durrah for Tutors: Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
+                <meta name="keywords" content="kids online quiz, safe kids exams, anti cheating online exam, child mode, secure quiz platform, fun learning for children, quiz for schools, quiz for tutors" />
+                <meta property="og:title" content="Fun, Secure Online Quizzes for Kids & Tutors | Durrah" />
+                <meta property="og:description" content="Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://tutors.durrahsystem.tech/" />
+                <meta property="og:image" content="https://tutors.durrahsystem.tech/illustrations/og-image.png" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Fun, Secure Online Quizzes for Kids & Tutors | Durrah" />
+                <meta name="twitter:description" content="Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
+                <meta name="twitter:image" content="https://tutors.durrahsystem.tech/illustrations/og-image.png" />
+                <link rel="canonical" href="https://tutors.durrahsystem.tech/" />
+                <script type="application/ld+json">{`
                                     {
                                         "@context": "https://schema.org",
                                         "@type": "WebSite",
@@ -49,12 +84,24 @@ export default function LandingPage() {
                                         "inLanguage": "en",
                                         "publisher": {
                                             "@type": "Organization",
-                                            "name": "Durrah for Tutors"
+                                            "name": "Durrah for Tutors",
+                                            "logo": "https://tutors.durrahsystem.tech/logo.png",
+                                            "url": "https://tutors.durrahsystem.tech"
                                         }
                                     }
                                 `}</script>
-                                <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-                        </Helmet>
+                <script type="application/ld+json">{`
+                                    {
+                                        "@context": "https://schema.org",
+                                        "@type": "Organization",
+                                        "name": "Durrah for Tutors",
+                                        "url": "https://tutors.durrahsystem.tech",
+                                        "logo": "https://tutors.durrahsystem.tech/logo.png",
+                                        "description": "Create secure, professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide."
+                                    }
+                                `}</script>
+                <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+            </Helmet>
 
             <style>{`
                 @keyframes blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
@@ -102,7 +149,7 @@ export default function LandingPage() {
                                 )}
                             </div>
                         </div>
-                        
+
                         {/* Mobile Menu Button */}
                         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
                             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -116,7 +163,7 @@ export default function LandingPage() {
                 <>
                     {/* Backdrop */}
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setMobileMenuOpen(false)} />
-                    
+
                     {/* Menu Drawer */}
                     <div className={`fixed top-20 ${isRTL ? 'left-4' : 'right-4'} w-[calc(100%-2rem)] max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl z-50 lg:hidden border border-gray-200 dark:border-gray-700 overflow-hidden animate-in slide-in-from-top duration-300`}>
                         <div className="p-6 space-y-4">
@@ -132,7 +179,7 @@ export default function LandingPage() {
                             <Link to="/blog" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-colors">
                                 Blog
                             </Link>
-                            
+
                             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <div className="mb-4">
                                     <LanguageSwitcher />
@@ -167,7 +214,7 @@ export default function LandingPage() {
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
                 <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
                 <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-purple-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
-                
+
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         <div className="text-center lg:text-left">
@@ -175,16 +222,16 @@ export default function LandingPage() {
                                 <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                                 <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('hero.trustedBadge')}</span>
                             </div>
-                            
+
                             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 dark:text-white mb-6 leading-[1.1]">
                                 {t('hero.title')}<br />
                                 <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">{t('hero.titleHighlight')}</span>
                             </h1>
-                            
+
                             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0">
                                 {t('hero.subtitle')}
                             </p>
-                            
+
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
                                 <a href={registrationUrl} target="_blank" rel="noreferrer" className="group relative bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-2xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center">
                                     <span className="relative z-10 flex items-center gap-2">
@@ -200,7 +247,7 @@ export default function LandingPage() {
                                     </svg>
                                 </Link>
                             </div>
-                            
+
                             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-gray-600 dark:text-gray-400">
                                 <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>{t('hero.features.noCreditCard')}</span></div>
                                 <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>{t('hero.features.freeExams')}</span></div>
@@ -211,7 +258,7 @@ export default function LandingPage() {
                         <div className="relative">
                             <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl shadow-indigo-500/10 p-8 border border-gray-100 dark:border-slate-700">
                                 <LottiePlayer src="/illustrations/juicy-woman-focused-on-online-learning.json" background="transparent" speed={1} className="w-full h-80" autoplay loop />
-                                
+
                                 <div className="absolute -top-6 -left-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-indigo-500/10 p-4 border border-gray-100 dark:border-slate-700 animate-float">
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
@@ -223,7 +270,7 @@ export default function LandingPage() {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="absolute -bottom-6 -right-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-violet-500/10 p-4 border border-gray-100 dark:border-slate-700 animate-float animation-delay-2000">
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl flex items-center justify-center">
@@ -236,7 +283,7 @@ export default function LandingPage() {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full">
                                 <div className="absolute top-0 right-0 w-72 h-72 bg-indigo-300/30 dark:bg-indigo-600/20 rounded-full filter blur-3xl"></div>
                                 <div className="absolute bottom-0 left-0 w-72 h-72 bg-violet-300/30 dark:bg-violet-600/20 rounded-full filter blur-3xl"></div>
@@ -281,7 +328,13 @@ export default function LandingPage() {
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('features.title')}</h2>
                         <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">{t('features.subtitle')}</p>
                     </div>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    >
                         {[
                             { icon: Zap, title: t('features.fastCreation.title'), desc: t('features.fastCreation.desc', 'Create professional exams in minutes'), gradient: 'from-yellow-400 to-orange-500' },
                             { icon: Shield, title: t('features.antiCheating.title'), desc: t('features.antiCheating.desc', 'Fullscreen mode, tab detection, violation tracking'), gradient: 'from-indigo-400 to-violet-500' },
@@ -290,15 +343,19 @@ export default function LandingPage() {
                             { icon: MessageCircle, title: t('features.support.title'), desc: t('features.support.desc', 'Always here to help you succeed'), gradient: 'from-blue-400 to-cyan-500' },
                             { icon: Layout, title: t('features.interface.title'), desc: t('features.interface.desc', 'Easy to use, powerful features'), gradient: 'from-purple-400 to-fuchsia-500' }
                         ].map((feature, index) => (
-                            <div key={index} className="group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-slate-700 p-8">
+                            <motion.div
+                                key={index}
+                                variants={fadeIn}
+                                className="group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-slate-700 p-8"
+                            >
                                 <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
                                     <feature.icon className="w-7 h-7 text-white" />
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
                                 <p className="text-gray-600 dark:text-gray-400">{feature.desc}</p>
-                            </div>
+                            </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
@@ -313,8 +370,14 @@ export default function LandingPage() {
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('pricing.title')}</h2>
                         <p className="text-xl text-gray-600 dark:text-gray-300">{t('pricing.subtitle')}</p>
                     </div>
-                    <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-200 dark:border-slate-700 p-8">
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+                    >
+                        <motion.div variants={fadeIn} className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-200 dark:border-slate-700 p-8">
                             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('pricing.starter.title')}</h3>
                             <div className="mb-6"><span className="text-5xl font-bold text-gray-900 dark:text-white">{t('pricing.starter.price')}</span></div>
                             <ul className="space-y-4 mb-8">
@@ -323,8 +386,11 @@ export default function LandingPage() {
                                 <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.starter.features.2')}</span></li>
                             </ul>
                             <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-slate-600 transition">{t('pricing.starter.cta')}</a>
-                        </div>
-                        <div className="relative bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 rounded-3xl shadow-2xl p-8 transform hover:scale-105 transition-all duration-300">
+                        </motion.div>
+                        <motion.div
+                            variants={fadeIn}
+                            className="relative bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 rounded-3xl shadow-2xl p-8 transform hover:scale-105 transition-all duration-300"
+                        >
                             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-gray-900 px-4 py-1 rounded-full font-bold text-sm shadow-lg">{t('pricing.professional.badge')}</div>
                             <h3 className="text-2xl font-bold text-white mb-2">{t('pricing.professional.title')}</h3>
                             <div className="mb-6">
@@ -338,8 +404,8 @@ export default function LandingPage() {
                                 <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">{t('pricing.professional.features.3')}</span></li>
                             </ul>
                             <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-white text-indigo-600 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition shadow-lg">{t('pricing.professional.cta')}</a>
-                        </div>
-                        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-indigo-200 dark:border-indigo-800 p-8">
+                        </motion.div>
+                        <motion.div variants={fadeIn} className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-indigo-200 dark:border-indigo-800 p-8">
                             <div className="inline-block bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full font-semibold text-sm mb-4">{t('pricing.yearly.badge')}</div>
                             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('pricing.yearly.title')}</h3>
                             <div className="mb-6">
@@ -352,8 +418,8 @@ export default function LandingPage() {
                                 <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.yearly.features.2')}</span></li>
                             </ul>
                             <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition">{t('pricing.yearly.cta')}</a>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 </div>
             </section>
 
@@ -364,13 +430,23 @@ export default function LandingPage() {
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('testimonials.title')}</h2>
                         <p className="text-xl text-gray-600 dark:text-gray-300">{t('testimonials.subtitle')}</p>
                     </div>
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="grid md:grid-cols-3 gap-8"
+                    >
                         {[
                             { name: t('testimonials.t1.name'), role: t('testimonials.t1.role'), content: t('testimonials.t1.content'), rating: 5 },
                             { name: t('testimonials.t2.name'), role: t('testimonials.t2.role'), content: t('testimonials.t2.content'), rating: 5 },
                             { name: t('testimonials.t3.name'), role: t('testimonials.t3.role'), content: t('testimonials.t3.content'), rating: 5 }
                         ].map((testimonial, index) => (
-                            <div key={index} className="group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-slate-700 p-8">
+                            <motion.div
+                                key={index}
+                                variants={fadeIn}
+                                className="group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-slate-700 p-8"
+                            >
                                 <div className="flex mb-4">
                                     {[...Array(testimonial.rating)].map((_, i) => (
                                         <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
@@ -381,7 +457,68 @@ export default function LandingPage() {
                                     <div className="font-bold text-gray-900 dark:text-white">{testimonial.name}</div>
                                     <div className="text-sm text-gray-500 dark:text-gray-400">{testimonial.role}</div>
                                 </div>
-                            </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* FAQ Section */}
+            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900/50">
+                <div className="max-w-3xl mx-auto">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-16"
+                    >
+                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                            {t('faq.title', 'Frequently Asked Questions')}
+                        </h2>
+                        <p className="text-gray-600 dark:text-gray-400">
+                            {t('faq.subtitle', 'Everything you need to know about Durrah')}
+                        </p>
+                    </motion.div>
+
+                    <div className="space-y-4">
+                        {faqs.map((faq, index) => (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 }}
+                                className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                            >
+                                <button
+                                    onClick={() => setActiveFaq(activeFaq === index ? null : index)}
+                                    className="w-full px-6 py-5 text-left flex justify-between items-center group"
+                                >
+                                    <span className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                        {t(`faq.q${index + 1}.question`, faq.question)}
+                                    </span>
+                                    <motion.div
+                                        animate={{ rotate: activeFaq === index ? 180 : 0 }}
+                                        className="text-gray-400"
+                                    >
+                                        <ChevronDown className="w-5 h-5" />
+                                    </motion.div>
+                                </button>
+                                <AnimatePresence>
+                                    {activeFaq === index && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                        >
+                                            <div className="px-6 pb-5 text-gray-600 dark:text-gray-400 text-sm leading-relaxed border-t border-gray-100 dark:border-slate-700/50 pt-4">
+                                                {t(`faq.q${index + 1}.answer`, faq.answer)}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
@@ -400,8 +537,169 @@ export default function LandingPage() {
                 </div>
             </section>
 
+            {/* Kids Mode & Student Portal Sections */}
+            <section className="py-24 relative overflow-hidden bg-white dark:bg-slate-900">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Kids Mode Feature */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8 }}
+                        className="grid lg:grid-cols-2 gap-16 items-center mb-32"
+                    >
+                        <div className="order-2 lg:order-1">
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-full px-4 py-2 mb-6"
+                            >
+                                <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                                <span className="text-sm font-medium text-amber-600 dark:text-amber-400">{t('landing.marketing.kids.badge', 'Playful & Safe')}</span>
+                            </motion.div>
+                            <motion.h2
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.1 }}
+                                className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight"
+                            >
+                                {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[0]}
+                                <span className="text-amber-500">{t('landing.marketing.kids.titleSpan', 'Ultimate')}</span>
+                                {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[1]}
+                            </motion.h2>
+                            <motion.p
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.2 }}
+                                className="text-lg text-gray-600 dark:text-gray-300 mb-8"
+                            >
+                                {t('landing.marketing.kids.desc', 'Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.')}
+                            </motion.p>
+                            <motion.ul
+                                variants={staggerContainer}
+                                initial="initial"
+                                whileInView="whileInView"
+                                viewport={{ once: true }}
+                                className="space-y-4 mb-8"
+                            >
+                                {[0, 1, 2, 3].map((i) => (
+                                    <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
+                                        <div className="bg-amber-100 dark:bg-amber-900/50 p-1 rounded-full">
+                                            <Check className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                                        </div>
+                                        <span className="text-gray-700 dark:text-gray-300 font-medium">{t(`landing.marketing.kids.features.${i}`)}</span>
+                                    </motion.li>
+                                ))}
+                            </motion.ul>
+                            <Link to="/kids" className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-amber-500/30 transition-all hover:scale-105 active:scale-95">
+                                {t('landing.marketing.kids.cta', 'Try Kids Mode Now')}
+                                <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+                            </Link>
+                        </div>
+                        <div className="order-1 lg:order-2 relative">
+                            {/* Floating Astronauts/Kids Decorations overlapping the main image */}
+                            <motion.img
+                                animate={{ y: [0, -20, 0] }}
+                                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                                src="/kids/image-1765886149420.png"
+                                alt=""
+                                className="absolute -top-16 -left-12 w-32 h-32 z-20 drop-shadow-2xl"
+                            />
+                            <motion.img
+                                animate={{ y: [0, 20, 0] }}
+                                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                                src="/kids/image-1765886176188.png"
+                                alt=""
+                                className="absolute -bottom-12 -right-12 w-36 h-36 z-20 drop-shadow-2xl"
+                            />
+
+                            <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-500 blur-3xl opacity-20 animate-pulse"></div>
+                            <img
+                                src="/kids/image-1765886669181.png"
+                                alt="Kids Mode Marketing"
+                                className="relative z-10 rounded-3xl shadow-2xl"
+                            />
+                        </div>
+                    </motion.div>
+
+                    {/* Student Portal Feature */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8 }}
+                        className="grid lg:grid-cols-2 gap-16 items-center"
+                    >
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 to-violet-500 blur-3xl opacity-20 animate-pulse"></div>
+                            <motion.img
+                                animate={{ y: [0, -10, 0] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                                src="/illustrations/techny-standardized-test-as-method-of-assessment.png"
+                                alt="Student Portal Marketing"
+                                className="relative z-10 rounded-3xl shadow-2xl"
+                            />
+                        </div>
+                        <div>
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-6"
+                            >
+                                <Trophy className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('landing.marketing.student.badge', 'Track & Grow')}</span>
+                            </motion.div>
+                            <motion.h2
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.1 }}
+                                className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight"
+                            >
+                                {t('landing.marketing.student.title', 'Empower Students with a Unified Portal').split(t('landing.marketing.student.titleSpan', 'Unified Portal'))[0]}
+                                <span className="text-indigo-600">{t('landing.marketing.student.titleSpan', 'Unified Portal')}</span>
+                                {t('landing.marketing.student.title', 'Empower Students with a Unified Portal').split(t('landing.marketing.student.titleSpan', 'Unified Portal'))[1]}
+                            </motion.h2>
+                            <motion.p
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.2 }}
+                                className="text-lg text-gray-600 dark:text-gray-300 mb-8"
+                            >
+                                {t('landing.marketing.student.desc', 'Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.')}
+                            </motion.p>
+                            <motion.ul
+                                variants={staggerContainer}
+                                initial="initial"
+                                whileInView="whileInView"
+                                viewport={{ once: true }}
+                                className="space-y-4 mb-8"
+                            >
+                                {[0, 1, 2, 3].map((i) => (
+                                    <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
+                                        <div className="bg-indigo-100 dark:bg-indigo-900/50 p-1 rounded-full">
+                                            <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                        </div>
+                                        <span className="text-gray-700 dark:text-gray-300 font-medium">{t(`landing.marketing.student.features.${i}`)}</span>
+                                    </motion.li>
+                                ))}
+                            </motion.ul>
+                            <Link to="/student-portal" className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95">
+                                {t('landing.marketing.student.cta', 'Visit Student Portal')}
+                                <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+                            </Link>
+                        </div>
+                    </motion.div>
+                </div>
+            </section>
+
             {/* Footer */}
-            <footer className="bg-slate-900 text-gray-300 py-12 px-4 sm:px-6 lg:px-8">
+            <footer dir="ltr" className="bg-slate-900 text-gray-300 py-12 px-4 sm:px-6 lg:px-8 relative z-10 text-left">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid md:grid-cols-4 gap-8 mb-8">
                         <div>
@@ -435,7 +733,7 @@ export default function LandingPage() {
                         </div>
                     </div>
                     <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-                        <p>&copy; 2024 Durrah. All rights reserved.</p>
+                        <p>&copy; 2025 Durrah. All rights reserved.</p>
                     </div>
                 </div>
             </footer>
