@@ -2,7 +2,7 @@
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, Trophy, ChevronDown, Rocket, Orbit } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Logo } from '../components/Logo';
 import { LottiePlayer } from '../components/LottiePlayer';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
@@ -25,6 +25,113 @@ export default function LandingPage() {
     const { price: yearlyPrice } = useCurrency(2000);
 
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    // Interactive Particle & Constellation Background for Kids Section
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        let particles: any[] = [];
+        let comets: any[] = [];
+        const particleCount = 80; // Reduced for performance on landing page
+        let mouse = { x: -1000, y: -1000 };
+
+        const resize = () => {
+            const container = canvas.parentElement;
+            if (container) {
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+            }
+        };
+
+        class Particle {
+            x: number; y: number; size: number; speedX: number; speedY: number; color: string;
+            constructor(w: number, h: number) {
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedX = Math.random() * 0.3 - 0.15;
+                this.speedY = Math.random() * 0.3 - 0.15;
+                this.color = ['#6366f1', '#a855f7', '#ec4899', '#ffffff'][Math.floor(Math.random() * 4)];
+            }
+            update(w: number, h: number, mx: number, my: number) {
+                this.x += this.speedX; this.y += this.speedY;
+                if (this.x > w) this.x = 0; if (this.x < 0) this.x = w;
+                if (this.y > h) this.y = 0; if (this.y < 0) this.y = h;
+                const dx = mx - this.x; const dy = my - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 150) {
+                    const force = (150 - distance) / 150;
+                    this.x -= (dx / distance) * force * 1.5;
+                    this.y -= (dy / distance) * force * 1.5;
+                }
+            }
+            draw() {
+                if (!ctx) return;
+                ctx.fillStyle = this.color; ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+
+        class Comet {
+            x: number = 0; y: number = 0; length: number = 0; speed: number = 0; angle: number = 0; opacity: number = 0;
+            constructor(w: number, h: number) { this.reset(w, h); }
+            reset(w: number, h: number) {
+                this.x = Math.random() * w; this.y = Math.random() * (h * 0.4);
+                this.length = Math.random() * 150 + 80; this.speed = Math.random() * 12 + 8;
+                this.angle = Math.PI / 4 + (Math.random() * 0.1 - 0.05); this.opacity = 0;
+            }
+            update(w: number, h: number) {
+                if (this.opacity === 0 && Math.random() > 0.995) this.opacity = 0.01;
+                if (this.opacity > 0) {
+                    this.x += Math.cos(this.angle) * this.speed; this.y += Math.sin(this.angle) * this.speed;
+                    this.opacity = Math.min(1, this.opacity + 0.1);
+                    if (this.x > w + 200 || this.y > h + 200) this.reset(w, h);
+                }
+            }
+            draw() {
+                if (this.opacity <= 0 || !ctx) return;
+                ctx.save();
+                const grad = ctx.createLinearGradient(this.x, this.y, this.x - Math.cos(this.angle) * this.length, this.y - Math.sin(this.angle) * this.length);
+                grad.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
+                grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.strokeStyle = grad; ctx.lineWidth = 2; ctx.lineCap = 'round';
+                ctx.beginPath(); ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x - Math.cos(this.angle) * this.length, this.y - Math.sin(this.angle) * this.length);
+                ctx.stroke(); ctx.restore();
+            }
+        }
+
+        const init = () => {
+            particles = []; comets = [new Comet(canvas.width, canvas.height), new Comet(canvas.width, canvas.height)];
+            for (let i = 0; i < particleCount; i++) particles.push(new Particle(canvas.width, canvas.height));
+        };
+
+        const animate = () => {
+            if (!ctx) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(canvas.width, canvas.height, mouse.x, mouse.y); p.draw(); });
+            comets.forEach(c => { c.update(canvas.width, canvas.height); c.draw(); });
+            requestAnimationFrame(animate);
+        };
+
+        const handleMouseMove = (e: MouseEvent) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+        };
+
+        window.addEventListener('resize', resize);
+        window.addEventListener('mousemove', handleMouseMove);
+        resize(); init(); animate();
+        return () => {
+            window.removeEventListener('resize', resize);
+            window.removeEventListener('mousemove', handleMouseMove);
+        };
+    }, []);
 
     const faqs = [
         {
@@ -118,6 +225,8 @@ export default function LandingPage() {
                 .star-field { position: absolute; inset: 0; background-image: radial-gradient(1px 1px at 10% 10%, white, transparent), radial-gradient(1px 1px at 25% 35%, white, transparent), radial-gradient(1.5px 1.5px at 45% 15%, white, transparent), radial-gradient(1px 1px at 65% 45%, white, transparent), radial-gradient(1px 1px at 85% 25%, white, transparent), radial-gradient(1px 1px at 15% 75%, white, transparent), radial-gradient(1.5px 1.5px at 35% 85%, white, transparent), radial-gradient(1px 1px at 55% 65%, white, transparent), radial-gradient(1px 1px at 75% 95%, white, transparent), radial-gradient(1px 1px at 95% 55%, white, transparent); background-size: 50% 50%; animation: twinkle 4s infinite ease-in-out; }
                 .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
                 .slant { transform: skewX(-20deg); }
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                .animate-spin-slow { animation: spin 12s linear infinite; }
             `}</style>
 
             {/* Navigation */}
@@ -549,7 +658,7 @@ export default function LandingPage() {
             <section className="py-32 relative overflow-hidden bg-[#050616] text-white">
                 {/* Space Atmosphere Background */}
                 <div className="absolute inset-0 pointer-events-none">
-                    <div className="star-field opacity-40"></div>
+                    <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-60" />
                     <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-purple-900/40 to-transparent"></div>
                     <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#050616] to-transparent"></div>
 
@@ -632,27 +741,27 @@ export default function LandingPage() {
                             </div>
                         </div>
                         <div className="order-1 lg:order-2 relative flex justify-center items-center h-[400px]">
-                            {/* Animated Space Assets without the main image */}
+                            {/* Animated Space Assets scaled down for distance */}
                             <motion.img
-                                animate={{ y: [0, -30, 0], rotate: [0, 8, 0], scale: [1, 1.05, 1] }}
+                                animate={{ y: [0, -20, 0], rotate: [0, 5, 0], scale: [1, 1.02, 1] }}
                                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886149420.png"
                                 alt=""
-                                className="absolute w-64 h-64 z-20 drop-shadow-[0_0_30px_rgba(129,140,248,0.5)] animate-glow"
+                                className="absolute w-32 h-32 z-20 drop-shadow-[0_0_20px_rgba(129,140,248,0.4)]"
                             />
                             <motion.img
-                                animate={{ y: [0, 40, 0], rotate: [0, -12, 0] }}
+                                animate={{ y: [0, 30, 0], rotate: [0, -8, 0] }}
                                 transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886176188.png"
                                 alt=""
-                                className="absolute -bottom-10 right-0 w-48 h-48 z-10 opacity-60 filter blur-[1px]"
+                                className="absolute bottom-4 right-10 w-24 h-24 z-10 opacity-50 filter blur-[0.5px]"
                             />
                             <motion.img
-                                animate={{ x: [0, 20, 0], y: [0, -20, 0] }}
+                                animate={{ x: [0, 15, 0], y: [0, -15, 0] }}
                                 transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886214428.png"
                                 alt=""
-                                className="absolute -top-20 -left-10 w-40 h-40 z-10 opacity-40 filter blur-[2px]"
+                                className="absolute top-4 left-10 w-20 h-20 z-10 opacity-30 filter blur-[1px]"
                             />
                         </div>
                     </motion.div>
