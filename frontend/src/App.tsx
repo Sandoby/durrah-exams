@@ -35,6 +35,7 @@ import KidsExamView from './pages/KidsExamView';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 
+import { PushNotificationHandler } from './components/PushNotificationHandler';
 import { LocationLanguageHandler } from './components/LocationLanguageHandler';
 
 function App() {
@@ -53,10 +54,11 @@ function App() {
 
   return (
     <AuthProvider>
+      <PushNotificationHandler />
       <LocationLanguageHandler />
       <SubmissionSync />
       <Router>
-        <div className="min-h-screen bg-background text-foreground font-sans antialiased">
+        <div className="min-h-screen bg-background text-foreground font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/kids" element={<KidsLanding />} />
