@@ -97,38 +97,66 @@ export default function KidsLanding() {
 
       reset() {
         this.x = Math.random() * canvas!.width;
-        this.y = Math.random() * (canvas!.height * 0.5);
-        this.length = Math.random() * 80 + 40;
-        this.speed = Math.random() * 10 + 5;
-        this.angle = Math.PI / 4 + (Math.random() * 0.2 - 0.1);
+        this.y = Math.random() * (canvas!.height * 0.4);
+        this.length = Math.random() * 200 + 120;
+        this.speed = Math.random() * 18 + 12;
+        this.angle = Math.PI / 4 + (Math.random() * 0.1 - 0.05);
         this.opacity = 0;
       }
 
       update() {
-        this.x += Math.cos(this.angle) * this.speed;
-        this.y += Math.sin(this.angle) * this.speed;
-        this.opacity = Math.min(1, this.opacity + 0.05);
+        if (this.opacity === 0 && Math.random() > 0.992) {
+          this.opacity = 0.01;
+        }
 
-        if (this.x > canvas!.width + 100 || this.y > canvas!.height + 100) {
-          this.reset();
+        if (this.opacity > 0) {
+          this.x += Math.cos(this.angle) * this.speed;
+          this.y += Math.sin(this.angle) * this.speed;
+          this.opacity = Math.min(1, this.opacity + 0.15);
+
+          if (this.x > canvas!.width + 300 || this.y > canvas!.height + 300) {
+            this.reset();
+          }
         }
       }
 
       draw() {
-        if (Math.random() > 0.999) {
-          ctx!.strokeStyle = `rgba(255, 255, 255, ${this.opacity})`;
-          ctx!.lineWidth = 2;
-          ctx!.beginPath();
-          ctx!.moveTo(this.x, this.y);
-          ctx!.lineTo(this.x - Math.cos(this.angle) * this.length, this.y - Math.sin(this.angle) * this.length);
-          ctx!.stroke();
-        }
+        ctx!.save();
+
+        // Create gradient trail
+        const gradient = ctx!.createLinearGradient(
+          this.x, this.y,
+          this.x - Math.cos(this.angle) * this.length,
+          this.y - Math.sin(this.angle) * this.length
+        );
+        gradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
+        gradient.addColorStop(0.3, `rgba(129, 140, 248, ${this.opacity * 0.7})`);
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx!.strokeStyle = gradient;
+        ctx!.lineWidth = 3;
+        ctx!.lineCap = 'round';
+        ctx!.shadowBlur = 15;
+        ctx!.shadowColor = '#818cf8';
+
+        ctx!.beginPath();
+        ctx!.moveTo(this.x, this.y);
+        ctx!.lineTo(this.x - Math.cos(this.angle) * this.length, this.y - Math.sin(this.angle) * this.length);
+        ctx!.stroke();
+
+        // Glowing head
+        ctx!.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+        ctx!.beginPath();
+        ctx!.arc(this.x, this.y, 2, 0, Math.PI * 2);
+        ctx!.fill();
+
+        ctx!.restore();
       }
     }
 
     const init = () => {
       particles = [];
-      comets = [new Comet(), new Comet()];
+      comets = [new Comet(), new Comet(), new Comet(), new Comet()];
       for (let i = 0; i < particleCount; i++) particles.push(new Particle());
     };
 
@@ -238,25 +266,20 @@ export default function KidsLanding() {
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 animate-pulse" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 animate-pulse delay-700" />
 
-      {/* Integrated Floating Space Illustrations */}
-      {/* 1. Rocket near Title */}
-      <div className="absolute top-[20%] left-[45%] w-24 sm:w-32 lg:w-40 opacity-40 animate-float pointer-events-none z-0">
-        <img src="/kids/image-1765886162298.png" className="w-full h-full object-contain -rotate-12" alt="" />
+      {/* Curated Space Illustrations */}
+      {/* 1. Astronaut floating - Top Left */}
+      <div className="absolute top-[18%] left-[5%] w-32 sm:w-44 lg:w-56 opacity-40 animate-float pointer-events-none z-0">
+        <img src="/illustrations/image-1765886149420.png" className="w-full h-full object-contain" alt="" />
       </div>
 
-      {/* 2. Planet nesting Entry Card */}
-      <div className="absolute top-[35%] right-[5%] w-40 sm:w-56 lg:w-72 opacity-20 animate-float pointer-events-none z-0" style={{ animationDelay: '2s' }}>
-        <img src="/kids/image-1765886176188.png" className="w-full h-full object-contain rotate-45 scale-125" alt="" />
+      {/* 2. Rocket - Near Title */}
+      <div className="absolute top-[25%] right-[10%] w-28 sm:w-40 lg:w-48 opacity-45 animate-float pointer-events-none z-0" style={{ animationDelay: '1.5s' }}>
+        <img src="/illustrations/image-1765886162298.png" className="w-full h-full object-contain -rotate-12" alt="" />
       </div>
 
-      {/* 3. Small Satellite near Brand Bar */}
-      <div className="absolute bottom-[20%] right-[10%] w-20 sm:w-28 lg:w-32 opacity-30 animate-float pointer-events-none z-0" style={{ animationDelay: '1s' }}>
-        <img src="/kids/image-1765886185739.png" className="w-full h-full object-contain rotate-12" alt="" />
-      </div>
-
-      {/* 4. UFO peeking from indicators */}
-      <div className="absolute top-[55%] left-[-2%] w-24 sm:w-32 lg:w-40 opacity-25 animate-float pointer-events-none z-0" style={{ animationDelay: '3s' }}>
-        <img src="/kids/image-1765886205296.png" className="w-full h-full object-contain" alt="" />
+      {/* 3. UFO - Bottom Left */}
+      <div className="absolute bottom-[22%] left-[3%] w-24 sm:w-36 lg:w-44 opacity-30 animate-float pointer-events-none z-0" style={{ animationDelay: '3s' }}>
+        <img src="/illustrations/image-1765886205296.png" className="w-full h-full object-contain" alt="" />
       </div>
 
       <style>{`
