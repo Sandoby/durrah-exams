@@ -35,6 +35,8 @@ import KidsExamView from './pages/KidsExamView';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 
+import { Capacitor } from '@capacitor/core';
+import MobileWelcome from './pages/MobileWelcome';
 import { PushNotificationHandler } from './components/PushNotificationHandler';
 import { LocationLanguageHandler } from './components/LocationLanguageHandler';
 
@@ -52,6 +54,8 @@ function App() {
     }
   }, [i18n.language]);
 
+  const isNative = Capacitor.isNativePlatform();
+
   return (
     <AuthProvider>
       <PushNotificationHandler />
@@ -60,7 +64,7 @@ function App() {
       <Router>
         <div className="min-h-screen bg-background text-foreground font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
           <Routes>
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={isNative ? <MobileWelcome /> : <LandingPage />} />
             <Route path="/kids" element={<KidsLanding />} />
             <Route path="/kids/quiz/:id" element={<KidsExamView />} />
             <Route path="/demo" element={<DemoPage />} />
