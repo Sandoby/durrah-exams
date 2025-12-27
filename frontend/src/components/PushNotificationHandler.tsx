@@ -32,7 +32,19 @@ export const PushNotificationHandler = () => {
                 return;
             }
 
-            // 2. Register
+            // 2. Create Channel (Android only)
+            if (Capacitor.getPlatform() === 'android') {
+                await PushNotifications.createChannel({
+                    id: 'default',
+                    name: 'Default Notifications',
+                    description: 'Generic notifications from the app',
+                    importance: 5, // High importance
+                    visibility: 1, // Public
+                    vibration: true,
+                });
+            }
+
+            // 3. Register
             await PushNotifications.register();
 
             // 3. Listeners
