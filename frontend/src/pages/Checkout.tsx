@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, CreditCard, Shield, Zap, Layout, X, Loader2, Star, Crown } from 'lucide-react';
+import { Check, CreditCard, Shield, Zap, Layout, X, Loader2, Star, Crown, Globe, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
@@ -11,7 +11,11 @@ import { supabase } from '../lib/supabase';
 
 import { useCurrency } from '../hooks/useCurrency';
 
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
+
 export default function Checkout() {
+    const isNative = Capacitor.isNativePlatform();
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -257,6 +261,42 @@ export default function Checkout() {
             setIsProcessing(false);
         }
     };
+
+    if (isNative) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 flex items-center justify-center p-6 text-center">
+                <div className="max-w-md w-full bg-white/8 backdrop-blur-xl border border-white/20 dark:border-white/10 p-8 rounded-3xl shadow-2xl animate-fade-in">
+                    <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <Globe className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                        Subscription Required
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+                        To maintain secure payment processing, subscriptions must be completed through our official website.
+                    </p>
+                    <div className="space-y-4">
+                        <button
+                            onClick={() => Browser.open({ url: 'https://tutors.durrahsystem.tech/login' })}
+                            className="w-full py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-indigo-500/30 transition-all flex items-center justify-center gap-2"
+                        >
+                            <ExternalLink className="h-5 w-5" />
+                            Open Durrah Website
+                        </button>
+                        <button
+                            onClick={() => navigate('/dashboard')}
+                            className="w-full py-3 text-gray-500 dark:text-gray-400 font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        >
+                            Back to Dashboard
+                        </button>
+                    </div>
+                    <p className="mt-8 text-xs text-gray-400 dark:text-gray-500">
+                        Once you subscribe on the website, lock your account in the app to access all premium features instantly.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 relative overflow-hidden font-sans">
