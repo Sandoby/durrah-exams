@@ -323,7 +323,7 @@ export default function ExamEditor() {
     const onSubmit = async (data: ExamForm) => {
         if (!user) return;
 
-        // Validation: Basic Info
+        // Validation
         if (!data.title?.trim()) {
             toast.error(t('examEditor.validation.title'));
             return;
@@ -332,28 +332,27 @@ export default function ExamEditor() {
             toast.error(t('examEditor.validation.description'));
             return;
         }
-
-        if (data.questions.length === 0) {
+        if (!data.questions || data.questions.length === 0) {
             toast.error(t('examEditor.validation.noQuestions'));
             return;
         }
 
-        // Validation: Question Content
-        for (const [index, q] of data.questions.entries()) {
-            const qNum = index + 1;
-
+        for (let i = 0; i < data.questions.length; i++) {
+            const q = data.questions[i];
+            const qNum = i + 1;
             if (!q.question_text?.trim()) {
-                toast.error(t('examEditor.validation.questionText', { num: qNum }));
+                toast.error(t('examEditor.questions.validation.questionText', { num: qNum }));
                 return;
             }
 
+            // Validation: Options
             if (["multiple_choice", "multiple_select", "dropdown"].includes(q.type)) {
                 if (!q.options || q.options.length < 2) {
-                    toast.error(t('examEditor.validation.minOptions', { num: qNum }));
+                    toast.error(t('examEditor.questions.validation.minOptions', { num: qNum }));
                     return;
                 }
                 if (q.options.some(opt => !opt?.trim())) {
-                    toast.error(t('examEditor.validation.emptyOption', { num: qNum }));
+                    toast.error(t('examEditor.questions.validation.emptyOption', { num: qNum }));
                     return;
                 }
             }
@@ -362,11 +361,11 @@ export default function ExamEditor() {
             if (["multiple_choice", "true_false", "multiple_select", "dropdown"].includes(q.type)) {
                 if (Array.isArray(q.correct_answer)) {
                     if (q.correct_answer.length === 0) {
-                        toast.error(t('examEditor.validation.correctAnswer', { num: qNum }));
+                        toast.error(t('examEditor.questions.validation.correctAnswer', { num: qNum }));
                         return;
                     }
                 } else if (!q.correct_answer) {
-                    toast.error(t('examEditor.validation.correctAnswer', { num: qNum }));
+                    toast.error(t('examEditor.questions.validation.correctAnswer', { num: qNum }));
                     return;
                 }
             }
@@ -1119,7 +1118,7 @@ export default function ExamEditor() {
                                     <div className="space-y-6 w-full">
                                         {fields.map((field, index) => (
                                             <SortableQuestionItem key={field.id} id={field.id}>
-                                                <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-sm border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-8 mb-6 relative overflow-hidden group/card text-left">
+                                                <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-sm border border-gray-100 dark:border-gray-800 rounded-3xl p-4 sm:p-8 mb-6 relative overflow-hidden group/card text-left">
                                                     {/* Background Gradient Accent */}
                                                     <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-indigo-500 to-violet-500 opacity-0 group-hover/card:opacity-100 transition-opacity" />
 
@@ -1129,7 +1128,7 @@ export default function ExamEditor() {
                                                                 {index + 1}
                                                             </div>
                                                             <div className="min-w-0">
-                                                                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500/60 dark:text-indigo-400/60">Question #{index + 1}</p>
+                                                                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500/60 dark:text-indigo-400/60">{t('examEditor.questions.question')} #{index + 1}</p>
                                                                 <div className="flex items-center gap-2 mt-0.5">
                                                                     <span className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg text-[9px] font-black uppercase">
                                                                         {questionsWatch?.[index]?.type?.replace('_', ' ') || 'standard'}
@@ -1220,7 +1219,7 @@ export default function ExamEditor() {
                                                                 <div className="flex items-center justify-between ml-1">
                                                                     <label className="text-sm font-black text-gray-400 uppercase tracking-widest">{t('examEditor.questions.options')}</label>
                                                                     <span className="text-[10px] font-black text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-full uppercase tracking-widest">
-                                                                        Select correct answer
+                                                                        {t('examEditor.questions.selectCorrect')}
                                                                     </span>
                                                                 </div>
                                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

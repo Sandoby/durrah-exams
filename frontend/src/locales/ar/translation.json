@@ -313,6 +313,11 @@
             "desc": "قصر الوصول للامتحان على عناوين بريد إلكتروني محددة",
             "enable": "تفعيل تقييد البريد الإلكتروني"
         },
+        "validation": {
+            "title": "يرجى إدخال عنوان الامتحان.",
+            "description": "يرجى إدخال وصف الامتحان.",
+            "noQuestions": "يرجى إضافة سؤال واحد على الأقل."
+        },
         "settings": {
             "title": "إعدادات الامتحان",
             "fullscreen": "فرض ملء الشاشة",
@@ -332,8 +337,12 @@
             "remove": "حذف",
             "type": "نوع السؤال",
             "points": "النقاط",
-            "text": "نص السؤال",
+            "question": "سؤال",
+            "questionText": "نص السؤال",
+            "questionTextPlaceholder": "أدخل سؤالك هنا...",
+            "questionImage": "صورة السؤال",
             "options": "الخيارات",
+            "option": "خيار",
             "addOption": "إضافة خيار",
             "correctAnswer": "الإجابة الصحيحة",
             "numericAnswer": "الإجابة الرقمية الصحيحة (اختياري)",
@@ -351,13 +360,13 @@
                 "false": "خطأ"
             },
             "validation": {
-                "titleRequired": "يرجى إدخال عنوان الامتحان.",
-                "descriptionRequired": "يرجى إدخال وصف الامتحان.",
-                "questionsRequired": "يرجى إضافة سؤال واحد على الأقل.",
-                "questionTextRequired": "السؤال {{index}} يفتقد للنص.",
-                "optionsRequired": "السؤال {{index}} يحتاج إلى خيارين على الأقل.",
-                "optionTextRequired": "السؤال {{index}} يحتوي على خيارات فارغة.",
-                "correctAnswerRequired": "السؤال {{index}} يحتاج إلى إجابة صحيحة."
+                "title": "يرجى إدخال عنوان الامتحان.",
+                "description": "يرجى إدخال وصف الامتحان.",
+                "noQuestions": "يرجى إضافة سؤال واحد على الأقل.",
+                "questionText": "السؤال {{num}} يفتقد للنص.",
+                "minOptions": "السؤال {{num}} يحتاج إلى خيارين على الأقل.",
+                "emptyOption": "السؤال {{num}} يحتوي على خيارات فارغة.",
+                "correctAnswer": "السؤال {{num}} يحتاج إلى إجابة صحيحة."
             },
             "success": {
                 "saved": "تم حفظ الامتحان بنجاح!",
@@ -424,8 +433,7 @@
         "success": {
             "submitted": "تم تسليم الامتحان بنجاح!"
         }
-    }
-    ,
+    },
     "kids": {
         "seo": {
             "title": "مغامرة اختبار الأطفال | آمن، ممتع، مضاد للغش | درة",

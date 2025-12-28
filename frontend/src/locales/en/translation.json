@@ -312,6 +312,11 @@
             "desc": "Restrict exam access to specific email addresses",
             "enable": "Enable email restriction"
         },
+        "validation": {
+            "title": "Please enter an exam title.",
+            "description": "Please enter a description.",
+            "noQuestions": "Please add at least one question."
+        },
         "settings": {
             "title": "Exam Settings",
             "fullscreen": "Force Fullscreen",
@@ -340,8 +345,12 @@
             "remove": "Remove",
             "type": "Question Type",
             "points": "Points",
-            "text": "Question Text",
+            "question": "Question",
+            "questionText": "Question Text",
+            "questionTextPlaceholder": "Enter your question here...",
+            "questionImage": "Question Image",
             "options": "Options",
+            "option": "Option",
             "addOption": "Add Option",
             "correctAnswer": "Correct Answer",
             "numericAnswer": "Correct Numeric Answer (Optional)",
@@ -359,13 +368,13 @@
                 "false": "False"
             },
             "validation": {
-                "titleRequired": "Please enter an exam title.",
-                "descriptionRequired": "Please enter a description.",
-                "questionsRequired": "Please add at least one question.",
-                "questionTextRequired": "Question {{index}} is missing text.",
-                "optionsRequired": "Question {{index}} needs at least 2 options.",
-                "optionTextRequired": "Question {{index}} has empty options.",
-                "correctAnswerRequired": "Question {{index}} needs a correct answer."
+                "title": "Please enter an exam title.",
+                "description": "Please enter a description.",
+                "noQuestions": "Please add at least one question.",
+                "questionText": "Question {{num}} is missing text.",
+                "minOptions": "Question {{num}} needs at least 2 options.",
+                "emptyOption": "Question {{num}} has empty options.",
+                "correctAnswer": "Question {{num}} needs a correct answer."
             },
             "success": {
                 "saved": "Exam saved successfully!",
