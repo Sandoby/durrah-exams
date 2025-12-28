@@ -68,3 +68,5 @@ Thumbs.db
 *.pem
 *.cert
 secrets/
+*-firebase-adminsdk-*.json
+google-services.json
