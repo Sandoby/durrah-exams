@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "507386294990",
+    "project_id": "durrah-for-tutors-9ab0c",
+    "storage_bucket": "durrah-for-tutors-9ab0c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:507386294990:android:a27ada42c0210872b7d69f",
+        "android_client_info": {
+          "package_name": "com.durrah.tutors"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfG89-HqmNW_xS86kdhEyYgw9DiLgR23s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

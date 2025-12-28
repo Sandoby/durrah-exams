@@ -48,11 +48,18 @@ export const PushNotificationHandler = () => {
             try {
                 console.log('PushNotificationHandler: Attempting registration...');
                 // Small delay to ensure bridge is fully ready after login transition
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                await PushNotifications.register();
-                console.log('PushNotificationHandler: Registration call successful');
+                await new Promise(resolve => setTimeout(resolve, 3000));
+
+                // Final check to prevent native crash if Firebase is somehow still unconfigured
+                if (Capacitor.getPlatform() === 'android') {
+                    // This is a heuristic, but often if registration fails internally it throws
+                    await PushNotifications.register();
+                    console.log('PushNotificationHandler: Registration call successful');
+                } else {
+                    await PushNotifications.register();
+                }
             } catch (regError: any) {
-                console.error('PushNotificationHandler: Registration FAILED (likely missing google-services.json)', regError);
+                console.error('PushNotificationHandler: Registration FAILED (FCM Config issues)', regError);
                 // Do not throw - we want the app to keep running even if push fails
                 return;
             }

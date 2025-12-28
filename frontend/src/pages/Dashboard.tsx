@@ -9,8 +9,8 @@ import { supabase } from '../lib/supabase';
 import { ExamResults } from '../components/ExamResults';
 import { ChatWidget } from '../components/ChatWidget';
 import { CardSkeleton } from '../components/skeletons';
-// import Joyride, { STATUS } from 'react-joyride';
-// import type { Step, CallBackProps } from 'react-joyride';
+import Joyride, { STATUS } from 'react-joyride';
+import type { Step, CallBackProps } from 'react-joyride';
 import { useDemoTour } from '../hooks/useDemoTour';
 
 interface Exam {
@@ -35,7 +35,7 @@ export default function Dashboard() {
     const [selectedExamForResults, setSelectedExamForResults] = useState<Exam | null>(null);
     const [profile, setProfile] = useState<any>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    // const [runTour, setRunTour] = useState(false);
+    const [runTour, setRunTour] = useState(false);
     const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
     const [startDemoTour, setStartDemoTour] = useState(false);
     const [kidsShareModal, setKidsShareModal] = useState<{ url: string; code: string; title?: string } | null>(null);
@@ -44,7 +44,7 @@ export default function Dashboard() {
 
     useDemoTour(new URLSearchParams(window.location.search).get('showSharing') === 'true' ? 'share-monitor' : new URLSearchParams(window.location.search).get('showAnalytics') === 'true' ? 'view-analytics' : null, startDemoTour && isDemo);
 
-    /* const [tourSteps] = useState<Step[]>([
+    const [tourSteps] = useState<Step[]>([
         {
             target: 'body',
             content: t('dashboard.tour.welcome', 'Welcome to Durrah for Tutors! Let\'s learn how to use your dashboard.'),
@@ -87,7 +87,7 @@ export default function Dashboard() {
             placement: 'center',
             disableBeacon: true,
         },
-    ]); */
+    ]);
 
     useEffect(() => {
         console.log('Dashboard: Component Mounted', { userId: user?.id, isDemo });
@@ -119,14 +119,14 @@ export default function Dashboard() {
     }, [user]);
 
     const checkFirstVisit = () => {
-        /* const hasSeenTour = localStorage.getItem(`dashboard_tour_${user?.id}`);
+        const hasSeenTour = localStorage.getItem(`dashboard_tour_${user?.id}`);
         if (!hasSeenTour) {
             // Delay tour start to ensure DOM is ready and elements are mounted
             setTimeout(() => setRunTour(true), 1500);
-        } */
+        }
     };
 
-    /* const handleTourCallback = (data: CallBackProps) => {
+    const handleTourCallback = (data: CallBackProps) => {
         const { status, type } = data;
 
         // Continue tour even if step target is not found
@@ -138,10 +138,10 @@ export default function Dashboard() {
             setRunTour(false);
             localStorage.setItem(`dashboard_tour_${user?.id}`, 'true');
         }
-    }; */
+    };
 
     const startTour = () => {
-        // setRunTour(true);
+        setRunTour(true);
     };
 
     const fetchProfile = async () => {
@@ -447,7 +447,7 @@ export default function Dashboard() {
                 .animation-delay-4000 { animation-delay: 4s; }
             `}</style>
             {/* Interactive Tutorial Tour */}
-            {/* <Joyride
+            <Joyride
                 steps={tourSteps}
                 run={runTour}
                 continuous
@@ -481,7 +481,7 @@ export default function Dashboard() {
                     next: t('tour.next', 'Next'),
                     skip: t('tour.skip', 'Skip Tour'),
                 }}
-            /> */}
+            />
 
             <nav className="sticky top-4 z-50 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
