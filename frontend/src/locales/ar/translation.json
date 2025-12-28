@@ -225,11 +225,11 @@
             "inactive": "غير نشط"
         },
         "actions": {
-            "copyLink": "نسخ الرابط",
-            "print": "طباعة / حفظ كملف PDF",
-            "results": "عرض النتائج",
-            "analytics": "لوحة التحليلات",
-            "analyticsLocked": "التحليلات (للمشتركين فقط)",
+            "copyLink": "مشاركة",
+            "print": "طباعة",
+            "results": "النتائج",
+            "analytics": "إحصائيات",
+            "analyticsLocked": "إحصائيات (Pro)",
             "edit": "تعديل",
             "delete": "حذف"
         },

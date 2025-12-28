@@ -698,7 +698,7 @@ export default function Dashboard() {
                                             </div>
 
                                             {/* Action Buttons */}
-                                            <div className="grid grid-cols-6 gap-2">
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2">
                                                 {/* Share Button */}
                                                 <button
                                                     onClick={() => copyExamLink(exam.id)}
@@ -857,6 +857,13 @@ export default function Dashboard() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Tutor Note */}
+                            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-2xl">
+                                <p className="text-xs font-bold text-amber-700 dark:text-amber-400 leading-relaxed">
+                                    ⚠️ Remind your students to have their accounts ready and be signed in before starting the exam!
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -940,10 +947,20 @@ export default function Dashboard() {
                                     </div>
                                 </div>
 
+                                {/* Tutor Note */}
+                                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-2xl">
+                                    <p className="text-xs font-bold text-amber-700 dark:text-amber-400 leading-relaxed text-center">
+                                        ⚠️ Remind your students to create their accounts and sign in BEFORE the exam starts to avoid losing time!
+                                    </p>
+                                </div>
+
                                 {/* Action Buttons - Moved to new row */}
                                 <div className="grid grid-cols-2 gap-3 pt-2">
                                     <button
-                                        onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Take this exam: ${shareModal.url} \nCode: ${shareModal.code}`)}`, '_blank')}
+                                        onClick={() => {
+                                            const message = `Join my exam: ${shareModal.title}\n\nLink: ${shareModal.url}\nAccess Code: ${shareModal.code}\n\n⚠️ IMPORTANT: Make sure you are signed up and logged in before the exam starts to avoid losing time!`;
+                                            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+                                        }}
                                         className="h-[46px] flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl transition-colors shadow-sm font-medium"
                                         title="Share on WhatsApp"
                                     >

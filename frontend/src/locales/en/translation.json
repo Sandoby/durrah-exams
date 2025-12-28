@@ -222,11 +222,11 @@
             "inactive": "Inactive"
         },
         "actions": {
-            "copyLink": "Copy Link",
-            "print": "Print / Save as PDF",
-            "results": "View Results",
-            "analytics": "Analytics Dashboard",
-            "analyticsLocked": "Analytics (Premium Only)",
+            "copyLink": "Share",
+            "print": "Print",
+            "results": "Results",
+            "analytics": "Stats",
+            "analyticsLocked": "Stats (Pro)",
             "edit": "Edit",
             "delete": "Delete"
         },

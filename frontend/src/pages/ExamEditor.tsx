@@ -738,7 +738,7 @@ export default function ExamEditor() {
                             </div>
 
                             {/* Kids Mode Toggle */}
-                            <div className="hidden lg:flex items-center gap-2 ml-6 pl-6 border-l border-gray-100 dark:border-gray-800">
+                            <div className="flex items-center gap-2 ml-2 sm:ml-6 pl-2 sm:pl-6 border-l border-gray-100 dark:border-gray-800">
                                 <label className="flex items-center cursor-pointer group px-4 py-2 rounded-2xl bg-purple-50/50 dark:bg-purple-900/20 border-2 border-transparent hover:border-purple-200 dark:hover:border-purple-800 transition-all">
                                     <input
                                         type="checkbox"
