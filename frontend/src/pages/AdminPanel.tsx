@@ -71,6 +71,8 @@ interface ChatSession {
     ended_at: string | null;
     rating: number | null;
     feedback: string | null;
+    created_at?: string;
+    updated_at?: string;
 }
 
 interface UserInfo {
