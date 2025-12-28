@@ -1,7 +1,7 @@
 ﻿import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, Trophy, ChevronDown, Rocket, Orbit, Smartphone, Download, Bell, Layers } from 'lucide-react';
+import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, Trophy, ChevronDown, Rocket, Orbit, Smartphone, Download, Bell } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { Logo } from '../components/Logo';
 import { LottiePlayer } from '../components/LottiePlayer';
