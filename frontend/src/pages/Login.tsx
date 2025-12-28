@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, Mail, Loader2 } from 'lucide-react';
+import { Lock, Mail, Loader2, ArrowLeft } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
@@ -71,7 +71,18 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
+            {/* Mobile Back Button */}
+            {Capacitor.isNativePlatform() && (
+                <button
+                    onClick={() => navigate('/mobile-welcome')}
+                    className="absolute top-4 left-4 p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                    aria-label="Back to welcome"
+                >
+                    <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                </button>
+            )}
+
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="flex justify-center">
                     <Logo size="lg" />

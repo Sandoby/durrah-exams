@@ -1,0 +1,24 @@
+{
+    "resources": {
+        "icon": {
+            "sources": [
+                "public/logo.png"
+            ],
+            "platform": {
+                "android": {
+                    "adaptive": true,
+                    "foreground": [
+                        "public/logo.png"
+                    ],
+                    "background": "#FFFFFF"
+                }
+            }
+        },
+        "splash": {
+            "sources": [
+                "public/logo.png"
+            ],
+            "backgroundColor": "#FFFFFF"
+        }
+    }
+}

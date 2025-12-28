@@ -60,9 +60,7 @@ export default function MobileWelcome() {
             >
                 {/* Header / Logo */}
                 <motion.div variants={itemVariants} className="flex flex-col items-center text-center space-y-4 mb-4">
-                    <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl shadow-xl shadow-indigo-100 dark:shadow-none border border-gray-100 dark:border-gray-800">
-                        <Logo size="lg" />
-                    </div>
+                    <Logo size="lg" />
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-4">Durrah Tutors</h1>
                         <p className="text-gray-500 dark:text-gray-400">Choose your learning path</p>
