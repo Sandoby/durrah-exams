@@ -1,7 +1,7 @@
 ﻿import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, Trophy, ChevronDown, Rocket, Orbit } from 'lucide-react';
+import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, Trophy, ChevronDown, Rocket, Orbit, Smartphone, Download, Bell, Layers } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { Logo } from '../components/Logo';
 import { LottiePlayer } from '../components/LottiePlayer';
@@ -840,6 +840,115 @@ export default function LandingPage() {
                             </Link>
                         </div>
                     </motion.div>
+                </div>
+            </section>
+
+            {/* Mobile App Section */}
+            <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600">
+                {/* Animated background patterns */}
+                <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+                </div>
+
+                <div className="max-w-7xl mx-auto relative z-10">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-12"
+                    >
+                        <div className="inline-flex items-center justify-center p-3 bg-white/20 backdrop-blur-sm rounded-2xl mb-6">
+                            <Smartphone className="w-8 h-8 text-white" />
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
+                            {t('landing.mobileApp.title', 'Take Durrah Anywhere')}
+                        </h2>
+                        <p className="text-xl text-white/90 max-w-2xl mx-auto">
+                            {t('landing.mobileApp.subtitle', 'Download our mobile app for seamless exam access on the go')}
+                        </p>
+                    </motion.div>
+
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        {/* Features List */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 }}
+                            className="space-y-6"
+                        >
+                            {[
+                                {
+                                    icon: Bell,
+                                    title: t('landing.mobileApp.feature1.title', 'Push Notifications'),
+                                    desc: t('landing.mobileApp.feature1.desc', 'Get instant alerts for new exams and updates')
+                                },
+                                {
+                                    icon: Layers,
+                                    title: t('landing.mobileApp.feature2.title', 'Offline Access'),
+                                    desc: t('landing.mobileApp.feature2.desc', 'Take exams even without internet connection')
+                                },
+                                {
+                                    icon: Smartphone,
+                                    title: t('landing.mobileApp.feature3.title', 'Native Experience'),
+                                    desc: t('landing.mobileApp.feature3.desc', 'Optimized for mobile with smooth performance')
+                                }
+                            ].map((feature, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: 0.3 + idx * 0.1 }}
+                                    className="flex items-start gap-4 bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/20"
+                                >
+                                    <div className="p-3 bg-white rounded-xl">
+                                        <feature.icon className="w-6 h-6 text-indigo-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
+                                        <p className="text-white/80">{feature.desc}</p>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </motion.div>
+
+                        {/* Download CTA */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="bg-white/10 backdrop-blur-md p-8 md:p-12 rounded-3xl border-2 border-white/30 text-center"
+                        >
+                            <div className="mb-8">
+                                <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-3xl mb-6 shadow-2xl">
+                                    <img src="/logo.png" alt="Durrah App" className="w-16 h-16" />
+                                </div>
+                                <h3 className="text-3xl font-bold text-white mb-2">Durrah Tutors</h3>
+                                <p className="text-white/80 mb-2">Version 1.1.0</p>
+                                <div className="flex items-center justify-center gap-2 text-white/70 text-sm">
+                                    <span className="px-3 py-1 bg-white/20 rounded-full">Android</span>
+                                    <span className="px-3 py-1 bg-white/20 rounded-full">Latest Build</span>
+                                </div>
+                            </div>
+
+                            <a
+                                href="https://github.com/Sandoby/durrah-exams/releases/latest/download/DurrahTutors-v1.1.0-2-debug.apk"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center gap-3 w-full bg-white hover:bg-gray-50 text-indigo-600 px-8 py-5 rounded-2xl font-bold text-lg shadow-2xl transition-all hover:scale-105 active:scale-95 group"
+                            >
+                                <Download className="w-6 h-6 group-hover:animate-bounce" />
+                                {t('landing.mobileApp.download', 'Download APK')}
+                            </a>
+
+                            <p className="mt-6 text-white/60 text-sm">
+                                {t('landing.mobileApp.note', 'For Android devices • Free download')}
+                            </p>
+                        </motion.div>
+                    </div>
                 </div>
             </section>
 
