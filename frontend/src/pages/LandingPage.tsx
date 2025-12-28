@@ -844,55 +844,99 @@ export default function LandingPage() {
             </section>
 
             {/* Mobile App Section */}
-            <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600">
-                {/* Animated background patterns */}
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-                </div>
-
-                <div className="max-w-7xl mx-auto relative z-10">
+            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+                <div className="max-w-7xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-center mb-12"
+                        className="text-center mb-16"
                     >
-                        <div className="inline-flex items-center justify-center p-3 bg-white/20 backdrop-blur-sm rounded-2xl mb-6">
-                            <Smartphone className="w-8 h-8 text-white" />
+                        <div className="inline-flex items-center justify-center p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-full mb-4">
+                            <Smartphone className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
-                            {t('landing.mobileApp.title', 'Take Durrah Anywhere')}
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                            {t('landing.mobileApp.title', 'Get the Mobile App')}
                         </h2>
-                        <p className="text-xl text-white/90 max-w-2xl mx-auto">
-                            {t('landing.mobileApp.subtitle', 'Download our mobile app for seamless exam access on the go')}
+                        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                            {t('landing.mobileApp.subtitle', 'Access exams anywhere with our native Android application')}
                         </p>
                     </motion.div>
 
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
-                        {/* Features List */}
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        {/* App Preview Card */}
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            transition={{ delay: 0.2 }}
-                            className="space-y-6"
+                            className="relative"
+                        >
+                            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <img src="/logo.png" alt="Durrah" className="w-10 h-10" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Durrah Tutors</h3>
+                                        <p className="text-gray-500 dark:text-gray-400">Version 1.1.0</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4 mb-8">
+                                    {[
+                                        { icon: Users, text: 'Tutor & Student Access' },
+                                        { icon: Bell, text: 'Real-time Push Notifications' },
+                                        { icon: Rocket, text: 'Kids Mode with Gamification' },
+                                        { icon: Shield, text: 'Secure Exam Taking' }
+                                    ].map((item, idx) => (
+                                        <div key={idx} className="flex items-center gap-3">
+                                            <item.icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                            <span className="text-gray-700 dark:text-gray-300">{item.text}</span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <a
+                                    href="https://khogxhpnuhhebkevaqlg.supabase.co/storage/v1/object/public/app-releases/DurrahTutors-latest.apk"
+                                    className="w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg transition-all hover:scale-105 active:scale-95"
+                                >
+                                    <Download className="w-6 h-6" />
+                                    Download for Android
+                                </a>
+
+                                <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+                                    Free • ~35 MB • Android 7.0+
+                                </p>
+                            </div>
+                        </motion.div>
+
+                        {/* Features Grid */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            className="grid sm:grid-cols-2 gap-6"
                         >
                             {[
                                 {
                                     icon: Bell,
-                                    title: t('landing.mobileApp.feature1.title', 'Push Notifications'),
-                                    desc: t('landing.mobileApp.feature1.desc', 'Get instant alerts for new exams and updates')
+                                    title: 'Instant Alerts',
+                                    desc: 'Get notified when tutors publish new exams'
                                 },
                                 {
-                                    icon: Layers,
-                                    title: t('landing.mobileApp.feature2.title', 'Offline Access'),
-                                    desc: t('landing.mobileApp.feature2.desc', 'Take exams even without internet connection')
+                                    icon: Users,
+                                    title: 'Multiple Modes',
+                                    desc: 'Switch between tutor, student, and kids modes'
                                 },
                                 {
-                                    icon: Smartphone,
-                                    title: t('landing.mobileApp.feature3.title', 'Native Experience'),
-                                    desc: t('landing.mobileApp.feature3.desc', 'Optimized for mobile with smooth performance')
+                                    icon: Rocket,
+                                    title: 'Kids Adventure',
+                                    desc: 'Gamified space-themed quizzes for children'
+                                },
+                                {
+                                    icon: Shield,
+                                    title: 'Secure & Fast',
+                                    desc: 'Native performance with secure authentication'
                                 }
                             ].map((feature, idx) => (
                                 <motion.div
@@ -900,53 +944,16 @@ export default function LandingPage() {
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    transition={{ delay: 0.3 + idx * 0.1 }}
-                                    className="flex items-start gap-4 bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/20"
+                                    transition={{ delay: 0.1 + idx * 0.1 }}
+                                    className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors"
                                 >
-                                    <div className="p-3 bg-white rounded-xl">
-                                        <feature.icon className="w-6 h-6 text-indigo-600" />
+                                    <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center mb-4">
+                                        <feature.icon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                                     </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
-                                        <p className="text-white/80">{feature.desc}</p>
-                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{feature.title}</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{feature.desc}</p>
                                 </motion.div>
                             ))}
-                        </motion.div>
-
-                        {/* Download CTA */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.4 }}
-                            className="bg-white/10 backdrop-blur-md p-8 md:p-12 rounded-3xl border-2 border-white/30 text-center"
-                        >
-                            <div className="mb-8">
-                                <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-3xl mb-6 shadow-2xl">
-                                    <img src="/logo.png" alt="Durrah App" className="w-16 h-16" />
-                                </div>
-                                <h3 className="text-3xl font-bold text-white mb-2">Durrah Tutors</h3>
-                                <p className="text-white/80 mb-2">Version 1.1.0</p>
-                                <div className="flex items-center justify-center gap-2 text-white/70 text-sm">
-                                    <span className="px-3 py-1 bg-white/20 rounded-full">Android</span>
-                                    <span className="px-3 py-1 bg-white/20 rounded-full">Latest Build</span>
-                                </div>
-                            </div>
-
-                            <a
-                                href="https://github.com/Sandoby/durrah-exams/releases/latest/download/DurrahTutors-v1.1.0-2-debug.apk"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center gap-3 w-full bg-white hover:bg-gray-50 text-indigo-600 px-8 py-5 rounded-2xl font-bold text-lg shadow-2xl transition-all hover:scale-105 active:scale-95 group"
-                            >
-                                <Download className="w-6 h-6 group-hover:animate-bounce" />
-                                {t('landing.mobileApp.download', 'Download APK')}
-                            </a>
-
-                            <p className="mt-6 text-white/60 text-sm">
-                                {t('landing.mobileApp.note', 'For Android devices • Free download')}
-                            </p>
                         </motion.div>
                     </div>
                 </div>
