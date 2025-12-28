@@ -40,6 +40,8 @@ import MobileWelcome from './pages/MobileWelcome';
 import { PushNotificationHandler } from './components/PushNotificationHandler';
 import { LocationLanguageHandler } from './components/LocationLanguageHandler';
 import { BackButtonHandler } from './components/BackButtonHandler';
+import { Browser } from '@capacitor/browser';
+import { App as CapApp } from '@capacitor/app';
 
 function App() {
   const { i18n } = useTranslation();
@@ -54,6 +56,22 @@ function App() {
       document.body.style.fontFamily = "inherit";
     }
   }, [i18n.language]);
+
+  useEffect(() => {
+    // Handle deep links for in-app browser returns
+    if (Capacitor.isNativePlatform()) {
+      const setupAppUrlListener = async () => {
+        CapApp.addListener('appUrlOpen', async (data: any) => {
+          console.log('App opened with URL:', data.url);
+          // If the URL is our custom scheme, close the browser
+          if (data.url.includes('durrah://')) {
+            await Browser.close();
+          }
+        });
+      };
+      setupAppUrlListener();
+    }
+  }, []);
 
   const isNative = Capacitor.isNativePlatform();
 

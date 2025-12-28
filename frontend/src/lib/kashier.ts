@@ -1,6 +1,8 @@
 import { supabase } from './supabase';
 import CryptoJS from 'crypto-js';
 import toast from 'react-hot-toast';
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 
 interface KashierPayParams {
   amount: number;
@@ -160,7 +162,11 @@ export class KashierIntegration {
       }
 
       // Build Kashier hosted checkout URL
-      const callbackUrl = `${window.location.origin}/payment-callback?provider=kashier`;
+      const isNative = Capacitor.isNativePlatform();
+      const callbackUrl = isNative
+        ? 'durrah://payment-callback'
+        : `${window.location.origin}/payment-callback?provider=kashier`;
+
       const metadata = encodeURIComponent(JSON.stringify({
         userId,
         planId,
@@ -180,10 +186,15 @@ export class KashierIntegration {
         `&failureRedirect=true` +
         `&redirectMethod=get`;
 
-      console.log('🔗 Redirecting to Kashier hosted checkout...');
+      console.log('🔗 Initiating Kashier checkout...', { isNative });
 
-      // Redirect to Kashier hosted payment page
-      window.location.href = checkoutUrl;
+      if (isNative) {
+        // Use Capacitor Browser to open natively
+        await Browser.open({ url: checkoutUrl, windowName: '_blank' });
+      } else {
+        // Redirect standard browser
+        window.location.href = checkoutUrl;
+      }
 
       return { success: true, data: { orderId, checkoutUrl } };
     } catch (error: any) {

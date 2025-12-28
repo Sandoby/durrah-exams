@@ -499,16 +499,7 @@ export default function Dashboard() {
                             <span className="hidden lg:inline text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
                                 {user?.user_metadata?.full_name || user?.email}
                             </span>
-                            <button
-                                onClick={startTour}
-                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
-                                title={t('dashboard.tour.startTour', 'Tutorial')}
-                            >
-                                <svg className="h-4 w-4 lg:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span className="hidden lg:inline">{t('dashboard.tour.startTour', 'Tutorial')}</span>
-                            </button>
+
                             {profile?.subscription_status !== 'active' && (
                                 <Link
                                     to="/checkout"
