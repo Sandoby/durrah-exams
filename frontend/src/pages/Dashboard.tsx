@@ -90,10 +90,12 @@ export default function Dashboard() {
     ]);
 
     useEffect(() => {
+        console.log('Dashboard: Component Mounted', { userId: user?.id, isDemo });
+
         const demoMode = new URLSearchParams(window.location.search).get('demo') === 'true';
 
         if (demoMode) {
-            // Load demo data without fetching from DB
+            // Load demo data
             setExams([
                 {
                     id: 'demo-1',
@@ -101,31 +103,19 @@ export default function Dashboard() {
                     description: 'Algebra, geometry, and trigonometry assessment for Grade 10',
                     created_at: new Date().toISOString(),
                     is_active: true,
-                },
-                {
-                    id: 'demo-2',
-                    title: '🧬 Science Mid-Term',
-                    description: 'Biology and Chemistry topics for Grade 9 semester evaluation',
-                    created_at: new Date(Date.now() - 86400000).toISOString(),
-                    is_active: true,
-                },
-                {
-                    id: 'demo-3',
-                    title: '📚 English Literature',
-                    description: 'Poetry, prose, and comprehension test for advanced learners',
-                    created_at: new Date(Date.now() - 172800000).toISOString(),
-                    is_active: true,
                 }
             ]);
             setProfile({ subscription_status: 'active' });
             setIsLoading(false);
-            // Start demo tour after short delay to ensure DOM is ready
             setTimeout(() => setStartDemoTour(true), 1000);
         } else if (user) {
+            console.log('Dashboard: Initializing for authenticated user...');
             fetchExams();
             fetchProfile();
             checkFirstVisit();
         }
+
+        return () => console.log('Dashboard: Component Unmounted');
     }, [user]);
 
     const checkFirstVisit = () => {

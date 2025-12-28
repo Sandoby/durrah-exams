@@ -44,12 +44,22 @@ export const PushNotificationHandler = () => {
                 });
             }
 
-            // 3. Register
-            await PushNotifications.register();
+            // 3. Register with safety wrapper
+            try {
+                console.log('PushNotificationHandler: Attempting registration...');
+                // Small delay to ensure bridge is fully ready after login transition
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                await PushNotifications.register();
+                console.log('PushNotificationHandler: Registration call successful');
+            } catch (regError: any) {
+                console.error('PushNotificationHandler: Registration FAILED (likely missing google-services.json)', regError);
+                // Do not throw - we want the app to keep running even if push fails
+                return;
+            }
 
-            // 3. Listeners
+            // 4. Listeners
             PushNotifications.addListener('registration', async (token) => {
-                console.log('Push Registration Token:', token.value);
+                console.log('Push Registration Token success:', token.value);
 
                 // Save token to Supabase
                 const { error } = await supabase

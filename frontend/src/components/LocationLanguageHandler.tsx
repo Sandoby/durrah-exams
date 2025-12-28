@@ -32,12 +32,8 @@ export function LocationLanguageHandler() {
             }
 
             if (targetLang !== i18n.language) {
+                console.log(`LocationLanguageHandler: Auto-detecting language: ${targetLang} (Current: ${i18n.language})`);
                 i18n.changeLanguage(targetLang);
-                // We intentionally don't save to localStorage here so that if they change it manually, 
-                // that preference sticks, but if they just visit, we guess for them.
-                // However, i18next might auto-save depending on config. 
-                // Given our config uses localStorage detector, it might be better to let the user confirm 
-                // or just set it. For now, we'll just change it.
             }
         }
     }, [location, isLoading, i18n]);
