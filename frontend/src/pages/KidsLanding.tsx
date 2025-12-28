@@ -4,9 +4,10 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Ticket, Rocket, Trophy, Orbit, Zap, Cpu, Sparkles } from 'lucide-react';
+import { Ticket, Rocket, Trophy, Orbit, Zap, Cpu, Sparkles, ArrowLeft } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
+import { Capacitor } from '@capacitor/core';
 
 export default function KidsLanding() {
   const { t, i18n } = useTranslation();
@@ -258,6 +259,17 @@ export default function KidsLanding() {
       <Helmet>
         <title>{t('kids.seo.title', 'Quiz Space Adventure | Durrah')}</title>
       </Helmet>
+
+      {/* Mobile Back Button */}
+      {Capacitor.isNativePlatform() && (
+        <button
+          onClick={() => navigate('/mobile-welcome')}
+          className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white/10 backdrop-blur-sm shadow-lg border border-white/20 hover:bg-white/20 transition-colors"
+          aria-label="Back to welcome"
+        >
+          <ArrowLeft className="w-5 h-5 text-white" />
+        </button>
+      )}
 
       {/* Particle & Constellation Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none opacity-80" />
