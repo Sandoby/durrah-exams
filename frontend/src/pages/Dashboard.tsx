@@ -119,11 +119,11 @@ export default function Dashboard() {
     }, [user]);
 
     const checkFirstVisit = () => {
-        const hasSeenTour = localStorage.getItem(`dashboard_tour_${user?.id}`);
+        /* const hasSeenTour = localStorage.getItem(`dashboard_tour_${user?.id}`);
         if (!hasSeenTour) {
             // Delay tour start to ensure DOM is ready and elements are mounted
             setTimeout(() => setRunTour(true), 1500);
-        }
+        } */
     };
 
     /* const handleTourCallback = (data: CallBackProps) => {
@@ -141,7 +141,7 @@ export default function Dashboard() {
     }; */
 
     const startTour = () => {
-        setRunTour(true);
+        // setRunTour(true);
     };
 
     const fetchProfile = async () => {
