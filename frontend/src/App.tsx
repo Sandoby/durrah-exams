@@ -26,7 +26,7 @@ import SupportDashboard from './pages/support/SupportDashboard';
 import AgentDashboard from './pages/support/AgentDashboard';
 import { BlogList } from './pages/blog/BlogList';
 import { BlogPost } from './pages/blog/BlogPost';
-import { SubmissionSync } from './components/SubmissionSync';
+// import { SubmissionSync } from './components/SubmissionSync';
 import { ExamAnalyticsDashboard } from "./components/analytics/ExamAnalyticsDashboard";
 
 import KidsLanding from './pages/KidsLanding';
@@ -37,8 +37,8 @@ import { useEffect } from 'react';
 
 import { Capacitor } from '@capacitor/core';
 import MobileWelcome from './pages/MobileWelcome';
-import { PushNotificationHandler } from './components/PushNotificationHandler';
-import { LocationLanguageHandler } from './components/LocationLanguageHandler';
+// import { PushNotificationHandler } from './components/PushNotificationHandler';
+// import { LocationLanguageHandler } from './components/LocationLanguageHandler';
 import { BackButtonHandler } from './components/BackButtonHandler';
 
 function App() {
