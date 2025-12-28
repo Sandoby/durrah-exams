@@ -136,7 +136,7 @@ export default function Dashboard() {
 
         if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
             setRunTour(false);
-            localStorage.setItem(`dashboard_tour_${user?.id}`, 'true');
+            // localStorage.setItem(`dashboard_tour_${user?.id}`, 'true');
         }
     };
 
@@ -447,7 +447,7 @@ export default function Dashboard() {
                 .animation-delay-4000 { animation-delay: 4s; }
             `}</style>
             {/* Interactive Tutorial Tour */}
-            <Joyride
+            {/* <Joyride
                 steps={tourSteps}
                 run={runTour}
                 continuous
@@ -481,7 +481,7 @@ export default function Dashboard() {
                     next: t('tour.next', 'Next'),
                     skip: t('tour.skip', 'Skip Tour'),
                 }}
-            />
+            /> */}
 
             <nav className="sticky top-4 z-50 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">

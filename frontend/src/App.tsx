@@ -59,9 +59,9 @@ function App() {
 
   return (
     <AuthProvider>
-      <PushNotificationHandler />
-      <LocationLanguageHandler />
-      <SubmissionSync />
+      {/* <PushNotificationHandler /> */}
+      {/* <LocationLanguageHandler /> */}
+      {/* <SubmissionSync /> */}
       <Router>
         <BackButtonHandler />
         <div className="min-h-screen bg-background text-foreground font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
