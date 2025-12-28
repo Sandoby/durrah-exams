@@ -264,10 +264,11 @@ export default function KidsLanding() {
       {Capacitor.isNativePlatform() && (
         <button
           onClick={() => navigate('/mobile-welcome')}
-          className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white/10 backdrop-blur-sm shadow-lg border border-white/20 hover:bg-white/20 transition-colors"
+          className="fixed top-6 left-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/20 backdrop-blur-md shadow-xl border border-white/30 hover:bg-white/30 transition-all hover:scale-105"
           aria-label="Back to welcome"
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeft className="w-4 h-4 text-white" />
+          <span className="text-sm font-medium text-white drop-shadow-lg">Back</span>
         </button>
       )}
 

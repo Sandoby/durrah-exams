@@ -76,10 +76,11 @@ export default function Login() {
             {Capacitor.isNativePlatform() && (
                 <button
                     onClick={() => navigate('/mobile-welcome')}
-                    className="absolute top-4 left-4 p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                    className="absolute top-6 left-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-all hover:scale-105"
                     aria-label="Back to welcome"
                 >
-                    <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                    <ArrowLeft className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Back</span>
                 </button>
             )}
 
