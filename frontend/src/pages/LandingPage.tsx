@@ -873,7 +873,7 @@ export default function LandingPage() {
                         >
                             <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
                                 <div className="flex items-center gap-4 mb-6">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-3xl flex items-center justify-center shadow-lg">
                                         <img src="/logo.png" alt="Durrah" className="w-10 h-10" />
                                     </div>
                                     <div>
