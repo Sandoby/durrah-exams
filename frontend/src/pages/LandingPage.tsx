@@ -872,13 +872,13 @@ export default function LandingPage() {
                             className="relative"
                         >
                             <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
-                                <div className="flex items-center gap-4 mb-6">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-3xl flex items-center justify-center shadow-lg">
-                                        <img src="/logo.png" alt="Durrah" className="w-10 h-10" />
+                                <div className="flex items-center gap-5 mb-8">
+                                    <div className="w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-[28%] flex items-center justify-center shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.4)] border border-white/50 dark:border-gray-600/50 transition-transform hover:scale-105">
+                                        <img src="/logo.png" alt="Durrah" className="w-12 h-12 object-contain" />
                                     </div>
                                     <div>
-                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Durrah Tutors</h3>
-                                        <p className="text-gray-500 dark:text-gray-400">Version 1.1.0</p>
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">Durrah Tutors</h3>
+                                        <p className="text-gray-500 dark:text-gray-400 font-medium">Version 1.1.0</p>
                                     </div>
                                 </div>
 
