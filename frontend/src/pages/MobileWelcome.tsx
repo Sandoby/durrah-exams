@@ -20,6 +20,11 @@ export default function MobileWelcome() {
         navigate(path);
     };
 
+    // Clear saved path on mount so back button works
+    useEffect(() => {
+        localStorage.removeItem('durrah_mobile_path');
+    }, []);
+
 
     const containerVariants = {
         hidden: { opacity: 0 },

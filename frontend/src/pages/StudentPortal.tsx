@@ -155,7 +155,10 @@ export default function StudentPortal() {
         {/* Mobile Back Button */}
         {Capacitor.isNativePlatform() && (
           <button
-            onClick={() => navigate('/mobile-welcome')}
+            onClick={() => {
+              localStorage.removeItem('durrah_mobile_path');
+              navigate('/mobile-welcome');
+            }}
             className="absolute top-6 left-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-all hover:scale-105"
             aria-label="Back to welcome"
           >

@@ -260,15 +260,18 @@ export default function KidsLanding() {
         <title>{t('kids.seo.title', 'Quiz Space Adventure | Durrah')}</title>
       </Helmet>
 
-      {/* Mobile Back Button */}
+      {/* Mobile Back Button - Bottom positioned for Kids page */}
       {Capacitor.isNativePlatform() && (
         <button
-          onClick={() => navigate('/mobile-welcome')}
-          className="fixed top-6 left-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/20 backdrop-blur-md shadow-xl border border-white/30 hover:bg-white/30 transition-all hover:scale-105"
+          onClick={() => {
+            localStorage.removeItem('durrah_mobile_path');
+            navigate('/mobile-welcome');
+          }}
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-indigo-500/90 to-purple-500/90 backdrop-blur-md shadow-2xl border-2 border-white/40 hover:from-indigo-600/90 hover:to-purple-600/90 transition-all hover:scale-105"
           aria-label="Back to welcome"
         >
-          <ArrowLeft className="w-4 h-4 text-white" />
-          <span className="text-sm font-medium text-white drop-shadow-lg">Back</span>
+          <ArrowLeft className="w-5 h-5 text-white" />
+          <span className="text-base font-bold text-white drop-shadow-lg">Back to Home</span>
         </button>
       )}
 
