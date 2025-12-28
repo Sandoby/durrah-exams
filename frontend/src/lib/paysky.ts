@@ -1,6 +1,8 @@
 import { supabase } from './supabase';
 import CryptoJS from 'crypto-js';
 import toast from 'react-hot-toast';
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 
 // Define types for global Lightbox
 declare global {
@@ -157,6 +159,28 @@ export class PaySkyIntegration {
                 window.TransactionType = 'SALE';
 
                 await this.createPaymentRecord(planId, amount, merchantRef, userEmail);
+
+                const isNative = Capacitor.isNativePlatform();
+                const callbackUrl = isNative
+                    ? 'durrah://payment-callback'
+                    : `${window.location.origin}/payment-callback?provider=paysky`;
+
+                if (isNative) {
+                    // For native, we construct a redirection URL and use Capacitor Browser
+                    const checkoutUrl = `https://cube.paysky.io:6006/PayMerchant/Index?` +
+                        `MID=${this.MID}` +
+                        `&TID=${this.TID}` +
+                        `&AmountTrxn=${amountInPiasters}` +
+                        `&MerchantReference=${merchantRef}` +
+                        `&TrxDateTime=${encodeURIComponent(trxDateTime)}` +
+                        `&SecureHash=${secureHash}` +
+                        `&ReturnURL=${encodeURIComponent(callbackUrl)}`;
+
+                    console.log('🔗 Initiating PaySky native checkout...', { checkoutUrl });
+                    await Browser.open({ url: checkoutUrl, windowName: '_blank' });
+                    resolve({ success: true, data: { orderId: merchantRef, checkoutUrl } });
+                    return;
+                }
 
                 window.Lightbox.Checkout.configure = {
                     MID: this.MID,

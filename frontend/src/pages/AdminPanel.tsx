@@ -40,10 +40,13 @@ interface Coupon {
 
 interface ChatMessage {
     id: string;
-    user_id: string;
-    user_email: string;
+    session_id: string;
+    sender_id: string | null;
+    sender_role: 'user' | 'agent' | 'admin';
+    sender_name: string;
     message: string;
-    is_admin: boolean;
+    is_agent: boolean;
+    is_read: boolean;
     created_at: string;
 }
 
@@ -56,13 +59,18 @@ interface SupportAgent {
     created_at: string;
 }
 
-interface ChatAssignment {
+interface ChatSession {
     id: string;
     user_id: string;
-    assigned_agent_id: string | null;
-    status: 'open' | 'closed';
-    assigned_at: string;
-    closed_at: string | null;
+    user_email: string;
+    user_name: string;
+    agent_id: string | null;
+    status: 'waiting' | 'active' | 'ended';
+    started_at: string;
+    assigned_at: string | null;
+    ended_at: string | null;
+    rating: number | null;
+    feedback: string | null;
 }
 
 interface UserInfo {
@@ -122,13 +130,12 @@ export default function AdminPanel() {
     const [generatedCode, setGeneratedCode] = useState<string | null>(null);
 
     // Chat
-    const [chatUsers, setChatUsers] = useState<string[]>([]);
-    const [selectedChatUser, setSelectedChatUser] = useState<string | null>(null);
+    const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+    const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const [newChatMessage, setNewChatMessage] = useState('');
     const [selectedUserInfo, setSelectedUserInfo] = useState<UserInfo | null>(null);
-    const [chatAssignments, setChatAssignments] = useState<ChatAssignment[]>([]);
-    const [chatFilter, setChatFilter] = useState<'new' | 'current' | 'ended'>('new');
+    const [chatFilter, setChatFilter] = useState<'waiting' | 'active' | 'ended'>('waiting');
     const [_showForwardModal, _setShowForwardModal] = useState(false);
     const [_forwardToAgentId, _setForwardToAgentId] = useState<string>('');
     const chatMessagesEndRef = useRef<HTMLDivElement>(null);
@@ -137,8 +144,7 @@ export default function AdminPanel() {
         if (isAuthenticated) {
             fetchUsers();
             fetchCoupons();
-            fetchChatUsers();
-            fetchChatAssignments();
+            fetchChatSessions();
             if (userRole === 'super_admin') {
                 fetchSupportAgents();
             }
@@ -149,16 +155,16 @@ export default function AdminPanel() {
     useEffect(() => {
         if (isAuthenticated) {
             const channel = supabase
-                .channel('admin_chat_users_global')
+                .channel('admin_chat_sessions_global')
                 .on(
                     'postgres_changes',
                     {
-                        event: 'INSERT',
+                        event: '*',
                         schema: 'public',
-                        table: 'chat_messages'
+                        table: 'live_chat_sessions'
                     },
                     () => {
-                        fetchChatUsers();
+                        fetchChatSessions();
                     }
                 )
                 .subscribe();
@@ -170,50 +176,44 @@ export default function AdminPanel() {
     }, [isAuthenticated]);
 
     useEffect(() => {
-        if (selectedChatUser) {
-            fetchChatMessages(selectedChatUser);
-            fetchUserInfo(selectedChatUser);
+        if (selectedSessionId) {
+            const session = chatSessions.find(s => s.id === selectedSessionId);
+            if (session) {
+                fetchChatMessages(selectedSessionId);
+                fetchUserInfo(session.user_id);
+            }
 
-            // Subscribe to new messages with unique channel
+            // Subscribe to new messages for this session
             const channel = supabase
-                .channel(`admin_chat:${selectedChatUser}`)
+                .channel(`admin_chat_session:${selectedSessionId}`)
                 .on(
                     'postgres_changes',
                     {
                         event: 'INSERT',
                         schema: 'public',
                         table: 'chat_messages',
-                        filter: `user_id=eq.${selectedChatUser}`
+                        filter: `session_id=eq.${selectedSessionId}`
                     },
                     (payload) => {
-                        console.log('Admin received message:', payload);
                         const newMsg = payload.new as ChatMessage;
                         setChatMessages(prev => {
-                            // Avoid duplicates
-                            if (prev.some(m => m.id === newMsg.id)) {
-                                return prev;
-                            }
+                            if (prev.some(m => m.id === newMsg.id)) return prev;
                             return [...prev, newMsg];
                         });
 
-                        // Play notification sound for user messages
-                        if (!newMsg.is_admin) {
+                        if (newMsg.sender_role === 'user') {
                             playNotificationSound();
                         }
-
                         scrollToBottom();
                     }
                 )
-                .subscribe((status) => {
-                    console.log('Admin subscription status:', status);
-                });
+                .subscribe();
 
             return () => {
-                console.log('Admin unsubscribing from chat');
                 supabase.removeChannel(channel);
             };
         }
-    }, [selectedChatUser]);
+    }, [selectedSessionId]);
 
     const scrollToBottom = () => {
         setTimeout(() => {
@@ -552,114 +552,28 @@ export default function AdminPanel() {
         }
     };
 
-    // ========== Chat Assignment Functions ==========
-    const fetchChatAssignments = async () => {
+    const fetchChatSessions = async () => {
         try {
             const { data, error } = await supabase
-                .from('chat_assignments')
-                .select('*');
+                .from('live_chat_sessions')
+                .select('*')
+                .order('updated_at', { ascending: false });
 
             if (error) throw error;
-            setChatAssignments(data || []);
+            setChatSessions(data || []);
         } catch (error) {
-            console.error('Error fetching chat assignments:', error);
+            console.error('Error fetching chat sessions:', error);
         }
     };
 
-    // Chat assignment helper (currently unused, reserved for future forwarding feature)
-    // const assignChatToAgent = async (userId: string, agentId: string) => {
-    //     try {
-    //         const { error } = await supabase
-    //             .from('chat_assignments')
-    //             .upsert({
-    //                 user_id: userId,
-    //                 assigned_agent_id: agentId,
-    //                 status: 'open'
-    //             });
-    //         if (error) throw error;
-    //         fetchChatAssignments();
-    //     } catch (error) {
-    //         console.error('Error assigning chat:', error);
-    //         toast.error('Failed to assign chat');
-    //     }
-    // };
-
-    // Forward chat function (for future use with forward modal UI)
-    // const forwardChat = async () => {
-    //     if (!selectedChatUser || !forwardToAgentId) return;
-    //     try {
-    //         await assignChatToAgent(selectedChatUser, forwardToAgentId);
-    //         toast.success('Chat forwarded successfully');
-    //         setShowForwardModal(false);
-    //         setForwardToAgentId('');
-    //     } catch (error) {
-    //         console.error('Error forwarding chat:', error);
-    //         toast.error('Failed to forward chat');
-    //     }
-    // };
-
-    const closeChat = async () => {
-        if (!selectedChatUser) return;
-
-        try {
-            const { error } = await supabase
-                .from('chat_assignments')
-                .update({
-                    status: 'closed',
-                    closed_at: new Date().toISOString()
-                })
-                .eq('user_id', selectedChatUser);
-
-            if (error) throw error;
-
-            // Send system message
-            await supabase.from('chat_messages').insert({
-                user_id: selectedChatUser,
-                user_email: selectedUserInfo?.email || '',
-                message: 'CHAT_CLOSED_BY_ADMIN',
-                is_admin: true
-            });
-
-            toast.success('Chat closed');
-            fetchChatAssignments();
-            setSelectedChatUser(null);
-        } catch (error) {
-            console.error('Error closing chat:', error);
-            toast.error('Failed to close chat');
-        }
-    };
-
-    const fetchChatUsers = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('chat_messages')
-                .select('user_id, user_email')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-
-            // Get unique users
-            const uniqueUsers = Array.from(new Set(data?.map(m => m.user_id) || []));
-            setChatUsers(uniqueUsers);
-        } catch (error) {
-            console.error('Error fetching chat users:', error);
-        }
-    };
-
-    // Get filtered chat users based on assignment status
-    const getFilteredChatUsers = () => {
-        return chatUsers.filter(userId => {
-            const assignment = chatAssignments.find(a => a.user_id === userId);
-
-            if (chatFilter === 'new') {
-                // New chats: no assignment or unassigned
-                return !assignment || assignment.assigned_agent_id === null;
-            } else if (chatFilter === 'current') {
-                // Current chats: assigned and open
-                return assignment && assignment.assigned_agent_id !== null && assignment.status === 'open';
+    const getFilteredChatSessions = () => {
+        return chatSessions.filter(session => {
+            if (chatFilter === 'waiting') {
+                return session.status === 'waiting';
+            } else if (chatFilter === 'active') {
+                return session.status === 'active';
             } else {
-                // Ended chats: closed status
-                return assignment && assignment.status === 'closed';
+                return session.status === 'ended';
             }
         });
     };
@@ -680,12 +594,12 @@ export default function AdminPanel() {
         }
     };
 
-    const fetchChatMessages = async (userId: string) => {
+    const fetchChatMessages = async (sessionId: string) => {
         try {
             const { data, error } = await supabase
                 .from('chat_messages')
                 .select('*')
-                .eq('user_id', userId)
+                .eq('session_id', sessionId)
                 .order('created_at', { ascending: true });
 
             if (error) throw error;
@@ -698,54 +612,64 @@ export default function AdminPanel() {
 
     const sendChatMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newChatMessage.trim() || !selectedChatUser) return;
+        if (!newChatMessage.trim() || !selectedSessionId) return;
 
         try {
-            const userEmail = chatMessages[0]?.user_email || '';
-
-            // Check if this chat needs to be assigned (new chat)
-            const existingAssignment = chatAssignments.find(a => a.user_id === selectedChatUser);
-
-            // If no assignment or unassigned, create/update assignment
-            if (!existingAssignment || existingAssignment.assigned_agent_id === null) {
-                if (currentAgentId) {
-                    // Create or update chat assignment
-                    const { error: assignError } = await supabase
-                        .from('chat_assignments')
-                        .upsert({
-                            user_id: selectedChatUser,
-                            assigned_agent_id: currentAgentId,
-                            status: 'open',
-                            assigned_at: new Date().toISOString()
-                        }, {
-                            onConflict: 'user_id'
-                        });
-
-                    if (assignError) {
-                        console.error('Error assigning chat:', assignError);
-                    } else {
-                        // Refresh assignments to update UI
-                        fetchChatAssignments();
-                    }
-                }
-            }
+            const session = chatSessions.find(s => s.id === selectedSessionId);
+            if (!session) return;
 
             // Send the message
             const { error } = await supabase
                 .from('chat_messages')
                 .insert({
-                    user_id: selectedChatUser,
-                    user_email: userEmail,
+                    session_id: selectedSessionId,
+                    sender_id: currentAgentId || null,
+                    sender_role: 'admin',
+                    sender_name: 'Admin',
                     message: newChatMessage.trim(),
-                    is_admin: true
+                    is_agent: true
                 });
 
             if (error) throw error;
             setNewChatMessage('');
             scrollToBottom();
+
+            // Mark session as active if it was waiting
+            if (session.status === 'waiting') {
+                await supabase
+                    .from('live_chat_sessions')
+                    .update({
+                        status: 'active',
+                        agent_id: currentAgentId || null,
+                        assigned_at: new Date().toISOString()
+                    })
+                    .eq('id', selectedSessionId);
+                fetchChatSessions();
+            }
         } catch (error) {
             console.error('Error sending message:', error);
             toast.error('Failed to send message');
+        }
+    };
+
+    const closeChat = async () => {
+        if (!selectedSessionId) return;
+        try {
+            const { error } = await supabase
+                .from('live_chat_sessions')
+                .update({
+                    status: 'ended',
+                    ended_at: new Date().toISOString()
+                })
+                .eq('id', selectedSessionId);
+
+            if (error) throw error;
+            toast.success('Chat closed');
+            fetchChatSessions();
+            setSelectedSessionId(null);
+        } catch (error) {
+            console.error('Error closing chat:', error);
+            toast.error('Failed to close chat');
         }
     };
 
@@ -1217,35 +1141,29 @@ export default function AdminPanel() {
                                 <div className="border-b border-gray-200 dark:border-gray-700">
                                     <nav className="-mb-px flex space-x-8 px-6" aria-label="Chat Filters">
                                         <button
-                                            onClick={() => setChatFilter('new')}
-                                            className={`${chatFilter === 'new'
+                                            onClick={() => setChatFilter('waiting')}
+                                            className={`${chatFilter === 'waiting'
                                                 ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
                                                 : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                                                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
                                         >
                                             <span className="mr-2">🆕</span>
-                                            New Chat Orders
+                                            Waiting
                                             <span className="ml-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 py-0.5 px-2 rounded-full text-xs font-semibold">
-                                                {chatUsers.filter(userId => {
-                                                    const assignment = chatAssignments.find(a => a.user_id === userId);
-                                                    return !assignment || assignment.assigned_agent_id === null;
-                                                }).length}
+                                                {chatSessions.filter(s => s.status === 'waiting').length}
                                             </span>
                                         </button>
                                         <button
-                                            onClick={() => setChatFilter('current')}
-                                            className={`${chatFilter === 'current'
+                                            onClick={() => setChatFilter('active')}
+                                            className={`${chatFilter === 'active'
                                                 ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
                                                 : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                                                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
                                         >
                                             <span className="mr-2">💬</span>
-                                            Current Chats
+                                            Active
                                             <span className="ml-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 py-0.5 px-2 rounded-full text-xs font-semibold">
-                                                {chatUsers.filter(userId => {
-                                                    const assignment = chatAssignments.find(a => a.user_id === userId);
-                                                    return assignment && assignment.assigned_agent_id !== null && assignment.status === 'open';
-                                                }).length}
+                                                {chatSessions.filter(s => s.status === 'active').length}
                                             </span>
                                         </button>
                                         <button
@@ -1256,12 +1174,9 @@ export default function AdminPanel() {
                                                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
                                         >
                                             <span className="mr-2">✅</span>
-                                            Ended Chats
+                                            Ended
                                             <span className="ml-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 py-0.5 px-2 rounded-full text-xs font-semibold">
-                                                {chatUsers.filter(userId => {
-                                                    const assignment = chatAssignments.find(a => a.user_id === userId);
-                                                    return assignment && assignment.status === 'closed';
-                                                }).length}
+                                                {chatSessions.filter(s => s.status === 'ended').length}
                                             </span>
                                         </button>
                                     </nav>
@@ -1270,30 +1185,36 @@ export default function AdminPanel() {
 
                             {/* Chat Interface */}
                             <div className="grid grid-cols-3 gap-6 h-[600px]">
-                                {/* Users List */}
-                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-                                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                                {/* Sessions List */}
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden flex flex-col">
+                                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                                         <h3 className="font-semibold text-gray-900 dark:text-white">
-                                            {chatFilter === 'new' && 'New Conversations'}
-                                            {chatFilter === 'current' && 'Active Conversations'}
-                                            {chatFilter === 'ended' && 'Closed Conversations'}
+                                            {chatFilter === 'waiting' && 'Waiting Conversations'}
+                                            {chatFilter === 'active' && 'Active Conversations'}
+                                            {chatFilter === 'ended' && 'Ended Conversations'}
                                         </h3>
                                     </div>
-                                    <div className="overflow-y-auto h-full">
-                                        {getFilteredChatUsers().length === 0 ? (
+                                    <div className="overflow-y-auto flex-1">
+                                        {getFilteredChatSessions().length === 0 ? (
                                             <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
                                                 No {chatFilter} conversations
                                             </div>
                                         ) : (
-                                            getFilteredChatUsers().map((userId) => (
+                                            getFilteredChatSessions().map((session) => (
                                                 <button
-                                                    key={userId}
-                                                    onClick={() => setSelectedChatUser(userId)}
-                                                    className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-700 ${selectedChatUser === userId ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
+                                                    key={session.id}
+                                                    onClick={() => setSelectedSessionId(session.id)}
+                                                    className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-700 ${selectedSessionId === session.id ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
                                                         }`}
                                                 >
-                                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                                        {userId.substring(0, 8)}...
+                                                    <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                                        {session.user_name || 'Anonymous'}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                        {session.user_email}
+                                                    </p>
+                                                    <p className="text-[10px] text-gray-400 mt-1">
+                                                        {new Date(session.updated_at || session.started_at).toLocaleString()}
                                                     </p>
                                                 </button>
                                             ))
@@ -1303,16 +1224,16 @@ export default function AdminPanel() {
 
                                 {/* Chat Messages */}
                                 <div className="col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow flex flex-col">
-                                    {selectedChatUser ? (
+                                    {selectedSessionId ? (
                                         <>
                                             <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                                                 <div className="flex items-start justify-between">
                                                     <div className="flex-1">
                                                         <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
-                                                            {selectedUserInfo?.full_name || chatMessages[0]?.user_email || 'User Chat'}
+                                                            {selectedUserInfo?.full_name || chatSessions.find(s => s.id === selectedSessionId)?.user_name || 'User Chat'}
                                                         </h3>
                                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                            {selectedUserInfo?.email || chatMessages[0]?.user_email}
+                                                            {selectedUserInfo?.email || chatSessions.find(s => s.id === selectedSessionId)?.user_email}
                                                         </p>
 
                                                         {/* User Details Grid */}
@@ -1338,66 +1259,32 @@ export default function AdminPanel() {
                                                                     {selectedUserInfo?.subscription_status === 'active' ? 'Subscribed' : 'Free'}
                                                                 </span>
                                                             </div>
-                                                            {selectedUserInfo?.subscription_plan && (
-                                                                <div>
-                                                                    <span className="text-gray-500 dark:text-gray-400">Plan:</span>
-                                                                    <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.subscription_plan}</span>
-                                                                </div>
-                                                            )}
-                                                            {selectedUserInfo?.created_at && (
-                                                                <div className="col-span-2">
-                                                                    <span className="text-gray-500 dark:text-gray-400">Member since:</span>
-                                                                    <span className="ml-1 text-gray-900 dark:text-white">
-                                                                        {new Date(selectedUserInfo.created_at).toLocaleDateString()}
-                                                                    </span>
-                                                                </div>
-                                                            )}
                                                         </div>
                                                     </div>
+                                                    <div className="flex space-x-2">
+                                                        <button
+                                                            onClick={closeChat}
+                                                            className="text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-800 transition-colors"
+                                                        >
+                                                            Close Chat
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex justify-end">
-                                                <button
-                                                    onClick={async () => {
-                                                        if (!selectedChatUser) return;
-
-                                                        try {
-                                                            // Send system message to trigger rating on user side
-                                                            await supabase
-                                                                .from('chat_messages')
-                                                                .insert({
-                                                                    user_id: selectedChatUser,
-                                                                    user_email: selectedUserInfo?.email || 'admin',
-                                                                    message: 'CHAT_CLOSED_BY_ADMIN',
-                                                                    is_admin: true
-                                                                });
-
-                                                            // Close the chat assignment
-                                                            await closeChat();
-                                                        } catch (error) {
-                                                            console.error('Error closing chat:', error);
-                                                            toast.error('Failed to close chat properly');
-                                                        }
-                                                    }}
-                                                    className="text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 px-3 py-1 rounded-full transition-colors"
-                                                >
-                                                    Close Chat & Request Rating
-                                                </button>
                                             </div>
                                             <div className="flex-1 overflow-y-auto p-4 space-y-3">
                                                 {chatMessages.map((msg) => (
                                                     <div
                                                         key={msg.id}
-                                                        className={`flex ${msg.is_admin ? 'justify-end' : 'justify-start'}`}
+                                                        className={`flex ${msg.sender_role === 'admin' ? 'justify-end' : 'justify-start'}`}
                                                     >
                                                         <div
-                                                            className={`max-w-[70%] rounded-lg p-3 ${msg.is_admin
+                                                            className={`max-w-[70%] rounded-lg p-3 ${msg.sender_role === 'admin'
                                                                 ? 'bg-indigo-600 text-white'
                                                                 : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                                                                 }`}
                                                         >
                                                             <p className="text-sm">{msg.message}</p>
-                                                            <p className={`text-xs mt-1 ${msg.is_admin ? 'text-indigo-200' : 'text-gray-500'}`}>
+                                                            <p className={`text-[10px] mt-1 ${msg.sender_role === 'admin' ? 'text-indigo-200' : 'text-gray-500 dark:text-gray-400'}`}>
                                                                 {new Date(msg.created_at).toLocaleTimeString()}
                                                             </p>
                                                         </div>
@@ -1405,22 +1292,21 @@ export default function AdminPanel() {
                                                 ))}
                                                 <div ref={chatMessagesEndRef} />
                                             </div>
-                                            <form onSubmit={sendChatMessage} className="p-4 border-t border-gray-200 dark:border-gray-700">
-                                                <div className="flex space-x-2">
-                                                    <input
-                                                        type="text"
-                                                        value={newChatMessage}
-                                                        onChange={(e) => setNewChatMessage(e.target.value)}
-                                                        placeholder="Type your response..."
-                                                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                                    />
-                                                    <button
-                                                        type="submit"
-                                                        className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700"
-                                                    >
-                                                        <Send className="h-5 w-5" />
-                                                    </button>
-                                                </div>
+                                            <form onSubmit={sendChatMessage} className="p-4 border-t border-gray-200 dark:border-gray-700 flex space-x-2">
+                                                <input
+                                                    type="text"
+                                                    value={newChatMessage}
+                                                    onChange={(e) => setNewChatMessage(e.target.value)}
+                                                    placeholder="Type your response..."
+                                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                />
+                                                <button
+                                                    type="submit"
+                                                    disabled={!newChatMessage.trim()}
+                                                    className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                                                >
+                                                    <Send className="h-5 w-5" />
+                                                </button>
                                             </form>
                                         </>
                                     ) : (
