@@ -1,33 +1,33 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
-import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
+import toast from 'react-hot-toast';
 
 export const downloaderService = {
     async downloadFile(filename: string, data: string, type: 'text' | 'base64' = 'text') {
         if (Capacitor.isNativePlatform()) {
             try {
-                // Create a unique filename if needed or use provided
-                const path = filename;
+                // Determine the directory based on platform
+                // On Android/iOS, Directory.Documents is the most appropriate for "Downloads"
+                const directory = Directory.Documents;
 
-                // Write file to cache or temporary directory for sharing
+                // Write file to the documents directory
                 const result = await Filesystem.writeFile({
-                    path,
+                    path: filename,
                     data,
-                    directory: Directory.Cache,
+                    directory,
                     encoding: type === 'text' ? Encoding.UTF8 : undefined,
+                    recursive: true
                 });
 
-                // Share the file so the user can save or open it
-                await Share.share({
-                    title: `Download ${filename}`,
-                    text: `Here is your ${filename}`,
-                    url: result.uri,
-                    dialogTitle: 'Save or Share File',
-                });
+                toast.success(`Success: ${filename} saved to Documents folder`);
+
+                // Note: We don't use Share.share here as the user wants direct downloading.
+                // The file will be available in the "Files" app (iOS) or "Documents" folder (Android).
 
                 return true;
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Download failed:', error);
+                toast.error(`Download failed: ${error.message || 'Unknown error'}`);
                 throw error;
             }
         } else {
