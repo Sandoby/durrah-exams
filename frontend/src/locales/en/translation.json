@@ -1,4 +1,12 @@
 {
+    "math": {
+        "togglePreview": "Preview Math",
+        "help": "Supports LaTeX (e.g. $$x^2$$)",
+        "insert": "Insert Formula"
+    },
+    "common": {
+        "dir": "ltr"
+    },
     "hero": {
         "title": "Create Exams That",
         "titleHighlight": "Inspire Excellence",
@@ -12,7 +20,7 @@
         },
         "features": {
             "noCreditCard": "No credit card required",
-            "freeExams": "Free for up to 3 exams",
+            "freeExams": "Free for up to 3 exams (lifetime)",
             "cancelAnytime": "Cancel anytime"
         }
     },
@@ -66,7 +74,7 @@
             "title": "Starter",
             "price": "Free",
             "features": [
-                "Up to 3 exams",
+                "Up to 3 exams (lifetime)",
                 "50 students per exam",
                 "Basic analytics"
             ],
@@ -233,7 +241,21 @@
         "deleteConfirm": "Are you sure you want to delete this exam?",
         "linkCopied": "Exam link copied!",
         "deleteSuccess": "Exam deleted successfully",
-        "upgradeLimit": "Free plan is limited to 3 exams. Upgrade to Pro for unlimited!"
+        "upgradeLimit": "Free plan is limited to 3 exams (lifetime). Upgrade to Pro for unlimited!",
+        "overLimitWarning": "You have reached or exceeded the free plan limit of 3 exams. You can still manage your existing exams, but cannot create new ones without a Pro subscription.",
+        "print": {
+            "studentInfo": "Student Info (fill before starting):",
+            "fullName": "Full Name",
+            "email": "Email",
+            "studentId": "Student ID",
+            "phone": "Phone",
+            "footerNote": "This printout is for administering the exam on paper. Students should write legibly and include their name on each page."
+        },
+        "demo": {
+            "statusError": "Cannot change status in demo mode",
+            "banner": "Demo Mode - Explore and try features. Sign up when ready to save your work!",
+            "back": "Back to Demo"
+        }
     },
     "settings": {
         "title": "Settings",
@@ -287,6 +309,118 @@
                     "desc": "Clean, distraction-free experience for both you and your students."
                 }
             }
+        },
+        "language": {
+            "title": "Language",
+            "desc": "Choose your preferred language for the interface",
+            "current": "Current Language"
+        }
+    },
+    "mobileWelcome": {
+        "title": "Choose your learning path",
+        "tutor": {
+            "title": "Tutor Access",
+            "desc": "Manage exams & students"
+        },
+        "student": {
+            "title": "Student Portal",
+            "desc": "Take exams & track progress"
+        },
+        "kids": {
+            "title": "Kids Adventure",
+            "desc": "Fun learning & games"
+        },
+        "version": "Mobile App"
+    },
+    "questionBank": {
+        "title": "Question Bank",
+        "demo": {
+            "save": "Demo mode: Sign up to save your own question banks",
+            "delete": "Demo mode: Sign up to delete and manage banks",
+            "add": "Demo mode: Sign up to add your own questions"
+        },
+        "validation": {
+            "name": "Please enter a bank name",
+            "question": "Please enter a question",
+            "bankSelect": "Please select a question bank first",
+            "options": "Please provide at least 2 options",
+            "correctAnswer": "Please select a correct answer"
+        },
+        "success": {
+            "created": "Question bank created successfully",
+            "deleted": "Question bank deleted",
+            "questionAdded": "Question added successfully!",
+            "questionDeleted": "Question deleted"
+        },
+        "error": {
+            "create": "Failed to create question bank",
+            "delete": "Failed to delete question bank",
+            "add": "Failed to add question",
+            "deleteQuestion": "Failed to delete question",
+            "noExport": "No questions to export"
+        },
+        "confirm": {
+            "deleteBank": "Are you sure you want to delete this question bank? All questions will be removed.",
+            "deleteQuestion": "Delete this question?"
+        }
+    },
+    "auth": {
+        "signIn": "Sign In",
+        "createAccount": "Create Account",
+        "forgotPassword": "Forgot password?",
+        "newToDurrah": "New to Durrah?",
+        "alreadyHaveAccount": "Already have an account?",
+        "signInInstead": "Sign In instead",
+        "processing": "Processing..."
+    },
+    "studentPortal": {
+        "title": "Student Portal",
+        "regSuccess": "Registration successful! Please check your email.",
+        "welcome": "Welcome back!",
+        "notFound": "Exam not found. Please check the code.",
+        "error": "An error occurred. Please try again.",
+        "signIn": "Sign in to Student Portal",
+        "createAccount": "Create Student Account",
+        "signOut": "Sign Out",
+        "joinExam": "Join an Exam",
+        "joinDesc": "Enter the Exam Code provided by your tutor to start a new assessment.",
+        "enterCode": "Enter Exam Code or ID",
+        "joining": "Joining...",
+        "start": "Start",
+        "performance": "Your Performance",
+        "examsTaken": "Exams Taken",
+        "avgScore": "Avg. Score",
+        "recentActivity": "Recent Activity",
+        "noExams": "No exams found yet. Join your first exam above!",
+        "untitled": "Untitled Exam",
+        "noDesc": "No description"
+    },
+    "kidsLanding": {
+        "missionCenter": "Mission Center",
+        "readySystem": "SYSTEM READY FOR TAKEOFF",
+        "readyTitle": "Ready for",
+        "readyTitleHighlight": "Takeoff?",
+        "subtitle": "Join the galaxy's smartest explorers! Enter your mission nickname and secret code to start your planetary challenge.",
+        "commander": "Commander AI",
+        "protocol": "Advanced Protocol",
+        "rankings": "Rankings",
+        "badges": "Earn Cosmic Badges",
+        "callsign": "Explorer Callsign",
+        "callsignPlaceholder": "e.g. CaptainCosmos",
+        "missionCode": "Mission Code",
+        "blastOff": "BLAST OFF!",
+        "constellation": "Dynamic Constellation Activated",
+        "poweredBy": "Powered By",
+        "cosmicSolutions": "Cosmic Exam Solutions",
+        "backHome": "Back to Home",
+        "validation": {
+            "nickname": "Please enter a nickname",
+            "code": "Please enter the quiz code",
+            "invalid": "Invalid code",
+            "notEnabled": "This quiz is not enabled for kids mode"
+        },
+        "error": {
+            "failed": "Failed to open quiz"
         }
     },
     "examEditor": {

@@ -207,11 +207,11 @@ export default function QuestionBank() {
 
     const createBank = async () => {
         if (isDemo) {
-            toast('Demo mode: Sign up to save your own question banks');
+            toast(t('questionBank.demo.save', 'Demo mode: Sign up to save your own question banks'));
             return;
         }
         if (!newBankName.trim()) {
-            toast.error('Please enter a bank name');
+            toast.error(t('questionBank.validation.name', 'Please enter a bank name'));
             return;
         }
 
@@ -229,14 +229,14 @@ export default function QuestionBank() {
 
             if (error) throw error;
 
-            toast.success('Question bank created successfully');
+            toast.success(t('questionBank.success.created', 'Question bank created successfully'));
             setShowCreateModal(false);
             setNewBankName('');
             setNewBankDescription('');
             fetchBanks();
         } catch (error: any) {
             console.error('Error creating bank:', error);
-            toast.error('Failed to create question bank');
+            toast.error(t('questionBank.error.create', 'Failed to create question bank'));
         } finally {
             setIsCreating(false);
         }
@@ -244,10 +244,10 @@ export default function QuestionBank() {
 
     const deleteBank = async (bankId: string) => {
         if (isDemo) {
-            toast('Demo mode: Sign up to delete and manage banks');
+            toast(t('questionBank.demo.delete', 'Demo mode: Sign up to delete and manage banks'));
             return;
         }
-        if (!confirm('Are you sure you want to delete this question bank? All questions will be removed.')) {
+        if (!confirm(t('questionBank.confirm.deleteBank', 'Are you sure you want to delete this question bank? All questions will be removed.'))) {
             return;
         }
 
@@ -259,7 +259,7 @@ export default function QuestionBank() {
 
             if (error) throw error;
 
-            toast.success('Question bank deleted');
+            toast.success(t('questionBank.success.deleted', 'Question bank deleted'));
             fetchBanks();
             if (selectedBank?.id === bankId) {
                 setSelectedBank(null);
@@ -275,15 +275,15 @@ export default function QuestionBank() {
 
     const handleAddQuestion = async () => {
         if (isDemo) {
-            toast('Demo mode: Sign up to add your own questions');
+            toast(t('questionBank.demo.add', 'Demo mode: Sign up to add your own questions'));
             return;
         }
         if (!newQuestion.question_text.trim()) {
-            toast.error('Please enter a question');
+            toast.error(t('questionBank.validation.question', 'Please enter a question'));
             return;
         }
         if (!selectedBank) {
-            toast.error('Please select a question bank first');
+            toast.error(t('questionBank.validation.bankSelect', 'Please select a question bank first'));
             return;
         }
 
@@ -293,7 +293,7 @@ export default function QuestionBank() {
             if (['multiple_choice', 'multiple_select', 'dropdown'].includes(newQuestion.type)) {
                 const validOptions = newQuestion.options.filter(o => o.trim());
                 if (validOptions.length < 2) {
-                    toast.error('Please provide at least 2 options');
+                    toast.error(t('questionBank.validation.options', 'Please provide at least 2 options'));
                     setIsAdding(false);
                     return;
                 }
@@ -303,7 +303,7 @@ export default function QuestionBank() {
                     : !!newQuestion.correct_answer;
 
                 if (!hasCorrect) {
-                    toast.error('Please select a correct answer');
+                    toast.error(t('questionBank.validation.correctAnswer', 'Please select a correct answer'));
                     setIsAdding(false);
                     return;
                 }
@@ -333,7 +333,7 @@ export default function QuestionBank() {
 
             if (error) throw error;
 
-            toast.success('Question added successfully!');
+            toast.success(t('questionBank.success.questionAdded', 'Question added successfully!'));
 
             // Reset form
             setNewQuestion({
@@ -354,14 +354,14 @@ export default function QuestionBank() {
             }
         } catch (error: any) {
             console.error('Error adding question:', error);
-            toast.error('Failed to add question');
+            toast.error(t('questionBank.error.add', 'Failed to add question'));
         } finally {
             setIsAdding(false);
         }
     };
 
     const deleteQuestion = async (questionId: string) => {
-        if (!confirm('Delete this question?')) return;
+        if (!confirm(t('questionBank.confirm.deleteQuestion', 'Delete this question?'))) return;
 
         try {
             const { error } = await supabase
@@ -371,7 +371,7 @@ export default function QuestionBank() {
 
             if (error) throw error;
 
-            toast.success('Question deleted');
+            toast.success(t('questionBank.success.questionDeleted', 'Question deleted'));
             if (selectedBank) {
                 fetchQuestions(selectedBank.id);
                 fetchBanks();
@@ -394,7 +394,7 @@ export default function QuestionBank() {
 
             if (error) throw error;
             if (!data || data.length === 0) {
-                toast.error('No questions to export');
+                toast.error(t('questionBank.error.noExport', 'No questions to export'));
                 return;
             }
 

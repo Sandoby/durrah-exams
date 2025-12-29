@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { CheckCircle, Loader2, Sparkles, Star, Trophy, AlertCircle, Rocket, Orbit } from 'lucide-react';
+import Latex from 'react-latex-next';
 
 import { supabase } from '../lib/supabase';
 import { KidsLeaderboard } from '../components/kids/KidsLeaderboard';
@@ -498,7 +499,7 @@ export default function KidsExamView() {
               </div>
 
               <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight mb-8">
-                {q.question_text}
+                <Latex>{q.question_text}</Latex>
               </h2>
 
               {q.media_url && (
@@ -525,7 +526,7 @@ export default function KidsExamView() {
                         <div className={`h-8 w-8 rounded-xl border-2 flex items-center justify-center font-black transition-colors ${isSelected ? 'border-none bg-indigo-500 text-white' : 'border-white/10 text-white/30'}`}>
                           {String.fromCharCode(65 + idx)}
                         </div>
-                        <span className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-indigo-100/60'}`}>{opt}</span>
+                        <span className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-indigo-100/60'}`}><Latex>{opt}</Latex></span>
                       </div>
                       {isSelected && <div className="absolute inset-y-0 right-5 flex items-center"><CheckCircle className="text-indigo-400 h-6 w-6" /></div>}
                     </button>

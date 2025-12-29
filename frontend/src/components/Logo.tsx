@@ -22,7 +22,7 @@ export function Logo({ className = '', showText = true, size = 'md' }: LogoProps
     };
 
     return (
-        <div className={`flex items-center ${className}`}>
+        <div className={`flex items-center logo ${className}`}>
             <div className="relative flex items-center justify-center">
                 <div className={`absolute inset-0 bg-indigo-600 rounded-full opacity-20 blur-sm transform scale-110`}></div>
                 <GraduationCap className={`${sizeClasses[size]} text-indigo-600 relative z-10`} />

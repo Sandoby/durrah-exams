@@ -181,7 +181,7 @@ export default function StudentPortal() {
             <form className="space-y-6" onSubmit={handleAuth}>
               {authMode === 'register' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('Full Name')}</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.profile.fullName', 'Full Name')}</label>
                   <div className="mt-1 relative rounded-md shadow-sm">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <User className="h-5 w-5 text-gray-400" />
@@ -199,7 +199,7 @@ export default function StudentPortal() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('Email address')}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.profile.email', 'Email address')}</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <User className="h-5 w-5 text-gray-400" />
@@ -218,7 +218,7 @@ export default function StudentPortal() {
               <div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t('Password')}
+                    {t('settings.password.new', 'Password')}
                   </label>
                   <input
                     type="password"
@@ -235,7 +235,7 @@ export default function StudentPortal() {
                         onClick={() => navigate('/forgot-password')}
                         className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
                       >
-                        {t('Forgot password?')}
+                        {t('auth.forgotPassword', 'Forgot password?')}
                       </button>
                     </div>
                   )}
@@ -247,7 +247,7 @@ export default function StudentPortal() {
                 disabled={loading}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform hover:scale-[1.02] transition-all"
               >
-                {loading ? t('Processing...') : authMode === 'login' ? t('Sign In') : t('Create Account')}
+                {loading ? t('auth.processing', 'Processing...') : authMode === 'login' ? t('auth.signIn', 'Sign In') : t('auth.createAccount', 'Create Account')}
               </button>
             </form>
 
@@ -258,7 +258,7 @@ export default function StudentPortal() {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
-                    {authMode === 'login' ? t('New to Durrah?') : t('Already have an account?')}
+                    {authMode === 'login' ? t('auth.newToDurrah', 'New to Durrah?') : t('auth.alreadyHaveAccount', 'Already have an account?')}
                   </span>
                 </div>
               </div>
@@ -268,7 +268,7 @@ export default function StudentPortal() {
                   onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
                   className="w-full flex justify-center py-3 px-4 border-2 border-indigo-100 dark:border-gray-600 rounded-full shadow-sm text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                 >
-                  {authMode === 'login' ? t('studentPortal.createAccount', 'Create Student Account') : t('Sign In instead')}
+                  {authMode === 'login' ? t('studentPortal.createAccount', 'Create Student Account') : t('auth.signInInstead', 'Sign In instead')}
                 </button>
               </div>
             </div>

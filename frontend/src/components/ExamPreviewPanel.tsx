@@ -1,4 +1,5 @@
 import { Eye, Clock, AlertTriangle } from 'lucide-react';
+import Latex from 'react-latex-next';
 
 interface Question {
     id?: string;
@@ -61,7 +62,7 @@ export function ExamPreviewPanel({ data }: { data: ExamForm }) {
                                 </div>
 
                                 <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3 break-words">
-                                    {q.question_text || 'Enter question text...'}
+                                    <Latex>{q.question_text || 'Enter question text...'}</Latex>
                                 </p>
 
                                 <div className="space-y-2">
@@ -78,7 +79,7 @@ export function ExamPreviewPanel({ data }: { data: ExamForm }) {
                                                 q.options?.map((opt, optIndex) => (
                                                     <div key={optIndex} className="flex items-center gap-2 p-2 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 opacity-70">
                                                         <div className={`w-3 h-3 ${q.type === 'multiple_select' ? 'rounded' : 'rounded-full'} border border-gray-300`}></div>
-                                                        <span className="text-xs text-gray-600 dark:text-gray-400">{opt || `Option ${optIndex + 1}`}</span>
+                                                        <span className="text-xs text-gray-600 dark:text-gray-400"><Latex>{opt || `Option ${optIndex + 1}`}</Latex></span>
                                                     </div>
                                                 ))
                                             )}

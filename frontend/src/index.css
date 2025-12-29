@@ -76,3 +76,18 @@
     color: hsl(var(--foreground));
   }
 }
+
+/* RTL Support: Keep logos and navbars in LTR direction */
+[dir="rtl"] .logo,
+[dir="rtl"] nav,
+[dir="rtl"] .navbar,
+[dir="rtl"] .ltr-content {
+  direction: ltr;
+}
+
+/* Keep logo images and brand elements LTR */
+[dir="rtl"] .logo img,
+[dir="rtl"] .logo svg,
+[dir="rtl"] .brand {
+  direction: ltr;
+}

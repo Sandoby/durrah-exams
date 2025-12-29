@@ -216,11 +216,11 @@ export default function KidsLanding() {
   const handleEnter = async () => {
     const nick = nickname.trim();
     if (!nick) {
-      toast.error('Please enter a nickname');
+      toast.error(t('kidsLanding.validation.nickname', 'Please enter a nickname'));
       return;
     }
     if (!normalizedCode) {
-      toast.error('Please enter the quiz code');
+      toast.error(t('kidsLanding.validation.code', 'Please enter the quiz code'));
       return;
     }
 
@@ -233,21 +233,21 @@ export default function KidsLanding() {
         .single();
 
       if (error || !exam) {
-        toast.error('Invalid code');
+        toast.error(t('kidsLanding.validation.invalid', 'Invalid code'));
         return;
       }
 
       const settings: any = exam.settings || {};
       const childModeEnabled = !!settings.child_mode_enabled;
       if (!childModeEnabled) {
-        toast.error('This quiz is not enabled for kids mode');
+        toast.error(t('kidsLanding.validation.notEnabled', 'This quiz is not enabled for kids mode'));
         return;
       }
 
       navigate(`/kids/quiz/${exam.id}?code=${encodeURIComponent(normalizedCode)}&nick=${encodeURIComponent(nick)}&kid=1`);
     } catch (e) {
       console.error(e);
-      toast.error('Failed to open quiz');
+      toast.error(t('kidsLanding.error.failed', 'Failed to open quiz'));
     } finally {
       setIsLoading(false);
     }
@@ -257,7 +257,7 @@ export default function KidsLanding() {
   return (
     <div dir={i18n.language === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen bg-[#050616] overflow-hidden relative font-sans">
       <Helmet>
-        <title>{t('kids.seo.title', 'Quiz Space Adventure | Durrah')}</title>
+        <title>{t('kidsLanding.seo.title', 'Quiz Space Adventure | Durrah')}</title>
       </Helmet>
 
       {/* Mobile Back Button - Bottom positioned for Kids page */}
@@ -271,7 +271,7 @@ export default function KidsLanding() {
           aria-label="Back to welcome"
         >
           <ArrowLeft className="w-5 h-5 text-white" />
-          <span className="text-base font-bold text-white drop-shadow-lg">Back to Home</span>
+          <span className="text-base font-bold text-white drop-shadow-lg">{t('kidsLanding.backHome', 'Back to Home')}</span>
         </button>
       )}
 
@@ -316,7 +316,7 @@ export default function KidsLanding() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="glass-panel px-4 py-2 rounded-full flex items-center gap-2 border-indigo-500/30">
             <Orbit className="h-5 w-5 text-indigo-400 animate-spin-slow" />
-            <span className="text-sm font-bold text-indigo-100/80 tracking-widest uppercase">Mission Center</span>
+            <span className="text-sm font-bold text-indigo-100/80 tracking-widest uppercase">{t('kidsLanding.missionCenter', 'Mission Center')}</span>
           </div>
           <LanguageSwitcher />
         </div>
@@ -329,13 +329,13 @@ export default function KidsLanding() {
           <div className="flex-1 text-center lg:text-left order-2 lg:order-1">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-6">
               <Zap className="h-4 w-4 fill-current animate-pulse" />
-              SYSTEM READY FOR TAKEOFF
+              {t('kidsLanding.readySystem', 'SYSTEM READY FOR TAKEOFF')}
             </div>
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight uppercase tracking-tight">
-              Ready for <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 animate-gradient">Takeoff?</span>
+              {t('kidsLanding.readyTitle', 'Ready for')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 animate-gradient">{t('kidsLanding.readyTitleHighlight', 'Takeoff?')}</span>
             </h1>
             <p className="text-indigo-200/60 text-base sm:text-lg mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
-              Join the galaxy's smartest explorers! Enter your mission nickname and secret code to start your planetary challenge.
+              {t('kidsLanding.subtitle', "Join the galaxy's smartest explorers! Enter your mission nickname and secret code to start your planetary challenge.")}
             </p>
 
             {/* Visual Indicators */}
@@ -346,8 +346,8 @@ export default function KidsLanding() {
                   <Cpu className="text-indigo-400" />
                 </div>
                 <div className="relative z-10">
-                  <p className="text-[10px] text-indigo-300/50 font-black tracking-widest uppercase mb-0.5">Commander AI</p>
-                  <p className="text-sm text-white font-black uppercase">Advanced Protocol</p>
+                  <p className="text-[10px] text-indigo-300/50 font-black tracking-widest uppercase mb-0.5">{t('kidsLanding.commander', 'Commander AI')}</p>
+                  <p className="text-sm text-white font-black uppercase">{t('kidsLanding.protocol', 'Advanced Protocol')}</p>
                 </div>
               </div>
               <div className="glass-panel p-4 rounded-2xl flex items-center gap-3 group hover:border-emerald-500/50 transition-all cursor-default relative overflow-hidden">
@@ -356,8 +356,8 @@ export default function KidsLanding() {
                   <Trophy className="text-emerald-400" />
                 </div>
                 <div className="relative z-10">
-                  <p className="text-[10px] text-emerald-300/50 font-black tracking-widest uppercase mb-0.5">Rankings</p>
-                  <p className="text-sm text-white font-black uppercase">Earn Cosmic Badges</p>
+                  <p className="text-[10px] text-emerald-300/50 font-black tracking-widest uppercase mb-0.5">{t('kidsLanding.rankings', 'Rankings')}</p>
+                  <p className="text-sm text-white font-black uppercase">{t('kidsLanding.badges', 'Earn Cosmic Badges')}</p>
                 </div>
               </div>
             </div>
@@ -388,19 +388,19 @@ export default function KidsLanding() {
 
                 <div className="space-y-6">
                   <div>
-                    <label className="text-[10px] font-black text-indigo-400/70 tracking-[0.2em] uppercase mb-3 block">Explorer Callsign</label>
+                    <label className="text-[10px] font-black text-indigo-400/70 tracking-[0.2em] uppercase mb-3 block">{t('kidsLanding.callsign', 'Explorer Callsign')}</label>
                     <div className="relative group">
                       <input
                         value={nickname}
                         onChange={(e) => setNickname(e.target.value)}
                         className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-5 py-4 text-white text-lg placeholder-white/20 focus:outline-none focus:border-indigo-500/50 transition-all focus:ring-4 focus:ring-indigo-500/10 group-hover:border-white/20 font-bold"
-                        placeholder="e.g. CaptainCosmos"
+                        placeholder={t('kidsLanding.callsignPlaceholder', 'e.g. CaptainCosmos')}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-black text-indigo-400/70 tracking-[0.2em] uppercase mb-3 block">Mission Code</label>
+                    <label className="text-[10px] font-black text-indigo-400/70 tracking-[0.2em] uppercase mb-3 block">{t('kidsLanding.missionCode', 'Mission Code')}</label>
                     <div className="relative">
                       <Ticket className="absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 text-indigo-500/40" />
                       <input
@@ -420,7 +420,7 @@ export default function KidsLanding() {
                     <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 slant" />
                     {isLoading ? <div className="h-6 w-6 border-3 border-white/30 border-t-white rounded-full animate-spin" /> : (
                       <>
-                        <span className="tracking-widest">BLAST OFF!</span>
+                        <span className="tracking-widest">{t('kidsLanding.blastOff', 'BLAST OFF!')}</span>
                         <Rocket className="h-6 w-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                       </>
                     )}
@@ -428,7 +428,7 @@ export default function KidsLanding() {
 
                   <p className="text-center text-indigo-100/30 text-[10px] flex items-center justify-center gap-2 font-black tracking-widest uppercase">
                     <Sparkles className="h-3 w-3 animate-pulse text-indigo-400" />
-                    Dynamic Constellation Activated
+                    {t('kidsLanding.constellation', 'Dynamic Constellation Activated')}
                   </p>
                 </div>
               </div>
@@ -442,14 +442,14 @@ export default function KidsLanding() {
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
-              <span className="text-indigo-400/70 text-[10px] font-black tracking-[0.2em] uppercase">Powered By</span>
+              <span className="text-indigo-400/70 text-[10px] font-black tracking-[0.2em] uppercase">{t('kidsLanding.poweredBy', 'Powered By')}</span>
             </div>
             <div className="h-4 w-[1px] bg-white/10 hidden sm:block" />
             <a href="/" className="group/logo flex items-center gap-3">
               <Logo showText={false} size="sm" />
               <div className="flex flex-col">
                 <span className="text-white font-black text-sm tracking-tight leading-none group-hover/logo:text-indigo-400 transition-colors">Durrah <span className="text-indigo-500">for Tutors</span></span>
-                <span className="text-indigo-300/30 text-[9px] font-bold tracking-tighter uppercase">Cosmic Exam Solutions</span>
+                <span className="text-indigo-300/30 text-[9px] font-bold tracking-tighter uppercase">{t('kidsLanding.cosmicSolutions', 'Cosmic Exam Solutions')}</span>
               </div>
             </a>
           </div>

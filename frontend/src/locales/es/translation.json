@@ -1,4 +1,12 @@
 {
+    "math": {
+        "togglePreview": "Vista Previa Matemáticas",
+        "help": "Soporta LaTeX (ej. $$x^2$$)",
+        "insert": "Insertar Fórmula"
+    },
+    "common": {
+        "dir": "ltr"
+    },
     "hero": {
         "title": "Crea Exámenes Que",
         "titleHighlight": "Inspiren Excelencia",
@@ -236,7 +244,127 @@
         "deleteConfirm": "¿Estás seguro de que quieres eliminar este examen?",
         "linkCopied": "¡Enlace del examen copiado!",
         "deleteSuccess": "Examen eliminado con éxito",
-        "upgradeLimit": "El plan gratuito está limitado a 3 exámenes. ¡Actualiza a Pro para ilimitados!"
+        "upgradeLimit": "El plan gratuito está limitado a 3 exámenes. ¡Actualiza a Pro para ilimitados!",
+        "print": {
+            "studentInfo": "Información del Estudiante (llenar antes de comenzar):",
+            "fullName": "Nombre Completo",
+            "email": "Correo Electrónico",
+            "studentId": "ID Estudiante",
+            "phone": "Teléfono",
+            "footerNote": "Esta copia impresa es para administrar el examen en papel. Los estudiantes deben escribir de manera legible e incluir su nombre en cada página."
+        },
+        "demo": {
+            "statusError": "No se puede cambiar el estado en modo demostración",
+            "banner": "Modo Demostración - Explora y prueba las funciones. ¡Regístrate cuando estés listo para guardar tu trabajo!",
+            "back": "Volver a la Demostración"
+        }
+    },
+    "mobileWelcome": {
+        "title": "Elige tu camino",
+        "tutor": {
+            "title": "Acceso Tutor",
+            "desc": "Gestionar exámenes y estudiantes"
+        },
+        "student": {
+            "title": "Portal de Estudiante",
+            "desc": "Realizar exámenes y ver progreso"
+        },
+        "kids": {
+            "title": "Aventura Niños",
+            "desc": "Aprendizaje divertido y juegos"
+        },
+        "version": "Aplicación Móvil"
+    },
+    "questionBank": {
+        "title": "Banco de Preguntas",
+        "demo": {
+            "save": "Modo demo: Regístrate para guardar bancos",
+            "delete": "Modo demo: Regístrate para gestionar bancos",
+            "add": "Modo demo: Regístrate para añadir preguntas"
+        },
+        "validation": {
+            "name": "Ingresa un nombre",
+            "question": "Ingresa una pregunta",
+            "bankSelect": "Selecciona un banco primero",
+            "options": "Al menos 2 opciones requeridas",
+            "correctAnswer": "Selecciona la respuesta correcta"
+        },
+        "success": {
+            "created": "Banco creado exitosamente",
+            "deleted": "Banco eliminado",
+            "questionAdded": "¡Pregunta añadida!",
+            "questionDeleted": "Pregunta eliminada"
+        },
+        "error": {
+            "create": "Error al crear",
+            "delete": "Error al eliminar",
+            "add": "Error al añadir",
+            "deleteQuestion": "Error al eliminar",
+            "noExport": "Nada para exportar"
+        },
+        "confirm": {
+            "deleteBank": "¿Eliminar este banco? Se borrarán todas las preguntas.",
+            "deleteQuestion": "¿Eliminar esta pregunta?"
+        }
+    },
+    "auth": {
+        "signIn": "Iniciar Sesión",
+        "createAccount": "Crear Cuenta",
+        "forgotPassword": "¿Olvidaste tu contraseña?",
+        "newToDurrah": "¿Nuevo en Durrah?",
+        "alreadyHaveAccount": "¿Ya tienes cuenta?",
+        "signInInstead": "Iniciar sesión en su lugar",
+        "processing": "Procesando..."
+    },
+    "studentPortal": {
+        "title": "Portal del Estudiante",
+        "regSuccess": "¡Registro exitoso! Revisa tu correo.",
+        "welcome": "¡Bienvenido de nuevo!",
+        "notFound": "Examen no encontrado. Verifique el código.",
+        "error": "Ocurrió un error.",
+        "signIn": "Acceso Estudiante",
+        "createAccount": "Crear cuenta estudiante",
+        "signOut": "Cerrar Sesión",
+        "joinExam": "Unirse a examen",
+        "joinDesc": "Ingresa el código del examen para comenzar.",
+        "enterCode": "Código o ID de examen",
+        "joining": "Uniéndose...",
+        "start": "Comenzar",
+        "performance": "Tu Rendimiento",
+        "examsTaken": "Exámenes Realizados",
+        "avgScore": "Puntaje Prom.",
+        "recentActivity": "Actividad Reciente",
+        "noExams": "No se encontraron exámenes.",
+        "untitled": "Examen sin título",
+        "noDesc": "Sin descripción"
+    },
+    "kidsLanding": {
+        "missionCenter": "Centro de Misión",
+        "readySystem": "SISTEMA LISTO PARA DESPEGUE",
+        "readyTitle": "Listo para",
+        "readyTitleHighlight": "¿Despegar?",
+        "subtitle": "¡Únete a los exploradores más inteligentes de la galaxia! Ingresa tu apodo y código secreto para comenzar.",
+        "commander": "Comandante IA",
+        "protocol": "Protocolo Avanzado",
+        "rankings": "Rankings",
+        "badges": "Gana Insignias Cósmicas",
+        "callsign": "Apodo Explorador",
+        "callsignPlaceholder": "ej: CapitánCosmos",
+        "missionCode": "Código de Misión",
+        "blastOff": "¡DESPEGUE!",
+        "constellation": "Constelación Dinámica Activada",
+        "poweredBy": "Impulsado Por",
+        "cosmicSolutions": "Soluciones de Exámenes Cósmicos",
+        "backHome": "Volver a Inicio",
+        "validation": {
+            "nickname": "Ingresa un apodo",
+            "code": "Ingresa el código del quiz",
+            "invalid": "Código inválido",
+            "notEnabled": "Este quiz no está habilitado para modo niños"
+        },
+        "error": {
+            "failed": "Error al abrir el quiz"
+        }
     },
     "settings": {
         "title": "Configuración",
@@ -290,6 +418,11 @@
                     "desc": "Experiencia limpia y sin distracciones."
                 }
             }
+        },
+        "language": {
+            "title": "Idioma",
+            "desc": "Elige tu idioma preferido para la interfaz",
+            "current": "Idioma actual"
         }
     },
     "examEditor": {

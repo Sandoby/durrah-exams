@@ -260,7 +260,12 @@ export default function Dashboard() {
                       <strong>Student Info (fill before starting):</strong>
                       <div style="margin-left:14px;margin-top:8px">
                         ${(exam.required_fields || ['name', 'email']).map((f: string) => {
-                const labels: Record<string, string> = { name: 'Full Name', email: 'Email', student_id: 'Student ID', phone: 'Phone' };
+                const labels: Record<string, string> = {
+                    name: t('dashboard.print.fullName', 'Full Name'),
+                    email: t('dashboard.print.email', 'Email'),
+                    student_id: t('dashboard.print.studentId', 'Student ID'),
+                    phone: t('dashboard.print.phone', 'Phone')
+                };
                 return `<div style="margin-top:12px"><strong>${labels[f] || f}:</strong> ____________________________________________</div>`;
             }).join('')}
                       </div>
@@ -300,7 +305,7 @@ export default function Dashboard() {
                         `;
             }).join('')}
 
-                    <div class="footer-note">This printout is for administering the exam on paper. Students should write legibly and include their name on each page.</div>
+                    <div class="footer-note">${t('dashboard.print.footerNote', 'This printout is for administering the exam on paper. Students should write legibly and include their name on each page.')}</div>
                   </div>
                 </body>
                 </html>
@@ -380,7 +385,7 @@ export default function Dashboard() {
         e.stopPropagation();
 
         if (isDemo) {
-            toast.error('Cannot change status in demo mode');
+            toast.error(t('dashboard.demo.statusError', 'Cannot change status in demo mode'));
             return;
         }
 
@@ -595,9 +600,9 @@ export default function Dashboard() {
                     <div className="max-w-7xl mx-auto flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                            <span className="text-sm font-medium text-blue-900 dark:text-blue-200">Demo Mode - Explore and try features. Sign up when ready to save your work!</span>
+                            <span className="text-sm font-medium text-blue-900 dark:text-blue-200">{t('dashboard.demo.banner', 'Demo Mode - Explore and try features. Sign up when ready to save your work!')}</span>
                         </div>
-                        <Link to="/demo" className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">Back to Demo</Link>
+                        <Link to="/demo" className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">{t('dashboard.demo.back', 'Back to Demo')}</Link>
                     </div>
                 </div>
             )}
@@ -633,6 +638,23 @@ export default function Dashboard() {
                             </button>
                         </div>
                     </div>
+
+                    {profile?.subscription_status !== 'active' && exams.length >= 3 && (
+                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-start gap-3 animate-fade-in shadow-sm mb-4">
+                            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                                <h4 className="text-sm font-bold text-amber-900 dark:text-amber-200">
+                                    {t('dashboard.overLimitWarning')}
+                                </h4>
+                                <Link
+                                    to="/checkout"
+                                    className="mt-2 inline-flex items-center text-xs font-bold text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-100 transition-colors underline decoration-2 underline-offset-4"
+                                >
+                                    {t('settings.subscription.upgrade')}
+                                </Link>
+                            </div>
+                        </div>
+                    )}
 
                     {exams.length === 0 ? (
                         <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700">

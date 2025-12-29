@@ -1,5 +1,6 @@
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import 'katex/dist/katex.min.css';
 import { AuthProvider } from './context/AuthContext';
 import LandingPage from './pages/LandingPage';
 import StudentPortal from './pages/StudentPortal';

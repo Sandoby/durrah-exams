@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown, LogOut, Menu } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown, LogOut, Menu, Sigma } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -15,6 +15,7 @@ import { useDemoTour } from '../hooks/useDemoTour';
 import { SortableQuestionItem } from '../components/SortableQuestionItem';
 import { ExamPreviewPanel } from '../components/ExamPreviewPanel';
 import { ImageUploader } from '../components/ImageUploader';
+import Latex from 'react-latex-next';
 
 interface Question {
     id?: string;
@@ -72,6 +73,7 @@ export default function ExamEditor() {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
+    const [showMathPreview, setShowMathPreview] = useState(false);
     const [isFetching, setIsFetching] = useState(!!id);
     const [showImportModal, setShowImportModal] = useState(false);
     const [questionBanks, setQuestionBanks] = useState<any[]>([]);
@@ -1103,14 +1105,27 @@ export default function ExamEditor() {
                                     <LayoutList className="w-6 h-6 text-indigo-600" />
                                     {t('examEditor.questions.title')}
                                 </h3>
-                                <button
-                                    type="button"
-                                    onClick={() => append(defaultQuestion)}
-                                    className="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-50 dark:border-indigo-900/30 rounded-2xl text-sm font-black hover:bg-indigo-50 dark:hover:bg-indigo-900/20 active:scale-95 transition-all shadow-sm"
-                                >
-                                    <Plus className="h-5 w-5 mr-2" />
-                                    {t('examEditor.questions.add')}
-                                </button>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowMathPreview(!showMathPreview)}
+                                        className={`px-4 py-3 rounded-2xl text-sm font-black flex items-center gap-2 transition-all ${showMathPreview
+                                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+                                            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                            }`}
+                                    >
+                                        <Sigma className="w-5 h-5" />
+                                        {t('math.togglePreview', 'Math')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => append(defaultQuestion)}
+                                        className="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-50 dark:border-indigo-900/30 rounded-2xl text-sm font-black hover:bg-indigo-50 dark:hover:bg-indigo-900/20 active:scale-95 transition-all shadow-sm"
+                                    >
+                                        <Plus className="h-5 w-5 mr-2" />
+                                        {t('examEditor.questions.add')}
+                                    </button>
+                                </div>
                             </div>
 
                             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -1194,6 +1209,11 @@ export default function ExamEditor() {
                                                                     placeholder={t('examEditor.questions.questionTextPlaceholder')}
                                                                     rows={index === 0 ? 3 : 2}
                                                                 />
+                                                                {showMathPreview && watch(`questions.${index}.question_text`) && (
+                                                                    <div className="mt-2 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-xl border border-gray-100 dark:border-gray-800 text-sm">
+                                                                        <Latex>{watch(`questions.${index}.question_text`)}</Latex>
+                                                                    </div>
+                                                                )}
                                                             </div>
 
                                                             <div className="lg:col-span-4 space-y-4">
@@ -1252,6 +1272,11 @@ export default function ExamEditor() {
                                                                                 className="flex-1 bg-transparent border-0 text-sm font-bold text-gray-900 dark:text-white placeholder-gray-300 focus:ring-0"
                                                                                 placeholder={`${t('examEditor.questions.option')} ${optionIndex + 1}`}
                                                                             />
+                                                                            {showMathPreview && watch(`questions.${index}.options.${optionIndex}`) && (
+                                                                                <div className="px-3 py-1 bg-gray-50 dark:bg-gray-900/30 rounded-lg border border-gray-100 dark:border-gray-800 text-xs">
+                                                                                    <Latex>{watch(`questions.${index}.options.${optionIndex}`)}</Latex>
+                                                                                </div>
+                                                                            )}
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={() => {

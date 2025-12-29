@@ -1,4 +1,12 @@
 {
+    "math": {
+        "togglePreview": "Aperçu Math",
+        "help": "Supporte LaTeX (ex. $$x^2$$)",
+        "insert": "Insérer une formule"
+    },
+    "common": {
+        "dir": "ltr"
+    },
     "hero": {
         "title": "Créez des Examens Qui",
         "titleHighlight": "Inspirent l'Excellence",
@@ -56,6 +64,14 @@
         "interface": {
             "title": "Interface Intuitive",
             "desc": "Facile à utiliser, fonctionnalités puissantes"
+        }
+    },
+    "print": {
+        "title": "Tarification simple et transparente",
+        "subtitle": "Commencez gratuitement, mettez à niveau quand vous êtes prêt",
+        "badge": "Tarifs",
+        "starter": {
+            "title": "Démarrage"
         }
     },
     "pricing": {
@@ -236,7 +252,60 @@
         "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet examen ?",
         "linkCopied": "Lien de l'examen copié !",
         "deleteSuccess": "Examen supprimé avec succès",
-        "upgradeLimit": "Le plan gratuit est limité à 3 examens. Passez à la version Pro pour un nombre illimité !"
+        "footerNote": "Cette copie est destinée à l'administration de l'examen sur papier. Les étudiants doivent écrire lisiblement et inclure leur nom sur chaque page."
+    },
+    "demo": {
+        "statusError": "Impossible de changer le statut en mode démo",
+        "banner": "Mode Démo - Explorez et essayez les fonctionnalités. Inscrivez-vous pour sauvegarder votre travail !",
+        "back": "Retour à la Démo"
+    },
+    "mobileWelcome": {
+        "title": "Choisissez votre parcours",
+        "tutor": {
+            "title": "Accès Tuteur",
+            "desc": "Gérer examens et étudiants"
+        },
+        "student": {
+            "title": "Portail Étudiant",
+            "desc": "Passer des examens et suivre le progrès"
+        },
+        "kids": {
+            "title": "Aventure Enfants",
+            "desc": "Apprentissage ludique et jeux"
+        },
+        "version": "Application Mobile"
+    },
+    "questionBank": {
+        "title": "Banque de Questions",
+        "demo": {
+            "save": "Mode démo : Inscrivez-vous pour sauvegarder vos banques",
+            "delete": "Mode démo : Inscrivez-vous pour gérer les banques",
+            "add": "Mode démo : Inscrivez-vous pour ajouter des questions"
+        },
+        "validation": {
+            "name": "Veuillez entrer un nom",
+            "question": "Veuillez entrer une question",
+            "bankSelect": "Sélectionnez d'abord une banque",
+            "options": "Au moins 2 options requises",
+            "correctAnswer": "Sélectionnez la bonne réponse"
+        },
+        "success": {
+            "created": "Banque créée avec succès",
+            "deleted": "Banque supprimée",
+            "questionAdded": "Question ajoutée !",
+            "questionDeleted": "Question supprimée"
+        },
+        "error": {
+            "create": "Échec de création",
+            "delete": "Échec de suppression",
+            "add": "Échec d'ajout",
+            "deleteQuestion": "Échec de suppression",
+            "noExport": "Rien à exporter"
+        },
+        "confirm": {
+            "deleteBank": "Supprimer cette banque ? Toutes les questions seront effacées.",
+            "deleteQuestion": "Supprimer cette question ?"
+        }
     },
     "settings": {
         "title": "Paramètres",
@@ -290,6 +359,11 @@
                     "desc": "Expérience propre et sans distraction."
                 }
             }
+        },
+        "language": {
+            "title": "Langue",
+            "desc": "Choisissez votre langue préférée pour l'interface",
+            "current": "Langue actuelle"
         }
     },
     "examEditor": {
@@ -314,6 +388,65 @@
             "title": "Contrôle d'Accès par Email",
             "desc": "Restreindre l'accès à des emails spécifiques",
             "enable": "Activer la restriction par email"
+        },
+        "auth": {
+            "signIn": "Se connecter",
+            "createAccount": "Créer un compte",
+            "forgotPassword": "Mot de passe oublié ?",
+            "newToDurrah": "Nouveau sur Durrah ?",
+            "alreadyHaveAccount": "Vous avez déjà un compte ?",
+            "signInInstead": "Se connecter plutôt",
+            "processing": "Traitement..."
+        },
+        "studentPortal": {
+            "title": "Portail Étudiant",
+            "regSuccess": "Inscription réussie ! Veuillez vérifier votre email.",
+            "welcome": "Bon retour !",
+            "notFound": "Examen introuvable. Vérifiez le code.",
+            "error": "Une erreur est survenue.",
+            "signIn": "Connexion Portail Étudiant",
+            "createAccount": "Créer compte étudiant",
+            "signOut": "Déconnexion",
+            "joinExam": "Rejoindre un examen",
+            "joinDesc": "Entrez le code d'examen pour commencer.",
+            "enterCode": "Entrez le code ou ID",
+            "joining": "Adhésion...",
+            "start": "Démarrer",
+            "performance": "Votre Performance",
+            "examsTaken": "Examens Passés",
+            "avgScore": "Score Moy.",
+            "recentActivity": "Activité Récente",
+            "noExams": "Aucun examen trouvé.",
+            "untitled": "Examen sans titre",
+            "noDesc": "Pas de description"
+        },
+        "kidsLanding": {
+            "missionCenter": "Centre de Mission",
+            "readySystem": "SYSTÈME PRÊT AU DÉCOLLAGE",
+            "readyTitle": "Prêt au",
+            "readyTitleHighlight": "Décollage ?",
+            "subtitle": "Rejoignez les explorateurs les plus intelligents de la galaxie ! Entrez votre pseudo et code secret pour commencer.",
+            "commander": "Commandant IA",
+            "protocol": "Protocole Avancé",
+            "rankings": "Classements",
+            "badges": "Gagnez des Badges Cosmiques",
+            "callsign": "Pseudo Explorateur",
+            "callsignPlaceholder": "ex: CapitaineCosmos",
+            "missionCode": "Code Mission",
+            "blastOff": "DÉCOLLAGE !",
+            "constellation": "Constellation Dynamique Activée",
+            "poweredBy": "Propulsé Par",
+            "cosmicSolutions": "Solutions d'Examens Cosmiques",
+            "backHome": "Retour Accueil",
+            "validation": {
+                "nickname": "Veuillez entrer un pseudo",
+                "code": "Veuillez entrer le code quiz",
+                "invalid": "Code invalide",
+                "notEnabled": "Ce quiz n'est pas activé pour le mode enfants"
+            },
+            "error": {
+                "failed": "Échec d'ouverture du quiz"
+            }
         },
         "settings": {
             "title": "Paramètres de l'Examen",
@@ -426,8 +559,7 @@
         "success": {
             "submitted": "Examen soumis avec succès !"
         }
-    }
-    ,
+    },
     "kids": {
         "seo": {
             "title": "Aventure Quiz Enfants | Sûr, Amusant, Anti-Triche | Durrah",

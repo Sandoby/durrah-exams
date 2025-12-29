@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, User, Mail, Lock, Save, Loader2, Crown, Menu, X, LogOut, Settings as SettingsIcon } from 'lucide-react';
+import { ArrowLeft, User, Mail, Lock, Save, Loader2, Crown, Menu, X, LogOut, Settings as SettingsIcon, Globe } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -273,7 +274,7 @@ export default function Settings() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400">
-                                        Full Name
+                                        {t('settings.profile.fullName', 'Full Name')}
                                     </label>
                                     <input
                                         type="text"
@@ -286,7 +287,7 @@ export default function Settings() {
 
                                 <div className="space-y-2">
                                     <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400">
-                                        Email Address
+                                        {t('settings.profile.email', 'Email Address')}
                                     </label>
                                     <div className="relative">
                                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -301,7 +302,7 @@ export default function Settings() {
 
                                 <div className="space-y-2">
                                     <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400">
-                                        Phone Number
+                                        {t('settings.profile.phone', 'Phone Number')}
                                     </label>
                                     <input
                                         type="tel"
@@ -314,7 +315,7 @@ export default function Settings() {
 
                                 <div className="space-y-2">
                                     <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400">
-                                        Institution
+                                        {t('settings.profile.institution', 'Institution')}
                                     </label>
                                     <input
                                         type="text"
@@ -333,7 +334,7 @@ export default function Settings() {
                                         className="flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg font-bold text-sm shadow-sm mr-4"
                                     >
                                         <Crown className="w-4 h-4" />
-                                        Upgrade to Pro
+                                        {t('settings.subscription.upgrade', 'Upgrade to Pro')}
                                     </Link>
                                 )}
                                 <button
@@ -352,6 +353,25 @@ export default function Settings() {
                         </form>
                     </section>
 
+                    {/* Language Settings */}
+                    <section className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
+                            <Globe className="h-5 w-5 text-indigo-600" />
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('settings.language.title', 'Language')}</h2>
+                        </div>
+                        <div className="p-6">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                {t('settings.language.desc', 'Choose your preferred language for the interface')}
+                            </p>
+                            <div className="flex items-center gap-4">
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    {t('settings.language.current', 'Current Language')}:
+                                </span>
+                                <LanguageSwitcher />
+                            </div>
+                        </div>
+                    </section>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Security */}
                         <section className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col">
@@ -362,7 +382,7 @@ export default function Settings() {
                             <form onSubmit={handlePasswordChange} className="p-6 flex-1 space-y-4">
                                 <div className="space-y-2">
                                     <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400">
-                                        New Password
+                                        {t('settings.password.new', 'New Password')}
                                     </label>
                                     <input
                                         type="password"
@@ -375,7 +395,7 @@ export default function Settings() {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400">
-                                        Confirm Password
+                                        {t('settings.password.confirm', 'Confirm Password')}
                                     </label>
                                     <input
                                         type="password"
@@ -407,7 +427,7 @@ export default function Settings() {
                                 {profile.subscription_status === 'active' ? (
                                     <div className="w-full space-y-4">
                                         <div className="p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                                            <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">Current Plan</p>
+                                            <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">{t('settings.subscription.plan', 'Current Plan')}</p>
                                             <h3 className="text-xl font-bold text-gray-900 dark:text-white">{profile.subscription_plan || 'PRO'}</h3>
                                         </div>
                                         <div>

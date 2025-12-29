@@ -3,8 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { GraduationCap, Users, Rocket, ArrowRight } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 export default function MobileWelcome() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -67,9 +70,14 @@ export default function MobileWelcome() {
                 <motion.div variants={itemVariants} className="flex flex-col items-center text-center space-y-4 mb-4">
                     <Logo size="lg" />
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-4">Durrah Tutors</h1>
-                        <p className="text-gray-500 dark:text-gray-400">Choose your learning path</p>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-4">Durrah for Tutors</h1>
+                        <p className="text-gray-500 dark:text-gray-400">{t('mobileWelcome.title', 'Choose your learning path')}</p>
                     </div>
+                </motion.div>
+
+                {/* Language Switcher */}
+                <motion.div variants={itemVariants} className="flex justify-center">
+                    <LanguageSwitcher />
                 </motion.div>
 
                 {/* Options */}
@@ -86,8 +94,8 @@ export default function MobileWelcome() {
                             <Users className="w-6 h-6" />
                         </div>
                         <div className="flex-1 text-left">
-                            <h3 className="font-bold text-gray-900 dark:text-white text-lg">Tutor Access</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Manage exams & students</p>
+                            <h3 className="font-bold text-gray-900 dark:text-white text-lg">{t('mobileWelcome.tutor.title', 'Tutor Access')}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{t('mobileWelcome.tutor.desc', 'Manage exams & students')}</p>
                         </div>
                         <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-indigo-600 transition-colors" />
                     </motion.button>
@@ -103,8 +111,8 @@ export default function MobileWelcome() {
                             <GraduationCap className="w-6 h-6" />
                         </div>
                         <div className="flex-1 text-left">
-                            <h3 className="font-bold text-gray-900 dark:text-white text-lg">Student Portal</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Take exams & track progress</p>
+                            <h3 className="font-bold text-gray-900 dark:text-white text-lg">{t('mobileWelcome.student.title', 'Student Portal')}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{t('mobileWelcome.student.desc', 'Take exams & track progress')}</p>
                         </div>
                         <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-emerald-600 transition-colors" />
                     </motion.button>
@@ -120,8 +128,8 @@ export default function MobileWelcome() {
                             <Rocket className="w-6 h-6" />
                         </div>
                         <div className="flex-1 text-left">
-                            <h3 className="font-bold text-gray-900 dark:text-white text-lg">Kids Adventure</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Fun learning & games</p>
+                            <h3 className="font-bold text-gray-900 dark:text-white text-lg">{t('mobileWelcome.kids.title', 'Kids Adventure')}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{t('mobileWelcome.kids.desc', 'Fun learning & games')}</p>
                         </div>
                         <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-violet-600 transition-colors" />
                     </motion.button>
@@ -129,7 +137,7 @@ export default function MobileWelcome() {
                 </div>
 
                 <motion.p variants={itemVariants} className="text-center text-xs text-gray-400 mt-8">
-                    v1.0.1 • Mobile App
+                    v1.0.1 • {t('mobileWelcome.version', 'Mobile App')}
                 </motion.p>
             </motion.div>
         </div>
