@@ -1,4 +1,4 @@
-import { ArrowLeft, Download, BarChart3, Users, Activity, TrendingUp, Calendar, LogOut, Settings, Menu, X, Clock, Search, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Download, BarChart3, Users, Activity, TrendingUp, Calendar, LogOut, Settings, Menu, X, Clock, Search, CheckCircle2, XCircle, Printer } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +6,8 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { Logo } from '../Logo';
 import toast from 'react-hot-toast';
+import { printerService } from '../../lib/printer';
+import { downloaderService } from '../../lib/downloader';
 import {
     BarChart, Bar, AreaChart, Area,
     XAxis, YAxis, CartesianGrid, Tooltip,
@@ -256,19 +258,73 @@ export function ExamAnalyticsDashboard() {
                 });
 
                 const csv = [headers, ...rows].map(r => r.map((cell: any) => `"${cell}"`).join(',')).join('\n');
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${exam?.title}-results.csv`;
-                a.click();
-                window.URL.revokeObjectURL(url);
+                await downloaderService.downloadFile(`${exam?.title}-results.csv`, csv, 'text');
 
                 toast.success('Results exported as CSV');
             }
         } catch (error) {
             console.error('Error exporting:', error);
             toast.error('Export failed');
+        }
+    };
+
+    const handlePrint = async () => {
+        try {
+            const html = `
+                <div style="font-family: sans-serif; padding: 20px;">
+                    <h1 style="color: #4f46e5;">Exam Analytics: ${exam?.title}</h1>
+                    <p style="color: #6b7280;">Date: ${new Date().toLocaleDateString()}</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 30px 0;">
+                        <div style="padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                            <h3 style="margin: 0; color: #6b7280; font-size: 14px;">Total Candidates</h3>
+                            <p style="margin: 5px 0 0; font-size: 24px; font-weight: bold;">${submissions.length}</p>
+                        </div>
+                        <div style="padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                            <h3 style="margin: 0; color: #6b7280; font-size: 14px;">Average Score</h3>
+                            <p style="margin: 5px 0 0; font-size: 24px; font-weight: bold;">${avgScore}%</p>
+                        </div>
+                        <div style="padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                            <h3 style="margin: 0; color: #6b7280; font-size: 14px;">Pass Rate</h3>
+                            <p style="margin: 5px 0 0; font-size: 24px; font-weight: bold;">${passRate}%</p>
+                        </div>
+                        <div style="padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                            <h3 style="margin: 0; color: #6b7280; font-size: 14px;">Avg Time Taken</h3>
+                            <p style="margin: 5px 0 0; font-size: 24px; font-weight: bold;">${avgTimeTaken}</p>
+                        </div>
+                    </div>
+
+                    <h2>Question Analysis</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                        <thead>
+                            <tr style="background-color: #f9fafb;">
+                                <th style="text-align: left; padding: 12px; border-bottom: 2px solid #e5e7eb;">Question</th>
+                                <th style="text-align: center; padding: 12px; border-bottom: 2px solid #e5e7eb;">Correct</th>
+                                <th style="text-align: center; padding: 12px; border-bottom: 2px solid #e5e7eb;">Incorrect</th>
+                                <th style="text-align: right; padding: 12px; border-bottom: 2px solid #e5e7eb;">Success Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${questionStats.map((q, idx) => {
+                const total = q.correct_count + q.incorrect_count;
+                const rate = total > 0 ? ((q.correct_count / total) * 100).toFixed(1) : 0;
+                return `
+                                    <tr>
+                                        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Q${idx + 1}: ${q.question_text}</td>
+                                        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${q.correct_count}</td>
+                                        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${q.incorrect_count}</td>
+                                        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">${rate}%</td>
+                                    </tr>
+                                `;
+            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            await printerService.printHtml(html);
+        } catch (error) {
+            console.error('Print failed:', error);
+            toast.error('Printing failed');
         }
     };
 
@@ -406,13 +462,22 @@ export function ExamAnalyticsDashboard() {
                             </div>
                         </div>
                     </div>
-                    <button
-                        onClick={() => exportResults('csv')}
-                        className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95 font-medium"
-                    >
-                        <Download className="h-5 w-5" />
-                        <span>Export CSV</span>
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={handlePrint}
+                            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-xl transition-all shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 font-medium"
+                        >
+                            <Printer className="h-5 w-5" />
+                            <span className="hidden sm:inline">Print Report</span>
+                        </button>
+                        <button
+                            onClick={() => exportResults('csv')}
+                            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95 font-medium"
+                        >
+                            <Download className="h-5 w-5" />
+                            <span>Export CSV</span>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Metrics Grid */}

@@ -12,6 +12,7 @@ import { CardSkeleton } from '../components/skeletons';
 import Joyride, { STATUS } from 'react-joyride';
 import type { Step, CallBackProps } from 'react-joyride';
 import { useDemoTour } from '../hooks/useDemoTour';
+import { printerService } from '../lib/printer';
 
 interface Exam {
     id: string;
@@ -305,16 +306,7 @@ export default function Dashboard() {
                 </html>
                 `;
 
-            const w = window.open('', '_blank');
-            if (!w) {
-                toast.error('Popup blocked. Allow popups to download PDF.');
-                return;
-            }
-            w.document.open();
-            w.document.write(html);
-            w.document.close();
-            w.focus();
-            setTimeout(() => w.print(), 600);
+            await printerService.printHtml(html);
         } catch (err: any) {
             console.error(err);
             toast.error('Failed to prepare printable exam');

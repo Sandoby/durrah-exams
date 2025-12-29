@@ -30,6 +30,7 @@ dependencies {
     implementation project(':capacitor-splash-screen')
     implementation project(':capacitor-status-bar')
     implementation project(':capawesome-capacitor-app-update')
+    implementation project(':capgo-capacitor-printer')
     implementation project(':capacitor-native-biometric')
 
 }
