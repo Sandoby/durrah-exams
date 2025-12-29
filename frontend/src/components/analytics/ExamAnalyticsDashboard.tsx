@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Download, BarChart3, Users, Activity, Trophy, TrendingUp, Calendar, LogOut, Settings, Menu, X } from 'lucide-react';
+import { ArrowLeft, Download, BarChart3, Users, Activity, TrendingUp, Calendar, LogOut, Settings, Menu, X, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { Logo } from '../Logo';
@@ -90,7 +90,7 @@ export function ExamAnalyticsDashboard() {
                 ...sub,
                 submitted_at: sub.created_at,
                 total_points: sub.max_score,
-                time_taken: 0 // Not stored in schema
+                time_taken: sub.time_taken || 0
             }));
 
             setSubmissions(transformedSubmissions);
@@ -183,6 +183,13 @@ export function ExamAnalyticsDashboard() {
         return s.student_data?.[field] ?? (s as any)[field] ?? '-';
     };
 
+    const formatDuration = (seconds?: number | null) => {
+        if (!seconds) return '-';
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
     const exportResults = async (format: 'csv' | 'pdf') => {
         try {
             if (format === 'csv') {
@@ -235,12 +242,6 @@ export function ExamAnalyticsDashboard() {
         }, 0) / submissions.length * 100).toFixed(1)
         : 0;
 
-    const highestScore = submissions.length > 0
-        ? Math.max(...submissions.map(s => {
-            const maxScore = s.max_score || s.total_points || 1;
-            return ((s.score || 0) / maxScore) * 100;
-        })).toFixed(1)
-        : '0';
 
     const passRate = submissions.length > 0
         ? ((submissions.filter(s => {
@@ -248,6 +249,10 @@ export function ExamAnalyticsDashboard() {
             return ((s.score || 0) / max) >= 0.5;
         }).length / submissions.length) * 100).toFixed(0)
         : '0';
+
+    const avgTimeTaken = submissions.length > 0
+        ? formatDuration(Math.round(submissions.reduce((sum, s) => sum + (s.time_taken || 0), 0) / submissions.length))
+        : '0:00';
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12 font-sans relative overflow-hidden">
@@ -415,20 +420,20 @@ export function ExamAnalyticsDashboard() {
                         </div>
                     </div>
 
-                    {/* Card 4: Top Score */}
+                    {/* Card 4: Avg Time Taken */}
                     <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Trophy className="h-20 w-20 text-amber-500" />
+                            <Clock className="h-20 w-20 text-orange-500" />
                         </div>
                         <div className="flex items-center justify-between mb-4">
-                            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
-                                <Trophy className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
+                                <Clock className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                             </div>
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Highest Score</p>
-                            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{highestScore}%</h3>
-                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 font-medium">Top Performer</p>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Avg Time Taken</p>
+                            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{avgTimeTaken}</h3>
+                            <p className="text-xs text-orange-600 dark:text-orange-400 mt-2 font-medium">Efficiency</p>
                         </div>
                     </div>
                 </div>
@@ -577,6 +582,7 @@ export function ExamAnalyticsDashboard() {
                                         </th>
                                     ))}
                                     <th className="text-center py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Score</th>
+                                    <th className="text-center py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Duration</th>
                                     <th className="text-center py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Result</th>
                                     <th className="text-right py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Submitted</th>
                                 </tr>
@@ -596,6 +602,9 @@ export function ExamAnalyticsDashboard() {
                                             ))}
                                             <td className="py-4 px-6 text-sm text-center">
                                                 <div className="font-bold text-gray-900 dark:text-white">{s.score || 0} <span className="text-gray-400 font-normal">/ {maxScore}</span></div>
+                                            </td>
+                                            <td className="py-4 px-6 text-sm text-center text-gray-600 dark:text-gray-400">
+                                                {formatDuration(s.time_taken)}
                                             </td>
                                             <td className="py-4 px-6 text-center">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${passed ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'}`}>
