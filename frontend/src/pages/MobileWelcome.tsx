@@ -129,7 +129,7 @@ export default function MobileWelcome() {
                 </div>
 
                 <motion.p variants={itemVariants} className="text-center text-xs text-gray-400 mt-8">
-                    v1.0.0 • Mobile App
+                    v1.0.1 • Mobile App
                 </motion.p>
             </motion.div>
         </div>

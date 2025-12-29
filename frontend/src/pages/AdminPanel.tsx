@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Users, MessageCircle, Tag, Lock, LogOut,
-    Loader2, Plus, Send, UserPlus, BarChart3, Bell
+    Loader2, Plus, Send, UserPlus, BarChart3, Bell,
+    Menu, X, ArrowLeft
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
@@ -95,6 +96,7 @@ export default function AdminPanel() {
     const [userRole, setUserRole] = useState<'super_admin' | 'support_agent' | null>(null);
     const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'coupons' | 'chat' | 'agents' | 'notifications'>('analytics');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Users
     const [users, setUsers] = useState<User[]>([]);
@@ -743,82 +745,80 @@ export default function AdminPanel() {
     }
 
     return (
-        <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
+        <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
+            {/* Mobile Header */}
+            <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 z-40">
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setIsSidebarOpen(true)}
+                        className="p-2 -ml-2 text-gray-600 dark:text-gray-400"
+                    >
+                        <Menu className="w-6 h-6" />
+                    </button>
+                    <Logo size="sm" />
+                    <span className="font-bold text-gray-900 dark:text-white text-sm">Admin</span>
+                </div>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleLogout}
+                        className="p-2 text-red-600"
+                    >
+                        <LogOut className="w-5 h-5" />
+                    </button>
+                </div>
+            </header>
+
+            {/* Sidebar Overlay (Mobile) */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-50 lg:hidden backdrop-blur-sm"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col sticky top-0 h-screen">
-                <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
-                    <Logo />
-                    <span className="font-bold text-gray-900 dark:text-white">Admin</span>
+            <aside className={`
+                w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col 
+                fixed inset-y-0 left-0 z-50 transition-transform duration-300 lg:translate-x-0 lg:static lg:h-screen
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            `}>
+                <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <Logo />
+                        <span className="font-bold text-gray-900 dark:text-white">Admin</span>
+                    </div>
+                    <button
+                        onClick={() => setIsSidebarOpen(false)}
+                        className="lg:hidden p-2 text-gray-400"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
                 </div>
 
-                <nav className="flex-1 p-4 space-y-2">
-                    <button
-                        onClick={() => setActiveTab('analytics')}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'analytics'
-                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
-                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                            }`}
-                    >
-                        <BarChart3 className="w-5 h-5" />
-                        Analytics
-                    </button>
-
-                    <button
-                        onClick={() => setActiveTab('users')}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'users'
-                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
-                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                            }`}
-                    >
-                        <Users className="w-5 h-5" />
-                        Users
-                    </button>
-
-                    <button
-                        onClick={() => setActiveTab('coupons')}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'coupons'
-                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
-                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                            }`}
-                    >
-                        <Tag className="w-5 h-5" />
-                        Coupons
-                    </button>
-
-                    <button
-                        onClick={() => setActiveTab('chat')}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'chat'
-                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
-                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                            }`}
-                    >
-                        <MessageCircle className="w-5 h-5" />
-                        Support Chat
-                    </button>
-
-                    {userRole === 'super_admin' && (
+                <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+                    {[
+                        { id: 'analytics', icon: BarChart3, label: 'Analytics' },
+                        { id: 'users', icon: Users, label: 'Users' },
+                        { id: 'coupons', icon: Tag, label: 'Coupons' },
+                        { id: 'chat', icon: MessageCircle, label: 'Support Chat' },
+                        ...(userRole === 'super_admin' ? [{ id: 'agents', icon: UserPlus, label: 'Agents' }] : []),
+                        { id: 'notifications', icon: Bell, label: 'Push Notifications' }
+                    ].map((item) => (
                         <button
-                            onClick={() => setActiveTab('agents')}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'agents'
+                            key={item.id}
+                            onClick={() => {
+                                setActiveTab(item.id as any);
+                                setIsSidebarOpen(false);
+                            }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === item.id
                                 ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
                                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                                 }`}
                         >
-                            <UserPlus className="w-5 h-5" />
-                            Agents
+                            <item.icon className="w-5 h-5" />
+                            {item.label}
                         </button>
-                    )}
-
-                    <button
-                        onClick={() => setActiveTab('notifications')}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'notifications'
-                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
-                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                            }`}
-                    >
-                        <Bell className="w-5 h-5" />
-                        Push Notifications
-                    </button>
+                    ))}
                 </nav>
 
                 <div className="p-4 border-t border-gray-100 dark:border-gray-800">
@@ -833,12 +833,14 @@ export default function AdminPanel() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 min-w-0 overflow-y-auto">
-                <div className="p-8">
+            <main className="flex-1 min-w-0 overflow-y-auto pt-16 lg:pt-0">
+                <div className="p-4 sm:p-8 max-w-[1600px] mx-auto">
 
                     {/* Analytics Tab */}
                     {activeTab === 'analytics' && (
-                        <AdminAnalyticsDashboard />
+                        <div className="-mx-4 sm:mx-0">
+                            <AdminAnalyticsDashboard />
+                        </div>
                     )}
 
 
@@ -903,10 +905,10 @@ export default function AdminPanel() {
                                 </h2>
                                 <button
                                     onClick={() => setShowCouponForm(!showCouponForm)}
-                                    className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                    className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
                                 >
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Create Coupon
+                                    <Plus className="h-4 w-4 sm:mr-2" />
+                                    <span className="hidden sm:inline">Create Coupon</span>
                                 </button>
                             </div>
 
@@ -916,7 +918,7 @@ export default function AdminPanel() {
                                         New Coupon
                                     </h3>
                                     <form onSubmit={createCoupon} className="space-y-4">
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                     Coupon Code
@@ -1186,9 +1188,9 @@ export default function AdminPanel() {
                             </div>
 
                             {/* Chat Interface */}
-                            <div className="grid grid-cols-3 gap-6 h-[600px]">
+                            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 h-[calc(100vh-280px)] lg:h-[600px]">
                                 {/* Sessions List */}
-                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden flex flex-col">
+                                <div className={`lg:flex bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden flex-col ${selectedSessionId ? 'hidden' : 'flex'}`}>
                                     <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                                         <h3 className="font-semibold text-gray-900 dark:text-white">
                                             {chatFilter === 'waiting' && 'Waiting Conversations'}
@@ -1209,14 +1211,16 @@ export default function AdminPanel() {
                                                     className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-700 ${selectedSessionId === session.id ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
                                                         }`}
                                                 >
-                                                    <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                                        {session.user_name || 'Anonymous'}
-                                                    </p>
+                                                    <div className="flex justify-between items-start">
+                                                        <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                                            {session.user_name || 'Anonymous'}
+                                                        </p>
+                                                        <span className="text-[10px] text-gray-400 shrink-0">
+                                                            {new Date(session.updated_at || session.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    </div>
                                                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                                                         {session.user_email}
-                                                    </p>
-                                                    <p className="text-[10px] text-gray-400 mt-1">
-                                                        {new Date(session.updated_at || session.started_at).toLocaleString()}
                                                     </p>
                                                 </button>
                                             ))
@@ -1225,51 +1229,60 @@ export default function AdminPanel() {
                                 </div>
 
                                 {/* Chat Messages */}
-                                <div className="col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow flex flex-col">
+                                <div className={`lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow flex-col ${selectedSessionId ? 'flex' : 'hidden lg:flex'}`}>
                                     {selectedSessionId ? (
                                         <>
                                             <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                                                 <div className="flex items-start justify-between">
-                                                    <div className="flex-1">
-                                                        <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
-                                                            {selectedUserInfo?.full_name || chatSessions.find(s => s.id === selectedSessionId)?.user_name || 'User Chat'}
-                                                        </h3>
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                            {selectedUserInfo?.email || chatSessions.find(s => s.id === selectedSessionId)?.user_email}
-                                                        </p>
+                                                    <div className="flex-1 flex items-center gap-3">
+                                                        <button
+                                                            onClick={() => setSelectedSessionId(null)}
+                                                            className="lg:hidden p-2 -ml-2 text-gray-600 dark:text-gray-400"
+                                                        >
+                                                            <ArrowLeft className="w-5 h-5" />
+                                                        </button>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h3 className="font-semibold text-gray-900 dark:text-white text-lg truncate">
+                                                                {selectedUserInfo?.full_name || chatSessions.find(s => s.id === selectedSessionId)?.user_name || 'User Chat'}
+                                                            </h3>
+                                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">
+                                                                {selectedUserInfo?.email || chatSessions.find(s => s.id === selectedSessionId)?.user_email}
+                                                            </p>
 
-                                                        {/* User Details Grid */}
-                                                        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                                                            {selectedUserInfo?.phone && (
+                                                            {/* User Details Grid */}
+                                                            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                                                {selectedUserInfo?.phone && (
+                                                                    <div>
+                                                                        <span className="text-gray-500 dark:text-gray-400">Phone:</span>
+                                                                        <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.phone}</span>
+                                                                    </div>
+                                                                )}
+                                                                {selectedUserInfo?.institution && (
+                                                                    <div>
+                                                                        <span className="text-gray-500 dark:text-gray-400">Institution:</span>
+                                                                        <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.institution}</span>
+                                                                    </div>
+                                                                )}
                                                                 <div>
-                                                                    <span className="text-gray-500 dark:text-gray-400">Phone:</span>
-                                                                    <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.phone}</span>
+                                                                    <span className="text-gray-500 dark:text-gray-400">Status:</span>
+                                                                    <span className={`ml-1 font-medium ${selectedUserInfo?.subscription_status === 'active'
+                                                                        ? 'text-green-600 dark:text-green-400'
+                                                                        : 'text-gray-600 dark:text-gray-400'
+                                                                        }`}>
+                                                                        {selectedUserInfo?.subscription_status === 'active' ? 'Subscribed' : 'Free'}
+                                                                    </span>
                                                                 </div>
-                                                            )}
-                                                            {selectedUserInfo?.institution && (
-                                                                <div>
-                                                                    <span className="text-gray-500 dark:text-gray-400">Institution:</span>
-                                                                    <span className="ml-1 text-gray-900 dark:text-white">{selectedUserInfo.institution}</span>
-                                                                </div>
-                                                            )}
-                                                            <div>
-                                                                <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                                                                <span className={`ml-1 font-medium ${selectedUserInfo?.subscription_status === 'active'
-                                                                    ? 'text-green-600 dark:text-green-400'
-                                                                    : 'text-gray-600 dark:text-gray-400'
-                                                                    }`}>
-                                                                    {selectedUserInfo?.subscription_status === 'active' ? 'Subscribed' : 'Free'}
-                                                                </span>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    <div className="flex space-x-2">
-                                                        <button
-                                                            onClick={closeChat}
-                                                            className="text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-800 transition-colors"
-                                                        >
-                                                            Close Chat
-                                                        </button>
+                                                        <div className="flex space-x-2">
+                                                            <button
+                                                                onClick={closeChat}
+                                                                className="text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 px-2 sm:px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-800 transition-colors"
+                                                            >
+                                                                <span className="hidden sm:inline">Close Chat</span>
+                                                                <span className="sm:hidden">Close</span>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1280,7 +1293,7 @@ export default function AdminPanel() {
                                                         className={`flex ${msg.sender_role === 'admin' ? 'justify-end' : 'justify-start'}`}
                                                     >
                                                         <div
-                                                            className={`max-w-[70%] rounded-lg p-3 ${msg.sender_role === 'admin'
+                                                            className={`max-w-[85%] sm:max-w-[70%] rounded-lg p-3 ${msg.sender_role === 'admin'
                                                                 ? 'bg-indigo-600 text-white'
                                                                 : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                                                                 }`}
@@ -1300,7 +1313,7 @@ export default function AdminPanel() {
                                                     value={newChatMessage}
                                                     onChange={(e) => setNewChatMessage(e.target.value)}
                                                     placeholder="Type your response..."
-                                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white text-sm"
                                                 />
                                                 <button
                                                     type="submit"
@@ -1472,14 +1485,13 @@ export default function AdminPanel() {
                             </div>
                         </div>
                     )}
+
+                    {activeTab === 'notifications' && (
+                        <div className="p-0 sm:p-6">
+                            <NotificationManager />
+                        </div>
+                    )}
                 </div>
-
-                {activeTab === 'notifications' && (
-                    <div className="p-6">
-                        <NotificationManager />
-                    </div>
-                )}
-
             </main>
         </div>
     );

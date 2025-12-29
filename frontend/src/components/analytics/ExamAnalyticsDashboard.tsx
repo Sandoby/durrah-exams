@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { ArrowLeft, Download, BarChart3, Users, Activity, TrendingUp, Calendar, LogOut, Settings, Menu, X, Clock, Search, CheckCircle2, XCircle } from 'lucide-react';
+import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Download, BarChart3, Users, Activity, TrendingUp, Calendar, LogOut, Settings, Menu, X, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { Logo } from '../Logo';
@@ -45,6 +45,11 @@ export function ExamAnalyticsDashboard() {
     const [scoreDistribution, setScoreDistribution] = useState<any[]>([]);
     const [questionStats, setQuestionStats] = useState<QuestionStats[]>([]);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Filtering & Sorting State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filterStatus, setFilterStatus] = useState<'all' | 'passed' | 'failed'>('all');
+    const [sortBy, setSortBy] = useState<'date' | 'score' | 'duration'>('date');
 
     useEffect(() => {
         if (examId) {
@@ -173,6 +178,49 @@ export function ExamAnalyticsDashboard() {
         }
     };
 
+    const filteredSubmissions = useMemo(() => {
+        let result = [...submissions];
+
+        // Search Filter
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            result = result.filter((sub: any) =>
+                sub.student_name.toLowerCase().includes(query) ||
+                sub.student_email.toLowerCase().includes(query) ||
+                (sub.student_data && Object.values(sub.student_data).some((val: any) =>
+                    String(val).toLowerCase().includes(query)
+                ))
+            );
+        }
+
+        // Status Filter
+        if (filterStatus !== 'all') {
+            result = result.filter((sub: any) => {
+                const max = sub.max_score || sub.total_points || 1;
+                const passed = (sub.score / max) >= 0.5;
+                return filterStatus === 'passed' ? passed : !passed;
+            });
+        }
+
+        // Sorting
+        result.sort((a, b) => {
+            if (sortBy === 'date') {
+                return new Date(b.submitted_at || b.created_at || 0).getTime() - new Date(a.submitted_at || a.created_at || 0).getTime();
+            }
+            if (sortBy === 'score') {
+                const scoreA = a.score / (a.max_score || a.total_points || 1);
+                const scoreB = b.score / (b.max_score || b.total_points || 1);
+                return scoreB - scoreA;
+            }
+            if (sortBy === 'duration') {
+                return (b.time_taken || 0) - (a.time_taken || 0);
+            }
+            return 0;
+        });
+
+        return result;
+    }, [submissions, searchQuery, filterStatus, sortBy]);
+
     const studentFields = (exam?.required_fields || []).length
         ? exam.required_fields || []
         : ['name'];
@@ -194,7 +242,7 @@ export function ExamAnalyticsDashboard() {
         try {
             if (format === 'csv') {
                 const headers = [...studentFields.map((f: string) => f.replace(/_/g, ' ')), 'Score', 'Max Score', 'Percentage', 'Submitted At'];
-                const rows = submissions.map((s) => {
+                const rows = submissions.map((s: any) => {
                     const maxScore = s.max_score || s.total_points || 1;
                     const percentage = s.percentage ? `${s.percentage.toFixed(2)}%` : `${(((s.score || 0) / maxScore) * 100).toFixed(2)}%`;
                     const dynamicFields = studentFields.map((f: string) => resolveFieldValue(s, f));
@@ -207,7 +255,7 @@ export function ExamAnalyticsDashboard() {
                     ];
                 });
 
-                const csv = [headers, ...rows].map(r => r.map(cell => `"${cell}"`).join(',')).join('\n');
+                const csv = [headers, ...rows].map(r => r.map((cell: any) => `"${cell}"`).join(',')).join('\n');
                 const blob = new Blob([csv], { type: 'text/csv' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -236,7 +284,7 @@ export function ExamAnalyticsDashboard() {
     }
 
     const avgScore = submissions.length > 0
-        ? (submissions.reduce((sum, s) => {
+        ? (submissions.reduce((sum: number, s: any) => {
             const maxScore = s.max_score || s.total_points || 1;
             return sum + ((s.score || 0) / maxScore);
         }, 0) / submissions.length * 100).toFixed(1)
@@ -244,7 +292,7 @@ export function ExamAnalyticsDashboard() {
 
 
     const passRate = submissions.length > 0
-        ? ((submissions.filter(s => {
+        ? ((submissions.filter((s: any) => {
             const max = s.max_score || s.total_points || 1;
             return ((s.score || 0) / max) >= 0.5;
         }).length / submissions.length) * 100).toFixed(0)
@@ -527,7 +575,7 @@ export function ExamAnalyticsDashboard() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                {questionStats.map((q, idx) => {
+                                {questionStats.map((q: any, idx: number) => {
                                     const total = q.correct_count + q.incorrect_count;
                                     const successRate = total > 0 ? ((q.correct_count / total) * 100).toFixed(2) : 0;
                                     return (
@@ -569,8 +617,44 @@ export function ExamAnalyticsDashboard() {
 
                 {/* Submissions List */}
                 <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                    <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                    <div className="p-6 border-b border-gray-100 dark:border-gray-700 md:flex md:items-center md:justify-between space-y-4 md:space-y-0">
                         <h2 className="text-lg font-bold text-gray-900 dark:text-white">Student Submissions</h2>
+
+                        {/* Search & Filters */}
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search students..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full sm:w-64 pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                />
+                            </div>
+
+                            <div className="flex gap-2">
+                                <select
+                                    value={filterStatus}
+                                    onChange={(e) => setFilterStatus(e.target.value as any)}
+                                    className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                    <option value="all">All</option>
+                                    <option value="passed">Passed</option>
+                                    <option value="failed">Failed</option>
+                                </select>
+
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value as any)}
+                                    className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                    <option value="date">Newest</option>
+                                    <option value="score">Score</option>
+                                    <option value="duration">Time</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full">
@@ -588,36 +672,45 @@ export function ExamAnalyticsDashboard() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                {submissions.map((s) => {
-                                    const maxScore = s.max_score || s.total_points || 1;
-                                    const percentage = s.percentage ? s.percentage : ((s.score || 0) / maxScore) * 100;
-                                    const passed = percentage >= 50;
+                                {filteredSubmissions.length > 0 ? (
+                                    filteredSubmissions.map((s: any) => {
+                                        const maxScore = s.max_score || s.total_points || 1;
+                                        const percentage = s.percentage ? s.percentage : ((s.score || 0) / maxScore) * 100;
+                                        const passed = percentage >= 50;
 
-                                    return (
-                                        <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                            {studentFields.map((field: string) => (
-                                                <td key={field} className="py-4 px-6 text-sm font-medium text-gray-900 dark:text-white">
-                                                    {resolveFieldValue(s, field)}
+                                        return (
+                                            <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                                {studentFields.map((field: string) => (
+                                                    <td key={field} className="py-4 px-6 text-sm font-medium text-gray-900 dark:text-white">
+                                                        {resolveFieldValue(s, field)}
+                                                    </td>
+                                                ))}
+                                                <td className="py-4 px-6 text-sm text-center">
+                                                    <div className="font-bold text-gray-900 dark:text-white">{s.score || 0} <span className="text-gray-400 font-normal">/ {maxScore}</span></div>
                                                 </td>
-                                            ))}
-                                            <td className="py-4 px-6 text-sm text-center">
-                                                <div className="font-bold text-gray-900 dark:text-white">{s.score || 0} <span className="text-gray-400 font-normal">/ {maxScore}</span></div>
-                                            </td>
-                                            <td className="py-4 px-6 text-sm text-center text-gray-600 dark:text-gray-400">
-                                                {formatDuration(s.time_taken)}
-                                            </td>
-                                            <td className="py-4 px-6 text-center">
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${passed ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'}`}>
-                                                    {percentage.toFixed(1)}% {passed ? 'Pass' : 'Fail'}
-                                                </span>
-                                            </td>
-                                            <td className="py-4 px-6 text-sm text-gray-500 dark:text-gray-400 text-right font-mono">
-                                                {new Date(s.submitted_at || s.created_at || new Date()).toLocaleDateString()}
-                                                <span className="ml-2 text-xs text-gray-400">{new Date(s.submitted_at || s.created_at || new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                                <td className="py-4 px-6 text-sm text-center text-gray-600 dark:text-gray-400">
+                                                    {formatDuration(s.time_taken)}
+                                                </td>
+                                                <td className="py-4 px-6 text-center">
+                                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${passed ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'}`}>
+                                                        {passed ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                                                        {percentage.toFixed(1)}%
+                                                    </span>
+                                                </td>
+                                                <td className="py-4 px-6 text-sm text-gray-500 dark:text-gray-400 text-right font-mono">
+                                                    {new Date(s.submitted_at || s.created_at || new Date()).toLocaleDateString()}
+                                                    <span className="ml-2 text-xs text-gray-400">{new Date(s.submitted_at || s.created_at || new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                ) : (
+                                    <tr>
+                                        <td colSpan={studentFields.length + 4} className="py-12 text-center text-gray-500 dark:text-gray-400">
+                                            No results match your filters
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
