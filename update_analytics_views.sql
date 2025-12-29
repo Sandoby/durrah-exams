@@ -1,4 +1,7 @@
--- Update the analytics summary view to include average time taken
+-- Drop the existing view first to avoid column naming conflicts during update
+DROP VIEW IF EXISTS public.exam_analytics_summary;
+
+-- Recreate the analytics summary view to include average time taken
 CREATE OR REPLACE VIEW public.exam_analytics_summary AS
 SELECT 
     e.id as exam_id,
@@ -18,3 +21,23 @@ GROUP BY e.id, e.title, e.tutor_id;
 
 -- Ensure tutors can access the view
 GRANT SELECT ON public.exam_analytics_summary TO authenticated;
+
+-- Update the helper function to also return average time taken
+CREATE OR REPLACE FUNCTION get_exam_analytics(exam_uuid UUID)
+RETURNS JSON AS $$
+DECLARE
+  result JSON;
+BEGIN
+  SELECT json_build_object(
+    'total_submissions', COUNT(s.id),
+    'average_score', AVG(s.score),
+    'average_time_taken', AVG(s.time_taken),
+    'max_score', MAX(s.score),
+    'min_score', MIN(s.score)
+  ) INTO result
+  FROM public.submissions s
+  WHERE s.exam_id = exam_uuid;
+  
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
