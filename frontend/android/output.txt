@@ -1,0 +1,306 @@
+
+> Configure project :app
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :capacitor-cordova-android-plugins
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Task :app:signingReport
+Variant: debug
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+Variant: release
+Config: null
+Store: null
+Alias: null
+----------
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-app:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-browser:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-camera:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-clipboard:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-community-barcode-scanner:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-community-firebase-analytics:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-community-privacy-screen:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-cordova-android-plugins:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-device:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-dialog:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-filesystem:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-haptics:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-keyboard:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-local-notifications:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-native-biometric:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-network:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-preferences:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-push-notifications:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-screen-orientation:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-share:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-splash-screen:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capacitor-status-bar:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+> Task :capawesome-capacitor-app-update:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\Elsaid Ahmed\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 6C:2D:D2:29:53:E2:1E:84:9A:21:7F:AB:AE:30:72:62
+SHA1: AE:69:04:D2:29:7B:CE:29:3F:80:94:88:E0:25:53:2A:D9:97:E9:31
+SHA-256: EA:45:50:AB:7B:7D:06:32:9A:5E:85:F7:CE:8C:48:97:8A:BF:6E:99:B2:99:FA:87:03:E6:AB:CA:30:2A:D2:91
+Valid until: Sunday, September 5, 2055
+----------
+
+[Incubating] Problems report is available at: file:///C:/Users/Elsaid%20Ahmed/Desktop/durrah%20exams%20new/frontend/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 10s
+25 actionable tasks: 25 executed
