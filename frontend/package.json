@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@bcyesil/capacitor-plugin-printer": "^0.0.6",
     "@capacitor-community/barcode-scanner": "^4.0.1",
     "@capacitor-community/firebase-analytics": "^7.0.1",
     "@capacitor-community/privacy-screen": "^6.0.0",
@@ -35,7 +36,6 @@
     "@capacitor/splash-screen": "^8.0.0",
     "@capacitor/status-bar": "^8.0.0",
     "@capawesome/capacitor-app-update": "^8.0.0",
-    "@capgo/capacitor-printer": "^8.0.3",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",

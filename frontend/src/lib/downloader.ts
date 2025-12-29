@@ -1,4 +1,5 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
 import toast from 'react-hot-toast';
 
@@ -7,11 +8,11 @@ export const downloaderService = {
         if (Capacitor.isNativePlatform()) {
             try {
                 // Determine the directory based on platform
-                // On Android/iOS, Directory.Documents is the most appropriate for "Downloads"
-                const directory = Directory.Documents;
+                // Directory.Cache is always accessible and good for temporary files to be shared/saved
+                const directory = Directory.Cache;
 
-                // Write file to the documents directory
-                await Filesystem.writeFile({
+                // Write file to the cache directory
+                const result = await Filesystem.writeFile({
                     path: filename,
                     data,
                     directory,
@@ -19,11 +20,16 @@ export const downloaderService = {
                     recursive: true
                 });
 
-                toast.success(`Success: ${filename} saved to Documents folder`);
+                // Use Share to let the user "Save to Files" or "Download"
+                // This is the most reliable way on Android 11+ to get the file into public space
+                await Share.share({
+                    title: `Download ${filename}`,
+                    text: `Exporting ${filename}`,
+                    url: result.uri,
+                    dialogTitle: 'Save to device'
+                });
 
-                // Note: We don't use Share.share here as the user wants direct downloading.
-                // The file will be available in the "Files" app (iOS) or "Documents" folder (Android).
-
+                toast.success(`Exporting ${filename}...`);
                 return true;
             } catch (error: any) {
                 console.error('Download failed:', error);

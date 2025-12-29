@@ -1,4 +1,4 @@
-import { Printer } from '@capgo/capacitor-printer';
+import { Printer } from '@bcyesil/capacitor-plugin-printer';
 import { Capacitor } from '@capacitor/core';
 import toast from 'react-hot-toast';
 
@@ -9,7 +9,10 @@ export const printerService = {
                 if (!Printer) {
                     throw new Error('Printer plugin not available');
                 }
-                await Printer.printHtml({ html: html });
+                await Printer.print({
+                    content: html,
+                    name: 'Exam Document'
+                });
                 return true;
             } catch (error: any) {
                 console.error('Printing failed:', error);
@@ -32,8 +35,8 @@ export const printerService = {
     async printUrl(url: string) {
         if (Capacitor.isNativePlatform()) {
             try {
-                // Fallback to printHtml with iframe or redirect if printUrl is not supported
-                await Printer.printHtml({ html: `<script>window.location.href="${url}"</script>` });
+                // Fallback to printHtml with iframe or redirect
+                await Printer.print({ content: `<script>window.location.href="${url}"</script>` });
             } catch (error) {
                 console.error('Print URL failed:', error);
                 toast.error('Print URL failed');
