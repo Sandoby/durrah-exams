@@ -11,7 +11,7 @@ export const downloaderService = {
                 const directory = Directory.Documents;
 
                 // Write file to the documents directory
-                const result = await Filesystem.writeFile({
+                await Filesystem.writeFile({
                     path: filename,
                     data,
                     directory,
