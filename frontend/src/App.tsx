@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import LandingPage from './pages/LandingPage';
@@ -43,8 +43,11 @@ import { BackButtonHandler } from './components/BackButtonHandler';
 import { Browser } from '@capacitor/browser';
 import { App as CapApp } from '@capacitor/app';
 
-function App() {
+import { useNavigate, Routes, Route } from 'react-router-dom';
+
+function AppContent() {
   const { i18n } = useTranslation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
@@ -58,23 +61,80 @@ function App() {
   }, [i18n.language]);
 
   useEffect(() => {
-    // Handle deep links for in-app browser returns
     if (Capacitor.isNativePlatform()) {
       const setupAppUrlListener = async () => {
         CapApp.addListener('appUrlOpen', async (data: any) => {
           console.log('App opened with URL:', data.url);
-          // If the URL is our custom scheme, close the browser
-          if (data.url.includes('durrah://')) {
-            await Browser.close();
+
+          try {
+            const url = new URL(data.url);
+
+            // Handle custom scheme durrah://
+            if (data.url.includes('durrah://')) {
+              await Browser.close();
+              if (url.hostname === 'payment-callback') {
+                navigate('/payment-callback' + url.search);
+              }
+              return;
+            }
+
+            // Handle Universal/App Links (https)
+            if (url.hostname.includes('durrahsystem.tech')) {
+              const path = url.pathname + url.search;
+              console.log('Deep linking to path:', path);
+              navigate(path);
+            }
+          } catch (err) {
+            console.error('Error parsing deep link URL:', err);
           }
         });
       };
       setupAppUrlListener();
     }
-  }, []);
+  }, [navigate]);
 
   const isNative = Capacitor.isNativePlatform();
 
+  return (
+    <div className="min-h-screen bg-background text-foreground font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+      <Routes>
+        <Route path="/" element={isNative ? <MobileWelcome /> : <LandingPage />} />
+        <Route path="/mobile-welcome" element={<MobileWelcome />} />
+        <Route path="/kids" element={<KidsLanding />} />
+        <Route path="/kids/quiz/:id" element={<KidsExamView />} />
+        <Route path="/demo" element={<DemoPage />} />
+        <Route path="/blog" element={<BlogList />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/update-password" element={<UpdatePassword />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/payment-callback" element={<PaymentCallback />} />
+        <Route path="/payment-history" element={<PaymentHistory />} />
+        <Route path="/payment-test" element={<PaymentTest />} />
+        <Route path="/question-bank" element={<QuestionBank />} />
+        <Route path="/exam/new" element={<ExamEditor />} />
+        <Route path="/exam/:id/edit" element={<ExamEditor />} />
+        <Route path="/exam/:id" element={<ExamView />} />
+        <Route path="/student-portal" element={<StudentPortal />} />
+        <Route path="/exam/:examId/analytics" element={<ExamAnalyticsDashboard />} />
+        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/super-admin" element={<SuperAdminPanel />} />
+        <Route path="/agent" element={<AgentDashboard />} />
+        <Route path="/agent-login" element={<AgentLogin />} />
+        <Route path="/support" element={<SupportDashboard />} />
+        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="*" element={<LandingPage />} />
+      </Routes>
+      <Toaster position="top-right" />
+    </div>
+  );
+}
+
+function App() {
   return (
     <AuthProvider>
       <PushNotificationHandler />
@@ -82,41 +142,7 @@ function App() {
       <SubmissionSync />
       <Router>
         <BackButtonHandler />
-        <div className="min-h-screen bg-background text-foreground font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-          <Routes>
-            <Route path="/" element={isNative ? <MobileWelcome /> : <LandingPage />} />
-            <Route path="/mobile-welcome" element={<MobileWelcome />} />
-            <Route path="/kids" element={<KidsLanding />} />
-            <Route path="/kids/quiz/:id" element={<KidsExamView />} />
-            <Route path="/demo" element={<DemoPage />} />
-            <Route path="/blog" element={<BlogList />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/update-password" element={<UpdatePassword />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/payment-callback" element={<PaymentCallback />} />
-            <Route path="/payment-history" element={<PaymentHistory />} />
-            <Route path="/payment-test" element={<PaymentTest />} />
-            <Route path="/question-bank" element={<QuestionBank />} />
-            <Route path="/exam/new" element={<ExamEditor />} />
-            <Route path="/exam/:id/edit" element={<ExamEditor />} />
-            <Route path="/exam/:id" element={<ExamView />} />
-            <Route path="/student-portal" element={<StudentPortal />} />
-            <Route path="/exam/:examId/analytics" element={<ExamAnalyticsDashboard />} />
-            <Route path="/admin" element={<AdminPanel />} />
-            <Route path="/super-admin" element={<SuperAdminPanel />} />
-            <Route path="/agent" element={<AgentDashboard />} />
-            <Route path="/agent-login" element={<AgentLogin />} />
-            <Route path="/support" element={<SupportDashboard />} />
-            <Route path="/refund-policy" element={<RefundPolicy />} />
-            <Route path="*" element={<LandingPage />} />
-          </Routes>
-          <Toaster position="top-right" />
-        </div>
+        <AppContent />
       </Router>
     </AuthProvider>
   );

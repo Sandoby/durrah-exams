@@ -26,6 +26,14 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="durrah" android:host="payment-callback" />
             </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="durrahsystem.tech" />
+                <data android:scheme="https" android:host="tutors.durrahsystem.tech" />
+            </intent-filter>
         </activity>
 
         <provider
@@ -40,4 +48,8 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 </manifest>
