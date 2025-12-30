@@ -312,9 +312,9 @@ export default function KidsLanding() {
       `}</style>
 
       {/* Futuristic Header */}
-      <header className="relative z-50 p-6">
+      <header className="fixed top-0 left-0 right-0 z-50 p-6">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="glass-panel px-4 py-2 rounded-full flex items-center gap-2 border-indigo-500/30">
+          <div className="glass-panel px-4 py-2 rounded-full flex items-center gap-2 border-indigo-500/30 shadow-2xl">
             <Orbit className="h-5 w-5 text-indigo-400 animate-spin-slow" />
             <span className="text-sm font-bold text-indigo-100/80 tracking-widest uppercase">{t('kidsLanding.missionCenter', 'Mission Center')}</span>
           </div>
@@ -322,7 +322,7 @@ export default function KidsLanding() {
         </div>
       </header>
 
-      <main className="relative z-10 px-6 pt-8 pb-20">
+      <main className="relative z-10 px-6 pt-32 pb-20">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
 
           {/* Hero Content */}

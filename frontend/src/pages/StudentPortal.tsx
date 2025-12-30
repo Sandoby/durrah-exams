@@ -279,16 +279,17 @@ export default function StudentPortal() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24">
       {/* Navbar */}
-      <nav className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Logo size="md" showText={false} />
-              <span className="ml-2 text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                {t('studentPortal.title', 'Student Portal')}
-              </span>
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
+          <div className="flex justify-between h-16 px-6">
+            <div className="flex items-center gap-3">
+              <Logo className="h-9 w-9" showText={false} />
+              <div className="flex flex-col">
+                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{t('studentPortal.title', 'Student Portal')}</span>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <div className="hidden sm:flex flex-col items-end mr-2">

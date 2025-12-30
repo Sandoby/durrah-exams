@@ -5,7 +5,9 @@
         "insert": "Insert Formula"
     },
     "common": {
-        "dir": "ltr"
+        "dir": "ltr",
+        "true": "True",
+        "false": "False"
     },
     "hero": {
         "title": "Create Exams That",
@@ -373,7 +375,8 @@
         "version": "Mobile App"
     },
     "questionBank": {
-        "title": "Question Banks",
+        "titlePart1": "Question",
+        "titlePart2": "Banks",
         "subtitle": "Centralize and reuse your expertise effectively",
         "createBank": "Create New Bank",
         "libraries": "Your Libraries",
@@ -385,6 +388,30 @@
         "collectionLibrary": "Collection Library",
         "searchPlaceholder": "Search items in this bank...",
         "addQuestion": "Add Question",
+        "export": {
+            "title": "Export",
+            "pdf": "Export as PDF",
+            "word": "Export as Word",
+            "json": "Export as JSON"
+        },
+        "delete": "Delete",
+        "types": {
+            "multiple_choice": "Multiple Choice",
+            "multiple_select": "Multiple Select",
+            "dropdown": "Dropdown Selection",
+            "true_false": "True / False",
+            "short_answer": "Short Text Response",
+            "numeric": "Numerical Value"
+        },
+        "difficulty": {
+            "easy": "Easy",
+            "medium": "Medium",
+            "hard": "Hard"
+        },
+        "points": "Points",
+        "option": "Option",
+        "removeOption": "Remove option",
+        "limitReach": "Free users are limited to 1 Question Bank.",
         "noQuestions": {
             "found": "No questions found",
             "import": "No questions yet. Import some!"

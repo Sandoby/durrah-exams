@@ -5,7 +5,9 @@
         "insert": "Insertar Fórmula"
     },
     "common": {
-        "dir": "ltr"
+        "dir": "ltr",
+        "true": "Verdadero",
+        "false": "Falso"
     },
     "hero": {
         "title": "Crea Exámenes Que",
@@ -316,7 +318,8 @@
         "version": "Aplicación Móvil"
     },
     "questionBank": {
-        "title": "Bancos de Preguntas",
+        "titlePart1": "Bancos de",
+        "titlePart2": "Preguntas",
         "subtitle": "Centraliza y reutiliza tu experiencia de manera efectiva",
         "createBank": "Crear Nuevo Banco",
         "libraries": "Tus Bibliotecas",
@@ -328,6 +331,30 @@
         "collectionLibrary": "Biblioteca de Colección",
         "searchPlaceholder": "Buscar elementos en este banco...",
         "addQuestion": "Añadir Pregunta",
+        "export": {
+            "title": "Exportar",
+            "pdf": "Exportar como PDF",
+            "word": "Exportar como Word",
+            "json": "Exportar como JSON"
+        },
+        "delete": "Eliminar",
+        "types": {
+            "multiple_choice": "Opción múltiple",
+            "multiple_select": "Selección múltiple",
+            "dropdown": "Lista desplegable",
+            "true_false": "Verdadero / Falso",
+            "short_answer": "Respuesta corta",
+            "numeric": "Valor numérico"
+        },
+        "difficulty": {
+            "easy": "Fácil",
+            "medium": "Medio",
+            "hard": "Difícil"
+        },
+        "points": "Puntos",
+        "option": "Opción",
+        "removeOption": "Eliminar opción",
+        "limitReach": "Los usuarios gratuitos están limitados a 1 banco de preguntas.",
         "noQuestions": {
             "found": "No se encontraron preguntas",
             "import": "Aún no hay preguntas. ¡Importa algunas!"

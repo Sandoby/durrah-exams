@@ -5,7 +5,9 @@
         "insert": "إدراج صيغة"
     },
     "common": {
-        "dir": "rtl"
+        "dir": "rtl",
+        "true": "صح",
+        "false": "خطأ"
     },
     "hero": {
         "title": "أنشئ اختبارات",
@@ -317,7 +319,8 @@
         "version": "تطبيق الجوال"
     },
     "questionBank": {
-        "title": "بنوك الأسئلة",
+        "titlePart1": "بنوك",
+        "titlePart2": "الأسئلة",
         "subtitle": "جمع وأعد استخدام خبراتك بفعالية",
         "createBank": "إنشاء بنك جديد",
         "libraries": "مكتباتك",
@@ -329,6 +332,30 @@
         "collectionLibrary": "مكتبة المجموعة",
         "searchPlaceholder": "البحث عن عناصر في هذا البنك...",
         "addQuestion": "إضافة سؤال",
+        "export": {
+            "title": "تصدير",
+            "pdf": "تصدير كـ PDF",
+            "word": "تصدير كـ Word",
+            "json": "تصدير كـ JSON"
+        },
+        "delete": "حذف",
+        "types": {
+            "multiple_choice": "اختيار من متعدد",
+            "multiple_select": "اجابات متعددة",
+            "dropdown": "قائمة منسدلة",
+            "true_false": "صح / خطأ",
+            "short_answer": "إجابة قصيرة",
+            "numeric": "قيمة رقمية"
+        },
+        "difficulty": {
+            "easy": "سهل",
+            "medium": "متوسط",
+            "hard": "صعب"
+        },
+        "points": "نقاط",
+        "option": "خيار",
+        "removeOption": "إزالة الخيار",
+        "limitReach": "المستخدمون المجانيون محدودون ببنك أسئلة واحد فقط.",
         "noQuestions": {
             "found": "لم يتم العثور على أسئلة",
             "import": "لا توجد أسئلة بعد. قم باستيراد البعض!"

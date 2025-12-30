@@ -431,42 +431,47 @@ export default function QuestionBank() {
     }
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] dark:bg-gray-950 font-sans">
+        <div className="min-h-screen bg-[#f8fafc] dark:bg-gray-950 font-sans pt-24">
             {/* Navbar */}
-            <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <Logo />
+            <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
+                <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
+                    <div className="flex justify-between h-16 px-6">
+                        <div className="flex items-center gap-3">
+                            <Logo className="h-9 w-9" showText={false} />
+                            <div className="flex flex-col">
+                                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
+                            </div>
                         </div>
 
                         {/* Desktop Navigation */}
-                        <div className="hidden md:flex items-center space-x-6">
-                            <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+                        <div className="hidden md:flex items-center space-x-3">
+                            <span className="hidden lg:inline text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
                                 {user?.user_metadata?.full_name || user?.email}
                             </span>
+
                             {profile?.subscription_status !== 'active' && (
                                 <Link
                                     to="/checkout"
-                                    className="inline-flex items-center px-6 py-2.5 text-xs font-black text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl hover:scale-105 transition-all shadow-sm"
+                                    className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-500/30 hover:shadow-xl transition-all"
                                 >
-                                    <Crown className="h-4 w-4 mr-2" />
-                                    {t('settings.subscription.upgrade')}
+                                    <Crown className="h-4 w-4 lg:mr-2" />
+                                    <span className="hidden lg:inline">{t('settings.subscription.upgrade')}</span>
                                 </Link>
                             )}
                             <Link
                                 to="/settings"
-                                className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-indigo-600 border border-transparent hover:border-indigo-100 transition-all"
-                                title={t('settings.title')}
+                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                             >
-                                <Settings className="h-5 w-5" />
+                                <Settings className="h-4 w-4 lg:mr-2" />
+                                <span className="hidden lg:inline">{t('settings.title')}</span>
                             </Link>
                             <button
                                 onClick={handleLogout}
-                                className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 hover:text-red-600 border border-transparent hover:border-red-100 transition-all"
-                                title={t('nav.logout', 'Logout')}
+                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                             >
-                                <LogOut className="h-5 w-5" />
+                                <LogOut className="h-4 w-4 lg:mr-2" />
+                                <span className="hidden lg:inline">{t('nav.logout', 'Logout')}</span>
                             </button>
                         </div>
 
@@ -474,9 +479,13 @@ export default function QuestionBank() {
                         <div className="flex items-center md:hidden">
                             <button
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                className="p-3 rounded-xl text-gray-400 hover:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent hover:border-gray-100 transition-all"
+                                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
                             >
-                                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                                {isMobileMenuOpen ? (
+                                    <X className="h-6 w-6" />
+                                ) : (
+                                    <Menu className="h-6 w-6" />
+                                )}
                             </button>
                         </div>
                     </div>
@@ -484,16 +493,33 @@ export default function QuestionBank() {
 
                 {/* Mobile menu */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 p-4">
-                        <div className="space-y-3">
-                            <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-2xl text-sm font-bold text-gray-700 dark:text-gray-300">
+                    <div className="md:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl mt-2 mx-4 shadow-xl">
+                        <div className="px-2 pt-2 pb-3 space-y-1">
+                            <div className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
                                 {user?.user_metadata?.full_name || user?.email}
                             </div>
-                            <Link to="/settings" className="flex items-center px-5 py-4 rounded-2xl text-base font-bold text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all">
-                                <Settings className="h-5 w-5 mr-3 text-gray-400" />
+                            {profile?.subscription_status !== 'active' && (
+                                <Link
+                                    to="/checkout"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="flex items-center px-3 py-2 rounded-md text-base font-medium text-indigo-600 dark:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                >
+                                    <Crown className="h-5 w-5 mr-3" />
+                                    {t('settings.subscription.upgrade')}
+                                </Link>
+                            )}
+                            <Link
+                                to="/settings"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                                <Settings className="h-5 w-5 mr-3" />
                                 {t('settings.title')}
                             </Link>
-                            <button onClick={handleLogout} className="flex items-center w-full px-5 py-4 rounded-2xl text-base font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
+                            <button
+                                onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
+                                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
                                 <LogOut className="h-5 w-5 mr-3" />
                                 {t('nav.logout', 'Logout')}
                             </button>
@@ -522,7 +548,7 @@ export default function QuestionBank() {
                                 <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                             </Link>
                             <h1 className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter">
-                                Question <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">{t('questionBank.title').split(' ')[1] || 'Banks'}</span>
+                                {t('questionBank.titlePart1')} <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">{t('questionBank.titlePart2')}</span>
                             </h1>
                         </div>
                         <p className="text-lg text-gray-500 dark:text-gray-400 font-bold ml-[72px]">{t('questionBank.subtitle')}</p>
@@ -531,7 +557,7 @@ export default function QuestionBank() {
                     <button
                         onClick={() => {
                             if (profile?.subscription_status !== 'active' && banks.length >= 1) {
-                                toast.error("Free users are limited to 1 Question Bank.");
+                                toast.error(t('questionBank.limitReach'));
                                 navigate('/checkout');
                                 return;
                             }
@@ -587,7 +613,7 @@ export default function QuestionBank() {
                                                                 setExportMenuOpen(exportMenuOpen === bank.id ? null : bank.id);
                                                             }}
                                                             className="flex items-center gap-1 p-2 text-gray-400 hover:text-green-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
-                                                            title="Export"
+                                                            title={t('questionBank.export.title')}
                                                         >
                                                             <Download className="h-4 w-4" />
                                                         </button>
@@ -604,7 +630,7 @@ export default function QuestionBank() {
                                                                     className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
                                                                 >
                                                                     <FileText className="w-4 h-4 mr-2 text-red-500" />
-                                                                    Export as PDF
+                                                                    {t('questionBank.export.pdf')}
                                                                 </button>
                                                                 <button
                                                                     onClick={(e) => {
@@ -615,7 +641,7 @@ export default function QuestionBank() {
                                                                     className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
                                                                 >
                                                                     <FileText className="w-4 h-4 mr-2 text-blue-500" />
-                                                                    Export as Word
+                                                                    {t('questionBank.export.word')}
                                                                 </button>
                                                                 <button
                                                                     onClick={(e) => {
@@ -626,7 +652,7 @@ export default function QuestionBank() {
                                                                     className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
                                                                 >
                                                                     <FileText className="w-4 h-4 mr-2 text-yellow-500" />
-                                                                    Export as JSON
+                                                                    {t('questionBank.export.json')}
                                                                 </button>
                                                             </div>
                                                         )}
@@ -637,7 +663,7 @@ export default function QuestionBank() {
                                                             deleteBank(bank.id);
                                                         }}
                                                         className="p-2 text-gray-400 hover:text-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
-                                                        title="Delete"
+                                                        title={t('questionBank.delete')}
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </button>
@@ -702,19 +728,19 @@ export default function QuestionBank() {
                                                     <div className="flex-1">
                                                         <div className="flex flex-wrap items-center gap-3 mb-3">
                                                             <span className="px-3 py-1 text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-full border border-indigo-100 dark:border-indigo-900/50">
-                                                                {question.type.replace('_', ' ')}
+                                                                {t(`questionBank.types.${question.type}`)}
                                                             </span>
                                                             {question.difficulty && (
                                                                 <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full border ${question.difficulty === 'easy' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-900/50' :
                                                                     question.difficulty === 'hard' ? 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-900/50' :
                                                                         'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-900/50'
                                                                     }`}>
-                                                                    {question.difficulty}
+                                                                    {t(`questionBank.difficulty.${question.difficulty}`)}
                                                                 </span>
                                                             )}
                                                             <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400">
                                                                 <FileText className="w-3 h-3" />
-                                                                {question.points} Points
+                                                                {question.points} {t('questionBank.points')}
                                                             </div>
                                                         </div>
                                                         <p className="text-lg text-gray-900 dark:text-white font-bold leading-tight mb-4">
@@ -734,7 +760,7 @@ export default function QuestionBank() {
                                                         <button
                                                             onClick={() => deleteQuestion(question.id)}
                                                             className="p-3 text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-gray-900/50 rounded-2xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all shadow-sm"
-                                                            title="Delete"
+                                                            title={t('questionBank.delete')}
                                                         >
                                                             <Trash2 className="h-5 w-5" />
                                                         </button>
@@ -862,12 +888,12 @@ export default function QuestionBank() {
                                             }}
                                             className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none appearance-none cursor-pointer"
                                         >
-                                            <option value="multiple_choice">Multiple Choice</option>
-                                            <option value="multiple_select">Multiple Select</option>
-                                            <option value="dropdown">Dropdown Selection</option>
-                                            <option value="true_false">True / False</option>
-                                            <option value="short_answer">Short Text Response</option>
-                                            <option value="numeric">Numerical Value</option>
+                                            <option value="multiple_choice">{t('questionBank.types.multiple_choice')}</option>
+                                            <option value="multiple_select">{t('questionBank.types.multiple_select')}</option>
+                                            <option value="dropdown">{t('questionBank.types.dropdown')}</option>
+                                            <option value="true_false">{t('questionBank.types.true_false')}</option>
+                                            <option value="short_answer">{t('questionBank.types.short_answer')}</option>
+                                            <option value="numeric">{t('questionBank.types.numeric')}</option>
                                         </select>
                                         <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                                             <ChevronDown className="w-5 h-5" />
@@ -882,7 +908,7 @@ export default function QuestionBank() {
                                             {t('questionBank.addQuestionModal.choicesLabel')} {newQuestion.type !== 'true_false' ? '*' : ''}
                                         </label>
                                         <div className="space-y-4">
-                                            {(newQuestion.type === 'true_false' ? ['True', 'False'] : newQuestion.options).map((option, index) => (
+                                            {(newQuestion.type === 'true_false' ? [t('common.true', 'True'), t('common.false', 'False')] : newQuestion.options).map((option, index) => (
                                                 <div key={index} className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 border-2 border-transparent focus-within:border-indigo-500/30 focus-within:bg-white dark:focus-within:bg-gray-900 transition-all group">
                                                     {/* Selection Input (Radio or Checkbox) */}
                                                     <div className="relative flex items-center justify-center">
@@ -934,7 +960,7 @@ export default function QuestionBank() {
                                                             }
                                                         }}
                                                         readOnly={newQuestion.type === 'true_false'}
-                                                        placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                                                        placeholder={`${t('questionBank.option')} ${String.fromCharCode(65 + index)}`}
                                                         className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-bold text-gray-700 dark:text-gray-300 placeholder-gray-400 outline-none"
                                                     />
 
@@ -952,7 +978,7 @@ export default function QuestionBank() {
                                                                 setNewQuestion({ ...newQuestion, options: newOptions, correct_answer: newCorrect });
                                                             }}
                                                             className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all opacity-0 group-hover:opacity-100"
-                                                            title="Remove option"
+                                                            title={t('questionBank.removeOption')}
                                                         >
                                                             <X className="h-4 w-4" />
                                                         </button>
@@ -1013,9 +1039,9 @@ export default function QuestionBank() {
                                                 onChange={(e) => setNewQuestion({ ...newQuestion, difficulty: e.target.value as any })}
                                                 className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none appearance-none cursor-pointer"
                                             >
-                                                <option value="easy">Easy</option>
-                                                <option value="medium">Medium</option>
-                                                <option value="hard">Hard</option>
+                                                <option value="easy">{t('questionBank.difficulty.easy')}</option>
+                                                <option value="medium">{t('questionBank.difficulty.medium')}</option>
+                                                <option value="hard">{t('questionBank.difficulty.hard')}</option>
                                             </select>
                                             <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                                                 <ChevronDown className="w-5 h-5" />

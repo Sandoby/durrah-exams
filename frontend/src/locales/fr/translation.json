@@ -5,7 +5,9 @@
         "insert": "Insérer une formule"
     },
     "common": {
-        "dir": "ltr"
+        "dir": "ltr",
+        "true": "Vrai",
+        "false": "Faux"
     },
     "hero": {
         "title": "Créez des Examens Qui",
@@ -316,7 +318,8 @@
         "version": "Application Mobile"
     },
     "questionBank": {
-        "title": "Banques de Questions",
+        "titlePart1": "Banques de",
+        "titlePart2": "Questions",
         "subtitle": "Centralisez et réutilisez votre expertise efficacement",
         "createBank": "Créer une Nouvelle Banque",
         "libraries": "Vos Bibliothèques",
@@ -328,6 +331,30 @@
         "collectionLibrary": "Bibliothèque de Collection",
         "searchPlaceholder": "Rechercher des éléments dans cette banque...",
         "addQuestion": "Ajouter une Question",
+        "export": {
+            "title": "Exporter",
+            "pdf": "Exporter en PDF",
+            "word": "Exporter en Word",
+            "json": "Exporter en JSON"
+        },
+        "delete": "Supprimer",
+        "types": {
+            "multiple_choice": "Choix multiple",
+            "multiple_select": "Sélection multiple",
+            "dropdown": "Liste déroulante",
+            "true_false": "Vrai / Faux",
+            "short_answer": "Réponse courte",
+            "numeric": "Valeur numérique"
+        },
+        "difficulty": {
+            "easy": "Facile",
+            "medium": "Moyen",
+            "hard": "Difficile"
+        },
+        "points": "Points",
+        "option": "Option",
+        "removeOption": "Supprimer l'option",
+        "limitReach": "Les utilisateurs gratuits sont limités à 1 banque de questions.",
         "noQuestions": {
             "found": "Aucune question trouvée",
             "import": "Pas encore de questions. Importez-en !"

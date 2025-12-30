@@ -1207,53 +1207,55 @@ export default function ExamView() {
                 </div>
             )}
 
-            <div className={`max-w-4xl mx-auto ${highContrast ? 'contrast-150 saturate-200 brightness-110' : ''}`}>
+            <div className={`max-w-4xl mx-auto pt-24 ${highContrast ? 'contrast-150 saturate-200 brightness-110' : ''}`}>
                 <div
                     className="max-w-3xl mx-auto transition-all duration-300"
                     style={{ fontSize: fontSize === 'normal' ? '1rem' : fontSize === 'large' ? '1.25rem' : '1.5rem' } as React.CSSProperties}
                 >
                     {/* Header - Hidden in Zen Mode unless hovered or essential */}
                     {!isZenMode && (
-                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 sticky top-0 z-10">
-                            <div className="flex flex-col gap-3">
-                                <div className="flex justify-between items-center">
-                                    <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate max-w-[50%]">{exam.title}</h1>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => setViewMode(prev => prev === 'list' ? 'single' : 'list')}
-                                            className="p-2 text-gray-500 hover:text-indigo-600 dark:text-gray-400"
-                                            title={viewMode === 'list' ? "Switch to One Question Per Page" : "Switch to List View"}
-                                        >
-                                            {viewMode === 'list' ? <LayoutGrid size={20} /> : <div className="flex items-center"><span className="text-xs font-bold mr-1">1/1</span></div>}
-                                        </button>
-                                        <button
-                                            onClick={() => setIsZenMode(!isZenMode)}
-                                            className={`p-2 ${isZenMode ? 'text-indigo-600' : 'text-gray-500 hover:text-indigo-600'} dark:text-gray-400`}
-                                            title="Toggle Zen Mode"
-                                        >
-                                            {isZenMode ? <Star size={20} /> : <Eye size={20} />}
-                                        </button>
+                        <div className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
+                            <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 border border-gray-200/50 dark:border-gray-700/50">
+                                <div className="flex flex-col gap-3">
+                                    <div className="flex justify-between items-center">
+                                        <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate max-w-[50%]">{exam.title}</h1>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setViewMode(prev => prev === 'list' ? 'single' : 'list')}
+                                                className="p-2 text-gray-500 hover:text-indigo-600 dark:text-gray-400"
+                                                title={viewMode === 'list' ? "Switch to One Question Per Page" : "Switch to List View"}
+                                            >
+                                                {viewMode === 'list' ? <LayoutGrid size={20} /> : <div className="flex items-center"><span className="text-xs font-bold mr-1">1/1</span></div>}
+                                            </button>
+                                            <button
+                                                onClick={() => setIsZenMode(!isZenMode)}
+                                                className={`p-2 ${isZenMode ? 'text-indigo-600' : 'text-gray-500 hover:text-indigo-600'} dark:text-gray-400`}
+                                                title="Toggle Zen Mode"
+                                            >
+                                                {isZenMode ? <Star size={20} /> : <Eye size={20} />}
+                                            </button>
+                                        </div>
                                     </div>
+                                    {started && (
+                                        <div className="mt-3 space-y-1">
+                                            <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
+                                                <span>Progress: {answeredCount}/{totalQuestions} questions</span>
+                                                <span className="font-semibold">{progress.toFixed(0)}%</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                                <div
+                                                    className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-500 ease-out"
+                                                    style={{ width: `${progress}%` }}
+                                                />
+                                            </div>
+                                            {progress === 100 && (
+                                                <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                                                    ✓ All questions answered!
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
-                                {started && (
-                                    <div className="mt-3 space-y-1">
-                                        <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                                            <span>Progress: {answeredCount}/{totalQuestions} questions</span>
-                                            <span className="font-semibold">{progress.toFixed(0)}%</span>
-                                        </div>
-                                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                                            <div
-                                                className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-500 ease-out"
-                                                style={{ width: `${progress}%` }}
-                                            />
-                                        </div>
-                                        {progress === 100 && (
-                                            <p className="text-xs text-green-600 dark:text-green-400 font-medium">
-                                                ✓ All questions answered!
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
                             </div>
                         </div>
                     )}

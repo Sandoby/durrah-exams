@@ -416,10 +416,10 @@ export default function KidsExamView() {
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10 pb-32">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-8 pt-32 pb-32">
         {/* Top HUD */}
-        <header className="mb-8">
-          <div className="glass-panel p-4 sm:p-6 rounded-[2rem] border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 pt-4">
+          <div className="max-w-5xl mx-auto glass-panel p-4 sm:p-6 rounded-[2rem] border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl">
             <div className="flex items-center gap-4">
               <div className="h-14 w-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20">
                 <Rocket className="h-7 w-7 text-indigo-400" />
@@ -432,7 +432,7 @@ export default function KidsExamView() {
 
             <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
               <div className="flex-1 sm:flex-initial glass-panel px-5 py-3 rounded-2xl flex items-center justify-center gap-3 border-indigo-500/20">
-                <Star className="h-5 w-5 text-yellow-400 h-5 w-5" />
+                <Star className="h-5 w-5 text-yellow-400" />
                 <span className="text-xl font-black text-white">{stars}</span>
               </div>
               <div className="flex-1 sm:flex-initial bg-white/5 border border-white/10 px-5 py-3 rounded-2xl">

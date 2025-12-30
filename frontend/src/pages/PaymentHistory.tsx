@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Receipt, Download, Check, X, Clock, AlertCircle, ArrowLeft } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Receipt, Download, Check, X, Clock, AlertCircle, Settings, LogOut, Menu } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { Logo } from '../components/Logo';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 
 interface Payment {
@@ -18,16 +20,28 @@ interface Payment {
 }
 
 export default function PaymentHistory() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchPayments();
     }
   }, [user]);
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Error logging out');
+    }
+  };
 
   const fetchPayments = async () => {
     try {
@@ -113,17 +127,86 @@ export default function PaymentHistory() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24 pb-8">
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
+          <div className="flex justify-between h-16 px-6">
+            <div className="flex items-center gap-3">
+              <Logo className="h-9 w-9" showText={false} />
+              <div className="flex flex-col">
+                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
+              </div>
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-3">
+              <span className="hidden lg:inline text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
+                {user?.user_metadata?.full_name || user?.email}
+              </span>
+
+              <Link
+                to="/settings"
+                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                <Settings className="h-4 w-4 lg:mr-2" />
+                <span className="hidden lg:inline">{t('settings.title', 'Settings')}</span>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                <LogOut className="h-4 w-4 lg:mr-2" />
+                <span className="hidden lg:inline">{t('nav.logout', 'Logout')}</span>
+              </button>
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="flex items-center md:hidden">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 mx-auto max-w-7xl">
+            <div className="px-4 py-3 space-y-2">
+              <div className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700 font-medium">
+                {user?.user_metadata?.full_name || user?.email}
+              </div>
+              <Link
+                to="/settings"
+                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                <Settings className="h-5 w-5 mr-3" />
+                {t('settings.title', 'Settings')}
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                <LogOut className="h-5 w-5 mr-3" />
+                {t('nav.logout', 'Logout')}
+              </button>
+            </div>
+          </div>
+        )}
+      </nav>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            Back to Dashboard
-          </button>
           <div className="flex items-center gap-3">
             <Receipt className="h-8 w-8 text-indigo-600" />
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Payment History</h1>
