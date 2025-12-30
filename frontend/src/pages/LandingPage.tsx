@@ -721,8 +721,10 @@ export default function LandingPage() {
                 {/* Space Atmosphere Background */}
                 <div className="absolute inset-0 pointer-events-none">
                     <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-60" />
-                    <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-purple-900/40 to-transparent"></div>
-                    <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#050616] to-transparent"></div>
+                    {/* Top Fade: Blend from CTA purple to Space Dark */}
+                    <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-[#4c1d95]/80 via-[#050616]/80 to-transparent"></div>
+                    {/* Bottom Fade: Blend from Space Dark to next section (White/Slate) */}
+                    <div className="absolute bottom-0 left-0 w-full h-96 bg-gradient-to-t from-white dark:from-slate-900 via-[#050616]/50 to-transparent"></div>
 
                     {/* Nebula Glows */}
                     <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse"></div>
