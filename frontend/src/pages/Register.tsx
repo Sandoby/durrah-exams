@@ -206,6 +206,16 @@ export default function Register() {
                             </button>
                         </div>
                     </form>
+
+                    <div className="mt-6 text-center">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            By creating an account, you agree to our{' '}
+                            <Link to="/terms" className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 font-medium">
+                                Terms of Service
+                            </Link>{' '}
+                            and acknowledge our Privacy Policy.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

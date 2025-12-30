@@ -14,6 +14,7 @@ import PaymentCallback from './pages/PaymentCallback';
 import PaymentHistory from './pages/PaymentHistory';
 import PaymentTest from './pages/PaymentTest';
 import RefundPolicy from './pages/RefundPolicy';
+import TermsOfService from './pages/TermsOfService';
 
 import Dashboard from './pages/Dashboard';
 import ExamEditor from './pages/ExamEditor';
@@ -128,6 +129,7 @@ function AppContent() {
         <Route path="/agent-login" element={<AgentLogin />} />
         <Route path="/support" element={<SupportDashboard />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
         <Route path="*" element={<LandingPage />} />
       </Routes>
       <Toaster position="top-right" />
