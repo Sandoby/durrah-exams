@@ -811,8 +811,8 @@ export default function Dashboard() {
                                     <X className="h-6 w-6" />
                                 </button>
                             </div>
-                            <h3 className="text-2xl font-bold mb-1">{kidsShareModal.title || 'Kids Exam'}</h3>
-                            <p className="text-indigo-100 text-sm">Kids Mode • Single Question View</p>
+                            <h3 className="text-2xl font-bold mb-1">{kidsShareModal.title || t('dashboard.modals.share.kidsTitle', 'Kids Exam')}</h3>
+                            <p className="text-indigo-100 text-sm">{t('dashboard.modals.share.kidsSubtitle', 'Kids Mode • Single Question View')}</p>
                         </div>
 
                         <div className="p-6 space-y-6">
@@ -824,13 +824,13 @@ export default function Dashboard() {
                                         alt="Exam QR Code"
                                         className="w-32 h-32"
                                     />
-                                    <p className="text-center text-xs text-gray-500 mt-2 font-medium">Scan to join</p>
+                                    <p className="text-center text-xs text-gray-500 mt-2 font-medium">{t('dashboard.modals.share.qrNote', 'Scan to join')}</p>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
                                 <div className="group">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Student Portal Link</label>
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('dashboard.modals.share.portalLink', 'Student Portal Link')}</label>
                                     <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 group-focus-within:border-indigo-500 dark:group-focus-within:border-indigo-500 transition-colors">
                                         <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
                                             <Globe className="h-4 w-4 text-indigo-600" />
@@ -841,7 +841,7 @@ export default function Dashboard() {
                                             className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium text-gray-700 dark:text-gray-200"
                                         />
                                         <button
-                                            onClick={() => copyValue(kidsShareModal.url, 'Student portal link copied')}
+                                            onClick={() => copyValue(kidsShareModal.url, t('dashboard.modals.share.linkCopied', 'Student portal link copied'))}
                                             className="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                                             title="Copy Link"
                                         >
@@ -851,7 +851,7 @@ export default function Dashboard() {
                                 </div>
 
                                 <div className="group">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Access Code</label>
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('dashboard.modals.share.accessCode', 'Access Code')}</label>
                                     <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 group-focus-within:border-indigo-500 dark:group-focus-within:border-indigo-500 transition-colors">
                                         <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
                                             <Lock className="h-4 w-4 text-indigo-600" />
@@ -862,7 +862,7 @@ export default function Dashboard() {
                                             className="flex-1 bg-transparent border-none focus:ring-0 text-lg font-mono font-bold tracking-widest text-indigo-600"
                                         />
                                         <button
-                                            onClick={() => copyValue(kidsShareModal.code, 'Access code copied')}
+                                            onClick={() => copyValue(kidsShareModal.code, t('dashboard.modals.share.codeCopied', 'Access code copied'))}
                                             className="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                                             title="Copy Code"
                                         >
@@ -875,7 +875,7 @@ export default function Dashboard() {
                             {/* Tutor Note */}
                             <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-2xl">
                                 <p className="text-xs font-bold text-amber-700 dark:text-amber-400 leading-relaxed">
-                                    ⚠️ Remind your students to have their accounts ready and be signed in before starting the exam!
+                                    {t('dashboard.modals.share.tutorNote', '⚠️ Remind your students to have their accounts ready and be signed in before starting the exam!')}
                                 </p>
                             </div>
                         </div>
@@ -890,7 +890,7 @@ export default function Dashboard() {
                         {/* Header */}
                         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-700">
                             <div>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Share Exam</h3>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t('dashboard.modals.share.title', 'Share Exam')}</h3>
                                 <p className="text-sm text-gray-500">{shareModal.title}</p>
                             </div>
                             <button
@@ -912,14 +912,14 @@ export default function Dashboard() {
                                     />
                                 </div>
                                 <p className="mt-2 text-xs text-gray-500 font-medium tracking-wide">
-                                    {shareModal.directUrl ? 'SCAN FOR DIRECT ACCESS' : 'SCAN TO START'}
+                                    {shareModal.directUrl ? t('dashboard.modals.share.qrDirectNote', 'SCAN FOR DIRECT ACCESS') : t('dashboard.modals.share.qrStartNote', 'SCAN TO START')}
                                 </p>
                             </div>
 
                             <div className="space-y-4">
                                 {/* Link Input */}
                                 <div className="group">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Student Portal Link</label>
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('dashboard.modals.share.portalLink', 'Student Portal Link')}</label>
                                     <div className="flex items-center gap-2 p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 group-focus-within:border-indigo-500 dark:group-focus-within:border-indigo-500 transition-colors">
                                         <div className="p-1.5 bg-white dark:bg-gray-800 rounded-md shadow-sm">
                                             <Globe className="h-4 w-4 text-indigo-600" />
@@ -930,7 +930,7 @@ export default function Dashboard() {
                                             className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-gray-700 dark:text-gray-200 font-medium"
                                         />
                                         <button
-                                            onClick={() => copyValue(shareModal.url, 'Link copied')}
+                                            onClick={() => copyValue(shareModal.url, t('dashboard.modals.share.linkCopied', 'Link copied'))}
                                             className="p-1.5 hover:bg-white dark:hover:bg-gray-800 rounded-md text-gray-400 hover:text-indigo-600 transition-all"
                                         >
                                             <Copy className="h-4 w-4" />
@@ -940,19 +940,19 @@ export default function Dashboard() {
 
                                 {/* Code Input */}
                                 <div className="group">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Access Code</label>
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('dashboard.modals.share.accessCode', 'Access Code')}</label>
                                     <div className="flex items-center gap-2 p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
                                         <div className="p-1.5 bg-white dark:bg-gray-800 rounded-md shadow-sm">
                                             <Lock className="h-4 w-4 text-indigo-600" />
                                         </div>
                                         <input
                                             readOnly
-                                            value={shareModal.code || 'NO CODE'}
+                                            value={shareModal.code || t('dashboard.modals.share.noCode', 'NO CODE')}
                                             className={`flex-1 bg-transparent border-none focus:ring-0 text-lg font-mono font-bold tracking-wider ${shareModal.code ? 'text-gray-900 dark:text-white' : 'text-red-400'}`}
                                         />
                                         {shareModal.code && (
                                             <button
-                                                onClick={() => copyValue(shareModal.code, 'Code copied')}
+                                                onClick={() => copyValue(shareModal.code, t('dashboard.modals.share.codeCopied', 'Code copied'))}
                                                 className="p-1.5 hover:bg-white dark:hover:bg-gray-800 rounded-md text-gray-400 hover:text-indigo-600 transition-all"
                                             >
                                                 <Copy className="h-4 w-4" />
@@ -964,7 +964,7 @@ export default function Dashboard() {
                                 {/* Tutor Note */}
                                 <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-2xl">
                                     <p className="text-xs font-bold text-amber-700 dark:text-amber-400 leading-relaxed text-center">
-                                        ⚠️ Remind your students to create their accounts and sign in BEFORE the exam starts to avoid losing time!
+                                        {t('dashboard.modals.share.tutorNote', '⚠️ Remind your students to create their accounts and sign in BEFORE the exam starts to avoid losing time!')}
                                     </p>
                                 </div>
 
@@ -979,7 +979,7 @@ export default function Dashboard() {
                                         title="Share on WhatsApp"
                                     >
                                         <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg>
-                                        WhatsApp
+                                        {t('dashboard.modals.share.whatsapp', 'WhatsApp')}
                                     </button>
                                     <button
                                         onClick={() => copyValue(`Exam Link: ${shareModal.url}\nAccess Code: ${shareModal.code}`, 'All details copied')}
@@ -987,20 +987,20 @@ export default function Dashboard() {
                                         title="Copy All Details"
                                     >
                                         <Copy className="h-5 w-5" />
-                                        Copy All
+                                        {t('dashboard.modals.share.copyAll', 'Copy All')}
                                     </button>
                                 </div>
 
                                 {shareModal.directUrl && (
                                     <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
-                                        <p className="text-xs text-gray-400 mb-2">Direct Link (No Code Required)</p>
+                                        <p className="text-xs text-gray-400 mb-2">{t('dashboard.modals.share.directLink', 'Direct Link (No Code Required)')}</p>
                                         <div className="flex items-center gap-2">
                                             <input
                                                 readOnly
                                                 value={shareModal.directUrl}
                                                 className="flex-1 text-xs text-gray-500 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded px-2 py-1"
                                             />
-                                            <button onClick={() => copyValue(shareModal.directUrl!, 'Direct link copied')} className="text-gray-400 hover:text-indigo-600">
+                                            <button onClick={() => copyValue(shareModal.directUrl!, t('dashboard.modals.share.linkCopied', 'Direct link copied'))} className="text-gray-400 hover:text-indigo-600">
                                                 <Copy className="h-3 w-3" />
                                             </button>
                                         </div>
@@ -1019,22 +1019,22 @@ export default function Dashboard() {
                         <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                             <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-500" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Delete Exam?</h3>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('dashboard.modals.delete.title', 'Delete Exam?')}</h3>
                         <p className="text-gray-500 dark:text-gray-400 mb-6">
-                            Are you sure you want to delete <span className="font-semibold text-gray-700 dark:text-gray-300">"{deleteConfirmModal.title}"</span>? This action cannot be undone and all student results will be lost.
+                            {t('dashboard.modals.delete.desc', { title: deleteConfirmModal.title })}
                         </p>
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setDeleteConfirmModal(null)}
                                 className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                             >
-                                Cancel
+                                {t('dashboard.modals.delete.cancel', 'Cancel')}
                             </button>
                             <button
                                 onClick={executeDelete}
                                 className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all hover:scale-[1.02]"
                             >
-                                Yes, Delete
+                                {t('dashboard.modals.delete.confirm', 'Yes, Delete')}
                             </button>
                         </div>
                     </div>
@@ -1050,7 +1050,7 @@ export default function Dashboard() {
                                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                                     {selectedExamForResults.title}
                                 </h2>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Results & Performance Analytics</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.modals.results.subtitle', 'Results & Performance Analytics')}</p>
                             </div>
                             <button
                                 onClick={() => setSelectedExamForResults(null)}

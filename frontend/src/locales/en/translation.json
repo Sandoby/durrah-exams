@@ -286,8 +286,38 @@
         "deleteConfirm": "Are you sure you want to delete this exam?",
         "linkCopied": "Exam link copied!",
         "deleteSuccess": "Exam deleted successfully",
-        "upgradeLimit": "Free plan is limited to 3 exams (lifetime). Upgrade to Pro for unlimited!",
-        "overLimitWarning": "You have reached or exceeded the free plan limit of 3 exams. You can still manage your existing exams, but cannot create new ones without a Pro subscription.",
+        "upgradeLimit": "Free Tier Limit: You can create up to 3 exams. Upgrade to Professional for unlimited exams!",
+        "overLimitWarning": "You've reached the free tier limit. Upgrade to continue creating more exams.",
+        "modals": {
+            "share": {
+                "title": "Share Exam",
+                "kidsTitle": "Kids Exam",
+                "kidsSubtitle": "Kids Mode • Single Question View",
+                "qrNote": "Scan to join",
+                "qrDirectNote": "SCAN FOR DIRECT ACCESS",
+                "qrStartNote": "SCAN TO START",
+                "portalLink": "Student Portal Link",
+                "accessCode": "Access Code",
+                "noCode": "NO CODE",
+                "tutorNote": "⚠️ Remind your students to create their accounts and sign in BEFORE the exam starts to avoid losing time!",
+                "whatsapp": "WhatsApp",
+                "copyAll": "Copy All",
+                "directLink": "Direct Link (No Code Required)",
+                "detailsCopied": "All details copied",
+                "linkCopied": "Link copied",
+                "codeCopied": "Code copied"
+            },
+            "delete": {
+                "title": "Delete Exam?",
+                "desc": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone and all student results will be lost.",
+                "confirm": "Yes, Delete",
+                "cancel": "Cancel"
+            },
+            "results": {
+                "subtitle": "Results & Performance Analytics"
+            }
+        },
+        "examCard": "Once you create exams, they'll appear here. Each card shows your exam details",
         "print": {
             "studentInfo": "Student Info (fill before starting):",
             "fullName": "Full Name",

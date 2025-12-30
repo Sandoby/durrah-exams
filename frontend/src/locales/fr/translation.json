@@ -6,7 +6,7 @@
     },
     "common": {
         "dir": "ltr",
-        "forTutors": "pour les Tuteurs",
+        "forTutors": "for Tutors",
         "true": "Vrai",
         "false": "Faux"
     },
@@ -579,6 +579,39 @@
             "copyPaste": "Copier/Coller désactivé",
             "maxViolations": "Violations max :"
         },
+        "createExam": "Cliquez ici pour créer un nouvel examen avec des questions et des paramètres personnalisés",
+        "overLimitWarning": "Vous avez atteint la limite du niveau gratuit. Passez à la version supérieure pour continuer à créer d'autres examens.",
+        "upgradeLimit": "Limite du Niveau Gratuit : Vous pouvez créer jusqu'à 3 examens. Passez à la version Professionnelle pour des examens illimités !",
+        "modals": {
+            "share": {
+                "title": "Partager l'Examen",
+                "kidsTitle": "Examen Enfants",
+                "kidsSubtitle": "Mode Enfants • Vue Question Unique",
+                "qrNote": "Scanner pour rejoindre",
+                "qrDirectNote": "SCANNER POUR ACCÈS DIRECT",
+                "qrStartNote": "SCANNER POUR COMMENCER",
+                "portalLink": "Lien vers le Portail Étudiant",
+                "accessCode": "Code d'Accès",
+                "noCode": "PAS DE CODE",
+                "tutorNote": "⚠️ Rappelez à vos étudiants de créer leurs comptes et de se connecter AVANT le début de l'examen pour éviter de perdre du temps !",
+                "whatsapp": "WhatsApp",
+                "copyAll": "Tout copier",
+                "directLink": "Lien Direct (Aucun code requis)",
+                "detailsCopied": "Tous les détails copiés",
+                "linkCopied": "Lien copié",
+                "codeCopied": "Code copié"
+            },
+            "delete": {
+                "title": "Supprimer l'examen ?",
+                "desc": "Êtes-vous sûr de vouloir supprimer \"{{title}}\" ? Cette action ne peut pas être annulée et tous les résultats des étudiants seront perdus.",
+                "confirm": "Oui, supprimer",
+                "cancel": "Annuler"
+            },
+            "results": {
+                "subtitle": "Résultats et analyses de performance"
+            }
+        },
+        "examCard": "Une fois que vous aurez créé des examens, ils apparaîtront ici. Chaque carte affiche les détails de votre examen",
         "iphoneHelp": {
             "title": "Aide à la Soumission iPhone/Safari",
             "privateMode": "Assurez-vous que Safari n'est pas en mode Privé.",
@@ -707,8 +740,8 @@
     },
     "landing": {
         "seo": {
-            "title": "Durrah pour les Tuteurs | Créez des Examens en Ligne Sécurisés",
-            "description": "Créez des examens professionnels en quelques minutes. Durrah pour les Tuteurs offre de puissantes fonctionnalités anti-triche, une notation automatique et des analyses détaillées pour les éducateurs du monde entier.",
+            "title": "Durrah for Tutors | Créez des Examens en Ligne Sécurisés",
+            "description": "Créez des examens professionnels en quelques minutes. Durrah for Tutors offre de puissantes fonctionnalités anti-triche, une notation automatique et des analyses détaillées pour les éducateurs du monde entier.",
             "keywords": "examens en ligne, anti-triche, mode enfants, outils pour éducateurs, évaluation numérique"
         },
         "marketing": {
