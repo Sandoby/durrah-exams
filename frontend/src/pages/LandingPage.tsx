@@ -1051,7 +1051,7 @@ export default function LandingPage() {
                             </ul>
                         </div>
                         <div>
-                            <h4 className="text-white font-bold mb-6">{t('footer.legal')}</h4>
+                            <h4 className="text-white font-bold mb-6">{t('footer.legalTitle')}</h4>
                             <ul className="space-y-4">
                                 <li><Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.privacy')}</Link></li>
                                 <li><Link to="/terms" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.terms')}</Link></li>

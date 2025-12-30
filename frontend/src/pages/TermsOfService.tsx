@@ -1,18 +1,13 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, Shield, Scale, FileText, Lock,
-    Mail, HelpCircle, Eye, RefreshCcw, Database, CreditCard,
-    UserCheck, Globe, Trash2, CheckCircle2, Info, Gavel,
-    Briefcase, ShieldAlert
+    Briefcase, ShieldAlert, CreditCard, UserCheck, Gavel,
+    HelpCircle, Mail, Globe, CheckCircle2, Info
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 
-type TabType = 'tos' | 'privacy' | 'refund';
-
 export default function TermsOfService() {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<TabType>('tos');
 
     const tosSections = [
         {
@@ -57,76 +52,6 @@ export default function TermsOfService() {
         }
     ];
 
-    const privacySections = [
-        {
-            icon: Database,
-            title: "1. Data Collection & Processing",
-            content: "We collect Personal Information (PII) including names, email addresses, and billing details. For students, we collect name and exam responses. We also collect 'Process Data' such as IP addresses, device identifiers, and browser activity logs during exams to enable anti-cheating features."
-        },
-        {
-            icon: Eye,
-            title: "2. Purpose of Processing",
-            content: "We process data to: (a) authenticate users; (b) facilitate exam administration; (c) provide Tutors with performance analytics; (d) improve platform security and prevent fraud. We do not engage in behavioral advertising or sell personal data."
-        },
-        {
-            icon: Lock,
-            title: "3. GDPR & COPPA Compliance",
-            content: "We adhere to the principles of GDPR (for EU/UK users) and COPPA (for US users). Tutors/Schools using our platform with minors are responsible for obtaining appropriate parental consent or relying on institutional consent where permitted by law."
-        },
-        {
-            icon: Globe,
-            title: "4. Data Sub-processors",
-            content: "We use trusted third-party services to provide the Service, including Supabase (Data Hosting), Paddle (Payment Processing), and Resend (Email Delivery). Each sub-processor is vetted for security compliance."
-        },
-        {
-            icon: Trash2,
-            title: "5. Data Subjects' Rights",
-            content: "Users have the right to access, rectify, or request the deletion of their personal data. Tutors can manage and delete student data at any time. To exercise these rights, contact us at abdelrahmansandoby@gmail.com."
-        }
-    ];
-
-    const refundSections = [
-        {
-            icon: RefreshCcw,
-            title: "1. 7-Day Satisfaction Guarantee",
-            content: "We offer a 7-day money-back guarantee for initial subscription purchases. If the Service does not meet your expectations, you may request a full refund within 7 calendar days of your first payment."
-        },
-        {
-            icon: Shield,
-            title: "2. Eligibility Criteria",
-            content: "Refunds are eligible for: (a) Technical failure of core features; (b) Significant discrepancy between advertised features and reality. Refunds are NOT eligible for: (a) Usage violations; (b) Change of mind after the 7-day window; (c) Renewal payments."
-        },
-        {
-            icon: CreditCard,
-            title: "3. Refund Request Process",
-            content: "To initiate a refund, email abdelrahmansandoby@gmail.com with your Order ID and reason for the request. We aim to review and process eligible requests within 5-10 business days."
-        },
-        {
-            icon: Trash2,
-            title: "4. Subscription Cancellation",
-            content: "You can cancel your subscription at any time via your Settings page. Cancellation prevents future billing but does not trigger a partial refund for the remaining time in the current cycle."
-        }
-    ];
-
-    const renderSections = (sections: any[]) => (
-        <div className="space-y-6">
-            {sections.map((section, idx) => (
-                <div key={idx} className="group relative overflow-hidden flex gap-5 p-8 rounded-3xl bg-white dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700 shadow-sm transition-all hover:shadow-xl hover:border-indigo-500/30">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-indigo-500/10 transition-colors"></div>
-                    <div className="flex-shrink-0">
-                        <div className="p-4 bg-indigo-50 dark:bg-indigo-900/40 rounded-2xl group-hover:scale-110 transition-transform">
-                            <section.icon className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">{section.title}</h3>
-                        <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-lg">{section.content}</p>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans selection:bg-indigo-100 dark:selection:bg-indigo-900/30">
             {/* Header */}
@@ -159,37 +84,18 @@ export default function TermsOfService() {
                 <div className="relative z-10 max-w-4xl mx-auto text-center">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-300 text-xs font-black uppercase tracking-widest mb-8">
                         <Lock className="h-3 w-3" />
-                        Trusted & Transparent
+                        Legal Agreement
                     </div>
                     <h1 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter">
-                        Legal <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Integrity</span>
+                        Terms of <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Service</span>
                     </h1>
                     <p className="text-slate-400 text-xl max-w-2xl mx-auto leading-relaxed font-medium">
-                        Our commitments to your privacy, rights, and the security of your educational content, refined for international standards.
+                        Please read these terms carefully before using our platform. They define your rights and responsibilities.
                     </p>
                 </div>
             </div>
 
             <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 pb-32">
-                {/* Modern Switcher Tabs */}
-                <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-2 rounded-[2.5rem] shadow-2xl flex gap-2 mb-12 sticky top-20 z-40 border border-white/20 dark:border-gray-700/30">
-                    {(['tos', 'privacy', 'refund'] as const).map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`flex-1 py-4 px-6 rounded-[2rem] font-black text-sm transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === tab
-                                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/40 translate-y-[-2px]'
-                                : 'text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                                }`}
-                        >
-                            {tab === 'tos' && <FileText className="h-5 w-5" />}
-                            {tab === 'privacy' && <Eye className="h-5 w-5" />}
-                            {tab === 'refund' && <RefreshCcw className="h-5 w-5" />}
-                            {tab === 'tos' ? 'Terms of Service' : tab === 'privacy' ? 'Privacy Policy' : 'Refund Policy'}
-                        </button>
-                    ))}
-                </div>
-
                 {/* Sub-header info */}
                 <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 px-4">
                     <div>
@@ -198,9 +104,7 @@ export default function TermsOfService() {
                             <p className="text-xs font-black text-indigo-500 uppercase tracking-[0.2em]">Latest Documentation</p>
                         </div>
                         <h2 className="text-4xl font-black text-gray-900 dark:text-white mt-1">
-                            {activeTab === 'tos' && "Contractual Terms"}
-                            {activeTab === 'privacy' && "Data Protection"}
-                            {activeTab === 'refund' && "Consumer Rights"}
+                            Contractual Terms
                         </h2>
                     </div>
                     <div className="flex items-center gap-3">
@@ -219,10 +123,21 @@ export default function TermsOfService() {
                 {/* Main Content Area */}
                 <div className="relative">
                     <div className="absolute inset-0 bg-indigo-500/5 dark:bg-indigo-500/1 rounded-[3rem] blur-3xl -z-10"></div>
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        {activeTab === 'tos' && renderSections(tosSections)}
-                        {activeTab === 'privacy' && renderSections(privacySections)}
-                        {activeTab === 'refund' && renderSections(refundSections)}
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-6">
+                        {tosSections.map((section, idx) => (
+                            <div key={idx} className="group relative overflow-hidden flex gap-5 p-8 rounded-3xl bg-white dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700 shadow-sm transition-all hover:shadow-xl hover:border-indigo-500/30">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-indigo-500/10 transition-colors"></div>
+                                <div className="flex-shrink-0">
+                                    <div className="p-4 bg-indigo-50 dark:bg-indigo-900/40 rounded-2xl group-hover:scale-110 transition-transform">
+                                        <section.icon className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
+                                    </div>
+                                </div>
+                                <div className="relative z-10">
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">{section.title}</h3>
+                                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-lg">{section.content}</p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 

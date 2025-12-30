@@ -200,7 +200,20 @@
         "product": "المنتج",
         "features": "الميزات",
         "signup": "تسجيل",
-        "copyright": "© 2025 درة للمعلمين. جميع الحقوق محفوظة."
+        "copyright": "© 2025 Durrah for Tutors. جميع الحقوق محفوظة.",
+        "legalTitle": "قانوني",
+        "links": {
+            "pricing": "الأسعار",
+            "testimonials": "آراء العملاء",
+            "blog": "المدونة",
+            "contact": "اتصل بنا"
+        },
+        "legal": {
+            "privacy": "سياسة الخصوصية",
+            "terms": "شروط الخدمة",
+            "refund": "سياسة الاسترداد",
+            "cancellation": "سياسة الإلغاء"
+        }
     },
     "ctaSection": {
         "title": "جاهز لتحويل امتحاناتك؟",

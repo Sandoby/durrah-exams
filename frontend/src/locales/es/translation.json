@@ -200,7 +200,20 @@
         "product": "Producto",
         "features": "Características",
         "signup": "Registrarse",
-        "copyright": "© 2025 Durrah para Tutores. Todos los derechos reservados."
+        "copyright": "© 2025 Durrah for Tutors. Todos los derechos reservados.",
+        "legalTitle": "Legal",
+        "links": {
+            "pricing": "Precios",
+            "testimonials": "Testimonios",
+            "blog": "Blog",
+            "contact": "Contacto"
+        },
+        "legal": {
+            "privacy": "Política de Privacidad",
+            "terms": "Términos de Servicio",
+            "refund": "Política de Reembolso",
+            "cancellation": "Política de Cancelación"
+        }
     },
     "ctaSection": {
         "title": "¿Listo para Transformar tus Exámenes?",
@@ -290,7 +303,6 @@
         "linkCopied": "¡Enlace del examen copiado!",
         "deleteSuccess": "Examen eliminado con éxito",
         "upgradeLimit": "Límite del Nivel Gratuito: Puedes crear hasta 3 exámenes. ¡Actualiza a Profesional para exámenes ilimitados!",
-        "createExam": "Haz clic aquí para crear un nuevo examen con preguntas y configuraciones personalizadas",
         "overLimitWarning": "Has alcanzado el límite del nivel gratuito. Actualiza para seguir creando más exámenes.",
         "modals": {
             "share": {

@@ -208,7 +208,20 @@
         "product": "Produit",
         "features": "Fonctionnalités",
         "signup": "S'inscrire",
-        "copyright": "© 2025 Durrah pour les Tuteurs. Tous droits réservés."
+        "copyright": "© 2025 Durrah for Tutors. Tous droits réservés.",
+        "legalTitle": "Légal",
+        "links": {
+            "pricing": "Tarification",
+            "testimonials": "Témoignages",
+            "blog": "Blog",
+            "contact": "Contact"
+        },
+        "legal": {
+            "privacy": "Politique de Confidentialité",
+            "terms": "Conditions d'Utilisation",
+            "refund": "Politique de Remboursement",
+            "cancellation": "Politique d'Annulation"
+        }
     },
     "ctaSection": {
         "title": "Prêt à Transformer Vos Examens ?",
