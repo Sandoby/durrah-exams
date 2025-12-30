@@ -6,6 +6,7 @@
     },
     "common": {
         "dir": "ltr",
+        "forTutors": "pour les Tuteurs",
         "true": "Vrai",
         "false": "Faux"
     },
@@ -30,8 +31,10 @@
         "features": "Fonctionnalités",
         "pricing": "Tarifs",
         "testimonials": "Témoignages",
+        "blog": "Blog",
         "login": "Connexion",
-        "getStarted": "Commencer Gratuitement"
+        "getStarted": "Commencer Gratuitement",
+        "goToDashboard": "Aller au Tableau de Bord"
     },
     "stats": {
         "tutors": "Tuteurs Actifs",
@@ -700,6 +703,93 @@
         },
         "error": {
             "failed": "Échec d'ouverture du quiz"
+        }
+    },
+    "landing": {
+        "seo": {
+            "title": "Durrah pour les Tuteurs | Créez des Examens en Ligne Sécurisés",
+            "description": "Créez des examens professionnels en quelques minutes. Durrah pour les Tuteurs offre de puissantes fonctionnalités anti-triche, une notation automatique et des analyses détaillées pour les éducateurs du monde entier.",
+            "keywords": "examens en ligne, anti-triche, mode enfants, outils pour éducateurs, évaluation numérique"
+        },
+        "marketing": {
+            "kids": {
+                "badge": "Ludique et Sûr",
+                "title": "Mode Enfants : L'Aventure Quiz Ultime",
+                "titleSpan": "Ultime",
+                "desc": "Transformez les évaluations en un voyage amusant. Notre mode enfants propose des visuels vibrants, une navigation simplifiée et un système anti-triche de classe mondiale qui ressemble à un jeu, pas à un test.",
+                "features": [
+                    "Psychologie du Jeu",
+                    "Communauté Sûre",
+                    "Mondes Interactifs",
+                    "système de Récompenses"
+                ],
+                "cta": "Décollage !"
+            },
+            "student": {
+                "badge": "Suivi et Croissance",
+                "title": "Donnez du Pouvoir aux Étudiants avec un Portail Unifié",
+                "titleSpan": "Portail Unifié",
+                "desc": "Offrez à vos étudiants un centre névralgique pour gérer leur parcours académique. De l'inscription aux examens avec un simple code au suivi des performances passées et à l'examen d'analyses approfondies.",
+                "features": [
+                    "Suivi des Performances",
+                    "Tableaux de Bord Personnalisés",
+                    "Aperçus de Croissance",
+                    "Accès Sécurisé"
+                ],
+                "cta": "Visiter le Portail Étudiant"
+            }
+        },
+        "mobileApp": {
+            "title": "Obtenez l'Application Mobile",
+            "subtitle": "Accédez aux examens n'importe où avec notre application Android native",
+            "appName": "Durrah Tutors",
+            "version": "Version 1.1.0",
+            "features": {
+                "tutorAccess": "Accès Tuteur & Étudiant",
+                "notifications": "Notifications Push en Temps Réel",
+                "kidsMode": "Mode Enfants avec Gamification",
+                "secure": "Passage d'Examens Sécurisé"
+            },
+            "download": "Télécharger pour Android",
+            "specs": "Gratuit • ~35 MB • Android 7.0+",
+            "grid": {
+                "alerts": {
+                    "title": "Alertas Instantanées",
+                    "desc": "Soyez notifié lorsque les tuteurs publient de nouveaux examens"
+                },
+                "modes": {
+                    "title": "Plusieurs Modes",
+                    "desc": "Basculez entre les modes tuteur, étudiant et enfants"
+                },
+                "adventure": {
+                    "title": "Aventure Enfants",
+                    "desc": "Quizzes ludiques sur le thème de l'espace pour les enfants"
+                },
+                "security": {
+                    "title": "Sécurisé & Rapide",
+                    "desc": "Performance native avec authentification sécurisée"
+                }
+            }
+        },
+        "faq": {
+            "title": "Foire Aux Questions",
+            "subtitle": "Tout ce que vous devez savoir sur Durrah",
+            "q1": {
+                "question": "Durrah est-il vraiment sûr pour les enfants ?",
+                "answer": "Oui ! Nous accordons la priorité à la sécurité avec un contenu filtré, des options d'accès sécurisées par pseudonyme uniquement et aucune vente de données."
+            },
+            "q2": {
+                "question": "Comment fonctionne le système anti-triche ?",
+                "answer": "Notre système utilise l'IA pour détecter les changements d'onglets, les sorties du mode plein écran et les comportements suspects sans logiciel intrusif."
+            },
+            "q3": {
+                "question": "Puis-je utiliser Durrah pour de grands groupes scolaires ?",
+                "answer": "Absolument. Nos forfaits 'Professionnel' et 'Annuel' sont conçus pour des tests à grande échelle avec des analyses détaillées."
+            },
+            "q4": {
+                "question": "Les étudiants ont-ils besoin d'un compte ?",
+                "answer": "Les étudiants peuvent rejoindre des examens avec seulement un code et un pseudonyme, ou utiliser le Portail Étudiant pour suivre leurs progrès à long terme."
+            }
         }
     }
 }

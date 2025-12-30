@@ -6,6 +6,7 @@
     },
     "common": {
         "dir": "ltr",
+        "forTutors": "para Tutores",
         "true": "Verdadero",
         "false": "Falso"
     },
@@ -30,8 +31,10 @@
         "features": "Características",
         "pricing": "Precios",
         "testimonials": "Testimonios",
+        "blog": "Blog",
         "login": "Iniciar Sesión",
-        "getStarted": "Empezar Gratis"
+        "getStarted": "Empezar Gratis",
+        "goToDashboard": "Ir al Panel"
     },
     "stats": {
         "tutors": "Tutores Activos",
@@ -422,6 +425,93 @@
         "confirm": {
             "deleteBank": "¿Estás seguro de que quieres eliminar este banco de preguntas? Todas las preguntas serán eliminadas.",
             "deleteQuestion": "¿Eliminar esta pregunta?"
+        }
+    },
+    "landing": {
+        "seo": {
+            "title": "Durrah para Tutores | Crea Exámenes Online Seguros",
+            "description": "Crea exámenes profesionales en minutos. Durrah para Tutores ofrece potentes funciones anti-trampas, calificación automática y análisis detallados para educadores de todo el mundo.",
+            "keywords": "exámenes online, anti-trampas, modo niños, herramientas para educadores, evaluación digital"
+        },
+        "marketing": {
+            "kids": {
+                "badge": "Divertido y Seguro",
+                "title": "Modo Niños: La Aventura de Quiz Definitiva",
+                "titleSpan": "Definitiva",
+                "desc": "Transforma las evaluaciones en un viaje divertido. Nuestro Modo Niños cuenta con visuales vibrantes, navegación simplificada y un sistema anti-trampas de clase mundial que se siente como un juego, no como una prueba.",
+                "features": [
+                    "Psicología de Juego",
+                    "Comunidad Segura",
+                    "Mundos Interactivos",
+                    "Sistema de Recompensas"
+                ],
+                "cta": "¡Despegar!"
+            },
+            "student": {
+                "badge": "Seguimiento y Crecimiento",
+                "title": "Empodera a los Estudiantes con un Portal Unificado",
+                "titleSpan": "Portal Unificado",
+                "desc": "Ofrece a tus estudiantes un centro centralizado para gestionar su trayectoria académica. Desde unirse a exámenes con un simple código hasta realizar un seguimiento de desempeños pasados y revisar análisis profundos.",
+                "features": [
+                    "Seguimiento de Desempeño",
+                    "Paneles Personalizados",
+                    "Información de Crecimiento",
+                    "Acceso Seguro"
+                ],
+                "cta": "Visitar Portal del Estudiante"
+            }
+        },
+        "mobileApp": {
+            "title": "Obtén la Aplicación Móvil",
+            "subtitle": "Accede a exámenes en cualquier lugar con nuestra aplicación nativa para Android",
+            "appName": "Durrah Tutors",
+            "version": "Versión 1.1.0",
+            "features": {
+                "tutorAccess": "Acceso para Tutor y Estudiantes",
+                "notifications": "Notificaciones Push en Tiempo Real",
+                "kidsMode": "Modo Niños con Gamificación",
+                "secure": "Realización Segura de Exámenes"
+            },
+            "download": "Descargar para Android",
+            "specs": "Gratis • ~35 MB • Android 7.0+",
+            "grid": {
+                "alerts": {
+                    "title": "Alertas Instantáneas",
+                    "desc": "Recibe notificaciones cuando los tutores publiquen nuevos exámenes"
+                },
+                "modes": {
+                    "title": "Múltiples Modos",
+                    "desc": "Cambia entre los modos tutor, estudiante y niños"
+                },
+                "adventure": {
+                    "title": "Aventura para Niños",
+                    "desc": "Quizzes gamificados con temática espacial para niños"
+                },
+                "security": {
+                    "title": "Seguro y Rápido",
+                    "desc": "Rendimiento nativo con autenticación segura"
+                }
+            }
+        },
+        "faq": {
+            "title": "Preguntas Frecuentes",
+            "subtitle": "Todo lo que necesitas saber sobre Durrah",
+            "q1": {
+                "question": "¿Es Durrah realmente seguro para los niños?",
+                "answer": "¡Sí! Priorizamos la seguridad con contenido filtrado, opciones de acceso seguro solo con apodo y cero venta de datos."
+            },
+            "q2": {
+                "question": "¿Cómo funciona el sistema anti-trampas?",
+                "answer": "Nuestro sistema utiliza IA para detectar cambios de pestaña, salidas de pantalla completa y patrones de comportamiento sospechosos sin software intrusivo."
+            },
+            "q3": {
+                "question": "¿Puedo usar Durrah para grandes grupos escolares?",
+                "answer": "Absolutamente. Nuestros planes 'Profesional' y 'Anual' están diseñados para pruebas de alta capacidad con análisis detallados."
+            },
+            "q4": {
+                "question": "¿Los estudiantes necesitan una cuenta?",
+                "answer": "Los estudiantes pueden unirse a los exámenes solo con un código y un apodo, o usar el Portal del Estudiante para seguir su progreso a largo plazo."
+            }
         }
     }
 }

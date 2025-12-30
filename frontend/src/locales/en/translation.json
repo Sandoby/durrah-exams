@@ -6,6 +6,7 @@
     },
     "common": {
         "dir": "ltr",
+        "forTutors": "for Tutors",
         "true": "True",
         "false": "False"
     },
@@ -30,8 +31,10 @@
         "features": "Features",
         "pricing": "Pricing",
         "testimonials": "Testimonials",
+        "blog": "Blog",
         "login": "Login",
-        "getStarted": "Get Started Free"
+        "getStarted": "Get Started Free",
+        "goToDashboard": "Go to Dashboard"
     },
     "stats": {
         "tutors": "Active Tutors",
@@ -719,6 +722,11 @@
         }
     },
     "landing": {
+        "seo": {
+            "title": "Durrah for Tutors | Create Secure Online Exams",
+            "description": "Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.",
+            "keywords": "online exams, anti-cheating, kids mode, educator tools, digital assessment"
+        },
         "marketing": {
             "kids": {
                 "badge": "Playful & Safe",
@@ -731,7 +739,7 @@
                     "Interactive Worlds",
                     "Rewards System"
                 ],
-                "cta": "Try Kids Mode Now"
+                "cta": "Blast Off!"
             },
             "student": {
                 "badge": "Track & Grow",
@@ -745,6 +753,58 @@
                     "Secure Access"
                 ],
                 "cta": "Visit Student Portal"
+            }
+        },
+        "mobileApp": {
+            "title": "Get the Mobile App",
+            "subtitle": "Access exams anywhere with our native Android application",
+            "appName": "Durrah Tutors",
+            "version": "Version 1.1.0",
+            "features": {
+                "tutorAccess": "Tutor & Student Access",
+                "notifications": "Real-time Push Notifications",
+                "kidsMode": "Kids Mode with Gamification",
+                "secure": "Secure Exam Taking"
+            },
+            "download": "Download for Android",
+            "specs": "Free • ~35 MB • Android 7.0+",
+            "grid": {
+                "alerts": {
+                    "title": "Instant Alerts",
+                    "desc": "Get notified when tutors publish new exams"
+                },
+                "modes": {
+                    "title": "Multiple Modes",
+                    "desc": "Switch between tutor, student, and kids modes"
+                },
+                "adventure": {
+                    "title": "Kids Adventure",
+                    "desc": "Gamified space-themed quizzes for children"
+                },
+                "security": {
+                    "title": "Secure & Fast",
+                    "desc": "Native performance with secure authentication"
+                }
+            }
+        },
+        "faq": {
+            "title": "Frequently Asked Questions",
+            "subtitle": "Everything you need to know about Durrah",
+            "q1": {
+                "question": "Is Durrah really safe for kids?",
+                "answer": "Yes! We prioritize safety with filtered content, secure nickname-only access options, and zero data selling."
+            },
+            "q2": {
+                "question": "How does the anti-cheating system work?",
+                "answer": "Our system uses AI to detect tab switching, fullscreen escapes, and suspicious behavior patterns without intrusive software."
+            },
+            "q3": {
+                "question": "Can I use Durrah for large school groups?",
+                "answer": "Absolutely. Our \"Professional\" and \"Yearly\" plans are designed for high-capacity testing with detailed analytics."
+            },
+            "q4": {
+                "question": "Do students need an account?",
+                "answer": "Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress."
             }
         }
     }

@@ -168,17 +168,17 @@ export default function LandingPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" dir={isRTL ? 'rtl' : 'ltr'}>
             <Helmet>
-                <title>Fun, Secure Online Quizzes for Kids & Tutors | Durrah</title>
-                <meta name="description" content="Durrah for Tutors: Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
-                <meta name="keywords" content="kids online quiz, safe kids exams, anti cheating online exam, child mode, secure quiz platform, fun learning for children, quiz for schools, quiz for tutors" />
-                <meta property="og:title" content="Fun, Secure Online Quizzes for Kids & Tutors | Durrah" />
-                <meta property="og:description" content="Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
+                <title>{t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')}</title>
+                <meta name="description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
+                <meta name="keywords" content={t('landing.seo.keywords', 'online exams, anti-cheating, kids mode, educator tools, digital assessment')} />
+                <meta property="og:title" content={t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')} />
+                <meta property="og:description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://tutors.durrahsystem.tech/" />
                 <meta property="og:image" content="https://tutors.durrahsystem.tech/illustrations/og-image.png" />
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Fun, Secure Online Quizzes for Kids & Tutors | Durrah" />
-                <meta name="twitter:description" content="Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
+                <meta name="twitter:title" content={t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')} />
+                <meta name="twitter:description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
                 <meta name="twitter:image" content="https://tutors.durrahsystem.tech/illustrations/og-image.png" />
                 <link rel="canonical" href="https://tutors.durrahsystem.tech/" />
                 <script type="application/ld+json">{`
@@ -187,8 +187,8 @@ export default function LandingPage() {
                                         "@type": "WebSite",
                                         "name": "Durrah for Tutors",
                                         "url": "https://tutors.durrahsystem.tech/",
-                                        "description": "Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics.",
-                                        "inLanguage": "en",
+                                        "description": "${t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')}",
+                                        "inLanguage": "${i18n.language}",
                                         "publisher": {
                                             "@type": "Organization",
                                             "name": "Durrah for Tutors",
@@ -204,7 +204,7 @@ export default function LandingPage() {
                                         "name": "Durrah for Tutors",
                                         "url": "https://tutors.durrahsystem.tech",
                                         "logo": "https://tutors.durrahsystem.tech/logo.png",
-                                        "description": "Create secure, professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide."
+                                        "description": "${t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')}"
                                     }
                                 `}</script>
                 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
@@ -238,14 +238,14 @@ export default function LandingPage() {
                                 <Logo className="h-9 w-9" showText={false} />
                                 <div className="flex flex-col">
                                     <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
-                                    <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">{t('common.forTutors')}</span>
                                 </div>
                             </div>
                             <div className="hidden lg:flex items-center gap-8">
                                 <a href="#features" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{t('nav.features')}</a>
                                 <a href="#pricing" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{t('nav.pricing')}</a>
                                 <a href="#testimonials" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{t('nav.testimonials')}</a>
-                                <Link to="/blog" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Blog</Link>
+                                <Link to="/blog" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{t('nav.blog', 'Blog')}</Link>
                                 <LanguageSwitcher />
                                 <div className="flex items-center gap-3">
                                     {!loading && user ? (
@@ -296,7 +296,7 @@ export default function LandingPage() {
                                 {t('nav.testimonials')}
                             </a>
                             <Link to="/blog" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-colors">
-                                Blog
+                                {t('nav.blog', 'Blog')}
                             </Link>
 
                             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -673,7 +673,7 @@ export default function LandingPage() {
                     <div className="flex justify-center mb-12">
                         <div className="glass-panel px-6 py-2 rounded-full flex items-center gap-2 border-indigo-500/30">
                             <Orbit className="h-5 w-5 text-indigo-400 animate-spin-slow" />
-                            <span className="text-sm font-bold text-indigo-100/80 tracking-widest uppercase">Mission Center</span>
+                            <span className="text-sm font-bold text-indigo-100/80 tracking-widest uppercase">{t('kidsLanding.missionCenter', 'Mission Center')}</span>
                         </div>
                     </div>
 
@@ -692,7 +692,7 @@ export default function LandingPage() {
                                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-6"
                             >
                                 <Zap className="h-4 w-4 fill-current animate-pulse" />
-                                <span>SYSTEM READY FOR TAKEOFF</span>
+                                <span>{t('kidsLanding.readySystem', 'SYSTEM READY FOR TAKEOFF')}</span>
                             </motion.div>
 
                             <div className="glass-panel p-8 sm:p-10 rounded-[2.5rem] border-white/10 shadow-3xl">
@@ -881,17 +881,17 @@ export default function LandingPage() {
                                         <GraduationCap className="w-12 h-12 text-indigo-600 dark:text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.3)]" />
                                     </div>
                                     <div>
-                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">Durrah Tutors</h3>
-                                        <p className="text-gray-500 dark:text-gray-400 font-medium">Version 1.1.0</p>
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">{t('landing.mobileApp.appName', 'Durrah Tutors')}</h3>
+                                        <p className="text-gray-500 dark:text-gray-400 font-medium">{t('landing.mobileApp.version', 'Version 1.1.0')}</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4 mb-8">
                                     {[
-                                        { icon: Users, text: 'Tutor & Student Access' },
-                                        { icon: Bell, text: 'Real-time Push Notifications' },
-                                        { icon: Rocket, text: 'Kids Mode with Gamification' },
-                                        { icon: Shield, text: 'Secure Exam Taking' }
+                                        { icon: Users, text: t('landing.mobileApp.features.tutorAccess', 'Tutor & Student Access') },
+                                        { icon: Bell, text: t('landing.mobileApp.features.notifications', 'Real-time Push Notifications') },
+                                        { icon: Rocket, text: t('landing.mobileApp.features.kidsMode', 'Kids Mode with Gamification') },
+                                        { icon: Shield, text: t('landing.mobileApp.features.secure', 'Secure Exam Taking') }
                                     ].map((item, idx) => (
                                         <div key={idx} className="flex items-center gap-3">
                                             <item.icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -905,11 +905,11 @@ export default function LandingPage() {
                                     className="w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg transition-all hover:scale-105 active:scale-95"
                                 >
                                     <Download className="w-6 h-6" />
-                                    Download for Android
+                                    {t('landing.mobileApp.download', 'Download for Android')}
                                 </a>
 
                                 <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-                                    Free • ~35 MB • Android 7.0+
+                                    {t('landing.mobileApp.specs', 'Free • ~35 MB • Android 7.0+')}
                                 </p>
                             </div>
                         </motion.div>
@@ -924,23 +924,23 @@ export default function LandingPage() {
                             {[
                                 {
                                     icon: Bell,
-                                    title: 'Instant Alerts',
-                                    desc: 'Get notified when tutors publish new exams'
+                                    title: t('landing.mobileApp.grid.alerts.title', 'Instant Alerts'),
+                                    desc: t('landing.mobileApp.grid.alerts.desc', 'Get notified when tutors publish new exams')
                                 },
                                 {
                                     icon: Users,
-                                    title: 'Multiple Modes',
-                                    desc: 'Switch between tutor, student, and kids modes'
+                                    title: t('landing.mobileApp.grid.modes.title', 'Multiple Modes'),
+                                    desc: t('landing.mobileApp.grid.modes.desc', 'Switch between tutor, student, and kids modes')
                                 },
                                 {
                                     icon: Rocket,
-                                    title: 'Kids Adventure',
-                                    desc: 'Gamified space-themed quizzes for children'
+                                    title: t('landing.mobileApp.grid.adventure.title', 'Kids Adventure'),
+                                    desc: t('landing.mobileApp.grid.adventure.desc', 'Gamified space-themed quizzes for children')
                                 },
                                 {
                                     icon: Shield,
-                                    title: 'Secure & Fast',
-                                    desc: 'Native performance with secure authentication'
+                                    title: t('landing.mobileApp.grid.security.title', 'Secure & Fast'),
+                                    desc: t('landing.mobileApp.grid.security.desc', 'Native performance with secure authentication')
                                 }
                             ].map((feature, idx) => (
                                 <motion.div
