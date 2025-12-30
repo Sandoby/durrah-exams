@@ -12,8 +12,10 @@ import { useAuth } from '../context/AuthContext';
 
 export default function LandingPage() {
     const { t, i18n } = useTranslation();
-    const { user, loading } = useAuth();
+    const { user, loading, signOut } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+    const userDropdownRef = useRef<HTMLDivElement>(null);
     const registrationUrl = 'https://tutors.durrahsystem.tech/register';
     // Force language detection on mount (for main landing page)
     import('../lib/countryLanguageDetector').then(mod => mod.default.lookup());
@@ -124,12 +126,20 @@ export default function LandingPage() {
             mouse.y = e.clientY - rect.top;
         };
 
+        const handleClickOutside = (event: MouseEvent) => {
+            if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+                setUserDropdownOpen(false);
+            }
+        };
+
         window.addEventListener('resize', resize);
         window.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mousedown', handleClickOutside);
         resize(); init(); animate();
         return () => {
             window.removeEventListener('resize', resize);
             window.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
 
@@ -249,13 +259,53 @@ export default function LandingPage() {
                                 <LanguageSwitcher />
                                 <div className="flex items-center gap-3">
                                     {!loading && user ? (
-                                        <>
-                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{user.email?.split('@')[0]}</span>
-                                            <Link to="/dashboard" className="group relative bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-medium text-sm shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300">
-                                                <span className="relative z-10">{t('nav.goToDashboard', 'Go to Dashboard')}</span>
-                                                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                            </Link>
-                                        </>
+                                        <div className="relative" ref={userDropdownRef}>
+                                            <button
+                                                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                                                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+                                            >
+                                                <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                                    <Users className="w-4 h-4" />
+                                                </div>
+                                                <span className="max-w-[150px] truncate">{user.email}</span>
+                                                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${userDropdownOpen ? 'rotate-180' : ''}`} />
+                                            </button>
+
+                                            <AnimatePresence>
+                                                {userDropdownOpen && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                        className={`absolute top-full ${isRTL ? 'left-0' : 'right-0'} mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 p-2 z-[60]`}
+                                                    >
+                                                        <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 mb-2">
+                                                            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('nav.signedInAs', 'Signed in as')}</p>
+                                                            <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user.email}</p>
+                                                        </div>
+                                                        <Link to="/dashboard" onClick={() => setUserDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all">
+                                                            <Layout className="w-4 h-4" />
+                                                            {t('nav.goToDashboard', 'Go to Dashboard')}
+                                                        </Link>
+                                                        <Link to="/settings" onClick={() => setUserDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all">
+                                                            <Trophy className="w-4 h-4" />
+                                                            {t('nav.settings', 'Account Settings')}
+                                                        </Link>
+                                                        <div className="h-px bg-gray-100 dark:bg-gray-800 my-2 mx-2"></div>
+                                                        <button
+                                                            onClick={() => {
+                                                                setUserDropdownOpen(false);
+                                                                signOut();
+                                                            }}
+                                                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                            {t('nav.signOut', 'Sign Out')}
+                                                        </button>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
                                     ) : (
                                         <>
                                             <Link to="/login" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 transition-colors">{t('nav.login')}</Link>
@@ -304,14 +354,24 @@ export default function LandingPage() {
                                     <LanguageSwitcher />
                                 </div>
                                 {!loading && user ? (
-                                    <>
-                                        <div className="py-3 px-4 text-center text-base font-medium text-gray-700 dark:text-gray-300 mb-3">
-                                            {user.email?.split('@')[0]}
+                                    <div className="space-y-2">
+                                        <div className="py-4 px-4 bg-gray-50 dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-gray-700 mb-4">
+                                            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{t('nav.signedInAs', 'Signed in as')}</p>
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user.email}</p>
                                         </div>
-                                        <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white rounded-xl font-semibold text-base shadow-lg shadow-indigo-500/30">
+                                        <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-4 px-4 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white rounded-2xl font-bold text-center shadow-lg shadow-indigo-500/20">
                                             {t('nav.goToDashboard', 'Go to Dashboard')}
                                         </Link>
-                                    </>
+                                        <button
+                                            onClick={() => {
+                                                setMobileMenuOpen(false);
+                                                signOut();
+                                            }}
+                                            className="w-full py-4 px-4 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-2xl font-bold text-center border border-red-100 dark:border-red-900/30"
+                                        >
+                                            {t('nav.signOut', 'Sign Out')}
+                                        </button>
+                                    </div>
                                 ) : (
                                     <>
                                         <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-4 text-center text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors mb-3">

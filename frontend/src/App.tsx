@@ -33,6 +33,7 @@ import { ExamAnalyticsDashboard } from "./components/analytics/ExamAnalyticsDash
 
 import KidsLanding from './pages/KidsLanding';
 import KidsExamView from './pages/KidsExamView';
+import { ProtectedRoute, AdminRoute, AgentRoute } from './components/ProtectedRoute';
 
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
@@ -111,23 +112,31 @@ function AppContent() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/update-password" element={<UpdatePassword />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/payment-callback" element={<PaymentCallback />} />
-        <Route path="/payment-history" element={<PaymentHistory />} />
-        <Route path="/payment-test" element={<PaymentTest />} />
-        <Route path="/question-bank" element={<QuestionBank />} />
-        <Route path="/exam/new" element={<ExamEditor />} />
-        <Route path="/exam/:id/edit" element={<ExamEditor />} />
+
+        {/* Protected Routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+        <Route path="/question-bank" element={<ProtectedRoute><QuestionBank /></ProtectedRoute>} />
+        <Route path="/exam/new" element={<ProtectedRoute><ExamEditor /></ProtectedRoute>} />
+        <Route path="/exam/:id/edit" element={<ProtectedRoute><ExamEditor /></ProtectedRoute>} />
+        <Route path="/payment-history" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
+        <Route path="/exam/:examId/analytics" element={<ProtectedRoute><ExamAnalyticsDashboard /></ProtectedRoute>} />
+
+        {/* Student Routes (Some have internal auth logic) */}
         <Route path="/exam/:id" element={<ExamView />} />
         <Route path="/student-portal" element={<StudentPortal />} />
-        <Route path="/exam/:examId/analytics" element={<ExamAnalyticsDashboard />} />
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/super-admin" element={<SuperAdminPanel />} />
-        <Route path="/agent" element={<AgentDashboard />} />
+        <Route path="/payment-callback" element={<PaymentCallback />} />
+
+        {/* Support & Admin (Strictly Protected) */}
+        <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+        <Route path="/super-admin" element={<AdminRoute><SuperAdminPanel /></AdminRoute>} />
+        <Route path="/support" element={<AgentRoute><SupportDashboard /></AgentRoute>} />
+        <Route path="/agent" element={<AgentRoute><AgentDashboard /></AgentRoute>} />
         <Route path="/agent-login" element={<AgentLogin />} />
-        <Route path="/support" element={<SupportDashboard />} />
+
+        {/* Public Utility */}
+        <Route path="/payment-test" element={<PaymentTest />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="*" element={<LandingPage />} />
