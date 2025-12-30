@@ -134,7 +134,8 @@
             "forgotPassword": "Forgot password?",
             "submit": "Sign in",
             "noAccount": "Don't have an account?",
-            "register": "Sign up"
+            "register": "Sign up",
+            "back": "Back"
         },
         "register": {
             "title": "Create an account",
@@ -146,6 +147,44 @@
             "submit": "Sign up",
             "hasAccount": "Already have an account?",
             "login": "Sign in"
+        },
+        "forgotPassword": {
+            "title": "Reset your password",
+            "desc": "Enter your email address and we'll send you a link to reset your password.",
+            "emailLabel": "Email address",
+            "submit": "Send reset link",
+            "sending": "Sending link...",
+            "backToLogin": "Back to sign in",
+            "goStudentPortal": "Go to Student Portal",
+            "successTitle": "Check your email",
+            "successDesc": "We have sent a password reset link to your email address.",
+            "or": "Or"
+        },
+        "updatePassword": {
+            "title": "Set new password",
+            "subtitle": "Please enter your new password below.",
+            "newPasswordLabel": "New Password",
+            "confirmPasswordLabel": "Confirm New Password",
+            "submit": "Update password",
+            "updating": "Updating password..."
+        },
+        "validation": {
+            "name": "Name must be at least 2 characters",
+            "email": "Invalid email address",
+            "passwordMin": "Password must be at least 6 characters",
+            "passwordMatch": "Passwords don't match"
+        },
+        "messages": {
+            "loginSuccess": "Logged in successfully",
+            "loginError": "Invalid email or password",
+            "registerSuccess": "Registration successful! Please check your email to verify your account.",
+            "emailInUse": "This email is already registered. Please sign in instead.",
+            "registerError": "Registration failed",
+            "resetLinkSent": "Password reset link sent to your email",
+            "resetLinkError": "Failed to send reset link",
+            "passwordUpdated": "Password updated successfully",
+            "passwordUpdateError": "Failed to update password",
+            "invalidLink": "Invalid or expired reset link"
         }
     },
     "footer": {
@@ -218,6 +257,7 @@
     },
     "dashboard": {
         "title": "My Exams",
+        "subTitle": "Manage and monitor your exams",
         "createExam": "Create New Exam",
         "questionBank": "Question Bank",
         "noExams": {
@@ -333,11 +373,61 @@
         "version": "Mobile App"
     },
     "questionBank": {
-        "title": "Question Bank",
+        "title": "Question Banks",
+        "subtitle": "Centralize and reuse your expertise effectively",
+        "createBank": "Create New Bank",
+        "libraries": "Your Libraries",
+        "noBanks": {
+            "title": "No question banks yet.",
+            "desc": "Create your first one!"
+        },
+        "questions": "questions",
+        "collectionLibrary": "Collection Library",
+        "searchPlaceholder": "Search items in this bank...",
+        "addQuestion": "Add Question",
+        "noQuestions": {
+            "found": "No questions found",
+            "import": "No questions yet. Import some!"
+        },
+        "selectLibrary": {
+            "title": "Select a Library",
+            "desc": "Choose a question bank from the sidebar to start managing your collection"
+        },
+        "createModal": {
+            "title": "Create Library",
+            "subtitle": "Group your questions by topic or subject",
+            "nameLabel": "Library Name",
+            "namePlaceholder": "e.g., Mathematics Vol. 1",
+            "descLabel": "Brief Description (optional)",
+            "descPlaceholder": "What topics does this library cover?",
+            "submit": "Create Library",
+            "cancel": "Cancel"
+        },
+        "addQuestionModal": {
+            "title": "New Question",
+            "subtitle": "Adding to",
+            "promptLabel": "Question Prompt *",
+            "promptPlaceholder": "What would you like to ask?",
+            "typeLabel": "Response Format *",
+            "choicesLabel": "Choices",
+            "addChoice": "Add Choice",
+            "correctAnswerLabel": "Correct Answer *",
+            "correctAnswerPlaceholder": "Enter the correct answer...",
+            "pointsLabel": "Points",
+            "difficultyLabel": "Difficulty",
+            "categoryLabel": "Category (optional)",
+            "categoryPlaceholder": "e.g., Biology, Chapter 3",
+            "tagsLabel": "Tags (optional, comma-separated)",
+            "tagsPlaceholder": "e.g., important, exam2024",
+            "submit": "Add to Library",
+            "cancel": "Cancel"
+        },
         "demo": {
             "save": "Demo mode: Sign up to save your own question banks",
             "delete": "Demo mode: Sign up to delete and manage banks",
-            "add": "Demo mode: Sign up to add your own questions"
+            "add": "Demo mode: Sign up to add your own questions",
+            "banner": "Demo Mode: Build Your Perfect Question Library",
+            "back": "Back to Demo"
         },
         "validation": {
             "name": "Please enter a bank name",
@@ -363,15 +453,6 @@
             "deleteBank": "Are you sure you want to delete this question bank? All questions will be removed.",
             "deleteQuestion": "Delete this question?"
         }
-    },
-    "auth": {
-        "signIn": "Sign In",
-        "createAccount": "Create Account",
-        "forgotPassword": "Forgot password?",
-        "newToDurrah": "New to Durrah?",
-        "alreadyHaveAccount": "Already have an account?",
-        "signInInstead": "Sign In instead",
-        "processing": "Processing..."
     },
     "studentPortal": {
         "title": "Student Portal",

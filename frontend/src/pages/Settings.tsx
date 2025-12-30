@@ -354,7 +354,7 @@ export default function Settings() {
                     </section>
 
                     {/* Language Settings */}
-                    <section className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                    <section className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
                         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
                             <Globe className="h-5 w-5 text-indigo-600" />
                             <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('settings.language.title', 'Language')}</h2>

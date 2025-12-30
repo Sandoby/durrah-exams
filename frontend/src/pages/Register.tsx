@@ -10,12 +10,12 @@ import { supabase } from '../lib/supabase';
 import { useTranslation } from 'react-i18next';
 
 const registerSchema = z.object({
-    name: z.string().min(2, 'Name must be at least 2 characters'),
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    name: z.string().min(2, 'auth.validation.name'),
+    email: z.string().email('auth.validation.email'),
+    password: z.string().min(6, 'auth.validation.passwordMin'),
     confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: "auth.validation.passwordMatch",
     path: ["confirmPassword"],
 });
 
@@ -58,7 +58,7 @@ export default function Register() {
             // Handle existing user (enumeration protection)
             // If user exists but no identities, they are already registered
             if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
-                toast.error('This email is already registered. Please sign in instead.');
+                toast.error(t('auth.messages.emailInUse'));
                 setIsLoading(false);
                 return;
             }
@@ -80,10 +80,10 @@ export default function Register() {
                 }
             }
 
-            toast.success('Registration successful! Please check your email to verify your account.');
+            toast.success(t('auth.messages.registerSuccess'));
             navigate('/login');
         } catch (error: any) {
-            toast.error(error.message || 'Registration failed');
+            toast.error(t('auth.messages.registerError'));
         } finally {
             setIsLoading(false);
         }
@@ -125,7 +125,7 @@ export default function Register() {
                                 />
                             </div>
                             {errors.name && (
-                                <p className="mt-2 text-sm text-red-600">{errors.name.message}</p>
+                                <p className="mt-2 text-sm text-red-600">{t(errors.name.message as string)}</p>
                             )}
                         </div>
 
@@ -145,7 +145,7 @@ export default function Register() {
                                 />
                             </div>
                             {errors.email && (
-                                <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>
+                                <p className="mt-2 text-sm text-red-600">{t(errors.email.message as string)}</p>
                             )}
                         </div>
 
@@ -165,7 +165,7 @@ export default function Register() {
                                 />
                             </div>
                             {errors.password && (
-                                <p className="mt-2 text-sm text-red-600">{errors.password.message}</p>
+                                <p className="mt-2 text-sm text-red-600">{t(errors.password.message as string)}</p>
                             )}
                         </div>
 
@@ -185,7 +185,7 @@ export default function Register() {
                                 />
                             </div>
                             {errors.confirmPassword && (
-                                <p className="mt-2 text-sm text-red-600">{errors.confirmPassword.message}</p>
+                                <p className="mt-2 text-sm text-red-600">{t(errors.confirmPassword.message as string)}</p>
                             )}
                         </div>
 

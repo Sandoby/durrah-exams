@@ -137,7 +137,8 @@
             "forgotPassword": "¿Olvidaste tu contraseña?",
             "submit": "Iniciar sesión",
             "noAccount": "¿No tienes cuenta?",
-            "register": "Regístrate"
+            "register": "Regístrate",
+            "back": "Volver"
         },
         "register": {
             "title": "Crear una cuenta",
@@ -149,6 +150,44 @@
             "submit": "Registrarse",
             "hasAccount": "¿Ya tienes cuenta?",
             "login": "Iniciar sesión"
+        },
+        "forgotPassword": {
+            "title": "Restablecer tu contraseña",
+            "desc": "Introduce tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.",
+            "emailLabel": "Correo electrónico",
+            "submit": "Enviar enlace",
+            "sending": "Enviando enlace...",
+            "backToLogin": "Volver al inicio de sesión",
+            "goStudentPortal": "Ir al Portal del Estudiante",
+            "successTitle": "Revisa tu correo",
+            "successDesc": "Hemos enviado un enlace de restablecimiento a tu correo electrónico.",
+            "or": "O"
+        },
+        "updatePassword": {
+            "title": "Establecer nueva contraseña",
+            "subtitle": "Por favor, introduce tu nueva contraseña a continuación.",
+            "newPasswordLabel": "Nueva Contraseña",
+            "confirmPasswordLabel": "Confirmar Nueva Contraseña",
+            "submit": "Actualizar contraseña",
+            "updating": "Actualizando contraseña..."
+        },
+        "validation": {
+            "name": "El nombre debe tener al menos 2 caracteres",
+            "email": "Correo electrónico inválido",
+            "passwordMin": "La contraseña debe tener al menos 6 caracteres",
+            "passwordMatch": "Las contraseñas no coinciden"
+        },
+        "messages": {
+            "loginSuccess": "Sesión iniciada correctamente",
+            "loginError": "Correo o contraseña inválidos",
+            "registerSuccess": "¡Registro exitoso! Por favor, revisa tu correo para verificar tu cuenta.",
+            "emailInUse": "Este correo ya está registrado. Por favor, inicia sesión.",
+            "registerError": "Error en el registro",
+            "resetLinkSent": "Enlace de restablecimiento enviado a tu correo",
+            "resetLinkError": "Error al enviar el enlace",
+            "passwordUpdated": "Contraseña actualizada correctamente",
+            "passwordUpdateError": "Error al actualizar la contraseña",
+            "invalidLink": "Enlace inválido o caducado"
         }
     },
     "footer": {
@@ -221,6 +260,7 @@
     },
     "dashboard": {
         "title": "Mis Exámenes",
+        "subTitle": "Administra y supervisa tus exámenes",
         "createExam": "Crear Nuevo Examen",
         "questionBank": "Banco de Preguntas",
         "noExams": {
@@ -276,394 +316,85 @@
         "version": "Aplicación Móvil"
     },
     "questionBank": {
-        "title": "Banco de Preguntas",
+        "title": "Bancos de Preguntas",
+        "subtitle": "Centraliza y reutiliza tu experiencia de manera efectiva",
+        "createBank": "Crear Nuevo Banco",
+        "libraries": "Tus Bibliotecas",
+        "noBanks": {
+            "title": "Aún no hay bancos de preguntas.",
+            "desc": "¡Crea el primero!"
+        },
+        "questions": "preguntas",
+        "collectionLibrary": "Biblioteca de Colección",
+        "searchPlaceholder": "Buscar elementos en este banco...",
+        "addQuestion": "Añadir Pregunta",
+        "noQuestions": {
+            "found": "No se encontraron preguntas",
+            "import": "Aún no hay preguntas. ¡Importa algunas!"
+        },
+        "selectLibrary": {
+            "title": "Selecciona una Biblioteca",
+            "desc": "Elige un banco de preguntas de la barra lateral para comenzar a gestionar tu colección"
+        },
+        "createModal": {
+            "title": "Crear Biblioteca",
+            "subtitle": "Agrupa tus preguntas por tema o materia",
+            "nameLabel": "Nombre de la Biblioteca",
+            "namePlaceholder": "ej., Matemáticas Vol. 1",
+            "descLabel": "Breve descripción (opcional)",
+            "descPlaceholder": "¿Qué temas cubre esta biblioteca?",
+            "submit": "Crear Biblioteca",
+            "cancel": "Cancelar"
+        },
+        "addQuestionModal": {
+            "title": "Nueva Pregunta",
+            "subtitle": "Añadiendo a",
+            "promptLabel": "Enunciado de la Pregunta *",
+            "promptPlaceholder": "¿Qué te gustaría preguntar?",
+            "typeLabel": "Formato de Respuesta *",
+            "choicesLabel": "Opciones",
+            "addChoice": "Añadir Opción",
+            "correctAnswerLabel": "Respuesta Correcta *",
+            "correctAnswerPlaceholder": "Introduce la respuesta correcta...",
+            "pointsLabel": "Puntos",
+            "difficultyLabel": "Dificultad",
+            "categoryLabel": "Categoría (opcional)",
+            "categoryPlaceholder": "ej., Biología, Capítulo 3",
+            "tagsLabel": "Etiquetas (opcional, separadas por comas)",
+            "tagsPlaceholder": "ej., importante, examen2024",
+            "submit": "Añadir a la Biblioteca",
+            "cancel": "Cancelar"
+        },
         "demo": {
-            "save": "Modo demo: Regístrate para guardar bancos",
-            "delete": "Modo demo: Regístrate para gestionar bancos",
-            "add": "Modo demo: Regístrate para añadir preguntas"
+            "save": "Modo demo: Regístrate para guardar tus propios bancos",
+            "delete": "Modo demo: Regístrate para gestionar y eliminar bancos",
+            "add": "Modo demo: Regístrate para añadir tus propias preguntas",
+            "banner": "Modo Demo: Construye tu Biblioteca de Preguntas Perfecta",
+            "back": "Volver a la Demo"
         },
         "validation": {
-            "name": "Ingresa un nombre",
-            "question": "Ingresa una pregunta",
-            "bankSelect": "Selecciona un banco primero",
-            "options": "Al menos 2 opciones requeridas",
-            "correctAnswer": "Selecciona la respuesta correcta"
+            "name": "Por favor ingresa un nombre para el banco",
+            "question": "Por favor ingresa una pregunta",
+            "bankSelect": "Por favor selecciona primero un banco de preguntas",
+            "options": "Por favor proporciona al menos 2 opciones",
+            "correctAnswer": "Por favor selecciona una respuesta correcta"
         },
         "success": {
-            "created": "Banco creado exitosamente",
-            "deleted": "Banco eliminado",
-            "questionAdded": "¡Pregunta añadida!",
+            "created": "Banco de preguntas creado con éxito",
+            "deleted": "Banco de preguntas eliminado",
+            "questionAdded": "¡Pregunta añadida con éxito!",
             "questionDeleted": "Pregunta eliminada"
         },
         "error": {
-            "create": "Error al crear",
-            "delete": "Error al eliminar",
-            "add": "Error al añadir",
-            "deleteQuestion": "Error al eliminar",
-            "noExport": "Nada para exportar"
+            "create": "Error al crear el banco de preguntas",
+            "delete": "Error al eliminar el banco de preguntas",
+            "add": "Error al añadir la pregunta",
+            "deleteQuestion": "Error al eliminar la pregunta",
+            "noExport": "No hay preguntas para exportar"
         },
         "confirm": {
-            "deleteBank": "¿Eliminar este banco? Se borrarán todas las preguntas.",
+            "deleteBank": "¿Estás seguro de que quieres eliminar este banco de preguntas? Todas las preguntas serán eliminadas.",
             "deleteQuestion": "¿Eliminar esta pregunta?"
         }
-    },
-    "auth": {
-        "signIn": "Iniciar Sesión",
-        "createAccount": "Crear Cuenta",
-        "forgotPassword": "¿Olvidaste tu contraseña?",
-        "newToDurrah": "¿Nuevo en Durrah?",
-        "alreadyHaveAccount": "¿Ya tienes cuenta?",
-        "signInInstead": "Iniciar sesión en su lugar",
-        "processing": "Procesando..."
-    },
-    "studentPortal": {
-        "title": "Portal del Estudiante",
-        "regSuccess": "¡Registro exitoso! Revisa tu correo.",
-        "welcome": "¡Bienvenido de nuevo!",
-        "notFound": "Examen no encontrado. Verifique el código.",
-        "error": "Ocurrió un error.",
-        "signIn": "Acceso Estudiante",
-        "createAccount": "Crear cuenta estudiante",
-        "signOut": "Cerrar Sesión",
-        "joinExam": "Unirse a examen",
-        "joinDesc": "Ingresa el código del examen para comenzar.",
-        "enterCode": "Código o ID de examen",
-        "joining": "Uniéndose...",
-        "start": "Comenzar",
-        "performance": "Tu Rendimiento",
-        "examsTaken": "Exámenes Realizados",
-        "avgScore": "Puntaje Prom.",
-        "recentActivity": "Actividad Reciente",
-        "noExams": "No se encontraron exámenes.",
-        "untitled": "Examen sin título",
-        "noDesc": "Sin descripción"
-    },
-    "kidsLanding": {
-        "missionCenter": "Centro de Misión",
-        "readySystem": "SISTEMA LISTO PARA DESPEGUE",
-        "readyTitle": "Listo para",
-        "readyTitleHighlight": "¿Despegar?",
-        "subtitle": "¡Únete a los exploradores más inteligentes de la galaxia! Ingresa tu apodo y código secreto para comenzar.",
-        "commander": "Comandante IA",
-        "protocol": "Protocolo Avanzado",
-        "rankings": "Rankings",
-        "badges": "Gana Insignias Cósmicas",
-        "callsign": "Apodo Explorador",
-        "callsignPlaceholder": "ej: CapitánCosmos",
-        "missionCode": "Código de Misión",
-        "blastOff": "¡DESPEGUE!",
-        "constellation": "Constelación Dinámica Activada",
-        "poweredBy": "Impulsado Por",
-        "cosmicSolutions": "Soluciones de Exámenes Cósmicos",
-        "backHome": "Volver a Inicio",
-        "validation": {
-            "nickname": "Ingresa un apodo",
-            "code": "Ingresa el código del quiz",
-            "invalid": "Código inválido",
-            "notEnabled": "Este quiz no está habilitado para modo niños"
-        },
-        "error": {
-            "failed": "Error al abrir el quiz"
-        }
-    },
-    "settings": {
-        "title": "Configuración",
-        "back": "Volver al Panel",
-        "profile": {
-            "title": "Información del Perfil",
-            "fullName": "Nombre Completo",
-            "email": "Correo Electrónico",
-            "emailNote": "El correo electrónico no se puede cambiar",
-            "phone": "Número de Teléfono (opcional)",
-            "institution": "Institución (opcional)",
-            "save": "Guardar Cambios",
-            "saving": "Guardando...",
-            "success": "Perfil actualizado con éxito",
-            "error": "Error al actualizar el perfil"
-        },
-        "password": {
-            "title": "Cambiar Contraseña",
-            "new": "Nueva Contraseña",
-            "confirm": "Confirmar Nueva Contraseña",
-            "update": "Actualizar Contraseña",
-            "updating": "Actualizando..."
-        },
-        "subscription": {
-            "title": "Estado de la Suscripción",
-            "status": "Estado:",
-            "plan": "Plan:",
-            "validUntil": "Válido hasta:",
-            "active": "Activo",
-            "freeMessage": "Actualmente estás en el plan gratuito",
-            "upgrade": "Actualizar a Pro"
-        },
-        "account": {
-            "summary": {
-                "original": "Precio Original:",
-                "discount": "Descuento:",
-                "final": "Precio Final:",
-                "free": "Gratis"
-            },
-            "features": {
-                "fast": {
-                    "title": "Ultrarrápido",
-                    "desc": "Crea exámenes en minutos."
-                },
-                "antiCheat": {
-                    "title": "Anti-trampas",
-                    "desc": "Monitoreo avanzado."
-                },
-                "interface": {
-                    "title": "Hermosa Interfaz",
-                    "desc": "Experiencia limpia y sin distracciones."
-                }
-            }
-        },
-        "language": {
-            "title": "Idioma",
-            "desc": "Elige tu idioma preferido para la interfaz",
-            "current": "Idioma actual"
-        }
-    },
-    "examEditor": {
-        "createTitle": "Crear Nuevo Examen",
-        "editTitle": "Editar Examen",
-        "save": "Guardar Examen",
-        "saving": "Guardando...",
-        "basicInfo": {
-            "title": "Información Básica",
-            "examTitle": "Título",
-            "description": "Descripción"
-        },
-        "studentInfo": {
-            "title": "Campos de Información del Estudiante",
-            "desc": "Selecciona los campos que los estudiantes deben completar",
-            "name": "Nombre Completo",
-            "email": "Correo Electrónico",
-            "studentId": "ID de Estudiante",
-            "phone": "Número de Teléfono"
-        },
-        "emailAccess": {
-            "title": "Control de Acceso por Correo",
-            "desc": "Restringir el acceso a correos electrónicos específicos",
-            "enable": "Habilitar restricción por correo"
-        },
-        "settings": {
-            "title": "Configuración del Examen",
-            "fullscreen": "Forzar Pantalla Completa",
-            "tabSwitch": "Detectar Cambio de Pestaña",
-            "copyPaste": "Deshabilitar Copiar/Pegar",
-            "showResults": "Mostrar Resultados Inmediatamente",
-            "maxViolations": "Violaciones Máximas",
-            "timeLimit": "Límite de Tiempo (minutos)",
-            "startTime": "Hora de Inicio",
-            "startTimeDesc": "Cuándo pueden comenzar los estudiantes",
-            "endTime": "Hora de Finalización",
-            "endTimeDesc": "Cuándo termina el examen"
-        },
-        "questions": {
-            "title": "Preguntas",
-            "add": "Agregar Pregunta",
-            "remove": "Eliminar",
-            "type": "Tipo de Pregunta",
-            "points": "Puntos",
-            "text": "Texto de la Pregunta",
-            "options": "Opciones",
-            "addOption": "Agregar Opción",
-            "correctAnswer": "Respuesta Correcta",
-            "numericAnswer": "Respuesta Numérica Correcta (Opcional)",
-            "numericNote": "Se usará coincidencia numérica exacta para la calificación automática.",
-            "selectCorrect": "Opciones (Selecciona una o más respuestas correctas)",
-            "types": {
-                "multipleChoice": "Opción Múltiple",
-                "multipleSelect": "Selección Múltiple",
-                "dropdown": "Menú Desplegable",
-                "numeric": "Numérico",
-                "trueFalse": "Verdadero/Falso"
-            },
-            "trueFalse": {
-                "true": "Verdadero",
-                "false": "Falso"
-            },
-            "validation": {
-                "titleRequired": "Por favor ingresa un título de examen.",
-                "descriptionRequired": "Por favor ingresa una descripción.",
-                "questionsRequired": "Por favor agrega al menos una pregunta.",
-                "questionTextRequired": "La pregunta {{index}} no tiene texto.",
-                "optionsRequired": "La pregunta {{index}} necesita al menos 2 opciones.",
-                "optionTextRequired": "La pregunta {{index}} tiene opciones vacías.",
-                "correctAnswerRequired": "La pregunta {{index}} necesita una respuesta correcta."
-            },
-            "success": {
-                "saved": "¡Examen guardado con éxito!",
-                "created": "¡Examen creado con éxito!"
-            }
-        }
-    },
-    "examView": {
-        "start": "Comenzar Examen",
-        "resume": "Reanudar Examen",
-        "submit": "Enviar Examen",
-        "submitting": "Enviando...",
-        "submitted": {
-            "title": "Examen Enviado",
-            "message": "¡Gracias! Tus respuestas han sido enviadas de forma segura.",
-            "resultsPending": "Los resultados serán publicados por tu tutor.",
-            "recorded": "Tu envío ha sido registrado."
-        },
-        "security": {
-            "title": "Reglas de Seguridad del Examen",
-            "fullscreen": "Se requiere modo pantalla completa",
-            "tabSwitch": "Cambio de pestaña monitoreado",
-            "copyPaste": "Copiar/Pegar deshabilitado",
-            "maxViolations": "Violaciones máximas:"
-        },
-        "iphoneHelp": {
-            "title": "Ayuda de Envío iPhone/Safari",
-            "privateMode": "Asegúrate de que Safari no esté en modo Privado.",
-            "cookies": "Habilita cookies: Configuración > Safari > Bloquear todas las cookies (Desactivado).",
-            "tracking": "Deshabilita rastreo: Configuración > Safari > Evitar rastreo entre sitios (Desactivado).",
-            "homeScreen": "Usa 'Agregar a Inicio' para mayor confiabilidad.",
-            "error": "Si ves un error de envío, intenta cerrar sesión y volver a entrar.",
-            "screenshot": "Si falla, toma capturas de pantalla de tus respuestas antes de salir."
-        },
-        "violations": "Violaciones:",
-        "accessibility": {
-            "settings": "Configuración de Accesibilidad",
-            "fontSize": "Tamaño de Fuente"
-        },
-        "previousSession": "Sesión anterior encontrada. Tu progreso ha sido restaurado.",
-        "fillRequired": "Por favor completa todos los campos requeridos",
-        "accessDenied": "Acceso denegado: Tu correo no está autorizado para este examen",
-        "notAvailable": "El examen no está disponible actualmente",
-        "startsAt": "El examen comienza a las",
-        "endedAt": "El examen terminó a las",
-        "warnings": {
-            "finalWarning": "Advertencia Final",
-            "finalMessage": "Te quedan {{count}} violación(es) antes del envío automático.",
-            "maxReached": "Violaciones Máximas Alcanzadas",
-            "maxMessage": "Tu examen se enviará automáticamente ahora debido a violaciones excesivas.",
-            "tabSwitch": "Cambio de Pestaña Detectado",
-            "tabSwitchMessage": "Has salido de la página del examen.",
-            "fullscreenExit": "Salida de Pantalla Completa Detectada",
-            "fullscreenExitMessage": "Por favor regresa al modo pantalla completa inmediatamente.",
-            "violationRecorded": "¡Violación registrada! Quedan {{count}}."
-        },
-        "errors": {
-            "notOpen": "El examen aún no ha comenzado. Empieza a las {{time}}",
-            "alreadyEnded": "El tiempo del examen ha terminado",
-            "alreadySubmitted": "Examen ya enviado desde este dispositivo.",
-            "submissionFailed": "Error al enviar: {{error}}",
-            "submissionSaved": "Envío guardado localmente. Reintentando automáticamente."
-        },
-        "success": {
-            "submitted": "¡Examen enviado con éxito!"
-        }
-    },
-    "kids": {
-        "seo": {
-            "title": "Aventura de Quiz para Niños | Seguro, Divertido, Anti-Trampa | Durrah",
-            "description": "¡Comienza tu aventura de quiz! Quizzes en línea seguros y divertidos para niños con modo infantil y anti-trampa. Desarrollado por Durrah para Tutores.",
-            "keywords": "quiz para niños, cuestionarios divertidos, exámenes seguros, anti trampa, modo niño, plataforma de quiz segura, aprendizaje infantil"
-        },
-        "header": {
-            "title": "Quiz para Niños",
-            "fun": "Aprendizaje Divertido"
-        },
-        "hero": {
-            "ready": "¿Listo para Jugar?",
-            "title": "Comencemos la",
-            "adventure": "¡Aventura de Quiz!",
-            "desc": "¡Ingresa tu nombre y el código secreto para comenzar tu divertido viaje!"
-        },
-        "form": {
-            "nickname": "Tu Súper Nombre",
-            "nicknamePlaceholder": "ej., SúperEstrella",
-            "code": "Código Secreto",
-            "codePlaceholder": "KID-ABC123",
-            "codeLabel": "Código:",
-            "loading": "Preparándote...",
-            "start": "¡Iniciar Aventura!",
-            "help": "Pide a tu profesor el código secreto"
-        },
-        "features": {
-            "title": "✨ Lo que te espera ✨",
-            "fun": "🎯 Quizzes Divertidos",
-            "rewards": "🏆 Gana Premios",
-            "games": "🎮 Juegos Geniales",
-            "star": "⭐ Sé una Estrella"
-        }
-    },
-    "faq": {
-        "title": "Preguntas Frecuentes",
-        "subtitle": "Todo lo que necesitas saber sobre Durrah",
-        "q1": {
-            "question": "¿Es Durrah realmente seguro para los niños?",
-            "answer": "¡Sí! Priorizamos la seguridad con contenido filtrado, opciones de inicio de sesión solo con apodo y nunca vendemos los datos de los estudiantes."
-        },
-        "q2": {
-            "question": "¿Cómo funciona el sistema anti-trampa?",
-            "answer": "Nuestro sistema detecta cambios de pestaña, salidas de pantalla completa y patrones de comportamiento sospechosos mediante IA sin necesidad de software complejo."
-        },
-        "q3": {
-            "question": "¿Puedo usar Durrah para grupos escolares grandes?",
-            "answer": "Absolutamente. Nuestros planes 'Pro' y 'Anual' están diseñados para exámenes de alta capacidad con análisis detallados."
-        },
-        "q4": {
-            "question": "¿Necesitan los estudiantes una cuenta?",
-            "answer": "Los estudiantes pueden unirse solo con un código y apodo, o usar el Portal del Estudiante para rastrear su progreso a largo plazo."
-        }
-    },
-    "landing": {
-        "marketing": {
-            "kids": {
-                "badge": "Divertido y Seguro",
-                "title": "Modo Niños: La Aventura de Quiz Definitiva",
-                "titleSpan": "Definitiva",
-                "desc": "Transforma las evaluaciones en un viaje divertido. Nuestro Modo Niños cuenta con visuales vibrantes, navegación simplificada y un sistema anti-trampa de nivel mundial que se siente como un juego, no como una prueba.",
-                "features": {
-                    "0": "Interfaz divertida y atractiva diseñada para niños",
-                    "1": "Anti-trampa y supervisión automatizados",
-                    "2": "Recompensas interactivas y apodos",
-                    "3": "Entorno seguro y protegido"
-                },
-                "cta": "Prueba el Modo Niños ahora"
-            },
-            "student": {
-                "badge": "Rastrea y Crece",
-                "title": "Empodera a los estudiantes con un portal unificado",
-                "titleSpan": "portal unificado",
-                "desc": "Ofrece a tu estudiantes un centro central para gestionar su trayectoria académica. Desde unirse a exámenes con un simple código hasta realizar un seguimiento de los desempeños pasados.",
-                "features": {
-                    "0": "Participación en exámenes con un solo clic",
-                    "1": "Historial completo y seguimiento del desempeño",
-                    "2": "Comentarios instantáneos y revisión de resultados",
-                    "3": "Perspectivas académicas personalizadas"
-                },
-                "cta": "Visitar Portal del Estudiante"
-            }
-        }
-    },
-    "studentPortal": {
-        "title": "Portal del Estudiante",
-        "signIn": "Iniciar sesión en el Portal del Estudiante",
-        "createAccount": "Crear cuenta de estudiante",
-        "welcome": "¡Bienvenido de nuevo!",
-        "regSuccess": "¡Registro exitoso! Por favor revisa tu correo electrónico.",
-        "joinExam": "Unirse a un examen",
-        "joinDesc": "Ingresa el código de examen proporcionado por tu tutor para comenzar una nueva evaluación.",
-        "enterCode": "Ingresa el código o ID del examen",
-        "joining": "Uniéndote...",
-        "start": "Comenzar",
-        "performance": "Tu Desempeño",
-        "examsTaken": "Exámenes realizados",
-        "avgScore": "Puntaje promedio",
-        "recentActivity": "Actividad reciente",
-        "noExams": "No se encontraron exámenes todavía. ¡Únete a tu primer examen arriba!",
-        "untitled": "Examen sin título",
-        "noDesc": "Sin descripción",
-        "signOut": "Cerrar sesión",
-        "notFound": "Examen no encontrado. Por favor revisa el código.",
-        "error": "Ocurrió un error. Por favor intenta de nuevo."
     }
 }

@@ -7,9 +7,10 @@ import { Mail, Loader2, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { Logo } from '../components/Logo';
+import { useTranslation } from 'react-i18next';
 
 const forgotPasswordSchema = z.object({
-    email: z.string().email('Invalid email address'),
+    email: z.string().email('auth.validation.email'),
 });
 
 type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
@@ -17,6 +18,7 @@ type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
 export default function ForgotPassword() {
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const { t } = useTranslation();
 
     const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordForm>({
         resolver: zodResolver(forgotPasswordSchema),
@@ -32,9 +34,9 @@ export default function ForgotPassword() {
             if (error) throw error;
 
             setIsSubmitted(true);
-            toast.success('Password reset link sent to your email');
+            toast.success(t('auth.messages.resetLinkSent'));
         } catch (error: any) {
-            toast.error(error.message || 'Failed to send reset link');
+            toast.error(t('auth.messages.resetLinkError'));
         } finally {
             setIsLoading(false);
         }
@@ -51,18 +53,18 @@ export default function ForgotPassword() {
                         <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
                             <Mail className="h-6 w-6 text-green-600" />
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Check your email</h3>
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('auth.forgotPassword.successTitle')}</h3>
                         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                            We have sent a password reset link to your email address.
+                            {t('auth.forgotPassword.successDesc')}
                         </p>
                         <div className="mt-6 space-y-3">
                             <Link to="/login" className="text-indigo-600 hover:text-indigo-500 font-medium flex items-center justify-center">
                                 <ArrowLeft className="h-4 w-4 mr-2" />
-                                Back to sign in
+                                {t('auth.forgotPassword.backToLogin')}
                             </Link>
                             <Link to="/student-portal" className="text-gray-600 hover:text-gray-500 text-sm flex items-center justify-center">
                                 <ArrowLeft className="h-3 w-3 mr-2" />
-                                Go to Student Portal
+                                {t('auth.forgotPassword.goStudentPortal')}
                             </Link>
                         </div>
                     </div>
@@ -78,10 +80,10 @@ export default function ForgotPassword() {
                     <Logo size="lg" />
                 </div>
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-                    Reset your password
+                    {t('auth.forgotPassword.title')}
                 </h2>
                 <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                    Enter your email address and we'll send you a link to reset your password.
+                    {t('auth.forgotPassword.desc')}
                 </p>
             </div>
 
@@ -90,7 +92,7 @@ export default function ForgotPassword() {
                     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Email address
+                                {t('auth.forgotPassword.emailLabel')}
                             </label>
                             <div className="mt-1 relative rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -104,7 +106,7 @@ export default function ForgotPassword() {
                                 />
                             </div>
                             {errors.email && (
-                                <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>
+                                <p className="mt-2 text-sm text-red-600">{t(errors.email.message as string)}</p>
                             )}
                         </div>
 
@@ -117,10 +119,10 @@ export default function ForgotPassword() {
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                                        Sending link...
+                                        {t('auth.forgotPassword.sending')}
                                     </>
                                 ) : (
-                                    'Send reset link'
+                                    t('auth.forgotPassword.submit')
                                 )}
                             </button>
                         </div>
@@ -133,7 +135,7 @@ export default function ForgotPassword() {
                             </div>
                             <div className="relative flex justify-center text-sm">
                                 <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
-                                    Or
+                                    {t('auth.forgotPassword.or')}
                                 </span>
                             </div>
                         </div>
@@ -141,7 +143,7 @@ export default function ForgotPassword() {
                         <div className="mt-6 flex justify-center">
                             <Link to="/login" className="text-indigo-600 hover:text-indigo-500 font-medium flex items-center">
                                 <ArrowLeft className="h-4 w-4 mr-2" />
-                                Back to sign in
+                                {t('auth.forgotPassword.backToLogin')}
                             </Link>
                         </div>
                     </div>

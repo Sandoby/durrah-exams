@@ -507,9 +507,9 @@ export default function QuestionBank() {
                     <div className="max-w-7xl mx-auto flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Sparkles className="w-5 h-5" />
-                            <span className="text-sm font-black uppercase tracking-tight">Demo Mode: Build Your Perfect Question Library</span>
+                            <span className="text-sm font-black uppercase tracking-tight">{t('questionBank.demo.banner')}</span>
                         </div>
-                        <Link to="/demo" className="text-xs font-black bg-white/20 hover:bg-white/30 px-4 py-1.5 rounded-full transition-all border border-white/20">Back to Demo</Link>
+                        <Link to="/demo" className="text-xs font-black bg-white/20 hover:bg-white/30 px-4 py-1.5 rounded-full transition-all border border-white/20">{t('questionBank.demo.back')}</Link>
                     </div>
                 </div>
             )}
@@ -522,10 +522,10 @@ export default function QuestionBank() {
                                 <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                             </Link>
                             <h1 className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter">
-                                Question <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Banks</span>
+                                Question <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">{t('questionBank.title').split(' ')[1] || 'Banks'}</span>
                             </h1>
                         </div>
-                        <p className="text-lg text-gray-500 dark:text-gray-400 font-bold ml-[72px]">Centralize and reuse your expertise effectively</p>
+                        <p className="text-lg text-gray-500 dark:text-gray-400 font-bold ml-[72px]">{t('questionBank.subtitle')}</p>
                     </div>
 
                     <button
@@ -540,7 +540,7 @@ export default function QuestionBank() {
                         className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-[2rem] font-black shadow-2xl shadow-indigo-200 dark:shadow-none hover:scale-105 active:scale-95 transition-all ml-[72px] md:ml-0 group"
                     >
                         <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform" />
-                        Create New Bank
+                        {t('questionBank.createBank')}
                     </button>
                 </div>
 
@@ -550,13 +550,13 @@ export default function QuestionBank() {
                         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-sm border border-gray-100 dark:border-gray-700 rounded-[2rem] p-8">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 px-1 flex items-center gap-2">
                                 <BookOpen className="w-5 h-5 text-indigo-600" />
-                                Your Libraries
+                                {t('questionBank.libraries')}
                             </h2>
 
                             <div className="space-y-4">
                                 {banks.length === 0 ? (
                                     <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
-                                        No question banks yet.<br />Create your first one!
+                                        {t('questionBank.noBanks.title')}<br />{t('questionBank.noBanks.desc')}
                                     </p>
                                 ) : (
                                     banks.map(bank => (
@@ -577,7 +577,7 @@ export default function QuestionBank() {
                                                     {bank.description && (
                                                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{bank.description}</p>
                                                     )}
-                                                    <p className="text-xs text-gray-500 mt-2">{bank.question_count || 0} questions</p>
+                                                    <p className="text-xs text-gray-500 mt-2">{bank.question_count || 0} {t('questionBank.questions')}</p>
                                                 </div>
                                                 <div className="flex gap-2 relative">
                                                     <div className="relative">
@@ -658,9 +658,9 @@ export default function QuestionBank() {
                                     <div>
                                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{selectedBank.name}</h2>
                                         <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-                                            <span className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full">{questions.length} questions</span>
+                                            <span className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full">{questions.length} {t('questionBank.questions')}</span>
                                             <span>•</span>
-                                            <span>Collection Library</span>
+                                            <span>{t('questionBank.collectionLibrary')}</span>
                                         </div>
                                     </div>
                                     <button
@@ -668,7 +668,7 @@ export default function QuestionBank() {
                                         className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-md"
                                     >
                                         <Plus className="h-5 w-5" />
-                                        Add Question
+                                        {t('questionBank.addQuestion')}
                                     </button>
                                 </div>
 
@@ -678,7 +678,7 @@ export default function QuestionBank() {
                                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                                         <input
                                             type="text"
-                                            placeholder="Search items in this bank..."
+                                            placeholder={t('questionBank.searchPlaceholder')}
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
                                             className="w-full pl-12 pr-6 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none"
@@ -692,7 +692,7 @@ export default function QuestionBank() {
                                         <div className="text-center py-12">
                                             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                                             <p className="text-gray-500 dark:text-gray-400">
-                                                {searchQuery ? 'No questions found' : 'No questions yet. Import some!'}
+                                                {searchQuery ? t('questionBank.noQuestions.found') : t('questionBank.noQuestions.import')}
                                             </p>
                                         </div>
                                     ) : (
@@ -750,8 +750,8 @@ export default function QuestionBank() {
                                 <div className="w-32 h-32 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mb-8 animate-pulse">
                                     <BookOpen className="h-16 w-16 text-indigo-600/50" />
                                 </div>
-                                <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">Select a Library</h3>
-                                <p className="text-lg text-gray-500 dark:text-gray-400 font-medium max-w-sm">Choose a question bank from the sidebar to start managing your collection</p>
+                                <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">{t('questionBank.selectLibrary.title')}</h3>
+                                <p className="text-lg text-gray-500 dark:text-gray-400 font-medium max-w-sm">{t('questionBank.selectLibrary.desc')}</p>
                             </div>
                         )}
                     </div>
@@ -770,28 +770,28 @@ export default function QuestionBank() {
                                 </button>
                             </div>
                             <div className="mb-8">
-                                <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-2">Create Library</h3>
-                                <p className="text-gray-500 dark:text-gray-400 font-medium">Group your questions by topic or subject</p>
+                                <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-2">{t('questionBank.createModal.title')}</h3>
+                                <p className="text-gray-500 dark:text-gray-400 font-medium">{t('questionBank.createModal.subtitle')}</p>
                             </div>
                             <div className="space-y-6">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">Library Name</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('questionBank.createModal.nameLabel')}</label>
                                     <input
                                         type="text"
                                         value={newBankName}
                                         onChange={(e) => setNewBankName(e.target.value)}
                                         className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none"
-                                        placeholder="e.g., Mathematics Vol. 1"
+                                        placeholder={t('questionBank.createModal.namePlaceholder')}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">Brief Description (optional)</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('questionBank.createModal.descLabel')}</label>
                                     <textarea
                                         value={newBankDescription}
                                         onChange={(e) => setNewBankDescription(e.target.value)}
                                         className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none resize-none"
                                         rows={3}
-                                        placeholder="What topics does this library cover?"
+                                        placeholder={t('questionBank.createModal.descPlaceholder')}
                                     />
                                 </div>
                             </div>
@@ -801,7 +801,7 @@ export default function QuestionBank() {
                                     disabled={isCreating}
                                     className="flex-1 px-8 py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                                 >
-                                    {isCreating ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : 'Create Library'}
+                                    {isCreating ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : t('questionBank.createModal.submit')}
                                 </button>
                             </div>
                         </div>
@@ -817,8 +817,8 @@ export default function QuestionBank() {
                         <div className="relative bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl max-w-2xl w-full my-8 p-10 overflow-hidden border border-gray-100 dark:border-gray-700">
                             <div className="flex justify-between items-center mb-10">
                                 <div>
-                                    <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-1">New Question</h3>
-                                    <p className="text-gray-500 dark:text-gray-400 font-medium">Adding to {selectedBank?.name}</p>
+                                    <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-1">{t('questionBank.addQuestionModal.title')}</h3>
+                                    <p className="text-gray-500 dark:text-gray-400 font-medium">{t('questionBank.addQuestionModal.subtitle')} {selectedBank?.name}</p>
                                 </div>
                                 <button
                                     onClick={() => setShowAddQuestionModal(false)}
@@ -832,21 +832,21 @@ export default function QuestionBank() {
                                 {/* Question Text */}
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 ml-1">
-                                        Question Prompt *
+                                        {t('questionBank.addQuestionModal.promptLabel')}
                                     </label>
                                     <textarea
                                         value={newQuestion.question_text}
                                         onChange={(e) => setNewQuestion({ ...newQuestion, question_text: e.target.value })}
                                         className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none resize-none"
                                         rows={3}
-                                        placeholder="What would you like to ask?"
+                                        placeholder={t('questionBank.addQuestionModal.promptPlaceholder')}
                                     />
                                 </div>
 
                                 {/* Question Type */}
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 ml-1">
-                                        Response Format *
+                                        {t('questionBank.addQuestionModal.typeLabel')}
                                     </label>
                                     <div className="relative group">
                                         <select
@@ -879,7 +879,7 @@ export default function QuestionBank() {
                                 {['multiple_choice', 'multiple_select', 'true_false', 'dropdown'].includes(newQuestion.type) && (
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 ml-1">
-                                            Choices {newQuestion.type !== 'true_false' ? '*' : ''}
+                                            {t('questionBank.addQuestionModal.choicesLabel')} {newQuestion.type !== 'true_false' ? '*' : ''}
                                         </label>
                                         <div className="space-y-4">
                                             {(newQuestion.type === 'true_false' ? ['True', 'False'] : newQuestion.options).map((option, index) => (
@@ -966,7 +966,7 @@ export default function QuestionBank() {
                                                     className="flex items-center gap-2 px-4 py-3 text-sm font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-2xl hover:bg-indigo-100 transition-all mt-4"
                                                 >
                                                     <Plus className="h-4 w-4" />
-                                                    Add Choice
+                                                    {t('questionBank.addQuestionModal.addChoice')}
                                                 </button>
                                             )}
                                         </div>
@@ -977,14 +977,14 @@ export default function QuestionBank() {
                                 {(newQuestion.type === 'short_answer' || newQuestion.type === 'numeric') && (
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 ml-1">
-                                            Correct Answer *
+                                            {t('questionBank.addQuestionModal.correctAnswerLabel')}
                                         </label>
                                         <input
                                             type={newQuestion.type === 'numeric' ? 'number' : 'text'}
                                             value={newQuestion.correct_answer as string}
                                             onChange={(e) => setNewQuestion({ ...newQuestion, correct_answer: e.target.value })}
                                             className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none"
-                                            placeholder="Enter the correct answer..."
+                                            placeholder={t('questionBank.addQuestionModal.correctAnswerPlaceholder')}
                                         />
                                     </div>
                                 )}
@@ -993,7 +993,7 @@ export default function QuestionBank() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 ml-1">
-                                            Points
+                                            {t('questionBank.addQuestionModal.pointsLabel')}
                                         </label>
                                         <input
                                             type="number"
@@ -1005,7 +1005,7 @@ export default function QuestionBank() {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 ml-1">
-                                            Difficulty
+                                            {t('questionBank.addQuestionModal.difficultyLabel')}
                                         </label>
                                         <div className="relative">
                                             <select
@@ -1027,28 +1027,28 @@ export default function QuestionBank() {
                                 {/* Category */}
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 ml-1">
-                                        Category (optional)
+                                        {t('questionBank.addQuestionModal.categoryLabel')}
                                     </label>
                                     <input
                                         type="text"
                                         value={newQuestion.category}
                                         onChange={(e) => setNewQuestion({ ...newQuestion, category: e.target.value })}
                                         className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none"
-                                        placeholder="e.g., Biology, Chapter 3"
+                                        placeholder={t('questionBank.addQuestionModal.categoryPlaceholder')}
                                     />
                                 </div>
 
                                 {/* Tags */}
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 ml-1">
-                                        Tags (optional, comma-separated)
+                                        {t('questionBank.addQuestionModal.tagsLabel')}
                                     </label>
                                     <input
                                         type="text"
                                         value={newQuestion.tags}
                                         onChange={(e) => setNewQuestion({ ...newQuestion, tags: e.target.value })}
                                         className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none"
-                                        placeholder="e.g., important, exam2024"
+                                        placeholder={t('questionBank.addQuestionModal.tagsPlaceholder')}
                                     />
                                 </div>
                             </div>
@@ -1058,7 +1058,7 @@ export default function QuestionBank() {
                                     onClick={() => setShowAddQuestionModal(false)}
                                     className="flex-1 px-8 py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-2xl font-black hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
                                 >
-                                    Cancel
+                                    {t('questionBank.addQuestionModal.cancel')}
                                 </button>
                                 <button
                                     onClick={handleAddQuestion}
@@ -1070,7 +1070,7 @@ export default function QuestionBank() {
                                     ) : (
                                         <>
                                             <Plus className="h-6 w-6" />
-                                            Add to Library
+                                            {t('questionBank.addQuestionModal.submit')}
                                         </>
                                     )}
                                 </button>

@@ -11,8 +11,8 @@ import { useTranslation } from 'react-i18next';
 import { Capacitor } from '@capacitor/core';
 
 const loginSchema = z.object({
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    email: z.string().email('auth.validation.email'),
+    password: z.string().min(6, 'auth.validation.passwordMin'),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -58,11 +58,11 @@ export default function Login() {
 
             if (error) throw error;
 
-            toast.success('Logged in successfully');
+            toast.success(t('auth.messages.loginSuccess'));
             navigate('/dashboard');
         } catch (error: any) {
             console.error('Login error:', error);
-            toast.error(error.message || 'Invalid email or password', {
+            toast.error(t('auth.messages.loginError'), {
                 duration: 5000 // Show longer for connection errors
             });
         } finally {
@@ -80,10 +80,10 @@ export default function Login() {
                         navigate('/mobile-welcome');
                     }}
                     className="absolute top-6 left-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-all hover:scale-105"
-                    aria-label="Back to welcome"
+                    aria-label={t('auth.login.back')}
                 >
                     <ArrowLeft className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Back</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('auth.login.back')}</span>
                 </button>
             )}
 
@@ -121,7 +121,7 @@ export default function Login() {
                                 />
                             </div>
                             {errors.email && (
-                                <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>
+                                <p className="mt-2 text-sm text-red-600">{t(errors.email.message as string)}</p>
                             )}
                         </div>
 
@@ -148,7 +148,7 @@ export default function Login() {
                                 />
                             </div>
                             {errors.password && (
-                                <p className="mt-2 text-sm text-red-600">{errors.password.message}</p>
+                                <p className="mt-2 text-sm text-red-600">{t(errors.password.message as string)}</p>
                             )}
                         </div>
 

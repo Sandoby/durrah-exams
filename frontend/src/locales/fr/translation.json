@@ -140,23 +140,62 @@
         "login": {
             "title": "Bon retour",
             "subtitle": "Connectez-vous à votre compte",
-            "emailLabel": "Adresse email",
+            "emailLabel": "Adresse e-mail",
             "passwordLabel": "Mot de passe",
             "forgotPassword": "Mot de passe oublié ?",
             "submit": "Se connecter",
             "noAccount": "Pas de compte ?",
-            "register": "S'inscrire"
+            "register": "S'inscrire",
+            "back": "Retour"
         },
         "register": {
             "title": "Créer un compte",
-            "subtitle": "Commencez à créer des examens sécurisés aujourd'hui",
-            "nameLabel": "Nom Complet",
-            "emailLabel": "Adresse email",
+            "subtitle": "Commencez à créer des examens sécurisés dès aujourd'hui",
+            "nameLabel": "Nom complet",
+            "emailLabel": "Adresse e-mail",
             "passwordLabel": "Mot de passe",
             "confirmPasswordLabel": "Confirmer le mot de passe",
             "submit": "S'inscrire",
-            "hasAccount": "Vous avez déjà un compte ?",
+            "hasAccount": "Déjà un compte ?",
             "login": "Se connecter"
+        },
+        "forgotPassword": {
+            "title": "Réinitialiser votre mot de passe",
+            "desc": "Entrez votre adresse e-mail et nous vous enverrons un lien de réinitialisation.",
+            "emailLabel": "Adresse e-mail",
+            "submit": "Envoyer le lien",
+            "sending": "Envoi en cours...",
+            "backToLogin": "Retour à la connexion",
+            "goStudentPortal": "Aller au portail étudiant",
+            "successTitle": "Vérifiez vos e-mails",
+            "successDesc": "Nous avons envoyé un lien de réinitialisation à votre adresse e-mail.",
+            "or": "Ou"
+        },
+        "updatePassword": {
+            "title": "Nouveau mot de passe",
+            "subtitle": "Veuillez entrer votre nouveau mot de passe ci-dessous.",
+            "newPasswordLabel": "Nouveau mot de passe",
+            "confirmPasswordLabel": "Confirmer le nouveau mot de passe",
+            "submit": "Mettre à jour",
+            "updating": "Mise à jour..."
+        },
+        "validation": {
+            "name": "Le nom doit contenir au moins 2 caractères",
+            "email": "Adresse e-mail invalide",
+            "passwordMin": "Le mot de passe doit contenir au moins 6 caractères",
+            "passwordMatch": "Les mots de passe ne correspondent pas"
+        },
+        "messages": {
+            "loginSuccess": "Connexion réussie",
+            "loginError": "E-mail ou mot de passe invalide",
+            "registerSuccess": "Inscription réussie ! Veuillez vérifier vos e-mails pour activer votre compte.",
+            "emailInUse": "Cet e-mail est déjà enregistré. Veuillez vous connecter.",
+            "registerError": "Échec de l'inscription",
+            "resetLinkSent": "Lien de réinitialisation envoyé par e-mail",
+            "resetLinkError": "Échec de l'envoi du lien",
+            "passwordUpdated": "Mot de passe mis à jour avec succès",
+            "passwordUpdateError": "Échec de la mise à jour",
+            "invalidLink": "Lien invalide ou expiré"
         }
     },
     "footer": {
@@ -229,6 +268,7 @@
     },
     "dashboard": {
         "title": "Mes Examens",
+        "subTitle": "Gérez et surveillez vos examens",
         "createExam": "Créer un Nouvel Examen",
         "questionBank": "Banque de Questions",
         "noExams": {
@@ -276,11 +316,61 @@
         "version": "Application Mobile"
     },
     "questionBank": {
-        "title": "Banque de Questions",
+        "title": "Banques de Questions",
+        "subtitle": "Centralisez et réutilisez votre expertise efficacement",
+        "createBank": "Créer une Nouvelle Banque",
+        "libraries": "Vos Bibliothèques",
+        "noBanks": {
+            "title": "Pas encore de banques de questions.",
+            "desc": "Créez votre première !"
+        },
+        "questions": "questions",
+        "collectionLibrary": "Bibliothèque de Collection",
+        "searchPlaceholder": "Rechercher des éléments dans cette banque...",
+        "addQuestion": "Ajouter une Question",
+        "noQuestions": {
+            "found": "Aucune question trouvée",
+            "import": "Pas encore de questions. Importez-en !"
+        },
+        "selectLibrary": {
+            "title": "Sélectionnez une Bibliothèque",
+            "desc": "Choisissez une banque de questions dans la barre latérale pour commencer à gérer votre collection"
+        },
+        "createModal": {
+            "title": "Créer une Bibliothèque",
+            "subtitle": "Groupez vos questions par sujet ou matière",
+            "nameLabel": "Nom de la Bibliothèque",
+            "namePlaceholder": "ex: Mathématiques Vol. 1",
+            "descLabel": "Brève Description (optionnel)",
+            "descPlaceholder": "Quels sujets couvre cette bibliothèque ?",
+            "submit": "Créer la Bibliothèque",
+            "cancel": "Annuler"
+        },
+        "addQuestionModal": {
+            "title": "Nouvelle Question",
+            "subtitle": "Ajout à",
+            "promptLabel": "Énoncé de la Question *",
+            "promptPlaceholder": "Que voulez-vous demander ?",
+            "typeLabel": "Format de Réponse *",
+            "choicesLabel": "Choix",
+            "addChoice": "Ajouter un Choix",
+            "correctAnswerLabel": "Bonne Réponse *",
+            "correctAnswerPlaceholder": "Entrez la bonne réponse...",
+            "pointsLabel": "Points",
+            "difficultyLabel": "Difficulté",
+            "categoryLabel": "Catégorie (optionnel)",
+            "categoryPlaceholder": "ex: Biologie, Chapitre 3",
+            "tagsLabel": "Tags (optionnel, séparés par des virgules)",
+            "tagsPlaceholder": "ex: important, examen2024",
+            "submit": "Ajouter à la Bibliothèque",
+            "cancel": "Annuler"
+        },
         "demo": {
             "save": "Mode démo : Inscrivez-vous pour sauvegarder vos banques",
             "delete": "Mode démo : Inscrivez-vous pour gérer les banques",
-            "add": "Mode démo : Inscrivez-vous pour ajouter des questions"
+            "add": "Mode démo : Inscrivez-vous pour ajouter des questions",
+            "banner": "Mode Démo : Construisez Votre Bibliothèque de Questions Parfaite",
+            "back": "Retour à la Démo"
         },
         "validation": {
             "name": "Veuillez entrer un nom",
@@ -388,65 +478,6 @@
             "title": "Contrôle d'Accès par Email",
             "desc": "Restreindre l'accès à des emails spécifiques",
             "enable": "Activer la restriction par email"
-        },
-        "auth": {
-            "signIn": "Se connecter",
-            "createAccount": "Créer un compte",
-            "forgotPassword": "Mot de passe oublié ?",
-            "newToDurrah": "Nouveau sur Durrah ?",
-            "alreadyHaveAccount": "Vous avez déjà un compte ?",
-            "signInInstead": "Se connecter plutôt",
-            "processing": "Traitement..."
-        },
-        "studentPortal": {
-            "title": "Portail Étudiant",
-            "regSuccess": "Inscription réussie ! Veuillez vérifier votre email.",
-            "welcome": "Bon retour !",
-            "notFound": "Examen introuvable. Vérifiez le code.",
-            "error": "Une erreur est survenue.",
-            "signIn": "Connexion Portail Étudiant",
-            "createAccount": "Créer compte étudiant",
-            "signOut": "Déconnexion",
-            "joinExam": "Rejoindre un examen",
-            "joinDesc": "Entrez le code d'examen pour commencer.",
-            "enterCode": "Entrez le code ou ID",
-            "joining": "Adhésion...",
-            "start": "Démarrer",
-            "performance": "Votre Performance",
-            "examsTaken": "Examens Passés",
-            "avgScore": "Score Moy.",
-            "recentActivity": "Activité Récente",
-            "noExams": "Aucun examen trouvé.",
-            "untitled": "Examen sans titre",
-            "noDesc": "Pas de description"
-        },
-        "kidsLanding": {
-            "missionCenter": "Centre de Mission",
-            "readySystem": "SYSTÈME PRÊT AU DÉCOLLAGE",
-            "readyTitle": "Prêt au",
-            "readyTitleHighlight": "Décollage ?",
-            "subtitle": "Rejoignez les explorateurs les plus intelligents de la galaxie ! Entrez votre pseudo et code secret pour commencer.",
-            "commander": "Commandant IA",
-            "protocol": "Protocole Avancé",
-            "rankings": "Classements",
-            "badges": "Gagnez des Badges Cosmiques",
-            "callsign": "Pseudo Explorateur",
-            "callsignPlaceholder": "ex: CapitaineCosmos",
-            "missionCode": "Code Mission",
-            "blastOff": "DÉCOLLAGE !",
-            "constellation": "Constellation Dynamique Activée",
-            "poweredBy": "Propulsé Par",
-            "cosmicSolutions": "Solutions d'Examens Cosmiques",
-            "backHome": "Retour Accueil",
-            "validation": {
-                "nickname": "Veuillez entrer un pseudo",
-                "code": "Veuillez entrer le code quiz",
-                "invalid": "Code invalide",
-                "notEnabled": "Ce quiz n'est pas activé pour le mode enfants"
-            },
-            "error": {
-                "failed": "Échec d'ouverture du quiz"
-            }
         },
         "settings": {
             "title": "Paramètres de l'Examen",
@@ -592,6 +623,56 @@
             "rewards": "🏆 Gagne des récompenses",
             "games": "🎮 Jeux sympas",
             "star": "⭐ Deviens une star"
+        }
+    },
+    "studentPortal": {
+        "title": "Portail Étudiant",
+        "regSuccess": "Inscription réussie ! Veuillez vérifier votre email.",
+        "welcome": "Bon retour !",
+        "notFound": "Examen introuvable. Vérifiez le code.",
+        "error": "Une erreur est survenue.",
+        "signIn": "Connexion Portail Étudiant",
+        "createAccount": "Créer compte étudiant",
+        "signOut": "Déconnexion",
+        "joinExam": "Rejoindre un examen",
+        "joinDesc": "Entrez le code d'examen pour commencer.",
+        "enterCode": "Entrez le code ou ID",
+        "joining": "Adhésion...",
+        "start": "Démarrer",
+        "performance": "Votre Performance",
+        "examsTaken": "Examens Passés",
+        "avgScore": "Score Moy.",
+        "recentActivity": "Activité Récente",
+        "noExams": "Aucun examen trouvé.",
+        "untitled": "Examen sans titre",
+        "noDesc": "Pas de description"
+    },
+    "kidsLanding": {
+        "missionCenter": "Centre de Mission",
+        "readySystem": "SYSTÈME PRÊT AU DÉCOLLAGE",
+        "readyTitle": "Prêt au",
+        "readyTitleHighlight": "Décollage ?",
+        "subtitle": "Rejoignez les explorateurs les plus intelligents de la galaxie ! Entrez votre pseudo et code secret pour commencer.",
+        "commander": "Commandant IA",
+        "protocol": "Protocole Avancé",
+        "rankings": "Classements",
+        "badges": "Gagnez des Badges Cosmiques",
+        "callsign": "Pseudo Explorateur",
+        "callsignPlaceholder": "ex: CapitaineCosmos",
+        "missionCode": "Code Mission",
+        "blastOff": "DÉCOLLAGE !",
+        "constellation": "Constellation Dynamique Activée",
+        "poweredBy": "Propulsé Par",
+        "cosmicSolutions": "Solutions d'Examens Cosmiques",
+        "backHome": "Retour Accueil",
+        "validation": {
+            "nickname": "Veuillez entrer un pseudo",
+            "code": "Veuillez entrer le code quiz",
+            "invalid": "Code invalide",
+            "notEnabled": "Ce quiz n'est pas activé pour le mode enfants"
+        },
+        "error": {
+            "failed": "Échec d'ouverture du quiz"
         }
     }
 }

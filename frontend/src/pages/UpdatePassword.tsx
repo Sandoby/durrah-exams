@@ -7,12 +7,13 @@ import { Lock, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { Logo } from '../components/Logo';
+import { useTranslation } from 'react-i18next';
 
 const updatePasswordSchema = z.object({
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    password: z.string().min(6, 'auth.validation.passwordMin'),
     confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: "auth.validation.passwordMatch",
     path: ["confirmPassword"],
 });
 
@@ -21,6 +22,7 @@ type UpdatePasswordForm = z.infer<typeof updatePasswordSchema>;
 export default function UpdatePassword() {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const { t } = useTranslation();
 
     // Check if user is authenticated (Supabase handles the hash fragment automatically)
     useEffect(() => {
@@ -30,14 +32,14 @@ export default function UpdatePassword() {
                 setTimeout(() => {
                     supabase.auth.getSession().then(({ data: { session: retrySession } }) => {
                         if (!retrySession) {
-                            toast.error('Invalid or expired reset link');
+                            toast.error(t('auth.messages.invalidLink'));
                             navigate('/login');
                         }
                     });
                 }, 1000);
             }
         });
-    }, [navigate]);
+    }, [navigate, t]);
 
     const { register, handleSubmit, formState: { errors } } = useForm<UpdatePasswordForm>({
         resolver: zodResolver(updatePasswordSchema),
@@ -52,10 +54,10 @@ export default function UpdatePassword() {
 
             if (error) throw error;
 
-            toast.success('Password updated successfully');
+            toast.success(t('auth.messages.passwordUpdated'));
             navigate('/dashboard');
         } catch (error: any) {
-            toast.error(error.message || 'Failed to update password');
+            toast.error(t('auth.messages.passwordUpdateError'));
         } finally {
             setIsLoading(false);
         }
@@ -68,10 +70,10 @@ export default function UpdatePassword() {
                     <Logo size="lg" />
                 </div>
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-                    Set new password
+                    {t('auth.updatePassword.title')}
                 </h2>
                 <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                    Please enter your new password below.
+                    {t('auth.updatePassword.subtitle')}
                 </p>
             </div>
 
@@ -80,7 +82,7 @@ export default function UpdatePassword() {
                     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                New Password
+                                {t('auth.updatePassword.newPasswordLabel')}
                             </label>
                             <div className="mt-1 relative rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -94,13 +96,13 @@ export default function UpdatePassword() {
                                 />
                             </div>
                             {errors.password && (
-                                <p className="mt-2 text-sm text-red-600">{errors.password.message}</p>
+                                <p className="mt-2 text-sm text-red-600">{t(errors.password.message as string)}</p>
                             )}
                         </div>
 
                         <div>
                             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Confirm New Password
+                                {t('auth.updatePassword.confirmPasswordLabel')}
                             </label>
                             <div className="mt-1 relative rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -114,7 +116,7 @@ export default function UpdatePassword() {
                                 />
                             </div>
                             {errors.confirmPassword && (
-                                <p className="mt-2 text-sm text-red-600">{errors.confirmPassword.message}</p>
+                                <p className="mt-2 text-sm text-red-600">{t(errors.confirmPassword.message as string)}</p>
                             )}
                         </div>
 
@@ -127,10 +129,10 @@ export default function UpdatePassword() {
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                                        Updating password...
+                                        {t('auth.updatePassword.updating')}
                                     </>
                                 ) : (
-                                    'Update password'
+                                    t('auth.updatePassword.submit')
                                 )}
                             </button>
                         </div>

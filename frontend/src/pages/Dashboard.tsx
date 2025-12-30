@@ -614,7 +614,7 @@ export default function Dashboard() {
                             <h1 className="text-3xl sm:text-4xl font-bold">
                                 <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">{t('dashboard.title')}</span>
                             </h1>
-                            <p className="mt-2 text-gray-600 dark:text-gray-400">Manage and monitor your exams</p>
+                            <p className="mt-2 text-gray-600 dark:text-gray-400">{t('dashboard.subTitle')}</p>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                             <Link
