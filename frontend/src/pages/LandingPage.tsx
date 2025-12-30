@@ -1036,10 +1036,11 @@ export default function LandingPage() {
                         </div>
                         <div>
                             <h3 className="font-bold text-white mb-4">Product</h3>
-                            <ul className="space-y-2">
-                                <li><a href="#features" className="hover:text-white transition">Features</a></li>
-                                <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
-                                <li><Link to="/blog" className="hover:text-white transition">Blog</Link></li>
+                            <ul className="space-y-4">
+                                <li><Link to="/pricing" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.pricing')}</Link></li>
+                                <li><a href="#testimonials" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.testimonials')}</a></li>
+                                <li><Link to="/blog" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.blog')}</Link></li>
+                                <li><a href="mailto:abdelrahmansandoby@gmail.com" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.contact')}</a></li>
                             </ul>
                         </div>
                         <div>
@@ -1050,10 +1051,12 @@ export default function LandingPage() {
                             </ul>
                         </div>
                         <div>
-                            <h3 className="font-bold text-white mb-4">Legal</h3>
-                            <ul className="space-y-2">
-                                <li><Link to="/privacy" className="hover:text-white transition">Privacy</Link></li>
-                                <li><Link to="/terms" className="hover:text-white transition">Terms</Link></li>
+                            <h4 className="text-white font-bold mb-6">{t('footer.legal')}</h4>
+                            <ul className="space-y-4">
+                                <li><Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.privacy')}</Link></li>
+                                <li><Link to="/terms" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.terms')}</Link></li>
+                                <li><Link to="/refund-policy" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.refund')}</Link></li>
+                                <li><Link to="/refund-policy" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.cancellation', 'Cancellation Policy')}</Link></li>
                             </ul>
                         </div>
                     </div>

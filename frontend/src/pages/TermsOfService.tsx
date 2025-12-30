@@ -18,17 +18,17 @@ export default function TermsOfService() {
         {
             icon: Shield,
             title: "1. Acceptance of Agreement",
-            content: "By creating an account, accessing, or using Durrah Tutors (\"the Service\"), you enter into a legally binding contract with us. If you are using the Service on behalf of an educational institution or entity, you represent that you have the authority to bind that entity to these Terms. If you do not agree to these terms, you must immediately cease all use of the Service."
+            content: "By creating an account, accessing, or using Durrah for Tutors (\"the Service\"), you enter into a legally binding contract with us. If you are using the Service on behalf of an educational institution or entity, you represent that you have the authority to bind that entity to these Terms. If you do not agree to these terms, you must immediately cease all use of the Service."
         },
         {
             icon: FileText,
             title: "2. Service Scope & Role",
-            content: "Durrah Tutors provides a platform for educators (\"Tutors\") to design and administer digital examinations. We act as a service provider (Data Processor) while the Tutor or Institution acts as the Data Controller. We do not provide educational content directly; we facilitate its delivery and management."
+            content: "Durrah for Tutors provides a platform for educators (\"Tutors\") to design and administer digital examinations. We act as a service provider (Data Processor) while the Tutor or Institution acts as the Data Controller. We do not provide educational content directly; we facilitate its delivery and management."
         },
         {
             icon: ShieldAlert,
             title: "3. Academic Integrity & Anti-Cheating Logs",
-            content: "The Service includes technical measures (e.g., full-screen enforcement, browser monitoring, activity logging) intended to deter academic dishonesty. You acknowledge that: (a) no system can prevent 100% of cheating; (b) Tutors are solely responsible for setting rules and interpreting logs; (c) Durrah Tutors is not liable for academic outcomes, false positives, or failure to detect specific cheating behaviors."
+            content: "The Service includes technical measures (e.g., full-screen enforcement, browser monitoring, activity logging) intended to deter academic dishonesty. You acknowledge that: (a) no system can prevent 100% of cheating; (b) Tutors are solely responsible for setting rules and interpreting logs; (c) Durrah for Tutors is not liable for academic outcomes, false positives, or failure to detect specific cheating behaviors."
         },
         {
             icon: Lock,
@@ -38,7 +38,7 @@ export default function TermsOfService() {
         {
             icon: UserCheck,
             title: "5. Intellectual Property Rights",
-            content: "You retain all ownership rights to the questions and exams you create (\"User Content\"). By using the Service, you grant Durrah Tutors a worldwide, non-exclusive license to host, store, and display your User Content solely for the purpose of providing the service to you and your students. Unauthorized scraping or distribution of our Question Bank is strictly prohibited."
+            content: "You retain all ownership rights to the questions and exams you create (\"User Content\"). By using the Service, you grant Durrah for Tutors a worldwide, non-exclusive license to host, store, and display your User Content solely for the purpose of providing the service to you and your students. Unauthorized scraping or distribution of our Question Bank is strictly prohibited."
         },
         {
             icon: CreditCard,
@@ -48,7 +48,7 @@ export default function TermsOfService() {
         {
             icon: Briefcase,
             title: "7. Limitation of Liability",
-            content: "To the maximum extent permitted by law, Durrah Tutors shall not be liable for any indirect, incidental, or consequential damages resulting from service interruptions, loss of data, or automated grading errors. Our total liability for any claim shall not exceed the amount paid by you for the service in the 12 months preceding the claim."
+            content: "To the maximum extent permitted by law, Durrah for Tutors shall not be liable for any indirect, incidental, or consequential damages resulting from service interruptions, loss of data, or automated grading errors. Our total liability for any claim shall not exceed the amount paid by you for the service in the 12 months preceding the claim."
         },
         {
             icon: Gavel,

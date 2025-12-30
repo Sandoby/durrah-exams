@@ -15,6 +15,8 @@ import PaymentHistory from './pages/PaymentHistory';
 import PaymentTest from './pages/PaymentTest';
 import RefundPolicy from './pages/RefundPolicy';
 import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import PricingPage from './pages/PricingPage';
 
 import Dashboard from './pages/Dashboard';
 import ExamEditor from './pages/ExamEditor';
@@ -137,8 +139,11 @@ function AppContent() {
 
         {/* Public Utility */}
         <Route path="/payment-test" element={<PaymentTest />} />
+        <Route path="/payment-test" element={<PaymentTest />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/pricing" element={<PricingPage />} />
         <Route path="*" element={<LandingPage />} />
       </Routes>
       <Toaster position="top-right" />
