@@ -35,7 +35,7 @@ import { ExamAnalyticsDashboard } from "./components/analytics/ExamAnalyticsDash
 
 import KidsLanding from './pages/KidsLanding';
 import KidsExamView from './pages/KidsExamView';
-import { ProtectedRoute, AdminRoute, AgentRoute } from './components/ProtectedRoute';
+import { ProtectedRoute, AgentRoute } from './components/ProtectedRoute';
 
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
@@ -132,9 +132,10 @@ function AppContent() {
 
         {/* Support & Admin (Strictly Protected) */}
         <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/super-admin" element={<AdminRoute><SuperAdminPanel /></AdminRoute>} />
+        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/super-admin" element={<SuperAdminPanel />} />
         <Route path="/support" element={<AgentRoute><SupportDashboard /></AgentRoute>} />
-        <Route path="/agent" element={<AgentRoute><AgentDashboard /></AgentRoute>} />
+        <Route path="/agent" element={<AgentDashboard />} />
         <Route path="/agent-login" element={<AgentLogin />} />
 
         {/* Public Utility */}
