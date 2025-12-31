@@ -131,7 +131,7 @@ function AppContent() {
         <Route path="/payment-callback" element={<PaymentCallback />} />
 
         {/* Support & Admin (Strictly Protected) */}
-        <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+        <Route path="/admin" element={<AdminPanel />} />
         <Route path="/super-admin" element={<AdminRoute><SuperAdminPanel /></AdminRoute>} />
         <Route path="/support" element={<AgentRoute><SupportDashboard /></AgentRoute>} />
         <Route path="/agent" element={<AgentRoute><AgentDashboard /></AgentRoute>} />
