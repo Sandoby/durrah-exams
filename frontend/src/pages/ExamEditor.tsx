@@ -722,7 +722,7 @@ export default function ExamEditor() {
             <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 sticky top-24 z-40 transition-all">
                 <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-wrap items-center gap-4">
                             <button
                                 onClick={() => navigate(isDemo ? '/demo' : '/dashboard')}
                                 className="p-2.5 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-500 hover:text-indigo-600 border border-gray-100 dark:border-gray-750 transition-all shadow-sm group"
@@ -1269,7 +1269,7 @@ export default function ExamEditor() {
                                                                             />
                                                                             <input
                                                                                 {...register(`questions.${index}.options.${optionIndex}`)}
-                                                                                className="flex-1 bg-transparent border-0 text-sm font-bold text-gray-900 dark:text-white placeholder-gray-300 focus:ring-0"
+                                                                                className="flex-1 bg-transparent border-0 text-sm font-bold text-gray-900 dark:text-white placeholder-gray-300 focus:ring-0 min-w-0"
                                                                                 placeholder={`${t('examEditor.questions.option')} ${optionIndex + 1}`}
                                                                             />
                                                                             {showMathPreview && watch(`questions.${index}.options.${optionIndex}`) && (
@@ -1310,7 +1310,7 @@ export default function ExamEditor() {
                                                         {questionsWatch?.[index]?.type === 'true_false' && (
                                                             <div className="space-y-4">
                                                                 <label className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('examEditor.questions.correctAnswer')}</label>
-                                                                <div className="grid grid-cols-2 gap-4">
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                                     {['True', 'False'].map((val) => (
                                                                         <label key={val} className={`p-6 rounded-[2rem] border-2 cursor-pointer transition-all flex flex-col items-center gap-4 ${watch(`questions.${index}.correct_answer`) === val
                                                                             ? 'bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-400'
@@ -1402,7 +1402,7 @@ export default function ExamEditor() {
                                                                     </div>
                                                                     <label className="text-sm font-black text-pink-700 dark:text-pink-300 uppercase tracking-widest">Odd One Out Finder</label>
                                                                 </div>
-                                                                <div className="grid grid-cols-2 gap-4">
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                                     {[0, 1, 2, 3].map((i) => (
                                                                         <div key={i} className={`p-4 rounded-[1.5rem] border-2 transition-all ${questionsWatch?.[index]?.correct_answer === String(i)
                                                                             ? 'bg-pink-100/50 dark:bg-pink-900/30 border-pink-300 dark:border-pink-700'
@@ -1504,7 +1504,7 @@ export default function ExamEditor() {
                                                                             <div className="h-10 w-10 flex-shrink-0 flex items-center justify-center bg-amber-100 dark:bg-amber-900/30 rounded-full text-amber-600 font-black">
                                                                                 {i + 1}
                                                                             </div>
-                                                                            <div className="flex-1 space-y-2">
+                                                                            <div className="flex-1 space-y-2 min-w-0">
                                                                                 <input
                                                                                     type="text"
                                                                                     placeholder={`Part ${i + 1} of the story...`}
