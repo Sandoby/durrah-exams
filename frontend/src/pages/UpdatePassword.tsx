@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useNavigate } from 'react-router-dom';
-import { Lock, Loader2 } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Lock, Loader2, AlertCircle, RefreshCcw, Home } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { Logo } from '../components/Logo';
@@ -22,106 +22,117 @@ type UpdatePasswordForm = z.infer<typeof updatePasswordSchema>;
 export default function UpdatePassword() {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
-    const [isValidating, setIsValidating] = useState(true);
+    const [status, setStatus] = useState<'validating' | 'ready' | 'error' | 'expired'>('validating');
+    const [debugInfo, setDebugInfo] = useState<string>('');
     const { t } = useTranslation();
+    const hasAttemptedExchange = useRef(false);
 
-    // Check if user is authenticated and handle hash-based/PKCE password reset
+    const log = (msg: string) => {
+        console.log(`[UpdatePassword Debug]: ${msg}`);
+        setDebugInfo(prev => `${prev}\n> ${msg}`.trim());
+    };
+
     useEffect(() => {
         let isMounted = true;
-        let retryCount = 0;
-        const maxRetries = 10; // Try for 5 seconds total (10 * 500ms)
+        let authSubscription: { unsubscribe: () => void } | null = null;
 
         const validateSession = async () => {
+            log('Initializing validation sequence...');
+
             try {
-                // 1. Initial check for existing session
-                const { data: { session: initialSession } } = await supabase.auth.getSession();
-                if (initialSession && isMounted) {
-                    setIsValidating(false);
+                // 1. Check if we already have a session (might be from a previous attempt)
+                const { data: { session: existingSession } } = await supabase.auth.getSession();
+                if (existingSession && isMounted) {
+                    log('Active session detected. Component ready.');
+                    setStatus('ready');
                     return;
                 }
 
-                // 2. Setup a listener for auth state changes (catches deep links/hash processing)
-                const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-                    if ((event === 'SIGNED_IN' || session) && isMounted) {
-                        setIsValidating(false);
+                // 2. Inspect URL for tokens
+                const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                const searchParams = new URLSearchParams(window.location.search);
+
+                const accessToken = hashParams.get('access_token');
+                const code = searchParams.get('code');
+                const errorCode = searchParams.get('error_code') || hashParams.get('error_code');
+                const errorDesc = searchParams.get('error_description') || hashParams.get('error_description');
+
+                if (errorCode) {
+                    log(`URL error detected: ${errorCode} - ${errorDesc}`);
+                    setStatus('error');
+                    return;
+                }
+
+                log(`Tokens - PKCE Code: ${!!code}, Implicit Token: ${!!accessToken}`);
+
+                // 3. Handle PKCE explicitly (High priority for native apps)
+                if (code && !hasAttemptedExchange.current) {
+                    hasAttemptedExchange.current = true;
+                    log('Attempting explicit PKCE code exchange...');
+                    const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+
+                    if (exchangeError) {
+                        log(`Exchange failed: ${exchangeError.message}`);
+                    } else if (exchangeData.session) {
+                        log('PKCE exchange successful!');
+                        if (isMounted) setStatus('ready');
+                        return;
+                    }
+                }
+
+                // 4. Setup listener for background processing
+                const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+                    log(`Auth Change Event: ${event} (Session: ${!!session})`);
+                    if (session && isMounted) {
+                        setStatus('ready');
                         subscription.unsubscribe();
                     }
                 });
+                authSubscription = subscription;
 
-                // 3. Polling mechanism to wait for Supabase to process URL tokens
-                const pollSession = async () => {
-                    if (!isMounted) return;
-
-                    const { data: { session } } = await supabase.auth.getSession();
-                    console.log('Polling session...', !!session);
-
-                    if (session) {
-                        setIsValidating(false);
-                        subscription.unsubscribe();
+                // 5. Polling fallback (Wait for tokens to hit the client)
+                let pollCount = 0;
+                const pollInterval = setInterval(async () => {
+                    if (!isMounted) {
+                        clearInterval(pollInterval);
                         return;
                     }
 
-                    // Explicitly handle PKCE if code is in URL but session hasn't started
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const code = urlParams.get('code');
-                    if (code && retryCount === 0) {
-                        console.log('Found PKCE code, exchanging...');
-                        try {
-                            const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-                            if (exchangeData.session) {
-                                console.log('PKCE exchange successful');
-                                setIsValidating(false);
-                                subscription.unsubscribe();
-                                return;
-                            }
-                            if (exchangeError) console.error('PKCE exchange error:', exchangeError);
-                        } catch (e) {
-                            console.error('PKCE catch error:', e);
-                        }
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        log('Session established via polling.');
+                        setStatus('ready');
+                        clearInterval(pollInterval);
+                        if (authSubscription) authSubscription.unsubscribe();
+                        return;
                     }
 
-                    if (retryCount < maxRetries) {
-                        retryCount++;
-                        setTimeout(pollSession, 500);
-                    } else {
-                        // Final check before failing
-                        const hasHash = window.location.hash.includes('access_token');
-                        const hasCode = window.location.search.includes('code=');
-
-                        console.log('Final validation failed. Hash:', !!hasHash, 'Code:', !!hasCode);
-
-                        if (!hasHash && !hasCode) {
-                            toast.error(t('auth.messages.invalidLink'));
-                            navigate('/login');
-                        } else {
-                            // If we have tokens but no session yet, wait one last time (longer)
-                            await new Promise(r => setTimeout(r, 3000));
-                            const { data: { session: finalSession } } = await supabase.auth.getSession();
-                            if (finalSession) {
-                                setIsValidating(false);
+                    pollCount++;
+                    if (pollCount > 20) { // 10 seconds total
+                        log('Validation timeout: No session established after 10s.');
+                        clearInterval(pollInterval);
+                        if (isMounted) {
+                            if (code || accessToken) {
+                                setStatus('error');
                             } else {
-                                console.error('Failed to establish session after 8 seconds');
-                                toast.error(t('auth.messages.invalidLink'));
-                                navigate('/login');
+                                setStatus('expired');
                             }
                         }
-                        subscription.unsubscribe();
                     }
-                };
+                }, 500);
 
-                pollSession();
-            } catch (error) {
-                console.error('Session validation error:', error);
-                if (isMounted) {
-                    toast.error(t('auth.messages.invalidLink'));
-                    navigate('/login');
-                }
+            } catch (err: any) {
+                log(`Critical validation error: ${err.message}`);
+                if (isMounted) setStatus('error');
             }
         };
 
         validateSession();
-        return () => { isMounted = false; };
-    }, [navigate, t]);
+        return () => {
+            isMounted = false;
+            if (authSubscription) authSubscription.unsubscribe();
+        };
+    }, []);
 
     const { register, handleSubmit, formState: { errors } } = useForm<UpdatePasswordForm>({
         resolver: zodResolver(updatePasswordSchema),
@@ -139,97 +150,149 @@ export default function UpdatePassword() {
             toast.success(t('auth.messages.passwordUpdated'));
             navigate('/dashboard');
         } catch (error: any) {
+            log(`Update error: ${error.message}`);
             toast.error(t('auth.messages.passwordUpdateError'));
         } finally {
             setIsLoading(false);
         }
     };
 
+    if (status === 'validating') {
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center items-center p-4">
+                <div className="text-center space-y-4">
+                    <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto" />
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Checking reset link...</h2>
+                    <p className="text-gray-500 max-w-xs mx-auto">Please wait while we secure your session. This can take a few seconds on mobile.</p>
+                    <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800 text-left">
+                        <p className="text-[10px] font-mono text-gray-400 whitespace-pre-wrap leading-relaxed">{debugInfo}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (status === 'error' || status === 'expired') {
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center items-center p-4">
+                <div className="max-w-md w-full bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg text-center space-y-6">
+                    <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/30 mb-2">
+                        <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {status === 'expired' ? 'Link Missing' : 'Invalid Link'}
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400">
+                        {status === 'expired'
+                            ? 'We couldn\'t find a reset token in the URL. If you came from an email, please try opening the link again or copying it directly into your browser.'
+                            : 'This reset link has either expired or has already been used. Password reset links are valid for 1 hour and can only be used once.'}
+                    </p>
+                    <div className="flex flex-col gap-3 pt-4">
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
+                        >
+                            <RefreshCcw className="h-4 w-4 mr-2" />
+                            Try Again
+                        </button>
+                        <Link
+                            to="/forgot-password"
+                            className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                            Request New Link
+                        </Link>
+                        <Link to="/" className="text-sm text-indigo-600 hover:text-indigo-500 font-medium inline-flex items-center justify-center mt-2">
+                            <Home className="h-4 w-4 mr-2" />
+                            Back to Home
+                        </Link>
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded text-left mt-6">
+                        <p className="text-[10px] font-mono text-gray-400 whitespace-pre-wrap break-all">{debugInfo}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-            {isValidating ? (
-                <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-                    <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto" />
-                    <p className="mt-4 text-gray-600 dark:text-gray-400">Validating reset link...</p>
+            <div className="sm:mx-auto sm:w-full sm:max-w-md">
+                <div className="flex justify-center">
+                    <Logo size="lg" />
                 </div>
-            ) : (
-                <>
-                    <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                        <div className="flex justify-center">
-                            <Logo size="lg" />
+                <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+                    {t('auth.updatePassword.title')}
+                </h2>
+                <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+                    {t('auth.updatePassword.subtitle')}
+                </p>
+            </div>
+
+            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+                <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                    <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {t('auth.updatePassword.newPasswordLabel')}
+                            </label>
+                            <div className="mt-1 relative rounded-md shadow-sm">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Lock className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    {...register('password')}
+                                    type="password"
+                                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-2 border"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                            {errors.password && (
+                                <p className="mt-2 text-sm text-red-600">{t(errors.password.message as string)}</p>
+                            )}
                         </div>
-                        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-                            {t('auth.updatePassword.title')}
-                        </h2>
-                        <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                            {t('auth.updatePassword.subtitle')}
-                        </p>
-                    </div>
 
-                    <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-                        <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-                                <div>
-                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        {t('auth.updatePassword.newPasswordLabel')}
-                                    </label>
-                                    <div className="mt-1 relative rounded-md shadow-sm">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Lock className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            {...register('password')}
-                                            type="password"
-                                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-2 border"
-                                            placeholder="••••••••"
-                                        />
-                                    </div>
-                                    {errors.password && (
-                                        <p className="mt-2 text-sm text-red-600">{t(errors.password.message as string)}</p>
-                                    )}
+                        <div>
+                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {t('auth.updatePassword.confirmPasswordLabel')}
+                            </label>
+                            <div className="mt-1 relative rounded-md shadow-sm">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Lock className="h-5 w-5 text-gray-400" />
                                 </div>
-
-                                <div>
-                                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        {t('auth.updatePassword.confirmPasswordLabel')}
-                                    </label>
-                                    <div className="mt-1 relative rounded-md shadow-sm">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Lock className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            {...register('confirmPassword')}
-                                            type="password"
-                                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-2 border"
-                                            placeholder="••••••••"
-                                        />
-                                    </div>
-                                    {errors.confirmPassword && (
-                                        <p className="mt-2 text-sm text-red-600">{t(errors.confirmPassword.message as string)}</p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <button
-                                        type="submit"
-                                        disabled={isLoading}
-                                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                                                {t('auth.updatePassword.updating')}
-                                            </>
-                                        ) : (
-                                            t('auth.updatePassword.submit')
-                                        )}
-                                    </button>
-                                </div>
-                            </form>
+                                <input
+                                    {...register('confirmPassword')}
+                                    type="password"
+                                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-2 border"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                            {errors.confirmPassword && (
+                                <p className="mt-2 text-sm text-red-600">{t(errors.confirmPassword.message as string)}</p>
+                            )}
                         </div>
-                    </div>
-                </>
-            )}
+
+                        <div>
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                                        {t('auth.updatePassword.updating')}
+                                    </>
+                                ) : (
+                                    t('auth.updatePassword.submit')
+                                )}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div className="mt-8 pt-8 text-center opacity-30 hover:opacity-100 transition-opacity">
+                <p className="text-[10px] font-mono text-gray-400 whitespace-pre-wrap max-w-xs mx-auto text-left">{debugInfo}</p>
+            </div>
         </div>
     );
 }
