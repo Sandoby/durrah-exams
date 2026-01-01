@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import UpdatePassword from './pages/UpdatePassword';
+import EmailConfirmed from './pages/EmailConfirmed';
 import Checkout from './pages/Checkout';
 import PaymentCallback from './pages/PaymentCallback';
 import PaymentHistory from './pages/PaymentHistory';
@@ -114,6 +115,7 @@ function AppContent() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/update-password" element={<UpdatePassword />} />
+        <Route path="/email-confirmed" element={<EmailConfirmed />} />
 
         {/* Protected Routes */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
