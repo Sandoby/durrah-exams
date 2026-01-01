@@ -25,38 +25,78 @@ export default function UpdatePassword() {
     const [isValidating, setIsValidating] = useState(true);
     const { t } = useTranslation();
 
-    // Check if user is authenticated and handle hash-based password reset
+    // Check if user is authenticated and handle hash-based/PKCE password reset
     useEffect(() => {
+        let isMounted = true;
+        let retryCount = 0;
+        const maxRetries = 10; // Try for 5 seconds total (10 * 500ms)
+
         const validateSession = async () => {
             try {
-                // First, check if there's a hash in the URL (password reset flow)
-                const hashParams = new URLSearchParams(window.location.hash.substring(1));
-                const accessToken = hashParams.get('access_token');
-                const type = hashParams.get('type');
-
-                if (type === 'recovery' && accessToken) {
-                    // Valid recovery link, let Supabase handle the session
-                    // Wait a bit longer for Supabase to process the hash
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                }
-
-                // Now check for session
-                const { data: { session } } = await supabase.auth.getSession();
-
-                if (!session) {
-                    toast.error(t('auth.messages.invalidLink'));
-                    navigate('/login');
-                } else {
+                // 1. Initial check for existing session
+                const { data: { session: initialSession } } = await supabase.auth.getSession();
+                if (initialSession && isMounted) {
                     setIsValidating(false);
+                    return;
                 }
+
+                // 2. Setup a listener for auth state changes (catches deep links/hash processing)
+                const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+                    if ((event === 'SIGNED_IN' || session) && isMounted) {
+                        setIsValidating(false);
+                        subscription.unsubscribe();
+                    }
+                });
+
+                // 3. Polling mechanism to wait for Supabase to process URL tokens
+                const pollSession = async () => {
+                    if (!isMounted) return;
+
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        setIsValidating(false);
+                        subscription.unsubscribe();
+                        return;
+                    }
+
+                    if (retryCount < maxRetries) {
+                        retryCount++;
+                        setTimeout(pollSession, 500);
+                    } else {
+                        // Final check before failing
+                        const hasHash = window.location.hash.includes('access_token');
+                        const hasCode = window.location.search.includes('code=');
+
+                        if (!hasHash && !hasCode) {
+                            toast.error(t('auth.messages.invalidLink'));
+                            navigate('/login');
+                        } else {
+                            // If we have tokens but no session yet, wait one last time
+                            await new Promise(r => setTimeout(r, 2000));
+                            const { data: { session: finalSession } } = await supabase.auth.getSession();
+                            if (finalSession) {
+                                setIsValidating(false);
+                            } else {
+                                toast.error(t('auth.messages.invalidLink'));
+                                navigate('/login');
+                            }
+                        }
+                        subscription.unsubscribe();
+                    }
+                };
+
+                pollSession();
             } catch (error) {
                 console.error('Session validation error:', error);
-                toast.error(t('auth.messages.invalidLink'));
-                navigate('/login');
+                if (isMounted) {
+                    toast.error(t('auth.messages.invalidLink'));
+                    navigate('/login');
+                }
             }
         };
 
         validateSession();
+        return () => { isMounted = false; };
     }, [navigate, t]);
 
     const { register, handleSubmit, formState: { errors } } = useForm<UpdatePasswordForm>({
