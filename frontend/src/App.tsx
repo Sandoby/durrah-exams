@@ -79,14 +79,14 @@ function AppContent() {
             if (data.url.includes('durrah://')) {
               await Browser.close();
               if (url.hostname === 'payment-callback') {
-                navigate('/payment-callback' + url.search);
+                navigate('/payment-callback' + url.search + url.hash);
               }
               return;
             }
 
             // Handle Universal/App Links (https)
             if (url.hostname.includes('durrahsystem.tech')) {
-              const path = url.pathname + url.search;
+              const path = url.pathname + url.search + url.hash;
               console.log('Deep linking to path:', path);
               navigate(path);
             }

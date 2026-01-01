@@ -53,10 +53,31 @@ export default function UpdatePassword() {
                     if (!isMounted) return;
 
                     const { data: { session } } = await supabase.auth.getSession();
+                    console.log('Polling session...', !!session);
+
                     if (session) {
                         setIsValidating(false);
                         subscription.unsubscribe();
                         return;
+                    }
+
+                    // Explicitly handle PKCE if code is in URL but session hasn't started
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const code = urlParams.get('code');
+                    if (code && retryCount === 0) {
+                        console.log('Found PKCE code, exchanging...');
+                        try {
+                            const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+                            if (exchangeData.session) {
+                                console.log('PKCE exchange successful');
+                                setIsValidating(false);
+                                subscription.unsubscribe();
+                                return;
+                            }
+                            if (exchangeError) console.error('PKCE exchange error:', exchangeError);
+                        } catch (e) {
+                            console.error('PKCE catch error:', e);
+                        }
                     }
 
                     if (retryCount < maxRetries) {
@@ -67,16 +88,19 @@ export default function UpdatePassword() {
                         const hasHash = window.location.hash.includes('access_token');
                         const hasCode = window.location.search.includes('code=');
 
+                        console.log('Final validation failed. Hash:', !!hasHash, 'Code:', !!hasCode);
+
                         if (!hasHash && !hasCode) {
                             toast.error(t('auth.messages.invalidLink'));
                             navigate('/login');
                         } else {
-                            // If we have tokens but no session yet, wait one last time
-                            await new Promise(r => setTimeout(r, 2000));
+                            // If we have tokens but no session yet, wait one last time (longer)
+                            await new Promise(r => setTimeout(r, 3000));
                             const { data: { session: finalSession } } = await supabase.auth.getSession();
                             if (finalSession) {
                                 setIsValidating(false);
                             } else {
+                                console.error('Failed to establish session after 8 seconds');
                                 toast.error(t('auth.messages.invalidLink'));
                                 navigate('/login');
                             }
