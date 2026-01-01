@@ -31,7 +31,7 @@ export default function RefundPolicy() {
             <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 md:p-12">
                     <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Refund Policy</h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">Last updated: December 1, 2025</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">Last updated: January 1, 2026</p>
 
                     <div className="prose prose-lg dark:prose-invert max-w-none">
                         <section className="mb-8">
@@ -44,16 +44,16 @@ export default function RefundPolicy() {
                         </section>
 
                         <section className="mb-8">
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">2. 7-Day Money-Back Guarantee</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">2. 14-Day Money-Back Guarantee</h2>
                             <p className="text-gray-600 dark:text-gray-300 mb-4">
-                                We offer a <strong>7-day money-back guarantee</strong> for all paid subscriptions (Professional and Yearly plans).
-                                If you are not satisfied with our service within the first 7 days of your subscription, you may request a full refund.
+                                We offer a <strong>14-day money-back guarantee</strong> for all paid subscriptions (Professional and Yearly plans).
+                                If you are not satisfied with our service within the first 14 days of your subscription, you may request a full refund.
                             </p>
                             <p className="text-gray-600 dark:text-gray-300 mb-4">
                                 To be eligible for a refund:
                             </p>
                             <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 mb-4 space-y-2">
-                                <li>The refund request must be made within 7 days of the initial purchase date</li>
+                                <li>The refund request must be made within 14 days of the initial purchase date</li>
                                 <li>You must provide a valid reason for the refund request</li>
                                 <li>The account must not have violated our Terms of Service</li>
                             </ul>
@@ -96,7 +96,7 @@ export default function RefundPolicy() {
                                 The following are not eligible for refunds:
                             </p>
                             <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 mb-4 space-y-2">
-                                <li>Subscriptions older than 7 days</li>
+                                <li>Subscriptions older than 14 days</li>
                                 <li>Free plan subscriptions (as they are free of charge)</li>
                                 <li>Partial month refunds for monthly subscriptions</li>
                                 <li>Accounts that have been suspended or terminated due to Terms of Service violations</li>

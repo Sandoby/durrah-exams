@@ -596,7 +596,7 @@ export function BlogPost() {
                 Learn More
               </a>
             </div>
-            <p className="text-indigo-100 text-sm mt-8">✨ No credit card required • 7 days free</p>
+            <p className="text-indigo-100 text-sm mt-8">✨ No credit card required • 14 days free</p>
           </div>
         </section>
       </article>

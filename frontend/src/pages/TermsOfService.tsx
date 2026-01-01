@@ -143,7 +143,7 @@ export default function TermsOfService() {
                                     <ArrowLeft className="w-4 h-4 text-gray-400 rotate-180 group-hover:translate-x-1 transition-transform" />
                                 </div>
                                 <h4 className="font-semibold text-gray-900 dark:text-white">Refund Policy</h4>
-                                <p className="text-xs text-gray-500 mt-1">7-day money-back guarantee</p>
+                                <p className="text-xs text-gray-500 mt-1">14-day money-back guarantee</p>
                             </div>
 
                             <div
@@ -184,7 +184,7 @@ export default function TermsOfService() {
                 </div>
 
                 <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                    <p>Last updated: December 2025</p>
+                    <p>Last updated: January 2026</p>
                     <p className="mt-2 text-xs opacity-60">Durrah for Tutors © 2025. All rights reserved.</p>
                 </div>
             </main>
