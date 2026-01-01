@@ -23,27 +23,23 @@ export default function UpdatePassword() {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState<'validating' | 'ready' | 'error' | 'expired'>('validating');
-    const [debugInfo, setDebugInfo] = useState<string>('');
     const { t } = useTranslation();
     const hasAttemptedExchange = useRef(false);
 
-    const log = (msg: string) => {
-        console.log(`[UpdatePassword Debug]: ${msg}`);
-        setDebugInfo(prev => `${prev}\n> ${msg}`.trim());
-    };
+
 
     useEffect(() => {
         let isMounted = true;
         let authSubscription: { unsubscribe: () => void } | null = null;
 
         const validateSession = async () => {
-            log('Initializing validation sequence...');
+
 
             try {
                 // 1. Check if we already have a session (might be from a previous attempt)
                 const { data: { session: existingSession } } = await supabase.auth.getSession();
                 if (existingSession && isMounted) {
-                    log('Active session detected. Component ready.');
+
                     setStatus('ready');
                     return;
                 }
@@ -55,34 +51,33 @@ export default function UpdatePassword() {
                 const accessToken = hashParams.get('access_token');
                 const code = searchParams.get('code');
                 const errorCode = searchParams.get('error_code') || hashParams.get('error_code');
-                const errorDesc = searchParams.get('error_description') || hashParams.get('error_description');
 
                 if (errorCode) {
-                    log(`URL error detected: ${errorCode} - ${errorDesc}`);
+
                     setStatus('error');
                     return;
                 }
 
-                log(`Tokens - PKCE Code: ${!!code}, Implicit Token: ${!!accessToken}`);
+
 
                 // 3. Handle PKCE explicitly (High priority for native apps)
                 if (code && !hasAttemptedExchange.current) {
                     hasAttemptedExchange.current = true;
-                    log('Attempting explicit PKCE code exchange...');
+
                     const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
                     if (exchangeError) {
-                        log(`Exchange failed: ${exchangeError.message}`);
+
                     } else if (exchangeData.session) {
-                        log('PKCE exchange successful!');
+
                         if (isMounted) setStatus('ready');
                         return;
                     }
                 }
 
                 // 4. Setup listener for background processing
-                const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-                    log(`Auth Change Event: ${event} (Session: ${!!session})`);
+                const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+
                     if (session && isMounted) {
                         setStatus('ready');
                         subscription.unsubscribe();
@@ -100,7 +95,7 @@ export default function UpdatePassword() {
 
                     const { data: { session } } = await supabase.auth.getSession();
                     if (session) {
-                        log('Session established via polling.');
+
                         setStatus('ready');
                         clearInterval(pollInterval);
                         if (authSubscription) authSubscription.unsubscribe();
@@ -109,7 +104,7 @@ export default function UpdatePassword() {
 
                     pollCount++;
                     if (pollCount > 20) { // 10 seconds total
-                        log('Validation timeout: No session established after 10s.');
+
                         clearInterval(pollInterval);
                         if (isMounted) {
                             if (code || accessToken) {
@@ -122,7 +117,7 @@ export default function UpdatePassword() {
                 }, 500);
 
             } catch (err: any) {
-                log(`Critical validation error: ${err.message}`);
+
                 if (isMounted) setStatus('error');
             }
         };
@@ -150,7 +145,7 @@ export default function UpdatePassword() {
             toast.success(t('auth.messages.passwordUpdated'));
             navigate('/dashboard');
         } catch (error: any) {
-            log(`Update error: ${error.message}`);
+
             toast.error(t('auth.messages.passwordUpdateError'));
         } finally {
             setIsLoading(false);
@@ -164,9 +159,6 @@ export default function UpdatePassword() {
                     <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto" />
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Checking reset link...</h2>
                     <p className="text-gray-500 max-w-xs mx-auto">Please wait while we secure your session. This can take a few seconds on mobile.</p>
-                    <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800 text-left">
-                        <p className="text-[10px] font-mono text-gray-400 whitespace-pre-wrap leading-relaxed">{debugInfo}</p>
-                    </div>
                 </div>
             </div>
         );
@@ -205,9 +197,6 @@ export default function UpdatePassword() {
                             <Home className="h-4 w-4 mr-2" />
                             Back to Home
                         </Link>
-                    </div>
-                    <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded text-left mt-6">
-                        <p className="text-[10px] font-mono text-gray-400 whitespace-pre-wrap break-all">{debugInfo}</p>
                     </div>
                 </div>
             </div>
@@ -290,9 +279,7 @@ export default function UpdatePassword() {
                     </form>
                 </div>
             </div>
-            <div className="mt-8 pt-8 text-center opacity-30 hover:opacity-100 transition-opacity">
-                <p className="text-[10px] font-mono text-gray-400 whitespace-pre-wrap max-w-xs mx-auto text-left">{debugInfo}</p>
-            </div>
+
         </div>
     );
 }
