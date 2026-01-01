@@ -277,6 +277,9 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
                                     <Mail className="h-3 w-3" />
                                     {user.email}
                                 </p>
+                                <p className="text-[10px] font-mono text-gray-400 mt-0.5">
+                                    ID: {user.id}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -304,6 +307,10 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
                                 User Details
                             </h4>
                             <div className="space-y-2 text-sm">
+                                <div>
+                                    <span className="text-gray-500 dark:text-gray-400">User ID:</span>
+                                    <p className="text-gray-900 dark:text-white font-mono text-xs">{user.id}</p>
+                                </div>
                                 <div>
                                     <span className="text-gray-500 dark:text-gray-400">Email:</span>
                                     <p className="text-gray-900 dark:text-white">{user.email}</p>
