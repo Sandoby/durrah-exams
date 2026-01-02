@@ -2,7 +2,7 @@
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Logo } from '../components/Logo';
 import { LottiePlayer } from '../components/LottiePlayer';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
@@ -13,7 +13,16 @@ export default function LandingPage() {
     const { t, i18n } = useTranslation();
     const { user, loading } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const registrationUrl = 'https://tutors.durrahsystem.tech/register';
+    
+    // Build registration URL with pending referral code if available
+    const registrationUrl = useMemo(() => {
+        const baseUrl = 'https://tutors.durrahsystem.tech/register';
+        const pendingRef = localStorage.getItem('pending_referral_code');
+        return pendingRef ? `${baseUrl}?ref=${encodeURIComponent(pendingRef)}` : baseUrl;
+    }, []);
+    
+    // Force language detection on mount (for main landing page)
+    import('../lib/countryLanguageDetector').then(mod => mod.default.lookup());
     const isRTL = i18n.language === 'ar';
 
     // No auto-redirect - show authenticated UI instead
@@ -22,13 +31,37 @@ export default function LandingPage() {
     const { price: yearlyPrice } = useCurrency(2000);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" dir={isRTL ? 'rtl' : 'ltr'}>
-            <Helmet>
-                <title>Create Exams That Inspire Excellence | Durrah</title>
-                <meta name="description" content="The modern exam platform trusted by tutors worldwide. Create, distribute, and grade exams with powerful anti-cheating features." />
-                <link rel="canonical" href="https://tutors.durrahsystem.tech/" />
-                <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-            </Helmet>
+                <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" dir={isRTL ? 'rtl' : 'ltr'}>
+                        <Helmet>
+                                <title>Fun, Secure Online Quizzes for Kids & Tutors | Durrah</title>
+                                <meta name="description" content="Durrah for Tutors: Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
+                                <meta name="keywords" content="kids online quiz, safe kids exams, anti cheating online exam, child mode, secure quiz platform, fun learning for children, quiz for schools, quiz for tutors" />
+                                <meta property="og:title" content="Fun, Secure Online Quizzes for Kids & Tutors | Durrah" />
+                                <meta property="og:description" content="Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
+                                <meta property="og:type" content="website" />
+                                <meta property="og:url" content="https://tutors.durrahsystem.tech/" />
+                                <meta property="og:image" content="https://tutors.durrahsystem.tech/illustrations/og-image.png" />
+                                <meta name="twitter:card" content="summary_large_image" />
+                                <meta name="twitter:title" content="Fun, Secure Online Quizzes for Kids & Tutors | Durrah" />
+                                <meta name="twitter:description" content="Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics." />
+                                <meta name="twitter:image" content="https://tutors.durrahsystem.tech/illustrations/og-image.png" />
+                                <link rel="canonical" href="https://tutors.durrahsystem.tech/" />
+                                <script type="application/ld+json">{`
+                                    {
+                                        "@context": "https://schema.org",
+                                        "@type": "WebSite",
+                                        "name": "Durrah for Tutors",
+                                        "url": "https://tutors.durrahsystem.tech/",
+                                        "description": "Safe, fun, and effective online quizzes for kids and schools. Advanced anti-cheating, kids mode, and real-time analytics.",
+                                        "inLanguage": "en",
+                                        "publisher": {
+                                            "@type": "Organization",
+                                            "name": "Durrah for Tutors"
+                                        }
+                                    }
+                                `}</script>
+                                <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+                        </Helmet>
 
             <style>{`
                 @keyframes blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }

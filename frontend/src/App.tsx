@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import LandingPage from './pages/LandingPage';
+import StudentPortal from './pages/StudentPortal';
 import DemoPage from './pages/DemoPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -23,10 +24,15 @@ import QuestionBank from './pages/QuestionBank';
 import AgentLogin from './pages/AgentLogin';
 import SupportDashboard from './pages/support/SupportDashboard';
 import AgentDashboard from './pages/support/AgentDashboard';
+import SalesPage from './pages/SalesPage.tsx';
 import { BlogList } from './pages/blog/BlogList';
 import { BlogPost } from './pages/blog/BlogPost';
 import { SubmissionSync } from './components/SubmissionSync';
 import { ExamAnalyticsDashboard } from "./components/analytics/ExamAnalyticsDashboard";
+import { ReferralTracker } from './components/ReferralTracker';
+
+import KidsLanding from './pages/KidsLanding';
+import KidsExamView from './pages/KidsExamView';
 
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
@@ -52,9 +58,12 @@ function App() {
       <LocationLanguageHandler />
       <SubmissionSync />
       <Router>
+        <ReferralTracker />
         <div className="min-h-screen bg-background text-foreground font-sans antialiased">
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/kids" element={<KidsLanding />} />
+            <Route path="/kids/quiz/:id" element={<KidsExamView />} />
             <Route path="/demo" element={<DemoPage />} />
             <Route path="/blog" element={<BlogList />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
@@ -72,12 +81,14 @@ function App() {
             <Route path="/exam/new" element={<ExamEditor />} />
             <Route path="/exam/:id/edit" element={<ExamEditor />} />
             <Route path="/exam/:id" element={<ExamView />} />
+            <Route path="/student-portal" element={<StudentPortal />} />
             <Route path="/exam/:examId/analytics" element={<ExamAnalyticsDashboard />} />
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/super-admin" element={<SuperAdminPanel />} />
             <Route path="/agent" element={<AgentDashboard />} />
             <Route path="/agent-login" element={<AgentLogin />} />
             <Route path="/support" element={<SupportDashboard />} />
+            <Route path="/sales" element={<SalesPage />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="*" element={<LandingPage />} />
           </Routes>
