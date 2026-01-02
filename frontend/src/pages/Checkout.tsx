@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, CreditCard, Shield, Zap, Layout, X, Loader2, Star, Crown, Globe, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +26,8 @@ export default function Checkout() {
     const [couponCode, setCouponCode] = useState('');
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
     const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+    const [_referralAgent, setReferralAgent] = useState<any>(null);
+    const [_isApplyingReferral, setIsApplyingReferral] = useState(false);
 
     // Dynamic currency conversion
     const proMonthlyPrice = 200;
@@ -112,6 +114,54 @@ export default function Checkout() {
             setIsValidatingCoupon(false);
         }
     };
+
+    // ---------- Automatic Referral Coupon ----------
+    useEffect(() => {
+        const applyReferralCoupon = async () => {
+            if (!user) return;
+            // Capture referral code from metadata (from Register.tsx)
+            const refCode = user.user_metadata?.referred_by_code;
+            if (!refCode) return;
+
+            setIsApplyingReferral(true);
+            try {
+                // 1. Find the agent
+                const { data: agent, error: agentError } = await supabase
+                    .from('sales_agents')
+                    .select('*, coupons(*)')
+                    .eq('access_code', refCode.toUpperCase())
+                    .single();
+
+                if (agentError || !agent) return;
+
+                // 2. Determine coupon (either linked via coupon_id or uses agent code directly)
+                let couponToApply = agent.coupons; // If joined via foreign key
+
+                if (!couponToApply) {
+                    // Fallback: try to find a coupon that matches the agent's access code
+                    const { data: fallbackCoupon } = await supabase
+                        .from('coupons')
+                        .select('*')
+                        .eq('code', agent.access_code.toUpperCase())
+                        .single();
+                    couponToApply = fallbackCoupon;
+                }
+
+                if (couponToApply && couponToApply.is_active) {
+                    setAppliedCoupon(couponToApply);
+                    setCouponCode(couponToApply.code);
+                    toast.success(`Partner discount applied: ${couponToApply.code}`);
+                }
+                setReferralAgent(agent);
+            } catch (err) {
+                console.error('Failed to apply referral coupon', err);
+            } finally {
+                setIsApplyingReferral(false);
+            }
+        };
+
+        applyReferralCoupon();
+    }, [user]);
 
     const removeCoupon = () => {
         setAppliedCoupon(null);

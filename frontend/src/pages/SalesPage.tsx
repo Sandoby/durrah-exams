@@ -39,15 +39,75 @@ export default function SalesPage() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [leadForm, setLeadForm] = useState<SalesLeadForm>({ name: '', email: '', notes: '', status: 'new' });
   const [isSavingLead, setIsSavingLead] = useState(false);
+  const [stats, setStats] = useState({ signups: 0, converted: 0, leads: 0, revenue: 0 });
+  const [_recentEvents, setRecentEvents] = useState<any[]>([]);
+  const [leadsList, setLeadsList] = useState<any[]>([]);
+  const [_isFetchingStats, setIsFetchingStats] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Load session from cache
   useEffect(() => {
     const cached = localStorage.getItem('sales_agent_session');
     if (cached) {
-      setSalesAgent(JSON.parse(cached));
+      const agent = JSON.parse(cached);
+      setSalesAgent(agent);
+      fetchStats(agent.id);
     }
   }, []);
+
+  const fetchStats = async (agentId: string) => {
+    if (!agentId) return;
+    setIsFetchingStats(true);
+    try {
+      // 1. Fetch total signups from events
+      const { count: signupCount } = await supabase
+        .from('sales_events')
+        .select('*', { count: 'exact', head: true })
+        .eq('agent_id', agentId)
+        .eq('type', 'signup');
+
+      // 2. Fetch converted leads
+      const { count: convCount } = await supabase
+        .from('sales_leads')
+        .select('*', { count: 'exact', head: true })
+        .eq('agent_id', agentId)
+        .eq('status', 'won');
+
+      // 3. Fetch total potential leads
+      const { count: leadCount } = await supabase
+        .from('sales_leads')
+        .select('*', { count: 'exact', head: true })
+        .eq('agent_id', agentId);
+
+      // 4. Fetch recent events
+      const { data: events } = await supabase
+        .from('sales_events')
+        .select('*')
+        .eq('agent_id', agentId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      // 5. Fetch actual leads for the table
+      const { data: leads } = await supabase
+        .from('sales_leads')
+        .select('*')
+        .eq('agent_id', agentId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      setStats({
+        signups: signupCount || 0,
+        converted: convCount || 0,
+        leads: leadCount || 0,
+        revenue: (convCount || 0) * 100 // Example: each 'won' lead is roughly $100
+      });
+      setRecentEvents(events || []);
+      setLeadsList(leads || []);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    } finally {
+      setIsFetchingStats(false);
+    }
+  };
 
   // Background Animation Logic (Simplified version of LandingPage's)
   useEffect(() => {
@@ -307,12 +367,11 @@ export default function SalesPage() {
               exit={{ opacity: 0, x: 20 }}
               className="space-y-10"
             >
-              {/* Hero Stats */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard icon={Users} label={t('sales.stats.totalSignups', 'Total Signups')} value="248" trend="+12% this week" color="indigo" />
-                <StatCard icon={TrendingUp} label={t('sales.stats.convertedLeads', 'Converted Leads')} value="42" trend="+5% this week" color="emerald" />
-                <StatCard icon={BarChart3} label={t('sales.stats.ctr', 'Click-Through Rate')} value="18.4%" trend="-2% this week" color="amber" />
-                <StatCard icon={Briefcase} label={t('sales.stats.revenue', 'Potential Revenue')} value="$4.2k" trend="+8% this week" color="purple" />
+                <StatCard icon={Users} label={t('sales.stats.totalSignups', 'Total Signups')} value={stats.signups.toString()} trend="All time" color="indigo" />
+                <StatCard icon={TrendingUp} label={t('sales.stats.convertedLeads', 'Converted Leads')} value={stats.converted.toString()} trend="Status: Won" color="emerald" />
+                <StatCard icon={BarChart3} label={t('sales.stats.totalLeads', 'Total Leads')} value={stats.leads.toString()} trend="In Pipeline" color="amber" />
+                <StatCard icon={Briefcase} label={t('sales.stats.revenue', 'Potential Revenue')} value={`$${stats.revenue.toLocaleString()}`} trend="Estimate" color="purple" />
               </div>
 
               {/* Main Quick Actions */}
@@ -373,10 +432,17 @@ export default function SalesPage() {
                   <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl p-8 shadow-sm">
                     <h2 className="text-xl font-black text-slate-900 dark:text-white mb-6">Live Activity</h2>
                     <div className="space-y-6">
-                      <ActivityItem icon={Plus} color="emerald" text="New lead 'Mohamed Ali' captured" time="2m ago" />
-                      <ActivityItem icon={Target} color="indigo" text="Link clicked via WhatsApp Blitz" time="15m ago" />
-                      <ActivityItem icon={Award} color="amber" text="Conversion achieved via Promo-20" time="4h ago" />
-                      <ActivityItem icon={Activity} color="slate" text="Asset 'Flyer-V2' downloaded" time="1d ago" />
+                      {_recentEvents.length > 0 ? _recentEvents.map((event, idx) => (
+                        <ActivityItem
+                          key={event.id || idx}
+                          icon={event.type === 'signup' ? Plus : event.type === 'lead_created' ? Target : event.type === 'conversion' ? Award : Activity}
+                          color={event.type === 'signup' ? 'emerald' : event.type === 'lead_created' ? 'indigo' : event.type === 'conversion' ? 'amber' : 'slate'}
+                          text={event.type === 'signup' ? 'New user registered via your link' : event.type === 'lead_created' ? 'New opportunity captured' : event.metadata?.label || event.type}
+                          time={new Date(event.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        />
+                      )) : (
+                        <p className="text-slate-500 text-xs py-4 text-center">No recent activity detected.</p>
+                      )}
                     </div>
                     <button
                       onClick={() => setActiveTab('leads')}
@@ -537,10 +603,15 @@ export default function SalesPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                      <LeadRow name="Dr. James Wilson" email="james@uni.edu" status="won" time="Today, 11:30" />
-                      <LeadRow name="Sarah Miller" email="sarah.m@gmail.com" status="contacted" time="Yesterday" />
-                      <LeadRow name="Prep Academy" email="info@prep.sch" status="new" time="2 days ago" />
-                      <LeadRow name="Ahmed Hassan" email="ahmed.h@tutors.eg" status="new" time="5 days ago" />
+                      {stats.leads > 0 ? (
+                        // We need to fetch the actual leads list here or use a separate state
+                        // For now, I'll add a separate state for leads as it's cleaner
+                        leadsList.map((lead) => (
+                          <LeadRow key={lead.id} name={lead.name || 'Anonymous'} email={lead.email} status={lead.status} time={new Date(lead.created_at).toLocaleDateString()} />
+                        ))
+                      ) : (
+                        <tr><td colSpan={4} className="px-6 py-10 text-center text-slate-500 text-sm">No leads captured yet.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

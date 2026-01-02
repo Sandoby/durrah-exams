@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, User, Loader2 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
@@ -23,8 +23,17 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function Register() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
     const { t } = useTranslation();
+
+    // Capture and persist referral code
+    useEffect(() => {
+        const refParam = searchParams.get('ref');
+        if (refParam) {
+            localStorage.setItem('pending_referral_code', refParam);
+        }
+    }, [searchParams]);
 
     const { register, handleSubmit, formState: { errors } } = useForm<RegisterForm>({
         resolver: zodResolver(registerSchema),
@@ -43,12 +52,15 @@ export default function Register() {
     const onSubmit = async (data: RegisterForm) => {
         setIsLoading(true);
         try {
+            const referralCode = localStorage.getItem('pending_referral_code');
+
             const { data: authData, error } = await supabase.auth.signUp({
                 email: data.email,
                 password: data.password,
                 options: {
                     data: {
                         full_name: data.name,
+                        referred_by_code: referralCode || undefined,
                     },
                 },
             });
@@ -77,6 +89,33 @@ export default function Register() {
                 } catch (emailError) {
                     console.error('Failed to send welcome email:', emailError);
                     // Continue with registration even if email fails
+                }
+            }
+
+            // Record Sales Event if referred
+            if (authData.user && referralCode) {
+                try {
+                    // 1. Resolve agent code to ID
+                    const { data: agent } = await supabase
+                        .from('sales_agents')
+                        .select('id')
+                        .eq('access_code', referralCode.toUpperCase())
+                        .single();
+
+                    if (agent) {
+                        await supabase.from('sales_events').insert({
+                            agent_id: agent.id,
+                            type: 'signup',
+                            metadata: {
+                                user_id: authData.user.id,
+                                email: data.email
+                            }
+                        });
+                        // Also clear the pending referral code
+                        localStorage.removeItem('pending_referral_code');
+                    }
+                } catch (eventError) {
+                    console.error('Failed to record sales event:', eventError);
                 }
             }
 

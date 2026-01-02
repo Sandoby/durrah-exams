@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
     Users, MessageCircle, Tag, Lock, LogOut,
     Loader2, Plus, Send, UserPlus, BarChart3, Bell,
-    Menu, X, ArrowLeft, Megaphone, Copy
+    Menu, X, ArrowLeft, Megaphone, Copy, TrendingUp,
+    Briefcase
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
@@ -165,6 +166,8 @@ export default function AdminPanel() {
     const [_showForwardModal, _setShowForwardModal] = useState(false);
     const [_forwardToAgentId, _setForwardToAgentId] = useState<string>('');
     const chatMessagesEndRef = useRef<HTMLDivElement>(null);
+    const [salesStats, setSalesStats] = useState({ total_signups: 0, total_revenue: 0, active_agents: 0 });
+    const [isFetchingSales, setIsFetchingSales] = useState(false);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -174,9 +177,43 @@ export default function AdminPanel() {
             if (userRole === 'super_admin') {
                 fetchSupportAgents();
                 fetchSalesAgents();
+                fetchGlobalSalesStats();
             }
         }
     }, [isAuthenticated, userRole]);
+
+    const fetchGlobalSalesStats = async () => {
+        if (userRole !== 'super_admin') return;
+        setIsFetchingSales(true);
+        try {
+            const { count: signupCount } = await supabase
+                .from('sales_events')
+                .select('*', { count: 'exact', head: true })
+                .eq('type', 'signup');
+
+            const { count: agentCount } = await supabase
+                .from('sales_agents')
+                .select('*', { count: 'exact', head: true })
+                .eq('is_active', true);
+
+            // For revenue, we sum 'won' leads or subscriptions attributed. 
+            // Simplified: count 'won' leads * average value
+            const { count: convCount } = await supabase
+                .from('sales_leads')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'won');
+
+            setSalesStats({
+                total_signups: signupCount || 0,
+                total_revenue: (convCount || 0) * 100,
+                active_agents: agentCount || 0
+            });
+        } catch (err) {
+            console.error('Error fetching global sales stats', err);
+        } finally {
+            setIsFetchingSales(false);
+        }
+    };
 
     // Subscribe to new chat messages globally to update user list
     useEffect(() => {
@@ -1003,6 +1040,86 @@ export default function AdminPanel() {
                                     )}
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {/* Sales Tab */}
+                    {activeTab === 'sales' && (
+                        <div className="space-y-8">
+                            <div className="flex justify-between items-center">
+                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Global Sales Performance</h1>
+                                <button
+                                    onClick={fetchGlobalSalesStats}
+                                    className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
+                                    disabled={isFetchingSales}
+                                >
+                                    <BarChart3 className={`w-5 h-5 ${isFetchingSales ? 'animate-spin' : ''}`} />
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Referral Signups</p>
+                                    <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{salesStats.total_signups}</p>
+                                    <div className="mt-4 flex items-center text-xs text-green-600">
+                                        <TrendingUp className="w-3 h-3 mr-1" />
+                                        <span>Lifetime Growth</span>
+                                    </div>
+                                </div>
+                                <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Attributed Revenue</p>
+                                    <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">${salesStats.total_revenue.toLocaleString()}</p>
+                                    <div className="mt-4 flex items-center text-xs text-purple-600">
+                                        <Briefcase className="w-3 h-3 mr-1" />
+                                        <span>Tracked via Conversions</span>
+                                    </div>
+                                </div>
+                                <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Partners</p>
+                                    <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{salesStats.active_agents}</p>
+                                    <div className="mt-4 flex items-center text-xs text-blue-600">
+                                        <Users className="w-3 h-3 mr-1" />
+                                        <span>Verified Agents</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white dark:bg-gray-800 shadow rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
+                                <div className="p-6 border-b border-gray-100 dark:border-gray-800">
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Partner Breakdown</h3>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left">
+                                        <thead className="bg-gray-50 dark:bg-gray-900/50">
+                                            <tr>
+                                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Agent</th>
+                                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Access Code</th>
+                                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Status</th>
+                                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Registered At</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                            {salesAgents.map((agent) => (
+                                                <tr key={agent.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="font-semibold text-gray-900 dark:text-white">{agent.name}</div>
+                                                        <div className="text-xs text-gray-500">{agent.email}</div>
+                                                    </td>
+                                                    <td className="px-6 py-4 font-mono text-sm text-indigo-600 dark:text-indigo-400 font-bold">{agent.access_code}</td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${agent.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                            {agent.is_active ? 'Active' : 'Missing'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                                        {new Date(agent.created_at).toLocaleDateString()}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     )}
 
