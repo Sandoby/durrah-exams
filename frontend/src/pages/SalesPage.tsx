@@ -19,6 +19,8 @@ interface SalesAgent {
   email: string;
   access_code: string;
   is_active: boolean;
+  tier: string;
+  total_earnings: number;
   created_at: string;
 }
 
@@ -29,7 +31,7 @@ interface SalesLeadForm {
   status: 'new' | 'contacted' | 'won' | 'lost';
 }
 
-type TabType = 'overview' | 'tools' | 'leads' | 'assets';
+type TabType = 'overview' | 'tools' | 'leads' | 'assets' | 'financial' | 'gamification';
 
 export default function SalesPage() {
   const { t } = useTranslation();
@@ -43,6 +45,10 @@ export default function SalesPage() {
   const [_recentEvents, setRecentEvents] = useState<any[]>([]);
   const [leadsList, setLeadsList] = useState<any[]>([]);
   const [salesAssets, setSalesAssets] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [payouts, setPayouts] = useState<any[]>([]);
+  const [socialTemplates, setSocialTemplates] = useState<any[]>([]);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [_isFetchingStats, setIsFetchingStats] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -110,6 +116,53 @@ export default function SalesPage() {
         .select('*')
         .order('created_at', { ascending: false });
       setSalesAssets(assets || []);
+
+      // 7. Fetch announcements
+      const { data: anns } = await supabase
+        .from('sales_announcements')
+        .select('*')
+        .order('created_at', { ascending: false });
+      setAnnouncements(anns || []);
+
+      // 8. Fetch payouts
+      const { data: payData } = await supabase
+        .from('sales_payouts')
+        .select('*')
+        .eq('agent_id', agentId)
+        .order('created_at', { ascending: false });
+      setPayouts(payData || []);
+
+      // 9. Fetch social templates
+      const { data: socialData } = await supabase
+        .from('sales_social_templates')
+        .select('*')
+        .order('created_at', { ascending: false });
+      setSocialTemplates(socialData || []);
+
+      // 10. Fetch leaderboard (Top 5 agents by total_earnings, anonymized)
+      const { data: boardData } = await supabase
+        .from('sales_agents')
+        .select('name, tier, total_earnings')
+        .order('total_earnings', { ascending: false })
+        .limit(5);
+      setLeaderboard(boardData || []);
+
+      // 11. Update stats with agent data (tier, total_earnings)
+      const { data: agentData } = await supabase
+        .from('sales_agents')
+        .select('tier, total_earnings')
+        .eq('id', agentId)
+        .single();
+
+      setStats({
+        signups: signupCount || 0,
+        converted: convCount || 0,
+        leads: leadCount || 0,
+        revenue: agentData?.total_earnings || 0
+      });
+      if (agentData) {
+        setSalesAgent(prev => prev ? { ...prev, ...agentData } : null);
+      }
     } catch (err) {
       console.error('Error fetching stats:', err);
     } finally {
@@ -251,6 +304,22 @@ export default function SalesPage() {
     }
   };
 
+  const updateLeadStatus = async (leadId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('sales_leads')
+        .update({ status: newStatus })
+        .eq('id', leadId);
+
+      if (error) throw error;
+      toast.success('Lead status updated');
+      setLeadsList(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
+      await logEvent('lead_status_updated', { leadId, newStatus });
+    } catch (err: any) {
+      toast.error(err?.message || 'Update failed');
+    }
+  };
+
   const buildUTMLink = (medium: string, campaign: string) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://durrahsystem.tech';
     const base = `${origin}?ref=${salesAgent?.access_code || ''}`;
@@ -338,7 +407,7 @@ export default function SalesPage() {
           </div>
 
           <div className="hidden lg:flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-            {(['overview', 'tools', 'leads', 'assets'] as TabType[]).map((tab) => (
+            {(['overview', 'tools', 'leads', 'assets', 'financial', 'gamification'] as TabType[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -353,6 +422,11 @@ export default function SalesPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1.5 rounded-lg border border-indigo-100 dark:border-indigo-800">
+              <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-tighter mr-2">Link</span>
+              <code className="text-[10px] font-mono text-indigo-500 max-w-[80px] truncate">{shareLink}</code>
+              <button onClick={() => copy(shareLink, 'Link')} className="ml-2 text-indigo-400 hover:text-indigo-600"><Copy className="w-3 h-3" /></button>
+            </div>
             <button
               onClick={handleLogout}
               className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
@@ -366,6 +440,27 @@ export default function SalesPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 pt-32 pb-20">
+        {/* Announcement Marquee */}
+        {announcements.length > 0 && (
+          <div className="mb-8 overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-2xl py-3 px-6 shadow-sm flex items-center gap-4">
+            <div className={`p-2 rounded-lg ${announcements[0].priority === 'urgent' ? 'bg-red-500/10 text-red-500' : 'bg-indigo-500/10 text-indigo-500'}`}>
+              <Megaphone className="w-4 h-4" />
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <div className="animate-marquee whitespace-nowrap text-sm font-bold text-slate-700 dark:text-slate-300">
+                {announcements.map((ann) => (
+                  <span key={ann.id} className="mx-8">
+                    <span className={`uppercase text-[10px] font-black mr-2 px-1.5 py-0.5 rounded ${ann.priority === 'urgent' ? 'bg-red-500 text-white' : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400'}`}>
+                      {ann.priority}
+                    </span>
+                    {ann.title}: {ann.content}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         <AnimatePresence mode="wait">
           {activeTab === 'overview' && (
             <motion.div
@@ -540,6 +635,33 @@ export default function SalesPage() {
                     Never promise features that aren't live. Always lead with the 14-day money-back guarantee to reduce friction for hesitant teachers.
                   </p>
                 </section>
+
+                {/* Social Sharing Toolkit */}
+                <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl p-8 shadow-sm">
+                  <div className="flex items-center justify-between mb-8">
+                    <h2 className="text-xl font-black dark:text-white">Social Toolkit</h2>
+                    <Sparkles className="w-5 h-5 text-indigo-400" />
+                  </div>
+                  <div className="space-y-4">
+                    {socialTemplates.length > 0 ? socialTemplates.map((tpl) => (
+                      <div key={tpl.id} className="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-white/5 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{tpl.platform}</span>
+                          <span className="text-xs font-bold text-slate-900 dark:text-white">{tpl.title}</span>
+                        </div>
+                        <p className="text-xs text-slate-500 leading-relaxed italic line-clamp-3">"{tpl.content}"</p>
+                        <button
+                          onClick={() => copy(tpl.content + "\n\nJoin here: " + shareLink, tpl.title)}
+                          className="w-full flex items-center justify-center gap-2 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all font-mono"
+                        >
+                          <Share2 className="w-3 h-3" /> Copy Social Post
+                        </button>
+                      </div>
+                    )) : (
+                      <p className="text-center text-slate-400 text-xs py-10">No templates available yet.</p>
+                    )}
+                  </div>
+                </section>
               </div>
             </motion.div>
           )}
@@ -612,10 +734,15 @@ export default function SalesPage() {
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                       {stats.leads > 0 ? (
-                        // We need to fetch the actual leads list here or use a separate state
-                        // For now, I'll add a separate state for leads as it's cleaner
                         leadsList.map((lead) => (
-                          <LeadRow key={lead.id} name={lead.name || 'Anonymous'} email={lead.email} status={lead.status} time={new Date(lead.created_at).toLocaleDateString()} />
+                          <LeadRow
+                            key={lead.id}
+                            name={lead.name || 'Anonymous'}
+                            email={lead.email}
+                            status={lead.status}
+                            time={new Date(lead.created_at).toLocaleDateString()}
+                            onStatusUpdate={(newStatus) => updateLeadStatus(lead.id, newStatus)}
+                          />
                         ))
                       ) : (
                         <tr><td colSpan={4} className="px-6 py-10 text-center text-slate-500 text-sm">No leads captured yet.</td></tr>
@@ -635,6 +762,139 @@ export default function SalesPage() {
             </motion.div>
           )}
 
+          {activeTab === 'financial' && (
+            <motion.div
+              key="financial"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-8"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <StatCard icon={Briefcase} label="Accumulated Earnings" value={`$${salesAgent?.total_earnings?.toLocaleString() || '0'}`} trend="All time" color="indigo" />
+                <StatCard icon={TrendingUp} label="Pending Payouts" value={`$${payouts.filter(p => p.status === 'pending').reduce((sum, p) => sum + Number(p.amount), 0).toLocaleString()}`} trend="In processing" color="amber" />
+                <StatCard icon={Award} label="Your Tier" value={(salesAgent?.tier || 'Bronze').toUpperCase()} trend="Next: Silver" color="purple" />
+              </div>
+
+              <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl p-8 shadow-sm">
+                <h2 className="text-2xl font-black dark:text-white mb-8">Payout History</h2>
+                <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-white/5">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 dark:bg-slate-800/50">
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase">Amount</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase text-center">Status</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                      {payouts.length > 0 ? payouts.map((p) => (
+                        <tr key={p.id}>
+                          <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">${Number(p.amount).toLocaleString()}</td>
+                          <td className="px-6 py-4 text-center">
+                            <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${p.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                              {p.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-slate-500 text-sm">{new Date(p.created_at).toLocaleDateString()}</td>
+                        </tr>
+                      )) : (
+                        <tr><td colSpan={3} className="px-6 py-10 text-center text-slate-500">No payout history found.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </motion.div>
+          )}
+
+          {activeTab === 'gamification' && (
+            <motion.div
+              key="gamification"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="grid lg:grid-cols-3 gap-8"
+            >
+              <div className="lg:col-span-1 space-y-8">
+                <section className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl p-8 text-white shadow-xl">
+                  <h2 className="text-xl font-black mb-6">Partner Tier</h2>
+                  <div className="flex items-center gap-6 mb-8">
+                    <div className="bg-white/20 p-4 rounded-3xl backdrop-blur-md">
+                      <Award className="w-10 h-10" />
+                    </div>
+                    <div>
+                      <p className="text-indigo-200 text-xs font-black uppercase tracking-widest leading-none mb-1">Current Level</p>
+                      <h3 className="text-3xl font-black uppercase">{(salesAgent?.tier || 'Bronze')}</h3>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-bold text-indigo-100">
+                      <span>Progress to Silver</span>
+                      <span>{Math.min(100, (Number(salesAgent?.total_earnings || 0) / 1000) * 100).toFixed(0)}%</span>
+                    </div>
+                    <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-white transition-all duration-1000"
+                        style={{ width: `${Math.min(100, (Number(salesAgent?.total_earnings || 0) / 1000) * 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-indigo-200 text-center italic mt-2">Earn $1,000 to unlock Silver Benefits (+2.5% Commission)</p>
+                  </div>
+                </section>
+
+                <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl p-8 shadow-sm">
+                  <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6">Tier Perks</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                      <p className="text-xs text-slate-600 dark:text-slate-400">10% Standard Commission</p>
+                    </div>
+                    <div className="flex items-center gap-3 opacity-30">
+                      <div className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                      <p className="text-xs text-slate-400">12.5% Silver Bonus</p>
+                    </div>
+                    <div className="flex items-center gap-3 opacity-30">
+                      <div className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                      <p className="text-xs text-slate-400">Priority Ads Budget Access</p>
+                    </div>
+                  </div>
+                </section>
+              </div>
+
+              <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl p-8 shadow-sm lg:col-span-2">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h2 className="text-2xl font-black dark:text-white">Partner Leaderboard</h2>
+                    <p className="text-sm text-slate-500">Monthly Top Performers (Anonymized for Privacy)</p>
+                  </div>
+                  <Sparkles className="w-8 h-8 text-amber-500 opacity-20" />
+                </div>
+
+                <div className="space-y-4">
+                  {leaderboard.map((agent, i) => (
+                    <div key={i} className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${i === 0 ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-900/30' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-white/5'}`}>
+                      <div className="flex items-center gap-4">
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center font-black text-xs ${i === 0 ? 'bg-amber-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>
+                          {i + 1}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-900 dark:text-white">
+                            {agent.name.charAt(0)}***{agent.name.charAt(agent.name.length - 1)}
+                            <span className="ml-2 text-[10px] font-black uppercase text-indigo-500">{agent.tier}</span>
+                          </p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Global Partner</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-lg font-black ${i === 0 ? 'text-amber-600' : 'text-slate-900 dark:text-white'}`}>${Number(agent.total_earnings).toLocaleString()}</p>
+                        <p className="text-[10px] text-slate-400 uppercase font-black">Total Earned</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </motion.div>
+          )}
+
           {activeTab === 'assets' && (
             <motion.div
               key="assets"
@@ -642,15 +902,26 @@ export default function SalesPage() {
               animate={{ opacity: 1, x: 0 }}
               className="space-y-12"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <AssetFileCard type="image" label="LinkedIn Header (English)" size="1.2 MB" color="indigo" />
-                <AssetFileCard type="image" label="Instagram Square (Arabic)" size="890 KB" color="purple" />
-                <AssetFileCard type="video" label="1-Minute Product Tour" size="14 MB" color="rose" />
-                <AssetFileCard type="document" label="Feature Sheet PDF" size="450 KB" color="emerald" />
-                <AssetFileCard type="image" label="Web Dashboard Mockup" size="2.4 MB" color="blue" />
-                <AssetFileCard type="image" label="Anti-Cheating Infographic" size="1.1 MB" color="indigo" />
-                <AssetFileCard type="document" label="Bulk Import Template" size="12 KB" color="slate" />
-                <AssetFileCard type="video" label="Step-by-Step Setup Guide" size="88 MB" color="rose" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-white/5 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-50 dark:bg-indigo-900/40 rounded-xl text-indigo-600">
+                      <ImageIcon className="w-5 h-5" />
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-widest text-slate-400">Graphics</span>
+                  </div>
+                  <h4 className="text-2xl font-black dark:text-white">{salesAssets.filter(a => a.category === 'graphics').length}</h4>
+                </div>
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-white/5 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-rose-50 dark:bg-rose-900/40 rounded-xl text-rose-600">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-widest text-slate-400">Assets</span>
+                  </div>
+                  <h4 className="text-2xl font-black dark:text-white">{salesAssets.length}</h4>
+                </div>
+                {/* Add more asset summary cards if needed */}
               </div>
 
               <div className="space-y-12">
@@ -659,29 +930,46 @@ export default function SalesPage() {
                     <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl">
                       <ImageIcon className="w-6 h-6 text-indigo-600" />
                     </div>
-                    <h2 className="text-2xl font-black dark:text-white">Marketing Assets</h2>
+                    <h2 className="text-2xl font-black dark:text-white">Professional Assets</h2>
                   </div>
 
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {salesAssets.length > 0 ? salesAssets.map((asset) => (
-                      <div key={asset.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-white/5 space-y-4 hover:border-indigo-100 transition-all relative group">
-                        <div className="flex justify-between items-start">
-                          <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{asset.category}</span>
-                          {asset.category === 'docs' && asset.url && (
-                            <a href={asset.url} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-indigo-600"><Download className="w-4 h-4" /></a>
-                          )}
-                        </div>
-                        <h4 className="font-bold text-slate-900 dark:text-white">{asset.title}</h4>
-                        <p className="text-xs text-slate-500 line-clamp-4 leading-relaxed italic">"{asset.content || asset.description}"</p>
-
-                        {(asset.url || (asset.category === 'scripts' && asset.content)) && (
-                          <button
-                            onClick={() => copy(asset.url || asset.content, asset.title)}
-                            className="w-full py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all"
-                          >
-                            Copy Asset {asset.category === 'docs' ? 'Link' : 'Script'}
-                          </button>
+                      <div key={asset.id} className="bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-white/5 overflow-hidden group hover:border-indigo-200 transition-all flex flex-col">
+                        {asset.thumbnail_url ? (
+                          <div className="aspect-video w-full overflow-hidden bg-slate-200 relative">
+                            <img src={asset.thumbnail_url} alt={asset.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-4">
+                              <span className="text-[10px] font-black text-white uppercase tracking-widest bg-indigo-600 px-2 py-0.5 rounded">{asset.file_size || 'HQ'}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="aspect-video w-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                            <ImageIcon className="w-12 h-12 text-slate-200 dark:text-slate-700" />
+                          </div>
                         )}
+
+                        <div className="p-6 flex-1 flex flex-col space-y-4">
+                          <div className="flex justify-between items-start">
+                            <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{asset.category}</span>
+                            {asset.category === 'docs' && asset.url && (
+                              <a href={asset.url} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-indigo-600"><Download className="w-4 h-4" /></a>
+                            )}
+                          </div>
+                          <h4 className="font-bold text-slate-900 dark:text-white">{asset.title}</h4>
+                          <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed">{asset.description || asset.content}</p>
+
+                          <div className="pt-2 mt-auto">
+                            {(asset.url || (asset.category === 'scripts' && asset.content)) && (
+                              <button
+                                onClick={() => copy(asset.url || asset.content, asset.title)}
+                                className="w-full py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all"
+                              >
+                                {asset.category === 'scripts' ? 'Copy Script' : asset.category === 'docs' ? 'Get Link' : 'Copy Asset Link'}
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     )) : (
                       <div className="col-span-full py-20 text-center">
@@ -830,11 +1118,12 @@ function InputField({ label, value, onChange, placeholder, required }: { label: 
   );
 }
 
-function LeadRow({ name, email, status, time }: { name: string, email: string, status: 'new' | 'contacted' | 'won' | 'lost', time: string }) {
+function LeadRow({ name, email, status, time, onStatusUpdate }: { name: string, email: string, status: 'new' | 'contacted' | 'won' | 'lost', time: string, onStatusUpdate: (s: string) => void }) {
   const statusColors: Record<string, string> = {
     won: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
     contacted: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400',
-    new: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+    new: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400',
+    lost: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400'
   };
 
   return (
@@ -844,9 +1133,16 @@ function LeadRow({ name, email, status, time }: { name: string, email: string, s
         <p className="text-[10px] font-bold text-slate-500 leading-none">{email}</p>
       </td>
       <td className="px-6 py-4 text-center">
-        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${statusColors[status] || statusColors.new}`}>
-          {status}
-        </span>
+        <select
+          value={status}
+          onChange={(e) => onStatusUpdate(e.target.value)}
+          className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest outline-none border-none cursor-pointer ${statusColors[status] || statusColors.new}`}
+        >
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="won">Won</option>
+          <option value="lost">Lost</option>
+        </select>
       </td>
       <td className="px-6 py-4">
         <p className="text-xs font-bold text-slate-500">{time}</p>
@@ -858,31 +1154,3 @@ function LeadRow({ name, email, status, time }: { name: string, email: string, s
   );
 }
 
-function AssetFileCard({ type, label, size, color }: { type: 'image' | 'video' | 'document', label: string, size: string, color: string }) {
-  const icons: Record<string, any> = { image: ImageIcon, video: PlayCircle, document: FileText };
-  const colors: Record<string, string> = {
-    indigo: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20',
-    purple: 'text-purple-600 bg-purple-50 dark:bg-purple-900/20',
-    rose: 'text-rose-600 bg-rose-50 dark:bg-rose-900/20',
-    emerald: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20',
-    slate: 'text-slate-600 bg-slate-100 dark:bg-slate-800',
-    blue: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20'
-  };
-
-  const Icon = icons[type] || FileText;
-
-  return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 p-6 rounded-3xl shadow-sm group hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer text-left">
-      <div className={`p-4 rounded-2xl w-fit mb-6 ${colors[color] || colors.slate}`}>
-        <Icon className="w-6 h-6" />
-      </div>
-      <h4 className="text-sm font-black text-slate-900 dark:text-white mb-1 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{label}</h4>
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{size}</p>
-      <div className="mt-6 flex justify-end">
-        <button className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-slate-700 transition-all opacity-0 group-hover:opacity-100">
-          <Download className="w-5 h-5" />
-        </button>
-      </div>
-    </div>
-  );
-}

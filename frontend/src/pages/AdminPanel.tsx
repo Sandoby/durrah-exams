@@ -168,10 +168,16 @@ export default function AdminPanel() {
     const chatMessagesEndRef = useRef<HTMLDivElement>(null);
     const [salesStats, setSalesStats] = useState({ total_signups: 0, total_revenue: 0, active_agents: 0 });
     const [salesAssets, setSalesAssets] = useState<any[]>([]);
-    const [newAsset, setNewAsset] = useState({ title: '', description: '', category: 'scripts', url: '', content: '' });
+    const [newAsset, setNewAsset] = useState({ title: '', description: '', category: 'scripts', url: '', content: '', thumbnail_url: '', file_size: '' });
+    const [salesAnnouncements, setSalesAnnouncements] = useState<any[]>([]);
+    const [newAnnouncement, setNewAnnouncement] = useState({ title: '', content: '', priority: 'normal' });
+    const [socialTemplates, setSocialTemplates] = useState<any[]>([]);
+    const [newSocialTemplate, setNewSocialTemplate] = useState({ platform: 'whatsapp', title: '', content: '' });
     const [isFetchingSales, setIsFetchingSales] = useState(false);
     const [isSavingAsset, setIsSavingAsset] = useState(false);
     const [showAssetForm, setShowAssetForm] = useState(false);
+    const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
+    const [showSocialForm, setShowSocialForm] = useState(false);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -183,6 +189,8 @@ export default function AdminPanel() {
                 fetchSalesAgents();
                 fetchSalesAssets();
                 fetchGlobalSalesStats();
+                fetchSalesAnnouncements();
+                fetchSocialTemplates();
             }
         }
     }, [isAuthenticated, userRole]);
@@ -711,7 +719,7 @@ export default function AdminPanel() {
             const { error } = await supabase.from('sales_assets').insert(newAsset);
             if (error) throw error;
             toast.success('Asset added successfully');
-            setNewAsset({ title: '', description: '', category: 'scripts', url: '', content: '' });
+            setNewAsset({ title: '', description: '', category: 'scripts', url: '', content: '', thumbnail_url: '', file_size: '' });
             fetchSalesAssets();
         } catch (err: any) {
             toast.error(err.message || 'Failed to add asset');
@@ -729,6 +737,78 @@ export default function AdminPanel() {
             fetchSalesAssets();
         } catch (err: any) {
             toast.error(err.message || 'Failed to delete asset');
+        }
+    };
+
+    const fetchSalesAnnouncements = async () => {
+        try {
+            const { data, error } = await supabase.from('sales_announcements').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            setSalesAnnouncements(data || []);
+        } catch (err) {
+            console.error('Error fetching announcements', err);
+        }
+    };
+
+    const createAnnouncement = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const { error } = await supabase.from('sales_announcements').insert(newAnnouncement);
+            if (error) throw error;
+            toast.success('Announcement posted');
+            setNewAnnouncement({ title: '', content: '', priority: 'normal' });
+            setShowAnnouncementForm(false);
+            fetchSalesAnnouncements();
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to post announcement');
+        }
+    };
+
+    const deleteAnnouncement = async (id: string) => {
+        if (!confirm('Delete announcement?')) return;
+        try {
+            const { error } = await supabase.from('sales_announcements').delete().eq('id', id);
+            if (error) throw error;
+            toast.success('Announcement deleted');
+            fetchSalesAnnouncements();
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to delete');
+        }
+    };
+
+    const fetchSocialTemplates = async () => {
+        try {
+            const { data, error } = await supabase.from('sales_social_templates').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            setSocialTemplates(data || []);
+        } catch (err) {
+            console.error('Error fetching social templates', err);
+        }
+    };
+
+    const createSocialTemplate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const { error } = await supabase.from('sales_social_templates').insert(newSocialTemplate);
+            if (error) throw error;
+            toast.success('Social template added');
+            setNewSocialTemplate({ platform: 'whatsapp', title: '', content: '' });
+            setShowSocialForm(false);
+            fetchSocialTemplates();
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to add social template');
+        }
+    };
+
+    const deleteSocialTemplate = async (id: string) => {
+        if (!confirm('Delete social template?')) return;
+        try {
+            const { error } = await supabase.from('sales_social_templates').delete().eq('id', id);
+            if (error) throw error;
+            toast.success('Social template deleted');
+            fetchSocialTemplates();
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to delete social template');
         }
     };
 
@@ -1848,14 +1928,27 @@ export default function AdminPanel() {
                                                 className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm font-mono"
                                             />
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Content / Body</label>
-                                            <textarea
-                                                value={newAsset.content}
-                                                onChange={(e) => setNewAsset({ ...newAsset, content: e.target.value })}
-                                                placeholder="Enter the script body or additional details..."
-                                                className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm min-h-[100px]"
-                                            />
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Thumbnail URL (Optional)</label>
+                                                <input
+                                                    type="text"
+                                                    value={newAsset.thumbnail_url}
+                                                    onChange={(e) => setNewAsset({ ...newAsset, thumbnail_url: e.target.value })}
+                                                    placeholder="https://.../thumb.png"
+                                                    className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">File Size (e.g. 2.4 MB)</label>
+                                                <input
+                                                    type="text"
+                                                    value={newAsset.file_size}
+                                                    onChange={(e) => setNewAsset({ ...newAsset, file_size: e.target.value })}
+                                                    placeholder="2.4 MB"
+                                                    className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm"
+                                                />
+                                            </div>
                                         </div>
                                         <button
                                             type="submit"
@@ -1891,6 +1984,162 @@ export default function AdminPanel() {
                                             No assets uploaded yet.
                                         </div>
                                     )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Sales Announcements */}
+                    {activeTab === 'sales' && userRole === 'super_admin' && (
+                        <div className="space-y-6 mt-12 pt-12 border-t border-gray-100 dark:border-gray-800">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Sales Announcements</h3>
+                                    <p className="text-sm text-gray-500">Broadcast news or updates to all sales partners.</p>
+                                </div>
+                                <button
+                                    onClick={() => setShowAnnouncementForm(!showAnnouncementForm)}
+                                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700"
+                                >
+                                    {showAnnouncementForm ? 'Hide Form' : 'Post New Update'}
+                                </button>
+                            </div>
+
+                            {showAnnouncementForm && (
+                                <form onSubmit={createAnnouncement} className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-indigo-100 dark:border-indigo-900/30 space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Title</label>
+                                            <input
+                                                type="text"
+                                                value={newAnnouncement.title}
+                                                onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
+                                                placeholder="e.g. New Commission Tiers are here!"
+                                                className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Priority</label>
+                                            <select
+                                                value={newAnnouncement.priority}
+                                                onChange={(e) => setNewAnnouncement({ ...newAnnouncement, priority: e.target.value })}
+                                                className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm"
+                                            >
+                                                <option value="normal">Normal</option>
+                                                <option value="warning">Important</option>
+                                                <option value="urgent">Urgent / Alert</option>
+                                            </select>
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Content</label>
+                                            <textarea
+                                                value={newAnnouncement.content}
+                                                onChange={(e) => setNewAnnouncement({ ...newAnnouncement, content: e.target.value })}
+                                                placeholder="Write your announcement message..."
+                                                className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm min-h-[100px]"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        className="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700"
+                                    >
+                                        Post Announcement
+                                    </button>
+                                </form>
+                            )}
+
+                            <div className="space-y-4">
+                                {salesAnnouncements.map((ann) => (
+                                    <div key={ann.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 flex justify-between items-start">
+                                        <div className="flex gap-4">
+                                            <div className={`mt-1 h-3 w-3 rounded-full ${ann.priority === 'urgent' ? 'bg-red-500' : ann.priority === 'warning' ? 'bg-amber-500' : 'bg-indigo-500'}`} />
+                                            <div>
+                                                <h4 className="font-bold text-gray-900 dark:text-white">{ann.title}</h4>
+                                                <p className="text-sm text-gray-500 mt-1">{ann.content}</p>
+                                                <p className="text-[10px] text-gray-400 mt-2">{new Date(ann.created_at).toLocaleString()}</p>
+                                            </div>
+                                        </div>
+                                        <button onClick={() => deleteAnnouncement(ann.id)} className="text-gray-400 hover:text-red-500"><X className="w-4 h-4" /></button>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Social Templates */}
+                            <div className="mt-12 pt-12 border-t border-gray-100 dark:border-gray-800 space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">Social Toolkit Management</h3>
+                                        <p className="text-sm text-gray-500">Add pre-written posts for partners to share.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowSocialForm(!showSocialForm)}
+                                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700"
+                                    >
+                                        {showSocialForm ? 'Hide Form' : 'Add Social Template'}
+                                    </button>
+                                </div>
+
+                                {showSocialForm && (
+                                    <form onSubmit={createSocialTemplate} className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-indigo-100 dark:border-indigo-900/30 space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Title</label>
+                                                <input
+                                                    type="text"
+                                                    value={newSocialTemplate.title}
+                                                    onChange={(e) => setNewSocialTemplate({ ...newSocialTemplate, title: e.target.value })}
+                                                    placeholder="e.g. Exam Day Post"
+                                                    className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm"
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Platform</label>
+                                                <select
+                                                    value={newSocialTemplate.platform}
+                                                    onChange={(e) => setNewSocialTemplate({ ...newSocialTemplate, platform: e.target.value })}
+                                                    className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm"
+                                                >
+                                                    <option value="whatsapp">WhatsApp</option>
+                                                    <option value="linkedin">LinkedIn</option>
+                                                    <option value="twitter">Twitter / X</option>
+                                                    <option value="facebook">Facebook</option>
+                                                </select>
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Post Content</label>
+                                                <textarea
+                                                    value={newSocialTemplate.content}
+                                                    onChange={(e) => setNewSocialTemplate({ ...newSocialTemplate, content: e.target.value })}
+                                                    placeholder="Write the sharing text here..."
+                                                    className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm min-h-[100px]"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            className="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700"
+                                        >
+                                            Save Template
+                                        </button>
+                                    </form>
+                                )}
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {socialTemplates.map((tpl) => (
+                                        <div key={tpl.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 space-y-3">
+                                            <div className="flex justify-between items-start">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{tpl.platform}</span>
+                                                <button onClick={() => deleteSocialTemplate(tpl.id)} className="text-gray-400 hover:text-red-500"><X className="w-4 h-4" /></button>
+                                            </div>
+                                            <h4 className="font-bold text-gray-900 dark:text-white">{tpl.title}</h4>
+                                            <p className="text-xs text-gray-500 line-clamp-3">{tpl.content}</p>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>

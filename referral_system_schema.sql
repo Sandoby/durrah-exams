@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS public.sales_agents (
     access_code TEXT UNIQUE NOT NULL, -- Used for referral links (e.g., ?ref=CODE)
     is_active BOOLEAN DEFAULT true,
     commission_rate DECIMAL(5,2) DEFAULT 10.00, -- Optional: percentage per sale
+    tier TEXT DEFAULT 'bronze', -- 'bronze', 'silver', 'gold'
+    total_earnings DECIMAL(10,2) DEFAULT 0.00,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -96,9 +98,43 @@ CREATE TABLE IF NOT EXISTS public.sales_assets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
     description TEXT,
-    category TEXT NOT NULL, -- 'images', 'scripts', 'docs'
+    category TEXT NOT NULL, -- 'scripts', 'links', 'docs', 'graphics'
     url TEXT,
     content TEXT, -- For scripts or copy
+    thumbnail_url TEXT,
+    file_size TEXT,
+    download_count INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 9. Sales Announcements
+-- Global messages from admins to all partners.
+CREATE TABLE IF NOT EXISTS public.sales_announcements (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    priority TEXT DEFAULT 'normal', -- 'info', 'warning', 'urgent'
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 10. Sales Payouts
+-- Tracking commissions and financial status.
+CREATE TABLE IF NOT EXISTS public.sales_payouts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    agent_id UUID REFERENCES public.sales_agents(id) ON DELETE CASCADE,
+    amount DECIMAL(10,2) NOT NULL,
+    status TEXT DEFAULT 'pending', -- 'pending', 'paid', 'cancelled'
+    user_id UUID REFERENCES public.profiles(id), -- The customer who generated this payout
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 11. Sales Social Templates
+-- Pre-written posts for partners to share on social media.
+CREATE TABLE IF NOT EXISTS public.sales_social_templates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    platform TEXT NOT NULL, -- 'whatsapp', 'linkedin', 'twitter', 'facebook'
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
