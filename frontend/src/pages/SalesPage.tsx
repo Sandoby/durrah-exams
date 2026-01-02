@@ -12,10 +12,19 @@ interface SalesAgent {
   created_at: string;
 }
 
+interface SalesLeadForm {
+  name: string;
+  email: string;
+  notes: string;
+  status: 'new' | 'contacted' | 'won' | 'lost';
+}
+
 export default function SalesPage() {
   const [accessCode, setAccessCode] = useState('');
   const [salesAgent, setSalesAgent] = useState<SalesAgent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [leadForm, setLeadForm] = useState<SalesLeadForm>({ name: '', email: '', notes: '', status: 'new' });
+  const [isSavingLead, setIsSavingLead] = useState(false);
 
   useEffect(() => {
     const cached = localStorage.getItem('sales_agent_session');
@@ -52,6 +61,19 @@ export default function SalesPage() {
     localStorage.removeItem('sales_agent_session');
   };
 
+  const logEvent = async (type: string, metadata: Record<string, any> = {}) => {
+    if (!salesAgent) return;
+    try {
+      await supabase.from('sales_events').insert({
+        agent_id: salesAgent.id,
+        type,
+        metadata
+      });
+    } catch (err) {
+      console.error('logEvent error', err);
+    }
+  };
+
   const shareLink = useMemo(() => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://durrahacademy.com';
     if (!salesAgent?.access_code) return origin;
@@ -62,9 +84,41 @@ export default function SalesPage() {
     try {
       await navigator.clipboard.writeText(text);
       toast.success(`${label} copied`);
+      await logEvent('copy', { label, text });
     } catch {
       toast.error('Copy failed');
     }
+  };
+
+  const handleLeadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!salesAgent) return;
+    if (!leadForm.email.trim()) return toast.error('Email required');
+    setIsSavingLead(true);
+    try {
+      const { error } = await supabase.from('sales_leads').insert({
+        agent_id: salesAgent.id,
+        name: leadForm.name || null,
+        email: leadForm.email,
+        notes: leadForm.notes || null,
+        status: leadForm.status
+      });
+      if (error) throw error;
+      toast.success('Lead saved');
+      setLeadForm({ name: '', email: '', notes: '', status: 'new' });
+      await logEvent('lead_created', { email: leadForm.email });
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to save lead');
+    } finally {
+      setIsSavingLead(false);
+    }
+  };
+
+  const buildUTMLink = (medium: string, campaign: string) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://durrahacademy.com';
+    const base = `${origin}?ref=${salesAgent?.access_code || ''}`;
+    const params = new URLSearchParams({ utm_medium: medium, utm_campaign: campaign, utm_source: 'sales' });
+    return `${base}&${params.toString()}`;
   };
 
   if (!salesAgent) {
@@ -181,6 +235,82 @@ export default function SalesPage() {
               <li className="flex gap-2 items-start"><CheckCircle className="w-4 h-4 text-emerald-600 mt-0.5" />Offer onboarding calls for paid signups; schedule within 24 hours.</li>
               <li className="flex gap-2 items-start"><CheckCircle className="w-4 h-4 text-emerald-600 mt-0.5" />Pair every outbound batch with your referral link to attribute wins.</li>
             </ul>
+          </div>
+        </section>
+
+        <section className="grid lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="w-5 h-5 text-indigo-600" />
+              <h2 className="text-lg font-bold text-slate-900">Capture Lead</h2>
+            </div>
+            <form onSubmit={handleLeadSubmit} className="space-y-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  value={leadForm.name}
+                  onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
+                  placeholder="Name"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500"
+                />
+                <input
+                  value={leadForm.email}
+                  onChange={(e) => setLeadForm({ ...leadForm, email: e.target.value })}
+                  placeholder="Email *"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <textarea
+                value={leadForm.notes}
+                onChange={(e) => setLeadForm({ ...leadForm, notes: e.target.value })}
+                placeholder="Notes / objection / next step"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500"
+                rows={3}
+              />
+              <div className="flex items-center gap-3">
+                <label className="text-xs font-semibold text-slate-600">Status</label>
+                <select
+                  value={leadForm.status}
+                  onChange={(e) => setLeadForm({ ...leadForm, status: e.target.value as SalesLeadForm['status'] })}
+                  className="px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500 text-sm"
+                >
+                  <option value="new">New</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="won">Won</option>
+                  <option value="lost">Lost</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                disabled={isSavingLead}
+                className="w-full py-3 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 disabled:opacity-60"
+              >
+                {isSavingLead ? 'Saving...' : 'Save Lead'}
+              </button>
+            </form>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <Shield className="w-5 h-5 text-amber-600" />
+              <h2 className="text-lg font-bold text-slate-900">Link Builder (with UTM)</h2>
+            </div>
+            <div className="space-y-3 text-sm">
+              {[{ label: 'WhatsApp Blitz', medium: 'whatsapp', campaign: 'blitz' }, { label: 'Email Nurture', medium: 'email', campaign: 'nurture' }, { label: 'Ads Remarketing', medium: 'ads', campaign: 'remarketing' }].map((preset) => {
+                const url = buildUTMLink(preset.medium, preset.campaign);
+                return (
+                  <div key={preset.label} className="border border-slate-200 rounded-lg px-3 py-2 flex items-center justify-between gap-3 bg-slate-50">
+                    <div>
+                      <p className="text-xs uppercase text-slate-500 font-semibold">{preset.label}</p>
+                      <p className="text-xs text-slate-600 truncate max-w-[300px]">{url}</p>
+                    </div>
+                    <button onClick={() => copy(url, `${preset.label} link`)} className="p-2 text-indigo-600 hover:bg-indigo-100 rounded-lg">
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </section>
 
