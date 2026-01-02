@@ -43,15 +43,12 @@ export default function Register() {
     const onSubmit = async (data: RegisterForm) => {
         setIsLoading(true);
         try {
-            const referralCode = localStorage.getItem('pending_referral_code');
-
             const { data: authData, error } = await supabase.auth.signUp({
                 email: data.email,
                 password: data.password,
                 options: {
                     data: {
                         full_name: data.name,
-                        referred_by_code: referralCode || undefined,
                     },
                 },
             });
@@ -80,33 +77,6 @@ export default function Register() {
                 } catch (emailError) {
                     console.error('Failed to send welcome email:', emailError);
                     // Continue with registration even if email fails
-                }
-            }
-
-            // Record Sales Event if referred
-            if (authData.user && referralCode) {
-                try {
-                    // 1. Resolve agent code to ID
-                    const { data: agent } = await supabase
-                        .from('sales_agents')
-                        .select('id')
-                        .eq('access_code', referralCode.toUpperCase())
-                        .single();
-
-                    if (agent) {
-                        await supabase.from('sales_events').insert({
-                            agent_id: agent.id,
-                            type: 'signup',
-                            metadata: {
-                                user_id: authData.user.id,
-                                email: data.email
-                            }
-                        });
-                        // Also clear the pending referral code
-                        localStorage.removeItem('pending_referral_code');
-                    }
-                } catch (eventError) {
-                    console.error('Failed to record sales event:', eventError);
                 }
             }
 
