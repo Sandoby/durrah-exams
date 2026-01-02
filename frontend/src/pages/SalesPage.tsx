@@ -921,7 +921,44 @@ export default function SalesPage() {
                   </div>
                   <h4 className="text-2xl font-black dark:text-white">{salesAssets.length}</h4>
                 </div>
-                {/* Add more asset summary cards if needed */}
+                {/* Brand Package Card */}
+                <div className="lg:col-span-2 bg-gradient-to-br from-indigo-600 to-indigo-700 p-6 rounded-3xl text-white flex flex-col justify-between relative overflow-hidden group">
+                  <Sparkles className="absolute top-[-10%] right-[-5%] w-32 h-32 text-white/10 group-hover:scale-110 transition-transform" />
+                  <div>
+                    <h3 className="text-lg font-black mb-1">Official Brand Package</h3>
+                    <p className="text-xs text-white/70 leading-relaxed max-w-[200px]">Use our official colors and logos to stay consistent.</p>
+                  </div>
+                  <div className="flex items-center gap-3 mt-4">
+                    <button
+                      onClick={() => {
+                        const svgData = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`;
+                        const blob = new Blob([svgData], { type: 'image/svg+xml' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'durrah-logo.svg';
+                        a.click();
+                        toast.success('Logo downloaded');
+                      }}
+                      className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                    >
+                      Download SVG
+                    </button>
+                    <div className="flex gap-1">
+                      {['#4F46E5', '#64748B', '#0F172A'].map(hex => (
+                        <button
+                          key={hex}
+                          onClick={() => copy(hex, `Color ${hex}`)}
+                          className="h-8 w-8 rounded-lg border border-white/20 hover:scale-110 transition-all flex items-center justify-center text-[8px] font-bold"
+                          style={{ backgroundColor: hex }}
+                          title={`Copy ${hex}`}
+                        >
+                          <Copy className="w-3 h-3 text-white mix-blend-difference" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-12">

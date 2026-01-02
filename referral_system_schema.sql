@@ -6,14 +6,25 @@ CREATE TABLE IF NOT EXISTS public.sales_agents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    access_code TEXT UNIQUE NOT NULL, -- Used for referral links (e.g., ?ref=CODE)
+    access_code TEXT UNIQUE NOT NULL,
     is_active BOOLEAN DEFAULT true,
-    commission_rate DECIMAL(5,2) DEFAULT 10.00, -- Optional: percentage per sale
-    tier TEXT DEFAULT 'bronze', -- 'bronze', 'silver', 'gold'
-    total_earnings DECIMAL(10,2) DEFAULT 0.00,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Ensure Partner Pro columns exist
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sales_agents' AND column_name='commission_rate') THEN
+        ALTER TABLE public.sales_agents ADD COLUMN commission_rate DECIMAL(5,2) DEFAULT 10.00;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sales_agents' AND column_name='tier') THEN
+        ALTER TABLE public.sales_agents ADD COLUMN tier TEXT DEFAULT 'bronze';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sales_agents' AND column_name='total_earnings') THEN
+        ALTER TABLE public.sales_agents ADD COLUMN total_earnings DECIMAL(10,2) DEFAULT 0.00;
+    END IF;
+END $$;
 
 -- Ensure access_code is case-insensitive for easier lookup
 CREATE INDEX IF NOT EXISTS idx_sales_agents_access_code_upper ON public.sales_agents (UPPER(access_code));
@@ -101,11 +112,22 @@ CREATE TABLE IF NOT EXISTS public.sales_assets (
     category TEXT NOT NULL, -- 'scripts', 'links', 'docs', 'graphics'
     url TEXT,
     content TEXT, -- For scripts or copy
-    thumbnail_url TEXT,
-    file_size TEXT,
-    download_count INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Ensure Partner Pro Asset columns exist
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sales_assets' AND column_name='thumbnail_url') THEN
+        ALTER TABLE public.sales_assets ADD COLUMN thumbnail_url TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sales_assets' AND column_name='file_size') THEN
+        ALTER TABLE public.sales_assets ADD COLUMN file_size TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sales_assets' AND column_name='download_count') THEN
+        ALTER TABLE public.sales_assets ADD COLUMN download_count INTEGER DEFAULT 0;
+    END IF;
+END $$;
 
 -- 9. Sales Announcements
 -- Global messages from admins to all partners.
