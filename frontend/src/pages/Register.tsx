@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, User, Loader2 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
@@ -23,8 +23,17 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function Register() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
     const { t } = useTranslation();
+
+    // Capture and persist referral code
+    useEffect(() => {
+        const refParam = searchParams.get('ref');
+        if (refParam) {
+            localStorage.setItem('pending_referral_code', refParam);
+        }
+    }, [searchParams]);
 
     const { register, handleSubmit, formState: { errors } } = useForm<RegisterForm>({
         resolver: zodResolver(registerSchema),
