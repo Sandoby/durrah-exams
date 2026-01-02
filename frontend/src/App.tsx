@@ -29,6 +29,7 @@ import { BlogList } from './pages/blog/BlogList';
 import { BlogPost } from './pages/blog/BlogPost';
 import { SubmissionSync } from './components/SubmissionSync';
 import { ExamAnalyticsDashboard } from "./components/analytics/ExamAnalyticsDashboard";
+import { ReferralTracker } from './components/ReferralTracker';
 
 import KidsLanding from './pages/KidsLanding';
 import KidsExamView from './pages/KidsExamView';
@@ -57,6 +58,7 @@ function App() {
       <LocationLanguageHandler />
       <SubmissionSync />
       <Router>
+        <ReferralTracker />
         <div className="min-h-screen bg-background text-foreground font-sans antialiased">
           <Routes>
             <Route path="/" element={<LandingPage />} />
