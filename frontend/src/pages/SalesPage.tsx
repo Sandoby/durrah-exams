@@ -42,6 +42,7 @@ export default function SalesPage() {
   const [stats, setStats] = useState({ signups: 0, converted: 0, leads: 0, revenue: 0 });
   const [_recentEvents, setRecentEvents] = useState<any[]>([]);
   const [leadsList, setLeadsList] = useState<any[]>([]);
+  const [salesAssets, setSalesAssets] = useState<any[]>([]);
   const [_isFetchingStats, setIsFetchingStats] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -102,6 +103,13 @@ export default function SalesPage() {
       });
       setRecentEvents(events || []);
       setLeadsList(leads || []);
+
+      // 6. Fetch marketing assets
+      const { data: assets } = await supabase
+        .from('sales_assets')
+        .select('*')
+        .order('created_at', { ascending: false });
+      setSalesAssets(assets || []);
     } catch (err) {
       console.error('Error fetching stats:', err);
     } finally {
@@ -645,35 +653,70 @@ export default function SalesPage() {
                 <AssetFileCard type="video" label="Step-by-Step Setup Guide" size="88 MB" color="rose" />
               </div>
 
-              <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl p-10 shadow-sm overflow-hidden relative">
-                <div className="relative z-10 grid lg:grid-cols-2 gap-10 items-center">
-                  <div className="space-y-6">
-                    <h2 className="text-3xl font-black dark:text-white">Brand Package v2.4</h2>
-                    <p className="text-slate-500 leading-relaxed">
-                      Need everything? Download our complete partner kit including logos, high-res screenshots, color palettes, and certified fonts. Always stay up to date with the latest Durrah branding.
-                    </p>
-                    <div className="flex flex-wrap gap-4">
-                      <button className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black transition-all shadow-xl shadow-indigo-600/20 flex items-center gap-2 hover:scale-105 active:scale-95">
-                        <Download className="w-5 h-5" />
-                        Download All Assets
-                      </button>
-                      <button className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-8 py-4 rounded-2xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center gap-2">
-                        <ExternalLink className="w-5 h-5" />
-                        Brand Guide
-                      </button>
+              <div className="space-y-12">
+                <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl p-8 shadow-sm">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl">
+                      <ImageIcon className="w-6 h-6 text-indigo-600" />
+                    </div>
+                    <h2 className="text-2xl font-black dark:text-white">Marketing Assets</h2>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {salesAssets.length > 0 ? salesAssets.map((asset) => (
+                      <div key={asset.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-white/5 space-y-4 hover:border-indigo-100 transition-all relative group">
+                        <div className="flex justify-between items-start">
+                          <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{asset.category}</span>
+                          {asset.category === 'docs' && asset.url && (
+                            <a href={asset.url} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-indigo-600"><Download className="w-4 h-4" /></a>
+                          )}
+                        </div>
+                        <h4 className="font-bold text-slate-900 dark:text-white">{asset.title}</h4>
+                        <p className="text-xs text-slate-500 line-clamp-4 leading-relaxed italic">"{asset.content || asset.description}"</p>
+
+                        {(asset.url || (asset.category === 'scripts' && asset.content)) && (
+                          <button
+                            onClick={() => copy(asset.url || asset.content, asset.title)}
+                            className="w-full py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all"
+                          >
+                            Copy Asset {asset.category === 'docs' ? 'Link' : 'Script'}
+                          </button>
+                        )}
+                      </div>
+                    )) : (
+                      <div className="col-span-full py-20 text-center">
+                        <p className="text-slate-500 text-sm">No assets available yet. Contact your partner manager for the latest materials.</p>
+                      </div>
+                    )}
+                  </div>
+                </section>
+
+                <section className="relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl p-8 shadow-sm">
+                  <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+                    <div className="space-y-6">
+                      <h2 className="text-3xl font-black dark:text-white">Brand Package v2.4</h2>
+                      <p className="text-slate-500 leading-relaxed">
+                        Need everything? Download our complete partner kit including logos, high-res screenshots, color palettes, and certified fonts. Always stay up to date with the latest Durrah branding.
+                      </p>
+                      <div className="flex flex-wrap gap-4">
+                        <button className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black transition-all shadow-xl shadow-indigo-600/20 flex items-center gap-2 hover:scale-105 active:scale-95">
+                          <Download className="w-5 h-5" />
+                          Download All Assets
+                        </button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="aspect-square bg-slate-50 dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-white/5 flex items-center justify-center -rotate-6 transform hover:rotate-0 transition-transform cursor-pointer">
+                        <Logo size="lg" className="opacity-40" />
+                      </div>
+                      <div className="aspect-square bg-slate-50 dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-white/5 flex items-center justify-center rotate-6 transform translate-y-8 hover:translate-y-0 hover:rotate-0 transition-all cursor-pointer">
+                        <ImageIcon className="w-12 h-12 text-indigo-500 opacity-20" />
+                      </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="aspect-square bg-slate-50 dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-white/5 flex items-center justify-center -rotate-6 transform hover:rotate-0 transition-transform cursor-pointer">
-                      <Logo size="lg" className="opacity-40" />
-                    </div>
-                    <div className="aspect-square bg-slate-50 dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-white/5 flex items-center justify-center rotate-6 transform translate-y-8 hover:translate-y-0 hover:rotate-0 transition-all cursor-pointer">
-                      <ImageIcon className="w-12 h-12 text-indigo-500 opacity-20" />
-                    </div>
-                  </div>
-                </div>
-                <BarChart3 className="absolute top-[-10%] right-[-10%] w-64 h-64 text-slate-50 dark:text-slate-900 pointer-events-none" />
-              </section>
+                  <BarChart3 className="absolute top-[-10%] right-[-10%] w-64 h-64 text-slate-50 dark:text-slate-900 pointer-events-none" />
+                </section>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

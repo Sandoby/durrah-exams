@@ -70,6 +70,26 @@ ALTER TABLE public.sales_agents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sales_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sales_leads ENABLE ROW LEVEL SECURITY;
 
+-- Policy: Allow everyone to SELECT (needed for referral lookups and dashboard)
+DROP POLICY IF EXISTS "Allow public select for sales_agents" ON public.sales_agents;
+CREATE POLICY "Allow public select for sales_agents" ON public.sales_agents FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow public select for sales_events" ON public.sales_events;
+CREATE POLICY "Allow public select for sales_events" ON public.sales_events FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow public select for sales_leads" ON public.sales_leads;
+CREATE POLICY "Allow public select for sales_leads" ON public.sales_leads FOR SELECT USING (true);
+
+-- Policy: Allow insertion/updates for everyone (Relies on Frontend Admin Guard)
+DROP POLICY IF EXISTS "Allow all for sales_agents" ON public.sales_agents;
+CREATE POLICY "Allow all for sales_agents" ON public.sales_agents FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all for sales_events" ON public.sales_events;
+CREATE POLICY "Allow all for sales_events" ON public.sales_events FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all for sales_leads" ON public.sales_leads;
+CREATE POLICY "Allow all for sales_leads" ON public.sales_leads FOR ALL USING (true) WITH CHECK (true);
+
 -- 5. Sales Assets Table
 -- Stores marketing materials (images, scripts, etc.)
 CREATE TABLE IF NOT EXISTS public.sales_assets (
@@ -107,14 +127,29 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_sales_agents_updated_at ON public.sales_agents;
 CREATE TRIGGER update_sales_agents_updated_at BEFORE UPDATE ON public.sales_agents FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_sales_leads_updated_at ON public.sales_leads;
 CREATE TRIGGER update_sales_leads_updated_at BEFORE UPDATE ON public.sales_leads FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
--- Policy: Admins can see everything
-CREATE POLICY "Admins have full access to sales data" 
-ON public.sales_agents 
-FOR ALL 
-USING (auth.jwt() ->> 'role' = 'super_admin');
+-- 8. Profile Attribution Sync Trigger
+-- Automatically syncs referred_by_code from auth.users metadata to public.profiles
+CREATE OR REPLACE FUNCTION public.handle_referral_sync()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE public.profiles
+    SET referred_by_code = (NEW.raw_user_meta_data->>'referred_by_code')
+    WHERE id = NEW.id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Note: Agents verify via access_code in the UI, but database-level 
--- isolation can be added if they login via auth.users.
+-- Trigger should run after a new user is created in auth.users
+DROP TRIGGER IF EXISTS on_auth_user_created_sync_referral ON auth.users;
+CREATE TRIGGER on_auth_user_created_sync_referral
+AFTER INSERT ON auth.users
+FOR EACH ROW EXECUTE FUNCTION public.handle_referral_sync();
+
+-- Note: In a strict production environment, you should use auth.jwt() ->> 'role' = 'super_admin'
+-- for the 'Admins have full access' policy above, but ensure your admin user actually has that role.

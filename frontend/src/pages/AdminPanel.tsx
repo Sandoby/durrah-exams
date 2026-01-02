@@ -167,7 +167,11 @@ export default function AdminPanel() {
     const [_forwardToAgentId, _setForwardToAgentId] = useState<string>('');
     const chatMessagesEndRef = useRef<HTMLDivElement>(null);
     const [salesStats, setSalesStats] = useState({ total_signups: 0, total_revenue: 0, active_agents: 0 });
+    const [salesAssets, setSalesAssets] = useState<any[]>([]);
+    const [newAsset, setNewAsset] = useState({ title: '', description: '', category: 'scripts', url: '', content: '' });
     const [isFetchingSales, setIsFetchingSales] = useState(false);
+    const [isSavingAsset, setIsSavingAsset] = useState(false);
+    const [showAssetForm, setShowAssetForm] = useState(false);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -177,6 +181,7 @@ export default function AdminPanel() {
             if (userRole === 'super_admin') {
                 fetchSupportAgents();
                 fetchSalesAgents();
+                fetchSalesAssets();
                 fetchGlobalSalesStats();
             }
         }
@@ -617,7 +622,7 @@ export default function AdminPanel() {
     };
 
     // ========== Sales Team Management (Super Admin Only) ==========
-    const generateSalesAccessCode = () => `SALES-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
 
     const fetchSalesAgents = async () => {
         if (userRole !== 'super_admin') return;
@@ -644,7 +649,11 @@ export default function AdminPanel() {
         }
 
         try {
-            const accessCode = generateSalesAccessCode();
+            const { data: codeData, error: codeError } = await supabase
+                .rpc('generate_access_code');
+
+            if (codeError) throw codeError;
+            const accessCode = codeData;
             const { error } = await supabase
                 .from('sales_agents')
                 .insert({
@@ -676,9 +685,50 @@ export default function AdminPanel() {
             if (error) throw error;
             toast.success(!currentStatus ? 'Activated' : 'Deactivated');
             fetchSalesAgents();
+        } catch (error: any) {
+            console.error('Error creating sales agent:', error);
+            toast.error(error.message || 'Failed to create sales agent');
+        }
+    };
+
+    const fetchSalesAssets = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('sales_assets')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            setSalesAssets(data || []);
         } catch (err) {
-            console.error('Error updating sales user:', err);
-            toast.error('Failed to update sales user');
+            console.error('Error fetching sales assets', err);
+        }
+    };
+
+    const createSalesAsset = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSavingAsset(true);
+        try {
+            const { error } = await supabase.from('sales_assets').insert(newAsset);
+            if (error) throw error;
+            toast.success('Asset added successfully');
+            setNewAsset({ title: '', description: '', category: 'scripts', url: '', content: '' });
+            fetchSalesAssets();
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to add asset');
+        } finally {
+            setIsSavingAsset(false);
+        }
+    };
+
+    const deleteSalesAsset = async (id: string) => {
+        if (!confirm('Delete this asset?')) return;
+        try {
+            const { error } = await supabase.from('sales_assets').delete().eq('id', id);
+            if (error) throw error;
+            toast.success('Asset deleted');
+            fetchSalesAssets();
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to delete asset');
         }
     };
 
@@ -1744,6 +1794,104 @@ export default function AdminPanel() {
                                         </tbody>
                                     </table>
                                 )}
+                            </div>
+
+                            {/* Sales Assets Management */}
+                            <div className="mt-12 space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">Marketing Assets</h3>
+                                        <p className="text-sm text-gray-500">Add scripts, links, and downloads for your sales partners.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowAssetForm(!showAssetForm)}
+                                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700"
+                                    >
+                                        {showAssetForm ? 'Hide Form' : 'Add Asset'}
+                                    </button>
+                                </div>
+
+                                {showAssetForm && (
+                                    <form onSubmit={createSalesAsset} className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-indigo-100 dark:border-indigo-900/30 space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Title</label>
+                                                <input
+                                                    type="text"
+                                                    value={newAsset.title}
+                                                    onChange={(e) => setNewAsset({ ...newAsset, title: e.target.value })}
+                                                    placeholder="e.g. WhatsApp Opener"
+                                                    className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm"
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Category</label>
+                                                <select
+                                                    value={newAsset.category}
+                                                    onChange={(e) => setNewAsset({ ...newAsset, category: e.target.value })}
+                                                    className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm"
+                                                >
+                                                    <option value="scripts">Sales Script</option>
+                                                    <option value="links">Quick Link</option>
+                                                    <option value="docs">Document / Image</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">URL / Link (Optional)</label>
+                                            <input
+                                                type="text"
+                                                value={newAsset.url}
+                                                onChange={(e) => setNewAsset({ ...newAsset, url: e.target.value })}
+                                                placeholder="https://..."
+                                                className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm font-mono"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Content / Body</label>
+                                            <textarea
+                                                value={newAsset.content}
+                                                onChange={(e) => setNewAsset({ ...newAsset, content: e.target.value })}
+                                                placeholder="Enter the script body or additional details..."
+                                                className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:text-white text-sm min-h-[100px]"
+                                            />
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            disabled={isSavingAsset}
+                                            className="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                                        >
+                                            {isSavingAsset ? 'Saving...' : 'Save Marketing Asset'}
+                                        </button>
+                                    </form>
+                                )}
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {salesAssets.map((asset) => (
+                                        <div key={asset.id} className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm space-y-3 relative group">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{asset.category}</span>
+                                                    <h4 className="font-bold text-gray-900 dark:text-white">{asset.title}</h4>
+                                                </div>
+                                                <button
+                                                    onClick={() => deleteSalesAsset(asset.id)}
+                                                    className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            <p className="text-xs text-gray-500 line-clamp-3 italic">"{asset.content || asset.description}"</p>
+                                            {asset.url && <p className="text-[10px] text-indigo-400 font-mono truncate">{asset.url}</p>}
+                                        </div>
+                                    ))}
+                                    {salesAssets.length === 0 && (
+                                        <div className="col-span-full py-10 text-center border-2 border-dashed rounded-xl text-gray-400 text-sm">
+                                            No assets uploaded yet.
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
