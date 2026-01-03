@@ -186,21 +186,7 @@ export default function ExamView() {
     useEffect(() => {
         if (!id) return;
 
-        // Check if already submitted on this device
-        const submittedFlag = localStorage.getItem(`durrah_exam_${id}_submitted`);
-        if (submittedFlag) {
-            setSubmitted(true);
-            // Optionally try to load the score if we saved it
-            const savedScore = localStorage.getItem(`durrah_exam_${id}_score`);
-            if (savedScore) {
-                const parsed = JSON.parse(savedScore);
-                setScore(parsed);
-
-            }
-            return;
-        }
-
-        // Check for active session to restore
+        // Restore any saved session state first
         const savedState = localStorage.getItem(`durrah_exam_${id}_state`);
         if (savedState) {
             try {
@@ -224,11 +210,50 @@ export default function ExamView() {
                 }
                 setHasPreviousSession(true);
                 setHasPreviousSession(true);
-                toast.success(t('examView.previousSession'));
             } catch (e) {
                 console.error('Failed to restore session', e);
             }
         }
+
+        // Check if already submitted on this device; verify on server that submission still exists
+        const submittedFlag = localStorage.getItem(`durrah_exam_${id}_submitted`);
+        const savedScore = localStorage.getItem(`durrah_exam_${id}_score`);
+
+        const verifySubmissionStillExists = async () => {
+            if (!submittedFlag) return;
+
+            // Use email/student_id from restored state if available
+            const identifier = (savedState ? JSON.parse(savedState)?.studentData?.email : null) || studentData.email || studentData.student_id;
+            if (!identifier) {
+                setSubmitted(true);
+                if (savedScore) {
+                    try { setScore(JSON.parse(savedScore)); } catch { /* noop */ }
+                }
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('submissions')
+                .select('id')
+                .eq('exam_id', id)
+                .eq('student_email', identifier)
+                .maybeSingle();
+
+            if (!error && !data) {
+                // Submission removed by tutor — clear local flags to allow retake
+                localStorage.removeItem(`durrah_exam_${id}_submitted`);
+                localStorage.removeItem(`durrah_exam_${id}_score`);
+                setSubmitted(false);
+                setScore(null);
+            } else {
+                setSubmitted(true);
+                if (savedScore) {
+                    try { setScore(JSON.parse(savedScore)); } catch { /* noop */ }
+                }
+            }
+        };
+
+        verifySubmissionStillExists();
     }, [id]);
 
     // Save state to localStorage whenever it changes
@@ -1640,7 +1665,7 @@ export default function ExamView() {
                 </div>
             )}
 
-            <div className={`max-w-4xl mx-auto ${!isZenMode ? 'pt-44 sm:pt-48' : 'pt-24'} ${highContrast ? 'contrast-150 saturate-200 brightness-110' : ''}`}>
+            <div className={`max-w-4xl mx-auto ${!isZenMode ? 'pt-44 sm:pt-48' : 'pt-24'} pb-28 sm:pb-16 ${highContrast ? 'contrast-150 saturate-200 brightness-110' : ''}`}>
                 <div
                     className="max-w-3xl mx-auto transition-all duration-300"
                     style={{ fontSize: fontSize === 'normal' ? '1rem' : fontSize === 'large' ? '1.25rem' : '1.5rem' } as React.CSSProperties}
@@ -1700,10 +1725,10 @@ export default function ExamView() {
                             // List View (Original)
                             <div className="space-y-6">
                                 {exam.questions.map((question, index) => (
-                                    <div key={question.id} className={`bg-white dark:bg-gray-800 shadow rounded-lg p-6 ${exam.settings.disable_copy_paste ? 'select-none' : ''} ${isBlurActive ? 'blur-sm pointer-events-none' : ''}`}>
+                                    <div key={question.id} className={`bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 ${exam.settings.disable_copy_paste ? 'select-none' : ''} ${isBlurActive ? 'blur-sm pointer-events-none' : ''}`}>
                                         {/* Question Content (Same as before) */}
                                         <div className="flex justify-between items-start mb-4">
-                                            <h3 className="text-[1.15em] font-bold text-gray-900 dark:text-white leading-tight">
+                                            <h3 className="text-base sm:text-[1.15em] font-bold text-gray-900 dark:text-white leading-tight">
                                                 <span className="mr-2 text-indigo-600 dark:text-indigo-400">Q{index + 1}.</span>
                                                 <Latex>{question.question_text}</Latex>
                                             </h3>
@@ -1757,7 +1782,7 @@ export default function ExamView() {
                                                         onChange={() => setAnswers({ ...answers, [question.id]: { answer: option } })}
                                                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                                                     />
-                                                    <label htmlFor={`q${question.id}-o${optIndex}`} className="ml-3 block text-[1em] text-gray-700 dark:text-gray-300">
+                                                    <label htmlFor={`q${question.id}-o${optIndex}`} className="ml-3 block text-sm sm:text-[1em] text-gray-700 dark:text-gray-300">
                                                         <Latex>{option}</Latex>
                                                     </label>
                                                 </div>
@@ -1783,7 +1808,7 @@ export default function ExamView() {
 
                                             {question.type === 'short_answer' && (
                                                 <textarea
-                                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-[1em]"
+                                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm sm:text-[1em]"
                                                     rows={3}
                                                     value={answers[question.id]?.answer || ''}
                                                     onChange={(e) => setAnswers({ ...answers, [question.id]: { answer: e.target.value } })}
@@ -1813,20 +1838,20 @@ export default function ExamView() {
                                     return (
                                         <div 
                                             key={question.id} 
-                                            className={`bg-white dark:bg-gray-800 shadow rounded-lg p-6 min-h-[50vh] transition-transform duration-150 ${exam.settings.disable_copy_paste ? 'select-none' : ''} ${isBlurActive ? 'blur-sm pointer-events-none' : ''} ${
+                                            className={`bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 min-h-[50vh] transition-transform duration-150 ${exam.settings.disable_copy_paste ? 'select-none' : ''} ${isBlurActive ? 'blur-sm pointer-events-none' : ''} ${
                                                 swipeDirection === 'left' ? '-translate-x-4 opacity-75' : swipeDirection === 'right' ? 'translate-x-4 opacity-75' : ''
                                             }`}
                                         >
                                             {/* Feature 8: Read Aloud Button */}
-                                            <div className="flex items-center justify-between mb-4">
-                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                            <div className="flex items-center justify-between mb-4 gap-2">
+                                                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                                                     Question {currentQuestionIndex + 1} of {exam.questions.length}
                                                 </h3>
                                                 <button
                                                     type="button"
                                                     onClick={() => speakQuestion(question.question_text)}
                                                     className={`
-                                                        flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium
+                                                        flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium
                                                         transition-all duration-200 hover:scale-105
                                                         ${isSpeaking
                                                             ? 'bg-indigo-600 text-white shadow-lg'
@@ -1853,7 +1878,7 @@ export default function ExamView() {
                                             </div>
 
                                             <div className="mb-6">
-                                                <h3 className="text-[1.2em] font-bold text-gray-900 dark:text-white leading-relaxed">
+                                                <h3 className="text-base sm:text-[1.1em] font-bold text-gray-900 dark:text-white leading-relaxed">
                                                     <Latex>{question.question_text}</Latex>
                                                 </h3>
                                             </div>
@@ -1964,12 +1989,12 @@ export default function ExamView() {
                                             )}
 
                                             {/* Navigation Buttons */}
-                                            <div className="flex justify-between items-center mt-8 pt-6 border-t dark:border-gray-700">
+                                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mt-6 sm:mt-8 pt-5 border-t dark:border-gray-700">
                                                 <button
                                                     type="button"
                                                     onClick={goToPrevQuestion}
                                                     disabled={currentQuestionIndex === 0}
-                                                    className={`px-4 py-2 rounded-md text-sm font-medium ${currentQuestionIndex === 0 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                                                    className={`px-4 py-2 rounded-md text-sm font-medium w-full sm:w-auto text-center ${currentQuestionIndex === 0 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
                                                 >
                                                     Previous
                                                 </button>
@@ -1990,7 +2015,7 @@ export default function ExamView() {
                                                     <button
                                                         type="button"
                                                         onClick={goToNextQuestion}
-                                                        className="px-6 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                                        className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full sm:w-auto"
                                                     >
                                                         Next Question
                                                     </button>
@@ -1999,7 +2024,7 @@ export default function ExamView() {
                                                         type="button"
                                                         onClick={handleSubmitWithCheck}
                                                         disabled={isSubmitting}
-                                                        className="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                                                        className="inline-flex justify-center py-2 px-5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 w-full sm:w-auto"
                                                     >
                                                         {isSubmitting ? (
                                                             <>
@@ -2315,7 +2340,7 @@ export default function ExamView() {
                 {started && !isReviewMode && (
                     <button
                         onClick={() => setShowScratchpad(!showScratchpad)}
-                        className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-3 rounded-full shadow-lg hover:scale-105 transform transition-all duration-200 z-30 group"
+                        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-3 rounded-full shadow-lg hover:scale-105 transform transition-all duration-200 z-40 group"
                         aria-label="Open scratchpad"
                     >
                         <div className="relative">
@@ -2335,8 +2360,8 @@ export default function ExamView() {
                 {/* Feature 4: Scratchpad Panel */}
                 {showScratchpad && !isScratchpadMinimized && (
                     <div 
-                        className="fixed bottom-20 right-6 w-80 h-[300px] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-indigo-200 dark:border-indigo-700 flex flex-col z-40 overflow-hidden"
-                        style={{ maxWidth: 'calc(100vw - 3rem)', maxHeight: 'calc(100vh - 10rem)' }}
+                        className="fixed bottom-24 sm:bottom-20 right-3 left-3 sm:left-auto sm:right-6 w-full max-w-[360px] sm:w-80 h-[280px] sm:h-[300px] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-indigo-200 dark:border-indigo-700 flex flex-col z-40 overflow-hidden"
+                        style={{ maxWidth: 'calc(100vw - 1.5rem)', maxHeight: 'calc(100vh - 12rem)' }}
                     >
                         {/* Header */}
                         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-3 py-2 flex items-center justify-between cursor-move">

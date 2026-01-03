@@ -265,20 +265,22 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
             const { error: ansErr } = await supabase
                 .from('submission_answers')
                 .delete()
-                .eq('submission_id', submission.id);
+                .eq('submission_id', submission.id)
+                .eq('exam_id', examId);
             if (ansErr) throw ansErr;
 
             const { error: subErr } = await supabase
                 .from('submissions')
                 .delete()
-                .eq('id', submission.id);
+                .eq('id', submission.id)
+                .eq('exam_id', examId);
             if (subErr) throw subErr;
 
             setSubmissions((prev) => prev.filter((s) => s.id !== submission.id));
             toast.success('Student can re-enter the exam now');
         } catch (error) {
             console.error('Failed to allow retake', error);
-            toast.error('Failed to allow retake');
+            toast.error('Failed to allow retake (permissions or network)');
         } finally {
             setReopenId(null);
         }
@@ -483,7 +485,7 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
                             </div>
                         </div>
 
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto hidden sm:block">
                             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead className="bg-gray-50 dark:bg-gray-900">
                                     <tr>
@@ -561,6 +563,53 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+
+                        {/* Mobile cards */}
+                        <div className="space-y-4 sm:hidden">
+                            {filteredSubmissions.map((submission, index) => (
+                                <div key={submission.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 space-y-3 border border-gray-100 dark:border-gray-700">
+                                    <div className="flex justify-between items-center">
+                                        <div className="text-sm text-gray-500 dark:text-gray-400">#{index + 1}</div>
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">{new Date(submission.created_at).toLocaleDateString()}</div>
+                                    </div>
+                                    <div className="text-base font-semibold text-gray-900 dark:text-white">
+                                        {getStudentFieldValue(submission, requiredFields[0] || 'name')}
+                                    </div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-300 flex flex-wrap gap-2">
+                                        {requiredFields.slice(1).map(field => (
+                                            <span key={field} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-xs">{getStudentFieldValue(submission, field)}</span>
+                                        ))}
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-3 text-sm">
+                                        <span className="font-semibold text-gray-900 dark:text-white">{submission.score} / {submission.max_score}</span>
+                                        <span className={`px-2 py-1 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full ${(submission.score / submission.max_score) >= 0.5
+                                            ? 'bg-green-100 text-green-800 border border-green-200'
+                                            : 'bg-red-100 text-red-800 border border-red-200'
+                                            }`}>
+                                            {(submission.max_score > 0 ? ((submission.score / submission.max_score) * 100).toFixed(1) : 0)}%
+                                        </span>
+                                        <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                                            <Clock className="h-3.5 w-3.5" /> {formatDuration(submission.time_taken)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => openSubmissionDetail(submission)}
+                                            className="flex-1 px-3 py-2 text-xs font-semibold rounded-md bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+                                        >
+                                            View
+                                        </button>
+                                        <button
+                                            onClick={() => handleAllowRetake(submission)}
+                                            disabled={reopenId === submission.id}
+                                            className="flex-1 px-3 py-2 text-xs font-semibold rounded-md bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-200 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1"
+                                        >
+                                            <RotateCcw className="h-3.5 w-3.5" /> {reopenId === submission.id ? 'Working...' : 'Allow Retake'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
 
                         {/* Leaderboard is not shown here; only in Kids Mode branch above */}
