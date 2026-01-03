@@ -1,15 +1,4 @@
 {
-    "math": {
-        "togglePreview": "Preview Math",
-        "help": "Supports LaTeX (e.g. $$x^2$$)",
-        "insert": "Insert Formula"
-    },
-    "common": {
-        "dir": "ltr",
-        "forTutors": "for Tutors",
-        "true": "True",
-        "false": "False"
-    },
     "hero": {
         "title": "Create Exams That",
         "titleHighlight": "Inspire Excellence",
@@ -23,7 +12,7 @@
         },
         "features": {
             "noCreditCard": "No credit card required",
-            "freeExams": "Free for up to 3 exams (lifetime)",
+            "freeExams": "Free for up to 3 exams",
             "cancelAnytime": "Cancel anytime"
         }
     },
@@ -31,10 +20,8 @@
         "features": "Features",
         "pricing": "Pricing",
         "testimonials": "Testimonials",
-        "blog": "Blog",
         "login": "Login",
-        "getStarted": "Get Started Free",
-        "goToDashboard": "Go to Dashboard"
+        "getStarted": "Get Started Free"
     },
     "stats": {
         "tutors": "Active Tutors",
@@ -79,7 +66,7 @@
             "title": "Starter",
             "price": "Free",
             "features": [
-                "Up to 3 exams (lifetime)",
+                "Up to 3 exams",
                 "50 students per exam",
                 "Basic analytics"
             ],
@@ -139,8 +126,7 @@
             "forgotPassword": "Forgot password?",
             "submit": "Sign in",
             "noAccount": "Don't have an account?",
-            "register": "Sign up",
-            "back": "Back"
+            "register": "Sign up"
         },
         "register": {
             "title": "Create an account",
@@ -152,44 +138,6 @@
             "submit": "Sign up",
             "hasAccount": "Already have an account?",
             "login": "Sign in"
-        },
-        "forgotPassword": {
-            "title": "Reset your password",
-            "desc": "Enter your email address and we'll send you a link to reset your password.",
-            "emailLabel": "Email address",
-            "submit": "Send reset link",
-            "sending": "Sending link...",
-            "backToLogin": "Back to sign in",
-            "goStudentPortal": "Go to Student Portal",
-            "successTitle": "Check your email",
-            "successDesc": "We have sent a password reset link to your email address.",
-            "or": "Or"
-        },
-        "updatePassword": {
-            "title": "Set new password",
-            "subtitle": "Please enter your new password below.",
-            "newPasswordLabel": "New Password",
-            "confirmPasswordLabel": "Confirm New Password",
-            "submit": "Update password",
-            "updating": "Updating password..."
-        },
-        "validation": {
-            "name": "Name must be at least 2 characters",
-            "email": "Invalid email address",
-            "passwordMin": "Password must be at least 6 characters",
-            "passwordMatch": "Passwords don't match"
-        },
-        "messages": {
-            "loginSuccess": "Logged in successfully",
-            "loginError": "Invalid email or password",
-            "registerSuccess": "Registration successful! Please check your email to verify your account.",
-            "emailInUse": "This email is already registered. Please sign in instead.",
-            "registerError": "Registration failed",
-            "resetLinkSent": "Password reset link sent to your email",
-            "resetLinkError": "Failed to send reset link",
-            "passwordUpdated": "Password updated successfully",
-            "passwordUpdateError": "Failed to update password",
-            "invalidLink": "Invalid or expired reset link"
         }
     },
     "footer": {
@@ -197,20 +145,7 @@
         "product": "Product",
         "features": "Features",
         "signup": "Sign Up",
-        "copyright": "© 2025 Durrah for Tutors. All rights reserved.",
-        "legalTitle": "Legal",
-        "links": {
-            "pricing": "Pricing",
-            "testimonials": "Testimonials",
-            "blog": "Blog",
-            "contact": "Contact"
-        },
-        "legal": {
-            "privacy": "Privacy Policy",
-            "terms": "Terms of Service",
-            "refund": "Refund Policy",
-            "cancellation": "Cancellation Policy"
-        }
+        "copyright": "© 2025 Durrah for Tutors. All rights reserved."
     },
     "ctaSection": {
         "title": "Ready to Transform Your Exams?",
@@ -275,7 +210,6 @@
     },
     "dashboard": {
         "title": "My Exams",
-        "subTitle": "Manage and monitor your exams",
         "createExam": "Create New Exam",
         "questionBank": "Question Bank",
         "noExams": {
@@ -288,62 +222,18 @@
             "inactive": "Inactive"
         },
         "actions": {
-            "copyLink": "Share",
-            "print": "Print",
-            "results": "Results",
-            "analytics": "Stats",
-            "analyticsLocked": "Stats (Pro)",
+            "copyLink": "Copy Link",
+            "print": "Print / Save as PDF",
+            "results": "View Results",
+            "analytics": "Analytics Dashboard",
+            "analyticsLocked": "Analytics (Premium Only)",
             "edit": "Edit",
             "delete": "Delete"
         },
         "deleteConfirm": "Are you sure you want to delete this exam?",
         "linkCopied": "Exam link copied!",
         "deleteSuccess": "Exam deleted successfully",
-        "upgradeLimit": "Free Tier Limit: You can create up to 3 exams. Upgrade to Professional for unlimited exams!",
-        "overLimitWarning": "You've reached the free tier limit. Upgrade to continue creating more exams.",
-        "modals": {
-            "share": {
-                "title": "Share Exam",
-                "kidsTitle": "Kids Exam",
-                "kidsSubtitle": "Kids Mode • Single Question View",
-                "qrNote": "Scan to join",
-                "qrDirectNote": "SCAN FOR DIRECT ACCESS",
-                "qrStartNote": "SCAN TO START",
-                "portalLink": "Student Portal Link",
-                "accessCode": "Access Code",
-                "noCode": "NO CODE",
-                "tutorNote": "⚠️ Remind your students to create their accounts and sign in BEFORE the exam starts to avoid losing time!",
-                "whatsapp": "WhatsApp",
-                "copyAll": "Copy All",
-                "directLink": "Direct Link (No Code Required)",
-                "detailsCopied": "All details copied",
-                "linkCopied": "Link copied",
-                "codeCopied": "Code copied"
-            },
-            "delete": {
-                "title": "Delete Exam?",
-                "desc": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone and all student results will be lost.",
-                "confirm": "Yes, Delete",
-                "cancel": "Cancel"
-            },
-            "results": {
-                "subtitle": "Results & Performance Analytics"
-            }
-        },
-        "examCard": "Once you create exams, they'll appear here. Each card shows your exam details",
-        "print": {
-            "studentInfo": "Student Info (fill before starting):",
-            "fullName": "Full Name",
-            "email": "Email",
-            "studentId": "Student ID",
-            "phone": "Phone",
-            "footerNote": "This printout is for administering the exam on paper. Students should write legibly and include their name on each page."
-        },
-        "demo": {
-            "statusError": "Cannot change status in demo mode",
-            "banner": "Demo Mode - Explore and try features. Sign up when ready to save your work!",
-            "back": "Back to Demo"
-        }
+        "upgradeLimit": "Free plan is limited to 3 exams. Upgrade to Pro for unlimited!"
     },
     "settings": {
         "title": "Settings",
@@ -397,184 +287,6 @@
                     "desc": "Clean, distraction-free experience for both you and your students."
                 }
             }
-        },
-        "language": {
-            "title": "Language",
-            "desc": "Choose your preferred language for the interface",
-            "current": "Current Language"
-        }
-    },
-    "mobileWelcome": {
-        "title": "Choose your learning path",
-        "tutor": {
-            "title": "Tutor Access",
-            "desc": "Manage exams & students"
-        },
-        "student": {
-            "title": "Student Portal",
-            "desc": "Take exams & track progress"
-        },
-        "kids": {
-            "title": "Kids Adventure",
-            "desc": "Fun learning & games"
-        },
-        "version": "Mobile App"
-    },
-    "questionBank": {
-        "titlePart1": "Question",
-        "titlePart2": "Banks",
-        "subtitle": "Centralize and reuse your expertise effectively",
-        "createBank": "Create New Bank",
-        "libraries": "Your Libraries",
-        "noBanks": {
-            "title": "No question banks yet.",
-            "desc": "Create your first one!"
-        },
-        "questions": "questions",
-        "collectionLibrary": "Collection Library",
-        "searchPlaceholder": "Search items in this bank...",
-        "addQuestion": "Add Question",
-        "export": {
-            "title": "Export",
-            "pdf": "Export as PDF",
-            "word": "Export as Word",
-            "json": "Export as JSON"
-        },
-        "delete": "Delete",
-        "types": {
-            "multiple_choice": "Multiple Choice",
-            "multiple_select": "Multiple Select",
-            "dropdown": "Dropdown Selection",
-            "true_false": "True / False",
-            "short_answer": "Short Text Response",
-            "numeric": "Numerical Value"
-        },
-        "difficulty": {
-            "easy": "Easy",
-            "medium": "Medium",
-            "hard": "Hard"
-        },
-        "points": "Points",
-        "option": "Option",
-        "removeOption": "Remove option",
-        "limitReach": "Free users are limited to 1 Question Bank.",
-        "noQuestions": {
-            "found": "No questions found",
-            "import": "No questions yet. Import some!"
-        },
-        "selectLibrary": {
-            "title": "Select a Library",
-            "desc": "Choose a question bank from the sidebar to start managing your collection"
-        },
-        "createModal": {
-            "title": "Create Library",
-            "subtitle": "Group your questions by topic or subject",
-            "nameLabel": "Library Name",
-            "namePlaceholder": "e.g., Mathematics Vol. 1",
-            "descLabel": "Brief Description (optional)",
-            "descPlaceholder": "What topics does this library cover?",
-            "submit": "Create Library",
-            "cancel": "Cancel"
-        },
-        "addQuestionModal": {
-            "title": "New Question",
-            "subtitle": "Adding to",
-            "promptLabel": "Question Prompt *",
-            "promptPlaceholder": "What would you like to ask?",
-            "typeLabel": "Response Format *",
-            "choicesLabel": "Choices",
-            "addChoice": "Add Choice",
-            "correctAnswerLabel": "Correct Answer *",
-            "correctAnswerPlaceholder": "Enter the correct answer...",
-            "pointsLabel": "Points",
-            "difficultyLabel": "Difficulty",
-            "categoryLabel": "Category (optional)",
-            "categoryPlaceholder": "e.g., Biology, Chapter 3",
-            "tagsLabel": "Tags (optional, comma-separated)",
-            "tagsPlaceholder": "e.g., important, exam2024",
-            "submit": "Add to Library",
-            "cancel": "Cancel"
-        },
-        "demo": {
-            "save": "Demo mode: Sign up to save your own question banks",
-            "delete": "Demo mode: Sign up to delete and manage banks",
-            "add": "Demo mode: Sign up to add your own questions",
-            "banner": "Demo Mode: Build Your Perfect Question Library",
-            "back": "Back to Demo"
-        },
-        "validation": {
-            "name": "Please enter a bank name",
-            "question": "Please enter a question",
-            "bankSelect": "Please select a question bank first",
-            "options": "Please provide at least 2 options",
-            "correctAnswer": "Please select a correct answer"
-        },
-        "success": {
-            "created": "Question bank created successfully",
-            "deleted": "Question bank deleted",
-            "questionAdded": "Question added successfully!",
-            "questionDeleted": "Question deleted"
-        },
-        "error": {
-            "create": "Failed to create question bank",
-            "delete": "Failed to delete question bank",
-            "add": "Failed to add question",
-            "deleteQuestion": "Failed to delete question",
-            "noExport": "No questions to export"
-        },
-        "confirm": {
-            "deleteBank": "Are you sure you want to delete this question bank? All questions will be removed.",
-            "deleteQuestion": "Delete this question?"
-        }
-    },
-    "studentPortal": {
-        "title": "Student Portal",
-        "regSuccess": "Registration successful! Please check your email.",
-        "welcome": "Welcome back!",
-        "notFound": "Exam not found. Please check the code.",
-        "error": "An error occurred. Please try again.",
-        "signIn": "Sign in to Student Portal",
-        "createAccount": "Create Student Account",
-        "signOut": "Sign Out",
-        "joinExam": "Join an Exam",
-        "joinDesc": "Enter the Exam Code provided by your tutor to start a new assessment.",
-        "enterCode": "Enter Exam Code or ID",
-        "joining": "Joining...",
-        "start": "Start",
-        "performance": "Your Performance",
-        "examsTaken": "Exams Taken",
-        "avgScore": "Avg. Score",
-        "recentActivity": "Recent Activity",
-        "noExams": "No exams found yet. Join your first exam above!",
-        "untitled": "Untitled Exam",
-        "noDesc": "No description"
-    },
-    "kidsLanding": {
-        "missionCenter": "Mission Center",
-        "readySystem": "SYSTEM READY FOR TAKEOFF",
-        "readyTitle": "Ready for",
-        "readyTitleHighlight": "Takeoff?",
-        "subtitle": "Join the galaxy's smartest explorers! Enter your mission nickname and secret code to start your planetary challenge.",
-        "commander": "Commander AI",
-        "protocol": "Advanced Protocol",
-        "rankings": "Rankings",
-        "badges": "Earn Cosmic Badges",
-        "callsign": "Explorer Callsign",
-        "callsignPlaceholder": "e.g. CaptainCosmos",
-        "missionCode": "Mission Code",
-        "blastOff": "BLAST OFF!",
-        "constellation": "Dynamic Constellation Activated",
-        "poweredBy": "Powered By",
-        "cosmicSolutions": "Cosmic Exam Solutions",
-        "backHome": "Back to Home",
-        "validation": {
-            "nickname": "Please enter a nickname",
-            "code": "Please enter the quiz code",
-            "invalid": "Invalid code",
-            "notEnabled": "This quiz is not enabled for kids mode"
-        },
-        "error": {
-            "failed": "Failed to open quiz"
         }
     },
     "examEditor": {
@@ -599,11 +311,6 @@
             "title": "Email Access Control",
             "desc": "Restrict exam access to specific email addresses",
             "enable": "Enable email restriction"
-        },
-        "validation": {
-            "title": "Please enter an exam title.",
-            "description": "Please enter a description.",
-            "noQuestions": "Please add at least one question."
         },
         "settings": {
             "title": "Exam Settings",
@@ -633,12 +340,8 @@
             "remove": "Remove",
             "type": "Question Type",
             "points": "Points",
-            "question": "Question",
-            "questionText": "Question Text",
-            "questionTextPlaceholder": "Enter your question here...",
-            "questionImage": "Question Image",
+            "text": "Question Text",
             "options": "Options",
-            "option": "Option",
             "addOption": "Add Option",
             "correctAnswer": "Correct Answer",
             "numericAnswer": "Correct Numeric Answer (Optional)",
@@ -656,13 +359,13 @@
                 "false": "False"
             },
             "validation": {
-                "title": "Please enter an exam title.",
-                "description": "Please enter a description.",
-                "noQuestions": "Please add at least one question.",
-                "questionText": "Question {{num}} is missing text.",
-                "minOptions": "Question {{num}} needs at least 2 options.",
-                "emptyOption": "Question {{num}} has empty options.",
-                "correctAnswer": "Question {{num}} needs a correct answer."
+                "titleRequired": "Please enter an exam title.",
+                "descriptionRequired": "Please enter a description.",
+                "questionsRequired": "Please add at least one question.",
+                "questionTextRequired": "Question {{index}} is missing text.",
+                "optionsRequired": "Question {{index}} needs at least 2 options.",
+                "optionTextRequired": "Question {{index}} has empty options.",
+                "correctAnswerRequired": "Question {{index}} needs a correct answer."
             },
             "success": {
                 "saved": "Exam saved successfully!",
@@ -729,7 +432,8 @@
         "success": {
             "submitted": "Exam submitted successfully!"
         }
-    },
+    }
+    ,
     "kids": {
         "seo": {
             "title": "Kids Quiz Adventure | Safe, Fun, Anti-Cheating | Durrah",
@@ -762,93 +466,6 @@
             "rewards": "🏆 Win Rewards",
             "games": "🎮 Cool Games",
             "star": "⭐ Be a Star"
-        }
-    },
-    "landing": {
-        "seo": {
-            "title": "Durrah for Tutors | Create Secure Online Exams",
-            "description": "Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.",
-            "keywords": "online exams, anti-cheating, kids mode, educator tools, digital assessment"
-        },
-        "marketing": {
-            "kids": {
-                "badge": "Playful & Safe",
-                "title": "Kids Mode: The Ultimate Quiz Adventure",
-                "titleSpan": "Ultimate",
-                "desc": "Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.",
-                "features": [
-                    "Gaming Psychology",
-                    "Safe Community",
-                    "Interactive Worlds",
-                    "Rewards System"
-                ],
-                "cta": "Blast Off!"
-            },
-            "student": {
-                "badge": "Track & Grow",
-                "title": "Empower Students with a Unified Portal",
-                "titleSpan": "Unified Portal",
-                "desc": "Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.",
-                "features": [
-                    "Performance Tracking",
-                    "Personalized Dashboards",
-                    "Growth Insights",
-                    "Secure Access"
-                ],
-                "cta": "Visit Student Portal"
-            }
-        },
-        "mobileApp": {
-            "title": "Get the Mobile App",
-            "subtitle": "Access exams anywhere with our native Android application",
-            "appName": "Durrah Tutors",
-            "version": "Version 1.1.0",
-            "features": {
-                "tutorAccess": "Tutor & Student Access",
-                "notifications": "Real-time Push Notifications",
-                "kidsMode": "Kids Mode with Gamification",
-                "secure": "Secure Exam Taking"
-            },
-            "download": "Download for Android",
-            "specs": "Free • ~35 MB • Android 7.0+",
-            "grid": {
-                "alerts": {
-                    "title": "Instant Alerts",
-                    "desc": "Get notified when tutors publish new exams"
-                },
-                "modes": {
-                    "title": "Multiple Modes",
-                    "desc": "Switch between tutor, student, and kids modes"
-                },
-                "adventure": {
-                    "title": "Kids Adventure",
-                    "desc": "Gamified space-themed quizzes for children"
-                },
-                "security": {
-                    "title": "Secure & Fast",
-                    "desc": "Native performance with secure authentication"
-                }
-            }
-        },
-        "faq": {
-            "title": "Frequently Asked Questions",
-            "subtitle": "Everything you need to know about Durrah",
-            "q1": {
-                "question": "Is Durrah really safe for kids?",
-                "answer": "Yes! We prioritize safety with filtered content, secure nickname-only access options, and zero data selling."
-            },
-            "q2": {
-                "question": "How does the anti-cheating system work?",
-                "answer": "Our system uses AI to detect tab switching, fullscreen escapes, and suspicious behavior patterns without intrusive software."
-            },
-            "q3": {
-                "question": "Can I use Durrah for large school groups?",
-                "answer": "Absolutely. Our \"Professional\" and \"Yearly\" plans are designed for high-capacity testing with detailed analytics."
-            },
-            "q4": {
-                "question": "Do students need an account?",
-                "answer": "Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress."
-            }
         }
     }
 }

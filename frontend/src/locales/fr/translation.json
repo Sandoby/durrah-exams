@@ -1,15 +1,4 @@
 {
-    "math": {
-        "togglePreview": "Aperçu Math",
-        "help": "Supporte LaTeX (ex. $$x^2$$)",
-        "insert": "Insérer une formule"
-    },
-    "common": {
-        "dir": "ltr",
-        "forTutors": "for Tutors",
-        "true": "Vrai",
-        "false": "Faux"
-    },
     "hero": {
         "title": "Créez des Examens Qui",
         "titleHighlight": "Inspirent l'Excellence",
@@ -31,10 +20,8 @@
         "features": "Fonctionnalités",
         "pricing": "Tarifs",
         "testimonials": "Témoignages",
-        "blog": "Blog",
         "login": "Connexion",
-        "getStarted": "Commencer Gratuitement",
-        "goToDashboard": "Aller au Tableau de Bord"
+        "getStarted": "Commencer Gratuitement"
     },
     "stats": {
         "tutors": "Tuteurs Actifs",
@@ -69,14 +56,6 @@
         "interface": {
             "title": "Interface Intuitive",
             "desc": "Facile à utiliser, fonctionnalités puissantes"
-        }
-    },
-    "print": {
-        "title": "Tarification simple et transparente",
-        "subtitle": "Commencez gratuitement, mettez à niveau quand vous êtes prêt",
-        "badge": "Tarifs",
-        "starter": {
-            "title": "Démarrage"
         }
     },
     "pricing": {
@@ -145,62 +124,23 @@
         "login": {
             "title": "Bon retour",
             "subtitle": "Connectez-vous à votre compte",
-            "emailLabel": "Adresse e-mail",
+            "emailLabel": "Adresse email",
             "passwordLabel": "Mot de passe",
             "forgotPassword": "Mot de passe oublié ?",
             "submit": "Se connecter",
             "noAccount": "Pas de compte ?",
-            "register": "S'inscrire",
-            "back": "Retour"
+            "register": "S'inscrire"
         },
         "register": {
             "title": "Créer un compte",
-            "subtitle": "Commencez à créer des examens sécurisés dès aujourd'hui",
-            "nameLabel": "Nom complet",
-            "emailLabel": "Adresse e-mail",
+            "subtitle": "Commencez à créer des examens sécurisés aujourd'hui",
+            "nameLabel": "Nom Complet",
+            "emailLabel": "Adresse email",
             "passwordLabel": "Mot de passe",
             "confirmPasswordLabel": "Confirmer le mot de passe",
             "submit": "S'inscrire",
-            "hasAccount": "Déjà un compte ?",
+            "hasAccount": "Vous avez déjà un compte ?",
             "login": "Se connecter"
-        },
-        "forgotPassword": {
-            "title": "Réinitialiser votre mot de passe",
-            "desc": "Entrez votre adresse e-mail et nous vous enverrons un lien de réinitialisation.",
-            "emailLabel": "Adresse e-mail",
-            "submit": "Envoyer le lien",
-            "sending": "Envoi en cours...",
-            "backToLogin": "Retour à la connexion",
-            "goStudentPortal": "Aller au portail étudiant",
-            "successTitle": "Vérifiez vos e-mails",
-            "successDesc": "Nous avons envoyé un lien de réinitialisation à votre adresse e-mail.",
-            "or": "Ou"
-        },
-        "updatePassword": {
-            "title": "Nouveau mot de passe",
-            "subtitle": "Veuillez entrer votre nouveau mot de passe ci-dessous.",
-            "newPasswordLabel": "Nouveau mot de passe",
-            "confirmPasswordLabel": "Confirmer le nouveau mot de passe",
-            "submit": "Mettre à jour",
-            "updating": "Mise à jour..."
-        },
-        "validation": {
-            "name": "Le nom doit contenir au moins 2 caractères",
-            "email": "Adresse e-mail invalide",
-            "passwordMin": "Le mot de passe doit contenir au moins 6 caractères",
-            "passwordMatch": "Les mots de passe ne correspondent pas"
-        },
-        "messages": {
-            "loginSuccess": "Connexion réussie",
-            "loginError": "E-mail ou mot de passe invalide",
-            "registerSuccess": "Inscription réussie ! Veuillez vérifier vos e-mails pour activer votre compte.",
-            "emailInUse": "Cet e-mail est déjà enregistré. Veuillez vous connecter.",
-            "registerError": "Échec de l'inscription",
-            "resetLinkSent": "Lien de réinitialisation envoyé par e-mail",
-            "resetLinkError": "Échec de l'envoi du lien",
-            "passwordUpdated": "Mot de passe mis à jour avec succès",
-            "passwordUpdateError": "Échec de la mise à jour",
-            "invalidLink": "Lien invalide ou expiré"
         }
     },
     "footer": {
@@ -208,20 +148,7 @@
         "product": "Produit",
         "features": "Fonctionnalités",
         "signup": "S'inscrire",
-        "copyright": "© 2025 Durrah for Tutors. Tous droits réservés.",
-        "legalTitle": "Légal",
-        "links": {
-            "pricing": "Tarification",
-            "testimonials": "Témoignages",
-            "blog": "Blog",
-            "contact": "Contact"
-        },
-        "legal": {
-            "privacy": "Politique de Confidentialité",
-            "terms": "Conditions d'Utilisation",
-            "refund": "Politique de Remboursement",
-            "cancellation": "Politique d'Annulation"
-        }
+        "copyright": "© 2025 Durrah pour les Tuteurs. Tous droits réservés."
     },
     "ctaSection": {
         "title": "Prêt à Transformer Vos Examens ?",
@@ -286,7 +213,6 @@
     },
     "dashboard": {
         "title": "Mes Examens",
-        "subTitle": "Gérez et surveillez vos examens",
         "createExam": "Créer un Nouvel Examen",
         "questionBank": "Banque de Questions",
         "noExams": {
@@ -310,135 +236,7 @@
         "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet examen ?",
         "linkCopied": "Lien de l'examen copié !",
         "deleteSuccess": "Examen supprimé avec succès",
-        "footerNote": "Cette copie est destinée à l'administration de l'examen sur papier. Les étudiants doivent écrire lisiblement et inclure leur nom sur chaque page."
-    },
-    "demo": {
-        "statusError": "Impossible de changer le statut en mode démo",
-        "banner": "Mode Démo - Explorez et essayez les fonctionnalités. Inscrivez-vous pour sauvegarder votre travail !",
-        "back": "Retour à la Démo"
-    },
-    "mobileWelcome": {
-        "title": "Choisissez votre parcours",
-        "tutor": {
-            "title": "Accès Tuteur",
-            "desc": "Gérer examens et étudiants"
-        },
-        "student": {
-            "title": "Portail Étudiant",
-            "desc": "Passer des examens et suivre le progrès"
-        },
-        "kids": {
-            "title": "Aventure Enfants",
-            "desc": "Apprentissage ludique et jeux"
-        },
-        "version": "Application Mobile"
-    },
-    "questionBank": {
-        "titlePart1": "Banques de",
-        "titlePart2": "Questions",
-        "subtitle": "Centralisez et réutilisez votre expertise efficacement",
-        "createBank": "Créer une Nouvelle Banque",
-        "libraries": "Vos Bibliothèques",
-        "noBanks": {
-            "title": "Pas encore de banques de questions.",
-            "desc": "Créez votre première !"
-        },
-        "questions": "questions",
-        "collectionLibrary": "Bibliothèque de Collection",
-        "searchPlaceholder": "Rechercher des éléments dans cette banque...",
-        "addQuestion": "Ajouter une Question",
-        "export": {
-            "title": "Exporter",
-            "pdf": "Exporter en PDF",
-            "word": "Exporter en Word",
-            "json": "Exporter en JSON"
-        },
-        "delete": "Supprimer",
-        "types": {
-            "multiple_choice": "Choix multiple",
-            "multiple_select": "Sélection multiple",
-            "dropdown": "Liste déroulante",
-            "true_false": "Vrai / Faux",
-            "short_answer": "Réponse courte",
-            "numeric": "Valeur numérique"
-        },
-        "difficulty": {
-            "easy": "Facile",
-            "medium": "Moyen",
-            "hard": "Difficile"
-        },
-        "points": "Points",
-        "option": "Option",
-        "removeOption": "Supprimer l'option",
-        "limitReach": "Les utilisateurs gratuits sont limités à 1 banque de questions.",
-        "noQuestions": {
-            "found": "Aucune question trouvée",
-            "import": "Pas encore de questions. Importez-en !"
-        },
-        "selectLibrary": {
-            "title": "Sélectionnez une Bibliothèque",
-            "desc": "Choisissez une banque de questions dans la barre latérale pour commencer à gérer votre collection"
-        },
-        "createModal": {
-            "title": "Créer une Bibliothèque",
-            "subtitle": "Groupez vos questions par sujet ou matière",
-            "nameLabel": "Nom de la Bibliothèque",
-            "namePlaceholder": "ex: Mathématiques Vol. 1",
-            "descLabel": "Brève Description (optionnel)",
-            "descPlaceholder": "Quels sujets couvre cette bibliothèque ?",
-            "submit": "Créer la Bibliothèque",
-            "cancel": "Annuler"
-        },
-        "addQuestionModal": {
-            "title": "Nouvelle Question",
-            "subtitle": "Ajout à",
-            "promptLabel": "Énoncé de la Question *",
-            "promptPlaceholder": "Que voulez-vous demander ?",
-            "typeLabel": "Format de Réponse *",
-            "choicesLabel": "Choix",
-            "addChoice": "Ajouter un Choix",
-            "correctAnswerLabel": "Bonne Réponse *",
-            "correctAnswerPlaceholder": "Entrez la bonne réponse...",
-            "pointsLabel": "Points",
-            "difficultyLabel": "Difficulté",
-            "categoryLabel": "Catégorie (optionnel)",
-            "categoryPlaceholder": "ex: Biologie, Chapitre 3",
-            "tagsLabel": "Tags (optionnel, séparés par des virgules)",
-            "tagsPlaceholder": "ex: important, examen2024",
-            "submit": "Ajouter à la Bibliothèque",
-            "cancel": "Annuler"
-        },
-        "demo": {
-            "save": "Mode démo : Inscrivez-vous pour sauvegarder vos banques",
-            "delete": "Mode démo : Inscrivez-vous pour gérer les banques",
-            "add": "Mode démo : Inscrivez-vous pour ajouter des questions",
-            "banner": "Mode Démo : Construisez Votre Bibliothèque de Questions Parfaite",
-            "back": "Retour à la Démo"
-        },
-        "validation": {
-            "name": "Veuillez entrer un nom",
-            "question": "Veuillez entrer une question",
-            "bankSelect": "Sélectionnez d'abord une banque",
-            "options": "Au moins 2 options requises",
-            "correctAnswer": "Sélectionnez la bonne réponse"
-        },
-        "success": {
-            "created": "Banque créée avec succès",
-            "deleted": "Banque supprimée",
-            "questionAdded": "Question ajoutée !",
-            "questionDeleted": "Question supprimée"
-        },
-        "error": {
-            "create": "Échec de création",
-            "delete": "Échec de suppression",
-            "add": "Échec d'ajout",
-            "deleteQuestion": "Échec de suppression",
-            "noExport": "Rien à exporter"
-        },
-        "confirm": {
-            "deleteBank": "Supprimer cette banque ? Toutes les questions seront effacées.",
-            "deleteQuestion": "Supprimer cette question ?"
-        }
+        "upgradeLimit": "Le plan gratuit est limité à 3 examens. Passez à la version Pro pour un nombre illimité !"
     },
     "settings": {
         "title": "Paramètres",
@@ -492,11 +290,6 @@
                     "desc": "Expérience propre et sans distraction."
                 }
             }
-        },
-        "language": {
-            "title": "Langue",
-            "desc": "Choisissez votre langue préférée pour l'interface",
-            "current": "Langue actuelle"
         }
     },
     "examEditor": {
@@ -592,39 +385,6 @@
             "copyPaste": "Copier/Coller désactivé",
             "maxViolations": "Violations max :"
         },
-        "createExam": "Cliquez ici pour créer un nouvel examen avec des questions et des paramètres personnalisés",
-        "overLimitWarning": "Vous avez atteint la limite du niveau gratuit. Passez à la version supérieure pour continuer à créer d'autres examens.",
-        "upgradeLimit": "Limite du Niveau Gratuit : Vous pouvez créer jusqu'à 3 examens. Passez à la version Professionnelle pour des examens illimités !",
-        "modals": {
-            "share": {
-                "title": "Partager l'Examen",
-                "kidsTitle": "Examen Enfants",
-                "kidsSubtitle": "Mode Enfants • Vue Question Unique",
-                "qrNote": "Scanner pour rejoindre",
-                "qrDirectNote": "SCANNER POUR ACCÈS DIRECT",
-                "qrStartNote": "SCANNER POUR COMMENCER",
-                "portalLink": "Lien vers le Portail Étudiant",
-                "accessCode": "Code d'Accès",
-                "noCode": "PAS DE CODE",
-                "tutorNote": "⚠️ Rappelez à vos étudiants de créer leurs comptes et de se connecter AVANT le début de l'examen pour éviter de perdre du temps !",
-                "whatsapp": "WhatsApp",
-                "copyAll": "Tout copier",
-                "directLink": "Lien Direct (Aucun code requis)",
-                "detailsCopied": "Tous les détails copiés",
-                "linkCopied": "Lien copié",
-                "codeCopied": "Code copié"
-            },
-            "delete": {
-                "title": "Supprimer l'examen ?",
-                "desc": "Êtes-vous sûr de vouloir supprimer \"{{title}}\" ? Cette action ne peut pas être annulée et tous les résultats des étudiants seront perdus.",
-                "confirm": "Oui, supprimer",
-                "cancel": "Annuler"
-            },
-            "results": {
-                "subtitle": "Résultats et analyses de performance"
-            }
-        },
-        "examCard": "Une fois que vous aurez créé des examens, ils apparaîtront ici. Chaque carte affiche les détails de votre examen",
         "iphoneHelp": {
             "title": "Aide à la Soumission iPhone/Safari",
             "privateMode": "Assurez-vous que Safari n'est pas en mode Privé.",
@@ -666,7 +426,8 @@
         "success": {
             "submitted": "Examen soumis avec succès !"
         }
-    },
+    }
+    ,
     "kids": {
         "seo": {
             "title": "Aventure Quiz Enfants | Sûr, Amusant, Anti-Triche | Durrah",
@@ -699,143 +460,6 @@
             "rewards": "🏆 Gagne des récompenses",
             "games": "🎮 Jeux sympas",
             "star": "⭐ Deviens une star"
-        }
-    },
-    "studentPortal": {
-        "title": "Portail Étudiant",
-        "regSuccess": "Inscription réussie ! Veuillez vérifier votre email.",
-        "welcome": "Bon retour !",
-        "notFound": "Examen introuvable. Vérifiez le code.",
-        "error": "Une erreur est survenue.",
-        "signIn": "Connexion Portail Étudiant",
-        "createAccount": "Créer compte étudiant",
-        "signOut": "Déconnexion",
-        "joinExam": "Rejoindre un examen",
-        "joinDesc": "Entrez le code d'examen pour commencer.",
-        "enterCode": "Entrez le code ou ID",
-        "joining": "Adhésion...",
-        "start": "Démarrer",
-        "performance": "Votre Performance",
-        "examsTaken": "Examens Passés",
-        "avgScore": "Score Moy.",
-        "recentActivity": "Activité Récente",
-        "noExams": "Aucun examen trouvé.",
-        "untitled": "Examen sans titre",
-        "noDesc": "Pas de description"
-    },
-    "kidsLanding": {
-        "missionCenter": "Centre de Mission",
-        "readySystem": "SYSTÈME PRÊT AU DÉCOLLAGE",
-        "readyTitle": "Prêt au",
-        "readyTitleHighlight": "Décollage ?",
-        "subtitle": "Rejoignez les explorateurs les plus intelligents de la galaxie ! Entrez votre pseudo et code secret pour commencer.",
-        "commander": "Commandant IA",
-        "protocol": "Protocole Avancé",
-        "rankings": "Classements",
-        "badges": "Gagnez des Badges Cosmiques",
-        "callsign": "Pseudo Explorateur",
-        "callsignPlaceholder": "ex: CapitaineCosmos",
-        "missionCode": "Code Mission",
-        "blastOff": "DÉCOLLAGE !",
-        "constellation": "Constellation Dynamique Activée",
-        "poweredBy": "Propulsé Par",
-        "cosmicSolutions": "Solutions d'Examens Cosmiques",
-        "backHome": "Retour Accueil",
-        "validation": {
-            "nickname": "Veuillez entrer un pseudo",
-            "code": "Veuillez entrer le code quiz",
-            "invalid": "Code invalide",
-            "notEnabled": "Ce quiz n'est pas activé pour le mode enfants"
-        },
-        "error": {
-            "failed": "Échec d'ouverture du quiz"
-        }
-    },
-    "landing": {
-        "seo": {
-            "title": "Durrah for Tutors | Créez des Examens en Ligne Sécurisés",
-            "description": "Créez des examens professionnels en quelques minutes. Durrah for Tutors offre de puissantes fonctionnalités anti-triche, une notation automatique et des analyses détaillées pour les éducateurs du monde entier.",
-            "keywords": "examens en ligne, anti-triche, mode enfants, outils pour éducateurs, évaluation numérique"
-        },
-        "marketing": {
-            "kids": {
-                "badge": "Ludique et Sûr",
-                "title": "Mode Enfants : L'Aventure Quiz Ultime",
-                "titleSpan": "Ultime",
-                "desc": "Transformez les évaluations en un voyage amusant. Notre mode enfants propose des visuels vibrants, une navigation simplifiée et un système anti-triche de classe mondiale qui ressemble à un jeu, pas à un test.",
-                "features": [
-                    "Psychologie du Jeu",
-                    "Communauté Sûre",
-                    "Mondes Interactifs",
-                    "système de Récompenses"
-                ],
-                "cta": "Décollage !"
-            },
-            "student": {
-                "badge": "Suivi et Croissance",
-                "title": "Donnez du Pouvoir aux Étudiants avec un Portail Unifié",
-                "titleSpan": "Portail Unifié",
-                "desc": "Offrez à vos étudiants un centre névralgique pour gérer leur parcours académique. De l'inscription aux examens avec un simple code au suivi des performances passées et à l'examen d'analyses approfondies.",
-                "features": [
-                    "Suivi des Performances",
-                    "Tableaux de Bord Personnalisés",
-                    "Aperçus de Croissance",
-                    "Accès Sécurisé"
-                ],
-                "cta": "Visiter le Portail Étudiant"
-            }
-        },
-        "mobileApp": {
-            "title": "Obtenez l'Application Mobile",
-            "subtitle": "Accédez aux examens n'importe où avec notre application Android native",
-            "appName": "Durrah Tutors",
-            "version": "Version 1.1.0",
-            "features": {
-                "tutorAccess": "Accès Tuteur & Étudiant",
-                "notifications": "Notifications Push en Temps Réel",
-                "kidsMode": "Mode Enfants avec Gamification",
-                "secure": "Passage d'Examens Sécurisé"
-            },
-            "download": "Télécharger pour Android",
-            "specs": "Gratuit • ~35 MB • Android 7.0+",
-            "grid": {
-                "alerts": {
-                    "title": "Alertas Instantanées",
-                    "desc": "Soyez notifié lorsque les tuteurs publient de nouveaux examens"
-                },
-                "modes": {
-                    "title": "Plusieurs Modes",
-                    "desc": "Basculez entre les modes tuteur, étudiant et enfants"
-                },
-                "adventure": {
-                    "title": "Aventure Enfants",
-                    "desc": "Quizzes ludiques sur le thème de l'espace pour les enfants"
-                },
-                "security": {
-                    "title": "Sécurisé & Rapide",
-                    "desc": "Performance native avec authentification sécurisée"
-                }
-            }
-        },
-        "faq": {
-            "title": "Foire Aux Questions",
-            "subtitle": "Tout ce que vous devez savoir sur Durrah",
-            "q1": {
-                "question": "Durrah est-il vraiment sûr pour les enfants ?",
-                "answer": "Oui ! Nous accordons la priorité à la sécurité avec un contenu filtré, des options d'accès sécurisées par pseudonyme uniquement et aucune vente de données."
-            },
-            "q2": {
-                "question": "Comment fonctionne le système anti-triche ?",
-                "answer": "Notre système utilise l'IA pour détecter les changements d'onglets, les sorties du mode plein écran et les comportements suspects sans logiciel intrusif."
-            },
-            "q3": {
-                "question": "Puis-je utiliser Durrah pour de grands groupes scolaires ?",
-                "answer": "Absolument. Nos forfaits 'Professionnel' et 'Annuel' sont conçus pour des tests à grande échelle avec des analyses détaillées."
-            },
-            "q4": {
-                "question": "Les étudiants ont-ils besoin d'un compte ?",
-                "answer": "Les étudiants peuvent rejoindre des examens avec seulement un code et un pseudonyme, ou utiliser le Portail Étudiant pour suivre leurs progrès à long terme."
-            }
         }
     }
 }

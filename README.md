@@ -1,6 +1,6 @@
 # 🎓 Durrah Exams - Advanced Online Examination & Learning Platform
 
-A modern, full-stack online examination platform with advanced anti-cheating measures, server-side grading, AI-powered features, sales workspace, and comprehensive admin management.
+A modern, full-stack online examination platform with advanced anti-cheating measures, server-side grading, AI-powered features, realtime chat support, sales workspace, and comprehensive admin management system.
 
 ![Version](https://img.shields.io/badge/version-3.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -8,6 +8,25 @@ A modern, full-stack online examination platform with advanced anti-cheating mea
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-3178C6?logo=typescript)
 ![Supabase](https://img.shields.io/badge/Supabase-Latest-3ECF8E?logo=supabase)
 ![Vite](https://img.shields.io/badge/Vite-7.2.2-646CFF?logo=vite)
+![Python](https://img.shields.io/badge/Python-3.9+-3776AB?logo=python)
+
+> 🚀 A comprehensive platform trusted by tutors and educational institutions for creating, managing, and delivering online examinations with enterprise-grade security and AI capabilities.
+
+---
+
+## 📑 Table of Contents
+
+- [Features](#-features)
+- [Tech Stack](#️-tech-stack)
+- [Quick Start](#-quick-start)
+- [Project Structure](#-project-structure)
+- [Database Schema](#-database-schema)
+- [API Documentation](#-api-documentation)
+- [Testing](#-testing)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
+- [Roadmap](#️-roadmap)
+- [Support](#-support)
 
 ---
 
@@ -53,8 +72,19 @@ A modern, full-stack online examination platform with advanced anti-cheating mea
 - **Support Agents**: Create and manage support team with access codes
 - **Sales Team Management**: Create sales users with access codes and performance tracking
 - **Analytics Dashboard**: System-wide metrics and insights
-- **Push Notifications**: Send targeted notifications to users
+- **Push Notifications**: Send targeted notifications to users via Firebase Cloud Messaging
 - **Mockups Gallery**: Download promotional screenshots
+- **Realtime Monitoring**: Live chat sessions and system health tracking
+
+### 💬 Realtime Chat System
+- **Live Support**: Real-time chat between users and support agents
+- **Agent Assignment**: Automatic and manual agent assignment to chat sessions
+- **Chat Ratings**: Users can rate their support experience
+- **Message History**: Full conversation history with timestamps
+- **Typing Indicators**: See when someone is typing
+- **Online Status**: Real-time presence tracking for agents
+- **File Sharing**: Share images and documents in chat
+- **Emoji Support**: Rich text messaging with emoji reactions
 
 ### 📊 Sales Workspace
 - **Sales Page**: Dedicated workspace for sales team with access code login
@@ -78,6 +108,14 @@ A modern, full-stack online examination platform with advanced anti-cheating mea
 - **Secure Payments**: Kashier integration for subscriptions
 - **Access Code System**: Secure authentication for agents and sales
 
+### 🤖 AI & Advanced Features
+- **Multiple AI Providers**: Support for OpenAI, Gemini, Groq, and Claude
+- **AI Question Generation**: Generate exam questions from topics or learning objectives
+- **Hybrid AI Extraction**: Extract questions from PDFs and images
+- **Smart Answer Validation**: Intelligent grading for subjective questions
+- **LaTeX Support**: Full mathematical notation rendering with KaTeX
+- **Document Processing**: OCR and text extraction capabilities
+
 ---
 
 ## 🏗️ Tech Stack
@@ -99,6 +137,8 @@ A modern, full-stack online examination platform with advanced anti-cheating mea
 - **FastAPI** (Python) - Enhanced backend with AI features
 - **Row Level Security** (RLS) for data protection
 - **Realtime Subscriptions** for live chat and updates
+- **Edge Functions** for serverless compute (Deno runtime)
+- **Supabase Storage** for file uploads and media management
 
 ### Mobile
 - **Capacitor 8** for native iOS/Android apps
@@ -107,24 +147,29 @@ A modern, full-stack online examination platform with advanced anti-cheating mea
 
 ### Payments & Integrations
 - **Kashier** payment gateway integration
-- **Firebase** (Analytics, Cloud Messaging)
+- **Firebase** (Analytics, Cloud Messaging for push notifications)
 - **Puppeteer** for screenshot generation
 - **XLSX** for Excel exports
 - **jsPDF** + **docx** for document generation
+- **Capacitor Plugins**: Camera, Biometric, Push Notifications, Local Storage
 
 ### AI & Advanced Features
-- **OpenAI** integration for question generation
-- **Hybrid AI extraction** for document processing
-- **LaTeX** support for mathematical content
+- **OpenAI GPT-4** for intelligent question generation
+- **Google Gemini** for multimodal AI capabilities
+- **Groq** for fast AI inference
+- **Anthropic Claude** for advanced reasoning
+- **Puppeteer** for web scraping and document processing
+- **LaTeX** support for mathematical content via KaTeX
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ and npm
-- Supabase account
-- Python 3.9+ (if using FastAPI backend)
+- **Node.js** 18+ and npm/pnpm
+- **Supabase** account (free tier available)
+- **Python** 3.9+ (optional, for FastAPI backend)
+- **Git** for version control
 
 ### 1. Clone the Repository
 ```bash
@@ -135,12 +180,18 @@ cd durrah-exams
 ### 2. Setup Supabase
 
 1. Create a new project at [supabase.com](https://supabase.com)
-2. Run the database schema:
-   ```bash
-   # In Supabase SQL Editor, run:
-   cat supabase_schema.sql
+2. Run the database schema migrations in the SQL Editor:
+   - Execute `COMPLETE_ADMIN_SYSTEM_MIGRATION.sql` for core tables
+   - Execute `FINAL_CHAT_SCHEMA.sql` for chat functionality
+   - Execute `analytics_migration.sql` for analytics
+   - Execute other migration files as needed
+3. Enable Realtime for chat tables:
+   ```sql
+   -- In Supabase Dashboard → Database → Replication
+   -- Enable realtime for: chat_messages, chat_sessions
    ```
-3. Get your credentials from Project Settings → API
+4. Get your credentials from Project Settings → API
+5. (Optional) Configure SMTP for email notifications
 
 ### 3. Configure Frontend
 
@@ -149,13 +200,46 @@ cd frontend
 
 # Install dependencies
 npm install
+# or
+pnpm install
 
 # Create environment file
 cp .env.example .env.local
 
-# Edit .env.local with your Supabase credentials
+# Edit .env.local with your credentials
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_KASHIER_API_KEY=your-kashier-key (optional)
+VITE_FIREBASE_CONFIG=your-firebase-config (optional)
+```
+
+### 4. Configure Backend (Optional - FastAPI)
+
+```bash
+cd backend
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+.\venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Create .env file
+cp .env.example .env
+
+# Edit .env with your API keys
+OPENAI_API_KEY=your-openai-key
+GEMINI_API_KEY=your-gemini-key
+GROQ_API_KEY=your-groq-key
+ANTHROPIC_API_KEY=your-claude-key
+SUPABASE_URL=your-supabase-url
+SUPABASE_KEY=your-supabase-service-role-key
 ```
 
 ### 4. Run Development Server

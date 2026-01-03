@@ -4,9 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
-import { LogOut, BookOpen, Clock, Trophy, Search, User, ArrowRight, History, ArrowLeft } from 'lucide-react';
+import { LogOut, BookOpen, Clock, Trophy, Search, User, ArrowRight, History } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { Capacitor } from '@capacitor/core';
 
 export default function StudentPortal() {
   const { t, i18n } = useTranslation();
@@ -151,22 +150,7 @@ export default function StudentPortal() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-gray-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
-        {/* Mobile Back Button */}
-        {Capacitor.isNativePlatform() && (
-          <button
-            onClick={() => {
-              localStorage.removeItem('durrah_mobile_path');
-              navigate('/mobile-welcome');
-            }}
-            className="absolute top-6 left-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-all hover:scale-105"
-            aria-label="Back to welcome"
-          >
-            <ArrowLeft className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Back</span>
-          </button>
-        )}
-
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-gray-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="flex justify-center">
             <Logo size="lg" />
@@ -181,7 +165,7 @@ export default function StudentPortal() {
             <form className="space-y-6" onSubmit={handleAuth}>
               {authMode === 'register' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.profile.fullName', 'Full Name')}</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('Full Name')}</label>
                   <div className="mt-1 relative rounded-md shadow-sm">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <User className="h-5 w-5 text-gray-400" />
@@ -199,7 +183,7 @@ export default function StudentPortal() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.profile.email', 'Email address')}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('Email address')}</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <User className="h-5 w-5 text-gray-400" />
@@ -218,7 +202,7 @@ export default function StudentPortal() {
               <div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t('settings.password.new', 'Password')}
+                    {t('Password')}
                   </label>
                   <input
                     type="password"
@@ -235,7 +219,7 @@ export default function StudentPortal() {
                         onClick={() => navigate('/forgot-password')}
                         className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
                       >
-                        {t('auth.forgotPassword', 'Forgot password?')}
+                        {t('Forgot password?')}
                       </button>
                     </div>
                   )}
@@ -247,7 +231,7 @@ export default function StudentPortal() {
                 disabled={loading}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform hover:scale-[1.02] transition-all"
               >
-                {loading ? t('auth.processing', 'Processing...') : authMode === 'login' ? t('auth.signIn', 'Sign In') : t('auth.createAccount', 'Create Account')}
+                {loading ? t('Processing...') : authMode === 'login' ? t('Sign In') : t('Create Account')}
               </button>
             </form>
 
@@ -258,7 +242,7 @@ export default function StudentPortal() {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
-                    {authMode === 'login' ? t('auth.newToDurrah', 'New to Durrah?') : t('auth.alreadyHaveAccount', 'Already have an account?')}
+                    {authMode === 'login' ? t('New to Durrah?') : t('Already have an account?')}
                   </span>
                 </div>
               </div>
@@ -268,7 +252,7 @@ export default function StudentPortal() {
                   onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
                   className="w-full flex justify-center py-3 px-4 border-2 border-indigo-100 dark:border-gray-600 rounded-full shadow-sm text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                 >
-                  {authMode === 'login' ? t('studentPortal.createAccount', 'Create Student Account') : t('auth.signInInstead', 'Sign In instead')}
+                  {authMode === 'login' ? t('studentPortal.createAccount', 'Create Student Account') : t('Sign In instead')}
                 </button>
               </div>
             </div>
@@ -279,17 +263,16 @@ export default function StudentPortal() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
-        <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
-          <div className="flex justify-between h-16 px-6">
-            <div className="flex items-center gap-3">
-              <Logo className="h-9 w-9" showText={false} />
-              <div className="flex flex-col">
-                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">{t('studentPortal.title', 'Student Portal')}</span>
-              </div>
+      <nav className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <Logo size="md" showText={false} />
+              <span className="ml-2 text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                {t('studentPortal.title', 'Student Portal')}
+              </span>
             </div>
             <div className="flex items-center space-x-4">
               <div className="hidden sm:flex flex-col items-end mr-2">
