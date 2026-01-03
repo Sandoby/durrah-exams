@@ -752,6 +752,11 @@ export default function ExamView() {
             toast.error(availabilityMessage || t('examView.notAvailable'));
             return;
         }
+
+        // Initialize timer if not already set but exam has a limit
+        if ((timeLeft === null || timeLeft === undefined) && exam?.settings?.time_limit_minutes) {
+            setTimeLeft(exam.settings.time_limit_minutes * 60);
+        }
         if (exam?.settings.require_fullscreen) {
             // Attempt fullscreen for all devices, but don't block if it fails
             try {
