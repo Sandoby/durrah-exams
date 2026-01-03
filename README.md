@@ -1001,26 +1001,192 @@ pytest --cov=. --cov-report=html
 
 ## 🚢 Deployment
 
-### Frontend (Vercel)
+## 🚢 Deployment
+
+### Frontend Deployment (Vercel - Recommended)
+
 ```bash
 cd frontend
+
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
 vercel
 
-# Set environment variables in Vercel dashboard
+# Set environment variables in Vercel dashboard:
+# - VITE_SUPABASE_URL
+# - VITE_SUPABASE_ANON_KEY
+# - VITE_KASHIER_API_KEY (optional)
 ```
 
-### Backend Options
+**Alternative: Netlify**
+```bash
+# Build
+npm run build
+
+# Deploy dist/ folder to Netlify
+# Configure environment variables in Netlify dashboard
+```
+
+### Backend Deployment
 
 #### Option 1: Supabase Edge Functions (Recommended)
+
 ```bash
+# Install Supabase CLI
+npm install -g supabase
+
+# Login
+supabase login
+
+# Link project
+supabase link --project-ref your-project-ref
+
+# Deploy functions
 supabase functions deploy grade-exam
+supabase functions deploy send-email
+
+# Set secrets
+supabase secrets set OPENAI_API_KEY=your-key
+supabase secrets set GEMINI_API_KEY=your-key
 ```
 
-#### Option 2: FastAPI on Railway
+#### Option 2: FastAPI on Railway/Render
+
+**Railway:**
 ```bash
+# Install Railway CLI
+npm i -g @railway/cli
+
+# Login
+railway login
+
+# Initialize
 railway init
+
+# Deploy
 railway up
+
+# Add environment variables in Railway dashboard
 ```
+
+**Render:**
+1. Connect GitHub repository
+2. Select "Web Service"
+3. Build command: `pip install -r requirements.txt`
+4. Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+5. Add environment variables
+
+### Database Setup
+
+1. **Supabase Project Setup**
+   - Create project at [supabase.com](https://supabase.com)
+   - Note project URL and API keys
+
+2. **Run Migrations**
+   ```sql
+   -- Execute in Supabase SQL Editor in order:
+   1. COMPLETE_ADMIN_SYSTEM_MIGRATION.sql
+   2. FINAL_CHAT_SCHEMA.sql
+   3. analytics_migration.sql
+   4. enable_realtime.sql
+   ```
+
+3. **Enable Realtime**
+   - Go to Database → Replication
+   - Enable for: `chat_messages`, `chat_sessions`
+
+4. **Configure Storage**
+   - Create bucket: `exam-attachments`
+   - Create bucket: `chat-files`
+   - Set appropriate policies
+
+### Mobile App Deployment
+
+#### Android (Google Play)
+
+```bash
+cd frontend
+
+# Build production app
+npm run build:mobile
+
+# Sync with Capacitor
+npx cap sync android
+
+# Open Android Studio
+npx cap open android
+
+# Build → Generate Signed Bundle/APK
+# Upload to Google Play Console
+```
+
+#### iOS (App Store)
+
+```bash
+cd frontend
+
+# Build production app
+npm run build:mobile
+
+# Sync with Capacitor
+npx cap sync ios
+
+# Open Xcode
+npx cap open ios
+
+# Product → Archive
+# Submit to App Store Connect
+```
+
+### Environment Variables
+
+#### Frontend (.env.production)
+```bash
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_KASHIER_API_KEY=your-kashier-key
+VITE_FIREBASE_API_KEY=your-firebase-key
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
+```
+
+#### Backend (.env)
+```bash
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+OPENAI_API_KEY=your-openai-key
+GEMINI_API_KEY=your-gemini-key
+GROQ_API_KEY=your-groq-key
+ANTHROPIC_API_KEY=your-claude-key
+KASHIER_API_KEY=your-kashier-key
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+```
+
+### Post-Deployment Checklist
+
+- [ ] Verify all environment variables are set
+- [ ] Test database connections
+- [ ] Verify authentication flows
+- [ ] Test payment integration
+- [ ] Check realtime subscriptions
+- [ ] Test email notifications
+- [ ] Verify mobile app builds
+- [ ] Configure custom domain (if applicable)
+- [ ] Set up SSL certificates
+- [ ] Configure CORS policies
+- [ ] Enable monitoring and logging
+- [ ] Set up error tracking (Sentry)
+- [ ] Configure analytics (Google Analytics)
+- [ ] Test all API endpoints
+- [ ] Verify file upload limits
+- [ ] Check rate limiting
+- [ ] Review security headers
 
 See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed instructions.
 
@@ -1028,13 +1194,70 @@ See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed instructions.
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please follow these steps:
+We welcome contributions from the community! Here's how you can help:
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Getting Started
+
+1. **Fork the repository**
+   ```bash
+   # Click "Fork" on GitHub
+   git clone https://github.com/your-username/durrah-exams.git
+   cd durrah-exams
+   ```
+
+2. **Create a feature branch**
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+
+3. **Make your changes**
+   - Follow the existing code style
+   - Add tests for new features
+   - Update documentation as needed
+
+4. **Commit your changes**
+   ```bash
+   git add .
+   git commit -m 'Add amazing feature'
+   ```
+
+5. **Push to your fork**
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+
+6. **Open a Pull Request**
+   - Go to the original repository
+   - Click "New Pull Request"
+   - Select your fork and branch
+   - Describe your changes
+
+### Contribution Guidelines
+
+- **Code Style**: Follow TypeScript/React best practices
+- **Testing**: Add unit tests for new features
+- **Documentation**: Update README and inline comments
+- **Commits**: Use clear, descriptive commit messages
+- **PRs**: Keep pull requests focused and atomic
+
+### Areas for Contribution
+
+- 🐛 Bug fixes
+- ✨ New features
+- 📝 Documentation improvements
+- 🎨 UI/UX enhancements
+- 🧪 Test coverage
+- 🌐 Translations
+- ♿ Accessibility improvements
+- ⚡ Performance optimizations
+
+### Development Setup
+
+See the [Quick Start](#-quick-start) section for development environment setup.
+
+### Code of Conduct
+
+Please be respectful and constructive in all interactions. We're building this together!
 
 ---
 
@@ -1042,65 +1265,262 @@ Contributions are welcome! Please follow these steps:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+```
+MIT License
+
+Copyright (c) 2026 Durrah Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+```
+
 ---
 
 ## 🙏 Acknowledgments
 
-- [Supabase](https://supabase.com) for the amazing backend platform
-- [Vercel](https://vercel.com) for hosting
-- [Lucide](https://lucide.dev) for beautiful icons
-- [TailwindCSS](https://tailwindcss.com) for styling utilities
+- **[Supabase](https://supabase.com)** - For the amazing backend-as-a-service platform
+- **[Vercel](https://vercel.com)** - For seamless frontend hosting
+- **[Lucide Icons](https://lucide.dev)** - For beautiful, consistent icons
+- **[TailwindCSS](https://tailwindcss.com)** - For utility-first styling
+- **[React Team](https://react.dev)** - For the incredible React framework
+- **[Vite](https://vitejs.dev)** - For lightning-fast build tooling
+- **[OpenAI](https://openai.com)** - For AI capabilities
+- **[Capacitor](https://capacitorjs.com)** - For mobile app framework
+- **Open Source Community** - For inspiration and contributions
 
 ---
 
 ## 📧 Support
 
-For support, email support@durrahexams.com or open an issue on GitHub.
+### Get Help
+
+- **📚 Documentation**: Check our comprehensive [docs](docs/)
+- **💬 Community Chat**: Join our live support chat
+- **🐛 Bug Reports**: [Open an issue](https://github.com/yourusername/durrah-exams/issues)
+- **💡 Feature Requests**: [Submit your ideas](https://github.com/yourusername/durrah-exams/discussions)
+- **📧 Email**: support@durrahexams.com
+- **🌐 Website**: [www.durrahexams.com](https://www.durrahexams.com)
+
+### FAQ
+
+**Q: Is there a free tier?**
+A: Yes! Free tier includes basic exam creation with limitations. See [FEATURE_COMPARISON.md](FEATURE_COMPARISON.md).
+
+**Q: Can I self-host?**
+A: Absolutely! Follow the deployment guide for self-hosting instructions.
+
+**Q: What browsers are supported?**
+A: All modern browsers (Chrome, Firefox, Safari, Edge). IE is not supported.
+
+**Q: Is it mobile-friendly?**
+A: Yes! Fully responsive web app + native iOS/Android apps.
+
+**Q: How secure is the anti-cheating system?**
+A: Multi-layered security including fullscreen enforcement, tab tracking, and server-side validation.
+
+**Q: Can I export exam results?**
+A: Yes! Export to Excel, PDF, and Word formats.
+
+**Q: Is there an API?**
+A: Yes! Full REST API and realtime subscriptions available.
 
 ---
 
 ## 🗺️ Roadmap
 
-### Completed ✅
-- [x] Server-side grading
+## 🗺️ Roadmap
+
+### ✅ Completed (v1.0 - v3.0)
+- [x] Core exam creation and management
+- [x] Multiple question types support
+- [x] Server-side grading system
 - [x] Advanced analytics dashboard
 - [x] Question bank management
-- [x] Mobile app (Capacitor)
+- [x] Mobile app (Capacitor - iOS & Android)
 - [x] Kids mode interface
 - [x] Payment integration (Kashier)
-- [x] Support chat system
+- [x] Realtime support chat system
 - [x] Sales team workspace
 - [x] Admin panel with full management
 - [x] Exam activation/deactivation
 - [x] Multiple export formats (Excel, PDF, Word)
-- [x] Live chat with realtime updates
-- [x] Push notifications
+- [x] Live chat with agent assignment
+- [x] Push notifications (Firebase FCM)
+- [x] Anti-cheating measures
+- [x] Multi-AI provider support (OpenAI, Gemini, Groq, Claude)
+- [x] LaTeX math rendering
+- [x] Offline submission queue
+- [x] Tutorial mode for exams
 
-### In Progress 🚧
-- [ ] Free vs Paid user restrictions
+### 🚧 In Progress (v3.1)
+- [ ] Free vs Paid user restrictions and feature gating
 - [ ] Advanced sales analytics and leaderboards
-- [ ] Email notifications for exam results
-- [ ] AI-powered proctoring
-- [ ] Bulk exam operations
+- [ ] Email notification system for exam results
+- [ ] AI-powered proctoring with webcam monitoring
+- [ ] Bulk exam operations (import/export/duplicate)
+- [ ] Scheduled exam publishing
+- [ ] Custom branding for tutors
+- [ ] White-label solutions
 
-### Planned 📋
+### 📋 Planned (v3.2+)
+
+#### Security & Monitoring
 - [ ] Video recording during exams
-- [ ] Integration with LMS platforms (Moodle, Canvas)
-- [ ] Advanced AI question generation
-- [ ] Collaborative exam editing
+- [ ] AI-based plagiarism detection
+- [ ] Advanced behavior analytics
+- [ ] Biometric authentication (enhanced)
+- [ ] Screen recording review
+
+#### Integration & Compatibility
+- [ ] LMS integration (Moodle, Canvas, Blackboard)
+- [ ] Google Classroom integration
+- [ ] Microsoft Teams integration
+- [ ] Calendar integration (Google Calendar, Outlook)
+- [ ] SSO (Single Sign-On) support
+- [ ] SCORM compliance
+
+#### AI & Automation
+- [ ] Advanced AI question generation from syllabi
+- [ ] Automated question difficulty assessment
+- [ ] Smart question recommendation
 - [ ] Student performance predictions
+- [ ] Adaptive testing (questions adjust to student level)
 - [ ] Automated plagiarism detection
-- [ ] Calendar integration for exam scheduling
+- [ ] AI essay grading
+
+#### Collaboration & Social
+- [ ] Collaborative exam editing
+- [ ] Peer review system
+- [ ] Student study groups
+- [ ] Discussion forums
+- [ ] Public question marketplace
+- [ ] Tutor networking
+
+#### Advanced Features
+- [ ] Live proctoring with human proctors
+- [ ] Oral exams via video call
+- [ ] Gamification system (badges, achievements)
+- [ ] Student portfolio system
+- [ ] Certification generation
+- [ ] QR code-based exam access
+- [ ] Blockchain certificates
+- [ ] Virtual exam halls (metaverse)
+
+#### Analytics & Insights
+- [ ] Predictive analytics
+- [ ] Learning path recommendations
+- [ ] Comparative analytics (benchmarking)
+- [ ] Heat maps for question difficulty
+- [ ] Student engagement scoring
+- [ ] Institutional dashboards
+
+#### Mobile & Accessibility
+- [ ] Offline-first mobile app
+- [ ] Dark mode (system-wide)
+- [ ] High contrast mode
+- [ ] Screen reader optimization
+- [ ] Multi-language support (i18n)
+- [ ] RTL language support
+
+#### Business Features
+- [ ] Multi-tenant architecture
+- [ ] API marketplace
+- [ ] Affiliate program
+- [ ] Reseller program
+- [ ] Enterprise plans
+- [ ] Custom SLAs
 
 ---
 
-## 📈 Project Status
+## 📊 Project Status
 
 **Current Version**: 3.0.0  
-**Status**: Production Ready ✅  
+**Status**: ✅ Production Ready  
 **Last Updated**: January 2026  
-**Active Development**: Yes 🟢
+**Active Development**: 🟢 Yes  
+**Contributors**: Durrah Team  
+**License**: MIT  
+
+### Statistics
+- **Total Features**: 100+
+- **Supported Question Types**: 6
+- **Mobile Platforms**: iOS, Android, Web
+- **AI Providers**: 4 (OpenAI, Gemini, Groq, Claude)
+- **Export Formats**: 3 (Excel, PDF, Word)
+- **Database Tables**: 20+
+- **API Endpoints**: 50+
+- **Lines of Code**: ~50,000+
+
+### Technology Stack Summary
+- **Frontend**: React 19.2 + TypeScript + Vite 7.2
+- **Backend**: Supabase + FastAPI (Python)
+- **Database**: PostgreSQL (Supabase)
+- **Mobile**: Capacitor 8
+- **Styling**: TailwindCSS
+- **AI**: OpenAI, Gemini, Groq, Claude
+- **Payments**: Kashier
+- **Notifications**: Firebase Cloud Messaging
+- **Hosting**: Vercel (Frontend), Railway/Render (Backend)
 
 ---
 
+## 🌟 Why Choose Durrah Exams?
+
+### For Tutors
+✅ **Easy to Use**: Intuitive interface, no technical skills required  
+✅ **Comprehensive**: All question types, analytics, and export options  
+✅ **Secure**: Advanced anti-cheating and server-side grading  
+✅ **Flexible**: Kids mode, tutorial mode, custom fields  
+✅ **AI-Powered**: Generate questions automatically  
+
+### For Students
+✅ **User-Friendly**: Clean interface, mobile-friendly  
+✅ **Fair**: Server-side grading prevents manipulation  
+✅ **Accessible**: Take exams anywhere, anytime  
+✅ **Engaging**: Kids mode with gamification  
+
+### For Institutions
+✅ **Scalable**: Handle thousands of concurrent users  
+✅ **Analytics**: Detailed insights and reporting  
+✅ **Support**: Live chat and dedicated support team  
+✅ **Customizable**: White-label and custom branding options  
+✅ **Cost-Effective**: Competitive pricing, free tier available  
+
+---
+
+## 🔗 Quick Links
+
+- 🌐 **Website**: [www.durrahexams.com](https://www.durrahexams.com)
+- 📱 **iOS App**: [App Store](https://apps.apple.com)
+- 🤖 **Android App**: [Google Play](https://play.google.com)
+- 📚 **Documentation**: [docs.durrahexams.com](https://docs.durrahexams.com)
+- 💬 **Community**: [Discord](https://discord.gg/durrah)
+- 🐦 **Twitter**: [@DurrahExams](https://twitter.com/durrahexams)
+- 💼 **LinkedIn**: [Durrah Exams](https://linkedin.com/company/durrah)
+
+---
+
+<div align="center">
+
 **Made with ❤️ by the Durrah Team**
+
+⭐ **Star us on GitHub!** It helps us grow and improve.
+
+[Report Bug](https://github.com/yourusername/durrah-exams/issues) · [Request Feature](https://github.com/yourusername/durrah-exams/discussions) · [Documentation](docs/)
+
+---
+
+© 2026 Durrah Team. All rights reserved.
+
+</div>

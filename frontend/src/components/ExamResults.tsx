@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, FileDown, Trophy, Search, Filter, ArrowUpDown, Clock, CheckCircle2, XCircle, Printer } from 'lucide-react';
+import { Loader2, FileDown, Trophy, Search, Filter, ArrowUpDown, Clock, CheckCircle2, XCircle, Printer, RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { printerService } from '../lib/printer';
 import { downloaderService } from '../lib/downloader';
@@ -38,6 +38,7 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
     const [requiredFields, setRequiredFields] = useState<string[]>(['name', 'email']);
     const [isLoading, setIsLoading] = useState(true);
     const [isExporting, setIsExporting] = useState(false);
+    const [reopenId, setReopenId] = useState<string | null>(null);
     const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
     const [detailedAnswers, setDetailedAnswers] = useState<any[]>([]);
     const [questionMap, setQuestionMap] = useState<Record<string, any>>({});
@@ -255,6 +256,34 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
         }
     };
 
+    const handleAllowRetake = async (submission: Submission) => {
+        const confirmText = `Allow ${submission.student_name || 'this student'} to retake? Their current submission will be removed.`;
+        if (!window.confirm(confirmText)) return;
+
+        setReopenId(submission.id);
+        try {
+            const { error: ansErr } = await supabase
+                .from('submission_answers')
+                .delete()
+                .eq('submission_id', submission.id);
+            if (ansErr) throw ansErr;
+
+            const { error: subErr } = await supabase
+                .from('submissions')
+                .delete()
+                .eq('id', submission.id);
+            if (subErr) throw subErr;
+
+            setSubmissions((prev) => prev.filter((s) => s.id !== submission.id));
+            toast.success('Student can re-enter the exam now');
+        } catch (error) {
+            console.error('Failed to allow retake', error);
+            toast.error('Failed to allow retake');
+        } finally {
+            setReopenId(null);
+        }
+    };
+
 
 
     const openSubmissionDetail = async (submission: Submission) => {
@@ -468,6 +497,7 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Duration</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Percentage</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Submitted</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -508,6 +538,24 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                 {new Date(submission.created_at).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => openSubmissionDetail(submission)}
+                                                        className="px-3 py-1.5 text-xs font-semibold rounded-md bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+                                                    >
+                                                        View
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleAllowRetake(submission)}
+                                                        disabled={reopenId === submission.id}
+                                                        className="px-3 py-1.5 text-xs font-semibold rounded-md bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-200 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1"
+                                                    >
+                                                        <RotateCcw className="h-3.5 w-3.5" />
+                                                        {reopenId === submission.id ? 'Working...' : 'Allow Retake'}
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}

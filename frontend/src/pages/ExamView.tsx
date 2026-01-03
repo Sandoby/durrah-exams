@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle, Settings, Type, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle, Settings, Type, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
@@ -161,6 +161,9 @@ export default function ExamView() {
         changes: number;
         history: Array<{ answer: any; timestamp: number }>;
     }>>({});
+
+    // Anti-cheat: temporary blur/lock during copy/print attempts
+    const [blurQuestionsUntil, setBlurQuestionsUntil] = useState<number>(0);
 
     // Feature 10: Session timeout
     const [showInactivityWarning, setShowInactivityWarning] = useState(false);
@@ -604,6 +607,7 @@ export default function ExamView() {
             if (exam.settings.disable_copy_paste) {
                 e.preventDefault();
                 logViolation('copy_attempt');
+                setBlurQuestionsUntil(Date.now() + 4000);
             }
         };
 
@@ -611,16 +615,29 @@ export default function ExamView() {
             if (exam.settings.disable_copy_paste) {
                 e.preventDefault();
                 logViolation('paste_attempt');
+                setBlurQuestionsUntil(Date.now() + 4000);
             }
         };
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (exam.settings.disable_copy_paste) {
-                if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'a'].includes(e.key.toLowerCase())) {
+                const key = e.key.toLowerCase();
+                if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'a'].includes(key)) {
                     e.preventDefault();
                     logViolation('keyboard_shortcut');
+                    setBlurQuestionsUntil(Date.now() + 4000);
+                }
+                if ((e.ctrlKey || e.metaKey) && key === 'p') {
+                    e.preventDefault();
+                    logViolation('print_attempt');
+                    setBlurQuestionsUntil(Date.now() + 4000);
                 }
             }
+        };
+
+        const handleBeforePrint = () => {
+            logViolation('print_detected');
+            setBlurQuestionsUntil(Date.now() + 4000);
         };
 
         const handleFullscreenChange = () => {
@@ -642,6 +659,7 @@ export default function ExamView() {
         document.addEventListener('paste', handlePaste);
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('fullscreenchange', handleFullscreenChange);
+        window.addEventListener('beforeprint', handleBeforePrint);
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -650,6 +668,7 @@ export default function ExamView() {
             document.removeEventListener('paste', handlePaste);
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            window.removeEventListener('beforeprint', handleBeforePrint);
         };
     }, [started, exam, violations.length, submitted]);
 
@@ -1248,6 +1267,7 @@ export default function ExamView() {
             !(Array.isArray(ans.answer) && ans.answer.length === 0);
     }).length;
     const totalQuestions = exam?.questions.length || 0;
+    const isBlurActive = blurQuestionsUntil > Date.now();
 
 
     if (!exam) return (
@@ -1610,7 +1630,7 @@ export default function ExamView() {
         <div ref={containerRef} className={`min-h-screen p-3 sm:p-6 bg-gray-50 dark:bg-gray-900`}>
             {/* Watermark Overlay */}
             {started && (
-                <div className={`fixed inset-0 pointer-events-none z-50 overflow-hidden select-none flex flex-wrap content-center justify-center gap-24 rotate-[-15deg] transition-opacity duration-300 ${highContrast ? 'opacity-[0.15]' : 'opacity-[0.03]'}`}>
+                <div className={`fixed inset-0 pointer-events-none z-50 overflow-hidden select-none flex flex-wrap content-center justify-center gap-24 rotate-[-15deg] transition-opacity duration-300 ${highContrast ? 'opacity-[0.08]' : 'opacity-[0.03]'}`}>
                     {Array.from({ length: 20 }).map((_, i) => (
                         <div key={i} className="text-4xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">
                             {studentData.name || 'Student'} <br />
@@ -1620,7 +1640,7 @@ export default function ExamView() {
                 </div>
             )}
 
-            <div className={`max-w-4xl mx-auto pt-24 ${highContrast ? 'contrast-150 saturate-200 brightness-110' : ''}`}>
+            <div className={`max-w-4xl mx-auto ${!isZenMode ? 'pt-44 sm:pt-48' : 'pt-24'} ${highContrast ? 'contrast-150 saturate-200 brightness-110' : ''}`}>
                 <div
                     className="max-w-3xl mx-auto transition-all duration-300"
                     style={{ fontSize: fontSize === 'normal' ? '1rem' : fontSize === 'large' ? '1.25rem' : '1.5rem' } as React.CSSProperties}
@@ -1680,7 +1700,7 @@ export default function ExamView() {
                             // List View (Original)
                             <div className="space-y-6">
                                 {exam.questions.map((question, index) => (
-                                    <div key={question.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                                    <div key={question.id} className={`bg-white dark:bg-gray-800 shadow rounded-lg p-6 ${exam.settings.disable_copy_paste ? 'select-none' : ''} ${isBlurActive ? 'blur-sm pointer-events-none' : ''}`}>
                                         {/* Question Content (Same as before) */}
                                         <div className="flex justify-between items-start mb-4">
                                             <h3 className="text-[1.15em] font-bold text-gray-900 dark:text-white leading-tight">
@@ -1711,7 +1731,14 @@ export default function ExamView() {
 
                                         {question.media_url && (
                                             <div className="mb-4">
-                                                {question.media_type === 'image' && <img src={question.media_url} alt="Question media" className="max-h-96 rounded-lg mx-auto" />}
+                                                {question.media_type === 'image' && (
+                                                    <div className="relative inline-block">
+                                                        <img src={question.media_url} alt="Question media" className="max-h-96 rounded-lg mx-auto" />
+                                                        <div className="absolute inset-0 flex items-center justify-center text-white/70 text-sm sm:text-base font-semibold pointer-events-none select-none">
+                                                            {(studentData.name || 'Student')} • {(studentData.email || studentData.student_id || '')}
+                                                        </div>
+                                                    </div>
+                                                )}
                                                 {question.media_type === 'audio' && <audio src={question.media_url} controls className="w-full" />}
                                                 {question.media_type === 'video' && <video src={question.media_url} controls className="w-full rounded-lg" />}
                                             </div>
@@ -1786,7 +1813,7 @@ export default function ExamView() {
                                     return (
                                         <div 
                                             key={question.id} 
-                                            className={`bg-white dark:bg-gray-800 shadow rounded-lg p-6 min-h-[50vh] transition-transform duration-150 ${
+                                            className={`bg-white dark:bg-gray-800 shadow rounded-lg p-6 min-h-[50vh] transition-transform duration-150 ${exam.settings.disable_copy_paste ? 'select-none' : ''} ${isBlurActive ? 'blur-sm pointer-events-none' : ''} ${
                                                 swipeDirection === 'left' ? '-translate-x-4 opacity-75' : swipeDirection === 'right' ? 'translate-x-4 opacity-75' : ''
                                             }`}
                                         >
@@ -1833,7 +1860,14 @@ export default function ExamView() {
 
                                             {question.media_url && (
                                                 <div className="mb-6">
-                                                    {question.media_type === 'image' && <img src={question.media_url} alt="Question media" className="max-h-96 rounded-lg shadow-md" />}
+                                                    {question.media_type === 'image' && (
+                                                        <div className="relative inline-block">
+                                                            <img src={question.media_url} alt="Question media" className="max-h-96 rounded-lg shadow-md" />
+                                                            <div className="absolute inset-0 flex items-center justify-center text-white/70 text-sm sm:text-base font-semibold pointer-events-none select-none">
+                                                                {(studentData.name || 'Student')} • {(studentData.email || studentData.student_id || '')}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
 
@@ -2005,35 +2039,6 @@ export default function ExamView() {
                         )}
                     </form>
                 </div>
-
-                {/* Feature 7: Mobile Swipe Indicators */}
-                {viewMode === 'single' && (
-                    <>
-                        {/* Left swipe indicator */}
-                        {currentQuestionIndex > 0 && (
-                            <div className="md:hidden fixed left-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
-                                <div className="bg-indigo-600/90 text-white rounded-full p-3 shadow-lg animate-pulse">
-                                    <ChevronLeft size={24} />
-                                </div>
-                                <div className="text-xs text-gray-600 dark:text-gray-400 mt-2 text-center">
-                                    Swipe →
-                                </div>
-                            </div>
-                        )}
-                        
-                        {/* Right swipe indicator */}
-                        {exam && currentQuestionIndex < exam.questions.length - 1 && (
-                            <div className="md:hidden fixed right-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
-                                <div className="bg-indigo-600/90 text-white rounded-full p-3 shadow-lg animate-pulse">
-                                    <ChevronRight size={24} />
-                                </div>
-                                <div className="text-xs text-gray-600 dark:text-gray-400 mt-2 text-center">
-                                    ← Swipe
-                                </div>
-                            </div>
-                        )}
-                    </>
-                )}
 
                 {/* Floating Toolbar */}
                 <div className={`fixed bottom-4 sm:bottom-6 right-4 sm:right-6 flex flex-col items-end gap-2 z-50 transition-all duration-300 ${isZenMode ? 'opacity-20 hover:opacity-100' : 'opacity-100'}`}>
@@ -2310,11 +2315,11 @@ export default function ExamView() {
                 {started && !isReviewMode && (
                     <button
                         onClick={() => setShowScratchpad(!showScratchpad)}
-                        className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 transform transition-all duration-200 z-30 group"
+                        className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-3 rounded-full shadow-lg hover:scale-105 transform transition-all duration-200 z-30 group"
                         aria-label="Open scratchpad"
                     >
                         <div className="relative">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                             {scratchpadContent && (
@@ -2330,24 +2335,24 @@ export default function ExamView() {
                 {/* Feature 4: Scratchpad Panel */}
                 {showScratchpad && !isScratchpadMinimized && (
                     <div 
-                        className="fixed bottom-24 right-6 w-96 h-[500px] bg-white dark:bg-gray-800 rounded-xl shadow-2xl border-2 border-indigo-200 dark:border-indigo-800 flex flex-col z-40 overflow-hidden"
-                        style={{ maxWidth: 'calc(100vw - 3rem)', maxHeight: 'calc(100vh - 8rem)' }}
+                        className="fixed bottom-20 right-6 w-80 h-[300px] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-indigo-200 dark:border-indigo-700 flex flex-col z-40 overflow-hidden"
+                        style={{ maxWidth: 'calc(100vw - 3rem)', maxHeight: 'calc(100vh - 10rem)' }}
                     >
                         {/* Header */}
-                        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 flex items-center justify-between cursor-move">
+                        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-3 py-2 flex items-center justify-between cursor-move">
                             <div className="flex items-center gap-2 text-white">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
-                                <h3 className="font-semibold">Scratchpad</h3>
+                                <h3 className="font-medium text-sm">Scratchpad</h3>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
                                 <button
                                     onClick={() => setIsScratchpadMinimized(true)}
-                                    className="text-white hover:bg-white/20 rounded p-1 transition-colors"
+                                    className="text-white hover:bg-white/20 rounded p-0.5 transition-colors"
                                     aria-label="Minimize"
                                 >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                                     </svg>
                                 </button>
@@ -2358,35 +2363,35 @@ export default function ExamView() {
                                             localStorage.removeItem(`durrah_exam_${id}_scratchpad`);
                                         }
                                     }}
-                                    className="text-white hover:bg-white/20 rounded p-1 transition-colors"
+                                    className="text-white hover:bg-white/20 rounded p-0.5 transition-colors"
                                     aria-label="Clear"
                                 >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                 </button>
                                 <button
                                     onClick={() => setShowScratchpad(false)}
-                                    className="text-white hover:bg-white/20 rounded p-1 transition-colors"
+                                    className="text-white hover:bg-white/20 rounded p-0.5 transition-colors"
                                     aria-label="Close"
                                 >
-                                    <X className="w-4 h-4" />
+                                    <X className="w-3.5 h-3.5" />
                                 </button>
                             </div>
                         </div>
 
                         {/* Content */}
-                        <div className="flex-1 p-4">
+                        <div className="flex-1 p-3">
                             <textarea
                                 value={scratchpadContent}
                                 onChange={(e) => setScratchpadContent(e.target.value)}
-                                placeholder="Use this space for calculations, notes, brainstorming...&#10;&#10;Your work is auto-saved!"
-                                className="w-full h-full resize-none bg-yellow-50 dark:bg-gray-900 border-2 border-dashed border-yellow-300 dark:border-yellow-700 rounded-lg p-4 focus:outline-none focus:border-yellow-500 dark:focus:border-yellow-500 font-mono text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400"
+                                placeholder="Notes & calculations...&#10;Auto-saved!"
+                                className="w-full h-full resize-none bg-yellow-50 dark:bg-gray-900 border border-dashed border-yellow-300 dark:border-yellow-700 rounded p-2 focus:outline-none focus:border-yellow-500 dark:focus:border-yellow-500 font-mono text-xs text-gray-800 dark:text-gray-200 placeholder-gray-400"
                             />
                         </div>
 
                         {/* Footer */}
-                        <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <div className="px-3 py-1.5 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-[10px] text-gray-500 dark:text-gray-400">
                             <span className="flex items-center gap-1">
                                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                                 Auto-saved
@@ -2537,7 +2542,7 @@ export default function ExamView() {
                     </div>
                 )}
 
-                <div className="mt-8 text-center pb-8">
+                <div className="mt-8 text-center pb-8" dir="ltr">
                     <div className="inline-flex items-center justify-center space-x-2 text-gray-400 dark:text-gray-500">
                         <span className="text-sm">Powered by</span>
                         <Logo size="sm" showText={true} className="opacity-75 grayscale hover:grayscale-0 transition-all duration-300" />
