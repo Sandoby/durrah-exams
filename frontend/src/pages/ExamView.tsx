@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle, Settings, Type, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle, Settings, Type, X, Wrench, StickyNote } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
@@ -1887,34 +1887,47 @@ export default function ExamView() {
                                                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                                                     Question {currentQuestionIndex + 1} of {exam.questions.length}
                                                 </h3>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => speakQuestion(question.question_text)}
-                                                    className={`
-                                                        flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium
-                                                        transition-all duration-200 hover:scale-105
-                                                        ${isSpeaking
-                                                            ? 'bg-indigo-600 text-white shadow-lg'
-                                                            : 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
-                                                        }
-                                                    `}
-                                                >
-                                                    {isSpeaking ? (
-                                                        <>
-                                                            <svg className="w-4 h-4 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
-                                                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                                                            </svg>
-                                                            Stop
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828-2.828" />
-                                                            </svg>
-                                                            Read Aloud
-                                                        </>
-                                                    )}
-                                                </button>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => toggleFlag(question.id)}
+                                                        className={`p-2 rounded-full border transition-colors ${flaggedQuestions.has(question.id)
+                                                            ? 'border-red-400 bg-red-50 text-red-600 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200'
+                                                            : 'border-gray-200 text-gray-500 hover:border-gray-300 dark:border-gray-700 dark:text-gray-300'
+                                                        }`}
+                                                        aria-label={flaggedQuestions.has(question.id) ? 'Unflag question' : 'Flag question'}
+                                                    >
+                                                        <Flag size={18} fill={flaggedQuestions.has(question.id) ? 'currentColor' : 'none'} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => speakQuestion(question.question_text)}
+                                                        className={`
+                                                            flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium
+                                                            transition-all duration-200 hover:scale-105
+                                                            ${isSpeaking
+                                                                ? 'bg-indigo-600 text-white shadow-lg'
+                                                                : 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
+                                                            }
+                                                        `}
+                                                    >
+                                                        {isSpeaking ? (
+                                                            <>
+                                                                <svg className="w-4 h-4 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                                </svg>
+                                                                Stop
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828-2.828" />
+                                                                </svg>
+                                                                Read Aloud
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             <div className="mb-6">
@@ -2105,7 +2118,7 @@ export default function ExamView() {
                     </form>
                 </div>
 
-                {/* Floating Toolbar */}
+                    {/* Floating Toolbar */}
                 <div className={`fixed bottom-4 sm:bottom-6 right-4 sm:right-6 flex flex-col items-end gap-2 z-50 transition-all duration-300 ${isZenMode ? 'opacity-20 hover:opacity-100' : 'opacity-100'}`}>
                     {showAccessMenu && (
                         <div className="mb-2 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 p-4 min-w-[240px] animate-in fade-in slide-in-from-bottom-4 duration-200">
@@ -2168,6 +2181,13 @@ export default function ExamView() {
                             </div>
                             <div className="space-y-2">
                                 <button
+                                    onClick={() => { setShowScratchpad(true); setIsScratchpadMinimized(false); setShowToolsMenu(false); }}
+                                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                                >
+                                    <span className="flex items-center gap-2"><StickyNote size={16} /> Scratchpad</span>
+                                    {showScratchpad && !isScratchpadMinimized && <span className="text-indigo-500 text-xs font-bold">Open</span>}
+                                </button>
+                                <button
                                     onClick={() => { setShowCalculator(true); setShowToolsMenu(false); }}
                                     className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                                 >
@@ -2206,10 +2226,10 @@ export default function ExamView() {
                         </button>
                         <button
                             onClick={() => setShowToolsMenu(!showToolsMenu)}
-                            className={`p-3 rounded-full shadow-lg transition-all ${showToolsMenu ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:scale-110 active:scale-95'}`}
+                            className={`p-3 rounded-full shadow-lg transition-all ${showToolsMenu ? 'bg-indigo-600 text-white' : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:scale-110 active:scale-95'}`}
                             title="Tools"
                         >
-                            <Settings size={24} />
+                            <Wrench size={22} />
                         </button>
                     </div>
                 </div>
@@ -2416,27 +2436,6 @@ export default function ExamView() {
                     </div>
                 )}
 
-                {/* Feature 4: Scratchpad Floating Button */}
-                {started && !isReviewMode && (
-                    <button
-                        onClick={() => setShowScratchpad(!showScratchpad)}
-                        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-3 rounded-full shadow-lg hover:scale-105 transform transition-all duration-200 z-40 group"
-                        aria-label="Open scratchpad"
-                    >
-                        <div className="relative">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            {scratchpadContent && (
-                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                            )}
-                        </div>
-                        <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                            Scratchpad
-                        </span>
-                    </button>
-                )}
-
                 {/* Feature 4: Scratchpad Panel */}
                 {showScratchpad && !isScratchpadMinimized && (
                     <div 
@@ -2510,7 +2509,7 @@ export default function ExamView() {
                 {isScratchpadMinimized && (
                     <button
                         onClick={() => setIsScratchpadMinimized(false)}
-                        className="fixed bottom-24 right-6 bg-indigo-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-indigo-700 transition-colors z-40 flex items-center gap-2"
+                        className="fixed bottom-24 right-6 bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-2 rounded-lg shadow-lg hover:scale-105 transition-transform z-40 flex items-center gap-2"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5" />
