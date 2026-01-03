@@ -100,6 +100,7 @@ export default function ExamView() {
     const [highContrast, setHighContrast] = useState(false);
     const [showCalculator, setShowCalculator] = useState(false);
     const [showAccessMenu, setShowAccessMenu] = useState(false);
+    const [showToolsMenu, setShowToolsMenu] = useState(false);
     const [startedAt, setStartedAt] = useState<number | null>(null);
 
     // New State for View Modes
@@ -124,6 +125,14 @@ export default function ExamView() {
 
     // Feature 1: Progress tracking
     const [progressPercentage, setProgressPercentage] = useState(0);
+
+    const formatTimeLeft = (seconds: number | null) => {
+        if (seconds === null || seconds === undefined) return '--:--';
+        if (seconds < 0) seconds = 0;
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    };
 
     // Feature 2: Keyboard shortcuts
     const [keyboardShortcutsEnabled] = useState(true);
@@ -1728,6 +1737,10 @@ export default function ExamView() {
                                                     style={{ width: `${progressPercentage}%` }}
                                                 />
                                             </div>
+                                            <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
+                                                <span>Time remaining: <span className="font-semibold text-gray-800 dark:text-gray-200">{formatTimeLeft(timeLeft)}</span></span>
+                                                <span>Violations: <span className="font-semibold text-gray-800 dark:text-gray-200">{violations.length}/{exam?.settings.max_violations || 3}</span></span>
+                                            </div>
                                             {progressPercentage === 100 && (
                                                 <p className="text-xs text-green-600 dark:text-green-400 font-medium">
                                                     ✓ All questions answered!
@@ -1747,7 +1760,7 @@ export default function ExamView() {
                             // List View (Original)
                             <div className="space-y-6">
                                 {exam.questions.map((question, index) => (
-                                    <div key={question.id} className={`bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 ${exam.settings.disable_copy_paste ? 'select-none' : ''} ${isBlurActive ? 'blur-sm pointer-events-none' : ''}`}>
+                                    <div id={`question-${index}`} key={question.id} className={`bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 ${exam.settings.disable_copy_paste ? 'select-none' : ''} ${isBlurActive ? 'blur-sm pointer-events-none' : ''}`}>
                                         {/* Question Content (Same as before) */}
                                         <div className="flex justify-between items-start mb-4">
                                             <h3 className="text-base sm:text-[1.15em] font-bold text-gray-900 dark:text-white leading-tight">
@@ -2140,14 +2153,45 @@ export default function ExamView() {
                         </div>
                     )}
 
+                    {showToolsMenu && (
+                        <div className="mb-2 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 p-4 min-w-[220px] animate-in fade-in slide-in-from-bottom-4 duration-200">
+                            <div className="flex justify-between items-center mb-3">
+                                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Tools</h3>
+                                <button onClick={() => setShowToolsMenu(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                    <X size={16} />
+                                </button>
+                            </div>
+                            <div className="space-y-2">
+                                <button
+                                    onClick={() => { setShowCalculator(true); setShowToolsMenu(false); }}
+                                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                                >
+                                    <span className="flex items-center gap-2"><CalcIcon size={16} /> Calculator</span>
+                                    {showCalculator && <span className="text-indigo-500 text-xs font-bold">Open</span>}
+                                </button>
+                                <button
+                                    onClick={() => { setShowAccessMenu(true); setShowToolsMenu(false); }}
+                                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                                >
+                                    <span className="flex items-center gap-2"><Settings size={16} /> Accessibility</span>
+                                </button>
+                                <button
+                                    onClick={() => { setShowKeyboardHelp(true); setShowToolsMenu(false); }}
+                                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                                >
+                                    <span className="flex items-center gap-2">⌨️ Keyboard Shortcuts</span>
+                                </button>
+                                <button
+                                    onClick={() => { setIsZenMode(prev => !prev); setShowToolsMenu(false); }}
+                                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                                >
+                                    <span className="flex items-center gap-2">{isZenMode ? 'Exit Zen' : 'Enter Zen'}</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="flex flex-col gap-2">
-                        <button
-                            onClick={() => setShowCalculator(!showCalculator)}
-                            className={`p-3 rounded-full shadow-lg transition-all ${showCalculator ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:scale-110 active:scale-95'}`}
-                            title="Calculator"
-                        >
-                            <CalcIcon size={24} />
-                        </button>
                         <button
                             onClick={() => setShowQuestionGrid(!showQuestionGrid)}
                             className="p-3 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full shadow-lg hover:scale-110 active:scale-95 transition-all"
@@ -2156,14 +2200,11 @@ export default function ExamView() {
                             <LayoutGrid size={24} />
                         </button>
                         <button
-                            onClick={() => setShowAccessMenu(!showAccessMenu)}
-                            className={`p-3 rounded-full shadow-lg transition-all relative ${showAccessMenu ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:scale-110 active:scale-95'}`}
-                            title="Accessibility Settings"
+                            onClick={() => setShowToolsMenu(!showToolsMenu)}
+                            className={`p-3 rounded-full shadow-lg transition-all ${showToolsMenu ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:scale-110 active:scale-95'}`}
+                            title="Tools"
                         >
                             <Settings size={24} />
-                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500 text-[10px] font-bold text-white border-2 border-white dark:border-gray-800 shadow-sm">
-                                {fontSize === 'normal' ? '1' : fontSize === 'large' ? '2' : '3'}
-                            </span>
                         </button>
                     </div>
                 </div>
@@ -2213,8 +2254,20 @@ export default function ExamView() {
                                         }`}
                                     aria-label={`Question ${idx + 1}${flaggedQuestions.has(q.id) ? ' (Flagged)' : ''}${answers[q.id] ? ' (Answered)' : ''}`}
                                 >
-                                    {flaggedQuestions.has(q.id) && <Flag size={8} className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 fill-red-500 text-red-500" />}
-                                    {idx + 1}
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span>{idx + 1}</span>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleFlag(q.id);
+                                            }}
+                                            className={`p-1 rounded-full ${flaggedQuestions.has(q.id) ? 'text-red-500 bg-red-50 dark:bg-red-900/30' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500'}`}
+                                            aria-label={flaggedQuestions.has(q.id) ? 'Unflag question' : 'Flag question'}
+                                        >
+                                            <Flag size={12} fill={flaggedQuestions.has(q.id) ? 'currentColor' : 'none'} />
+                                        </button>
+                                    </div>
                                 </button>
                             ))}
                         </div>
