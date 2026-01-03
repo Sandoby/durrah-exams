@@ -265,8 +265,7 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
             const { error: ansErr } = await supabase
                 .from('submission_answers')
                 .delete()
-                .eq('submission_id', submission.id)
-                .eq('exam_id', examId);
+                .eq('submission_id', submission.id);
             if (ansErr) throw ansErr;
 
             const { error: subErr } = await supabase
