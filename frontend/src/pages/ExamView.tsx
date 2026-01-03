@@ -3,13 +3,14 @@ import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Sun, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle, Settings, Type, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { Calculator } from '../components/Calculator';
+import Latex from 'react-latex-next';
 
 interface Question {
     id: string;
@@ -98,6 +99,7 @@ export default function ExamView() {
     const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
     const [highContrast, setHighContrast] = useState(false);
     const [showCalculator, setShowCalculator] = useState(false);
+    const [showAccessMenu, setShowAccessMenu] = useState(false);
     const [startedAt, setStartedAt] = useState<number | null>(null);
 
     // New State for View Modes
@@ -1004,7 +1006,7 @@ export default function ExamView() {
                                     <div className="px-6 py-5 space-y-4">
                                         {/* Question Text */}
                                         <p className="text-base font-medium text-gray-900 dark:text-white">
-                                            {question.question_text}
+                                            <Latex>{question.question_text}</Latex>
                                         </p>
 
                                         {/* Options for multiple choice */}
@@ -1047,7 +1049,7 @@ export default function ExamView() {
                                                                         : ''
                                                                         } text-gray-900 dark:text-white`}
                                                                 >
-                                                                    {option}
+                                                                    {option ? <Latex>{option}</Latex> : ''}
                                                                 </span>
                                                                 {isStudentAnswer && (
                                                                     <span className="text-xs font-semibold">
@@ -1195,7 +1197,7 @@ export default function ExamView() {
         <div ref={containerRef} className={`min-h-screen p-3 sm:p-6 bg-gray-50 dark:bg-gray-900`}>
             {/* Watermark Overlay */}
             {started && (
-                <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden opacity-[0.03] select-none flex flex-wrap content-center justify-center gap-24 rotate-[-15deg]">
+                <div className={`fixed inset-0 pointer-events-none z-50 overflow-hidden select-none flex flex-wrap content-center justify-center gap-24 rotate-[-15deg] transition-opacity duration-300 ${highContrast ? 'opacity-[0.15]' : 'opacity-[0.03]'}`}>
                     {Array.from({ length: 20 }).map((_, i) => (
                         <div key={i} className="text-4xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">
                             {studentData.name || 'Student'} <br />
@@ -1205,50 +1207,55 @@ export default function ExamView() {
                 </div>
             )}
 
-            <div className={`max-w-4xl mx-auto ${highContrast ? 'contrast-150 saturate-200 brightness-110' : ''}`}>
-                <div className={`max-w-3xl mx-auto ${fontSize === 'large' ? 'text-lg' : fontSize === 'xlarge' ? 'text-xl' : ''}`}>
+            <div className={`max-w-4xl mx-auto pt-24 ${highContrast ? 'contrast-150 saturate-200 brightness-110' : ''}`}>
+                <div
+                    className="max-w-3xl mx-auto transition-all duration-300"
+                    style={{ fontSize: fontSize === 'normal' ? '1rem' : fontSize === 'large' ? '1.25rem' : '1.5rem' } as React.CSSProperties}
+                >
                     {/* Header - Hidden in Zen Mode unless hovered or essential */}
                     {!isZenMode && (
-                        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 sticky top-0 z-10">
-                            <div className="flex flex-col gap-3">
-                                <div className="flex justify-between items-center">
-                                    <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate max-w-[50%]">{exam.title}</h1>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => setViewMode(prev => prev === 'list' ? 'single' : 'list')}
-                                            className="p-2 text-gray-500 hover:text-indigo-600 dark:text-gray-400"
-                                            title={viewMode === 'list' ? "Switch to One Question Per Page" : "Switch to List View"}
-                                        >
-                                            {viewMode === 'list' ? <LayoutGrid size={20} /> : <div className="flex items-center"><span className="text-xs font-bold mr-1">1/1</span></div>}
-                                        </button>
-                                        <button
-                                            onClick={() => setIsZenMode(!isZenMode)}
-                                            className={`p-2 ${isZenMode ? 'text-indigo-600' : 'text-gray-500 hover:text-indigo-600'} dark:text-gray-400`}
-                                            title="Toggle Zen Mode"
-                                        >
-                                            {isZenMode ? <Star size={20} /> : <Eye size={20} />}
-                                        </button>
+                        <div className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
+                            <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 border border-gray-200/50 dark:border-gray-700/50">
+                                <div className="flex flex-col gap-3">
+                                    <div className="flex justify-between items-center">
+                                        <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate max-w-[50%]">{exam.title}</h1>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setViewMode(prev => prev === 'list' ? 'single' : 'list')}
+                                                className="p-2 text-gray-500 hover:text-indigo-600 dark:text-gray-400"
+                                                title={viewMode === 'list' ? "Switch to One Question Per Page" : "Switch to List View"}
+                                            >
+                                                {viewMode === 'list' ? <LayoutGrid size={20} /> : <div className="flex items-center"><span className="text-xs font-bold mr-1">1/1</span></div>}
+                                            </button>
+                                            <button
+                                                onClick={() => setIsZenMode(!isZenMode)}
+                                                className={`p-2 ${isZenMode ? 'text-indigo-600' : 'text-gray-500 hover:text-indigo-600'} dark:text-gray-400`}
+                                                title="Toggle Zen Mode"
+                                            >
+                                                {isZenMode ? <Star size={20} /> : <Eye size={20} />}
+                                            </button>
+                                        </div>
                                     </div>
+                                    {started && (
+                                        <div className="mt-3 space-y-1">
+                                            <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
+                                                <span>Progress: {answeredCount}/{totalQuestions} questions</span>
+                                                <span className="font-semibold">{progress.toFixed(0)}%</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                                <div
+                                                    className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-500 ease-out"
+                                                    style={{ width: `${progress}%` }}
+                                                />
+                                            </div>
+                                            {progress === 100 && (
+                                                <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                                                    ✓ All questions answered!
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
-                                {started && (
-                                    <div className="mt-3 space-y-1">
-                                        <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                                            <span>Progress: {answeredCount}/{totalQuestions} questions</span>
-                                            <span className="font-semibold">{progress.toFixed(0)}%</span>
-                                        </div>
-                                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                                            <div
-                                                className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-500 ease-out"
-                                                style={{ width: `${progress}%` }}
-                                            />
-                                        </div>
-                                        {progress === 100 && (
-                                            <p className="text-xs text-green-600 dark:text-green-400 font-medium">
-                                                ✓ All questions answered!
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
                             </div>
                         </div>
                     )}
@@ -1263,9 +1270,9 @@ export default function ExamView() {
                                     <div key={question.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                                         {/* Question Content (Same as before) */}
                                         <div className="flex justify-between items-start mb-4">
-                                            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                                            <h3 className="text-[1.15em] font-bold text-gray-900 dark:text-white leading-tight">
                                                 <span className="mr-2 text-indigo-600 dark:text-indigo-400">Q{index + 1}.</span>
-                                                {question.question_text}
+                                                <Latex>{question.question_text}</Latex>
                                             </h3>
                                             <div className="flex items-center gap-2">
                                                 <button
@@ -1310,8 +1317,8 @@ export default function ExamView() {
                                                         onChange={() => setAnswers({ ...answers, [question.id]: { answer: option } })}
                                                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                                                     />
-                                                    <label htmlFor={`q${question.id}-o${optIndex}`} className="ml-3 block text-gray-700 dark:text-gray-300">
-                                                        {option}
+                                                    <label htmlFor={`q${question.id}-o${optIndex}`} className="ml-3 block text-[1em] text-gray-700 dark:text-gray-300">
+                                                        <Latex>{option}</Latex>
                                                     </label>
                                                 </div>
                                             ))}
@@ -1328,7 +1335,7 @@ export default function ExamView() {
                                                         onChange={() => setAnswers({ ...answers, [question.id]: { answer: option } })}
                                                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                                                     />
-                                                    <label htmlFor={`q${question.id}-o${optIndex}`} className="ml-3 block text-gray-700 dark:text-gray-300">
+                                                    <label htmlFor={`q${question.id}-o${optIndex}`} className="ml-3 block text-[1em] text-gray-700 dark:text-gray-300">
                                                         {option}
                                                     </label>
                                                 </div>
@@ -1336,7 +1343,7 @@ export default function ExamView() {
 
                                             {question.type === 'short_answer' && (
                                                 <textarea
-                                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-[1em]"
                                                     rows={3}
                                                     value={answers[question.id]?.answer || ''}
                                                     onChange={(e) => setAnswers({ ...answers, [question.id]: { answer: e.target.value } })}
@@ -1361,8 +1368,8 @@ export default function ExamView() {
                                     return (
                                         <div key={question.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 min-h-[50vh]">
                                             <div className="mb-6">
-                                                <h3 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white leading-relaxed">
-                                                    {question.question_text}
+                                                <h3 className="text-[1.2em] font-bold text-gray-900 dark:text-white leading-relaxed">
+                                                    <Latex>{question.question_text}</Latex>
                                                 </h3>
                                             </div>
 
@@ -1384,7 +1391,7 @@ export default function ExamView() {
                                                             onChange={() => setAnswers({ ...answers, [question.id]: { answer: option } })}
                                                             className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                                                         />
-                                                        <span className="ml-3 text-lg text-gray-900 dark:text-white">{option}</span>
+                                                        <span className="ml-3 text-[1.1em] text-gray-900 dark:text-white"><Latex>{option}</Latex></span>
                                                     </label>
                                                 ))}
 
@@ -1398,14 +1405,14 @@ export default function ExamView() {
                                                             onChange={() => setAnswers({ ...answers, [question.id]: { answer: option } })}
                                                             className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                                                         />
-                                                        <span className="ml-3 text-lg text-gray-900 dark:text-white">{option}</span>
+                                                        <span className="ml-3 text-[1.1em] text-gray-900 dark:text-white">{option}</span>
                                                     </label>
                                                 ))}
 
 
                                                 {question.type === 'short_answer' && (
                                                     <textarea
-                                                        className="w-full p-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white"
+                                                        className="w-full p-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white text-[1.1em]"
                                                         rows={6}
                                                         value={answers[question.id]?.answer || ''}
                                                         onChange={(e) => setAnswers({ ...answers, [question.id]: { answer: e.target.value } })}
@@ -1492,53 +1499,84 @@ export default function ExamView() {
                 </div>
 
                 {/* Floating Toolbar */}
-                <div className={`fixed bottom-4 sm:bottom-6 right-4 sm:right-6 flex flex-col gap-2 z-50 transition-opacity duration-300 ${isZenMode ? 'opacity-20 hover:opacity-100' : 'opacity-100'}`}>
-                    <button
-                        onClick={() => setShowCalculator(!showCalculator)}
-                        className={`p-2 sm:p-3 rounded-full shadow-lg transition-all ${showCalculator ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-                        title="Calculator"
-                        aria-label="Toggle Calculator"
-                    >
-                        <CalcIcon size={20} className="sm:w-6 sm:h-6" />
-                    </button>
-                    <button
-                        onClick={() => setShowQuestionGrid(!showQuestionGrid)}
-                        className="p-2 sm:p-3 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
-                        title="Question Map"
-                        aria-label="Toggle Question Grid"
-                    >
-                        <LayoutGrid size={20} className="sm:w-6 sm:h-6" />
-                    </button>
-                    <button
-                        onClick={() => {
-                            const newSize = fontSize === 'normal' ? 'large' : fontSize === 'large' ? 'xlarge' : 'normal';
-                            setFontSize(newSize);
-                            const sizeLabels = { normal: 'Normal', large: 'Large', xlarge: 'Extra Large' };
-                            toast.success(`Font size: ${sizeLabels[newSize]}`, { duration: 1500, icon: '🔤' });
-                        }}
-                        className={`p-2 sm:p-3 rounded-full shadow-lg transition-all font-serif font-bold ${fontSize === 'normal' ? 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300' :
-                            fontSize === 'large' ? 'bg-blue-100 text-blue-800 border-2 border-blue-400' :
-                                'bg-purple-100 text-purple-800 border-2 border-purple-400'
-                            } hover:bg-gray-50 dark:hover:bg-gray-700`}
-                        title="Toggle Font Size"
-                        aria-label={`Font Size: ${fontSize}`}
-                    >
-                        <span className="text-sm sm:text-base">Aa</span>
-                    </button>
-                    <button
-                        onClick={() => {
-                            setHighContrast(!highContrast);
-                            toast.success(highContrast ? 'High Contrast Off' : 'High Contrast On', {
-                                duration: 1500,
-                                icon: highContrast ? '🌙' : '☀️'
-                            });
-                        }}
-                        className={`p-2 sm:p-3 rounded-full shadow-lg transition-all ${highContrast ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-400' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-                        title="Toggle High Contrast"
-                        aria-label={`High Contrast: ${highContrast ? 'On' : 'Off'}`}
-                    >
-                        {highContrast ? <Sun size={20} className="sm:w-6 sm:h-6" /> : <Moon size={20} className="sm:w-6 sm:h-6" />}
-                    </button>
+                <div className={`fixed bottom-4 sm:bottom-6 right-4 sm:right-6 flex flex-col items-end gap-2 z-50 transition-all duration-300 ${isZenMode ? 'opacity-20 hover:opacity-100' : 'opacity-100'}`}>
+                    {showAccessMenu && (
+                        <div className="mb-2 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 p-4 min-w-[240px] animate-in fade-in slide-in-from-bottom-4 duration-200">
+                            <div className="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-2">
+                                <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <Settings size={16} /> {t('examView.accessibility.settings')}
+                                </h3>
+                                <button onClick={() => setShowAccessMenu(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                    <X size={16} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                {/* Font Size */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                        <Type size={14} /> {t('examView.accessibility.fontSize')}
+                                    </label>
+                                    <div className="flex bg-gray-100 dark:bg-gray-900 rounded-lg p-1">
+                                        {(['normal', 'large', 'xlarge'] as const).map((size) => (
+                                            <button
+                                                key={size}
+                                                onClick={() => {
+                                                    setFontSize(size);
+                                                }}
+                                                className={`flex-1 py-1.5 rounded-md text-xs font-bold transition-all ${fontSize === size
+                                                    ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                                                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                                    }`}
+                                            >
+                                                {size === 'normal' ? 'A' : size === 'large' ? 'A+' : 'A++'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* High Contrast */}
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                        <Moon size={14} /> High Contrast
+                                    </label>
+                                    <button
+                                        onClick={() => setHighContrast(!highContrast)}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${highContrast ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                                    >
+                                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${highContrast ? (t('common.dir') === 'rtl' ? '-translate-x-6' : 'translate-x-6') : 'translate-x-1'}`} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex flex-col gap-2">
+                        <button
+                            onClick={() => setShowCalculator(!showCalculator)}
+                            className={`p-3 rounded-full shadow-lg transition-all ${showCalculator ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:scale-110 active:scale-95'}`}
+                            title="Calculator"
+                        >
+                            <CalcIcon size={24} />
+                        </button>
+                        <button
+                            onClick={() => setShowQuestionGrid(!showQuestionGrid)}
+                            className="p-3 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full shadow-lg hover:scale-110 active:scale-95 transition-all"
+                            title="Question Map"
+                        >
+                            <LayoutGrid size={24} />
+                        </button>
+                        <button
+                            onClick={() => setShowAccessMenu(!showAccessMenu)}
+                            className={`p-3 rounded-full shadow-lg transition-all relative ${showAccessMenu ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:scale-110 active:scale-95'}`}
+                            title="Accessibility Settings"
+                        >
+                            <Settings size={24} />
+                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500 text-[10px] font-bold text-white border-2 border-white dark:border-gray-800 shadow-sm">
+                                {fontSize === 'normal' ? '1' : fontSize === 'large' ? '2' : '3'}
+                            </span>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Calculator Drawer */}

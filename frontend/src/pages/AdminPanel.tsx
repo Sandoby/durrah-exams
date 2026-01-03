@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Users, MessageCircle, Tag, Lock, LogOut,
     Loader2, Plus, Send, UserPlus, BarChart3, Bell,
-    Menu, X, ArrowLeft, Megaphone, Copy
+    Menu, X, ArrowLeft
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
@@ -60,15 +60,6 @@ interface SupportAgent {
     created_at: string;
 }
 
-interface SalesAgent {
-    id: string;
-    name: string;
-    email: string;
-    access_code: string;
-    is_active: boolean;
-    created_at: string;
-}
-
 interface ChatSession {
     id: string;
     user_id: string;
@@ -104,7 +95,7 @@ export default function AdminPanel() {
     const [accessCode, setAccessCode] = useState('');
     const [userRole, setUserRole] = useState<'super_admin' | 'support_agent' | null>(null);
     const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'coupons' | 'chat' | 'agents' | 'notifications' | 'sales'>('analytics');
+    const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'coupons' | 'chat' | 'agents' | 'notifications'>('analytics');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Users
@@ -142,19 +133,6 @@ export default function AdminPanel() {
     });
     const [generatedCode, setGeneratedCode] = useState<string | null>(null);
 
-    // Sales Team (Super Admin only)
-    const [salesAgents, setSalesAgents] = useState<SalesAgent[]>([]);
-    const [showSalesForm, setShowSalesForm] = useState(false);
-    const [newSalesAgent, setNewSalesAgent] = useState({
-        name: '',
-        email: ''
-    });
-    const [generatedSalesCode, setGeneratedSalesCode] = useState<string | null>(null);
-    const salesEntryLink = useMemo(() => {
-        if (typeof window === 'undefined') return '/sales';
-        return `${window.location.origin}/sales`;
-    }, []);
-
     // Chat
     const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
     const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
@@ -173,7 +151,6 @@ export default function AdminPanel() {
             fetchChatSessions();
             if (userRole === 'super_admin') {
                 fetchSupportAgents();
-                fetchSalesAgents();
             }
         }
     }, [isAuthenticated, userRole]);
@@ -579,90 +556,6 @@ export default function AdminPanel() {
         }
     };
 
-    // ========== Sales Team Management (Super Admin Only) ==========
-    const generateSalesAccessCode = () => `SALES-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-
-    const fetchSalesAgents = async () => {
-        if (userRole !== 'super_admin') return;
-
-        try {
-            const { data, error } = await supabase
-                .from('sales_agents')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            setSalesAgents(data || []);
-        } catch (error) {
-            console.error('Error fetching sales agents:', error);
-            toast.error('Failed to fetch sales team');
-        }
-    };
-
-    const createSalesAgent = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (userRole !== 'super_admin') {
-            toast.error('Only Super Admin can add sales users');
-            return;
-        }
-
-        try {
-            const accessCode = generateSalesAccessCode();
-            const { error } = await supabase
-                .from('sales_agents')
-                .insert({
-                    name: newSalesAgent.name,
-                    email: newSalesAgent.email,
-                    access_code: accessCode,
-                    is_active: true
-                });
-
-            if (error) throw error;
-            setGeneratedSalesCode(accessCode);
-            toast.success('Sales user created');
-            setNewSalesAgent({ name: '', email: '' });
-            fetchSalesAgents();
-        } catch (err: any) {
-            console.error('Error creating sales user:', err);
-            toast.error(err?.message || 'Failed to create sales user');
-        }
-    };
-
-    const toggleSalesAgentStatus = async (id: string, currentStatus: boolean) => {
-        if (userRole !== 'super_admin') return;
-        try {
-            const { error } = await supabase
-                .from('sales_agents')
-                .update({ is_active: !currentStatus })
-                .eq('id', id);
-
-            if (error) throw error;
-            toast.success(!currentStatus ? 'Activated' : 'Deactivated');
-            fetchSalesAgents();
-        } catch (err) {
-            console.error('Error updating sales user:', err);
-            toast.error('Failed to update sales user');
-        }
-    };
-
-    const deleteSalesAgent = async (id: string) => {
-        if (userRole !== 'super_admin') return;
-        if (!confirm('Remove this sales user?')) return;
-        try {
-            const { error } = await supabase
-                .from('sales_agents')
-                .update({ is_active: false })
-                .eq('id', id);
-
-            if (error) throw error;
-            toast.success('Sales user removed');
-            fetchSalesAgents();
-        } catch (err) {
-            console.error('Error removing sales user:', err);
-            toast.error('Failed to remove sales user');
-        }
-    };
-
     const fetchChatSessions = async () => {
         try {
             const { data, error } = await supabase
@@ -908,10 +801,7 @@ export default function AdminPanel() {
                         { id: 'users', icon: Users, label: 'Users' },
                         { id: 'coupons', icon: Tag, label: 'Coupons' },
                         { id: 'chat', icon: MessageCircle, label: 'Support Chat' },
-                        ...(userRole === 'super_admin' ? [
-                            { id: 'sales', icon: Megaphone, label: 'Sales' },
-                            { id: 'agents', icon: UserPlus, label: 'Agents' }
-                        ] : []),
+                        ...(userRole === 'super_admin' ? [{ id: 'agents', icon: UserPlus, label: 'Agents' }] : []),
                         { id: 'notifications', icon: Bell, label: 'Push Notifications' }
                     ].map((item) => (
                         <button
@@ -1440,193 +1330,6 @@ export default function AdminPanel() {
                                         </div>
                                     )}
                                 </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Sales Tab (Super Admin Only) */}
-                    {activeTab === 'sales' && userRole === 'super_admin' && (
-                        <div className="space-y-6">
-                            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                                <div>
-                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                        Sales Team Workspace
-                                    </h2>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">Create access codes for sales users to enter the Sales page.</p>
-                                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                                        <span className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200 font-semibold">
-                                            Total: {salesAgents.length}
-                                        </span>
-                                        <span className="px-2.5 py-1 rounded-full bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-200 font-semibold">
-                                            Active: {salesAgents.filter(a => a.is_active).length}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col sm:flex-row gap-2">
-                                    <button
-                                        onClick={() => {
-                                            setShowSalesForm(!showSalesForm);
-                                            setGeneratedSalesCode(null);
-                                        }}
-                                        className="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                                    >
-                                        <Megaphone className="h-4 w-4 mr-2" />
-                                        Add Sales User
-                                    </button>
-                                    <button
-                                        onClick={() => navigator.clipboard.writeText(salesEntryLink)}
-                                        className="inline-flex items-center justify-center px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
-                                    >
-                                        <Copy className="w-4 h-4 mr-2" /> Copy Sales Entry Link
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-center justify-between gap-3">
-                                <div>
-                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Sales entry link</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xl">{salesEntryLink}</p>
-                                </div>
-                                <button
-                                    onClick={() => navigator.clipboard.writeText(salesEntryLink)}
-                                    className="inline-flex items-center px-3 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg"
-                                >
-                                    <Copy className="w-4 h-4 mr-2" /> Copy
-                                </button>
-                            </div>
-
-                            {showSalesForm && (
-                                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">New Sales User</h3>
-                                    {generatedSalesCode ? (
-                                        <div className="space-y-4">
-                                            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                                                <p className="text-sm text-green-800 dark:text-green-200 mb-2">Sales user created successfully!</p>
-                                                <p className="text-xs text-green-700 dark:text-green-300 mb-3">Share this access code with the sales user to unlock the Sales page.</p>
-                                                <div className="bg-white dark:bg-gray-900 p-3 rounded border border-green-300 dark:border-green-700 flex items-center justify-between">
-                                                    <p className="text-2xl font-mono font-bold text-gray-900 dark:text-white tracking-wider">{generatedSalesCode}</p>
-                                                    <button
-                                                        onClick={() => navigator.clipboard.writeText(generatedSalesCode)}
-                                                        className="px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg"
-                                                    >
-                                                        <Copy className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={() => {
-                                                    setShowSalesForm(false);
-                                                    setGeneratedSalesCode(null);
-                                                }}
-                                                className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                                            >
-                                                Done
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <form onSubmit={createSalesAgent} className="space-y-4">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-                                                    <input
-                                                        type="text"
-                                                        value={newSalesAgent.name}
-                                                        onChange={(e) => setNewSalesAgent({ ...newSalesAgent, name: e.target.value })}
-                                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-                                                    <input
-                                                        type="email"
-                                                        value={newSalesAgent.email}
-                                                        onChange={(e) => setNewSalesAgent({ ...newSalesAgent, email: e.target.value })}
-                                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                                                        required
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-end space-x-3">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setShowSalesForm(false)}
-                                                    className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button
-                                                    type="submit"
-                                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                                                >
-                                                    Create Sales User
-                                                </button>
-                                            </div>
-                                        </form>
-                                    )}
-                                </div>
-                            )}
-
-                            <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                                {salesAgents.length === 0 ? (
-                                    <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                                        No sales users yet. Create one to share an access code.
-                                    </div>
-                                ) : (
-                                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                        <thead className="bg-gray-50 dark:bg-gray-700">
-                                            <tr>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Name</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Email</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Access Code</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Status</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Created</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                            {salesAgents.map((agent) => (
-                                                <tr key={agent.id}>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{agent.name}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{agent.email}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="font-mono font-semibold text-gray-900 dark:text-white">{agent.access_code}</span>
-                                                            <button
-                                                                onClick={() => navigator.clipboard.writeText(agent.access_code)}
-                                                                className="text-indigo-600 hover:text-indigo-800"
-                                                            >
-                                                                <Copy className="w-4 h-4" />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${agent.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                            {agent.is_active ? 'Active' : 'Inactive'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        {new Date(agent.created_at).toLocaleDateString()}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm space-x-3">
-                                                        <button
-                                                            onClick={() => toggleSalesAgentStatus(agent.id, agent.is_active)}
-                                                            className="text-indigo-600 hover:text-indigo-900"
-                                                        >
-                                                            {agent.is_active ? 'Deactivate' : 'Activate'}
-                                                        </button>
-                                                        <button
-                                                            onClick={() => deleteSalesAgent(agent.id)}
-                                                            className="text-red-600 hover:text-red-800"
-                                                        >
-                                                            Remove
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                )}
                             </div>
                         </div>
                     )}

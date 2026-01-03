@@ -242,38 +242,121 @@ SUPABASE_URL=your-supabase-url
 SUPABASE_KEY=your-supabase-service-role-key
 ```
 
-### 4. Run Development Server
+### 5. Run Development Servers
 
 ```bash
-# Frontend
+# Frontend (from /frontend directory)
 npm run dev
+# Access at http://localhost:5173
 
-# Backend (optional FastAPI)
-cd ../backend
-pip install -r requirements.txt
-uvicorn main:app --reload
+# Backend - FastAPI (optional, from /backend directory)
+uvicorn main:app --reload --port 8000
+# API docs at http://localhost:8000/docs
 
-# Mobile app (after setup)
+# Mobile app (after initial setup)
 npm run build:mobile
-npx cap open android
-npx cap open ios
+npx cap sync
+npx cap open android  # For Android
+npx cap open ios      # For iOS (macOS only)
 ```
 
-Visit `http://localhost:5173` for web app
+### 6. Access the Application
+
+- **Web App**: http://localhost:5173
+- **Tutor Dashboard**: http://localhost:5173/dashboard
+- **Admin Panel**: http://localhost:5173/admin
+- **Sales Workspace**: http://localhost:5173/sales
+- **Support Chat**: http://localhost:5173/support
+
+### 7. Create Your First Admin User
+
+```sql
+-- Run in Supabase SQL Editor
+UPDATE profiles 
+SET role = 'super_admin' 
+WHERE email = 'your-email@example.com';
+```
+
+---
+
+## 📁 Project Structure
+
+```
+durrah-exams/
+├── frontend/                 # React + Vite frontend
+│   ├── src/
+│   │   ├── components/      # Reusable UI components
+│   │   ├── pages/          # Route pages
+│   │   ├── hooks/          # Custom React hooks
+│   │   ├── lib/            # Utilities and helpers
+│   │   ├── types/          # TypeScript definitions
+│   │   └── App.tsx         # Main app component
+│   ├── public/             # Static assets
+│   ├── index.html          # Entry HTML
+│   └── vite.config.ts      # Vite configuration
+│
+├── backend/                 # FastAPI Python backend
+│   ├── main.py             # FastAPI application
+│   ├── routes/             # API route handlers
+│   ├── services/           # Business logic
+│   ├── models/             # Data models
+│   └── requirements.txt    # Python dependencies
+│
+├── durrah-tutors-mobile/   # Capacitor mobile app
+│   ├── android/            # Android native project
+│   ├── ios/                # iOS native project
+│   └── capacitor.config.ts # Capacitor configuration
+│
+├── supabase/               # Supabase configuration
+│   ├── migrations/         # Database migrations
+│   └── functions/          # Edge functions
+│
+├── docs/                   # Documentation
+│   ├── screenshots/        # App screenshots
+│   ├── guides/            # Setup and usage guides
+│   └── api/               # API documentation
+│
+└── README.md              # This file
+```
 
 ---
 
 ## 📖 Documentation
 
-- **[Sales Improvement Plan](SALES_IMPROVEMENT_PLAN.md)** - Comprehensive sales features roadmap
-- **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Security improvements & deployment
-- **[Supabase Setup](SUPABASE_SETUP.md)** - Database configuration
-- **[New Features](NEW_FEATURES.md)** - Feature documentation
-- **[Troubleshooting](TROUBLESHOOTING.md)** - Common issues & solutions
-- **[Realtime Chat](REALTIME_CHAT_QUICKSTART.md)** - Live chat setup guide
-- **[Kids Mode](KIDS_MODE_TASKS.md)** - Kids interface documentation
-- **[Mobile App](MOBILE_APP_PLAN.md)** - Capacitor mobile app guide
-- **[Payment Integration](KASHIER_IMPLEMENTATION_COMPLETE.md)** - Kashier setup
+### Setup & Configuration
+- **[Database Setup Instructions](DATABASE_SETUP_INSTRUCTIONS.md)** - Comprehensive database configuration
+- **[Supabase Setup](SUPABASE_SETUP.md)** - Supabase project configuration
+- **[Configure Supabase SMTP](CONFIGURE_SUPABASE_SMTP.md)** - Email notification setup
+- **[Deploy Edge Function](DEPLOY_EDGE_FUNCTION.md)** - Serverless function deployment
+
+### Features & Implementation
+- **[Realtime Chat Quickstart](REALTIME_CHAT_QUICKSTART.md)** - Live chat setup guide
+- **[Bulletproof Realtime Chat](BULLETPROOF_REALTIME_CHAT.md)** - Advanced chat implementation
+- **[Kids Mode Tasks](KIDS_MODE_TASKS.md)** - Kids interface documentation
+- **[Payment Integration](KASHIER_IMPLEMENTATION_COMPLETE.md)** - Kashier payment setup
+- **[AI Providers Guide](AI_PROVIDERS_COMPLETE_GUIDE.md)** - Multi-AI provider integration
+- **[Hybrid AI Integration](HYBRID_AI_INTEGRATION_GUIDE.md)** - Advanced AI features
+
+### Deployment & Maintenance
+- **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Production deployment steps
+- **[Deployment and Testing Checklist](DEPLOYMENT_AND_TESTING_CHECKLIST.md)** - Pre-launch checklist
+- **[Email Deployment Guide](EMAIL_DEPLOYMENT_GUIDE.md)** - Email system setup
+- **[GitHub Push Guide](GITHUB_PUSH_GUIDE.md)** - Version control workflow
+
+### Business & Sales
+- **[Sales Improvement Plan](SALES_IMPROVEMENT_PLAN.md)** - Sales features roadmap
+- **[Feature Comparison](FEATURE_COMPARISON.md)** - Free vs Paid features
+
+### Troubleshooting
+- **[Fix Chat Errors Guide](FIX_CHAT_ERRORS_GUIDE.md)** - Chat system troubleshooting
+- **[Groq Troubleshooting](GROQ_TROUBLESHOOTING.md)** - AI provider issues
+- **[Build Status](BUILD_STATUS.md)** - Current build information
+
+### Project Management
+- **[Complete Project Summary](COMPLETE_PROJECT_SUMMARY.md)** - Full project overview
+- **[Final Summary](FINAL_SUMMARY.md)** - Latest updates and status
+- **[Almost Done](ALMOST_DONE.md)** - Remaining tasks
+- **[Checklist](CHECKLIST.md)** - Development checklist
 
 ---
 
@@ -281,254 +364,638 @@ Visit `http://localhost:5173` for web app
 
 ### ✅ What's New in v3.0
 
-1. **Sales Team Management**
-   - Dedicated sales workspace at `/sales`
-   - Lead capture and tracking
-   - Event logging for all sales activities
-   - UTM link builder for attribution
-   - Admin oversight with performance analytics
+1. **Realtime Chat System**
+   - WebSocket-based live messaging
+   - Agent assignment and routing
+   - Message history and persistence
+   - Chat session management
+   - Rating system for support quality
+   - Typing indicators and presence
+   - File sharing capabilities
 
-2. **Advanced Admin Features**
-   - User management with filters
-   - Coupon system with usage tracking
-   - Live support chat with agent assignment
+2. **Sales Team Management**
+   - Dedicated sales workspace at `/sales`
+   - Lead capture and tracking system
+   - Event logging for all sales activities
+   - UTM link builder for marketing attribution
+   - Sales performance analytics
+   - Admin oversight and monitoring
+
+3. **Advanced Admin Features**
+   - Comprehensive user management with filters
+   - Coupon system with usage tracking and analytics
    - Support agent management with access codes
    - System-wide analytics dashboard
-   - Push notifications system
+   - Firebase Cloud Messaging integration
+   - Push notification system
+   - Mockups gallery for marketing materials
 
-3. **Exam Lifecycle Management**
-   - Activate/deactivate exams
+4. **Exam Lifecycle Management**
+   - Activate/deactivate exams functionality
    - Students can only access active exams
    - Direct exam links with access control
-   - Exam-specific analytics
+   - Exam-specific analytics and insights
+   - Tutorial mode for practice exams
+   - Test/production exam flags
 
-4. **Kids Mode**
-   - Child-friendly interface
-   - Gamification elements
-   - Simplified navigation
-   - Age-appropriate design
+5. **Kids Mode**
+   - Child-friendly interface design
+   - Gamification elements and rewards
+   - Simplified navigation patterns
+   - Age-appropriate visual design
+   - Engaging animations and feedback
 
-5. **Enhanced Payment Integration**
-   - Kashier payment gateway
-   - Subscription management
-   - Coupon redemption
-   - Payment history
+6. **Enhanced Payment Integration**
+   - Kashier payment gateway integration
+   - Subscription plan management
+   - Coupon redemption system
+   - Payment history and receipts
+   - Free trial management
+   - Automated subscription renewal
 
 ### ✅ What's New in v2.0
 
 1. **Server-Side Grading**
-   - Correct answers no longer exposed to clients
-   - Prevents score manipulation
+   - Correct answers stored securely on server
+   - Prevents client-side answer manipulation
    - Supabase Edge Function implementation
+   - Secure answer validation
 
-2. **Fixed Scoring Bug**
-   - All question types properly scored
+2. **Fixed Scoring System**
+   - All question types scored accurately
    - Numeric comparison for numeric questions
    - Case-insensitive text comparison
+   - Array-based answers for multiple select
+   - Points system with partial credit support
 
 3. **Enhanced Error Handling**
-   - Centralized error management
+   - Centralized error management system
    - Retry logic with exponential backoff
    - User-friendly error messages
    - Offline submission queuing
+   - Network failure recovery
+   - Toast notifications for user feedback
 
 4. **Time Validation**
    - Server-side enforcement of exam schedules
    - Prevents early/late submissions
+   - Timezone-aware date handling
+   - Grace period support
+   - Countdown timers with warnings
+
+---
+
+## 🔒 Security Features
+
+### Anti-Cheating System
+- **Fullscreen Enforcement**: Exams must be taken in fullscreen mode
+- **Tab Switch Detection**: Tracks when students leave the exam page
+- **Copy/Paste Blocking**: Prevents content copying
+- **Right-Click Disabling**: Blocks context menu access
+- **Violation Tracking**: Logs all suspicious activities
+- **Auto-Submission**: Automatic submission after violation threshold
+- **Screenshot Prevention**: Blocks screenshot attempts (mobile)
+- **DevTools Detection**: Warns when developer tools are opened
+
+### Data Security
+- **Row Level Security (RLS)**: Database-level access control
+- **Server-Side Validation**: All submissions validated on server
+- **Encrypted Storage**: Sensitive data encrypted at rest
+- **Secure Authentication**: Supabase Auth with JWT tokens
+- **Role-Based Access**: Granular permissions system
+- **API Rate Limiting**: Prevents abuse and DDoS
+- **CORS Configuration**: Strict origin policies
+- **SQL Injection Prevention**: Parameterized queries
+
+### Privacy & Compliance
+- **GDPR Compliant**: User data management and deletion
+- **Data Encryption**: End-to-end encryption for sensitive data
+- **Audit Logs**: Complete activity tracking
+- **Access Controls**: Multi-level permission system
+- **Data Backup**: Automated backups and recovery
+- **Anonymous Submissions**: Support for anonymous exam taking
 
 ---
 
 ## 📊 Database Schema
 
 ### Core Tables
+
+#### profiles
+User accounts and subscription information
+```sql
+CREATE TABLE profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id),
+  email TEXT UNIQUE NOT NULL,
+  full_name TEXT,
+  phone TEXT,
+  institution TEXT,
+  subscription_status TEXT DEFAULT 'free',
+  subscription_plan TEXT,
+  subscription_end_date TIMESTAMPTZ,
+  role TEXT DEFAULT 'tutor',
+  fcm_token TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
-profiles
-├── id (uuid, PK)
-├── email (text)
-├── full_name (text)
-├── phone (text)
-├── institution (text)
-├── subscription_status (text)
-├── subscription_plan (text)
-├── subscription_end_date (timestamp)
-└── created_at (timestamp)
 
-exams
-├── id (uuid, PK)
-├── tutor_id (uuid, FK → profiles)
-├── title (text)
-├── description (text)
-├── settings (jsonb)
-├── required_fields (text[])
-├── is_active (boolean)
-├── is_kids_mode (boolean)
-└── created_at (timestamp)
+#### exams
+Exam definitions and settings
+```sql
+CREATE TABLE exams (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  tutor_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  settings JSONB DEFAULT '{}',
+  required_fields TEXT[] DEFAULT '{}',
+  is_active BOOLEAN DEFAULT true,
+  is_kids_mode BOOLEAN DEFAULT false,
+  is_test BOOLEAN DEFAULT false,
+  tutorial_content TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
 
-questions
-├── id (uuid, PK)
-├── exam_id (uuid, FK → exams)
-├── type (text)
-├── question_text (text)
-├── options (jsonb)
-├── correct_answer (text | jsonb)
-├── points (integer)
-├── randomize_options (boolean)
-└── order_index (integer)
+#### questions
+Exam questions with various types
+```sql
+CREATE TABLE questions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  exam_id UUID REFERENCES exams(id) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK (type IN ('multiple-choice', 'true-false', 'short-answer', 'numeric', 'dropdown', 'multiple-select')),
+  question_text TEXT NOT NULL,
+  options JSONB,
+  correct_answer TEXT,
+  points INTEGER DEFAULT 1,
+  randomize_options BOOLEAN DEFAULT false,
+  order_index INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
 
-submissions
-├── id (uuid, PK)
-├── exam_id (uuid, FK → exams)
-├── student_name (text)
-├── student_email (text)
-├── score (integer)
-├── max_score (integer)
-├── percentage (numeric)
-├── violations (jsonb)
-├── time_taken (integer)
-└── created_at (timestamp)
+#### submissions
+Student exam submissions
+```sql
+CREATE TABLE submissions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  exam_id UUID REFERENCES exams(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES profiles(id),
+  student_name TEXT,
+  student_email TEXT,
+  student_fields JSONB DEFAULT '{}',
+  score INTEGER DEFAULT 0,
+  max_score INTEGER DEFAULT 0,
+  percentage NUMERIC(5,2),
+  violations JSONB DEFAULT '[]',
+  time_taken INTEGER,
+  is_anonymous BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
 
-submission_answers
-├── id (uuid, PK)
-├── submission_id (uuid, FK → submissions)
-├── question_id (uuid, FK → questions)
-├── answer (text)
-└── is_correct (boolean)
+#### submission_answers
+Individual answers for each question
+```sql
+CREATE TABLE submission_answers (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  submission_id UUID REFERENCES submissions(id) ON DELETE CASCADE,
+  question_id UUID REFERENCES questions(id) ON DELETE CASCADE,
+  answer TEXT,
+  is_correct BOOLEAN,
+  points_earned INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
 
 ### Admin & Support Tables
+
+#### coupons
+Discount and promotional codes
+```sql
+CREATE TABLE coupons (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  code TEXT UNIQUE NOT NULL,
+  discount_type TEXT CHECK (discount_type IN ('percentage', 'fixed', 'free_trial')),
+  discount_value NUMERIC,
+  max_uses INTEGER,
+  used_count INTEGER DEFAULT 0,
+  valid_until TIMESTAMPTZ,
+  is_active BOOLEAN DEFAULT true,
+  created_by UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
-coupons
-├── id (uuid, PK)
-├── code (text, unique)
-├── discount_type (text)
-├── discount_value (numeric)
-├── max_uses (integer)
-├── used_count (integer)
-├── valid_until (timestamp)
-├── is_active (boolean)
-└── created_at (timestamp)
 
-support_agents
-├── id (uuid, PK)
-├── name (text)
-├── email (text)
-├── access_code (text, unique)
-├── is_active (boolean)
-└── created_at (timestamp)
+#### support_agents
+Support team members
+```sql
+CREATE TABLE support_agents (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  access_code TEXT UNIQUE NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  last_login TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
 
-live_chat_sessions
-├── id (uuid, PK)
-├── user_id (uuid, FK → profiles)
-├── assigned_agent_id (uuid, FK → support_agents)
-├── status (text)
-├── created_at (timestamp)
-└── updated_at (timestamp)
+#### chat_sessions
+Live chat conversations
+```sql
+CREATE TABLE chat_sessions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES profiles(id),
+  user_name TEXT,
+  user_email TEXT,
+  assigned_agent_id UUID REFERENCES support_agents(id),
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'resolved', 'closed')),
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  resolved_at TIMESTAMPTZ
+);
+```
 
-chat_messages
-├── id (uuid, PK)
-├── session_id (uuid, FK → live_chat_sessions)
-├── user_id (uuid, FK → profiles)
-├── message (text)
-├── is_admin (boolean)
-└── created_at (timestamp)
+#### chat_messages
+Chat message history
+```sql
+CREATE TABLE chat_messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id UUID REFERENCES chat_sessions(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES profiles(id),
+  agent_id UUID REFERENCES support_agents(id),
+  message TEXT NOT NULL,
+  is_agent BOOLEAN DEFAULT false,
+  attachments JSONB DEFAULT '[]',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+#### push_notifications
+FCM notification history
+```sql
+CREATE TABLE push_notifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES profiles(id),
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  data JSONB DEFAULT '{}',
+  sent_at TIMESTAMPTZ DEFAULT NOW(),
+  status TEXT DEFAULT 'pending'
+);
 ```
 
 ### Sales Tables
-```
-sales_agents
-├── id (uuid, PK)
-├── name (text)
-├── email (text, unique)
-├── access_code (text, unique)
-├── is_active (boolean)
-├── created_at (timestamp)
-└── updated_at (timestamp)
 
-sales_events
-├── id (uuid, PK)
-├── agent_id (uuid, FK → sales_agents)
-├── type (text)
-├── metadata (jsonb)
-└── created_at (timestamp)
-
-sales_leads
-├── id (uuid, PK)
-├── agent_id (uuid, FK → sales_agents)
-├── email (text)
-├── name (text)
-├── status (text)
-├── notes (text)
-├── meta (jsonb)
-├── created_at (timestamp)
-└── updated_at (timestamp)
+#### sales_agents
+Sales team members
+```sql
+CREATE TABLE sales_agents (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  access_code TEXT UNIQUE NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  last_login TIMESTAMPTZ,
+  performance_metrics JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
 
-### Question Bank
+#### sales_leads
+Captured leads from sales team
+```sql
+CREATE TABLE sales_leads (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  agent_id UUID REFERENCES sales_agents(id),
+  email TEXT NOT NULL,
+  name TEXT,
+  phone TEXT,
+  institution TEXT,
+  status TEXT DEFAULT 'new' CHECK (status IN ('new', 'contacted', 'qualified', 'converted', 'lost')),
+  notes TEXT,
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+  meta JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
-question_banks
-├── id (uuid, PK)
-├── tutor_id (uuid, FK → profiles)
-├── name (text)
-├── description (text)
-└── created_at (timestamp)
 
-question_bank_items
-├── id (uuid, PK)
-├── bank_id (uuid, FK → question_banks)
-├── question_data (jsonb)
-└── created_at (timestamp)
+#### sales_events
+Activity tracking for sales
+```sql
+CREATE TABLE sales_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  agent_id UUID REFERENCES sales_agents(id),
+  lead_id UUID REFERENCES sales_leads(id),
+  type TEXT NOT NULL CHECK (type IN ('login', 'lead_created', 'link_generated', 'conversion', 'note_added')),
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### Question Bank & Analytics
+
+#### question_banks
+Reusable question collections
+```sql
+CREATE TABLE question_banks (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  tutor_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT,
+  category TEXT,
+  tags TEXT[] DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+#### question_bank_items
+Individual questions in banks
+```sql
+CREATE TABLE question_bank_items (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  bank_id UUID REFERENCES question_banks(id) ON DELETE CASCADE,
+  question_data JSONB NOT NULL,
+  difficulty_level TEXT,
+  topic TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+#### analytics_events
+User activity tracking
+```sql
+CREATE TABLE analytics_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES profiles(id),
+  event_type TEXT NOT NULL,
+  event_data JSONB DEFAULT '{}',
+  ip_address INET,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
 
 ---
 
-## 🎨 Screenshots
+## 🔌 API Documentation
+
+### REST API Endpoints
+
+#### Authentication
+```http
+POST /auth/signup          # Create new account
+POST /auth/login           # User login
+POST /auth/logout          # User logout
+POST /auth/reset-password  # Password reset
+GET  /auth/user            # Get current user
+```
+
+#### Exams
+```http
+GET    /api/exams               # List all exams
+GET    /api/exams/:id           # Get exam details
+POST   /api/exams               # Create new exam
+PUT    /api/exams/:id           # Update exam
+DELETE /api/exams/:id           # Delete exam
+PATCH  /api/exams/:id/activate  # Activate/deactivate exam
+```
+
+#### Questions
+```http
+GET    /api/exams/:id/questions         # List exam questions
+POST   /api/exams/:id/questions         # Add question
+PUT    /api/questions/:id               # Update question
+DELETE /api/questions/:id               # Delete question
+POST   /api/questions/bulk              # Bulk import
+```
+
+#### Submissions
+```http
+GET  /api/exams/:id/submissions       # List submissions
+POST /api/exams/:id/submit            # Submit exam
+GET  /api/submissions/:id             # Get submission details
+GET  /api/submissions/:id/export      # Export results
+```
+
+#### Admin
+```http
+GET    /api/admin/users              # List all users
+GET    /api/admin/analytics          # System analytics
+POST   /api/admin/coupons            # Create coupon
+GET    /api/admin/coupons            # List coupons
+DELETE /api/admin/coupons/:id        # Delete coupon
+POST   /api/admin/notifications      # Send push notification
+```
+
+#### Chat
+```http
+GET    /api/chat/sessions            # List chat sessions
+POST   /api/chat/sessions            # Create session
+GET    /api/chat/sessions/:id        # Get session
+POST   /api/chat/messages            # Send message
+PATCH  /api/chat/sessions/:id/assign # Assign agent
+PATCH  /api/chat/sessions/:id/rate   # Rate session
+```
+
+#### Sales
+```http
+POST /api/sales/login       # Sales agent login
+GET  /api/sales/leads       # List leads
+POST /api/sales/leads       # Create lead
+PUT  /api/sales/leads/:id   # Update lead
+GET  /api/sales/analytics   # Sales metrics
+POST /api/sales/utm         # Generate UTM link
+```
+
+### Realtime Subscriptions
+
+```typescript
+// Subscribe to chat messages
+supabase
+  .channel('chat:session_id')
+  .on('postgres_changes', {
+    event: 'INSERT',
+    schema: 'public',
+    table: 'chat_messages',
+    filter: `session_id=eq.${sessionId}`
+  }, (payload) => {
+    console.log('New message:', payload.new);
+  })
+  .subscribe();
+
+// Subscribe to exam submissions
+supabase
+  .channel('submissions:exam_id')
+  .on('postgres_changes', {
+    event: 'INSERT',
+    schema: 'public',
+    table: 'submissions',
+    filter: `exam_id=eq.${examId}`
+  }, (payload) => {
+    console.log('New submission:', payload.new);
+  })
+  .subscribe();
+```
+
+### Edge Functions
+
+#### grade-exam
+Server-side grading function
+```typescript
+// Request
+POST /functions/v1/grade-exam
+{
+  "submissionId": "uuid",
+  "answers": [
+    {
+      "questionId": "uuid",
+      "answer": "student answer"
+    }
+  ]
+}
+
+// Response
+{
+  "score": 85,
+  "maxScore": 100,
+  "percentage": 85.0,
+  "results": [...]
+}
+```
+
+---
+
+## 🎨 Screenshots & Demo
 
 ### Tutor Dashboard
 ![Dashboard](docs/screenshots/dashboard.png)
+*Create and manage exams with comprehensive analytics*
 
 ### Exam Editor
 ![Editor](docs/screenshots/editor.png)
+*Rich question editor supporting multiple question types*
 
 ### Student Exam View
 ![Exam View](docs/screenshots/exam-view.png)
+*Clean, distraction-free exam-taking experience*
 
 ### Results & Analytics
 ![Results](docs/screenshots/results.png)
+*Detailed analytics and exportable results*
+
+### Admin Panel
+*Full system administration and user management*
+
+### Live Chat
+*Real-time support chat with agent assignment*
+
+### Sales Dashboard
+*Lead tracking and performance analytics*
 
 ---
 
 ## 🧪 Testing
 
-### Run Tests
+## 🧪 Testing
+
+### Automated Testing
+
 ```bash
-# Frontend tests
+# Frontend unit tests
 cd frontend
 npm test
 
-# Backend tests (if using FastAPI)
+# Frontend E2E tests
+npm run test:e2e
+
+# Backend tests
 cd backend
 pytest
+
+# Run with coverage
+pytest --cov=. --cov-report=html
 ```
 
 ### Manual Testing Checklist
 
+#### Exam Functionality
 - [x] Create exam with all question types
+- [x] Edit and update existing exams
+- [x] Activate/deactivate exams
+- [x] Delete exams and cascade deletion
 - [x] Take exam as student
-- [x] Verify scoring accuracy
-- [x] Test violation system
-- [x] Export results to Excel, PDF, Word
-- [x] Test time-based access
-- [x] Verify mobile compatibility
+- [x] Verify scoring accuracy for all question types
+- [x] Test time limits and auto-submission
+- [x] Verify randomization of questions and options
+
+#### Security & Anti-Cheating
+- [x] Test fullscreen enforcement
+- [x] Verify violation tracking system
+- [x] Test tab switch detection
+- [x] Verify copy/paste blocking
+- [x] Test auto-submission after violations
+- [x] Server-side answer validation
+
+#### User Management
+- [x] Test time-based access control
+- [x] Verify mobile compatibility (iOS & Android)
 - [x] Test offline submission queue
+- [x] User registration and login
+- [x] Password reset flow
+- [x] Role-based access control
+- [x] Subscription management
+
+#### Admin Features
 - [x] Live chat functionality
-- [x] Payment integration
-- [x] Coupon redemption
+- [x] Chat agent assignment
+- [x] Chat session management
+- [x] Payment integration (Kashier)
+- [x] Coupon creation and redemption
 - [x] Admin panel features
+- [x] User filtering and search
+- [x] Push notifications
+
+#### Sales Features
 - [x] Sales page access and lead capture
-- [x] Support agent chat assignment
-- [x] Exam activation/deactivation
+- [x] UTM link generation
+- [x] Sales analytics
+- [x] Lead status management
+
+#### Export & Analytics
+- [x] Export results to Excel
+- [x] Export results to PDF
+- [x] Export results to Word
+- [x] Exam-specific analytics
+- [x] System-wide analytics
+
+#### Kids Mode
 - [x] Kids mode interface
-- [ ] Free vs Paid restrictions
+- [x] Child-friendly navigation
+- [x] Gamification elements
+
+#### Mobile App
+- [ ] Camera integration
+- [ ] Biometric authentication
+- [ ] Push notifications (mobile)
+- [ ] Offline mode
+- [ ] App store deployment
+
+#### Performance
+- [ ] Load testing with concurrent users
+- [ ] Database query optimization
+- [ ] API response time monitoring
+- [ ] Realtime subscription scalability
 
 ---
 
