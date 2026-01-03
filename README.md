@@ -1,19 +1,20 @@
-# 🎓 Durrah Exams - Secure Online Examination Platform
+# 🎓 Durrah Exams - Advanced Online Examination & Learning Platform
 
-A modern, full-stack online examination platform with advanced anti-cheating measures and server-side grading.
+A modern, full-stack online examination platform with advanced anti-cheating measures, server-side grading, AI-powered features, sales workspace, and comprehensive admin management.
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue)
+![Version](https://img.shields.io/badge/version-3.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![React](https://img.shields.io/badge/React-19.2.0-61DAFB?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-3178C6?logo=typescript)
 ![Supabase](https://img.shields.io/badge/Supabase-Latest-3ECF8E?logo=supabase)
+![Vite](https://img.shields.io/badge/Vite-7.2.2-646CFF?logo=vite)
 
 ---
 
 ## ✨ Features
 
 ### 🎯 For Tutors
-- **Exam Management**: Create, edit, and delete exams with ease
+- **Exam Management**: Create, edit, activate/deactivate, and delete exams
 - **Multiple Question Types**: 
   - Multiple Choice
   - True/False
@@ -26,17 +27,43 @@ A modern, full-stack online examination platform with advanced anti-cheating mea
   - Start/end dates
   - Custom student fields
   - Anti-cheating settings
+  - Exam activation/deactivation
 - **Results & Analytics**:
   - View all submissions
-  - Export to Excel
+  - Export to Excel, Word, PDF
   - Violation tracking
   - Performance analytics
+  - Exam-specific analytics dashboard
+- **Question Bank**: Organize and reuse questions across exams
+- **Kids Mode**: Child-friendly interface with gamification
 
 ### 👨‍🎓 For Students
 - **User-Friendly Interface**: Clean, modern exam-taking experience
+- **Student Portal**: Access all available exams in one place
 - **Progress Saving**: Automatic session restoration
-- **Mobile Support**: Works on desktop, tablet, and mobile
+- **Mobile Support**: Full mobile app (Capacitor) + responsive web
 - **Offline Resilience**: Submissions saved locally if network fails
+- **Kids Interface**: Engaging, age-appropriate exam experience
+
+### 💼 For Administrators
+- **Super Admin Panel**: Full system management and monitoring
+- **User Management**: View, filter, and manage all users
+- **Coupon System**: Create discount codes and free trial coupons
+- **Support Chat**: Built-in live chat with assignment system
+- **Support Agents**: Create and manage support team with access codes
+- **Sales Team Management**: Create sales users with access codes and performance tracking
+- **Analytics Dashboard**: System-wide metrics and insights
+- **Push Notifications**: Send targeted notifications to users
+- **Mockups Gallery**: Download promotional screenshots
+
+### 📊 Sales Workspace
+- **Sales Page**: Dedicated workspace for sales team with access code login
+- **Lead Capture**: Integrated lead form with status tracking
+- **Event Logging**: Track all sales activities and conversions
+- **UTM Link Builder**: Generate campaign-specific tracking links
+- **Outreach Scripts**: Ready-to-use pitch templates and objection handling
+- **Referral System**: Track referrals via unique access codes
+- **Admin Oversight**: Monitor sales team performance and leads
 
 ### 🔒 Security Features
 - **Anti-Cheating Measures**:
@@ -48,28 +75,47 @@ A modern, full-stack online examination platform with advanced anti-cheating mea
 - **Server-Side Grading**: Prevents answer manipulation
 - **Time-Based Access Control**: Enforce exam schedules
 - **Row Level Security**: Database-level access control
+- **Secure Payments**: Kashier integration for subscriptions
+- **Access Code System**: Secure authentication for agents and sales
 
 ---
 
 ## 🏗️ Tech Stack
 
 ### Frontend
-- **React 19** with TypeScript
-- **Vite** for blazing-fast builds
+- **React 19.2** with TypeScript
+- **Vite 7.2** (Rolldown) for blazing-fast builds
 - **TailwindCSS** for styling
-- **React Router** for navigation
+- **React Router 7** for navigation
 - **React Hook Form** + **Zod** for validation
 - **Lucide React** for icons
+- **Framer Motion** for animations
+- **Recharts** for analytics visualizations
+- **KaTeX** for LaTeX math rendering
+- **React Quill** for rich text editing
 
 ### Backend
-- **Supabase** (PostgreSQL + Auth + Edge Functions)
-- **FastAPI** (Python) - Optional enhanced backend
+- **Supabase** (PostgreSQL + Auth + Realtime + Edge Functions + Storage)
+- **FastAPI** (Python) - Enhanced backend with AI features
 - **Row Level Security** (RLS) for data protection
+- **Realtime Subscriptions** for live chat and updates
 
-### Additional Tools
+### Mobile
+- **Capacitor 8** for native iOS/Android apps
+- **Native Plugins**: Camera, Biometric, Push Notifications, Local Storage
+- **Progressive Web App** (PWA) support
+
+### Payments & Integrations
+- **Kashier** payment gateway integration
+- **Firebase** (Analytics, Cloud Messaging)
+- **Puppeteer** for screenshot generation
 - **XLSX** for Excel exports
-- **React Hot Toast** for notifications
-- **CryptoJS** for secure hashing
+- **jsPDF** + **docx** for document generation
+
+### AI & Advanced Features
+- **OpenAI** integration for question generation
+- **Hybrid AI extraction** for document processing
+- **LaTeX** support for mathematical content
 
 ---
 
@@ -115,35 +161,84 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 ### 4. Run Development Server
 
 ```bash
+# Frontend
 npm run dev
+
+# Backend (optional FastAPI)
+cd ../backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+
+# Mobile app (after setup)
+npm run build:mobile
+npx cap open android
+npx cap open ios
 ```
 
-Visit `http://localhost:5173`
+Visit `http://localhost:5173` for web app
 
 ---
 
 ## 📖 Documentation
 
+- **[Sales Improvement Plan](SALES_IMPROVEMENT_PLAN.md)** - Comprehensive sales features roadmap
 - **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Security improvements & deployment
 - **[Supabase Setup](SUPABASE_SETUP.md)** - Database configuration
 - **[New Features](NEW_FEATURES.md)** - Feature documentation
 - **[Troubleshooting](TROUBLESHOOTING.md)** - Common issues & solutions
+- **[Realtime Chat](REALTIME_CHAT_QUICKSTART.md)** - Live chat setup guide
+- **[Kids Mode](KIDS_MODE_TASKS.md)** - Kids interface documentation
+- **[Mobile App](MOBILE_APP_PLAN.md)** - Capacitor mobile app guide
+- **[Payment Integration](KASHIER_IMPLEMENTATION_COMPLETE.md)** - Kashier setup
 
 ---
 
-## 🔐 Security Improvements (v2.0)
+## 🔐 Security Improvements (v3.0)
 
-### ✅ What's New
+### ✅ What's New in v3.0
+
+1. **Sales Team Management**
+   - Dedicated sales workspace at `/sales`
+   - Lead capture and tracking
+   - Event logging for all sales activities
+   - UTM link builder for attribution
+   - Admin oversight with performance analytics
+
+2. **Advanced Admin Features**
+   - User management with filters
+   - Coupon system with usage tracking
+   - Live support chat with agent assignment
+   - Support agent management with access codes
+   - System-wide analytics dashboard
+   - Push notifications system
+
+3. **Exam Lifecycle Management**
+   - Activate/deactivate exams
+   - Students can only access active exams
+   - Direct exam links with access control
+   - Exam-specific analytics
+
+4. **Kids Mode**
+   - Child-friendly interface
+   - Gamification elements
+   - Simplified navigation
+   - Age-appropriate design
+
+5. **Enhanced Payment Integration**
+   - Kashier payment gateway
+   - Subscription management
+   - Coupon redemption
+   - Payment history
+
+### ✅ What's New in v2.0
 
 1. **Server-Side Grading**
    - Correct answers no longer exposed to clients
    - Prevents score manipulation
-   - Two implementation options:
-     - Supabase Edge Function (recommended)
-     - Enhanced FastAPI backend
+   - Supabase Edge Function implementation
 
 2. **Fixed Scoring Bug**
-   - All question types now properly scored
+   - All question types properly scored
    - Numeric comparison for numeric questions
    - Case-insensitive text comparison
 
@@ -161,11 +256,17 @@ Visit `http://localhost:5173`
 
 ## 📊 Database Schema
 
+### Core Tables
 ```
 profiles
 ├── id (uuid, PK)
 ├── email (text)
 ├── full_name (text)
+├── phone (text)
+├── institution (text)
+├── subscription_status (text)
+├── subscription_plan (text)
+├── subscription_end_date (timestamp)
 └── created_at (timestamp)
 
 exams
@@ -175,6 +276,8 @@ exams
 ├── description (text)
 ├── settings (jsonb)
 ├── required_fields (text[])
+├── is_active (boolean)
+├── is_kids_mode (boolean)
 └── created_at (timestamp)
 
 questions
@@ -185,7 +288,8 @@ questions
 ├── options (jsonb)
 ├── correct_answer (text | jsonb)
 ├── points (integer)
-└── randomize_options (boolean)
+├── randomize_options (boolean)
+└── order_index (integer)
 
 submissions
 ├── id (uuid, PK)
@@ -196,6 +300,7 @@ submissions
 ├── max_score (integer)
 ├── percentage (numeric)
 ├── violations (jsonb)
+├── time_taken (integer)
 └── created_at (timestamp)
 
 submission_answers
@@ -204,6 +309,90 @@ submission_answers
 ├── question_id (uuid, FK → questions)
 ├── answer (text)
 └── is_correct (boolean)
+```
+
+### Admin & Support Tables
+```
+coupons
+├── id (uuid, PK)
+├── code (text, unique)
+├── discount_type (text)
+├── discount_value (numeric)
+├── max_uses (integer)
+├── used_count (integer)
+├── valid_until (timestamp)
+├── is_active (boolean)
+└── created_at (timestamp)
+
+support_agents
+├── id (uuid, PK)
+├── name (text)
+├── email (text)
+├── access_code (text, unique)
+├── is_active (boolean)
+└── created_at (timestamp)
+
+live_chat_sessions
+├── id (uuid, PK)
+├── user_id (uuid, FK → profiles)
+├── assigned_agent_id (uuid, FK → support_agents)
+├── status (text)
+├── created_at (timestamp)
+└── updated_at (timestamp)
+
+chat_messages
+├── id (uuid, PK)
+├── session_id (uuid, FK → live_chat_sessions)
+├── user_id (uuid, FK → profiles)
+├── message (text)
+├── is_admin (boolean)
+└── created_at (timestamp)
+```
+
+### Sales Tables
+```
+sales_agents
+├── id (uuid, PK)
+├── name (text)
+├── email (text, unique)
+├── access_code (text, unique)
+├── is_active (boolean)
+├── created_at (timestamp)
+└── updated_at (timestamp)
+
+sales_events
+├── id (uuid, PK)
+├── agent_id (uuid, FK → sales_agents)
+├── type (text)
+├── metadata (jsonb)
+└── created_at (timestamp)
+
+sales_leads
+├── id (uuid, PK)
+├── agent_id (uuid, FK → sales_agents)
+├── email (text)
+├── name (text)
+├── status (text)
+├── notes (text)
+├── meta (jsonb)
+├── created_at (timestamp)
+└── updated_at (timestamp)
+```
+
+### Question Bank
+```
+question_banks
+├── id (uuid, PK)
+├── tutor_id (uuid, FK → profiles)
+├── name (text)
+├── description (text)
+└── created_at (timestamp)
+
+question_bank_items
+├── id (uuid, PK)
+├── bank_id (uuid, FK → question_banks)
+├── question_data (jsonb)
+└── created_at (timestamp)
 ```
 
 ---
@@ -239,14 +428,23 @@ pytest
 
 ### Manual Testing Checklist
 
-- [ ] Create exam with all question types
-- [ ] Take exam as student
-- [ ] Verify scoring accuracy
-- [ ] Test violation system
-- [ ] Export results to Excel
-- [ ] Test time-based access
-- [ ] Verify mobile compatibility
-- [ ] Test offline submission queue
+- [x] Create exam with all question types
+- [x] Take exam as student
+- [x] Verify scoring accuracy
+- [x] Test violation system
+- [x] Export results to Excel, PDF, Word
+- [x] Test time-based access
+- [x] Verify mobile compatibility
+- [x] Test offline submission queue
+- [x] Live chat functionality
+- [x] Payment integration
+- [x] Coupon redemption
+- [x] Admin panel features
+- [x] Sales page access and lead capture
+- [x] Support agent chat assignment
+- [x] Exam activation/deactivation
+- [x] Kids mode interface
+- [ ] Free vs Paid restrictions
 
 ---
 
@@ -312,22 +510,45 @@ For support, email support@durrahexams.com or open an issue on GitHub.
 
 ## 🗺️ Roadmap
 
+### Completed ✅
+- [x] Server-side grading
+- [x] Advanced analytics dashboard
+- [x] Question bank management
+- [x] Mobile app (Capacitor)
+- [x] Kids mode interface
+- [x] Payment integration (Kashier)
+- [x] Support chat system
+- [x] Sales team workspace
+- [x] Admin panel with full management
+- [x] Exam activation/deactivation
+- [x] Multiple export formats (Excel, PDF, Word)
+- [x] Live chat with realtime updates
+- [x] Push notifications
+
+### In Progress 🚧
+- [ ] Free vs Paid user restrictions
+- [ ] Advanced sales analytics and leaderboards
 - [ ] Email notifications for exam results
-- [ ] Advanced analytics dashboard
-- [ ] Question bank management
-- [ ] Bulk exam operations
-- [ ] Mobile app (React Native)
 - [ ] AI-powered proctoring
+- [ ] Bulk exam operations
+
+### Planned 📋
 - [ ] Video recording during exams
-- [ ] Integration with LMS platforms
+- [ ] Integration with LMS platforms (Moodle, Canvas)
+- [ ] Advanced AI question generation
+- [ ] Collaborative exam editing
+- [ ] Student performance predictions
+- [ ] Automated plagiarism detection
+- [ ] Calendar integration for exam scheduling
 
 ---
 
 ## 📈 Project Status
 
-**Current Version**: 2.0.0  
+**Current Version**: 3.0.0  
 **Status**: Production Ready ✅  
-**Last Updated**: November 2025
+**Last Updated**: January 2026  
+**Active Development**: Yes 🟢
 
 ---
 
