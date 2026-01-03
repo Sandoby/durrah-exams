@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle, Settings, Type, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle, Settings, Type, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
@@ -122,6 +122,52 @@ export default function ExamView() {
     const [showAutoSubmitWarning, setShowAutoSubmitWarning] = useState(false);
     const [autoSubmitCountdown, setAutoSubmitCountdown] = useState(5);
 
+    // Feature 1: Progress tracking
+    const [progressPercentage, setProgressPercentage] = useState(0);
+
+    // Feature 2: Keyboard shortcuts
+    const [keyboardShortcutsEnabled] = useState(true);
+    const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
+
+    // Feature 3: Timer warnings
+    const [showTimerWarning, setShowTimerWarning] = useState(false);
+    const [warningLevel, setWarningLevel] = useState<'yellow' | 'orange' | 'red'>('yellow');
+    const [hasShownWarning, setHasShownWarning] = useState({
+        fiveMin: false,
+        oneMin: false,
+        thirtySec: false
+    });
+
+    // Feature 4: Scratchpad
+    const [showScratchpad, setShowScratchpad] = useState(false);
+    const [scratchpadContent, setScratchpadContent] = useState('');
+    const [isScratchpadMinimized, setIsScratchpadMinimized] = useState(false);
+
+    // Feature 6: Confidence levels
+    const [confidenceLevels, setConfidenceLevels] = useState<Record<string, 'low' | 'medium' | 'high'>>({});
+
+    // Feature 7: Mobile swipe gestures
+    const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+    const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
+    const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+
+    // Feature 8: Text-to-speech
+    const [isSpeaking, setIsSpeaking] = useState(false);
+    const [speechRate] = useState(1.0);
+    const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+    // Feature 9: Answer change tracking
+    const [answerChanges, setAnswerChanges] = useState<Record<string, {
+        changes: number;
+        history: Array<{ answer: any; timestamp: number }>;
+    }>>({});
+
+    // Feature 10: Session timeout
+    const [showInactivityWarning, setShowInactivityWarning] = useState(false);
+    const [inactivityCountdown, setInactivityCountdown] = useState(60);
+    const lastActivityRef = useRef(Date.now());
+    const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
+
     // Load exam data or review data
     useEffect(() => {
         if (id) {
@@ -166,6 +212,13 @@ export default function ExamView() {
                 if (parsed.timeLeft !== null && parsed.timeLeft !== undefined) {
                     setTimeLeft(parsed.timeLeft);
                 }
+                // Restore new feature states
+                if (parsed.confidenceLevels) {
+                    setConfidenceLevels(parsed.confidenceLevels);
+                }
+                if (parsed.scratchpadContent) {
+                    setScratchpadContent(parsed.scratchpadContent);
+                }
                 setHasPreviousSession(true);
                 setHasPreviousSession(true);
                 toast.success(t('examView.previousSession'));
@@ -189,11 +242,141 @@ export default function ExamView() {
                 timeLeft,
                 started,
                 startedAt,
-                lastUpdated: Date.now()
+                lastUpdated: Date.now(),
+                confidenceLevels,
+                scratchpadContent
             };
             localStorage.setItem(`durrah_exam_${id}_state`, JSON.stringify(stateToSave));
         }
-    }, [id, studentData, answers, violations, timeLeft, started, startedAt, submitted, flaggedQuestions]);
+    }, [id, studentData, answers, violations, timeLeft, started, startedAt, submitted, flaggedQuestions, confidenceLevels, scratchpadContent]);
+
+    // Feature 1: Calculate progress percentage
+    useEffect(() => {
+        const answeredCount = Object.keys(answers).filter(id => {
+            const answer = answers[id]?.answer;
+            return answer !== undefined && answer !== '' && 
+                   (!Array.isArray(answer) || answer.length > 0);
+        }).length;
+        
+        const percentage = exam ? (answeredCount / exam.questions.length) * 100 : 0;
+        setProgressPercentage(percentage);
+    }, [answers, exam]);
+
+    // Feature 3: Timer warnings
+    useEffect(() => {
+        if (timeLeft === null) return;
+
+        // 5 minutes warning
+        if (timeLeft <= 300 && timeLeft > 60 && !hasShownWarning.fiveMin) {
+            setWarningLevel('yellow');
+            setShowTimerWarning(true);
+            setHasShownWarning(prev => ({ ...prev, fiveMin: true }));
+            toast('⏰ 5 minutes remaining!', { icon: '⚠️', duration: 4000 });
+        }
+        
+        // 1 minute warning
+        if (timeLeft <= 60 && timeLeft > 30 && !hasShownWarning.oneMin) {
+            setWarningLevel('orange');
+            setShowTimerWarning(true);
+            setHasShownWarning(prev => ({ ...prev, oneMin: true }));
+            toast.error('⏰ 1 minute remaining!', { duration: 4000 });
+        }
+        
+        // 30 seconds critical
+        if (timeLeft <= 30 && !hasShownWarning.thirtySec) {
+            setWarningLevel('red');
+            setShowTimerWarning(true);
+            setHasShownWarning(prev => ({ ...prev, thirtySec: true }));
+            toast.error('⏰ 30 seconds left!', { duration: 4000 });
+        }
+        
+        // Hide warning after 5 seconds
+        if (showTimerWarning) {
+            const timer = setTimeout(() => setShowTimerWarning(false), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [timeLeft, hasShownWarning, showTimerWarning]);
+
+    // Feature 4: Load scratchpad from localStorage
+    useEffect(() => {
+        if (id) {
+            const saved = localStorage.getItem(`durrah_exam_${id}_scratchpad`);
+            if (saved) setScratchpadContent(saved);
+        }
+    }, [id]);
+
+    // Feature 4: Auto-save scratchpad
+    useEffect(() => {
+        if (id && scratchpadContent) {
+            const timer = setTimeout(() => {
+                localStorage.setItem(`durrah_exam_${id}_scratchpad`, scratchpadContent);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [scratchpadContent, id]);
+
+    // Feature 8: Cleanup text-to-speech on unmount
+    useEffect(() => {
+        return () => {
+            window.speechSynthesis.cancel();
+        };
+    }, []);
+
+    // Feature 10: Session timeout / inactivity tracking
+    useEffect(() => {
+        if (!started) return;
+
+        const updateActivity = () => {
+            lastActivityRef.current = Date.now();
+            setShowInactivityWarning(false);
+            setInactivityCountdown(60);
+        };
+
+        // Track user activity
+        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+        events.forEach(event => {
+            window.addEventListener(event, updateActivity);
+        });
+
+        // Check for inactivity every 30 seconds
+        const checkInterval = setInterval(() => {
+            const inactiveTime = Date.now() - lastActivityRef.current;
+            const inactiveMinutes = inactiveTime / (1000 * 60);
+
+            // Show warning after 15 minutes of inactivity
+            if (inactiveMinutes >= 15 && !showInactivityWarning) {
+                setShowInactivityWarning(true);
+                
+                // Start countdown
+                let countdown = 60;
+                setInactivityCountdown(countdown);
+                
+                inactivityTimerRef.current = setInterval(() => {
+                    countdown -= 1;
+                    setInactivityCountdown(countdown);
+                    
+                    if (countdown <= 0) {
+                        // Auto-save and notify
+                        toast.success('Progress saved due to inactivity', { duration: 5000 });
+                        setShowInactivityWarning(false);
+                        if (inactivityTimerRef.current) {
+                            clearInterval(inactivityTimerRef.current);
+                        }
+                    }
+                }, 1000);
+            }
+        }, 30000); // Check every 30 seconds
+
+        return () => {
+            events.forEach(event => {
+                window.removeEventListener(event, updateActivity);
+            });
+            clearInterval(checkInterval);
+            if (inactivityTimerRef.current) {
+                clearInterval(inactivityTimerRef.current);
+            }
+        };
+    }, [started, showInactivityWarning]);
 
     const fetchExam = async () => {
         try {
@@ -507,6 +690,217 @@ export default function ExamView() {
         setStartedAt(Date.now());
     };
 
+    // Feature 2: Toggle flag helper
+    const toggleFlag = (questionId: string) => {
+        setFlaggedQuestions(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(questionId)) {
+                newSet.delete(questionId);
+                toast.success('Flag removed', { icon: '🏳️', duration: 1500 });
+            } else {
+                newSet.add(questionId);
+                toast.success('Question flagged', { icon: '🚩', duration: 1500 });
+            }
+            return newSet;
+        });
+    };
+
+    // Feature 2: Keyboard navigation handler
+    useEffect(() => {
+        if (!keyboardShortcutsEnabled || !started || isReviewMode) return;
+
+        const handleKeyPress = (e: KeyboardEvent) => {
+            // Don't trigger if typing in input/textarea
+            if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
+                return;
+            }
+
+            const currentQuestion = exam?.questions[currentQuestionIndex];
+            
+            switch(e.key) {
+                case 'ArrowLeft':
+                    if (viewMode === 'single' && currentQuestionIndex > 0) {
+                        e.preventDefault();
+                        setCurrentQuestionIndex(prev => prev - 1);
+                    }
+                    break;
+                    
+                case 'ArrowRight':
+                    if (viewMode === 'single' && currentQuestionIndex < (exam?.questions.length || 0) - 1) {
+                        e.preventDefault();
+                        setCurrentQuestionIndex(prev => prev + 1);
+                    }
+                    break;
+                    
+                case ' ':
+                    if (currentQuestion) {
+                        e.preventDefault();
+                        toggleFlag(currentQuestion.id);
+                    }
+                    break;
+                    
+                case 's':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        toast.success('Progress saved!', { icon: '💾', duration: 1500 });
+                    }
+                    break;
+                    
+                case 'Enter':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        handleSubmitWithCheck();
+                    }
+                    break;
+                    
+                case 'g':
+                case 'G':
+                    e.preventDefault();
+                    setShowQuestionGrid(prev => !prev);
+                    break;
+                    
+                case 'Escape':
+                    setShowQuestionGrid(false);
+                    setShowAccessMenu(false);
+                    setShowKeyboardHelp(false);
+                    break;
+                    
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                    if (currentQuestion?.type === 'multiple_choice' && currentQuestion.options) {
+                        const index = parseInt(e.key) - 1;
+                        if (index < currentQuestion.options.length) {
+                            e.preventDefault();
+                            handleAnswerUpdate(currentQuestion.id, currentQuestion.options[index]);
+                        }
+                    }
+                    break;
+                    
+                case '?':
+                    e.preventDefault();
+                    setShowKeyboardHelp(prev => !prev);
+                    break;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, [keyboardShortcutsEnabled, started, currentQuestionIndex, viewMode, exam, answers, isReviewMode]);
+
+    // Feature 7: Mobile swipe gesture handlers
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        setTouchEnd(null);
+        setTouchStart({
+            x: e.targetTouches[0].clientX,
+            y: e.targetTouches[0].clientY
+        });
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd({
+            x: e.targetTouches[0].clientX,
+            y: e.targetTouches[0].clientY
+        });
+    };
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        
+        const distanceX = touchStart.x - touchEnd.x;
+        const distanceY = touchStart.y - touchEnd.y;
+        const isHorizontalSwipe = Math.abs(distanceX) > Math.abs(distanceY);
+        
+        if (isHorizontalSwipe && Math.abs(distanceX) > minSwipeDistance) {
+            if (distanceX > 0) {
+                // Swipe left - next question
+                if (currentQuestionIndex < (exam?.questions.length || 0) - 1) {
+                    setSwipeDirection('left');
+                    setTimeout(() => {
+                        setCurrentQuestionIndex(prev => prev + 1);
+                        setSwipeDirection(null);
+                    }, 150);
+                }
+            } else {
+                // Swipe right - previous question
+                if (currentQuestionIndex > 0) {
+                    setSwipeDirection('right');
+                    setTimeout(() => {
+                        setCurrentQuestionIndex(prev => prev - 1);
+                        setSwipeDirection(null);
+                    }, 150);
+                }
+            }
+        }
+    };
+
+    // Feature 8: Text-to-speech function
+    const speakQuestion = (text: string) => {
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+        
+        if (isSpeaking) {
+            setIsSpeaking(false);
+            return;
+        }
+
+        // Strip LaTeX and HTML
+        const cleanText = text
+            .replace(/\$\$.*?\$\$/g, ' mathematical expression ')
+            .replace(/\$.*?\$/g, ' formula ')
+            .replace(/<[^>]*>/g, '')
+            .trim();
+
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.rate = speechRate;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+
+        utterance.onend = () => {
+            setIsSpeaking(false);
+        };
+
+        utterance.onerror = () => {
+            setIsSpeaking(false);
+            toast.error('Speech synthesis not available');
+        };
+
+        utteranceRef.current = utterance;
+        window.speechSynthesis.speak(utterance);
+        setIsSpeaking(true);
+    };
+
+    // Feature 9: Enhanced answer update with change tracking
+    const handleAnswerUpdate = (questionId: string, newAnswer: any) => {
+        const previousAnswer = answers[questionId]?.answer;
+        
+        // Track answer changes (only if previously set and different)
+        if (previousAnswer !== undefined && previousAnswer !== newAnswer) {
+            setAnswerChanges(prev => ({
+                ...prev,
+                [questionId]: {
+                    changes: (prev[questionId]?.changes || 0) + 1,
+                    history: [
+                        ...(prev[questionId]?.history || []),
+                        {
+                            answer: newAnswer,
+                            timestamp: Date.now()
+                        }
+                    ]
+                }
+            }));
+        }
+
+        // Update answer
+        setAnswers(prev => ({
+            ...prev,
+            [questionId]: { answer: newAnswer }
+        }));
+    };
+
     const handleSubmitWithCheck = () => {
         if (!exam) return;
 
@@ -619,6 +1013,21 @@ export default function ExamView() {
 
             const timeTakenSeconds = startedAt ? Math.max(0, Math.floor((Date.now() - startedAt) / 1000)) : null;
 
+            // Prepare metadata with confidence levels and answer changes
+            const answerMetadata = answersPayload.map((a: any) => ({
+                question_id: a.question_id,
+                answer: a.answer,
+                confidence: confidenceLevels[a.question_id] || null,
+                changes: answerChanges[a.question_id]?.changes || 0,
+                revision_history: answerChanges[a.question_id]?.history || []
+            }));
+
+            const confidenceStats = {
+                low: Object.values(confidenceLevels).filter(c => c === 'low').length,
+                medium: Object.values(confidenceLevels).filter(c => c === 'medium').length,
+                high: Object.values(confidenceLevels).filter(c => c === 'high').length,
+            };
+
             const submissionData = {
                 exam_id: id,
                 student_data: {
@@ -629,7 +1038,12 @@ export default function ExamView() {
                 answers: answersPayload,
                 violations: violations,
                 browser_info: browserInfo,
-                time_taken: timeTakenSeconds
+                time_taken: timeTakenSeconds,
+                metadata: {
+                    answer_metadata: answerMetadata,
+                    confidence_stats: confidenceStats,
+                    total_answer_changes: Object.values(answerChanges).reduce((sum, item) => sum + item.changes, 0)
+                }
             };
 
             const response = await fetch(edgeFunctionUrl, {
@@ -834,7 +1248,6 @@ export default function ExamView() {
             !(Array.isArray(ans.answer) && ans.answer.length === 0);
     }).length;
     const totalQuestions = exam?.questions.length || 0;
-    const progress = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
 
 
     if (!exam) return (
@@ -1240,15 +1653,15 @@ export default function ExamView() {
                                         <div className="mt-3 space-y-1">
                                             <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
                                                 <span>Progress: {answeredCount}/{totalQuestions} questions</span>
-                                                <span className="font-semibold">{progress.toFixed(0)}%</span>
+                                                <span className="font-semibold">{progressPercentage.toFixed(0)}%</span>
                                             </div>
                                             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                                                 <div
                                                     className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-500 ease-out"
-                                                    style={{ width: `${progress}%` }}
+                                                    style={{ width: `${progressPercentage}%` }}
                                                 />
                                             </div>
-                                            {progress === 100 && (
+                                            {progressPercentage === 100 && (
                                                 <p className="text-xs text-green-600 dark:text-green-400 font-medium">
                                                     ✓ All questions answered!
                                                 </p>
@@ -1362,11 +1775,56 @@ export default function ExamView() {
                             </div>
                         ) : (
                             // Single Question Mode (Pagination)
-                            <div className="space-y-6">
+                            <div 
+                                className="space-y-6"
+                                onTouchStart={onTouchStart}
+                                onTouchMove={onTouchMove}
+                                onTouchEnd={onTouchEnd}
+                            >
                                 {exam.questions[currentQuestionIndex] && (() => {
                                     const question = exam.questions[currentQuestionIndex];
                                     return (
-                                        <div key={question.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 min-h-[50vh]">
+                                        <div 
+                                            key={question.id} 
+                                            className={`bg-white dark:bg-gray-800 shadow rounded-lg p-6 min-h-[50vh] transition-transform duration-150 ${
+                                                swipeDirection === 'left' ? '-translate-x-4 opacity-75' : swipeDirection === 'right' ? 'translate-x-4 opacity-75' : ''
+                                            }`}
+                                        >
+                                            {/* Feature 8: Read Aloud Button */}
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                    Question {currentQuestionIndex + 1} of {exam.questions.length}
+                                                </h3>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => speakQuestion(question.question_text)}
+                                                    className={`
+                                                        flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium
+                                                        transition-all duration-200 hover:scale-105
+                                                        ${isSpeaking
+                                                            ? 'bg-indigo-600 text-white shadow-lg'
+                                                            : 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
+                                                        }
+                                                    `}
+                                                >
+                                                    {isSpeaking ? (
+                                                        <>
+                                                            <svg className="w-4 h-4 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                            </svg>
+                                                            Stop
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828-2.828" />
+                                                            </svg>
+                                                            Read Aloud
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
+
                                             <div className="mb-6">
                                                 <h3 className="text-[1.2em] font-bold text-gray-900 dark:text-white leading-relaxed">
                                                     <Latex>{question.question_text}</Latex>
@@ -1382,13 +1840,13 @@ export default function ExamView() {
                                             <div className="space-y-4">
                                                 {/* Render options based on type - Simplified for Single View */}
                                                 {question.type === 'multiple_choice' && question.options?.map((option, optIndex) => (
-                                                    <label key={optIndex} className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all ${answers[question.id]?.answer === option ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'}`}>
+                                                    <label key={optIndex} className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all ${answers[question.id]?.answer === option ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 shadow-lg ring-2 ring-indigo-300' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'}`}>
                                                         <input
                                                             type="radio"
                                                             name={`question-${question.id}`}
                                                             value={option}
                                                             checked={answers[question.id]?.answer === option}
-                                                            onChange={() => setAnswers({ ...answers, [question.id]: { answer: option } })}
+                                                            onChange={() => handleAnswerUpdate(question.id, option)}
                                                             className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                                                         />
                                                         <span className="ml-3 text-[1.1em] text-gray-900 dark:text-white"><Latex>{option}</Latex></span>
@@ -1396,13 +1854,13 @@ export default function ExamView() {
                                                 ))}
 
                                                 {question.type === 'true_false' && ['True', 'False'].map((option, optIndex) => (
-                                                    <label key={optIndex} className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all ${String(answers[question.id]?.answer) === option ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'}`}>
+                                                    <label key={optIndex} className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all ${String(answers[question.id]?.answer) === option ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 shadow-lg ring-2 ring-indigo-300' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'}`}>
                                                         <input
                                                             type="radio"
                                                             name={`question-${question.id}`}
                                                             value={option}
                                                             checked={String(answers[question.id]?.answer) === option}
-                                                            onChange={() => setAnswers({ ...answers, [question.id]: { answer: option } })}
+                                                            onChange={() => handleAnswerUpdate(question.id, option)}
                                                             className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                                                         />
                                                         <span className="ml-3 text-[1.1em] text-gray-900 dark:text-white">{option}</span>
@@ -1415,11 +1873,61 @@ export default function ExamView() {
                                                         className="w-full p-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white text-[1.1em]"
                                                         rows={6}
                                                         value={answers[question.id]?.answer || ''}
-                                                        onChange={(e) => setAnswers({ ...answers, [question.id]: { answer: e.target.value } })}
+                                                        onChange={(e) => handleAnswerUpdate(question.id, e.target.value)}
                                                         placeholder="Type your answer here..."
                                                     />
                                                 )}
                                             </div>
+
+                                            {/* Feature 6: Confidence Level Selector */}
+                                            {answers[question.id]?.answer && (
+                                                <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">
+                                                        How confident are you about this answer?
+                                                    </label>
+                                                    <div className="flex gap-2">
+                                                        {[
+                                                            { level: 'low', label: 'Not Sure', icon: '😕', color: 'red' },
+                                                            { level: 'medium', label: 'Somewhat', icon: '🤔', color: 'yellow' },
+                                                            { level: 'high', label: 'Very Sure', icon: '😊', color: 'green' }
+                                                        ].map(({ level, label, icon, color }) => (
+                                                            <button
+                                                                key={level}
+                                                                type="button"
+                                                                onClick={() => setConfidenceLevels(prev => ({
+                                                                    ...prev,
+                                                                    [question.id]: level as 'low' | 'medium' | 'high'
+                                                                }))}
+                                                                className={`
+                                                                    flex-1 px-3 py-2 rounded-lg text-xs font-semibold border-2 
+                                                                    transition-all duration-200 hover:scale-105
+                                                                    ${confidenceLevels[question.id] === level
+                                                                        ? color === 'red' 
+                                                                            ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 shadow-md' 
+                                                                            : color === 'yellow'
+                                                                                ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 shadow-md'
+                                                                                : 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 shadow-md'
+                                                                        : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:border-gray-400'
+                                                                    }
+                                                                `}
+                                                            >
+                                                                <span className="text-base mr-1">{icon}</span>
+                                                                {label}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Feature 9: Answer Change Indicator */}
+                                            {answerChanges[question.id]?.changes > 0 && (
+                                                <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                    </svg>
+                                                    Changed {answerChanges[question.id].changes} time{answerChanges[question.id].changes !== 1 ? 's' : ''}
+                                                </div>
+                                            )}
 
                                             {/* Navigation Buttons */}
                                             <div className="flex justify-between items-center mt-8 pt-6 border-t dark:border-gray-700">
@@ -1497,6 +2005,35 @@ export default function ExamView() {
                         )}
                     </form>
                 </div>
+
+                {/* Feature 7: Mobile Swipe Indicators */}
+                {viewMode === 'single' && (
+                    <>
+                        {/* Left swipe indicator */}
+                        {currentQuestionIndex > 0 && (
+                            <div className="md:hidden fixed left-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
+                                <div className="bg-indigo-600/90 text-white rounded-full p-3 shadow-lg animate-pulse">
+                                    <ChevronLeft size={24} />
+                                </div>
+                                <div className="text-xs text-gray-600 dark:text-gray-400 mt-2 text-center">
+                                    Swipe →
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Right swipe indicator */}
+                        {exam && currentQuestionIndex < exam.questions.length - 1 && (
+                            <div className="md:hidden fixed right-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
+                                <div className="bg-indigo-600/90 text-white rounded-full p-3 shadow-lg animate-pulse">
+                                    <ChevronRight size={24} />
+                                </div>
+                                <div className="text-xs text-gray-600 dark:text-gray-400 mt-2 text-center">
+                                    ← Swipe
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
 
                 {/* Floating Toolbar */}
                 <div className={`fixed bottom-4 sm:bottom-6 right-4 sm:right-6 flex flex-col items-end gap-2 z-50 transition-all duration-300 ${isZenMode ? 'opacity-20 hover:opacity-100' : 'opacity-100'}`}>
@@ -1687,6 +2224,270 @@ export default function ExamView() {
                                 </button>
                                 <button onClick={() => { setShowUnansweredModal(false); handleSubmit(); }} className="flex-1 px-4 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all shadow-lg">
                                     Submit Anyway
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Feature 2: Keyboard Help Modal */}
+                {showKeyboardHelp && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                            <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-center justify-between">
+                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                    ⌨️ Keyboard Shortcuts
+                                </h3>
+                                <button 
+                                    onClick={() => setShowKeyboardHelp(false)}
+                                    className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            
+                            <div className="p-6 space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {[
+                                        { keys: ['←', '→'], desc: 'Navigate questions' },
+                                        { keys: ['Space'], desc: 'Flag question' },
+                                        { keys: ['Ctrl', 'S'], desc: 'Save progress' },
+                                        { keys: ['Ctrl', 'Enter'], desc: 'Submit exam' },
+                                        { keys: ['1-4'], desc: 'Select option A-D' },
+                                        { keys: ['G'], desc: 'Question grid' },
+                                        { keys: ['Esc'], desc: 'Close modals' },
+                                        { keys: ['?'], desc: 'Show this help' },
+                                    ].map((shortcut, idx) => (
+                                        <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                                            <span className="text-sm text-gray-700 dark:text-gray-300">{shortcut.desc}</span>
+                                            <div className="flex gap-1">
+                                                {shortcut.keys.map(key => (
+                                                    <kbd 
+                                                        key={key}
+                                                        className="px-2 py-1 text-xs font-semibold text-gray-800 bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded shadow-sm"
+                                                    >
+                                                        {key}
+                                                    </kbd>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Feature 3: Timer Warning */}
+                {timeLeft !== null && timeLeft <= 300 && (
+                    <div className={`fixed top-4 right-4 z-40 transition-all duration-300 ${
+                        showTimerWarning ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+                    }`}>
+                        <div className={`
+                            px-4 py-3 rounded-lg shadow-xl border-2 backdrop-blur-sm
+                            ${warningLevel === 'yellow' ? 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-400 text-yellow-800 dark:text-yellow-200' : ''}
+                            ${warningLevel === 'orange' ? 'bg-orange-50 dark:bg-orange-900/30 border-orange-500 text-orange-800 dark:text-orange-200 animate-pulse' : ''}
+                            ${warningLevel === 'red' ? 'bg-red-50 dark:bg-red-900/30 border-red-500 text-red-800 dark:text-red-200 animate-pulse' : ''}
+                        `}>
+                            <div className="flex items-center gap-2">
+                                <AlertTriangle className={`w-5 h-5 ${
+                                    warningLevel === 'red' ? 'animate-bounce' : ''
+                                }`} />
+                                <div>
+                                    <p className="font-bold text-sm">
+                                        {timeLeft > 60 ? `${Math.floor(timeLeft / 60)} minutes` : `${timeLeft} seconds`} remaining
+                                    </p>
+                                    {warningLevel === 'red' && (
+                                        <p className="text-xs mt-1">Please submit your exam!</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Feature 4: Scratchpad Floating Button */}
+                {started && !isReviewMode && (
+                    <button
+                        onClick={() => setShowScratchpad(!showScratchpad)}
+                        className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 transform transition-all duration-200 z-30 group"
+                        aria-label="Open scratchpad"
+                    >
+                        <div className="relative">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            {scratchpadContent && (
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                            )}
+                        </div>
+                        <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            Scratchpad
+                        </span>
+                    </button>
+                )}
+
+                {/* Feature 4: Scratchpad Panel */}
+                {showScratchpad && !isScratchpadMinimized && (
+                    <div 
+                        className="fixed bottom-24 right-6 w-96 h-[500px] bg-white dark:bg-gray-800 rounded-xl shadow-2xl border-2 border-indigo-200 dark:border-indigo-800 flex flex-col z-40 overflow-hidden"
+                        style={{ maxWidth: 'calc(100vw - 3rem)', maxHeight: 'calc(100vh - 8rem)' }}
+                    >
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 flex items-center justify-between cursor-move">
+                            <div className="flex items-center gap-2 text-white">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                <h3 className="font-semibold">Scratchpad</h3>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setIsScratchpadMinimized(true)}
+                                    className="text-white hover:bg-white/20 rounded p-1 transition-colors"
+                                    aria-label="Minimize"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                    </svg>
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (confirm('Clear all scratchpad content?')) {
+                                            setScratchpadContent('');
+                                            localStorage.removeItem(`durrah_exam_${id}_scratchpad`);
+                                        }
+                                    }}
+                                    className="text-white hover:bg-white/20 rounded p-1 transition-colors"
+                                    aria-label="Clear"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                                <button
+                                    onClick={() => setShowScratchpad(false)}
+                                    className="text-white hover:bg-white/20 rounded p-1 transition-colors"
+                                    aria-label="Close"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 p-4">
+                            <textarea
+                                value={scratchpadContent}
+                                onChange={(e) => setScratchpadContent(e.target.value)}
+                                placeholder="Use this space for calculations, notes, brainstorming...&#10;&#10;Your work is auto-saved!"
+                                className="w-full h-full resize-none bg-yellow-50 dark:bg-gray-900 border-2 border-dashed border-yellow-300 dark:border-yellow-700 rounded-lg p-4 focus:outline-none focus:border-yellow-500 dark:focus:border-yellow-500 font-mono text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400"
+                            />
+                        </div>
+
+                        {/* Footer */}
+                        <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                            <span className="flex items-center gap-1">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                Auto-saved
+                            </span>
+                            <span>{scratchpadContent.length} characters</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Minimized scratchpad indicator */}
+                {isScratchpadMinimized && (
+                    <button
+                        onClick={() => setIsScratchpadMinimized(false)}
+                        className="fixed bottom-24 right-6 bg-indigo-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-indigo-700 transition-colors z-40 flex items-center gap-2"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5" />
+                        </svg>
+                        Scratchpad
+                        {scratchpadContent && <div className="w-2 h-2 bg-green-400 rounded-full"></div>}
+                    </button>
+                )}
+
+                {/* Feature 10: Inactivity Warning Modal */}
+                {showInactivityWarning && (
+                    <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-bounce-in">
+                            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-white rounded-full p-2">
+                                        <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white">Are You Still There?</h3>
+                                </div>
+                            </div>
+
+                            <div className="p-6 text-center space-y-4">
+                                <div className="flex justify-center">
+                                    <div className="relative w-24 h-24">
+                                        <svg className="w-24 h-24 transform -rotate-90">
+                                            <circle 
+                                                cx="48" 
+                                                cy="48" 
+                                                r="44" 
+                                                stroke="currentColor" 
+                                                strokeWidth="6" 
+                                                fill="none" 
+                                                className="text-gray-200 dark:text-gray-700" 
+                                            />
+                                            <circle 
+                                                cx="48" 
+                                                cy="48" 
+                                                r="44" 
+                                                stroke="currentColor" 
+                                                strokeWidth="6" 
+                                                fill="none" 
+                                                strokeDasharray={`${2 * Math.PI * 44}`}
+                                                strokeDashoffset={`${2 * Math.PI * 44 * (1 - inactivityCountdown / 60)}`}
+                                                className="text-orange-500 transition-all duration-1000" 
+                                                strokeLinecap="round" 
+                                            />
+                                        </svg>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <span className="text-3xl font-bold text-orange-600 dark:text-orange-500">
+                                                {inactivityCountdown}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <p className="text-gray-700 dark:text-gray-300">
+                                        You've been inactive for 15 minutes
+                                    </p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        Your progress will be saved automatically in {inactivityCountdown} seconds
+                                    </p>
+                                </div>
+
+                                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                                    <p className="text-sm text-blue-800 dark:text-blue-300">
+                                        💡 Don't worry! Your answers are being saved automatically.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="px-6 pb-6 flex gap-3">
+                                <button
+                                    onClick={() => {
+                                        lastActivityRef.current = Date.now();
+                                        setShowInactivityWarning(false);
+                                        if (inactivityTimerRef.current) {
+                                            clearInterval(inactivityTimerRef.current);
+                                        }
+                                        toast.success("Welcome back! Session extended.");
+                                    }}
+                                    className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg transform hover:scale-105"
+                                >
+                                    I'm Still Here
                                 </button>
                             </div>
                         </div>
