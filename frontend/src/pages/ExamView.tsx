@@ -224,11 +224,39 @@ export default function ExamView() {
 
             // Use email/student_id from restored state if available
             const identifier = (savedState ? JSON.parse(savedState)?.studentData?.email : null) || studentData.email || studentData.student_id;
-            if (!identifier) {
-                setSubmitted(true);
-                if (savedScore) {
-                    try { setScore(JSON.parse(savedScore)); } catch { /* noop */ }
+            const savedScoreObj = savedScore ? (() => { try { return JSON.parse(savedScore); } catch { return null; } })() : null;
+            const savedSubmissionId = savedScoreObj?.submission_id;
+
+            const clearLocalSubmission = () => {
+                localStorage.removeItem(`durrah_exam_${id}_submitted`);
+                localStorage.removeItem(`durrah_exam_${id}_score`);
+                setSubmitted(false);
+                setScore(null);
+            };
+
+            // Prefer checking by submission_id if we have it; fallback to identifier lookup
+            if (savedSubmissionId) {
+                const { data, error } = await supabase
+                    .from('submissions')
+                    .select('id')
+                    .eq('id', savedSubmissionId)
+                    .maybeSingle();
+
+                if (!error && !data) {
+                    clearLocalSubmission();
+                    return;
                 }
+            }
+
+            if (!identifier) {
+                // No identifier and no confirmed submission record — allow retake
+                if (!savedSubmissionId) {
+                    clearLocalSubmission();
+                    return;
+                }
+                // We had a submission id and it still exists; keep submitted state
+                setSubmitted(true);
+                if (savedScoreObj) setScore(savedScoreObj);
                 return;
             }
 
@@ -240,16 +268,10 @@ export default function ExamView() {
                 .maybeSingle();
 
             if (!error && !data) {
-                // Submission removed by tutor — clear local flags to allow retake
-                localStorage.removeItem(`durrah_exam_${id}_submitted`);
-                localStorage.removeItem(`durrah_exam_${id}_score`);
-                setSubmitted(false);
-                setScore(null);
+                clearLocalSubmission();
             } else {
                 setSubmitted(true);
-                if (savedScore) {
-                    try { setScore(JSON.parse(savedScore)); } catch { /* noop */ }
-                }
+                if (savedScoreObj) setScore(savedScoreObj);
             }
         };
 
