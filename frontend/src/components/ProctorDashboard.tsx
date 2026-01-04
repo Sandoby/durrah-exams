@@ -167,24 +167,36 @@ export function ProctorDashboard({ examId, examTitle }: ProctorDashboardProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg">
-            <Eye className="h-6 w-6 text-white" />
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="p-2.5 sm:p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg">
+              <Eye className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                Live Proctoring
+              </h2>
+              {examTitle && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[200px] sm:max-w-none">{examTitle}</p>
+              )}
+            </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Live Proctoring
-            </h2>
-            {examTitle && (
-              <p className="text-gray-500 dark:text-gray-400">{examTitle}</p>
-            )}
+          
+          {/* Live badge - always visible */}
+          <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full shadow-lg">
+            <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-white"></span>
+            </span>
+            <span className="text-white font-semibold text-xs sm:text-sm">LIVE</span>
           </div>
         </div>
         
-        <div className="flex items-center gap-3 flex-wrap">
+        {/* Controls - Second Row on Mobile */}
+        <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
           {/* Sound toggle */}
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
@@ -195,11 +207,11 @@ export function ProctorDashboard({ examId, examTitle }: ProctorDashboardProps) {
             }`}
             title={soundEnabled ? 'Mute notifications' : 'Enable sound notifications'}
           >
-            <Bell className="h-5 w-5" />
+            <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
           
-          {/* View mode toggle */}
-          <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+          {/* View mode toggle - Hidden on small mobile, auto grid */}
+          <div className="hidden sm:flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
             <button
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-md transition-all ${
@@ -218,100 +230,103 @@ export function ProctorDashboard({ examId, examTitle }: ProctorDashboardProps) {
             </button>
           </div>
           
-          {/* Live badge */}
-          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full shadow-lg">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
-            </span>
-            <span className="text-white font-semibold text-sm">LIVE</span>
+          {/* Refresh indicator */}
+          <div className="flex items-center gap-1.5 text-xs text-gray-400">
+            <RefreshCw className="h-3 w-3 animate-spin" />
+            <span className="hidden sm:inline">Auto-updating</span>
           </div>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <StatCard
-          icon={<Users className="h-5 w-5" />}
-          label="Total Students"
-          value={stats.total}
-          color="indigo"
-          trend={stats.total > 0 ? 'up' : undefined}
-        />
-        <StatCard
-          icon={<Activity className="h-5 w-5" />}
-          label="Active Now"
-          value={stats.active}
-          color="green"
-          pulse={stats.active > 0}
-        />
-        <StatCard
-          icon={<WifiOff className="h-5 w-5" />}
-          label="Disconnected"
-          value={stats.disconnected}
-          color="yellow"
-          alert={stats.disconnected > 0}
-        />
-        <StatCard
-          icon={<CheckCircle className="h-5 w-5" />}
-          label="Submitted"
-          value={stats.submitted}
-          color="blue"
-        />
-        <StatCard
-          icon={<AlertTriangle className="h-5 w-5" />}
-          label="Total Violations"
-          value={stats.total_violations}
-          color="red"
-          alert={stats.total_violations > 0}
-        />
+      {/* Stats Cards - Scrollable on mobile */}
+      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-2">
+        <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 min-w-max sm:min-w-0">
+          <StatCard
+            icon={<Users className="h-4 w-4 sm:h-5 sm:w-5" />}
+            label="Total"
+            value={stats.total}
+            color="indigo"
+            compact
+          />
+          <StatCard
+            icon={<Activity className="h-4 w-4 sm:h-5 sm:w-5" />}
+            label="Active"
+            value={stats.active}
+            color="green"
+            pulse={stats.active > 0}
+            compact
+          />
+          <StatCard
+            icon={<WifiOff className="h-4 w-4 sm:h-5 sm:w-5" />}
+            label="Offline"
+            value={stats.disconnected}
+            color="yellow"
+            alert={stats.disconnected > 0}
+            compact
+          />
+          <StatCard
+            icon={<CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />}
+            label="Done"
+            value={stats.submitted}
+            color="blue"
+            compact
+          />
+          <StatCard
+            icon={<AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />}
+            label="Violations"
+            value={stats.total_violations}
+            color="red"
+            alert={stats.total_violations > 0}
+            compact
+          />
+        </div>
       </div>
 
       {/* Alerts Banner */}
       {alerts.length > 0 && (
-        <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border border-red-200 dark:border-red-800 rounded-2xl overflow-hidden">
+        <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border border-red-200 dark:border-red-800 rounded-xl sm:rounded-2xl overflow-hidden">
           <button
             onClick={() => setExpandedAlerts(!expandedAlerts)}
-            className="w-full p-4 flex items-center justify-between hover:bg-red-100/50 dark:hover:bg-red-900/30 transition-colors"
+            className="w-full p-3 sm:p-4 flex items-center justify-between hover:bg-red-100/50 dark:hover:bg-red-900/30 transition-colors"
           >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-100 dark:bg-red-900/50 rounded-lg animate-pulse">
-                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-red-100 dark:bg-red-900/50 rounded-lg animate-pulse">
+                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 dark:text-red-400" />
               </div>
               <div className="text-left">
-                <span className="font-semibold text-red-800 dark:text-red-200">
+                <span className="font-semibold text-sm sm:text-base text-red-800 dark:text-red-200">
                   {alerts.length} Student{alerts.length > 1 ? 's' : ''} Need Attention
                 </span>
-                <p className="text-sm text-red-600 dark:text-red-400">
+                <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 hidden sm:block">
                   Students with 2 or more violations
                 </p>
               </div>
             </div>
             {expandedAlerts ? (
-              <ChevronUp className="h-5 w-5 text-red-600" />
+              <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
             ) : (
-              <ChevronDown className="h-5 w-5 text-red-600" />
+              <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
             )}
           </button>
           
           {expandedAlerts && (
-            <div className="px-4 pb-4 space-y-2">
+            <div className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2">
               {(alerts as ExamSession[]).map((session: ExamSession) => (
                 <div 
                   key={session._id} 
-                  className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow gap-2 sm:gap-0"
                   onClick={() => setSelectedStudent(session)}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-white ${
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold text-white text-sm sm:text-base ${
                       session.violations_count >= 3 ? 'bg-red-500' : 'bg-orange-500'
                     }`}>
                       {session.student_name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <span className="font-medium text-gray-900 dark:text-white">{session.student_name}</span>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      <span className="font-medium text-sm sm:text-base text-gray-900 dark:text-white">{session.student_name}</span>
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
+                        <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-medium ${
                           session.violations_count >= 3 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
                         }`}>
                           {session.violations_count} violations
@@ -320,11 +335,11 @@ export function ProctorDashboard({ examId, examTitle }: ProctorDashboardProps) {
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 max-w-xs">
-                    {session.violations.slice(-4).map((v, i) => (
+                  <div className="flex flex-wrap gap-1 sm:gap-1.5 max-w-full sm:max-w-xs ml-10 sm:ml-0">
+                    {session.violations.slice(-3).map((v, i) => (
                       <span 
                         key={i} 
-                        className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg"
+                        className="text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg"
                       >
                         {VIOLATION_LABELS[v.type] || v.type}
                       </span>
@@ -338,27 +353,28 @@ export function ProctorDashboard({ examId, examTitle }: ProctorDashboardProps) {
       )}
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-3 bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="text"
             placeholder="Search by name or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            className="w-full pl-10 pr-4 py-2 sm:py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
           />
         </div>
         
-        <div className="flex items-center gap-3">
-          <Filter className="h-4 w-4 text-gray-400 hidden sm:block" />
+        {/* Status Filter - Scrollable on mobile */}
+        <div className="flex items-center gap-2 overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0 pb-1 sm:pb-0">
+          <Filter className="h-4 w-4 text-gray-400 flex-shrink-0" />
           
-          <div className="flex bg-gray-100 dark:bg-gray-900 rounded-lg p-1">
+          <div className="flex bg-gray-100 dark:bg-gray-900 rounded-lg p-1 min-w-max">
             {(['all', 'active', 'disconnected', 'submitted'] as const).map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                className={`px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all whitespace-nowrap ${
                   statusFilter === status 
                     ? 'bg-white dark:bg-gray-700 shadow-sm text-indigo-600 dark:text-indigo-400' 
                     : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
@@ -366,7 +382,7 @@ export function ProctorDashboard({ examId, examTitle }: ProctorDashboardProps) {
               >
                 {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
                 {status === 'active' && stats.active > 0 && (
-                  <span className="ml-1.5 px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full text-xs">
+                  <span className="ml-1 sm:ml-1.5 px-1 sm:px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full text-xs">
                     {stats.active}
                   </span>
                 )}
@@ -378,19 +394,19 @@ export function ProctorDashboard({ examId, examTitle }: ProctorDashboardProps) {
 
       {/* Sessions */}
       {sortedSessions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-16 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-          <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full mb-4">
-            <Users className="h-10 w-10 text-gray-400" />
+        <div className="flex flex-col items-center justify-center p-8 sm:p-16 bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-gray-700">
+          <div className="p-3 sm:p-4 bg-gray-100 dark:bg-gray-700 rounded-full mb-3 sm:mb-4">
+            <Users className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
           </div>
-          <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300">No Students Found</h3>
-          <p className="text-gray-500 mt-1">
+          <h3 className="text-base sm:text-lg font-medium text-gray-700 dark:text-gray-300">No Students Found</h3>
+          <p className="text-sm text-gray-500 mt-1 text-center">
             {searchQuery || statusFilter !== 'all' 
               ? 'Try adjusting your filters' 
               : 'Waiting for students to start the exam...'}
           </p>
         </div>
-      ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      ) : viewMode === 'grid' || window.innerWidth < 640 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {sortedSessions.map((session) => (
             <StudentCard 
               key={session._id} 
@@ -428,9 +444,9 @@ export function ProctorDashboard({ examId, examTitle }: ProctorDashboardProps) {
       )}
 
       {/* Footer Stats */}
-      <div className="flex items-center justify-center gap-6 py-4 text-sm text-gray-500">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-500">
         <span>Average Progress: <span className="font-semibold text-indigo-600">{stats.avg_progress}%</span></span>
-        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+        <span className="hidden sm:block w-1 h-1 bg-gray-300 rounded-full"></span>
         <span>Total Sessions: <span className="font-semibold">{stats.total}</span></span>
       </div>
 
@@ -454,6 +470,7 @@ function StatCard({
   pulse = false,
   alert = false,
   trend,
+  compact = false,
 }: { 
   icon: React.ReactNode; 
   label: string; 
@@ -462,6 +479,7 @@ function StatCard({
   pulse?: boolean;
   alert?: boolean;
   trend?: 'up' | 'down';
+  compact?: boolean;
 }) {
   const colorStyles = {
     indigo: {
@@ -494,21 +512,21 @@ function StatCard({
   const styles = colorStyles[color];
 
   return (
-    <div className={`relative rounded-2xl p-5 ${styles.bg} ${alert ? 'ring-2 ring-red-500 ring-offset-2' : ''} transition-all`}>
+    <div className={`relative rounded-xl sm:rounded-2xl ${compact ? 'p-3 sm:p-4 min-w-[100px] sm:min-w-0' : 'p-5'} ${styles.bg} ${alert ? 'ring-2 ring-red-500 ring-offset-2' : ''} transition-all flex-shrink-0`}>
       {pulse && (
-        <span className="absolute top-3 right-3 flex h-3 w-3">
+        <span className="absolute top-2 sm:top-3 right-2 sm:right-3 flex h-2 w-2 sm:h-3 sm:w-3">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 sm:h-3 sm:w-3 bg-green-500"></span>
         </span>
       )}
-      <div className={`inline-flex p-2.5 rounded-xl ${styles.icon} mb-3`}>
+      <div className={`inline-flex ${compact ? 'p-1.5 sm:p-2' : 'p-2.5'} rounded-lg sm:rounded-xl ${styles.icon} ${compact ? 'mb-1.5 sm:mb-2' : 'mb-3'}`}>
         {icon}
       </div>
-      <div className="text-3xl font-bold text-gray-900 dark:text-white">{value}</div>
-      <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">{label}</div>
+      <div className={`${compact ? 'text-xl sm:text-2xl' : 'text-3xl'} font-bold text-gray-900 dark:text-white`}>{value}</div>
+      <div className={`${compact ? 'text-xs' : 'text-sm'} text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1`}>{label}</div>
       {trend && (
-        <div className={`absolute bottom-3 right-3 ${trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
-          <TrendingUp className={`h-4 w-4 ${trend === 'down' ? 'rotate-180' : ''}`} />
+        <div className={`absolute ${compact ? 'bottom-2 right-2' : 'bottom-3 right-3'} ${trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
+          <TrendingUp className={`h-3 w-3 sm:h-4 sm:w-4 ${trend === 'down' ? 'rotate-180' : ''}`} />
         </div>
       )}
     </div>
@@ -538,23 +556,23 @@ function StudentCard({ session, onClick }: { session: ExamSession; onClick: () =
   return (
     <div 
       onClick={onClick}
-      className={`relative bg-white dark:bg-gray-800 rounded-2xl border ${
+      className={`relative bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border ${
         session.violations_count >= 2 ? 'border-red-300 dark:border-red-700' : 'border-gray-200 dark:border-gray-700'
-      } p-5 cursor-pointer hover:shadow-lg transition-all group`}
+      } p-3 sm:p-5 cursor-pointer hover:shadow-lg active:scale-[0.99] transition-all group`}
     >
       {/* Status indicator */}
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
         {session.status === 'active' && isRecentlyActive && (
-          <span className="relative flex h-3 w-3">
+          <span className="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-green-500"></span>
           </span>
         )}
       </div>
 
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg text-white ${
+      <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-4">
+        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg text-white ${
           session.violations_count >= 2 ? 'bg-gradient-to-br from-red-500 to-orange-500' : 
           session.status === 'active' ? 'bg-gradient-to-br from-green-500 to-emerald-500' :
           session.status === 'submitted' ? 'bg-gradient-to-br from-blue-500 to-indigo-500' :
@@ -563,27 +581,27 @@ function StudentCard({ session, onClick }: { session: ExamSession; onClick: () =
           {session.student_name.charAt(0).toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-gray-900 dark:text-white truncate">
+          <h4 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate pr-6">
             {session.student_name}
           </h4>
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${statusStyles[session.status]}`}>
-            {session.status === 'active' && <Wifi className="h-3 w-3 mr-1" />}
-            {session.status === 'disconnected' && <WifiOff className="h-3 w-3 mr-1" />}
-            {session.status === 'submitted' && <CheckCircle className="h-3 w-3 mr-1" />}
-            {session.status}
+          <span className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-medium border ${statusStyles[session.status]}`}>
+            {session.status === 'active' && <Wifi className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />}
+            {session.status === 'disconnected' && <WifiOff className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />}
+            {session.status === 'submitted' && <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />}
+            <span className="capitalize">{session.status}</span>
           </span>
         </div>
       </div>
 
       {/* Progress */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between text-sm mb-1.5">
+      <div className="mb-3 sm:mb-4">
+        <div className="flex items-center justify-between text-xs sm:text-sm mb-1 sm:mb-1.5">
           <span className="text-gray-500">Progress</span>
           <span className="font-medium text-gray-900 dark:text-white">
             {session.answered_count}/{session.total_questions}
           </span>
         </div>
-        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div className="h-1.5 sm:h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
           <div 
             className={`h-full rounded-full transition-all duration-500 ${
               progress >= 100 ? 'bg-green-500' : 'bg-indigo-500'
@@ -594,29 +612,34 @@ function StudentCard({ session, onClick }: { session: ExamSession; onClick: () =
       </div>
 
       {/* Info Grid */}
-      <div className="grid grid-cols-2 gap-3 text-sm">
-        <div className="flex items-center gap-2 text-gray-500">
-          <Timer className="h-4 w-4" />
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-gray-500">
+          <Timer className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           <span>{timeLeftText}</span>
         </div>
-        <div className={`flex items-center gap-2 ${session.violations_count > 0 ? 'text-red-600' : 'text-gray-500'}`}>
-          <AlertTriangle className="h-4 w-4" />
-          <span className="font-medium">{session.violations_count} violations</span>
+        <div className={`flex items-center gap-1.5 sm:gap-2 ${session.violations_count > 0 ? 'text-red-600' : 'text-gray-500'}`}>
+          <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="font-medium">{session.violations_count}</span>
         </div>
       </div>
 
       {/* Recent violations */}
       {session.violations_count > 0 && (
-        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+        <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 dark:border-gray-700">
           <div className="flex flex-wrap gap-1">
-            {session.violations.slice(-3).map((v, i) => (
+            {session.violations.slice(-2).map((v, i) => (
               <span 
                 key={i}
-                className="text-xs px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded"
+                className="text-xs px-1.5 sm:px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded"
               >
                 {VIOLATION_LABELS[v.type] || v.type}
               </span>
             ))}
+            {session.violations.length > 2 && (
+              <span className="text-xs px-1.5 py-0.5 text-gray-500">
+                +{session.violations.length - 2}
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -724,45 +747,50 @@ function StudentDetailModal({ session, onClose }: { session: ExamSession; onClos
                    session.user_agent?.toLowerCase().includes('iphone');
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 z-50" onClick={onClose}>
       <div 
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Mobile drag handle */}
+        <div className="sm:hidden flex justify-center py-2">
+          <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
+        </div>
+        
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl text-white ${
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center font-bold text-lg sm:text-xl text-white ${
                 session.violations_count >= 2 ? 'bg-gradient-to-br from-red-500 to-orange-500' : 
                 session.status === 'active' ? 'bg-gradient-to-br from-green-500 to-emerald-500' :
                 'bg-gradient-to-br from-blue-500 to-indigo-500'
               }`}>
                 {session.student_name.charAt(0).toUpperCase()}
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{session.student_name}</h3>
+              <div className="min-w-0">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">{session.student_name}</h3>
                 {session.student_email && (
-                  <p className="text-gray-500">{session.student_email}</p>
+                  <p className="text-sm text-gray-500 truncate">{session.student_email}</p>
                 )}
               </div>
             </div>
             <button 
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              <XCircle className="h-6 w-6 text-gray-400" />
+              <XCircle className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* Status & Progress */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
-              <div className="text-sm text-gray-500 mb-1">Status</div>
-              <div className={`font-semibold capitalize ${
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-3 sm:p-4">
+              <div className="text-xs sm:text-sm text-gray-500 mb-0.5 sm:mb-1">Status</div>
+              <div className={`font-semibold text-sm sm:text-base capitalize ${
                 session.status === 'active' ? 'text-green-600' :
                 session.status === 'disconnected' ? 'text-yellow-600' :
                 session.status === 'submitted' ? 'text-blue-600' : 'text-gray-600'
@@ -770,36 +798,36 @@ function StudentDetailModal({ session, onClose }: { session: ExamSession; onClos
                 {session.status}
               </div>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
-              <div className="text-sm text-gray-500 mb-1">Time Remaining</div>
-              <div className="font-semibold text-gray-900 dark:text-white">{timeLeftText}</div>
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-3 sm:p-4">
+              <div className="text-xs sm:text-sm text-gray-500 mb-0.5 sm:mb-1">Time Left</div>
+              <div className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">{timeLeftText}</div>
             </div>
           </div>
 
           {/* Progress Bar */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-500">Progress</span>
-              <span className="font-semibold text-gray-900 dark:text-white">{progress}%</span>
+            <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+              <span className="text-xs sm:text-sm text-gray-500">Progress</span>
+              <span className="font-semibold text-sm text-gray-900 dark:text-white">{progress}%</span>
             </div>
-            <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-2.5 sm:h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <div className="mt-1 text-sm text-gray-500">
-              {session.answered_count} of {session.total_questions} questions answered
+            <div className="mt-1 text-xs sm:text-sm text-gray-500">
+              {session.answered_count} of {session.total_questions} questions
             </div>
           </div>
 
           {/* Device Info */}
-          <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              {isMobile ? <Smartphone className="h-4 w-4" /> : <Monitor className="h-4 w-4" />}
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-3 sm:p-4">
+            <h4 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white mb-2 sm:mb-3 flex items-center gap-2">
+              {isMobile ? <Smartphone className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Monitor className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
               Device Info
             </h4>
-            <div className="space-y-2 text-sm">
+            <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
               {session.screen_resolution && (
                 <div className="flex justify-between">
                   <span className="text-gray-500">Screen</span>
@@ -826,27 +854,27 @@ function StudentDetailModal({ session, onClose }: { session: ExamSession; onClos
 
           {/* Violations */}
           <div>
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <AlertTriangle className={`h-4 w-4 ${session.violations_count > 0 ? 'text-red-500' : 'text-gray-400'}`} />
+            <h4 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white mb-2 sm:mb-3 flex items-center gap-2">
+              <AlertTriangle className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${session.violations_count > 0 ? 'text-red-500' : 'text-gray-400'}`} />
               Violations ({session.violations_count})
             </h4>
             {session.violations.length === 0 ? (
-              <p className="text-gray-500 text-sm">No violations recorded</p>
+              <p className="text-gray-500 text-xs sm:text-sm">No violations recorded</p>
             ) : (
-              <div className="space-y-2 max-h-48 overflow-y-auto">
+              <div className="space-y-1.5 sm:space-y-2 max-h-40 sm:max-h-48 overflow-y-auto">
                 {session.violations.map((v, i) => (
                   <div 
                     key={i}
-                    className="flex items-center justify-between bg-red-50 dark:bg-red-900/20 rounded-lg p-3"
+                    className="flex items-center justify-between bg-red-50 dark:bg-red-900/20 rounded-lg p-2.5 sm:p-3"
                   >
                     <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-red-500" />
-                      <span className="font-medium text-red-700 dark:text-red-300">
+                      <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-500 flex-shrink-0" />
+                      <span className="font-medium text-xs sm:text-sm text-red-700 dark:text-red-300">
                         {VIOLATION_LABELS[v.type] || v.type}
                       </span>
                     </div>
-                    <span className="text-xs text-red-500">
-                      {new Date(v.timestamp).toLocaleTimeString()}
+                    <span className="text-xs text-red-500 flex-shrink-0 ml-2">
+                      {new Date(v.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                 ))}
@@ -854,6 +882,9 @@ function StudentDetailModal({ session, onClose }: { session: ExamSession; onClos
             )}
           </div>
         </div>
+        
+        {/* Safe area for mobile */}
+        <div className="h-safe-area-inset-bottom sm:hidden" />
       </div>
     </div>
   );

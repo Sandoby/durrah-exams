@@ -167,15 +167,25 @@ export default function ExamView() {
     
     // Flag to track if we just restored progress (to prevent immediate re-sync)
     const justRestoredRef = useRef(false);
+    // Flag to track if we've already shown the restore toast (prevent duplicates)
+    const hasShownRestoreToastRef = useRef(false);
     
     // Restore progress from Supabase for authenticated users
     useEffect(() => {
         if (!progressLoading && savedProgress && hasExistingProgress && isAuthenticated) {
+            // Check if there's actually meaningful progress to restore
+            const hasAnswers = savedProgress.answers && Object.keys(savedProgress.answers).length > 0;
+            const hasStarted = !!savedProgress.started_at;
+            const hasMeaningfulProgress = hasAnswers || hasStarted;
+            
+            // Skip if no meaningful progress
+            if (!hasMeaningfulProgress) return;
+            
             // Mark that we're restoring to prevent immediate re-sync
             justRestoredRef.current = true;
             
             // Restore answers
-            if (savedProgress.answers && Object.keys(savedProgress.answers).length > 0) {
+            if (hasAnswers) {
                 setAnswers(savedProgress.answers);
             }
             // Restore flagged questions
@@ -183,11 +193,11 @@ export default function ExamView() {
                 setFlaggedQuestions(new Set(savedProgress.flagged_questions));
             }
             // Restore current question
-            if (savedProgress.current_question_index !== undefined) {
+            if (savedProgress.current_question_index !== undefined && savedProgress.current_question_index > 0) {
                 setCurrentQuestionIndex(savedProgress.current_question_index);
             }
             // Restore time remaining
-            if (savedProgress.time_remaining_seconds !== null) {
+            if (savedProgress.time_remaining_seconds !== null && savedProgress.time_remaining_seconds > 0) {
                 setTimeLeft(savedProgress.time_remaining_seconds);
             }
             // Restore violations
@@ -203,14 +213,19 @@ export default function ExamView() {
                 setConfidenceLevels(savedProgress.confidence_levels as Record<string, 'low' | 'medium' | 'high'>);
             }
             // Check if already started
-            if (savedProgress.started_at) {
+            if (hasStarted && savedProgress.started_at) {
                 setStarted(true);
                 setStartedAt(new Date(savedProgress.started_at).getTime());
                 setHasPreviousSession(true);
-                toast.success(t('examView.progressRestored', 'Your progress has been restored'), {
-                    duration: 3000,
-                    icon: '💾'
-                });
+                
+                // Only show toast once per session and if we have actual answers
+                if (!hasShownRestoreToastRef.current && hasAnswers) {
+                    hasShownRestoreToastRef.current = true;
+                    toast.success(t('examView.progressRestored', 'Your progress has been restored'), {
+                        duration: 3000,
+                        icon: '💾'
+                    });
+                }
             }
             // Check if already submitted
             if (savedProgress.status === 'submitted' || savedProgress.status === 'auto_submitted') {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     MessageCircle, User, CreditCard, FileText, LogOut,
     AlertCircle, Package,
-    Search, Key, Activity, Zap, Sparkles
+    Search, Key, Activity, Zap, Sparkles, X, ChevronLeft
 } from 'lucide-react';
 import { Logo } from '../../components/Logo';
 import { supabase } from '../../lib/supabase';
@@ -104,6 +104,10 @@ export default function AgentDashboard() {
 
     // Convex Chat Mode Toggle
     const [useConvexChat, setUseConvexChat] = useState(CONVEX_FEATURES.chat);
+    
+    // Mobile UI State
+    const [showChatsList, setShowChatsList] = useState(true);
+    const [showUserProfile, setShowUserProfile] = useState(false);
 
     // Chat Messages
     const [messages, setMessages] = useState<any[]>([]);
@@ -479,36 +483,36 @@ export default function AgentDashboard() {
         <div className="min-h-screen bg-gray-50 flex flex-col">
             {/* Header */}
             <div className="bg-white shadow-sm border-b">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-4">
-                        <div className="flex items-center space-x-4">
-                            <Logo className="h-8" />
-                            <div>
-                                <h1 className="text-xl font-bold text-gray-900">{agent?.name}</h1>
-                                <p className="text-sm text-gray-600">Support Agent • {agent?.total_chats_handled} chats handled</p>
+                <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center py-3 sm:py-4">
+                        <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
+                            <Logo className="h-6 sm:h-8 flex-shrink-0" />
+                            <div className="min-w-0">
+                                <h1 className="text-base sm:text-xl font-bold text-gray-900 truncate">{agent?.name}</h1>
+                                <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Support Agent • {agent?.total_chats_handled} chats</p>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            {/* Convex Chat Toggle */}
+                        <div className="flex items-center space-x-2 sm:space-x-4">
+                            {/* Convex Chat Toggle - hidden on mobile */}
                             {CONVEX_FEATURES.chat && (
                                 <button
                                     onClick={() => setUseConvexChat(!useConvexChat)}
-                                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                                    className={`hidden sm:flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg transition-colors ${
                                         useConvexChat 
                                             ? 'bg-indigo-100 text-indigo-700 border border-indigo-300' 
                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                                 >
                                     <Sparkles className="h-4 w-4" />
-                                    <span className="text-sm font-medium">{useConvexChat ? 'Realtime Mode' : 'Classic Mode'}</span>
+                                    <span className="text-sm font-medium">{useConvexChat ? 'Realtime' : 'Classic'}</span>
                                 </button>
                             )}
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                             >
                                 <LogOut className="h-5 w-5" />
-                                <span>Logout</span>
+                                <span className="hidden sm:inline">Logout</span>
                             </button>
                         </div>
                     </div>
@@ -522,11 +526,18 @@ export default function AgentDashboard() {
                 </div>
             ) : (
             /* Classic Supabase Chat Mode */
-            <div className="flex-1 flex overflow-hidden">
-                {/* Left Sidebar - Chats List */}
-                <div className="w-80 bg-white border-r flex flex-col">
-                    <div className="p-4 border-b">
-                        <div className="relative">
+            <div className="flex-1 flex overflow-hidden relative">
+                {/* Mobile: Chats List Overlay */}
+                <div className={`
+                    ${showChatsList ? 'translate-x-0' : '-translate-x-full'}
+                    md:translate-x-0 md:relative
+                    absolute inset-y-0 left-0 z-20
+                    w-full sm:w-80 bg-white border-r flex flex-col
+                    transition-transform duration-300 ease-in-out
+                `}>
+                    {/* Mobile header for chats list */}
+                    <div className="p-3 sm:p-4 border-b flex items-center justify-between">
+                        <div className="relative flex-1 mr-2">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                             <input
                                 type="text"
@@ -536,6 +547,12 @@ export default function AgentDashboard() {
                                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
+                        <button 
+                            onClick={() => setShowChatsList(false)}
+                            className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
                     </div>
 
                     <div className="flex-1 overflow-y-auto">
@@ -544,16 +561,17 @@ export default function AgentDashboard() {
                                 key={chat.id}
                                 onClick={() => {
                                     setSelectedChat(chat);
+                                    setShowChatsList(false); // Hide list on mobile after selection
                                 }}
-                                className={`w-full p-4 text-left border-b hover:bg-gray-50 transition-colors ${selectedChat?.id === chat.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
+                                className={`w-full p-3 sm:p-4 text-left border-b hover:bg-gray-50 transition-colors ${selectedChat?.id === chat.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
                                     }`}
                             >
                                 <div className="flex items-start justify-between mb-1">
-                                    <h3 className="font-semibold text-gray-900 truncate">
+                                    <h3 className="font-semibold text-gray-900 truncate text-sm sm:text-base">
                                         {chat.user_name || 'Unknown'}
                                         {!chat.agent_id && <span className="ml-2 text-xs text-orange-600">(New)</span>}
                                     </h3>
-                                    <span className={`px-2 py-0.5 rounded text-xs ${chat.status === 'active'
+                                    <span className={`px-2 py-0.5 rounded text-xs flex-shrink-0 ${chat.status === 'active'
                                         ? 'bg-green-100 text-green-800'
                                         : chat.status === 'ended'
                                             ? 'bg-gray-100 text-gray-800'
@@ -562,7 +580,7 @@ export default function AgentDashboard() {
                                         {chat.status}
                                     </span>
                                 </div>
-                                <p className="text-sm text-gray-600 truncate">{chat.user_email || 'Unknown email'}</p>
+                                <p className="text-xs sm:text-sm text-gray-600 truncate">{chat.user_email || 'Unknown email'}</p>
                                 <p className="text-xs text-gray-500 mt-1">
                                     {chat.started_at ? new Date(chat.started_at).toLocaleString() : 'Unknown start'}
                                 </p>
@@ -579,24 +597,47 @@ export default function AgentDashboard() {
                 </div>
 
                 {/* Middle - Chat Interface */}
-                <div className="flex-1 flex flex-col bg-gray-50">
+                <div className="flex-1 flex flex-col bg-gray-50 min-w-0">
                     {selectedChat ? (
                         <>
-                            <div className="bg-white border-b p-4">
-                                <h2 className="font-bold text-lg text-gray-900">
-                                    Chat with {selectedUser?.full_name || selectedChat.user_name || 'Unknown user'}
-                                </h2>
-                                <p className="text-sm text-gray-600">{selectedUser?.email || selectedChat.user_email || 'Unknown email'}</p>
+                            <div className="bg-white border-b p-3 sm:p-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-2 min-w-0">
+                                        {/* Mobile: Back to chats list */}
+                                        <button
+                                            onClick={() => setShowChatsList(true)}
+                                            className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+                                        >
+                                            <ChevronLeft className="h-5 w-5" />
+                                        </button>
+                                        <div className="min-w-0">
+                                            <h2 className="font-bold text-base sm:text-lg text-gray-900 truncate">
+                                                {selectedUser?.full_name || selectedChat.user_name || 'Unknown'}
+                                            </h2>
+                                            <p className="text-xs sm:text-sm text-gray-600 truncate">{selectedUser?.email || selectedChat.user_email || ''}</p>
+                                        </div>
+                                    </div>
+                                    {/* Mobile: Show user profile button */}
+                                    {selectedUser && (
+                                        <button
+                                            onClick={() => setShowUserProfile(true)}
+                                            className="lg:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+                                            title="View user profile"
+                                        >
+                                            <User className="h-5 w-5" />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
                                 {messages.map((msg) => (
                                     <div
                                         key={msg.id}
                                         className={`flex ${msg.is_agent ? 'justify-end' : 'justify-start'}`}
                                     >
                                         <div
-                                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${msg.is_agent
+                                            className={`max-w-[85%] sm:max-w-xs lg:max-w-md px-3 sm:px-4 py-2 rounded-lg ${msg.is_agent
                                                 ? 'bg-blue-600 text-white'
                                                 : 'bg-white border text-gray-900'
                                                 }`}
@@ -666,21 +707,53 @@ export default function AgentDashboard() {
                         </>
                     ) : (
                         <div className="flex-1 flex items-center justify-center text-gray-500">
-                            <div className="text-center">
-                                <MessageCircle className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                                <p>Select a chat to start</p>
+                            <div className="text-center p-4">
+                                <MessageCircle className="h-12 sm:h-16 w-12 sm:w-16 mx-auto mb-4 opacity-50" />
+                                <p className="text-sm sm:text-base">Select a chat to start</p>
+                                <button
+                                    onClick={() => setShowChatsList(true)}
+                                    className="md:hidden mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                >
+                                    View Chats
+                                </button>
                             </div>
                         </div>
                     )}
                 </div>
 
+                {/* Mobile Backdrop for User Profile */}
+                {showUserProfile && (
+                    <div 
+                        className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+                        onClick={() => setShowUserProfile(false)}
+                    />
+                )}
+
                 {/* Right Sidebar - User Profile */}
                 {selectedUser && (
-                    <div className="w-96 bg-white border-l overflow-y-auto">
-                        <div className="p-6 space-y-6">
+                    <div className={`
+                        ${showUserProfile ? 'translate-x-0' : 'translate-x-full'}
+                        lg:translate-x-0 lg:relative
+                        fixed inset-y-0 right-0 z-30
+                        w-full sm:w-96 bg-white border-l overflow-y-auto
+                        transition-transform duration-300 ease-in-out
+                        shadow-xl lg:shadow-none
+                    `}>
+                        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                            {/* Mobile: Close button */}
+                            <div className="flex items-center justify-between lg:hidden">
+                                <h3 className="text-lg font-bold text-gray-900">User Profile</h3>
+                                <button
+                                    onClick={() => setShowUserProfile(false)}
+                                    className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+                            
                             {/* User Info */}
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
+                                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center hidden lg:flex">
                                     <User className="h-5 w-5 mr-2" />
                                     User Profile
                                 </h3>
