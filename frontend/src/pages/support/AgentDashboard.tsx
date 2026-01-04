@@ -480,39 +480,39 @@ export default function AgentDashboard() {
 
     return (
         <>
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen bg-gray-50 flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="bg-white shadow-sm border-b">
-                <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-3 sm:py-4">
-                        <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
+            <div className="bg-white shadow-sm border-b flex-shrink-0">
+                <div className="px-3 sm:px-4 lg:px-6">
+                    <div className="flex justify-between items-center py-2.5 sm:py-3">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                             <Logo className="h-6 sm:h-8 flex-shrink-0" />
                             <div className="min-w-0">
-                                <h1 className="text-base sm:text-xl font-bold text-gray-900 truncate">{agent?.name}</h1>
-                                <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Support Agent • {agent?.total_chats_handled} chats</p>
+                                <h1 className="text-sm sm:text-lg font-bold text-gray-900 truncate">{agent?.name}</h1>
+                                <p className="text-xs text-gray-500 hidden sm:block">Support • {agent?.total_chats_handled} chats</p>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-2 sm:space-x-4">
-                            {/* Convex Chat Toggle - hidden on mobile */}
+                        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+                            {/* Convex Chat Toggle */}
                             {CONVEX_FEATURES.chat && (
                                 <button
                                     onClick={() => setUseConvexChat(!useConvexChat)}
-                                    className={`hidden sm:flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg transition-colors ${
+                                    className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm ${
                                         useConvexChat 
-                                            ? 'bg-indigo-100 text-indigo-700 border border-indigo-300' 
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            ? 'bg-indigo-100 text-indigo-700' 
+                                            : 'bg-gray-100 text-gray-600'
                                     }`}
                                 >
-                                    <Sparkles className="h-4 w-4" />
-                                    <span className="text-sm font-medium">{useConvexChat ? 'Realtime' : 'Classic'}</span>
+                                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                    <span className="hidden xs:inline font-medium">{useConvexChat ? 'Live' : 'Classic'}</span>
                                 </button>
                             )}
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                             >
-                                <LogOut className="h-5 w-5" />
-                                <span className="hidden sm:inline">Logout</span>
+                                <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
+                                <span className="hidden sm:inline text-sm">Logout</span>
                             </button>
                         </div>
                     </div>
@@ -527,70 +527,79 @@ export default function AgentDashboard() {
             ) : (
             /* Classic Supabase Chat Mode */
             <div className="flex-1 flex overflow-hidden relative">
-                {/* Mobile: Chats List Overlay */}
+                {/* Mobile Backdrop for Chats List */}
+                {showChatsList && (
+                    <div 
+                        className="fixed inset-0 bg-black/40 z-10 md:hidden"
+                        onClick={() => setShowChatsList(false)}
+                    />
+                )}
+                
+                {/* Chats List Panel */}
                 <div className={`
                     ${showChatsList ? 'translate-x-0' : '-translate-x-full'}
-                    md:translate-x-0 md:relative
-                    absolute inset-y-0 left-0 z-20
-                    w-full sm:w-80 bg-white border-r flex flex-col
+                    md:translate-x-0 md:relative md:flex
+                    fixed inset-y-0 left-0 z-20
+                    w-[85vw] max-w-[320px] md:w-72 lg:w-80
+                    bg-white border-r flex flex-col
                     transition-transform duration-300 ease-in-out
+                    shadow-xl md:shadow-none
                 `}>
-                    {/* Mobile header for chats list */}
-                    <div className="p-3 sm:p-4 border-b flex items-center justify-between">
-                        <div className="relative flex-1 mr-2">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    {/* Chats list header */}
+                    <div className="p-2.5 sm:p-3 border-b flex items-center gap-2 flex-shrink-0">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <input
                                 type="text"
                                 value={chatSearch}
                                 onChange={(e) => setChatSearch(e.target.value)}
-                                placeholder="Search chats..."
-                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="Search..."
+                                className="w-full pl-8 pr-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
                         <button 
                             onClick={() => setShowChatsList(false)}
-                            className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+                            className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg flex-shrink-0"
                         >
                             <X className="h-5 w-5" />
                         </button>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto">
+                    <div className="flex-1 overflow-y-auto overscroll-contain">
                         {filteredChats.map((chat) => (
                             <button
                                 key={chat.id}
                                 onClick={() => {
                                     setSelectedChat(chat);
-                                    setShowChatsList(false); // Hide list on mobile after selection
+                                    setShowChatsList(false);
                                 }}
-                                className={`w-full p-3 sm:p-4 text-left border-b hover:bg-gray-50 transition-colors ${selectedChat?.id === chat.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
-                                    }`}
+                                className={`w-full p-2.5 sm:p-3 text-left border-b hover:bg-gray-50 active:bg-gray-100 transition-colors ${selectedChat?.id === chat.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''}`}
                             >
-                                <div className="flex items-start justify-between mb-1">
-                                    <h3 className="font-semibold text-gray-900 truncate text-sm sm:text-base">
+                                <div className="flex items-start justify-between gap-2 mb-0.5">
+                                    <h3 className="font-semibold text-gray-900 truncate text-sm flex-1">
                                         {chat.user_name || 'Unknown'}
-                                        {!chat.agent_id && <span className="ml-2 text-xs text-orange-600">(New)</span>}
+                                        {!chat.agent_id && <span className="ml-1.5 text-xs text-orange-600 font-normal">(New)</span>}
                                     </h3>
-                                    <span className={`px-2 py-0.5 rounded text-xs flex-shrink-0 ${chat.status === 'active'
-                                        ? 'bg-green-100 text-green-800'
+                                    <span className={`px-1.5 py-0.5 rounded text-xs flex-shrink-0 ${chat.status === 'active'
+                                        ? 'bg-green-100 text-green-700'
                                         : chat.status === 'ended'
-                                            ? 'bg-gray-100 text-gray-800'
-                                            : 'bg-blue-100 text-blue-800'
+                                            ? 'bg-gray-100 text-gray-600'
+                                            : 'bg-blue-100 text-blue-700'
                                         }`}>
                                         {chat.status}
                                     </span>
                                 </div>
-                                <p className="text-xs sm:text-sm text-gray-600 truncate">{chat.user_email || 'Unknown email'}</p>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    {chat.started_at ? new Date(chat.started_at).toLocaleString() : 'Unknown start'}
+                                <p className="text-xs text-gray-500 truncate">{chat.user_email || 'Unknown email'}</p>
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                    {chat.started_at ? new Date(chat.started_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : ''}
                                 </p>
                             </button>
                         ))}
 
                         {filteredChats.length === 0 && (
-                            <div className="p-8 text-center text-gray-500">
-                                <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                <p>No chats assigned</p>
+                            <div className="p-6 text-center text-gray-500">
+                                <MessageCircle className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                                <p className="text-sm">No chats</p>
                             </div>
                         )}
                     </div>
@@ -600,52 +609,49 @@ export default function AgentDashboard() {
                 <div className="flex-1 flex flex-col bg-gray-50 min-w-0">
                     {selectedChat ? (
                         <>
-                            <div className="bg-white border-b p-3 sm:p-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-2 min-w-0">
-                                        {/* Mobile: Back to chats list */}
+                            <div className="bg-white border-b p-2.5 sm:p-3 flex-shrink-0">
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
                                         <button
                                             onClick={() => setShowChatsList(true)}
-                                            className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+                                            className="md:hidden p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg flex-shrink-0"
                                         >
                                             <ChevronLeft className="h-5 w-5" />
                                         </button>
                                         <div className="min-w-0">
-                                            <h2 className="font-bold text-base sm:text-lg text-gray-900 truncate">
+                                            <h2 className="font-bold text-sm sm:text-base text-gray-900 truncate">
                                                 {selectedUser?.full_name || selectedChat.user_name || 'Unknown'}
                                             </h2>
-                                            <p className="text-xs sm:text-sm text-gray-600 truncate">{selectedUser?.email || selectedChat.user_email || ''}</p>
+                                            <p className="text-xs text-gray-500 truncate">{selectedUser?.email || selectedChat.user_email || ''}</p>
                                         </div>
                                     </div>
-                                    {/* Mobile: Show user profile button */}
                                     {selectedUser && (
                                         <button
                                             onClick={() => setShowUserProfile(true)}
-                                            className="lg:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+                                            className="lg:hidden p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg flex-shrink-0"
                                             title="View user profile"
                                         >
-                                            <User className="h-5 w-5" />
+                                            <User className="h-4 w-4" />
                                         </button>
                                     )}
                                 </div>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
+                            <div className="flex-1 overflow-y-auto p-3 space-y-2.5 overscroll-contain">
                                 {messages.map((msg) => (
                                     <div
                                         key={msg.id}
                                         className={`flex ${msg.is_agent ? 'justify-end' : 'justify-start'}`}
                                     >
                                         <div
-                                            className={`max-w-[85%] sm:max-w-xs lg:max-w-md px-3 sm:px-4 py-2 rounded-lg ${msg.is_agent
-                                                ? 'bg-blue-600 text-white'
-                                                : 'bg-white border text-gray-900'
-                                                }`}
+                                            className={`max-w-[80%] sm:max-w-[70%] px-3 py-2 rounded-2xl ${msg.is_agent
+                                                ? 'bg-blue-600 text-white rounded-br-md'
+                                                : 'bg-white border text-gray-900 rounded-bl-md shadow-sm'
+                                            }`}
                                         >
-                                            <p>{msg.message}</p>
-                                            <p className={`text-xs mt-1 ${msg.is_agent ? 'text-blue-100' : 'text-gray-500'
-                                                }`}>
-                                                {new Date(msg.created_at).toLocaleTimeString()}
+                                            <p className="text-sm break-words">{msg.message}</p>
+                                            <p className={`text-xs mt-1 ${msg.is_agent ? 'text-blue-200' : 'text-gray-400'}`}>
+                                                {new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
                                             </p>
                                         </div>
                                     </div>
@@ -653,8 +659,8 @@ export default function AgentDashboard() {
                                 <div ref={messagesEndRef} />
                             </div>
 
-                            <div className="bg-white border-t p-4">
-                                <div className="flex items-start space-x-2">
+                            <div className="bg-white border-t p-2.5 sm:p-3 flex-shrink-0">
+                                <div className="flex items-end gap-2">
                                     <div className="relative flex-1">
                                         <textarea
                                             value={newMessage}
@@ -665,31 +671,31 @@ export default function AgentDashboard() {
                                                     sendMessage();
                                                 }
                                             }}
-                                            placeholder="Type your message... (Enter to send)"
-                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
-                                            rows={3}
+                                            placeholder="Type a message..."
+                                            className="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 resize-none text-sm"
+                                            rows={2}
                                         />
                                         <button
                                             onClick={() => setShowCannedMenu(!showCannedMenu)}
-                                            className="absolute bottom-2 right-2 p-1 text-gray-400 hover:text-gray-600"
-                                            title="Canned responses"
+                                            className="absolute bottom-2 right-2 p-1 text-gray-400 hover:text-blue-600"
+                                            title="Quick replies"
                                         >
-                                            <Zap className="h-5 w-5" />
+                                            <Zap className="h-4 w-4" />
                                         </button>
 
                                         {showCannedMenu && (
-                                            <div className="absolute bottom-full right-0 mb-2 w-64 bg-white rounded-lg shadow-xl border max-h-64 overflow-y-auto z-10">
+                                            <div className="absolute bottom-full right-0 mb-2 w-56 sm:w-64 bg-white rounded-xl shadow-xl border max-h-52 overflow-y-auto z-10">
                                                 {cannedResponses.map((response) => (
                                                     <button
                                                         key={response.id}
                                                         onClick={() => useCannedResponse(response.content)}
-                                                        className="w-full text-left p-3 hover:bg-gray-50 border-b last:border-b-0"
+                                                        className="w-full text-left p-2.5 hover:bg-gray-50 border-b last:border-b-0"
                                                     >
-                                                        <div className="flex items-center justify-between mb-1">
-                                                            <span className="font-medium text-sm">{response.title}</span>
-                                                            <span className="text-xs text-gray-500">{response.shortcut}</span>
+                                                        <div className="flex items-center justify-between mb-0.5">
+                                                            <span className="font-medium text-xs">{response.title}</span>
+                                                            <span className="text-xs text-gray-400">{response.shortcut}</span>
                                                         </div>
-                                                        <p className="text-xs text-gray-600 truncate">{response.content}</p>
+                                                        <p className="text-xs text-gray-500 truncate">{response.content}</p>
                                                     </button>
                                                 ))}
                                             </div>
@@ -698,7 +704,7 @@ export default function AgentDashboard() {
                                     <button
                                         onClick={sendMessage}
                                         disabled={!newMessage.trim()}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed h-[76px]"
+                                        className="px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium flex-shrink-0"
                                     >
                                         Send
                                     </button>
@@ -708,11 +714,11 @@ export default function AgentDashboard() {
                     ) : (
                         <div className="flex-1 flex items-center justify-center text-gray-500">
                             <div className="text-center p-4">
-                                <MessageCircle className="h-12 sm:h-16 w-12 sm:w-16 mx-auto mb-4 opacity-50" />
-                                <p className="text-sm sm:text-base">Select a chat to start</p>
+                                <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                                <p className="text-sm mb-3">Select a chat to start</p>
                                 <button
                                     onClick={() => setShowChatsList(true)}
-                                    className="md:hidden mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                    className="md:hidden px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
                                 >
                                     View Chats
                                 </button>
@@ -732,85 +738,96 @@ export default function AgentDashboard() {
                 {/* Right Sidebar - User Profile */}
                 {selectedUser && (
                     <div className={`
-                        ${showUserProfile ? 'translate-x-0' : 'translate-x-full'}
-                        lg:translate-x-0 lg:relative
-                        fixed inset-y-0 right-0 z-30
-                        w-full sm:w-96 bg-white border-l overflow-y-auto
+                        ${showUserProfile ? 'translate-y-0' : 'translate-y-full'}
+                        lg:translate-y-0 lg:translate-x-0 lg:relative
+                        fixed inset-x-0 bottom-0 lg:inset-y-0 lg:right-0 lg:left-auto z-30
+                        w-full lg:w-80 xl:w-96
+                        max-h-[85vh] lg:max-h-none
+                        bg-white border-t lg:border-t-0 lg:border-l
+                        rounded-t-2xl lg:rounded-none
+                        overflow-y-auto overscroll-contain
                         transition-transform duration-300 ease-in-out
                         shadow-xl lg:shadow-none
                     `}>
-                        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                        {/* Mobile drag handle */}
+                        <div className="lg:hidden flex justify-center py-2 sticky top-0 bg-white">
+                            <div className="w-10 h-1 bg-gray-300 rounded-full" />
+                        </div>
+                        
+                        <div className="p-3 sm:p-4 space-y-4">
                             {/* Mobile: Close button */}
                             <div className="flex items-center justify-between lg:hidden">
-                                <h3 className="text-lg font-bold text-gray-900">User Profile</h3>
+                                <h3 className="text-base font-bold text-gray-900">User Profile</h3>
                                 <button
                                     onClick={() => setShowUserProfile(false)}
-                                    className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+                                    className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg"
                                 >
                                     <X className="h-5 w-5" />
                                 </button>
                             </div>
                             
                             {/* User Info */}
-                            <div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center hidden lg:flex">
-                                    <User className="h-5 w-5 mr-2" />
+                            <div className="bg-gray-50 rounded-xl p-3">
+                                <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center hidden lg:flex">
+                                    <User className="h-4 w-4 mr-1.5" />
                                     User Profile
                                 </h3>
-                                <div className="space-y-2 text-sm">
-                                    <p><strong>Name:</strong> {selectedUser.full_name}</p>
-                                    <p><strong>Email:</strong> {selectedUser.email}</p>
-                                    <p><strong>Member since:</strong> {new Date(selectedUser.created_at).toLocaleDateString()}</p>
+                                <div className="space-y-1.5 text-sm">
+                                    <p className="truncate"><span className="text-gray-500">Name:</span> <span className="font-medium">{selectedUser.full_name}</span></p>
+                                    <p className="truncate"><span className="text-gray-500">Email:</span> <span className="font-medium">{selectedUser.email}</span></p>
+                                    <p><span className="text-gray-500">Member since:</span> <span className="font-medium">{new Date(selectedUser.created_at).toLocaleDateString()}</span></p>
                                 </div>
                             </div>
 
                             {/* Subscription Info */}
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                                    <Package className="h-5 w-5 mr-2" />
+                                <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center">
+                                    <Package className="h-4 w-4 mr-1.5" />
                                     Subscription
                                 </h3>
-                                <div className="space-y-2 text-sm">
-                                    <p><strong>Plan:</strong> {selectedUser.subscription_plan || 'None'}</p>
-                                    <p><strong>Status:</strong> <span className={`px-2 py-1 rounded text-xs ${selectedUser.subscription_status === 'active'
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-gray-100 text-gray-800'
+                                <div className="space-y-1.5 text-sm">
+                                    <p><span className="text-gray-500">Plan:</span> <span className="font-medium">{selectedUser.subscription_plan || 'None'}</span></p>
+                                    <p><span className="text-gray-500">Status:</span> <span className={`ml-1 px-1.5 py-0.5 rounded text-xs ${selectedUser.subscription_status === 'active'
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-gray-100 text-gray-600'
                                         }`}>{selectedUser.subscription_status}</span></p>
-                                    <p><strong>End Date:</strong> {selectedUser.subscription_end_date
+                                    <p><span className="text-gray-500">End Date:</span> <span className="font-medium">{selectedUser.subscription_end_date
                                         ? new Date(selectedUser.subscription_end_date).toLocaleDateString()
-                                        : 'N/A'}</p>
+                                        : 'N/A'}</span></p>
                                 </div>
 
                                 {agent?.permissions.can_extend_subscriptions && (
-                                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                                        <h4 className="font-semibold text-sm mb-3">Extend Subscription</h4>
-                                        <div className="space-y-3">
-                                            <div>
-                                                <label className="block text-xs font-medium mb-1">Days to extend:</label>
-                                                <input
-                                                    type="number"
-                                                    value={extendDays}
-                                                    onChange={(e) => setExtendDays(parseInt(e.target.value))}
-                                                    min="1"
-                                                    className="w-full px-3 py-2 border rounded-lg text-sm"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-medium mb-1">Reason:</label>
-                                                <input
-                                                    type="text"
-                                                    value={extendReason}
-                                                    onChange={(e) => setExtendReason(e.target.value)}
-                                                    placeholder="Optional..."
-                                                    className="w-full px-3 py-2 border rounded-lg text-sm"
-                                                />
+                                    <div className="mt-3 p-3 bg-blue-50 rounded-xl">
+                                        <h4 className="font-semibold text-xs mb-2">Extend Subscription</h4>
+                                        <div className="space-y-2">
+                                            <div className="flex gap-2">
+                                                <div className="flex-1">
+                                                    <label className="block text-xs text-gray-500 mb-1">Days</label>
+                                                    <input
+                                                        type="number"
+                                                        value={extendDays}
+                                                        onChange={(e) => setExtendDays(parseInt(e.target.value))}
+                                                        min="1"
+                                                        className="w-full px-2 py-1.5 border rounded-lg text-sm"
+                                                    />
+                                                </div>
+                                                <div className="flex-[2]">
+                                                    <label className="block text-xs text-gray-500 mb-1">Reason</label>
+                                                    <input
+                                                        type="text"
+                                                        value={extendReason}
+                                                        onChange={(e) => setExtendReason(e.target.value)}
+                                                        placeholder="Optional..."
+                                                        className="w-full px-2 py-1.5 border rounded-lg text-sm"
+                                                    />
+                                                </div>
                                             </div>
                                             <button
                                                 onClick={extendSubscription}
                                                 disabled={loading}
-                                                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
+                                                className="w-full bg-blue-600 text-white py-1.5 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
                                             >
-                                                Extend Subscription
+                                                Extend
                                             </button>
                                         </div>
                                     </div>
@@ -820,23 +837,22 @@ export default function AgentDashboard() {
                             {/* Payment History */}
                             {agent?.permissions.can_view_payments && userPayments.length > 0 && (
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                                        <CreditCard className="h-5 w-5 mr-2" />
-                                        Recent Payments
+                                    <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center">
+                                        <CreditCard className="h-4 w-4 mr-1.5" />
+                                        Payments
                                     </h3>
-                                    <div className="space-y-2">
-                                        {userPayments.slice(0, 5).map((payment) => (
-                                            <div key={payment.id} className="p-3 bg-gray-50 rounded-lg text-sm">
-                                                <div className="flex justify-between mb-1">
+                                    <div className="space-y-1.5">
+                                        {userPayments.slice(0, 3).map((payment) => (
+                                            <div key={payment.id} className="p-2 bg-gray-50 rounded-lg text-xs flex items-center justify-between">
+                                                <div>
                                                     <span className="font-medium">{payment.amount} EGP</span>
-                                                    <span className={`px-2 py-0.5 rounded text-xs ${payment.status === 'completed'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-gray-100 text-gray-800'
-                                                        }`}>{payment.status}</span>
+                                                    <span className="text-gray-400 mx-1">•</span>
+                                                    <span className="text-gray-500">{payment.provider}</span>
                                                 </div>
-                                                <p className="text-xs text-gray-600">
-                                                    {new Date(payment.created_at).toLocaleDateString()} • {payment.provider}
-                                                </p>
+                                                <span className={`px-1.5 py-0.5 rounded text-xs ${payment.status === 'completed'
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : 'bg-gray-100 text-gray-600'
+                                                }`}>{payment.status}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -846,20 +862,15 @@ export default function AgentDashboard() {
                             {/* Exam History */}
                             {userExams.length > 0 && (
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                                        <FileText className="h-5 w-5 mr-2" />
-                                        Recent Exams
+                                    <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center">
+                                        <FileText className="h-4 w-4 mr-1.5" />
+                                        Exams
                                     </h3>
-                                    <div className="space-y-2">
-                                        {userExams.slice(0, 5).map((exam) => (
-                                            <div key={exam.id} className="p-3 bg-gray-50 rounded-lg text-sm">
-                                                <div className="flex justify-between mb-1">
-                                                    <span className="font-medium">{exam.exam_type}</span>
-                                                    <span className="text-blue-600 font-bold">{exam.score}%</span>
-                                                </div>
-                                                <p className="text-xs text-gray-600">
-                                                    {new Date(exam.created_at).toLocaleDateString()}
-                                                </p>
+                                    <div className="space-y-1.5">
+                                        {userExams.slice(0, 3).map((exam) => (
+                                            <div key={exam.id} className="p-2 bg-gray-50 rounded-lg text-xs flex items-center justify-between">
+                                                <span className="font-medium truncate flex-1">{exam.exam_type}</span>
+                                                <span className="text-blue-600 font-bold ml-2">{exam.score}%</span>
                                             </div>
                                         ))}
                                     </div>
@@ -868,67 +879,70 @@ export default function AgentDashboard() {
 
                             {/* Agent Notes */}
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                                    <Activity className="h-5 w-5 mr-2" />
-                                    Agent Notes
+                                <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center">
+                                    <Activity className="h-4 w-4 mr-1.5" />
+                                    Notes
                                 </h3>
 
-                                <div className="mb-4">
+                                <div className="mb-3">
                                     <textarea
                                         value={newNote}
                                         onChange={(e) => setNewNote(e.target.value)}
-                                        placeholder="Add a note about this user..."
-                                        className="w-full px-3 py-2 border rounded-lg text-sm resize-none"
-                                        rows={3}
+                                        placeholder="Add a note..."
+                                        className="w-full px-2.5 py-2 border rounded-xl text-sm resize-none"
+                                        rows={2}
                                     />
-                                    <div className="flex items-center justify-between mt-2">
-                                        <label className="flex items-center space-x-2 text-sm">
+                                    <div className="flex items-center justify-between mt-1.5 gap-2">
+                                        <label className="flex items-center gap-1.5 text-xs text-gray-600">
                                             <input
                                                 type="checkbox"
                                                 checked={noteImportant}
                                                 onChange={(e) => setNoteImportant(e.target.checked)}
-                                                className="rounded"
+                                                className="rounded w-3.5 h-3.5"
                                             />
-                                            <span>Mark as important</span>
+                                            <span>Important</span>
                                         </label>
                                         <button
                                             onClick={addNote}
                                             disabled={!newNote.trim()}
-                                            className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 disabled:opacity-50 text-sm"
+                                            className="px-3 py-1.5 bg-gray-800 text-white rounded-lg hover:bg-gray-900 disabled:opacity-50 text-xs"
                                         >
-                                            Add Note
+                                            Add
                                         </button>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2 max-h-64 overflow-y-auto">
+                                <div className="space-y-1.5 max-h-40 overflow-y-auto">
                                     {userNotes.map((note) => (
                                         <div
                                             key={note.id}
-                                            className={`p-3 rounded-lg text-sm ${note.is_important
+                                            className={`p-2 rounded-lg text-xs ${note.is_important
                                                 ? 'bg-yellow-50 border border-yellow-200'
                                                 : 'bg-gray-50'
-                                                }`}
+                                            }`}
                                         >
                                             {note.is_important && (
-                                                <div className="flex items-center text-yellow-600 text-xs mb-1">
-                                                    <AlertCircle className="h-3 w-3 mr-1" />
+                                                <div className="flex items-center text-yellow-600 text-xs mb-0.5">
+                                                    <AlertCircle className="h-3 w-3 mr-0.5" />
                                                     Important
                                                 </div>
                                             )}
-                                            <p className="text-gray-900">{note.note}</p>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                {new Date(note.created_at).toLocaleString()}
+                                            <p className="text-gray-900 text-xs">{note.note}</p>
+                                            <p className="text-xs text-gray-400 mt-0.5">
+                                                {new Date(note.created_at).toLocaleDateString()}
                                             </p>
                                         </div>
                                     ))}
 
                                     {userNotes.length === 0 && (
-                                        <p className="text-sm text-gray-500 text-center py-4">No notes yet</p>
+                                        <p className="text-xs text-gray-500 text-center py-3">No notes yet</p>
                                     )}
                                 </div>
                             </div>
                         </div>
+                        
+                        {/* Safe area for mobile */}
+                        <div className="h-6 lg:hidden" />
                     </div>
                 )}
             </div>
