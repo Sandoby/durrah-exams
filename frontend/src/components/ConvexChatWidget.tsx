@@ -23,7 +23,9 @@ interface ConvexChatWidgetProps {
   examId?: string;
   questionId?: string;
   questionText?: string;
+  existingSessionId?: string; // Connect to existing session
   onClose?: () => void;
+  onSessionEnded?: (endedByAgent: boolean) => void; // Callback when chat ends
 }
 
 // Message type
@@ -41,6 +43,7 @@ interface ChatSession {
   _id: Id<"chatSessions">;
   status: 'waiting' | 'active' | 'ended';
   student_name?: string;
+  ended_by?: string; // Track who ended the session
 }
 
 /**
@@ -60,15 +63,20 @@ export function ConvexChatWidget({
   userRole,
   examId,
   questionText,
-  onClose
+  existingSessionId,
+  onClose,
+  onSessionEnded
 }: ConvexChatWidgetProps) {
   const enabled = CONVEX_FEATURES.chat;
   const [isMinimized, setIsMinimized] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [rating, setRating] = useState(0);
   const [showRating, setShowRating] = useState(false);
-  const [sessionId, setSessionId] = useState<Id<"chatSessions"> | null>(null);
+  const [sessionId, setSessionId] = useState<Id<"chatSessions"> | null>(
+    existingSessionId ? existingSessionId as Id<"chatSessions"> : null
+  );
   const [isStarting, setIsStarting] = useState(false);
+  const [previousStatus, setPreviousStatus] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Mutations
@@ -97,6 +105,32 @@ export function ConvexChatWidget({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Sync existingSessionId prop with state
+  useEffect(() => {
+    if (existingSessionId) {
+      setSessionId(existingSessionId as Id<"chatSessions">);
+    }
+  }, [existingSessionId]);
+
+  // Detect when session ends (agent closes chat) - show rating modal for tutor
+  useEffect(() => {
+    if (!session) return;
+    
+    // If status changed from active/waiting to ended
+    if (previousStatus && previousStatus !== 'ended' && session.status === 'ended') {
+      // Check if ended by agent (not by the current user)
+      if (session.ended_by && session.ended_by !== userId) {
+        // Show rating modal for the user (tutor) side
+        if (userRole === 'tutor') {
+          setShowRating(true);
+          onSessionEnded?.(true); // Notify parent that agent ended
+        }
+      }
+    }
+    
+    setPreviousStatus(session.status);
+  }, [session?.status, session?.ended_by, previousStatus, userId, userRole, onSessionEnded]);
 
   // Start a new chat session
   const startSession = useCallback(async () => {
@@ -148,11 +182,15 @@ export function ConvexChatWidget({
     if (!sessionId) return;
     
     try {
-      await endChatMutation({ session_id: sessionId, ended_by: userId });
+      await endChatMutation({ 
+        session_id: sessionId, 
+        ended_by: userId,
+        ended_by_role: userRole === 'tutor' ? 'tutor' : 'user'
+      });
     } catch (error) {
       console.error('Failed to end chat:', error);
     }
-  }, [sessionId, userId, endChatMutation]);
+  }, [sessionId, userId, userRole, endChatMutation]);
 
   // Rate session
   const rateSession = useCallback(async (stars: number) => {
@@ -449,10 +487,13 @@ function MessageBubble({ message, isOwn }: { message: ChatMessage; isOwn: boolea
 export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentName: string }) {
   const enabled = CONVEX_FEATURES.chat;
   const assignAgentMutation = useMutation(api.chat.assignAgent);
+  const endChatMutation = useMutation(api.chat.endChat);
+  const sendMessageMutation = useMutation(api.chat.sendMessage);
   
-  const sessions = useQuery(
+  // Query all sessions (including waiting ones that agent can pick up)
+  const allSessions = useQuery(
     api.chatQueries.listSessions,
-    enabled ? { scope: 'support' as const, assigned_to: agentId } : 'skip'
+    enabled ? { scope: 'support' as const } : 'skip'
   );
   
   const waitingCount = useQuery(
@@ -461,6 +502,24 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
   );
   
   const [activeSessionId, setActiveSessionId] = useState<Id<"chatSessions"> | null>(null);
+  const [newMessage, setNewMessage] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Get messages for active session
+  const activeSession = useQuery(
+    api.chatQueries.getSession,
+    activeSessionId ? { session_id: activeSessionId } : 'skip'
+  );
+
+  const messages = useQuery(
+    api.chatQueries.getMessages,
+    activeSessionId ? { session_id: activeSessionId, limit: 100 } : 'skip'
+  );
+
+  // Auto-scroll when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const handleAssign = async (sessionId: Id<"chatSessions">) => {
     try {
@@ -475,7 +534,49 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
     }
   };
 
-  if (!enabled || sessions === undefined) {
+  const handleSend = async () => {
+    if (!newMessage.trim() || !activeSessionId) return;
+    
+    const text = newMessage;
+    setNewMessage('');
+    
+    try {
+      await sendMessageMutation({
+        session_id: activeSessionId,
+        sender_id: agentId,
+        sender_name: agentName,
+        sender_role: 'agent',
+        body: text,
+        message_type: 'text',
+      });
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      setNewMessage(text);
+    }
+  };
+
+  const handleEndChat = async () => {
+    if (!activeSessionId) return;
+    
+    try {
+      await endChatMutation({
+        session_id: activeSessionId,
+        ended_by: agentId,
+        ended_by_role: 'agent',
+      });
+    } catch (error) {
+      console.error('Failed to end chat:', error);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  if (!enabled || allSessions === undefined) {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
@@ -483,73 +584,174 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
     );
   }
 
+  // Filter sessions: show waiting + assigned to this agent
+  const sessions = (allSessions ?? []).filter((s: any) => 
+    s.status === 'waiting' || s.assigned_to === agentId
+  );
+
   return (
-    <div className="flex h-full">
+    <div className="flex h-full bg-gray-50 dark:bg-gray-900">
       {/* Sessions List */}
-      <div className="w-72 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="font-semibold flex items-center gap-2">
+      <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto flex flex-col">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+          <h3 className="font-bold flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
             Chat Sessions
           </h3>
           {waitingCount !== undefined && waitingCount > 0 && (
-            <div className="mt-2 text-sm text-orange-600 flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              {waitingCount} waiting
+            <div className="mt-2 text-sm flex items-center gap-1 text-yellow-200">
+              <Clock className="h-4 w-4 animate-pulse" />
+              {waitingCount} waiting for support
             </div>
           )}
         </div>
         
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
-          {(sessions ?? []).map((session: any) => (
-            <button
-              key={session._id}
-              onClick={() => {
-                if (session.status === 'waiting') {
-                  handleAssign(session._id);
-                } else {
-                  setActiveSessionId(session._id);
-                }
-              }}
-              className={`w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors ${
-                activeSessionId === session._id ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
-              }`}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-medium text-sm truncate">{session.user_name}</span>
-                <span className={`text-xs px-1.5 py-0.5 rounded ${
-                  session.status === 'waiting' 
-                    ? 'bg-yellow-100 text-yellow-700' 
-                    : session.status === 'active'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-700'
-                }`}>
-                  {session.status}
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 truncate">
-                {session.subject || 'No subject'}
-              </p>
-            </button>
-          ))}
+        <div className="flex-1 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700">
+          {sessions.length === 0 ? (
+            <div className="p-6 text-center text-gray-400">
+              <MessageSquare className="h-10 w-10 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No chat sessions</p>
+            </div>
+          ) : (
+            sessions.map((session: any) => (
+              <button
+                key={session._id}
+                onClick={() => {
+                  if (session.status === 'waiting') {
+                    handleAssign(session._id);
+                  } else {
+                    setActiveSessionId(session._id);
+                  }
+                }}
+                className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors ${
+                  activeSessionId === session._id ? 'bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-600' : ''
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-semibold text-sm truncate text-gray-900 dark:text-white">
+                    {session.user_name || 'Anonymous'}
+                  </span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    session.status === 'waiting' 
+                      ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' 
+                      : session.status === 'active'
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                      : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                  }`}>
+                    {session.status}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  {session.subject || 'No subject'}
+                </p>
+                {session.user_email && (
+                  <p className="text-xs text-gray-400 dark:text-gray-500 truncate mt-0.5">
+                    {session.user_email}
+                  </p>
+                )}
+              </button>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Active Chat */}
-      <div className="flex-1 flex items-center justify-center">
-        {activeSessionId ? (
-          <ConvexChatWidget
-            userId={agentId}
-            userName={agentName}
-            userRole="tutor"
-          />
+      {/* Active Chat Area */}
+      <div className="flex-1 flex flex-col">
+        {activeSessionId && activeSession ? (
+          <>
+            {/* Chat Header */}
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center">
+                    <User className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  {activeSession.status === 'active' && (
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
+                  )}
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900 dark:text-white">
+                    {activeSession.user_name || 'Anonymous'}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {activeSession.user_email || activeSession.subject || 'Support Chat'}
+                  </div>
+                </div>
+              </div>
+              
+              {activeSession.status !== 'ended' && (
+                <button
+                  onClick={handleEndChat}
+                  className="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  End Chat
+                </button>
+              )}
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50 dark:bg-gray-900">
+              {(messages ?? []).map((message: any) => (
+                <MessageBubble 
+                  key={message._id} 
+                  message={message} 
+                  isOwn={message.sender_id === agentId}
+                />
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input */}
+            {activeSession.status !== 'ended' ? (
+              <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
+                <div className="flex items-end gap-3">
+                  <textarea
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Type your message..."
+                    rows={1}
+                    className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl resize-none bg-gray-50 dark:bg-gray-900 text-sm max-h-32 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                  <button
+                    onClick={handleSend}
+                    disabled={!newMessage.trim()}
+                    className="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Send className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 text-center">
+                <p className="text-sm text-gray-500 dark:text-gray-400">This chat has ended</p>
+                {activeSession.rating && (
+                  <div className="flex items-center justify-center gap-1 mt-2">
+                    <span className="text-xs text-gray-400">Rating:</span>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star 
+                        key={star}
+                        className={`h-4 w-4 ${star <= activeSession.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         ) : (
-          <div className="text-center text-gray-400">
-            <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p>Select a chat session</p>
+          <div className="flex-1 flex items-center justify-center text-center text-gray-400">
+            <div>
+              <MessageSquare className="h-16 w-16 mx-auto mb-4 opacity-30" />
+              <p className="text-lg font-medium">Select a chat session</p>
+              <p className="text-sm mt-1">Click on a waiting session to assign it to yourself</p>
+            </div>
           </div>
         )}
       </div>
     </div>
   );
 }
+

@@ -211,6 +211,11 @@ export const endChat = mutation({
   args: {
     session_id: v.id("chatSessions"),
     ended_by: v.string(),
+    ended_by_role: v.optional(v.union(
+      v.literal("user"),
+      v.literal("agent"),
+      v.literal("tutor")
+    )),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
@@ -220,18 +225,30 @@ export const endChat = mutation({
       throw new Error("Session not found");
     }
     
+    // Check if already ended
+    if (session.status === "ended") {
+      return args.session_id;
+    }
+    
     await ctx.db.patch(args.session_id, {
       status: "ended",
       ended_at: now,
+      ended_by: args.ended_by,
     });
     
-    // Add system message
+    // Add system message indicating who ended
+    const endedByName = args.ended_by_role === "agent" 
+      ? "Support agent" 
+      : args.ended_by_role === "tutor"
+      ? "Tutor"
+      : "User";
+    
     await ctx.db.insert("chatMessages", {
       session_id: args.session_id,
       sender_id: "system",
       sender_name: "System",
       sender_role: "system",
-      body: "Chat session has ended.",
+      body: `${endedByName} has ended the chat session.`,
       read_by: [],
       created_at: now,
       message_type: "system",

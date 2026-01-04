@@ -112,6 +112,7 @@ export default defineSchema({
     created_at: v.number(),
     last_message_at: v.optional(v.number()),
     ended_at: v.optional(v.number()),
+    ended_by: v.optional(v.string()),    // ID of who ended the session
     
     // Rating (after session ends)
     rating: v.optional(v.number()),      // 1-5
