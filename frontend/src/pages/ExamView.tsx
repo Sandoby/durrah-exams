@@ -1,5 +1,5 @@
 // helper: get user session or attempt background anonymous sign-in (non-blocking)
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { Calculator } from '../components/Calculator';
 import Latex from 'react-latex-next';
+import { useConvexProctoring } from '../hooks/useConvexProctoring';
 
 interface Question {
     id: string;
@@ -179,6 +180,105 @@ export default function ExamView() {
     const [inactivityCountdown, setInactivityCountdown] = useState(60);
     const lastActivityRef = useRef(Date.now());
     const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Generate a stable student ID for proctoring
+    const proctoringStudentId = useRef(
+        studentData.email || studentData.student_id || `anon_${Date.now()}_${Math.random().toString(36).slice(2)}`
+    );
+    
+    // Convex Proctoring Integration with answer backup and server-side timer
+    const {
+        startSession: startProctoringSession,
+        syncAnswers: syncAnswersToConvex,
+        updateProgress: updateProctoringProgress,
+        logViolation: logConvexViolation,
+        endSession: endProctoringSession,
+        serverTimeRemaining,
+        savedAnswers: _convexSavedAnswers, // Used in callbacks
+        isResumedSession: _isResumedSession, // Used in callbacks
+        sessionStatus,
+        enabled: proctoringEnabled,
+    } = useConvexProctoring({
+        examId: id || '',
+        studentId: proctoringStudentId.current,
+        studentName: studentData.name || 'Anonymous',
+        studentEmail: studentData.email,
+        totalQuestions: exam?.questions?.length || 0,
+        timeLimitSeconds: exam?.settings?.time_limit_minutes ? exam.settings.time_limit_minutes * 60 : undefined,
+        studentData: studentData, // Full form data for auto-submit
+        heartbeatInterval: 10000,
+        answerSyncDebounce: 2000,
+        onHeartbeatError: (error) => {
+            console.warn('Proctoring heartbeat error:', error);
+        },
+        onAutoSubmitted: (savedAnswers) => {
+            // Handle auto-submit notification from server
+            console.log('🔔 Exam was auto-submitted by server with answers:', savedAnswers);
+            toast.success(t('examView.autoSubmitted'), { duration: 5000 });
+            setSubmitted(true);
+        },
+        onSessionRecovered: (data) => {
+            // Handle session recovery - restore answers from Convex
+            console.log('🔄 Session recovered from Convex:', data);
+            if (data.savedAnswers && Object.keys(data.savedAnswers).length > 0) {
+                setAnswers(prev => ({
+                    ...prev,
+                    ...data.savedAnswers
+                }));
+                toast.success(t('examView.sessionRecovered'), { 
+                    duration: 4000,
+                    icon: '💾'
+                });
+            }
+        },
+    });
+
+    // Update proctoring student ID when student data changes
+    useEffect(() => {
+        if (studentData.email || studentData.student_id) {
+            proctoringStudentId.current = studentData.email || studentData.student_id || proctoringStudentId.current;
+        }
+    }, [studentData.email, studentData.student_id]);
+
+    // Update proctoring progress and sync answers to Convex when answers change
+    useEffect(() => {
+        if (started && exam && proctoringEnabled) {
+            const answeredCount = Object.keys(answers).filter(qId => {
+                const ans = answers[qId]?.answer;
+                return ans !== undefined && ans !== '' && (!Array.isArray(ans) || ans.length > 0);
+            }).length;
+            
+            updateProctoringProgress(currentQuestionIndex, answeredCount, timeLeft ?? undefined);
+            
+            // Sync answers to Convex (debounced in the hook)
+            if (Object.keys(answers).length > 0) {
+                syncAnswersToConvex(answers, currentQuestionIndex, answeredCount).catch(err => {
+                    console.warn('Failed to sync answers to Convex:', err);
+                });
+            }
+        }
+    }, [answers, currentQuestionIndex, timeLeft, started, exam, proctoringEnabled, updateProctoringProgress, syncAnswersToConvex]);
+
+    // Use server-side timer when available (more accurate/tamper-proof)
+    useEffect(() => {
+        if (proctoringEnabled && serverTimeRemaining !== null && serverTimeRemaining !== undefined) {
+            // Only update if significantly different (more than 3 seconds) to avoid jitter
+            if (timeLeft === null || Math.abs((timeLeft || 0) - serverTimeRemaining) > 3) {
+                setTimeLeft(serverTimeRemaining);
+            }
+        }
+    }, [serverTimeRemaining, proctoringEnabled, timeLeft]);
+
+    // Handle auto-submitted status from Convex
+    useEffect(() => {
+        if (sessionStatus === 'auto_submitted' && !submitted) {
+            setSubmitted(true);
+            toast.success(t('examView.autoSubmittedByServer'), { 
+                duration: 6000,
+                icon: '⏰'
+            });
+        }
+    }, [sessionStatus, submitted, t]);
 
     // Load exam data or review data
     useEffect(() => {
@@ -598,8 +698,14 @@ export default function ExamView() {
         }
     }, [showAutoSubmitWarning, autoSubmitCountdown]);
 
-    const logViolation = (type: string) => {
+    const logViolation = useCallback((type: string, detail?: string) => {
         const violation: Violation = { type, timestamp: new Date().toISOString() };
+        
+        // Log to Convex proctoring system (real-time for tutors)
+        if (proctoringEnabled) {
+            logConvexViolation(type, detail);
+        }
+        
         setViolations((prev) => {
             const newViolations = [...prev, violation];
             const violationCount = newViolations.length;
@@ -637,7 +743,7 @@ export default function ExamView() {
 
             return newViolations;
         });
-    };
+    }, [proctoringEnabled, logConvexViolation, exam?.settings.max_violations, t]);
 
     useEffect(() => {
         if (!started || !exam) return;
@@ -766,6 +872,47 @@ export default function ExamView() {
                 console.warn('Fullscreen request failed or not supported', e);
             }
         }
+        
+        // Start Convex proctoring session for real-time monitoring and server-side timer
+        if (proctoringEnabled) {
+            try {
+                const sessionResult = await startProctoringSession();
+                
+                if (sessionResult) {
+                    console.log('📡 Proctoring session started:', sessionResult);
+                    
+                    // If session was resumed, restore state
+                    if (sessionResult.is_resume) {
+                        console.log('🔄 Resuming previous session');
+                        
+                        // Restore saved answers from Convex
+                        if (sessionResult.saved_answers && Object.keys(sessionResult.saved_answers).length > 0) {
+                            setAnswers(prev => ({
+                                ...prev,
+                                ...sessionResult.saved_answers
+                            }));
+                            toast.success(t('examView.answersRestored'), { 
+                                duration: 3000,
+                                icon: '💾'
+                            });
+                        }
+                        
+                        // Use server time (tamper-proof)
+                        if (sessionResult.time_remaining_seconds !== null) {
+                            setTimeLeft(sessionResult.time_remaining_seconds);
+                        }
+                    } else {
+                        // New session - use server start time if available
+                        if (sessionResult.time_remaining_seconds !== null) {
+                            setTimeLeft(sessionResult.time_remaining_seconds);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to start proctoring session:', err);
+            }
+        }
+        
         setStarted(true);
         setStartedAt(Date.now());
     };
@@ -1165,6 +1312,19 @@ export default function ExamView() {
                 });
 
                 setSubmitted(true);
+                
+                // End Convex proctoring session with submission result
+                if (proctoringEnabled) {
+                    endProctoringSession('submitted', {
+                        score: result.score,
+                        max_score: result.max_score,
+                        percentage: result.percentage,
+                        submission_id: result.submission_id,
+                        submitted_at: new Date().toISOString(),
+                    }).catch(err => {
+                        console.warn('Failed to end proctoring session:', err);
+                    });
+                }
 
                 // Mark as submitted in local storage
                 localStorage.setItem(`durrah_exam_${id}_submitted`, 'true');

@@ -4,10 +4,21 @@ import { internal } from "./_generated/api";
 /**
  * Convex Cron Jobs
  * 
- * Scheduled tasks for cleanup and maintenance.
+ * Scheduled tasks for cleanup, maintenance, and auto-submission.
  */
 
 const crons = cronJobs();
+
+// ============================================
+// AUTO-SUBMIT EXPIRED EXAMS
+// Every 30 seconds, check for exams where timer expired and auto-submit
+// This ensures students don't lose their answers if they disconnect
+// ============================================
+crons.interval(
+  "auto-submit expired exams",
+  { seconds: 30 },
+  internal.cronHandlers.autoSubmitExpiredExams
+);
 
 // ============================================
 // CLEANUP STALE PROCTORING SESSIONS

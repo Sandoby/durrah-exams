@@ -20,16 +20,17 @@ export const getExamSessions = query({
       .withIndex("by_exam", (q) => q.eq("exam_id", args.exam_id))
       .collect();
     
-    // Sort by status (active first, then disconnected, then submitted)
+    // Sort by status (active first, then disconnected, then submitted/auto_submitted)
     const statusOrder: Record<string, number> = {
       active: 0,
       disconnected: 1,
       submitted: 2,
+      auto_submitted: 2, // Same priority as submitted
       expired: 3,
     };
     
     return sessions.sort((a, b) => {
-      const orderDiff = statusOrder[a.status] - statusOrder[b.status];
+      const orderDiff = (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4);
       if (orderDiff !== 0) return orderDiff;
       // Within same status, sort by last heartbeat (most recent first)
       return b.last_heartbeat - a.last_heartbeat;
@@ -144,6 +145,7 @@ export const getExamStats = query({
       active: 0,
       disconnected: 0,
       submitted: 0,
+      auto_submitted: 0,
       expired: 0,
       total_violations: 0,
       avg_progress: 0,
@@ -155,6 +157,7 @@ export const getExamStats = query({
       if (session.status === "active") stats.active++;
       else if (session.status === "disconnected") stats.disconnected++;
       else if (session.status === "submitted") stats.submitted++;
+      else if (session.status === "auto_submitted") stats.auto_submitted++;
       else if (session.status === "expired") stats.expired++;
       
       stats.total_violations += session.violations_count;
@@ -169,5 +172,40 @@ export const getExamStats = query({
     }
     
     return stats;
+  },
+});
+
+// ============================================
+// GET PENDING AUTO-SUBMITS (for Supabase sync)
+// Returns sessions that were auto-submitted by Convex cron
+// and have pending_supabase_sync flag
+// ============================================
+export const getPendingAutoSubmits = query({
+  args: {},
+  handler: async (ctx) => {
+    const sessions = await ctx.db
+      .query("examSessions")
+      .collect();
+    
+    // Filter for auto-submitted sessions that haven't been synced to Supabase
+    return sessions
+      .filter((s) => 
+        s.status === "auto_submitted" && 
+        s.submission_result?.pending_supabase_sync === true
+      )
+      .map((s) => ({
+        session_id: s._id,
+        exam_id: s.exam_id,
+        student_id: s.student_id,
+        student_name: s.student_name,
+        student_email: s.student_email,
+        student_data: s.student_data,
+        saved_answers: s.saved_answers,
+        violations: s.violations,
+        violations_count: s.violations_count,
+        auto_submitted_at: s.auto_submitted_at,
+        started_at: s.started_at,
+        time_limit_seconds: s.time_limit_seconds,
+      }));
   },
 });

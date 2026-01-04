@@ -720,7 +720,11 @@
         },
         "success": {
             "submitted": "تم تسليم الامتحان بنجاح!"
-        }
+        },
+        "autoSubmitted": "تم تسليم امتحانك تلقائياً بسبب انتهاء الوقت.",
+        "autoSubmittedByServer": "انتهى الوقت! تم تسليم إجاباتك تلقائياً.",
+        "sessionRecovered": "تم استعادة تقدمك من الخادم.",
+        "answersRestored": "تم استعادة إجاباتك السابقة."
     },
     "landing": {
         "seo": {

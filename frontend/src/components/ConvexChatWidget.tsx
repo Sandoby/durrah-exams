@@ -11,9 +11,17 @@ import {
   CheckCheck,
   Loader2,
   Clock,
-  Star
+  Star,
+  CreditCard,
+  FileText,
+  Calendar,
+  Mail,
+  Crown,
+  Plus,
+  AlertCircle
 } from 'lucide-react';
 import { CONVEX_FEATURES } from '../main';
+import { supabase } from '../lib/supabase';
 
 interface ConvexChatWidgetProps {
   userId: string;
@@ -483,7 +491,34 @@ function MessageBubble({ message, isOwn }: { message: ChatMessage; isOwn: boolea
  * Agent Chat Panel
  * 
  * For tutors/agents to manage multiple chat sessions
+ * Now includes user details, payments, notes, and subscription management
  */
+
+interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  subscription_plan: string;
+  subscription_status: string;
+  subscription_end_date: string;
+  created_at: string;
+}
+
+interface Payment {
+  id: string;
+  amount: number;
+  status: string;
+  created_at: string;
+  provider: string;
+}
+
+interface AgentNote {
+  id: string;
+  note: string;
+  is_important: boolean;
+  created_at: string;
+}
+
 export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentName: string }) {
   const enabled = CONVEX_FEATURES.chat;
   const assignAgentMutation = useMutation(api.chat.assignAgent);
@@ -504,6 +539,17 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
   const [activeSessionId, setActiveSessionId] = useState<Id<"chatSessions"> | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // User details state (fetched from Supabase)
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userPayments, setUserPayments] = useState<Payment[]>([]);
+  const [userNotes, setUserNotes] = useState<AgentNote[]>([]);
+  const [loadingUser, setLoadingUser] = useState(false);
+  const [newNote, setNewNote] = useState('');
+  const [noteImportant, setNoteImportant] = useState(false);
+  const [showUserPanel, setShowUserPanel] = useState(true);
+  const [extendDays, setExtendDays] = useState(30);
+  const [extendReason, setExtendReason] = useState('');
 
   // Get messages for active session
   const activeSession = useQuery(
@@ -520,6 +566,56 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Fetch user details when active session changes
+  useEffect(() => {
+    if (activeSession?.user_id) {
+      fetchUserDetails(activeSession.user_id);
+    } else {
+      setUserProfile(null);
+      setUserPayments([]);
+      setUserNotes([]);
+    }
+  }, [activeSession?.user_id]);
+
+  const fetchUserDetails = async (userId: string) => {
+    setLoadingUser(true);
+    try {
+      // Fetch user profile from Supabase
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (profileData) {
+        setUserProfile(profileData);
+      }
+
+      // Fetch payments
+      const { data: paymentsData } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      setUserPayments(paymentsData || []);
+
+      // Fetch agent notes
+      const { data: notesData } = await supabase
+        .from('agent_user_notes')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      setUserNotes(notesData || []);
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    } finally {
+      setLoadingUser(false);
+    }
+  };
 
   const handleAssign = async (sessionId: Id<"chatSessions">) => {
     try {
@@ -576,6 +672,51 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
     }
   };
 
+  const addNote = async () => {
+    if (!newNote.trim() || !userProfile) return;
+
+    try {
+      const { error } = await supabase.from('agent_user_notes').insert({
+        user_id: userProfile.id,
+        agent_id: agentId,
+        note: newNote,
+        is_important: noteImportant
+      });
+
+      if (error) throw error;
+
+      setNewNote('');
+      setNoteImportant(false);
+      fetchUserDetails(userProfile.id);
+    } catch (error) {
+      console.error('Failed to add note:', error);
+    }
+  };
+
+  const extendSubscription = async () => {
+    if (!userProfile || !extendDays) return;
+
+    if (!confirm(`Extend subscription for ${userProfile.email} by ${extendDays} days?`)) return;
+
+    try {
+      const { data, error } = await supabase.rpc('extend_subscription', {
+        p_user_id: userProfile.id,
+        p_agent_id: agentId,
+        p_days: extendDays,
+        p_reason: extendReason || 'Extended by support agent'
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        setExtendReason('');
+        fetchUserDetails(userProfile.id);
+      }
+    } catch (error) {
+      console.error('Failed to extend subscription:', error);
+    }
+  };
+
   if (!enabled || allSessions === undefined) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -592,7 +733,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
   return (
     <div className="flex h-full bg-gray-50 dark:bg-gray-900">
       {/* Sessions List */}
-      <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto flex flex-col">
+      <div className="w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto flex flex-col shrink-0">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
           <h3 className="font-bold flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
@@ -656,11 +797,11 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
       </div>
 
       {/* Active Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {activeSessionId && activeSession ? (
           <>
             {/* Chat Header */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center">
@@ -680,15 +821,24 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
                 </div>
               </div>
               
-              {activeSession.status !== 'ended' && (
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={handleEndChat}
-                  className="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                  onClick={() => setShowUserPanel(!showUserPanel)}
+                  className="px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
                 >
-                  <X className="h-4 w-4" />
-                  End Chat
+                  <User className="h-4 w-4" />
+                  {showUserPanel ? 'Hide' : 'Show'} Info
                 </button>
-              )}
+                {activeSession.status !== 'ended' && (
+                  <button
+                    onClick={handleEndChat}
+                    className="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                  >
+                    <X className="h-4 w-4" />
+                    End Chat
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Messages */}
@@ -705,7 +855,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
 
             {/* Input */}
             {activeSession.status !== 'ended' ? (
-              <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
+              <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 shrink-0">
                 <div className="flex items-end gap-3">
                   <textarea
                     value={newMessage}
@@ -725,7 +875,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 text-center">
+              <div className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 text-center shrink-0">
                 <p className="text-sm text-gray-500 dark:text-gray-400">This chat has ended</p>
                 {activeSession.rating !== undefined && activeSession.rating > 0 && (
                   <div className="flex items-center justify-center gap-1 mt-2">
@@ -751,6 +901,183 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
           </div>
         )}
       </div>
+
+      {/* User Details Sidebar */}
+      {showUserPanel && activeSessionId && activeSession && (
+        <div className="w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto shrink-0">
+          {loadingUser ? (
+            <div className="flex items-center justify-center p-8">
+              <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+            </div>
+          ) : userProfile ? (
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              {/* User Profile */}
+              <div className="p-4">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  User Profile
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                    <Mail className="h-4 w-4" />
+                    <span className="truncate">{userProfile.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                    <User className="h-4 w-4" />
+                    <span>{userProfile.full_name || 'No name'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-4 w-4" />
+                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                      userProfile.subscription_status === 'active'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                    }`}>
+                      {userProfile.subscription_plan || 'Free'} - {userProfile.subscription_status || 'inactive'}
+                    </span>
+                  </div>
+                  {userProfile.subscription_end_date && (
+                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                      <Calendar className="h-4 w-4" />
+                      <span>Expires: {new Date(userProfile.subscription_end_date).toLocaleDateString()}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Subscription Extension */}
+              <div className="p-4">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                  <Crown className="h-4 w-4" />
+                  Extend Subscription
+                </h4>
+                <div className="space-y-2">
+                  <select
+                    value={extendDays}
+                    onChange={(e) => setExtendDays(Number(e.target.value))}
+                    className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900"
+                  >
+                    <option value={7}>7 days</option>
+                    <option value={14}>14 days</option>
+                    <option value={30}>30 days</option>
+                    <option value={60}>60 days</option>
+                    <option value={90}>90 days</option>
+                  </select>
+                  <input
+                    type="text"
+                    value={extendReason}
+                    onChange={(e) => setExtendReason(e.target.value)}
+                    placeholder="Reason (optional)"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900"
+                  />
+                  <button
+                    onClick={extendSubscription}
+                    className="w-full px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg font-medium transition-colors"
+                  >
+                    Extend Subscription
+                  </button>
+                </div>
+              </div>
+
+              {/* Recent Payments */}
+              <div className="p-4">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  Recent Payments
+                </h4>
+                {userPayments.length === 0 ? (
+                  <p className="text-sm text-gray-500">No payments found</p>
+                ) : (
+                  <div className="space-y-2">
+                    {userPayments.map((payment) => (
+                      <div key={payment.id} className="flex items-center justify-between text-sm">
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            ${(payment.amount / 100).toFixed(2)}
+                          </span>
+                          <span className={`ml-2 px-1.5 py-0.5 rounded text-xs ${
+                            payment.status === 'succeeded' || payment.status === 'paid'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-gray-100 text-gray-600'
+                          }`}>
+                            {payment.status}
+                          </span>
+                        </div>
+                        <span className="text-gray-400 text-xs">
+                          {new Date(payment.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Agent Notes */}
+              <div className="p-4">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Notes
+                </h4>
+                <div className="space-y-2 mb-3">
+                  <textarea
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    placeholder="Add a note about this user..."
+                    rows={2}
+                    className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 resize-none"
+                  />
+                  <div className="flex items-center gap-2">
+                    <label className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                      <input
+                        type="checkbox"
+                        checked={noteImportant}
+                        onChange={(e) => setNoteImportant(e.target.checked)}
+                        className="rounded"
+                      />
+                      <AlertCircle className="h-3 w-3" />
+                      Important
+                    </label>
+                    <button
+                      onClick={addNote}
+                      disabled={!newNote.trim()}
+                      className="ml-auto px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded-lg font-medium disabled:opacity-50 flex items-center gap-1"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Add
+                    </button>
+                  </div>
+                </div>
+                
+                {userNotes.length > 0 && (
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {userNotes.map((note) => (
+                      <div 
+                        key={note.id} 
+                        className={`p-2 rounded-lg text-sm ${
+                          note.is_important 
+                            ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' 
+                            : 'bg-gray-50 dark:bg-gray-900'
+                        }`}
+                      >
+                        <p className="text-gray-700 dark:text-gray-300">{note.note}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(note.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="p-6 text-center text-gray-400">
+              <User className="h-10 w-10 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">User info not available</p>
+              <p className="text-xs mt-1">User may not be registered</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

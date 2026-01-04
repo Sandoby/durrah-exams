@@ -26,19 +26,31 @@ export default defineSchema({
     student_name: v.string(),
     student_email: v.optional(v.string()),
     
+    // Full student data for auto-submission
+    student_data: v.optional(v.any()), // Full student form data
+    
     // Session state
     status: v.union(
       v.literal("active"),
       v.literal("submitted"),
       v.literal("disconnected"),
-      v.literal("expired")
+      v.literal("expired"),
+      v.literal("auto_submitted") // New status for server-side auto-submit
     ),
     
     // Progress tracking
     current_question: v.number(),
     answered_count: v.number(),
     total_questions: v.number(),
-    time_remaining_seconds: v.optional(v.number()),
+    
+    // Server-side timer (authoritative)
+    time_limit_seconds: v.optional(v.number()),     // Total exam duration
+    server_started_at: v.optional(v.number()),      // Server timestamp when exam started
+    time_remaining_seconds: v.optional(v.number()), // Calculated from server time
+    
+    // Saved answers (real-time backup)
+    saved_answers: v.optional(v.any()), // { questionId: { answer: value } }
+    last_answer_sync: v.optional(v.number()), // Last time answers were synced
     
     // Violations stream
     violations: v.array(v.object({
@@ -61,6 +73,11 @@ export default defineSchema({
     started_at: v.number(),
     ended_at: v.optional(v.number()),
     
+    // Auto-submission tracking
+    auto_submit_scheduled: v.optional(v.boolean()),
+    auto_submitted_at: v.optional(v.number()),
+    submission_result: v.optional(v.any()), // Store submission result from edge function
+    
     // Browser/device info (optional)
     user_agent: v.optional(v.string()),
     screen_resolution: v.optional(v.string()),
@@ -68,7 +85,8 @@ export default defineSchema({
     .index("by_exam", ["exam_id"])
     .index("by_exam_student", ["exam_id", "student_id"])
     .index("by_status", ["status"])
-    .index("by_last_heartbeat", ["last_heartbeat"]),
+    .index("by_last_heartbeat", ["last_heartbeat"])
+    .index("by_auto_submit", ["status", "auto_submit_scheduled"]),
 
   // ============================================
   // CHAT SESSIONS

@@ -8,6 +8,85 @@ import { internalMutation } from "./_generated/server";
  */
 
 // ============================================
+// AUTO-SUBMIT EXPIRED EXAMS
+// ============================================
+export const autoSubmitExpiredExams = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    
+    // Find sessions that:
+    // 1. Have auto_submit_scheduled = true
+    // 2. Are active or disconnected
+    // 3. Have server_started_at + time_limit_seconds < now (timer expired)
+    
+    const sessions = await ctx.db
+      .query("examSessions")
+      .collect();
+    
+    const expiredSessions = sessions.filter((s) => {
+      // Must be scheduled for auto-submit
+      if (!s.auto_submit_scheduled) return false;
+      
+      // Must be active or disconnected (not already submitted)
+      if (s.status !== "active" && s.status !== "disconnected") return false;
+      
+      // Must have server timer data
+      if (!s.server_started_at || !s.time_limit_seconds) return false;
+      
+      // Check if timer expired (add 5 second grace period)
+      const expiryTime = s.server_started_at + (s.time_limit_seconds * 1000) + 5000;
+      return now >= expiryTime;
+    });
+    
+    // Process each expired session
+    const results: { sessionId: string; success: boolean; error?: string }[] = [];
+    
+    for (const session of expiredSessions) {
+      try {
+        // Mark as auto-submitted with saved answers
+        await ctx.db.patch(session._id, {
+          status: "auto_submitted",
+          auto_submitted_at: now,
+          auto_submit_scheduled: false,
+          ended_at: now,
+          submission_result: {
+            auto_submitted: true,
+            submitted_at: now,
+            saved_answers: session.saved_answers,
+            student_data: session.student_data,
+            pending_supabase_sync: true, // Flag for client to sync to Supabase
+          },
+        });
+        
+        results.push({ 
+          sessionId: session._id, 
+          success: true 
+        });
+        
+        console.log(`[Auto-Submit] Session ${session._id} auto-submitted for student ${session.student_id}`);
+      } catch (error) {
+        results.push({ 
+          sessionId: session._id, 
+          success: false, 
+          error: String(error) 
+        });
+        console.error(`[Auto-Submit] Failed for session ${session._id}:`, error);
+      }
+    }
+    
+    // Update job meta
+    await updateJobMeta(ctx, "auto_submit_expired", results.filter(r => r.success).length);
+    
+    return {
+      processed: results.length,
+      successful: results.filter(r => r.success).length,
+      failed: results.filter(r => !r.success).length,
+    };
+  },
+});
+
+// ============================================
 // CLEANUP STALE PROCTORING SESSIONS
 // ============================================
 export const cleanupStaleSessions = internalMutation({

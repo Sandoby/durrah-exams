@@ -728,7 +728,11 @@
         },
         "success": {
             "submitted": "Exam submitted successfully!"
-        }
+        },
+        "autoSubmitted": "Your exam was auto-submitted due to time expiration.",
+        "autoSubmittedByServer": "Time expired! Your answers have been automatically submitted.",
+        "sessionRecovered": "Your progress has been restored from the server.",
+        "answersRestored": "Your previous answers have been restored."
     },
     "kids": {
         "seo": {

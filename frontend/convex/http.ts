@@ -88,4 +88,76 @@ http.route({
   }),
 });
 
+// ============================================
+// GET PENDING AUTO-SUBMITTED SESSIONS
+// GET /pendingAutoSubmits
+// Returns sessions that were auto-submitted by Convex and need to be synced to Supabase
+// ============================================
+http.route({
+  path: "/pendingAutoSubmits",
+  method: "GET",
+  handler: httpAction(async (ctx) => {
+    try {
+      // Get all auto-submitted sessions that haven't been synced to Supabase yet
+      const sessions = await ctx.runQuery(api.sessionsQueries.getPendingAutoSubmits, {});
+      
+      return new Response(JSON.stringify({ 
+        success: true, 
+        sessions,
+        count: sessions.length
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      console.error("Error getting pending auto-submits:", error);
+      return new Response(JSON.stringify({ error: "Internal error" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+  }),
+});
+
+// ============================================
+// MARK SESSION AS SYNCED TO SUPABASE
+// POST /markSynced
+// ============================================
+http.route({
+  path: "/markSynced",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    try {
+      const body = await request.json();
+      const { session_id, supabase_submission_id, score, max_score, percentage } = body;
+      
+      if (!session_id) {
+        return new Response(JSON.stringify({ error: "Missing session_id" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      
+      await ctx.runMutation(api.sessions.markSyncedToSupabase, {
+        session_id,
+        supabase_submission_id,
+        score,
+        max_score,
+        percentage,
+      });
+      
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      console.error("Error marking session as synced:", error);
+      return new Response(JSON.stringify({ error: "Internal error" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+  }),
+});
+
 export default http;
