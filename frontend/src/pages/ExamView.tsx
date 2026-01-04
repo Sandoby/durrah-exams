@@ -165,9 +165,15 @@ export default function ExamView() {
         }
     }, [user, studentInfo]);
     
+    // Flag to track if we just restored progress (to prevent immediate re-sync)
+    const justRestoredRef = useRef(false);
+    
     // Restore progress from Supabase for authenticated users
     useEffect(() => {
         if (!progressLoading && savedProgress && hasExistingProgress && isAuthenticated) {
+            // Mark that we're restoring to prevent immediate re-sync
+            justRestoredRef.current = true;
+            
             // Restore answers
             if (savedProgress.answers && Object.keys(savedProgress.answers).length > 0) {
                 setAnswers(savedProgress.answers);
@@ -210,6 +216,11 @@ export default function ExamView() {
             if (savedProgress.status === 'submitted' || savedProgress.status === 'auto_submitted') {
                 setSubmitted(true);
             }
+            
+            // Clear the flag after a short delay
+            setTimeout(() => {
+                justRestoredRef.current = false;
+            }, 3000);
         }
     }, [progressLoading, savedProgress, hasExistingProgress, isAuthenticated, t]);
     const [autoSubmitCountdown, setAutoSubmitCountdown] = useState(5);
@@ -593,6 +604,9 @@ export default function ExamView() {
     }, [id]);
 
     // Save state to localStorage whenever it changes (fallback for non-authenticated)
+    // Use a ref to prevent infinite loops when syncing to Supabase
+    const lastSyncedRef = useRef<string>('');
+    
     useEffect(() => {
         if (!id || submitted) return;
 
@@ -613,21 +627,46 @@ export default function ExamView() {
             
             // Save to localStorage as fallback
             localStorage.setItem(`durrah_exam_${id}_state`, JSON.stringify(stateToSave));
-            
-            // For authenticated users, also sync to Supabase
-            if (isAuthenticated && started) {
-                updateProgressAnswers(answers);
-                updateProgressFlagged(Array.from(flaggedQuestions));
-                updateProgressCurrentQuestion(currentQuestionIndex);
-                if (timeLeft !== null) {
-                    updateProgressTimeRemaining(timeLeft);
-                }
-                updateProgressViolations(violations);
-                updateProgressConfidence(confidenceLevels);
-                updateProgressScratchpad(scratchpadContent);
-            }
         }
-    }, [id, studentData, answers, violations, timeLeft, started, startedAt, submitted, flaggedQuestions, confidenceLevels, scratchpadContent, isAuthenticated, currentQuestionIndex, updateProgressAnswers, updateProgressFlagged, updateProgressCurrentQuestion, updateProgressTimeRemaining, updateProgressViolations, updateProgressConfidence, updateProgressScratchpad]);
+    }, [id, studentData, answers, violations, timeLeft, started, startedAt, submitted, flaggedQuestions, confidenceLevels, scratchpadContent]);
+    
+    // Separate effect for Supabase sync to avoid infinite loops
+    useEffect(() => {
+        // Skip if we just restored progress (prevent immediate re-sync)
+        if (justRestoredRef.current) return;
+        if (!id || submitted || !isAuthenticated || !started) return;
+        
+        // Create a hash of current state to avoid duplicate syncs
+        const stateHash = JSON.stringify({
+            answers: Object.keys(answers).length,
+            flagged: flaggedQuestions.size,
+            question: currentQuestionIndex,
+            time: timeLeft,
+            violations: violations.length,
+        });
+        
+        // Skip if nothing changed
+        if (stateHash === lastSyncedRef.current) return;
+        lastSyncedRef.current = stateHash;
+        
+        // Debounce the sync
+        const syncTimeout = setTimeout(() => {
+            // Double-check we're not in restore mode
+            if (justRestoredRef.current) return;
+            
+            updateProgressAnswers(answers);
+            updateProgressFlagged(Array.from(flaggedQuestions));
+            updateProgressCurrentQuestion(currentQuestionIndex);
+            if (timeLeft !== null) {
+                updateProgressTimeRemaining(timeLeft);
+            }
+            updateProgressViolations(violations);
+            updateProgressConfidence(confidenceLevels);
+            updateProgressScratchpad(scratchpadContent);
+        }, 2000); // 2 second debounce
+        
+        return () => clearTimeout(syncTimeout);
+    }, [id, submitted, isAuthenticated, started, answers, flaggedQuestions, currentQuestionIndex, timeLeft, violations, confidenceLevels, scratchpadContent, updateProgressAnswers, updateProgressFlagged, updateProgressCurrentQuestion, updateProgressTimeRemaining, updateProgressViolations, updateProgressConfidence, updateProgressScratchpad]);
 
     // Feature 1: Calculate progress percentage
     useEffect(() => {
