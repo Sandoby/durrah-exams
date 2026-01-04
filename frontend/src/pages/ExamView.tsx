@@ -13,6 +13,16 @@ import { Calculator } from '../components/Calculator';
 import Latex from 'react-latex-next';
 import { useConvexProctoring } from '../hooks/useConvexProctoring';
 import { useExamProgress } from '../hooks/useExamProgress';
+import { 
+    Confetti, 
+    QuestionSkeleton, 
+    SuccessCheck, 
+    ShakeWrapper, 
+    SlideTransition,
+    useScreenReaderAnnounce,
+    useImagePreloader,
+    useDyslexiaFont 
+} from '../components/ExamAnimations';
 
 interface Question {
     id: string;
@@ -303,6 +313,27 @@ export default function ExamView() {
     const lastServerSyncRef = useRef<number>(Date.now());
     const timerPausedAtRef = useRef<number | null>(null);
     const reconnectAttemptsRef = useRef<number>(0);
+
+    // ============================================
+    // ANIMATION & ACCESSIBILITY STATE
+    // ============================================
+    // Show confetti when exam is submitted successfully
+    const [showConfetti, setShowConfetti] = useState(false);
+    // Show success checkmark animation when answer is selected
+    const [showSuccessAnimation, setShowSuccessAnimation] = useState<string | null>(null);
+    // Shake validation errors
+    const [shakeSubmitButton, setShakeSubmitButton] = useState(false);
+    // Loading state for questions
+    const [isLoadingQuestion, setIsLoadingQuestion] = useState(false);
+    // Question slide direction
+    const [slideDirection, setSlideDirection] = useState<'left' | 'right' | 'up' | 'down'>('right');
+    // Dyslexia-friendly font
+    const { isDyslexiaFont: dyslexiaFont, toggleDyslexiaFont } = useDyslexiaFont();
+    // Screen reader announcements
+    const announce = useScreenReaderAnnounce();
+    // Preload question images
+    const questionImages = exam?.questions?.map(q => q.media_url).filter((url): url is string => !!url) || [];
+    useImagePreloader(questionImages);
 
     // Generate a stable student ID for proctoring
     const proctoringStudentId = useRef(
@@ -1384,7 +1415,7 @@ export default function ExamView() {
         setIsSpeaking(true);
     };
 
-    // Feature 9: Enhanced answer update with change tracking
+    // Feature 9: Enhanced answer update with change tracking + success animation
     const handleAnswerUpdate = (questionId: string, newAnswer: any) => {
         const previousAnswer = answers[questionId]?.answer;
         
@@ -1404,6 +1435,13 @@ export default function ExamView() {
                 }
             }));
         }
+
+        // Show success animation
+        setShowSuccessAnimation(questionId);
+        setTimeout(() => setShowSuccessAnimation(null), 600);
+        
+        // Announce for screen readers
+        announce(`Answer selected for question ${currentQuestionIndex + 1}`);
 
         // Update answer
         setAnswers(prev => ({
@@ -1425,6 +1463,13 @@ export default function ExamView() {
         });
 
         if (unanswered.length > 0) {
+            // Shake the submit button to indicate error
+            setShakeSubmitButton(true);
+            setTimeout(() => setShakeSubmitButton(false), 500);
+            
+            // Announce for screen readers
+            announce(`${unanswered.length} questions unanswered. Please review before submitting.`);
+            
             setUnansweredQuestions(unanswered);
             setShowUnansweredModal(true);
             return;
@@ -1597,6 +1642,12 @@ export default function ExamView() {
 
                 setSubmitted(true);
                 
+                // Show confetti animation on successful submission
+                setShowConfetti(true);
+                
+                // Announce for screen readers
+                announce(`Exam submitted successfully! Your score is ${result.percentage.toFixed(1)} percent.`);
+                
                 // End Convex proctoring session with submission result
                 if (proctoringEnabled) {
                     endProctoringSession('submitted', {
@@ -1747,7 +1798,12 @@ export default function ExamView() {
     const goToNextQuestion = () => {
         if (!exam) return;
         if (currentQuestionIndex < exam.questions.length - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
+            setSlideDirection('left'); // Slide left when going forward
+            setIsLoadingQuestion(true);
+            setTimeout(() => {
+                setCurrentQuestionIndex(prev => prev + 1);
+                setIsLoadingQuestion(false);
+            }, 100);
             // Scroll to top of question container
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -1755,7 +1811,12 @@ export default function ExamView() {
 
     const goToPrevQuestion = () => {
         if (currentQuestionIndex > 0) {
-            setCurrentQuestionIndex(prev => prev - 1);
+            setSlideDirection('right'); // Slide right when going back
+            setIsLoadingQuestion(true);
+            setTimeout(() => {
+                setCurrentQuestionIndex(prev => prev - 1);
+                setIsLoadingQuestion(false);
+            }, 100);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
@@ -1763,7 +1824,17 @@ export default function ExamView() {
     const jumpToQuestion = (index: number) => {
         if (!exam) return;
         if (index >= 0 && index < exam.questions.length) {
-            setCurrentQuestionIndex(index);
+            // Determine direction based on navigation
+            setSlideDirection(index > currentQuestionIndex ? 'left' : 'right');
+            setIsLoadingQuestion(true);
+            
+            // Announce for screen readers
+            announce(`Navigating to question ${index + 1} of ${exam.questions.length}`);
+            
+            setTimeout(() => {
+                setCurrentQuestionIndex(index);
+                setIsLoadingQuestion(false);
+            }, 100);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
@@ -1818,27 +1889,32 @@ export default function ExamView() {
         const showResults = exam?.settings.show_results_immediately !== false;
 
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-                <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-2xl w-full mb-8">
-                    <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
-                    <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white">{t('examView.submitted.title')}</h2>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 relative overflow-hidden">
+                {/* Confetti Animation */}
+                {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
+                
+                <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-2xl w-full mb-8 animate-scale-pop relative z-10">
+                    <div className="animate-success-pop">
+                        <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
+                    </div>
+                    <h2 className="text-2xl font-bold mt-4 text-gray-900 dark:text-white animate-fade-in">{t('examView.submitted.title')}</h2>
                     {showResults && score ? (
-                        <div className="mt-4">
+                        <div className="mt-4 animate-slide-in-up">
                             <p className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">{score.percentage.toFixed(1)}%</p>
                             <p className="text-gray-500 dark:text-gray-400 mt-1">{score.score} / {score.max_score} points</p>
                         </div>
                     ) : (
-                        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-md">
+                        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-md animate-slide-in-up">
                             <p>{t('examView.submitted.message')}</p>
                             <p className="text-sm mt-2">{t('examView.submitted.resultsPending')}</p>
                         </div>
                     )}
-                    <p className="mt-4 text-sm text-gray-500">{t('examView.submitted.recorded')}</p>
+                    <p className="mt-4 text-sm text-gray-500 animate-fade-in">{t('examView.submitted.recorded')}</p>
 
                     {/* View Answers Button */}
                     {/* View Answers Button */}
                     {exam?.settings.show_detailed_results && (
-                        <div className="mt-6 flex justify-center">
+                        <div className="mt-6 flex justify-center animate-slide-in-up">
                             <button
                                 onClick={() => {
                                     let subId = score?.submission_id;
@@ -2142,7 +2218,10 @@ export default function ExamView() {
     );
 
     return (
-        <div ref={containerRef} className={`min-h-screen p-3 sm:p-6 bg-gray-50 dark:bg-gray-900`}>
+        <div ref={containerRef} className={`min-h-screen p-3 sm:p-6 bg-gray-50 dark:bg-gray-900 ${dyslexiaFont ? 'dyslexia-font' : ''}`}>
+            {/* Screen Reader Announcer */}
+            <announce.Announcer />
+            
             {/* Watermark Overlay */}
             {started && (
                 <div className={`fixed inset-0 pointer-events-none z-50 overflow-hidden select-none flex flex-wrap content-center justify-center gap-24 rotate-[-15deg] transition-opacity duration-300 ${highContrast ? 'opacity-[0.08]' : 'opacity-[0.03]'}`}>
@@ -2349,15 +2428,26 @@ export default function ExamView() {
                                 onTouchMove={onTouchMove}
                                 onTouchEnd={onTouchEnd}
                             >
-                                {exam.questions[currentQuestionIndex] && (() => {
+                                {/* Show skeleton while loading question */}
+                                {isLoadingQuestion ? (
+                                    <QuestionSkeleton />
+                                ) : exam.questions[currentQuestionIndex] && (() => {
                                     const question = exam.questions[currentQuestionIndex];
                                     return (
-                                        <div 
-                                            key={question.id} 
+                                        <SlideTransition 
+                                            key={`question-${currentQuestionIndex}`} 
+                                            direction={slideDirection}
                                             className={`bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 min-h-[50vh] transition-transform duration-150 ${exam.settings.disable_copy_paste ? 'select-none' : ''} ${isBlurActive ? 'blur-sm pointer-events-none' : ''} ${
                                                 swipeDirection === 'left' ? '-translate-x-4 opacity-75' : swipeDirection === 'right' ? 'translate-x-4 opacity-75' : ''
                                             }`}
                                         >
+                                            {/* Success Animation Overlay */}
+                                            {showSuccessAnimation === question.id && (
+                                                <div className="absolute top-4 right-4 z-10">
+                                                    <SuccessCheck />
+                                                </div>
+                                            )}
+                                            
                                             {/* Feature 8: Read Aloud Button */}
                                             <div className="flex items-center justify-between mb-4 gap-2">
                                                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
@@ -2549,24 +2639,26 @@ export default function ExamView() {
                                                         Next Question
                                                     </button>
                                                 ) : (
-                                                    <button
-                                                        type="button"
-                                                        onClick={handleSubmitWithCheck}
-                                                        disabled={isSubmitting}
-                                                        className="inline-flex justify-center py-2 px-5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 w-full sm:w-auto"
-                                                    >
-                                                        {isSubmitting ? (
-                                                            <>
-                                                                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                                                                Submitting...
-                                                            </>
-                                                        ) : (
-                                                            'Submit Exam'
-                                                        )}
-                                                    </button>
+                                                    <ShakeWrapper shake={shakeSubmitButton}>
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleSubmitWithCheck}
+                                                            disabled={isSubmitting}
+                                                            className="inline-flex justify-center py-2 px-5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 w-full sm:w-auto"
+                                                        >
+                                                            {isSubmitting ? (
+                                                                <>
+                                                                    <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                                                                    Submitting...
+                                                                </>
+                                                            ) : (
+                                                                'Submit Exam'
+                                                            )}
+                                                        </button>
+                                                    </ShakeWrapper>
                                                 )}
                                             </div>
-                                        </div>
+                                        </SlideTransition>
                                     );
                                 })()}
                             </div>
@@ -2574,21 +2666,23 @@ export default function ExamView() {
 
                         {viewMode === 'list' && (
                             <div className="flex justify-end pt-4">
-                                <button
-                                    type="button"
-                                    onClick={handleSubmitWithCheck}
-                                    disabled={isSubmitting}
-                                    className="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 w-full sm:w-auto"
-                                >
-                                    {isSubmitting ? (
-                                        <>
-                                            <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                                            Submitting...
-                                        </>
-                                    ) : (
-                                        t('examView.submit')
-                                    )}
-                                </button>
+                                <ShakeWrapper shake={shakeSubmitButton}>
+                                    <button
+                                        type="button"
+                                        onClick={handleSubmitWithCheck}
+                                        disabled={isSubmitting}
+                                        className="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 w-full sm:w-auto"
+                                    >
+                                        {isSubmitting ? (
+                                            <>
+                                                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                                                Submitting...
+                                            </>
+                                        ) : (
+                                            t('examView.submit')
+                                        )}
+                                    </button>
+                                </ShakeWrapper>
                             </div>
                         )}
                     </form>
@@ -2631,6 +2725,20 @@ export default function ExamView() {
                                     </div>
                                 </div>
 
+                                {/* Dyslexia-Friendly Font */}
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                        <Type size={14} /> Dyslexia Font
+                                    </label>
+                                    <button
+                                        onClick={toggleDyslexiaFont}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${dyslexiaFont ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                                        aria-label="Toggle dyslexia-friendly font"
+                                    >
+                                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${dyslexiaFont ? (t('common.dir') === 'rtl' ? '-translate-x-6' : 'translate-x-6') : 'translate-x-1'}`} />
+                                    </button>
+                                </div>
+
                                 {/* High Contrast */}
                                 <div className="flex items-center justify-between">
                                     <label className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
@@ -2638,7 +2746,8 @@ export default function ExamView() {
                                     </label>
                                     <button
                                         onClick={() => setHighContrast(!highContrast)}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${highContrast ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${highContrast ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                                        aria-label="Toggle high contrast mode"
                                     >
                                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${highContrast ? (t('common.dir') === 'rtl' ? '-translate-x-6' : 'translate-x-6') : 'translate-x-1'}`} />
                                     </button>

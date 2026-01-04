@@ -2,6 +2,360 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   EXAM VIEW ANIMATIONS & EFFECTS
+   ============================================ */
+
+/* Confetti Animation */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.animate-confetti {
+  animation: confetti-fall 3s ease-out forwards;
+}
+
+/* Success Check Animation */
+@keyframes success-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes success-circle {
+  0% {
+    stroke-dasharray: 0 157;
+  }
+  100% {
+    stroke-dasharray: 157 157;
+  }
+}
+
+@keyframes success-check {
+  0% {
+    stroke-dasharray: 0 50;
+  }
+  100% {
+    stroke-dasharray: 50 50;
+  }
+}
+
+.animate-success-pop {
+  animation: success-pop 0.4s ease-out forwards;
+}
+
+.animate-success-circle {
+  stroke-dasharray: 0 157;
+  animation: success-circle 0.4s ease-out 0.1s forwards;
+}
+
+.animate-success-check {
+  stroke-dasharray: 0 50;
+  animation: success-check 0.3s ease-out 0.4s forwards;
+}
+
+/* Shake Animation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Slide Transitions */
+@keyframes slide-in-left {
+  0% {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-up {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-down {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.3s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out forwards;
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 0.3s ease-out forwards;
+}
+
+.animate-slide-in-down {
+  animation: slide-in-down 0.3s ease-out forwards;
+}
+
+/* Fade In Animation */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Scale Pop Animation */
+@keyframes scale-pop {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale-pop {
+  animation: scale-pop 0.25s ease-out forwards;
+}
+
+/* Answer Select Animation */
+@keyframes answer-select {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.98);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-answer-select {
+  animation: answer-select 0.15s ease-out;
+}
+
+/* Pulse Ring Animation */
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 1s ease-out;
+}
+
+/* Question Transition */
+.question-transition-enter {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.question-transition-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.question-transition-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.question-transition-exit-active {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+/* ============================================
+   ACCESSIBILITY - DYSLEXIA FRIENDLY FONT
+   ============================================ */
+.dyslexia-font,
+.dyslexia-font * {
+  font-family: 'OpenDyslexic', 'Comic Sans MS', 'Arial', sans-serif !important;
+  letter-spacing: 0.05em;
+  word-spacing: 0.1em;
+  line-height: 1.8 !important;
+}
+
+/* Better focus indicators for accessibility */
+.focus-visible-ring:focus-visible {
+  outline: none;
+  ring: 2px solid;
+  ring-color: #6366f1;
+  ring-offset: 2px;
+}
+
+/* Skip to content link */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  z-index: 9999;
+  padding: 1rem;
+  background: #6366f1;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.skip-to-content:focus {
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+}
+
+/* High contrast focus ring */
+.high-contrast-focus:focus {
+  outline: 3px solid #000 !important;
+  outline-offset: 2px !important;
+}
+
+.dark .high-contrast-focus:focus {
+  outline-color: #fff !important;
+}
+
+/* ============================================
+   SKELETON LOADING ANIMATION
+   ============================================ */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+}
+
+.dark .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+}
+
+/* ============================================
+   MODAL SLIDE-IN ANIMATIONS
+   ============================================ */
+@keyframes modal-slide-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modal-backdrop-fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-modal-in {
+  animation: modal-slide-in 0.2s ease-out forwards;
+}
+
+.animate-backdrop-fade {
+  animation: modal-backdrop-fade 0.2s ease-out forwards;
+}
+
+/* Bottom sheet modal for mobile */
+@keyframes bottom-sheet-slide {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animate-bottom-sheet {
+  animation: bottom-sheet-slide 0.3s ease-out forwards;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
