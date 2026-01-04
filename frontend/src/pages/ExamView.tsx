@@ -395,9 +395,13 @@ export default function ExamView() {
                 console.log(`🌐 Back online after ${offlineDuration}s offline`);
                 
                 // Adjust timer if we were offline (subtract elapsed time)
-                if (offlineDuration > 0 && timeLeft !== null && timeLeft > 0) {
-                    const adjustedTime = Math.max(0, timeLeft - offlineDuration);
-                    setTimeLeft(adjustedTime);
+                if (offlineDuration > 0) {
+                    setTimeLeft(prev => {
+                        if (prev !== null && prev > 0) {
+                            return Math.max(0, prev - offlineDuration);
+                        }
+                        return prev;
+                    });
                 }
                 
                 timerPausedAtRef.current = null;
@@ -422,8 +426,13 @@ export default function ExamView() {
                 }
                 
                 // Also sync to Supabase if authenticated
-                if (isAuthenticated && timeLeft !== null) {
-                    updateProgressTimeRemaining(timeLeft);
+                if (isAuthenticated) {
+                    setTimeLeft(prev => {
+                        if (prev !== null) {
+                            updateProgressTimeRemaining(prev);
+                        }
+                        return prev;
+                    });
                     forceSaveProgress().catch(console.warn);
                 }
             }
@@ -466,7 +475,7 @@ export default function ExamView() {
             window.removeEventListener('offline', handleOffline);
             clearInterval(connectionCheck);
         };
-    }, [started, submitted, timeLeft, proctoringEnabled, isAuthenticated, startProctoringSession, updateProgressTimeRemaining, forceSaveProgress, t]);
+    }, [started, submitted, proctoringEnabled, isAuthenticated, startProctoringSession, updateProgressTimeRemaining, forceSaveProgress, t]);
     
     // Update server sync timestamp when we receive server time
     useEffect(() => {
