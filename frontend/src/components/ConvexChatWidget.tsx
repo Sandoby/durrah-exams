@@ -727,13 +727,13 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
             ) : (
               <div className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 text-center">
                 <p className="text-sm text-gray-500 dark:text-gray-400">This chat has ended</p>
-                {activeSession.rating && (
+                {activeSession.rating !== undefined && activeSession.rating > 0 && (
                   <div className="flex items-center justify-center gap-1 mt-2">
                     <span className="text-xs text-gray-400">Rating:</span>
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star 
                         key={star}
-                        className={`h-4 w-4 ${star <= activeSession.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                        className={`h-4 w-4 ${star <= (activeSession.rating ?? 0) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                       />
                     ))}
                   </div>
