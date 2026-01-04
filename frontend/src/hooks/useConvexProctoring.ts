@@ -81,6 +81,8 @@ export function useConvexProctoring(options: UseConvexProctoringOptions) {
   const [savedAnswers, setSavedAnswers] = useState<Record<string, unknown>>({});
   const [isResumedSession, setIsResumedSession] = useState(false);
   const [sessionStatus, setSessionStatus] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(true);
+  const [lastHeartbeat, setLastHeartbeat] = useState<number>(Date.now());
 
   // Mutations
   const startSessionMutation = useMutation(api.sessions.startSession);
@@ -89,18 +91,22 @@ export function useConvexProctoring(options: UseConvexProctoringOptions) {
   const logViolationMutation = useMutation(api.sessions.logViolation);
   const endSessionMutation = useMutation(api.sessions.endSession);
 
-  // Server time query (for timer sync)
+  // Server time query (for timer sync) - query even if disconnected to detect reconnection
   const serverTimeData = useQuery(
     api.sessions.getServerTime,
-    enabled && sessionStatus === 'active' ? { exam_id: examId, student_id: studentId } : 'skip'
+    enabled && (sessionStatus === 'active' || sessionStatus === 'disconnected') 
+      ? { exam_id: examId, student_id: studentId } 
+      : 'skip'
   );
 
   // Refs for tracking state
   const sessionIdRef = useRef<string | null>(null);
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const answerSyncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isActiveRef = useRef(false);
   const pendingAnswersRef = useRef<Record<string, unknown>>({});
+  const heartbeatFailCountRef = useRef(0);
 
   // Current progress (updated by caller)
   const currentProgressRef = useRef({
@@ -113,6 +119,8 @@ export function useConvexProctoring(options: UseConvexProctoringOptions) {
   useEffect(() => {
     if (serverTimeData && serverTimeData.time_remaining_seconds !== null) {
       setServerTimeRemaining(serverTimeData.time_remaining_seconds);
+      setIsConnected(true);
+      heartbeatFailCountRef.current = 0;
       
       // Check if auto-submitted on server
       if (serverTimeData.status === 'auto_submitted' && serverTimeData.saved_answers) {
@@ -157,8 +165,12 @@ export function useConvexProctoring(options: UseConvexProctoringOptions) {
       if (result.time_remaining_seconds !== null) {
         setServerTimeRemaining(result.time_remaining_seconds);
       }
+      
+      // Reset heartbeat fail count
+      heartbeatFailCountRef.current = 0;
+      setIsConnected(true);
 
-      // Start heartbeat
+      // Start heartbeat with reconnection logic
       heartbeatIntervalRef.current = setInterval(async () => {
         if (!isActiveRef.current) return;
 
@@ -169,10 +181,50 @@ export function useConvexProctoring(options: UseConvexProctoringOptions) {
             current_question: currentProgressRef.current.currentQuestion,
             answered_count: currentProgressRef.current.answeredCount,
             time_remaining_seconds: currentProgressRef.current.timeRemaining,
-            network_quality: navigator.onLine ? 'good' : 'poor',
+            network_quality: navigator.onLine ? (heartbeatFailCountRef.current > 0 ? 'fair' : 'good') : 'poor',
           });
+          
+          // Successful heartbeat - reset fail count
+          heartbeatFailCountRef.current = 0;
+          setIsConnected(true);
+          setLastHeartbeat(Date.now());
+          
+          // If we were reconnecting, update status
+          if (sessionStatus === 'disconnected') {
+            setSessionStatus('active');
+          }
         } catch (error) {
           console.error('Heartbeat error:', error);
+          heartbeatFailCountRef.current += 1;
+          
+          // After 3 consecutive failures, mark as potentially disconnected
+          if (heartbeatFailCountRef.current >= 3) {
+            setIsConnected(false);
+            
+            // Try to restart session to reactivate
+            if (heartbeatFailCountRef.current === 3) {
+              console.log('🔄 Attempting to reconnect proctoring session...');
+              try {
+                await startSessionMutation({
+                  exam_id: examId,
+                  student_id: studentId,
+                  student_name: studentName,
+                  student_email: studentEmail,
+                  student_data: studentData,
+                  total_questions: totalQuestions,
+                  time_limit_seconds: timeLimitSeconds,
+                  user_agent: navigator.userAgent,
+                  screen_resolution: `${window.screen.width}x${window.screen.height}`,
+                });
+                heartbeatFailCountRef.current = 0;
+                setIsConnected(true);
+                setSessionStatus('active');
+              } catch (reconnectError) {
+                console.error('Reconnection failed:', reconnectError);
+              }
+            }
+          }
+          
           onHeartbeatError?.(error as Error);
         }
       }, heartbeatInterval);
@@ -180,6 +232,7 @@ export function useConvexProctoring(options: UseConvexProctoringOptions) {
       return result;
     } catch (error) {
       console.error('Failed to start proctoring session:', error);
+      setIsConnected(false);
       return null;
     }
   }, [
@@ -190,6 +243,8 @@ export function useConvexProctoring(options: UseConvexProctoringOptions) {
     studentEmail,
     studentData,
     totalQuestions,
+    timeLimitSeconds,
+    sessionStatus,
     timeLimitSeconds,
     heartbeatInterval,
     startSessionMutation,
@@ -352,6 +407,9 @@ export function useConvexProctoring(options: UseConvexProctoringOptions) {
       if (answerSyncTimeoutRef.current) {
         clearTimeout(answerSyncTimeoutRef.current);
       }
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -368,6 +426,8 @@ export function useConvexProctoring(options: UseConvexProctoringOptions) {
     isResumedSession,
     sessionStatus,
     enabled,
+    isConnected,
+    lastHeartbeat,
   };
 }
 

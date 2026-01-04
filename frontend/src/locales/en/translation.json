@@ -732,7 +732,12 @@
         "autoSubmitted": "Your exam was auto-submitted due to time expiration.",
         "autoSubmittedByServer": "Time expired! Your answers have been automatically submitted.",
         "sessionRecovered": "Your progress has been restored from the server.",
-        "answersRestored": "Your previous answers have been restored."
+        "answersRestored": "Your previous answers have been restored.",
+        "progressRestored": "Welcome back! Your progress has been restored.",
+        "welcomeBack": "Welcome back, {{name}}! Your exam progress has been synced.",
+        "connectionRestored": "Connection restored",
+        "connectionLost": "Connection lost - your progress is being saved locally",
+        "timerSynced": "Timer synced with server"
     },
     "kids": {
         "seo": {

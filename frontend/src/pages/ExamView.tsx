@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle, Settings, Type, X, Wrench, StickyNote } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Loader2, Save, Flag, LayoutGrid, Moon, Calculator as CalcIcon, Star, Eye, AlertCircle, Settings, Type, X, Wrench, StickyNote, Wifi } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ViolationModal } from '../components/ViolationModal';
 import { Logo } from '../components/Logo';
@@ -12,6 +12,7 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { Calculator } from '../components/Calculator';
 import Latex from 'react-latex-next';
 import { useConvexProctoring } from '../hooks/useConvexProctoring';
+import { useExamProgress } from '../hooks/useExamProgress';
 
 interface Question {
     id: string;
@@ -59,6 +60,36 @@ interface Exam {
 
 export default function ExamView() {
     const { user, loading } = useAuth();
+    const { t } = useTranslation();
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const submissionId = searchParams.get('submission');
+    const isReviewMode = !!submissionId;
+    
+    // Supabase-based exam progress (for authenticated users)
+    const {
+        progress: savedProgress,
+        isLoading: progressLoading,
+        hasExistingProgress,
+        isAuthenticated,
+        studentInfo,
+        updateAnswers: updateProgressAnswers,
+        updateFlaggedQuestions: updateProgressFlagged,
+        updateCurrentQuestion: updateProgressCurrentQuestion,
+        updateTimeRemaining: updateProgressTimeRemaining,
+        updateViolations: updateProgressViolations,
+        updateScratchpad: updateProgressScratchpad,
+        updateConfidenceLevels: updateProgressConfidence,
+        startExam: startProgressExam,
+        markSubmitted: markProgressSubmitted,
+        forceSave: forceSaveProgress,
+    } = useExamProgress({
+        examId: id || '',
+        enabled: !!user && !isReviewMode,
+        autoSaveInterval: 3000,
+    });
+    
     // Check if exam was accessed via portal (code entry)
     useEffect(() => {
         // Allow review mode and submission view
@@ -72,15 +103,14 @@ export default function ExamView() {
             navigate('/student-portal');
         }
         // If logged in or portalFlag, allow access
-    }, [loading, user]);
-    const { t } = useTranslation();
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const submissionId = searchParams.get('submission');
-    const isReviewMode = !!submissionId;
+    }, [loading, user, navigate]);
+    
     const [exam, setExam] = useState<Exam | null>(null);
-    const [studentData, setStudentData] = useState<Record<string, string>>({});
+    // Initialize studentData from authenticated user if available
+    const [studentData, setStudentData] = useState<Record<string, string>>(() => {
+        // Will be populated by effect when user loads
+        return {};
+    });
     const [started, setStarted] = useState(false);
     const [answers, setAnswers] = useState<Record<string, any>>({});
     const [violations, setViolations] = useState<Violation[]>([]);
@@ -122,6 +152,66 @@ export default function ExamView() {
     const [showUnansweredModal, setShowUnansweredModal] = useState(false);
     const [unansweredQuestions, setUnansweredQuestions] = useState<number[]>([]);
     const [showAutoSubmitWarning, setShowAutoSubmitWarning] = useState(false);
+    
+    // Initialize student data from authenticated user
+    useEffect(() => {
+        if (user && studentInfo) {
+            setStudentData(prev => ({
+                ...prev,
+                name: studentInfo.name || prev.name || '',
+                email: studentInfo.email || prev.email || '',
+                student_id: studentInfo.id || prev.student_id || '',
+            }));
+        }
+    }, [user, studentInfo]);
+    
+    // Restore progress from Supabase for authenticated users
+    useEffect(() => {
+        if (!progressLoading && savedProgress && hasExistingProgress && isAuthenticated) {
+            // Restore answers
+            if (savedProgress.answers && Object.keys(savedProgress.answers).length > 0) {
+                setAnswers(savedProgress.answers);
+            }
+            // Restore flagged questions
+            if (savedProgress.flagged_questions?.length > 0) {
+                setFlaggedQuestions(new Set(savedProgress.flagged_questions));
+            }
+            // Restore current question
+            if (savedProgress.current_question_index !== undefined) {
+                setCurrentQuestionIndex(savedProgress.current_question_index);
+            }
+            // Restore time remaining
+            if (savedProgress.time_remaining_seconds !== null) {
+                setTimeLeft(savedProgress.time_remaining_seconds);
+            }
+            // Restore violations
+            if (savedProgress.violations?.length > 0) {
+                setViolations(savedProgress.violations);
+            }
+            // Restore scratchpad
+            if (savedProgress.scratchpad_content) {
+                setScratchpadContent(savedProgress.scratchpad_content);
+            }
+            // Restore confidence levels
+            if (savedProgress.confidence_levels && Object.keys(savedProgress.confidence_levels).length > 0) {
+                setConfidenceLevels(savedProgress.confidence_levels as Record<string, 'low' | 'medium' | 'high'>);
+            }
+            // Check if already started
+            if (savedProgress.started_at) {
+                setStarted(true);
+                setStartedAt(new Date(savedProgress.started_at).getTime());
+                setHasPreviousSession(true);
+                toast.success(t('examView.progressRestored', 'Your progress has been restored'), {
+                    duration: 3000,
+                    icon: '💾'
+                });
+            }
+            // Check if already submitted
+            if (savedProgress.status === 'submitted' || savedProgress.status === 'auto_submitted') {
+                setSubmitted(true);
+            }
+        }
+    }, [progressLoading, savedProgress, hasExistingProgress, isAuthenticated, t]);
     const [autoSubmitCountdown, setAutoSubmitCountdown] = useState(5);
 
     // Feature 1: Progress tracking
@@ -180,6 +270,13 @@ export default function ExamView() {
     const [inactivityCountdown, setInactivityCountdown] = useState(60);
     const lastActivityRef = useRef(Date.now());
     const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
+    
+    // Network/Connection tracking for robust timer
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const [connectionQuality, setConnectionQuality] = useState<'good' | 'fair' | 'poor'>('good');
+    const lastServerSyncRef = useRef<number>(Date.now());
+    const timerPausedAtRef = useRef<number | null>(null);
+    const reconnectAttemptsRef = useRef<number>(0);
 
     // Generate a stable student ID for proctoring
     const proctoringStudentId = useRef(
@@ -198,6 +295,8 @@ export default function ExamView() {
         isResumedSession: _isResumedSession, // Used in callbacks
         sessionStatus,
         enabled: proctoringEnabled,
+        isConnected: proctoringConnected,
+        lastHeartbeat: _lastProctoringHeartbeat,
     } = useConvexProctoring({
         examId: id || '',
         studentId: proctoringStudentId.current,
@@ -279,6 +378,103 @@ export default function ExamView() {
             });
         }
     }, [sessionStatus, submitted, t]);
+    
+    // Network status monitoring for robust timer
+    useEffect(() => {
+        const handleOnline = async () => {
+            setIsOnline(true);
+            setConnectionQuality('good');
+            reconnectAttemptsRef.current = 0;
+            
+            if (started && !submitted) {
+                // Calculate time elapsed while offline
+                const offlineDuration = timerPausedAtRef.current 
+                    ? Math.floor((Date.now() - timerPausedAtRef.current) / 1000)
+                    : 0;
+                
+                console.log(`🌐 Back online after ${offlineDuration}s offline`);
+                
+                // Adjust timer if we were offline (subtract elapsed time)
+                if (offlineDuration > 0 && timeLeft !== null && timeLeft > 0) {
+                    const adjustedTime = Math.max(0, timeLeft - offlineDuration);
+                    setTimeLeft(adjustedTime);
+                }
+                
+                timerPausedAtRef.current = null;
+                
+                // Attempt to resync with Convex
+                if (proctoringEnabled) {
+                    try {
+                        // Restart proctoring session to reactivate status
+                        const sessionResult = await startProctoringSession();
+                        if (sessionResult?.time_remaining_seconds !== null && sessionResult?.time_remaining_seconds !== undefined) {
+                            // Use server time as authoritative
+                            setTimeLeft(sessionResult.time_remaining_seconds);
+                            lastServerSyncRef.current = Date.now();
+                        }
+                        toast.success(t('examView.connectionRestored', 'Connection restored'), {
+                            duration: 2000,
+                            icon: '🌐'
+                        });
+                    } catch (err) {
+                        console.warn('Failed to resync proctoring session:', err);
+                    }
+                }
+                
+                // Also sync to Supabase if authenticated
+                if (isAuthenticated && timeLeft !== null) {
+                    updateProgressTimeRemaining(timeLeft);
+                    forceSaveProgress().catch(console.warn);
+                }
+            }
+        };
+        
+        const handleOffline = () => {
+            setIsOnline(false);
+            setConnectionQuality('poor');
+            
+            if (started && !submitted) {
+                // Record when we went offline to calculate duration
+                timerPausedAtRef.current = Date.now();
+                
+                console.log('⚠️ Network offline, timer continues locally');
+                toast.error(t('examView.connectionLost', 'Connection lost - your progress is being saved locally'), {
+                    duration: 3000,
+                    icon: '📡'
+                });
+            }
+        };
+        
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        
+        // Check connection quality periodically
+        const connectionCheck = setInterval(() => {
+            if (navigator.onLine && started && !submitted) {
+                const timeSinceSync = Date.now() - lastServerSyncRef.current;
+                if (timeSinceSync > 30000) { // 30s without server sync
+                    setConnectionQuality('fair');
+                }
+                if (timeSinceSync > 60000) { // 60s without server sync
+                    setConnectionQuality('poor');
+                }
+            }
+        }, 10000);
+        
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+            clearInterval(connectionCheck);
+        };
+    }, [started, submitted, timeLeft, proctoringEnabled, isAuthenticated, startProctoringSession, updateProgressTimeRemaining, forceSaveProgress, t]);
+    
+    // Update server sync timestamp when we receive server time
+    useEffect(() => {
+        if (serverTimeRemaining !== null && serverTimeRemaining !== undefined) {
+            lastServerSyncRef.current = Date.now();
+            setConnectionQuality('good');
+        }
+    }, [serverTimeRemaining]);
 
     // Load exam data or review data
     useEffect(() => {
@@ -387,7 +583,7 @@ export default function ExamView() {
         verifySubmissionStillExists();
     }, [id]);
 
-    // Save state to localStorage whenever it changes
+    // Save state to localStorage whenever it changes (fallback for non-authenticated)
     useEffect(() => {
         if (!id || submitted) return;
 
@@ -405,9 +601,24 @@ export default function ExamView() {
                 confidenceLevels,
                 scratchpadContent
             };
+            
+            // Save to localStorage as fallback
             localStorage.setItem(`durrah_exam_${id}_state`, JSON.stringify(stateToSave));
+            
+            // For authenticated users, also sync to Supabase
+            if (isAuthenticated && started) {
+                updateProgressAnswers(answers);
+                updateProgressFlagged(Array.from(flaggedQuestions));
+                updateProgressCurrentQuestion(currentQuestionIndex);
+                if (timeLeft !== null) {
+                    updateProgressTimeRemaining(timeLeft);
+                }
+                updateProgressViolations(violations);
+                updateProgressConfidence(confidenceLevels);
+                updateProgressScratchpad(scratchpadContent);
+            }
         }
-    }, [id, studentData, answers, violations, timeLeft, started, startedAt, submitted, flaggedQuestions, confidenceLevels, scratchpadContent]);
+    }, [id, studentData, answers, violations, timeLeft, started, startedAt, submitted, flaggedQuestions, confidenceLevels, scratchpadContent, isAuthenticated, currentQuestionIndex, updateProgressAnswers, updateProgressFlagged, updateProgressCurrentQuestion, updateProgressTimeRemaining, updateProgressViolations, updateProgressConfidence, updateProgressScratchpad]);
 
     // Feature 1: Calculate progress percentage
     useEffect(() => {
@@ -913,6 +1124,16 @@ export default function ExamView() {
             }
         }
         
+        // For authenticated users, record exam start in Supabase
+        if (isAuthenticated) {
+            const timeLimitSeconds = exam?.settings?.time_limit_minutes 
+                ? exam.settings.time_limit_minutes * 60 
+                : undefined;
+            startProgressExam(timeLimitSeconds).catch(err => {
+                console.warn('Failed to record exam start in Supabase:', err);
+            });
+        }
+        
         setStarted(true);
         setStartedAt(Date.now());
     };
@@ -1337,6 +1558,16 @@ export default function ExamView() {
 
                 // Clear temporary state
                 localStorage.removeItem(`durrah_exam_${id}_state`);
+                
+                // Mark as submitted in Supabase for authenticated users
+                if (isAuthenticated) {
+                    try {
+                        await forceSaveProgress(); // Ensure final state is saved
+                        await markProgressSubmitted();
+                    } catch (err) {
+                        console.warn('Failed to mark progress as submitted in Supabase:', err);
+                    }
+                }
 
                 // Exit fullscreen if active
                 if (document.fullscreenElement) {
@@ -1903,7 +2134,29 @@ export default function ExamView() {
                                                 />
                                             </div>
                                             <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                                                <span>Time remaining: <span className="font-semibold text-gray-800 dark:text-gray-200">{formatTimeLeft(timeLeft)}</span></span>
+                                                <span className="flex items-center gap-1">
+                                                    Time remaining: <span className="font-semibold text-gray-800 dark:text-gray-200">{formatTimeLeft(timeLeft)}</span>
+                                                    {proctoringEnabled && (
+                                                        <span className={`inline-flex items-center ml-1 ${
+                                                            !isOnline || !proctoringConnected ? 'text-red-500' : 
+                                                            connectionQuality === 'poor' ? 'text-yellow-500' : 
+                                                            'text-green-500'
+                                                        }`} title={
+                                                            !isOnline ? 'Offline - timer running locally' :
+                                                            !proctoringConnected ? 'Reconnecting...' :
+                                                            connectionQuality === 'poor' ? 'Poor connection' :
+                                                            'Connected to server'
+                                                        }>
+                                                            {!isOnline || !proctoringConnected ? (
+                                                                <Wifi className="w-3 h-3 animate-pulse" />
+                                                            ) : connectionQuality === 'poor' ? (
+                                                                <Wifi className="w-3 h-3" />
+                                                            ) : (
+                                                                <Wifi className="w-3 h-3" />
+                                                            )}
+                                                        </span>
+                                                    )}
+                                                </span>
                                                 <span>Violations: <span className="font-semibold text-gray-800 dark:text-gray-200">{violations.length}/{exam?.settings.max_violations || 3}</span></span>
                                             </div>
                                             {progressPercentage === 100 && (

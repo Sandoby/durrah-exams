@@ -724,7 +724,12 @@
         "autoSubmitted": "تم تسليم امتحانك تلقائياً بسبب انتهاء الوقت.",
         "autoSubmittedByServer": "انتهى الوقت! تم تسليم إجاباتك تلقائياً.",
         "sessionRecovered": "تم استعادة تقدمك من الخادم.",
-        "answersRestored": "تم استعادة إجاباتك السابقة."
+        "answersRestored": "تم استعادة إجاباتك السابقة.",
+        "progressRestored": "مرحباً بعودتك! تم استعادة تقدمك.",
+        "welcomeBack": "مرحباً بعودتك، {{name}}! تم مزامنة تقدمك في الامتحان.",
+        "connectionRestored": "تم استعادة الاتصال",
+        "connectionLost": "انقطع الاتصال - يتم حفظ تقدمك محلياً",
+        "timerSynced": "تم مزامنة المؤقت مع الخادم"
     },
     "landing": {
         "seo": {
