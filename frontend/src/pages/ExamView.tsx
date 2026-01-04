@@ -179,6 +179,35 @@ export default function ExamView() {
     const justRestoredRef = useRef(false);
     // Flag to track if we've already shown the restore toast (prevent duplicates)
     const hasShownRestoreToastRef = useRef(false);
+    // Flag to track if we've verified submission status
+    const hasVerifiedSubmissionRef = useRef(false);
+    
+    // Verify submission status against the server (source of truth)
+    // This handles the case where tutor allows retake but local state thinks exam is submitted
+    const verifySubmissionStatus = useCallback(async (studentEmail: string) => {
+        if (!id || hasVerifiedSubmissionRef.current) return null;
+        
+        try {
+            const { data, error } = await supabase
+                .from('submissions')
+                .select('id')
+                .eq('exam_id', id)
+                .eq('student_email', studentEmail)
+                .maybeSingle();
+            
+            hasVerifiedSubmissionRef.current = true;
+            
+            if (error) {
+                console.warn('Error verifying submission:', error);
+                return null;
+            }
+            
+            return !!data; // true if submission exists, false if not
+        } catch (err) {
+            console.warn('Failed to verify submission status:', err);
+            return null;
+        }
+    }, [id]);
     
     // Restore progress from Supabase for authenticated users
     useEffect(() => {
@@ -237,9 +266,35 @@ export default function ExamView() {
                     });
                 }
             }
-            // Check if already submitted
+            // Check if already submitted - but VERIFY against submissions table first!
             if (savedProgress.status === 'submitted' || savedProgress.status === 'auto_submitted') {
-                setSubmitted(true);
+                // Verify against the server before showing submitted state
+                const studentEmail = savedProgress.student_email || user?.email;
+                if (studentEmail) {
+                    verifySubmissionStatus(studentEmail).then((hasSubmission) => {
+                        if (hasSubmission === true) {
+                            // Submission exists, show submitted state
+                            setSubmitted(true);
+                        } else if (hasSubmission === false) {
+                            // No submission found - tutor allowed retake!
+                            // Clear the submitted status and allow retake
+                            console.log('📝 Submission not found - allowing retake');
+                            setSubmitted(false);
+                            setScore(null);
+                            // Clear localStorage as well
+                            localStorage.removeItem(`durrah_exam_${id}_submitted`);
+                            localStorage.removeItem(`durrah_exam_${id}_score`);
+                            toast.success(t('examView.retakeAllowed', 'You can now retake this exam!'), {
+                                duration: 4000,
+                                icon: '🔄'
+                            });
+                        }
+                        // If null, we couldn't verify - keep the local state as-is
+                    });
+                } else {
+                    // No email to verify against, trust local state
+                    setSubmitted(true);
+                }
             }
             
             // Clear the flag after a short delay
@@ -247,7 +302,7 @@ export default function ExamView() {
                 justRestoredRef.current = false;
             }, 3000);
         }
-    }, [progressLoading, savedProgress, hasExistingProgress, isAuthenticated, t]);
+    }, [progressLoading, savedProgress, hasExistingProgress, isAuthenticated, t, id, user?.email, verifySubmissionStatus]);
     const [autoSubmitCountdown, setAutoSubmitCountdown] = useState(5);
 
     // Feature 1: Progress tracking
