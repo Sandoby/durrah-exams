@@ -8,6 +8,8 @@ import { supabase } from '../lib/supabase';
 import * as XLSX from 'xlsx';
 import { TableSkeleton } from './skeletons';
 import { KidsLeaderboard } from './kids/KidsLeaderboard';
+import { ConvexLeaderboard } from './ConvexLeaderboard';
+import { CONVEX_FEATURES } from '../main';
 
 
 interface ExamResultsProps {
@@ -387,11 +389,18 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
                 </div>
                 <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 p-1 rounded-3xl">
                     <div className="bg-white dark:bg-gray-800 rounded-3xl p-6">
-                        <KidsLeaderboard
-                            examId={examId}
-                            maxRows={20}
-                            refreshKey={submissions.length}
-                        />
+                        {CONVEX_FEATURES.leaderboard ? (
+                            <ConvexLeaderboard
+                                quizCode={examId}
+                                limit={20}
+                            />
+                        ) : (
+                            <KidsLeaderboard
+                                examId={examId}
+                                maxRows={20}
+                                refreshKey={submissions.length}
+                            />
+                        )}
                     </div>
                 </div>
             </div>

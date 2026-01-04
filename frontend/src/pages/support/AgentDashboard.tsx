@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
     MessageCircle, User, CreditCard, FileText, LogOut,
     AlertCircle, Package,
-    Search, Key, Activity, Zap
+    Search, Key, Activity, Zap, Sparkles
 } from 'lucide-react';
 import { Logo } from '../../components/Logo';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
+import { AgentChatPanel } from '../../components/ConvexChatWidget';
+import { CONVEX_FEATURES } from '../../main';
 
 interface Agent {
     id: string;
@@ -99,6 +101,9 @@ export default function AgentDashboard() {
     // Canned Responses
     const [cannedResponses, setCannedResponses] = useState<CannedResponse[]>([]);
     const [showCannedMenu, setShowCannedMenu] = useState(false);
+
+    // Convex Chat Mode Toggle
+    const [useConvexChat, setUseConvexChat] = useState(CONVEX_FEATURES.chat);
 
     // Chat Messages
     const [messages, setMessages] = useState<any[]>([]);
@@ -483,18 +488,40 @@ export default function AgentDashboard() {
                                 <p className="text-sm text-gray-600">Support Agent • {agent?.total_chats_handled} chats handled</p>
                             </div>
                         </div>
-                        <button
-                            onClick={handleLogout}
-                            className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                            <LogOut className="h-5 w-5" />
-                            <span>Logout</span>
-                        </button>
+                        <div className="flex items-center space-x-4">
+                            {/* Convex Chat Toggle */}
+                            {CONVEX_FEATURES.chat && (
+                                <button
+                                    onClick={() => setUseConvexChat(!useConvexChat)}
+                                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                                        useConvexChat 
+                                            ? 'bg-indigo-100 text-indigo-700 border border-indigo-300' 
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    <Sparkles className="h-4 w-4" />
+                                    <span className="text-sm font-medium">{useConvexChat ? 'Realtime Mode' : 'Classic Mode'}</span>
+                                </button>
+                            )}
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                <LogOut className="h-5 w-5" />
+                                <span>Logout</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Main Content */}
+            {/* Convex Chat Mode */}
+            {useConvexChat && agent ? (
+                <div className="flex-1 overflow-hidden">
+                    <AgentChatPanel agentId={agent.id} agentName={agent.name} />
+                </div>
+            ) : (
+            /* Classic Supabase Chat Mode */
             <div className="flex-1 flex overflow-hidden">
                 {/* Left Sidebar - Chats List */}
                 <div className="w-80 bg-white border-r flex flex-col">
@@ -832,6 +859,7 @@ export default function AgentDashboard() {
                     </div>
                 )}
             </div>
+            )}
         </div>
         </>
     );

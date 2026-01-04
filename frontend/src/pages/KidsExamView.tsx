@@ -8,6 +8,8 @@ import Latex from 'react-latex-next';
 
 import { supabase } from '../lib/supabase';
 import { KidsLeaderboard } from '../components/kids/KidsLeaderboard';
+import { ConvexLeaderboard } from '../components/ConvexLeaderboard';
+import { CONVEX_FEATURES } from '../main';
 import { Logo } from '../components/Logo';
 
 type LeaderboardVisibility = 'hidden' | 'after_submit' | 'always';
@@ -373,7 +375,15 @@ export default function KidsExamView() {
 
           {showLeaderboard && (
             <div className="mb-10 text-left">
-              <KidsLeaderboard examId={id!} nickname={safeNick} refreshKey={score?.submission_id || 'submitted'} />
+              {CONVEX_FEATURES.leaderboard ? (
+                <ConvexLeaderboard 
+                  quizCode={safeCode || id!} 
+                  currentUserId={safeNick} 
+                  limit={10}
+                />
+              ) : (
+                <KidsLeaderboard examId={id!} nickname={safeNick} refreshKey={score?.submission_id || 'submitted'} />
+              )}
             </div>
           )}
 
