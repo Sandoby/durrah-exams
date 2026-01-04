@@ -457,3 +457,54 @@ export const markSyncedToSupabase = mutation({
     return { success: true };
   },
 });
+
+// ============================================
+// DELETE SESSION FOR RETAKE
+// Called when tutor allows student to retake exam
+// ============================================
+export const deleteSessionForRetake = mutation({
+  args: {
+    exam_id: v.string(),
+    student_email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Find all sessions for this student/exam
+    const sessions = await ctx.db
+      .query("examSessions")
+      .withIndex("by_exam_student")
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("exam_id"), args.exam_id),
+          q.eq(q.field("student_email"), args.student_email)
+        )
+      )
+      .collect();
+    
+    // Also try to find by student_id matching email (some sessions use email as student_id)
+    const sessionsByStudentId = await ctx.db
+      .query("examSessions")
+      .withIndex("by_exam_student", (q) => 
+        q.eq("exam_id", args.exam_id).eq("student_id", args.student_email)
+      )
+      .collect();
+    
+    // Combine and deduplicate
+    const allSessions = [...sessions, ...sessionsByStudentId];
+    const uniqueSessionIds = new Set(allSessions.map(s => s._id));
+    
+    // Delete all found sessions
+    let deletedCount = 0;
+    for (const sessionId of uniqueSessionIds) {
+      await ctx.db.delete(sessionId);
+      deletedCount++;
+    }
+    
+    return { 
+      success: true, 
+      deleted_count: deletedCount,
+      message: deletedCount > 0 
+        ? `Deleted ${deletedCount} session(s) for retake`
+        : "No sessions found to delete"
+    };
+  },
+});

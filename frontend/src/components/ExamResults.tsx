@@ -10,6 +10,8 @@ import { TableSkeleton } from './skeletons';
 import { KidsLeaderboard } from './kids/KidsLeaderboard';
 import { ConvexLeaderboard } from './ConvexLeaderboard';
 import { CONVEX_FEATURES } from '../main';
+import { useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 
 
 interface ExamResultsProps {
@@ -45,6 +47,9 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
     const [detailedAnswers, setDetailedAnswers] = useState<any[]>([]);
     const [questionMap, setQuestionMap] = useState<Record<string, any>>({});
     const [isKidsMode, setIsKidsMode] = useState(false);
+
+    // Convex mutation for deleting session on retake
+    const deleteConvexSession = useMutation(api.sessions.deleteSessionForRetake);
 
     // Filtering & Sorting State
     const [searchQuery, setSearchQuery] = useState('');
@@ -264,18 +269,48 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
 
         setReopenId(submission.id);
         try {
+            // 1. Delete submission answers
             const { error: ansErr } = await supabase
                 .from('submission_answers')
                 .delete()
                 .eq('submission_id', submission.id);
             if (ansErr) throw ansErr;
 
+            // 2. Delete submission
             const { error: subErr } = await supabase
                 .from('submissions')
                 .delete()
                 .eq('id', submission.id)
                 .eq('exam_id', examId);
             if (subErr) throw subErr;
+
+            // 3. Delete exam_progress for this student (for authenticated users)
+            // This allows them to start fresh
+            if (submission.student_email) {
+                const { error: progressErr } = await supabase
+                    .from('exam_progress')
+                    .delete()
+                    .eq('exam_id', examId)
+                    .eq('student_email', submission.student_email);
+                
+                if (progressErr) {
+                    console.warn('Could not delete exam_progress (may not exist):', progressErr);
+                    // Don't throw - this is optional cleanup
+                }
+            }
+
+            // 4. Delete Convex proctoring session (if enabled)
+            if (CONVEX_FEATURES.proctoring && submission.student_email) {
+                try {
+                    await deleteConvexSession({
+                        exam_id: examId,
+                        student_email: submission.student_email,
+                    });
+                } catch (convexErr) {
+                    console.warn('Could not delete Convex session (may not exist):', convexErr);
+                    // Don't throw - this is optional cleanup
+                }
+            }
 
             setSubmissions((prev) => prev.filter((s) => s.id !== submission.id));
             toast.success('Student can re-enter the exam now');
