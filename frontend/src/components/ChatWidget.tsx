@@ -329,7 +329,7 @@ function ChatWidget() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 p-4 rounded-full shadow-lg transition-all duration-300 z-50 ${
+        className={`fixed bottom-6 right-6 p-4 rounded-full shadow-lg transition-all duration-300 z-40 ${
           isOpen
             ? 'scale-0 opacity-0'
             : 'scale-100 opacity-100 bg-indigo-600 hover:bg-indigo-700 text-white'
@@ -344,7 +344,7 @@ function ChatWidget() {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 sm:inset-auto sm:bottom-20 sm:right-4 sm:w-96 sm:h-[600px] bg-white dark:bg-gray-800 shadow-2xl rounded-none sm:rounded-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 z-50 transition-all duration-200 ease-in-out">
+        <div className="fixed inset-0 sm:inset-auto sm:bottom-20 sm:right-4 sm:w-96 sm:h-[600px] bg-white dark:bg-gray-800 shadow-2xl rounded-none sm:rounded-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 z-40 transition-all duration-200 ease-in-out">
           <div className="p-4 bg-indigo-600 flex justify-between items-center text-white shrink-0">
             <div className="flex items-center gap-2">
               <MessageCircle className="w-5 h-5" />

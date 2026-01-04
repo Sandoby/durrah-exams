@@ -76,7 +76,7 @@ export function ConvexChatWidget({
   onSessionEnded
 }: ConvexChatWidgetProps) {
   const enabled = CONVEX_FEATURES.chat;
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true); // Start minimized/closed by default
   const [newMessage, setNewMessage] = useState('');
   const [rating, setRating] = useState(0);
   const [showRating, setShowRating] = useState(false);
@@ -282,7 +282,7 @@ export function ConvexChatWidget({
     return (
       <button
         onClick={() => setIsMinimized(false)}
-        className="fixed bottom-4 right-4 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 rounded-full shadow-lg flex items-center justify-center text-white transition-all z-50"
+        className="fixed bottom-4 right-4 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 rounded-full shadow-lg flex items-center justify-center text-white transition-all z-40"
       >
         <MessageSquare className="h-6 w-6" />
         {unreadCount > 0 && (
@@ -297,7 +297,7 @@ export function ConvexChatWidget({
   // No active session - show start button
   if (!sessionId) {
     return (
-      <div className="fixed bottom-4 right-4 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+      <div className="fixed bottom-4 right-4 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-40">
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
@@ -347,7 +347,7 @@ export function ConvexChatWidget({
   }
 
   return (
-    <div className="fixed bottom-4 right-4 w-80 sm:w-96 h-[500px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden z-50">
+    <div className="fixed bottom-4 right-4 w-80 sm:w-96 h-[500px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden z-40">
       {/* Header */}
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
