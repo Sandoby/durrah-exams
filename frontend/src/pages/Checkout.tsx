@@ -206,8 +206,17 @@ export default function Checkout() {
                     }
                 });
 
-                if (error || !data || !data.payment_link) {
+                if (error || !data || (!data.payment_link && !data.checkout_url)) {
+                    console.error('Dodo Init Error:', data);
                     throw new Error(error?.message || 'Failed to initialize Dodo payment');
+                }
+
+                // Dodo returns `checkout_url` in the response
+                const redirectUrl = data.checkout_url || data.payment_link;
+
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                    return;
                 }
 
                 // If using Embedded SDK, we would use the token here.
