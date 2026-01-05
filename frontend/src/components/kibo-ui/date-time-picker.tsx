@@ -171,17 +171,19 @@ export function DateTimePicker({
       {/* Dropdown */}
       {isOpen && (
         <div className="absolute z-50 mt-2 left-0 right-0 animate-in fade-in slide-in-from-top-2 duration-200">
-          <MiniCalendar
-            value={selectedDate}
-            onChange={handleDateSelect}
-            minDate={minDate}
-            maxDate={maxDate}
-            className="w-full"
-          >
-            <MiniCalendarHeader />
-            <MiniCalendarDays>
-              {(date) => <MiniCalendarDay date={date} key={date.toISOString()} />}
-            </MiniCalendarDays>
+          <div className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-lg">
+            <MiniCalendar
+              value={selectedDate}
+              onChange={handleDateSelect}
+              minDate={minDate}
+              maxDate={maxDate}
+              className="w-full border-0 shadow-none p-0"
+            >
+              <MiniCalendarHeader />
+              <MiniCalendarDays>
+                {(date) => <MiniCalendarDay date={date} key={date.toISOString()} />}
+              </MiniCalendarDays>
+            </MiniCalendar>
             
             {/* Time Picker */}
             <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
@@ -221,7 +223,7 @@ export function DateTimePicker({
             >
               Done
             </button>
-          </MiniCalendar>
+          </div>
         </div>
       )}
     </div>
