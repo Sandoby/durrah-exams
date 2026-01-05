@@ -53,32 +53,37 @@ serve(async (req) => {
             dodoProductId = 'pdt_0NVdvPLWrAr1Rym66kXLP'; // Monthly
         }
 
+        // Dodo Customer splitting
+        const fullName = customer.name || "Student User";
+        const nameParts = fullName.trim().split(' ');
+        const firstName = nameParts[0];
+        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : "User";
+
         const payload = {
             product_cart: [{
                 product_id: dodoProductId,
-                quantity: 1,
-                amount: amount * 100, // Amount to charge (initial)
+                quantity: 1
+                // Removed 'amount' to let Dodo use the defined product price
             }],
-            billing: {
-                city: "Cairo", // Default or user provided?
+            billing_address: {
+                city: "Cairo",
                 country: "EG",
-                street: "123 Street", // Placeholder if strict
+                street: "123 Street",
                 state: "Cairo",
                 zipcode: "11511"
             },
             customer: {
-                firstName: customer.name || "Student",
-                lastName: "User",
+                firstName: firstName,
+                lastName: lastName,
                 email: customer.email,
                 phone: customer.phone || "+201000000000"
             },
-            currency: currency || 'EGP',
-            payment_link: true, // or redirect_url?
+            billing_currency: currency || 'EGP',
             metadata: {
                 ...metadata,
                 billingCycle
             },
-            return_url: `${req.headers.get('origin')}/payment/callback?provider=dodo`, // For redirect flow
+            return_url: `${req.headers.get('origin')}/payment/callback?provider=dodo`,
         };
 
         const response = await fetch(`${baseUrl}/checkouts`, {
@@ -93,8 +98,9 @@ serve(async (req) => {
         const data = await response.json();
 
         if (!response.ok) {
-            console.error('Dodo Error:', data);
-            throw new Error(data.message || 'Failed to create payment session');
+            console.error('Dodo Error:', JSON.stringify(data));
+            // Throw detailed error to catch block
+            throw new Error(data.message || (data.error ? JSON.stringify(data.error) : 'Failed to create payment session'));
         }
 
         return new Response(JSON.stringify(data), {
@@ -103,7 +109,10 @@ serve(async (req) => {
 
     } catch (error) {
         console.error('Error creating Dodo payment:', error);
-        return new Response(JSON.stringify({ error: error.message }), {
+        return new Response(JSON.stringify({
+            error: error.message,
+            details: error.toString()
+        }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
