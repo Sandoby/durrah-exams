@@ -19,10 +19,10 @@ serve(async (req) => {
         }
 
         // Determine environment based on key prefix
-        const isLive = dodoApiKey.startsWith('live_');
-        const baseUrl = isLive ? 'https://live.dodopayments.com' : 'https://test.dodopayments.com';
+        const isTest = dodoApiKey.startsWith('test_');
+        const baseUrl = isTest ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
 
-        console.log(`Using Dodo API: ${isLive ? 'LIVE' : 'TEST'} Mode`);
+        console.log(`Using Dodo API: ${isTest ? 'TEST' : 'LIVE'} Mode`);
         console.log(`Key prefix: ${dodoApiKey.substring(0, 5)}...`);
         console.log(`Target URL: ${baseUrl}/checkouts`);
 
