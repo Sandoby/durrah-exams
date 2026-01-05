@@ -7,6 +7,7 @@ import App from './App.tsx'
 
 import { HelmetProvider } from 'react-helmet-async';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { HeroUIProvider } from "@heroui/react";
 
 // Convex imports
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
@@ -34,13 +35,15 @@ const AppWithProviders = () => (
   <StrictMode>
     <ErrorBoundary>
       <HelmetProvider>
-        {convex ? (
-          <ConvexProvider client={convex}>
+        <HeroUIProvider>
+          {convex ? (
+            <ConvexProvider client={convex}>
+              <App />
+            </ConvexProvider>
+          ) : (
             <App />
-          </ConvexProvider>
-        ) : (
-          <App />
-        )}
+          )}
+        </HeroUIProvider>
       </HelmetProvider>
     </ErrorBoundary>
   </StrictMode>
