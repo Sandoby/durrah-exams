@@ -95,12 +95,20 @@ serve(async (req) => {
             body: JSON.stringify(payload)
         });
 
-        const data = await response.json();
+        const rawResponse = await response.text();
+        console.log('Dodo Raw Response:', response.status, rawResponse);
+
+        let data;
+        try {
+            data = rawResponse ? JSON.parse(rawResponse) : {};
+        } catch (e) {
+            console.error('Failed to parse Dodo response:', e);
+            throw new Error(`Invalid response from Dodo Payments: ${response.status} ${response.statusText}. Body: ${rawResponse.substring(0, 200)}`);
+        }
 
         if (!response.ok) {
-            console.error('Dodo Error:', JSON.stringify(data));
-            // Throw detailed error to catch block
-            throw new Error(data.message || (data.error ? JSON.stringify(data.error) : 'Failed to create payment session'));
+            console.error('Dodo API Error:', data);
+            throw new Error(data.message || (data.error ? JSON.stringify(data.error) : `Dodo API Error: ${response.status} ${rawResponse}`));
         }
 
         return new Response(JSON.stringify(data), {
