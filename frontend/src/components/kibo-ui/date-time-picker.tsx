@@ -135,7 +135,7 @@ export function DateTimePicker({
   };
 
   return (
-    <div ref={containerRef} className={cn("relative", className)}>
+    <div ref={containerRef} className={cn("relative isolate", className)}>
       {/* Trigger Button */}
       <button
         type="button"
@@ -170,8 +170,8 @@ export function DateTimePicker({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 mt-2 left-0 right-0 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-lg">
+        <div className="absolute z-[9999] mt-2 left-0 right-0 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl">
             <MiniCalendar
               value={selectedDate}
               onChange={handleDateSelect}
