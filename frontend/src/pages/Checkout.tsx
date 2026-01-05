@@ -203,7 +203,7 @@ export default function Checkout() {
                 const { data, error } = await supabase.functions.invoke('create-dodo-payment', {
                     body: {
                         amount: finalPrice,
-                        currency: 'EGP', // or 'USD' depending on what Dodo supports/expects? Assume EGP for Durrah.
+                        currency: 'USD',
                         billingCycle,
                         metadata: {
                             userId: user?.id,
@@ -525,7 +525,7 @@ export default function Checkout() {
                                                                     ? t('checkout.coupon.free')
                                                                     : appliedCoupon.discount_type === 'percentage'
                                                                         ? `${appliedCoupon.discount_value}% OFF`
-                                                                        : `${appliedCoupon.discount_value} EGP OFF`}
+                                                                        : `${appliedCoupon.discount_value} USD OFF`}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -558,18 +558,18 @@ export default function Checkout() {
                                     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-800 space-y-3">
                                         <div className="flex justify-between text-gray-600 dark:text-gray-400 text-sm">
                                             <span>Subtotal</span>
-                                            <span className="font-medium">EGP {plans.find(p => p.id === selectedPlan)?.price}</span>
+                                            <span className="font-medium">USD {plans.find(p => p.id === selectedPlan)?.price}</span>
                                         </div>
                                         {appliedCoupon && (
                                             <div className="flex justify-between text-green-600 dark:text-green-400 text-sm">
                                                 <span>Discount</span>
-                                                <span className="font-medium">- EGP {(plans.find(p => p.id === selectedPlan)?.price || 0) - calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}</span>
+                                                <span className="font-medium">- USD {(plans.find(p => p.id === selectedPlan)?.price || 0) - calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}</span>
                                             </div>
                                         )}
                                         <div className="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between items-center">
                                             <span className="font-bold text-gray-900 dark:text-white">Total</span>
                                             <span className="text-xl font-black text-indigo-600 dark:text-indigo-400">
-                                                {calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0) === 0 ? 'FREE' : `EGP ${calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}`}
+                                                {calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0) === 0 ? 'FREE' : `USD ${calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}`}
                                             </span>
                                         </div>
                                     </div>
