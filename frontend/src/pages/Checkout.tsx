@@ -37,13 +37,32 @@ export default function Checkout() {
         }
     }, [location.state]);
 
-    // Fixed pricing to 5 USD / 50 USD
-    const proMonthlyPrice = 5;
-    const proYearlyPrice = 50;
+    // Provider-specific pricing definitions
+    const pricingConfig = {
+        dodo: {
+            currency: 'USD',
+            monthly: 5,
+            yearly: 50,
+            displayMonthly: '5.00',
+            displayYearly: '50.00'
+        },
+        local: {
+            currency: 'EGP',
+            monthly: 250,
+            yearly: 2500,
+            displayMonthly: '250.00',
+            displayYearly: '2,500.00'
+        }
+    };
 
-    const currencyCode = 'USD';
-    const monthlyPrice = '5.00';
-    const yearlyPrice = '50.00';
+    const currentPricing = selectedPaymentProvider === 'dodo' ? pricingConfig.dodo : pricingConfig.local;
+
+    const proMonthlyPrice = currentPricing.monthly;
+    const proYearlyPrice = currentPricing.yearly;
+
+    const currencyCode = currentPricing.currency;
+    const monthlyPrice = currentPricing.displayMonthly;
+    const yearlyPrice = currentPricing.displayYearly;
     const isCurrencyLoading = false;
 
     // ---------- Plans ----------
@@ -144,9 +163,15 @@ export default function Checkout() {
     const calculateFinalPrice = (basePrice: number) => {
         if (!appliedCoupon) return basePrice;
         if (appliedCoupon.discount_type === 'free') return 0;
+
+        // Handle Percentage
         if (appliedCoupon.discount_type === 'percentage') {
             return Math.max(0, basePrice - (basePrice * appliedCoupon.discount_value) / 100);
         }
+
+        // Handle Fixed Discount
+        // Note: We assume the fixed discount value in the DB matches the currency of the current selection for simplicity,
+        // unless we want to implement conversion logic. Most coupons are percentage based.
         if (appliedCoupon.discount_type === 'fixed') {
             return Math.max(0, basePrice - appliedCoupon.discount_value);
         }
@@ -525,7 +550,7 @@ export default function Checkout() {
                                                                     ? t('checkout.coupon.free')
                                                                     : appliedCoupon.discount_type === 'percentage'
                                                                         ? `${appliedCoupon.discount_value}% OFF`
-                                                                        : `${appliedCoupon.discount_value} USD OFF`}
+                                                                        : `${appliedCoupon.discount_value} ${currencyCode} OFF`}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -558,18 +583,23 @@ export default function Checkout() {
                                     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-800 space-y-3">
                                         <div className="flex justify-between text-gray-600 dark:text-gray-400 text-sm">
                                             <span>Subtotal</span>
-                                            <span className="font-medium">USD {plans.find(p => p.id === selectedPlan)?.price}</span>
+                                            <span className="font-medium">{currencyCode} {plans.find(p => p.id === selectedPlan)?.price}</span>
                                         </div>
+                                        {selectedPaymentProvider === 'dodo' && (
+                                            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+                                                * Taxes may be applied on the secure checkout page.
+                                            </p>
+                                        )}
                                         {appliedCoupon && (
                                             <div className="flex justify-between text-green-600 dark:text-green-400 text-sm">
                                                 <span>Discount</span>
-                                                <span className="font-medium">- USD {(plans.find(p => p.id === selectedPlan)?.price || 0) - calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}</span>
+                                                <span className="font-medium">- {currencyCode} {(plans.find(p => p.id === selectedPlan)?.price || 0) - calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}</span>
                                             </div>
                                         )}
                                         <div className="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between items-center">
                                             <span className="font-bold text-gray-900 dark:text-white">Total</span>
                                             <span className="text-xl font-black text-indigo-600 dark:text-indigo-400">
-                                                {calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0) === 0 ? 'FREE' : `USD ${calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}`}
+                                                {calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0) === 0 ? 'FREE' : `${currencyCode} ${calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}`}
                                             </span>
                                         </div>
                                     </div>
