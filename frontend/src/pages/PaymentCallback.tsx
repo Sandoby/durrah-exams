@@ -33,6 +33,12 @@ export default function PaymentCallback() {
         if (provider === 'paysky') {
           const data = localStorage.getItem(`paysky_payment_${orderId}`);
           if (data) metadata = JSON.parse(data);
+        } else if (provider === 'dodo') {
+          // Dodo usually sends session_id or id. We might need to fetch details or rely on webhook.
+          // For now, assume success if we are here and existing params look good.
+          console.log('Using Dodo provider logic');
+          // We can try to look up the payment by the orderId (which might be the session ID passed back)
+          // But since we rely on webhooks, let's just display success for now or poll.
         } else {
           metadata = kashierIntegration.getPaymentMetadata(orderId);
         }
@@ -92,7 +98,7 @@ export default function PaymentCallback() {
         else if (paymentStatus?.toUpperCase() === 'CANCELLED') {
           console.log('⚠️ Payment cancelled');
           setStatus('cancelled');
-          setMessage(t('checkout.callback.cancelled_message', 'The payment process was cancelled. No charges were made.'));
+          setMessage(t('checkout.callback.cancelled_message', 'The subscription process was cancelled. No charges were made.'));
 
           localStorage.removeItem('pendingCoupon');
           if (provider === 'kashier') kashierIntegration.clearPaymentData(orderId);
@@ -102,7 +108,7 @@ export default function PaymentCallback() {
         else {
           console.log('❌ Payment failed');
           setStatus('error');
-          setMessage(t('checkout.callback.error_message', 'We couldn\'t process your payment. Please check your details and try again.'));
+          setMessage(t('checkout.callback.error_message', 'We couldn\'t activate your subscription. Please check your payment details and try again.'));
 
           localStorage.removeItem('pendingCoupon');
           if (provider === 'kashier') kashierIntegration.clearPaymentData(orderId);
@@ -111,7 +117,7 @@ export default function PaymentCallback() {
       } catch (error) {
         console.error('❌ Callback error:', error);
         setStatus('error');
-        setMessage((error as Error).message || 'An unexpected error occurred during verification.');
+        setMessage((error as Error).message || 'An unexpected error occurred during subscription verification.');
       }
     };
 
@@ -157,7 +163,7 @@ export default function PaymentCallback() {
                     <CreditCard className="h-10 w-10 text-indigo-600" />
                   </div>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Verifying Transaction</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Verifying Subscription</h2>
                 <p className="text-gray-500 dark:text-gray-400">{message}</p>
               </div>
             )}
@@ -214,7 +220,7 @@ export default function PaymentCallback() {
                   {status === 'error' ? <X className="h-12 w-12" strokeWidth={3} /> : <AlertCircle className="h-12 w-12" strokeWidth={3} />}
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                  {status === 'error' ? 'Payment Failed' : 'Payment Cancelled'}
+                  {status === 'error' ? 'Subscription Activation Failed' : 'Subscription Cancelled'}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 mb-10 leading-relaxed">{message}</p>
 

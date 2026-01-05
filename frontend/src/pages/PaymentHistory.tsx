@@ -209,10 +209,10 @@ export default function PaymentHistory() {
         <div className="mb-8">
           <div className="flex items-center gap-3">
             <Receipt className="h-8 w-8 text-indigo-600" />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Payment History</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Subscription History</h1>
           </div>
           <p className="mt-2 text-gray-600 dark:text-gray-400">
-            View all your transactions and download invoices
+            View all your subscription payments and download invoices
           </p>
         </div>
 
@@ -221,10 +221,10 @@ export default function PaymentHistory() {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center">
             <Receipt className="h-16 w-16 mx-auto mb-4 text-gray-400" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              No payments yet
+              No subscriptions yet
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Your payment history will appear here once you make a purchase
+              Your subscription history will appear here once you subscribe
             </p>
             <button
               onClick={() => navigate('/checkout')}

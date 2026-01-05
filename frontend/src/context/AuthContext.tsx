@@ -3,11 +3,13 @@ import { supabase } from '../lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 
 type UserRole = 'admin' | 'agent' | 'tutor' | null;
+type SubscriptionStatus = 'active' | 'payment_failed' | 'cancelled' | null;
 
 interface AuthContextType {
     user: User | null;
     session: Session | null;
     role: UserRole;
+    subscriptionStatus: SubscriptionStatus;
     loading: boolean;
     signOut: () => Promise<void>;
 }
@@ -18,25 +20,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [role, setRole] = useState<UserRole>(null);
+    const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchUserRole = async (userId: string) => {
+    const fetchUserProfile = async (userId: string) => {
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('role')
+                .select('role, subscription_status')
                 .eq('id', userId)
                 .single();
 
             if (error) {
-                console.error('Error fetching user role:', error);
+                console.error('Error fetching user profile:', error);
                 setRole('tutor'); // Default to tutor if error
+                setSubscriptionStatus(null);
                 return;
             }
             setRole(data?.role || 'tutor');
+            setSubscriptionStatus(data?.subscription_status || null);
         } catch (error) {
-            console.error('Error fetching user role:', error);
+            console.error('Error fetching user profile:', error);
             setRole('tutor'); // Default to tutor if error
+            setSubscriptionStatus(null);
         }
     };
 
@@ -57,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const cached = localStorage.getItem('cached_session');
             const user = localStorage.getItem('cached_user');
             const timestamp = localStorage.getItem('session_timestamp');
-            
+
             if (cached && user && timestamp) {
                 // Session valid for 60 days (extended from 30)
                 const sixtyDaysAgo = Date.now() - (60 * 24 * 60 * 60 * 1000);
@@ -88,6 +94,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             if (agentRole && agentId) {
                 setRole(agentRole);
+                setSubscriptionStatus('active'); // Agents essentially have active access
                 // Create a mock user object for the context
                 setUser({
                     id: agentId,
@@ -106,7 +113,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         let isMounted = true;
-        
+
         // Set a timeout to prevent infinite loading
         const loadingTimeout = setTimeout(() => {
             if (isMounted && loading) {
@@ -118,7 +125,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const initAuth = async () => {
             // Check custom auth first
             const hasCustomAuth = checkCustomAuth();
-            
+
             if (!hasCustomAuth) {
                 // Try to use cached session first
                 const cachedData = getCachedSession();
@@ -126,9 +133,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     if (!isMounted) return;
                     setSession(cachedData.session);
                     setUser(cachedData.user);
-                    // Fetch role but don't block on it
-                    fetchUserRole(cachedData.user.id).catch(err => {
-                        console.error('Role fetch failed:', err);
+                    // Fetch profile but don't block on it
+                    fetchUserProfile(cachedData.user.id).catch(err => {
+                        console.error('Profile fetch failed:', err);
                     });
                     setLoading(false);
                     clearTimeout(loadingTimeout);
@@ -139,16 +146,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 try {
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!isMounted) return;
-                    
+
                     setSession(session);
                     setUser(session?.user ?? null);
 
                     if (session?.user) {
                         // Cache the session
                         cacheSession(session, session.user);
-                        // Fetch role but don't block on it
-                        fetchUserRole(session.user.id).catch(err => {
-                            console.error('Role fetch failed:', err);
+                        // Fetch profile but don't block on it
+                        fetchUserProfile(session.user.id).catch(err => {
+                            console.error('Profile fetch failed:', err);
                         });
                     }
 
@@ -170,16 +177,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Listen for changes on auth state (sign in, sign out, etc.)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             if (!isMounted) return;
-            
+
             setSession(session);
             setUser(session?.user ?? null);
 
             if (session?.user) {
                 // Cache the session on auth state change
                 cacheSession(session, session.user);
-                // Fetch role but don't block
-                fetchUserRole(session.user.id).catch(err => {
-                    console.error('Role fetch failed:', err);
+                // Fetch profile but don't block
+                fetchUserProfile(session.user.id).catch(err => {
+                    console.error('Profile fetch failed:', err);
                 });
             } else {
                 // Clear cache on sign out
@@ -187,6 +194,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 // If signed out from Supabase, check if custom auth is active
                 if (!checkCustomAuth()) {
                     setRole(null);
+                    setSubscriptionStatus(null);
                 }
             }
 
@@ -245,6 +253,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         sessionStorage.removeItem('agent_email');
         sessionStorage.removeItem('agent_name');
         setRole(null);
+        setSubscriptionStatus(null);
         setUser(null);
     };
 
@@ -261,7 +270,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user, session, role, loading, signOut }}>
+        <AuthContext.Provider value={{ user, session, role, subscriptionStatus, loading, signOut }}>
             {children}
         </AuthContext.Provider>
     );

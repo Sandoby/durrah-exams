@@ -20,7 +20,7 @@ interface TutorProfile {
 
 export default function Settings() {
     const { t } = useTranslation();
-    const { user } = useAuth();
+    const { user, subscriptionStatus } = useAuth();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -328,7 +328,7 @@ export default function Settings() {
                             </div>
 
                             <div className="flex justify-end pt-6 border-t border-gray-50 dark:border-gray-800">
-                                {profile?.subscription_status !== 'active' && (
+                                {subscriptionStatus !== 'active' && (
                                     <Link
                                         to="/checkout"
                                         className="flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg font-bold text-sm shadow-sm mr-4"
@@ -424,7 +424,7 @@ export default function Settings() {
                                 <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('settings.subscription.title', 'Subscription')}</h2>
                             </div>
                             <div className="p-6 flex-1 flex flex-col justify-center items-center text-center">
-                                {profile.subscription_status === 'active' ? (
+                                {subscriptionStatus === 'active' ? (
                                     <div className="w-full space-y-4">
                                         <div className="p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
                                             <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">{t('settings.subscription.plan', 'Current Plan')}</p>

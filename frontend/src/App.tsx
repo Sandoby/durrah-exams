@@ -51,9 +51,14 @@ import { App as CapApp } from '@capacitor/app';
 
 import { useNavigate, Routes, Route } from 'react-router-dom';
 
+import { useAuth } from './context/AuthContext';
+
 function AppContent() {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
+  const { user, subscriptionStatus } = useAuth();
+
+  // ... existing useEffects ...
 
   useEffect(() => {
     document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
@@ -103,6 +108,19 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+      {user && subscriptionStatus === 'payment_failed' && (
+        <div className="bg-red-600 text-white p-4 text-center font-bold sticky top-0 z-[100] shadow-lg animate-pulse">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-2">
+            <span>⚠️ Subscription Payment Failed: Your access is restricted.</span>
+            <button
+              onClick={() => navigate('/checkout')}
+              className="px-4 py-1 bg-white text-red-600 rounded-full text-sm hover:bg-red-50 transition-colors"
+            >
+              Update Payment Method
+            </button>
+          </div>
+        </div>
+      )}
       <Routes>
         <Route path="/" element={isNative ? <MobileWelcome /> : <LandingPage />} />
         <Route path="/mobile-welcome" element={<MobileWelcome />} />

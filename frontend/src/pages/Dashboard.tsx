@@ -41,7 +41,7 @@ const getProductionOrigin = () => {
 
 export default function Dashboard() {
     const { t } = useTranslation();
-    const { user, signOut } = useAuth();
+    const { user, signOut, subscriptionStatus } = useAuth();
     const navigate = useNavigate();
     const [exams, setExams] = useState<Exam[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -511,7 +511,7 @@ export default function Dashboard() {
                                 {user?.user_metadata?.full_name || user?.email}
                             </span>
 
-                            {profile?.subscription_status !== 'active' && (
+                            {subscriptionStatus !== 'active' && (
                                 <Link
                                     to="/checkout"
                                     className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-500/30 hover:shadow-xl transition-all"
@@ -569,7 +569,7 @@ export default function Dashboard() {
                                 </svg>
                                 {t('dashboard.tour.startTour', 'Tutorial')}
                             </button>
-                            {profile?.subscription_status !== 'active' && (
+                            {subscriptionStatus !== 'active' && (
                                 <Link
                                     to="/checkout"
                                     onClick={() => setIsMobileMenuOpen(false)}
@@ -643,7 +643,7 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {profile?.subscription_status !== 'active' && exams.length >= 3 && (
+                    {subscriptionStatus !== 'active' && exams.length >= 3 && (
                         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-start gap-3 animate-fade-in shadow-sm mb-4">
                             <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                             <div className="flex-1">
@@ -749,25 +749,25 @@ export default function Dashboard() {
                                                 {/* Analytics Button */}
                                                 <button
                                                     onClick={() => {
-                                                        if (profile?.subscription_status === 'active') {
+                                                        if (subscriptionStatus === 'active') {
                                                             navigate(`/exam/${exam.id}/analytics`);
                                                         } else {
                                                             toast.error(t('dashboard.actions.analyticsLocked'));
                                                             navigate('/checkout');
                                                         }
                                                     }}
-                                                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl ${profile?.subscription_status === 'active'
+                                                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl ${subscriptionStatus === 'active'
                                                         ? 'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 hover:shadow-lg hover:scale-105'
                                                         : 'bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 opacity-60 cursor-not-allowed'
                                                         } transition-all duration-200 group`}
-                                                    disabled={profile?.subscription_status !== 'active'}
+                                                    disabled={subscriptionStatus !== 'active'}
                                                 >
-                                                    {profile?.subscription_status === 'active' ? (
+                                                    {subscriptionStatus === 'active' ? (
                                                         <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" />
                                                     ) : (
                                                         <Lock className="h-5 w-5 text-gray-400" />
                                                     )}
-                                                    <span className={`text-xs font-semibold ${profile?.subscription_status === 'active'
+                                                    <span className={`text-xs font-semibold ${subscriptionStatus === 'active'
                                                         ? 'text-purple-700 dark:text-purple-300'
                                                         : 'text-gray-500'
                                                         }`}>
@@ -1107,9 +1107,9 @@ export default function Dashboard() {
             )}
             {/* Chat Widget - Convex or Classic */}
             {CONVEX_FEATURES.chat ? (
-                <ConvexChatWidget 
-                    userId={user?.id || 'anonymous'} 
-                    userName={user?.user_metadata?.full_name || user?.email || 'Tutor'} 
+                <ConvexChatWidget
+                    userId={user?.id || 'anonymous'}
+                    userName={user?.user_metadata?.full_name || user?.email || 'Tutor'}
                     userRole="tutor"
                 />
             ) : (
