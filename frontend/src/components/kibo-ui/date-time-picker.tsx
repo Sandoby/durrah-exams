@@ -171,28 +171,30 @@ export function DateTimePicker({
       {/* Dropdown */}
       {isOpen && (
         <div className="absolute z-[9999] mt-2 left-0 right-0 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="w-full p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl">
-            <MiniCalendar
-              value={selectedDate}
-              onChange={handleDateSelect}
-              minDate={minDate}
-              maxDate={maxDate}
-              className="w-full border-0 shadow-none p-0"
-            >
-              <MiniCalendarHeader />
-              <MiniCalendarDays>
-                {(date) => <MiniCalendarDay date={date} key={date.toISOString()} />}
-              </MiniCalendarDays>
-            </MiniCalendar>
+          <div className="w-full bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl overflow-hidden">
+            <div className="p-4">
+              <MiniCalendar
+                value={selectedDate}
+                onChange={handleDateSelect}
+                minDate={minDate}
+                maxDate={maxDate}
+                className="w-full border-0 shadow-none p-0"
+              >
+                <MiniCalendarHeader />
+                <MiniCalendarDays>
+                  {(date) => <MiniCalendarDay date={date} key={date.toISOString()} />}
+                </MiniCalendarDays>
+              </MiniCalendar>
+            </div>
             
             {/* Time Picker */}
-            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <div className="px-4 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
               <div className="flex items-center justify-center gap-2">
                 <Clock className="w-4 h-4 text-gray-400" />
                 <select
                   value={hours}
                   onChange={(e) => handleTimeChange(e.target.value, minutes)}
-                  className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   {Array.from({ length: 24 }, (_, i) => (
                     <option key={i} value={i.toString().padStart(2, "0")}>
@@ -204,7 +206,7 @@ export function DateTimePicker({
                 <select
                   value={minutes}
                   onChange={(e) => handleTimeChange(hours, e.target.value)}
-                  className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   {Array.from({ length: 60 }, (_, i) => (
                     <option key={i} value={i.toString().padStart(2, "0")}>
@@ -216,13 +218,15 @@ export function DateTimePicker({
             </div>
 
             {/* Done Button */}
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="w-full mt-4 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-colors"
-            >
-              Done
-            </button>
+            <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800">
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="w-full px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-colors"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}
