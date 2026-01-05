@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown, LogOut, Menu, Sigma } from 'lucide-react';
@@ -15,6 +15,7 @@ import { useDemoTour } from '../hooks/useDemoTour';
 import { SortableQuestionItem } from '../components/SortableQuestionItem';
 import { ExamPreviewPanel } from '../components/ExamPreviewPanel';
 import { ImageUploader } from '../components/ImageUploader';
+import { DateTimePicker } from '../components/kibo-ui/date-time-picker';
 import Latex from 'react-latex-next';
 
 interface Question {
@@ -1057,18 +1058,30 @@ export default function ExamEditor() {
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
                                                     <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 ml-1">{t('examEditor.settings.startTime')}</label>
-                                                    <input
-                                                        type="datetime-local"
-                                                        className="w-full px-4 py-3 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 outline-none transition-all text-sm"
-                                                        {...register('settings.start_time')}
+                                                    <Controller
+                                                        name="settings.start_time"
+                                                        control={control}
+                                                        render={({ field }) => (
+                                                            <DateTimePicker
+                                                                value={field.value}
+                                                                onChange={field.onChange}
+                                                                placeholder={t('examEditor.settings.startTime')}
+                                                            />
+                                                        )}
                                                     />
                                                 </div>
                                                 <div>
                                                     <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 ml-1">{t('examEditor.settings.endTime')}</label>
-                                                    <input
-                                                        type="datetime-local"
-                                                        className="w-full px-4 py-3 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 outline-none transition-all text-sm"
-                                                        {...register('settings.end_time')}
+                                                    <Controller
+                                                        name="settings.end_time"
+                                                        control={control}
+                                                        render={({ field }) => (
+                                                            <DateTimePicker
+                                                                value={field.value}
+                                                                onChange={field.onChange}
+                                                                placeholder={t('examEditor.settings.endTime')}
+                                                            />
+                                                        )}
                                                     />
                                                 </div>
                                             </div>
