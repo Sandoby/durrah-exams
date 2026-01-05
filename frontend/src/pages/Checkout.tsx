@@ -601,9 +601,9 @@ export default function Checkout() {
                                                         <div className="flex-1 flex items-center justify-between">
                                                             <div className="flex items-center gap-3">
                                                                 <img
-                                                                    src="https://docs.dodopayments.com/img/logo.svg"
+                                                                    src="https://logo.clearbit.com/dodopayments.com"
                                                                     alt="Dodo Payments"
-                                                                    className="h-8 object-contain dark:invert"
+                                                                    className="h-8 w-8 rounded-lg object-contain bg-white p-1"
                                                                     onError={(e) => {
                                                                         e.currentTarget.style.display = 'none';
                                                                         e.currentTarget.nextElementSibling?.classList.remove('hidden');
@@ -640,9 +640,9 @@ export default function Checkout() {
                                                         <div className="flex-1 flex items-center justify-between">
                                                             <div className="flex items-center gap-3">
                                                                 <img
-                                                                    src="https://paysky.io/wp-content/uploads/2021/04/PaySky-Logo-1.png"
+                                                                    src="https://logo.clearbit.com/paysky.io"
                                                                     alt="PaySky"
-                                                                    className="h-8 object-contain"
+                                                                    className="h-8 w-8 rounded-lg object-contain bg-white p-1"
                                                                     onError={(e) => {
                                                                         e.currentTarget.style.display = 'none';
                                                                         e.currentTarget.nextElementSibling?.classList.remove('hidden');
@@ -667,9 +667,9 @@ export default function Checkout() {
                                                         <div className="flex-1 flex items-center justify-between">
                                                             <div className="flex items-center gap-3">
                                                                 <img
-                                                                    src="https://kashier.io/images/logo.svg"
+                                                                    src="https://logo.clearbit.com/kashier.io"
                                                                     alt="Kashier"
-                                                                    className="h-6 object-contain"
+                                                                    className="h-8 w-8 rounded-lg object-contain bg-white p-1"
                                                                     onError={(e) => {
                                                                         e.currentTarget.style.display = 'none';
                                                                         e.currentTarget.nextElementSibling?.classList.remove('hidden');
