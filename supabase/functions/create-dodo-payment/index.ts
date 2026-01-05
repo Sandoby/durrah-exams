@@ -13,15 +13,18 @@ serve(async (req) => {
     try {
         const { amount, currency, customer, metadata, billingCycle } = await req.json();
 
-        const dodoApiKey = Deno.env.get('DODO_PAYMENTS_API_KEY');
+        const dodoApiKey = Deno.env.get('DODO_PAYMENTS_API_KEY')?.trim();
         if (!dodoApiKey) {
             throw new Error('Dodo Payments API key not configured');
         }
 
-        // Determine environment based on key prefix or separate env var
-        // Defaulting to test for safety if not specified
+        // Determine environment based on key prefix
         const isLive = dodoApiKey.startsWith('live_');
         const baseUrl = isLive ? 'https://live.dodopayments.com' : 'https://test.dodopayments.com';
+
+        console.log(`Using Dodo API: ${isLive ? 'LIVE' : 'TEST'} Mode`);
+        console.log(`Key prefix: ${dodoApiKey.substring(0, 5)}...`);
+        console.log(`Target URL: ${baseUrl}/checkouts`);
 
         // Construct product cart
         // Dodo expects a product cart. We will create a dynamic product for the subscription.
