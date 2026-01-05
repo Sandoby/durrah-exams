@@ -9,7 +9,7 @@ import { kashierIntegration } from '../lib/kashier';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 
-import { useCurrency } from '../hooks/useCurrency';
+
 
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
@@ -37,12 +37,14 @@ export default function Checkout() {
         }
     }, [location.state]);
 
-    // Dynamic currency conversion
-    const proMonthlyPrice = 200;
-    const proYearlyPrice = 2000;
+    // Fixed pricing to 5 USD / 50 USD
+    const proMonthlyPrice = 5;
+    const proYearlyPrice = 50;
 
-    const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(proMonthlyPrice);
-    const { price: yearlyPrice } = useCurrency(proYearlyPrice);
+    const currencyCode = 'USD';
+    const monthlyPrice = '5.00';
+    const yearlyPrice = '50.00';
+    const isCurrencyLoading = false;
 
     // ---------- Plans ----------
     const plans = [
@@ -576,67 +578,111 @@ export default function Checkout() {
                                 <div className="flex flex-col justify-between">
                                     {/* Payment Provider Selection */}
                                     {selectedPlan && plans.find(p => p.id === selectedPlan)?.price !== 0 && (
-                                        <div className="mb-6">
-                                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
-                                                Select Payment Method
-                                            </label>
-                                            <div className="space-y-3">
-                                                {/* Dodo Payments Option */}
-                                                <button
-                                                    onClick={() => setSelectedPaymentProvider('dodo')}
-                                                    className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'dodo'
-                                                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
-                                                        : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
-                                                        }`}
-                                                >
-                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'dodo' ? 'border-indigo-600' : 'border-gray-300'}`}>
-                                                        {selectedPaymentProvider === 'dodo' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
-                                                    </div>
-                                                    <div className="text-left flex-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center text-white font-bold text-[10px]">D</div>
-                                                            <div className="font-bold text-gray-900 dark:text-white">Dodo Payments</div>
-                                                        </div>
-                                                        <div className="text-xs text-gray-500">Secure global payments (Apple Pay, Cards)</div>
-                                                    </div>
-                                                </button>
+                                        <div className="mb-6 space-y-8">
 
-                                                <button
-                                                    onClick={() => setSelectedPaymentProvider('paysky')}
-                                                    className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'paysky'
-                                                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
-                                                        : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
-                                                        }`}
-                                                >
-                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'paysky' ? 'border-indigo-600' : 'border-gray-300'}`}>
-                                                        {selectedPaymentProvider === 'paysky' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                                            {/* International Providers */}
+                                            <div>
+                                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                                                    <Globe className="w-4 h-4 text-indigo-500" />
+                                                    International Payment Providers
+                                                </label>
+                                                <div className="space-y-3">
+                                                    {/* Dodo Payments */}
+                                                    <button
+                                                        onClick={() => setSelectedPaymentProvider('dodo')}
+                                                        className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'dodo'
+                                                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
+                                                            : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                                                            }`}
+                                                    >
+                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'dodo' ? 'border-indigo-600' : 'border-gray-300'}`}>
+                                                            {selectedPaymentProvider === 'dodo' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                                                        </div>
+                                                        <div className="flex-1 flex items-center justify-between">
+                                                            <div className="flex items-center gap-3">
+                                                                <img
+                                                                    src="https://docs.dodopayments.com/img/logo.svg"
+                                                                    alt="Dodo Payments"
+                                                                    className="h-8 object-contain dark:invert"
+                                                                    onError={(e) => {
+                                                                        e.currentTarget.style.display = 'none';
+                                                                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                                                    }}
+                                                                />
+                                                                <div className="hidden font-bold text-gray-900 dark:text-white">Dodo Payments</div>
+                                                            </div>
+                                                            <div className="text-xs font-semibold px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-gray-500">Global</div>
+                                                        </div>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {/* Egyptian Providers */}
+                                            <div>
+                                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                                                    <div className="w-4 h-4 rounded-full overflow-hidden border border-gray-200">
+                                                        <svg viewBox="0 0 3 2" className="w-full h-full"><rect width="3" height="2" fill="#CE1126" /><rect width="3" height="0.66" y="0.66" fill="#fff" /><rect width="3" height="0.66" y="1.33" fill="#000" /><circle cx="1.5" cy="1" r="0.2" fill="#C09300" /></svg>
                                                     </div>
-                                                    <div className="text-left">
-                                                        <div className="font-bold text-gray-900 dark:text-white">PaySky</div>
-                                                        <div className="text-xs text-gray-500">Instant activation</div>
-                                                    </div>
-                                                </button>
-                                                <button
-                                                    onClick={() => setSelectedPaymentProvider('kashier')}
-                                                    className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'kashier'
-                                                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
-                                                        : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
-                                                        }`}
-                                                >
-                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'kashier' ? 'border-indigo-600' : 'border-gray-300'}`}>
-                                                        {selectedPaymentProvider === 'kashier' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
-                                                    </div>
-                                                    <div className="text-left">
-                                                        <div className="font-bold text-gray-900 dark:text-white">Kashier</div>
-                                                        <div className="text-xs text-gray-500">Secure credit card processing</div>
-                                                    </div>
-                                                </button>
+                                                    Egyptian Payment Providers
+                                                </label>
+                                                <div className="space-y-3">
+                                                    {/* PaySky */}
+                                                    <button
+                                                        onClick={() => setSelectedPaymentProvider('paysky')}
+                                                        className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'paysky'
+                                                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
+                                                            : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                                                            }`}
+                                                    >
+                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'paysky' ? 'border-indigo-600' : 'border-gray-300'}`}>
+                                                            {selectedPaymentProvider === 'paysky' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                                                        </div>
+                                                        <div className="flex-1 flex items-center justify-between">
+                                                            <div className="flex items-center gap-3">
+                                                                <img
+                                                                    src="https://paysky.io/wp-content/uploads/2021/04/PaySky-Logo-1.png"
+                                                                    alt="PaySky"
+                                                                    className="h-8 object-contain"
+                                                                    onError={(e) => {
+                                                                        e.currentTarget.style.display = 'none';
+                                                                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                                                    }}
+                                                                />
+                                                                <div className="hidden font-bold text-gray-900 dark:text-white">PaySky</div>
+                                                            </div>
+                                                        </div>
+                                                    </button>
+
+                                                    {/* Kashier */}
+                                                    <button
+                                                        onClick={() => setSelectedPaymentProvider('kashier')}
+                                                        className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'kashier'
+                                                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
+                                                            : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                                                            }`}
+                                                    >
+                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'kashier' ? 'border-indigo-600' : 'border-gray-300'}`}>
+                                                            {selectedPaymentProvider === 'kashier' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                                                        </div>
+                                                        <div className="flex-1 flex items-center justify-between">
+                                                            <div className="flex items-center gap-3">
+                                                                <img
+                                                                    src="https://kashier.io/images/logo.svg"
+                                                                    alt="Kashier"
+                                                                    className="h-6 object-contain"
+                                                                    onError={(e) => {
+                                                                        e.currentTarget.style.display = 'none';
+                                                                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                                                    }}
+                                                                />
+                                                                <div className="hidden font-bold text-gray-900 dark:text-white">Kashier</div>
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    )}
-
-                                    {/* Action button */}
-                                    <button
+                                    )}<button
                                         onClick={handlePayment}
                                         disabled={isProcessing}
                                         className="w-full py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all disabled:opacity-70 disabled:hover:scale-100 flex items-center justify-center gap-2"
