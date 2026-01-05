@@ -1,13 +1,12 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown, LogOut, Menu, Sigma } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Button, Input, Textarea } from "@heroui/react";
 
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -16,7 +15,6 @@ import { useDemoTour } from '../hooks/useDemoTour';
 import { SortableQuestionItem } from '../components/SortableQuestionItem';
 import { ExamPreviewPanel } from '../components/ExamPreviewPanel';
 import { ImageUploader } from '../components/ImageUploader';
-import { DateTimePicker } from '../components/kibo-ui/date-time-picker';
 import Latex from 'react-latex-next';
 
 interface Question {
@@ -784,16 +782,18 @@ export default function ExamEditor() {
                                     Sign Up to Save
                                 </Link>
                             ) : (
-                                <Button
+                                <button
                                     onClick={handleSubmit(onSubmit)}
-                                    isLoading={isLoading}
-                                    color="primary"
-                                    size="lg"
-                                    className="font-black shadow-lg"
-                                    startContent={!isLoading && <Save className="h-4 w-4" />}
+                                    disabled={isLoading}
+                                    className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-indigo-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                                 >
+                                    {isLoading ? (
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    ) : (
+                                        <Save className="h-4 w-4 mr-2" />
+                                    )}
                                     {isLoading ? t('examEditor.saving') : t('examEditor.save')}
-                                </Button>
+                                </button>
                             )}
                         </div>
                     </div>
@@ -812,45 +812,22 @@ export default function ExamEditor() {
                             </h3>
                             <div className="space-y-6">
                                 <div>
-                                    <Controller
-                                        name="title"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Input
-                                                {...field}
-                                                label={t('examEditor.basicInfo.examTitle')}
-                                                placeholder="e.g., Final Physics Assessment"
-                                                variant="bordered"
-                                                size="lg"
-                                                radius="lg"
-                                                classNames={{
-                                                    input: "font-medium",
-                                                    label: "font-bold",
-                                                }}
-                                                required
-                                            />
-                                        )}
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('examEditor.basicInfo.examTitle')}</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none"
+                                        placeholder="e.g., Final Physics Assessment"
+                                        {...register('title')}
                                     />
                                 </div>
                                 <div id="exam-description">
-                                    <Controller
-                                        name="description"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Textarea
-                                                {...field}
-                                                label={t('examEditor.basicInfo.description')}
-                                                placeholder="Briefly describe the purpose of this exam..."
-                                                variant="bordered"
-                                                size="lg"
-                                                radius="lg"
-                                                minRows={3}
-                                                classNames={{
-                                                    input: "font-medium",
-                                                    label: "font-bold",
-                                                }}
-                                            />
-                                        )}
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('examEditor.basicInfo.description')}</label>
+                                    <textarea
+                                        rows={3}
+                                        className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none resize-none"
+                                        placeholder="Briefly describe the purpose of this exam..."
+                                        {...register('description')}
                                     />
                                 </div>
                             </div>
@@ -1080,30 +1057,18 @@ export default function ExamEditor() {
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
                                                     <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 ml-1">{t('examEditor.settings.startTime')}</label>
-                                                    <Controller
-                                                        name="settings.start_time"
-                                                        control={control}
-                                                        render={({ field }) => (
-                                                            <DateTimePicker
-                                                                value={field.value}
-                                                                onChange={field.onChange}
-                                                                placeholder={t('examEditor.settings.startTime')}
-                                                            />
-                                                        )}
+                                                    <input
+                                                        type="datetime-local"
+                                                        className="w-full px-4 py-3 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 outline-none transition-all text-sm"
+                                                        {...register('settings.start_time')}
                                                     />
                                                 </div>
                                                 <div>
                                                     <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 ml-1">{t('examEditor.settings.endTime')}</label>
-                                                    <Controller
-                                                        name="settings.end_time"
-                                                        control={control}
-                                                        render={({ field }) => (
-                                                            <DateTimePicker
-                                                                value={field.value}
-                                                                onChange={field.onChange}
-                                                                placeholder={t('examEditor.settings.endTime')}
-                                                            />
-                                                        )}
+                                                    <input
+                                                        type="datetime-local"
+                                                        className="w-full px-4 py-3 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 outline-none transition-all text-sm"
+                                                        {...register('settings.end_time')}
                                                     />
                                                 </div>
                                             </div>
@@ -1141,28 +1106,25 @@ export default function ExamEditor() {
                                     {t('examEditor.questions.title')}
                                 </h3>
                                 <div className="flex items-center gap-3">
-                                    <Button
+                                    <button
                                         type="button"
                                         onClick={() => setShowMathPreview(!showMathPreview)}
-                                        variant={showMathPreview ? "flat" : "bordered"}
-                                        color={showMathPreview ? "primary" : "default"}
-                                        size="lg"
-                                        className="font-black"
-                                        startContent={<Sigma className="w-5 h-5" />}
+                                        className={`px-4 py-3 rounded-2xl text-sm font-black flex items-center gap-2 transition-all ${showMathPreview
+                                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+                                            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                            }`}
                                     >
+                                        <Sigma className="w-5 h-5" />
                                         {t('math.togglePreview', 'Math')}
-                                    </Button>
-                                    <Button
+                                    </button>
+                                    <button
                                         type="button"
                                         onClick={() => append(defaultQuestion)}
-                                        color="primary"
-                                        variant="bordered"
-                                        size="lg"
-                                        className="font-black"
-                                        startContent={<Plus className="h-5 w-5" />}
+                                        className="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-50 dark:border-indigo-900/30 rounded-2xl text-sm font-black hover:bg-indigo-50 dark:hover:bg-indigo-900/20 active:scale-95 transition-all shadow-sm"
                                     >
+                                        <Plus className="h-5 w-5 mr-2" />
                                         {t('examEditor.questions.add')}
-                                    </Button>
+                                    </button>
                                 </div>
                             </div>
 
