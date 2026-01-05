@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, CreditCard, Shield, Zap, Layout, X, Loader2, Star, Crown, Globe, ExternalLink, Ticket } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Logo } from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
 import { paySkyIntegration } from '../lib/paysky';
@@ -18,6 +18,7 @@ export default function Checkout() {
     const isNative = Capacitor.isNativePlatform();
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const location = useLocation();
     const { user } = useAuth();
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
@@ -26,6 +27,15 @@ export default function Checkout() {
     const [couponCode, setCouponCode] = useState('');
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
     const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+
+    // Handle errors from payment callback
+    useEffect(() => {
+        if (location.state?.error) {
+            toast.error(location.state.error, { duration: 6000 });
+            // Clear the state so it doesn't show again on refresh
+            window.history.replaceState({}, '');
+        }
+    }, [location.state]);
 
     // Dynamic currency conversion
     const proMonthlyPrice = 200;

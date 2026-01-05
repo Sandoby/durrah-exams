@@ -56,7 +56,7 @@ export default function PaymentCallback() {
           if (metadata) {
             const { userId, planId, billingCycle } = metadata;
 
-            // Activate subscription (if not already done by integration)
+            // Activate subscription
             await kashierIntegration.updateUserProfile(userId, planId, billingCycle);
 
             // Background updates
@@ -83,8 +83,6 @@ export default function PaymentCallback() {
                 localStorage.removeItem('pendingCoupon');
               } catch (e) { console.warn('Coupon error:', e); }
             }
-
-            // Confirmation email is now handled server-side by webhooks for better reliability
           }
 
           // Cleanup
@@ -92,13 +90,20 @@ export default function PaymentCallback() {
           else localStorage.removeItem(`paysky_payment_${orderId}`);
 
           toast.success(t('checkout.callback.toast_success', 'Subscription activated!'));
-          setTimeout(() => navigate('/dashboard'), 5000);
+          // Immediate redirect to dashboard
+          navigate('/dashboard', { replace: true });
         }
         // Logic for Cancelled Payment
         else if (paymentStatus?.toUpperCase() === 'CANCELLED') {
+          // Redirect back to checkout
           console.log('⚠️ Payment cancelled');
-          setStatus('cancelled');
-          setMessage(t('checkout.callback.cancelled_message', 'The subscription process was cancelled. No charges were made.'));
+          navigate('/checkout', {
+            state: {
+              error: t('checkout.callback.cancelled_message', 'Payment cancelled.'),
+              paymentFailed: true
+            },
+            replace: true
+          });
 
           localStorage.removeItem('pendingCoupon');
           if (provider === 'kashier') kashierIntegration.clearPaymentData(orderId);
@@ -107,8 +112,14 @@ export default function PaymentCallback() {
         // Logic for Failure
         else {
           console.log('❌ Payment failed');
-          setStatus('error');
-          setMessage(t('checkout.callback.error_message', 'We couldn\'t activate your subscription. Please check your payment details and try again.'));
+          // Redirect back to checkout with error reason
+          navigate('/checkout', {
+            state: {
+              error: t('checkout.callback.error_message', 'Payment failed. Please try again.'),
+              paymentFailed: true
+            },
+            replace: true
+          });
 
           localStorage.removeItem('pendingCoupon');
           if (provider === 'kashier') kashierIntegration.clearPaymentData(orderId);

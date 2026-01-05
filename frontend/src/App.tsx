@@ -39,7 +39,7 @@ import KidsExamView from './pages/KidsExamView';
 import { ProtectedRoute, AgentRoute } from './components/ProtectedRoute';
 
 import { useTranslation } from 'react-i18next';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Capacitor } from '@capacitor/core';
 import MobileWelcome from './pages/MobileWelcome';
@@ -57,6 +57,7 @@ function AppContent() {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, subscriptionStatus } = useAuth();
+  const [isBannerVisible, setIsBannerVisible] = useState(true);
 
   // ... existing useEffects ...
 
@@ -108,16 +109,41 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-      {user && subscriptionStatus === 'payment_failed' && (
-        <div className="bg-red-600 text-white p-4 text-center font-bold sticky top-0 z-[100] shadow-lg animate-pulse">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-2">
-            <span>⚠️ Subscription Payment Failed: Your access is restricted.</span>
-            <button
-              onClick={() => navigate('/checkout')}
-              className="px-4 py-1 bg-white text-red-600 rounded-full text-sm hover:bg-red-50 transition-colors"
-            >
-              Update Payment Method
-            </button>
+      {user && subscriptionStatus === 'payment_failed' && isBannerVisible && (
+        <div className="fixed top-4 right-4 z-[100] animate-in slide-in-from-right-5 duration-500 max-w-md w-full">
+          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-l-4 border-rose-500 shadow-2xl rounded-2xl overflow-hidden ring-1 ring-black/5 dark:ring-white/10">
+            <div className="p-4">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-full shrink-0 mt-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-600 dark:text-rose-400"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><line x1="12" x2="12" y1="9" y2="13" /><line x1="12" x2="12.01" y1="17" y2="17" /></svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-gray-900 dark:text-white text-sm">Subscription Payment Failed</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">Your access is restricted. Please update your payment details to continue.</p>
+
+                  <div className="mt-3 flex gap-3">
+                    <button
+                      onClick={() => navigate('/checkout')}
+                      className="text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 px-4 py-2 rounded-lg transition-colors shadow-sm shadow-rose-200 dark:shadow-rose-900/20"
+                    >
+                      Update Payment
+                    </button>
+                    <button
+                      onClick={() => setIsBannerVisible(false)}
+                      className="text-xs font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 px-2 py-2"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsBannerVisible(false)}
+                  className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
