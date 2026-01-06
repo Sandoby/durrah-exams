@@ -19,10 +19,9 @@ serve(async (req) => {
             event.type === 'checkout.succeeded' ||
             event.type === 'payment.succeeded' ||
             event.type === 'subscription.active' ||
-            event.type === 'subscription.renewed'
         ) {
             await handleSubscriptionUpdate(event, 'active');
-        } else if (event.type === 'payment.failed') {
+        } else if (event.type === 'subscription.on_hold') {
             await handleSubscriptionUpdate(event, 'payment_failed');
         } else if (event.type === 'subscription.cancelled') {
             await handleSubscriptionUpdate(event, 'cancelled');
