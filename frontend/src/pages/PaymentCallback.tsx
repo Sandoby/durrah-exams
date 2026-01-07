@@ -96,7 +96,7 @@ export default function PaymentCallback() {
         // Logic for Cancelled Payment
         else if (paymentStatus?.toUpperCase() === 'CANCELLED') {
           // Redirect back to checkout
-          console.log('⚠️ Payment cancelled');
+          console.log('âڑ  Payment cancelled');
           navigate('/checkout', {
             state: {
               error: t('checkout.callback.cancelled_message', 'Payment cancelled.'),
@@ -107,23 +107,24 @@ export default function PaymentCallback() {
 
           localStorage.removeItem('pendingCoupon');
           if (provider === 'kashier') kashierIntegration.clearPaymentData(orderId);
-          else localStorage.removeItem(`paysky_payment_${orderId}`);
+          else if (provider === 'paysky') localStorage.removeItem(`paysky_payment_${orderId}`);
         }
         // Logic for Failure
         else {
-          console.log('❌ Payment failed');
+          console.log('â‌Œ Payment failed');
           // Redirect back to checkout with error reason
           navigate('/checkout', {
             state: {
               error: t('checkout.callback.error_message', 'Payment failed. Please try again.'),
-              paymentFailed: true
+              paymentFailed: true,
+              provider: provider // Pass provider back for context
             },
             replace: true
           });
 
           localStorage.removeItem('pendingCoupon');
           if (provider === 'kashier') kashierIntegration.clearPaymentData(orderId);
-          else localStorage.removeItem(`paysky_payment_${orderId}`);
+          else if (provider === 'paysky') localStorage.removeItem(`paysky_payment_${orderId}`);
         }
       } catch (error) {
         console.error('❌ Callback error:', error);
