@@ -349,19 +349,19 @@ function ChatWidget() {
           {/* Subtle glass texture overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
 
-          <div className="relative p-6 bg-gradient-to-tr from-indigo-600 via-indigo-600 to-violet-700 flex justify-between items-center text-white shrink-0 overflow-hidden">
+          <div className="relative p-5 sm:p-6 bg-gradient-to-tr from-indigo-600 via-indigo-600 to-violet-700 flex justify-between items-center text-white shrink-0 overflow-hidden">
             {/* Animated header background blob */}
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-pulse"></div>
 
-            <div className="relative flex items-center gap-4">
-              <div className="h-12 w-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
-                <MessageCircle className="w-6 h-6 text-white drop-shadow-md" />
+            <div className="relative flex items-center gap-3 sm:gap-4">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-white/20 backdrop-blur-md rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
+                <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-md" />
               </div>
               <div>
-                <h3 className="text-lg font-black tracking-tight leading-none uppercase">Durrah Support</h3>
-                <div className="flex items-center gap-1.5 mt-1.5">
-                  <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-400 animate-pulse' : 'bg-white/40'}`}></div>
-                  <span className="text-[10px] font-black uppercase tracking-widest opacity-80">
+                <h3 className="text-base sm:text-lg font-black tracking-tight leading-none uppercase">Durrah Support</h3>
+                <div className="flex items-center gap-1.5 mt-1 sm:mt-1.5">
+                  <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isOnline ? 'bg-green-400 animate-pulse' : 'bg-white/40'}`}></div>
+                  <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest opacity-80">
                     {isOnline ? 'Direct Access' : 'Disconnected'}
                   </span>
                 </div>
@@ -369,7 +369,7 @@ function ChatWidget() {
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="relative p-2.5 bg-white/10 hover:bg-white/20 rounded-2xl transition-all hover:rotate-90 duration-300"
+              className="relative p-2 bg-white/10 hover:bg-white/20 rounded-xl sm:rounded-2xl transition-all hover:rotate-90 duration-300"
             >
               <X className="w-5 h-5 text-white" />
             </button>
@@ -439,173 +439,171 @@ function ChatWidget() {
                         )}
                         {!isMe && isSequence && <div className="w-[52px]" />}
 
-                        <div
-                          className={`px-4 sm:px-5 py-3 sm:py-3.5 shadow-sm transition-all hover:shadow-md ${isMe
-                            ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-[1.25rem] sm:rounded-[1.5rem] rounded-tr-[0.4rem] sm:rounded-tr-[0.5rem] font-medium'
-                            : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-[1.25rem] sm:rounded-[1.5rem] rounded-tl-[0.4rem] sm:rounded-tl-[0.5rem] border border-slate-100 dark:border-slate-700/50 font-medium'
-                            }`}
-                        >
-                          <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">{msg.message}</p>
-                        </div>
+                        <div className="flex flex-col gap-1.5 max-w-[85%]">
+                          <div
+                            className={`px-4 sm:px-5 py-3 sm:py-3.5 shadow-sm transition-all hover:shadow-md ${isMe
+                              ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-[1.25rem] sm:rounded-[1.5rem] rounded-tr-[0.4rem] sm:rounded-tr-[0.5rem] font-medium'
+                              : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-[1.25rem] sm:rounded-[1.5rem] rounded-tl-[0.4rem] sm:rounded-tl-[0.5rem] border border-slate-100 dark:border-slate-700/50 font-medium'
+                              }`}
+                          >
+                            <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">{msg.message}</p>
+                          </div>
 
-                        <div className={`flex items-center gap-2 px-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                          <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
-                            {new Date(msg.created_at).toLocaleTimeString([], {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
-                          {isMe && (
-                            <span className={msg.is_read ? 'text-indigo-500' : 'text-slate-400'}>
-                              {msg.is_read ? (
-                                <CheckCheck className="w-3 h-3" />
-                              ) : (
-                                <Check className="w-3 h-3" />
-                              )}
+                          <div className={`flex items-center gap-2 px-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                            <span className="text-[8px] sm:text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
+                              {new Date(msg.created_at).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
                             </span>
-                          )}
+                            {isMe && (
+                              <span className={msg.is_read ? 'text-indigo-500' : 'text-slate-400'}>
+                                {msg.is_read ? (
+                                  <CheckCheck className="w-3 h-3" />
+                                ) : (
+                                  <Check className="w-3 h-3" />
+                                )}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                    </div>
-              );
+                  );
                 })}
-              {/* Rating Button - Show when session is ended */}
-              {currentSession?.status === 'ended' && (
-                <div className="flex justify-center my-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                {/* Rating Button - Show when session is ended */}
+                {currentSession?.status === 'ended' && (
+                  <div className="flex justify-center my-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button
+                      onClick={() => setShowRatingModal(true)}
+                      className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white rounded-full font-semibold shadow-lg transition-all hover:shadow-xl"
+                    >
+                      <span>⭐</span>
+                      <span>Rate Your Experience</span>
+                    </button>
+                  </div>
+                )}
+                <div ref={messagesEndRef} className="h-4" />
+              </div>
+
+              <div className="relative p-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border-t border-white/40 dark:border-slate-800/60 shrink-0">
+                {currentSession?.status === 'ended' ? (
                   <button
-                    onClick={() => setShowRatingModal(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white rounded-full font-semibold shadow-lg transition-all hover:shadow-xl"
+                    onClick={async () => {
+                      setMessages([]);
+                      await startNewSession();
+                    }}
+                    className="w-full py-4 px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2"
                   >
-                    <span>⭐</span>
-                    <span>Rate Your Experience</span>
+                    Start New Conversation
                   </button>
-                </div>
-              )}
-              <div ref={messagesEndRef} className="h-4" />
+                ) : (
+                  <form onSubmit={sendMessage} className="relative group">
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Share your thoughts..."
+                      disabled={isSending || !isOnline}
+                      className="w-full pl-6 pr-14 py-4 rounded-[1.5rem] border border-white/40 dark:border-slate-800/60 bg-white/40 dark:bg-slate-800/40 text-slate-900 dark:text-white text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all disabled:opacity-50 placeholder:text-slate-400"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!newMessage.trim() || isSending || !isOnline}
+                      className="absolute right-2 top-2 p-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl transition-all shadow-lg shadow-slate-900/10 dark:shadow-white/5 active:scale-90 disabled:opacity-50 group-hover:scale-105"
+                    >
+                      {isSending ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Send className="w-5 h-5 translate-x-0.5 -translate-y-0.5" />
+                      )}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Ultra-Premium Rating Modal */}
+      {showRatingModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-[20px] flex items-center justify-center z-[999] p-4 animate-in fade-in duration-500">
+          <div className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-[40px] rounded-[3rem] shadow-[0_32px_128px_-16px_rgba(0,0,0,0.5)] max-w-md w-full p-10 transform animate-in zoom-in-95 duration-500 overflow-hidden border border-white/40 dark:border-slate-800/60">
+            {/* Ambient background glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px]"></div>
+
+            <div className="relative text-center mb-10">
+              <div className="inline-flex h-20 w-20 bg-gradient-to-tr from-indigo-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-3xl items-center justify-center mb-6 shadow-inner border border-indigo-100 dark:border-slate-700">
+                <span className="text-4xl animate-bounce">⭐</span>
+              </div>
+              <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                Help Us <br />Get Better
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 mt-3 text-sm font-medium max-w-[240px] mx-auto leading-relaxed">
+                Your feedback directly impacts the future of Durrah.
+              </p>
             </div>
 
-          <div className="relative p-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border-t border-white/40 dark:border-slate-800/60 shrink-0">
-            {currentSession?.status === 'ended' ? (
+            <div className="flex justify-center gap-3 mb-10">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onClick={() => setSelectedRating(star)}
+                  className="group relative transition-all duration-300"
+                >
+                  {star <= selectedRating && (
+                    <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-xl animate-pulse"></div>
+                  )}
+                  <svg
+                    className={`w-12 h-12 transition-all duration-300 cursor-pointer ${star <= selectedRating
+                      ? 'text-amber-400 fill-amber-400 scale-125'
+                      : 'text-slate-200 dark:text-slate-700 hover:text-amber-300 hover:scale-110'
+                      }`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                </button>
+              ))}
+            </div>
+
+            <textarea
+              value={ratingFeedback}
+              onChange={(e) => setRatingFeedback(e.target.value)}
+              placeholder="Tell us what you liked or what to improve..."
+              className="w-full px-6 py-4 rounded-[1.5rem] border border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all resize-none mb-10 text-sm font-medium placeholder:text-slate-400"
+              rows={3}
+            />
+
+            <div className="flex flex-col gap-2.5 sm:gap-3">
               <button
                 onClick={async () => {
-                  setMessages([]);
-                  await startNewSession();
+                  if (selectedRating > 0 && currentSession) {
+                    await handleRateSession();
+                  }
                 }}
-                className="w-full py-4 px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2"
+                disabled={selectedRating === 0}
+                className="w-full py-4 sm:py-5 rounded-[1.2rem] sm:rounded-[1.5rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center"
               >
-                Start New Conversation
+                Submit Experience
               </button>
-            ) : (
-              <form onSubmit={sendMessage} className="relative group">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Share your thoughts..."
-                  disabled={isSending || !isOnline}
-                  className="w-full pl-6 pr-14 py-4 rounded-[1.5rem] border border-white/40 dark:border-slate-800/60 bg-white/40 dark:bg-slate-800/40 text-slate-900 dark:text-white text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all disabled:opacity-50 placeholder:text-slate-400"
-                />
-                <button
-                  type="submit"
-                  disabled={!newMessage.trim() || isSending || !isOnline}
-                  className="absolute right-2 top-2 p-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl transition-all shadow-lg shadow-slate-900/10 dark:shadow-white/5 active:scale-90 disabled:opacity-50 group-hover:scale-105"
-                >
-                  {isSending ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Send className="w-5 h-5 translate-x-0.5 -translate-y-0.5" />
-                  )}
-                </button>
-              </form>
-            )}
-          </div>
-        </>
-      )}
-    </div >
-      )
-}
-
-{/* Ultra-Premium Rating Modal */ }
-{
-  showRatingModal && (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-[20px] flex items-center justify-center z-[999] p-4 animate-in fade-in duration-500">
-      <div className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-[40px] rounded-[3rem] shadow-[0_32px_128px_-16px_rgba(0,0,0,0.5)] max-w-md w-full p-10 transform animate-in zoom-in-95 duration-500 overflow-hidden border border-white/40 dark:border-slate-800/60">
-        {/* Ambient background glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px]"></div>
-
-        <div className="relative text-center mb-10">
-          <div className="inline-flex h-20 w-20 bg-gradient-to-tr from-indigo-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-3xl items-center justify-center mb-6 shadow-inner border border-indigo-100 dark:border-slate-700">
-            <span className="text-4xl animate-bounce">⭐</span>
-          </div>
-          <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-            Help Us <br />Get Better
-          </h3>
-          <p className="text-slate-500 dark:text-slate-400 mt-3 text-sm font-medium max-w-[240px] mx-auto leading-relaxed">
-            Your feedback directly impacts the future of Durrah.
-          </p>
-        </div>
-
-        <div className="flex justify-center gap-3 mb-10">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onClick={() => setSelectedRating(star)}
-              className="group relative transition-all duration-300"
-            >
-              {star <= selectedRating && (
-                <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-xl animate-pulse"></div>
-              )}
-              <svg
-                className={`w-12 h-12 transition-all duration-300 cursor-pointer ${star <= selectedRating
-                  ? 'text-amber-400 fill-amber-400 scale-125'
-                  : 'text-slate-200 dark:text-slate-700 hover:text-amber-300 hover:scale-110'
-                  }`}
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
+              <button
+                onClick={() => {
+                  setShowRatingModal(false);
+                  setSelectedRating(0);
+                  setRatingFeedback('');
+                }}
+                className="w-full py-1 sm:py-2 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
               >
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-            </button>
-          ))}
+                Skip for now
+              </button>
+            </div>
+          </div>
         </div>
-
-        <textarea
-          value={ratingFeedback}
-          onChange={(e) => setRatingFeedback(e.target.value)}
-          placeholder="Tell us what you liked or what to improve..."
-          className="w-full px-6 py-4 rounded-[1.5rem] border border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all resize-none mb-10 text-sm font-medium placeholder:text-slate-400"
-          rows={3}
-        />
-
-        <div className="flex flex-col gap-2.5 sm:gap-3">
-          <button
-            onClick={async () => {
-              if (selectedRating > 0 && currentSession) {
-                await handleRateSession();
-              }
-            }}
-            disabled={selectedRating === 0}
-            className="w-full py-4 sm:py-5 rounded-[1.2rem] sm:rounded-[1.5rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center"
-          >
-            Submit Experience
-          </button>
-          <button
-            onClick={() => {
-              setShowRatingModal(false);
-              setSelectedRating(0);
-              setRatingFeedback('');
-            }}
-            className="w-full py-1 sm:py-2 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
-          >
-            Skip for now
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
+      )}
     </>
   );
 }
