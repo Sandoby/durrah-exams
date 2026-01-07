@@ -329,15 +329,15 @@ function ChatWidget() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-8 right-8 p-4.5 rounded-[1.5rem] shadow-[0_20px_40px_rgba(79,70,229,0.3)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500 z-40 group ${isOpen
-            ? 'scale-0 opacity-0 rotate-90'
-            : 'scale-100 opacity-100 bg-gradient-to-tr from-indigo-600 to-violet-600 text-white hover:scale-110 active:scale-95'
+        className={`fixed bottom-4 right-4 sm:bottom-8 sm:right-8 p-4 sm:p-4.5 rounded-[1.5rem] shadow-[0_20px_40px_rgba(79,70,229,0.3)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500 z-40 group ${isOpen
+          ? 'scale-0 opacity-0 rotate-90'
+          : 'scale-100 opacity-100 bg-gradient-to-tr from-indigo-600 to-violet-600 text-white hover:scale-110 active:scale-95'
           }`}
       >
         <div className="relative">
-          <MessageCircle className="w-7 h-7 group-hover:rotate-12 transition-transform duration-300" />
+          <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 group-hover:rotate-12 transition-transform duration-300" />
           {unreadCount > 0 && (
-            <span className="absolute -top-3 -right-3 bg-rose-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-lg animate-bounce">
+            <span className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-rose-500 text-white text-[9px] sm:text-[10px] font-black w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-lg animate-bounce">
               {unreadCount}
             </span>
           )}
@@ -442,8 +442,8 @@ function ChatWidget() {
                         <div className="flex flex-col gap-1.5 max-w-[85%]">
                           <div
                             className={`px-5 py-3.5 shadow-sm transition-all hover:shadow-md ${isMe
-                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-[1.5rem] rounded-tr-[0.5rem] font-medium'
-                                : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-[1.5rem] rounded-tl-[0.5rem] border border-slate-100 dark:border-slate-700/50 font-medium'
+                              ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-[1.5rem] rounded-tr-[0.5rem] font-medium'
+                              : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-[1.5rem] rounded-tl-[0.5rem] border border-slate-100 dark:border-slate-700/50 font-medium'
                               }`}
                           >
                             <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.message}</p>
@@ -557,8 +557,8 @@ function ChatWidget() {
                   )}
                   <svg
                     className={`w-12 h-12 transition-all duration-300 cursor-pointer ${star <= selectedRating
-                        ? 'text-amber-400 fill-amber-400 scale-125'
-                        : 'text-slate-200 dark:text-slate-700 hover:text-amber-300 hover:scale-110'
+                      ? 'text-amber-400 fill-amber-400 scale-125'
+                      : 'text-slate-200 dark:text-slate-700 hover:text-amber-300 hover:scale-110'
                       }`}
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -578,7 +578,7 @@ function ChatWidget() {
               rows={3}
             />
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2.5 sm:gap-3">
               <button
                 onClick={async () => {
                   if (selectedRating > 0 && currentSession) {
@@ -586,7 +586,7 @@ function ChatWidget() {
                   }
                 }}
                 disabled={selectedRating === 0}
-                className="w-full py-5 rounded-[1.5rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center"
+                className="w-full py-4 sm:py-5 rounded-[1.2rem] sm:rounded-[1.5rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center"
               >
                 Submit Experience
               </button>
@@ -596,7 +596,7 @@ function ChatWidget() {
                   setSelectedRating(0);
                   setRatingFeedback('');
                 }}
-                className="w-full py-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                className="w-full py-1 sm:py-2 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
               >
                 Skip for now
               </button>
