@@ -109,57 +109,58 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-      {/* Premium Payment Failure Notification */}
+      {/* Ultra-Premium Glassy Payment Failure Notification */}
       {user && subscriptionStatus === 'payment_failed' && isBannerVisible && (
-        <div className="fixed top-6 right-6 z-[100] animate-in slide-in-from-right-8 duration-700 max-w-md w-full">
-          <div className="relative group overflow-hidden">
-            {/* Background Glow */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-rose-500 to-indigo-600 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+        <div className="fixed top-8 right-8 z-[100] animate-in slide-in-from-right-12 fade-in duration-1000 max-w-md w-full">
+          <div className="relative group">
+            {/* Multi-layer ambient glow */}
+            <div className="absolute -inset-1.5 bg-gradient-to-tr from-rose-500/30 via-violet-600/20 to-indigo-500/30 rounded-[2.5rem] blur-2xl opacity-40 group-hover:opacity-60 transition duration-1000"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-transparent rounded-[2.5rem] blur-xl"></div>
 
-            <div className="relative bg-white/70 dark:bg-slate-900/70 backdrop-blur-3xl border border-white/20 dark:border-slate-800/50 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] rounded-3xl p-6">
-              <div className="flex gap-5">
-                {/* Visual Indicator */}
-                <div className="relative shrink-0">
-                  <div className="h-14 w-14 bg-gradient-to-br from-rose-100 to-rose-50 dark:from-rose-950/40 dark:to-rose-900/20 rounded-2xl flex items-center justify-center border border-rose-200/50 dark:border-rose-800/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-rose-600 dark:text-rose-400 animate-pulse">
+            <div className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-[40px] border border-white/40 dark:border-slate-800/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] rounded-[2.5rem] p-8 overflow-hidden">
+              {/* Subtle glass texture overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none"></div>
+
+              <div className="relative flex flex-col gap-6">
+                <div className="flex justify-between items-start">
+                  <div className="h-16 w-16 bg-gradient-to-br from-rose-50 to-white dark:from-rose-500/20 dark:to-slate-900/40 rounded-3xl flex items-center justify-center border border-rose-100 dark:border-rose-500/30 shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-rose-600 dark:text-rose-400 drop-shadow-sm">
                       <path d="M10.73 5.07a2 2 0 0 0-3.47 0L2.27 15.09a2 2 0 0 0 1.74 2.91h12.18a2 2 0 0 0 1.74-2.91L12.47 5.07Z" /><line x1="12" x2="12" y1="9" y2="13" /><line x1="12" x2="12.01" y1="17" y2="17" />
                     </svg>
                   </div>
-                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900"></div>
+                  <button
+                    onClick={() => setIsBannerVisible(false)}
+                    className="p-2 rounded-2xl bg-black/5 dark:bg-white/5 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all hover:rotate-90 duration-300"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                  </button>
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
-                      Access Interrupted
-                    </h3>
-                    <button
-                      onClick={() => setIsBannerVisible(false)}
-                      className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                    </button>
-                  </div>
-
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed font-medium">
-                    We were unable to process your subscription renewal. Please update your payment method to restore your Professional features.
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+                    Subscription <br />On Hold
+                  </h3>
+                  <p className="text-base text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                    We were unable to process your automatic renewal. Restore your access to professional features now.
                   </p>
+                </div>
 
-                  <div className="mt-5 flex items-center gap-4">
-                    <button
-                      onClick={() => navigate('/checkout')}
-                      className="flex-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-sm font-bold py-3 px-6 rounded-2xl transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98] flex items-center justify-center gap-2"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></svg>
-                      Restore Direct Access
-                    </button>
-                    <button
-                      onClick={() => setIsBannerVisible(false)}
-                      className="text-sm font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 px-2 transition-colors"
-                    >
-                      Later
-                    </button>
-                  </div>
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => navigate('/checkout')}
+                    className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-black py-4 px-6 rounded-2xl transition-all shadow-xl shadow-slate-900/10 dark:shadow-white/5 active:scale-[0.98] flex items-center justify-center gap-3 group"
+                  >
+                    <div className="p-1.5 bg-white/20 dark:bg-black/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></svg>
+                    </div>
+                    Restore Access
+                  </button>
+                  <button
+                    onClick={() => setIsBannerVisible(false)}
+                    className="w-full py-4 text-sm font-bold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
+                  >
+                    Remind me later
+                  </button>
                 </div>
               </div>
             </div>
