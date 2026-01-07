@@ -214,13 +214,13 @@ function ChatWidget() {
       if (!authUser) {
         console.log('[CHAT] No user found, signing in anonymously...');
         const { data: anonData, error: anonError } = await supabase.auth.signInAnonymously();
-        
+
         if (anonError || !anonData.user) {
           console.error('[CHAT] Anonymous sign-in error:', anonError);
           toast.error('Failed to start chat session');
           return;
         }
-        
+
         authUser = anonData.user;
         console.log('[CHAT] Anonymous user created:', authUser.id);
       }
@@ -265,7 +265,7 @@ function ChatWidget() {
 
       // Get current authenticated user (could be anonymous)
       const { data: { user: authUser } } = await supabase.auth.getUser();
-      
+
       if (!authUser) {
         console.error('[CHAT] No authenticated user found');
         toast.error('Please refresh and try again');
@@ -329,80 +329,90 @@ function ChatWidget() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 p-4 rounded-full shadow-lg transition-all duration-300 z-40 ${
-          isOpen
-            ? 'scale-0 opacity-0'
-            : 'scale-100 opacity-100 bg-indigo-600 hover:bg-indigo-700 text-white'
-        }`}
+        className={`fixed bottom-8 right-8 p-4.5 rounded-[1.5rem] shadow-[0_20px_40px_rgba(79,70,229,0.3)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500 z-40 group ${isOpen
+            ? 'scale-0 opacity-0 rotate-90'
+            : 'scale-100 opacity-100 bg-gradient-to-tr from-indigo-600 to-violet-600 text-white hover:scale-110 active:scale-95'
+          }`}
       >
-        <MessageCircle className="w-6 h-6" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white dark:border-gray-900">
-            {unreadCount}
-          </span>
-        )}
+        <div className="relative">
+          <MessageCircle className="w-7 h-7 group-hover:rotate-12 transition-transform duration-300" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-3 -right-3 bg-rose-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-lg animate-bounce">
+              {unreadCount}
+            </span>
+          )}
+        </div>
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 sm:inset-auto sm:bottom-20 sm:right-4 sm:w-96 sm:h-[600px] bg-white dark:bg-gray-800 shadow-2xl rounded-none sm:rounded-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 z-40 transition-all duration-200 ease-in-out">
-          <div className="p-4 bg-indigo-600 flex justify-between items-center text-white shrink-0">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5" />
-              <h3 className="font-semibold">Durrah Support</h3>
-            </div>
-            <div className="flex items-center gap-2">
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  isOnline ? 'bg-green-400 animate-pulse' : 'bg-gray-400'
-                }`}
-              ></div>
-              <span className="text-xs opacity-90">
-                {isOnline ? 'Online' : 'Offline'}
-              </span>
+        <div className="fixed inset-0 sm:inset-auto sm:bottom-24 sm:right-8 sm:w-[400px] sm:h-[650px] bg-white/70 dark:bg-slate-900/70 backdrop-blur-[40px] shadow-[0_32px_80px_-16px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_80px_-16px_rgba(0,0,0,0.5)] rounded-none sm:rounded-[2.5rem] flex flex-col overflow-hidden border border-white/40 dark:border-slate-800/60 z-50 animate-in slide-in-from-bottom-12 fade-in duration-500 ease-out">
+          {/* Subtle glass texture overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+
+          <div className="relative p-6 bg-gradient-to-tr from-indigo-600 via-indigo-600 to-violet-700 flex justify-between items-center text-white shrink-0 overflow-hidden">
+            {/* Animated header background blob */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-pulse"></div>
+
+            <div className="relative flex items-center gap-4">
+              <div className="h-12 w-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
+                <MessageCircle className="w-6 h-6 text-white drop-shadow-md" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black tracking-tight leading-none uppercase">Durrah Support</h3>
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-400 animate-pulse' : 'bg-white/40'}`}></div>
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-80">
+                    {isOnline ? 'Direct Access' : 'Disconnected'}
+                  </span>
+                </div>
+              </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-indigo-700 rounded-full transition-colors"
+              className="relative p-2.5 bg-white/10 hover:bg-white/20 rounded-2xl transition-all hover:rotate-90 duration-300"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5 text-white" />
             </button>
           </div>
 
           {!currentSession ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-gray-50 dark:bg-gray-900">
-              <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center mb-4">
-                <MessageCircle className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+            <div className="relative flex-1 flex flex-col items-center justify-center p-8 text-center bg-transparent">
+              <div className="relative w-24 h-24 mb-6">
+                <div className="absolute inset-0 bg-indigo-500/20 dark:bg-indigo-500/10 rounded-[2rem] blur-xl animate-pulse"></div>
+                <div className="relative w-full h-full bg-gradient-to-br from-indigo-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-[2rem] flex items-center justify-center border border-indigo-100 dark:border-slate-700 shadow-inner">
+                  <MessageCircle className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
+                </div>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">
                 How can we help?
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                Start a conversation with our support team. We typically reply in a few minutes.
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-8 leading-relaxed font-medium px-4">
+                Our team is ready to assist you. Start a conversation and we'll be with you shortly.
               </p>
               <button
                 onClick={startNewSession}
                 disabled={isLoading}
-                className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-5 px-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[1.5rem] font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-slate-900/10 dark:shadow-white/5 active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50"
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-6 h-6 animate-spin" />
                 ) : (
                   <>
-                    <Send className="w-4 h-4" />
-                    Start Chat
+                    <Send className="w-4 h-4 translate-x-0.5 -translate-y-0.5" />
+                    Connect Now
                   </>
                 )}
               </button>
             </div>
           ) : (
             <>
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900">
+              <div className="relative flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
                 {messages.map((msg, index) => {
                   const isMe = msg.sender_role === 'user';
                   const showDateSeparator =
                     index === 0 ||
                     getDateLabel(new Date(msg.created_at)) !==
-                      getDateLabel(new Date(messages[index - 1].created_at));
+                    getDateLabel(new Date(messages[index - 1].created_at));
 
                   const isSequence =
                     index > 0 &&
@@ -410,49 +420,44 @@ function ChatWidget() {
                     !showDateSeparator;
 
                   return (
-                    <div key={msg.id}>
+                    <div key={msg.id} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                       {showDateSeparator && (
-                        <div className="flex justify-center my-4">
-                          <span className="text-xs font-medium text-gray-500 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
+                        <div className="flex justify-center my-8">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-100 dark:bg-slate-800/50 px-4 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
                             {getDateLabel(new Date(msg.created_at))}
                           </span>
                         </div>
                       )}
                       <div
-                        className={`flex ${isMe ? 'justify-end' : 'justify-start'} ${
-                          isSequence ? 'mt-1' : 'mt-4'
-                        }`}
+                        className={`flex ${isMe ? 'justify-end' : 'justify-start'} ${isSequence ? 'mt-1.5' : 'mt-6'
+                          }`}
                       >
                         {!isMe && !isSequence && (
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center mr-2 flex-shrink-0">
-                            <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mr-3 flex-shrink-0 shadow-lg border border-white/20">
+                            <User className="w-5 h-5 text-white" />
                           </div>
                         )}
-                        {!isMe && isSequence && <div className="w-10" />}
+                        {!isMe && isSequence && <div className="w-[52px]" />}
 
-                        <div
-                          className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                            isMe
-                              ? 'bg-indigo-600 text-white rounded-br-none'
-                              : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none shadow-sm'
-                          }`}
-                        >
-                          <p className="text-sm break-words">{msg.message}</p>
-                          <div className={`flex items-center justify-end gap-1 mt-1`}>
-                            <p
-                              className={`text-[10px] ${
-                                isMe
-                                  ? 'text-indigo-200'
-                                  : 'text-gray-500 dark:text-gray-400'
+                        <div className="flex flex-col gap-1.5 max-w-[85%]">
+                          <div
+                            className={`px-5 py-3.5 shadow-sm transition-all hover:shadow-md ${isMe
+                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-[1.5rem] rounded-tr-[0.5rem] font-medium'
+                                : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-[1.5rem] rounded-tl-[0.5rem] border border-slate-100 dark:border-slate-700/50 font-medium'
                               }`}
-                            >
+                          >
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.message}</p>
+                          </div>
+
+                          <div className={`flex items-center gap-2 px-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                            <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
                               {new Date(msg.created_at).toLocaleTimeString([], {
                                 hour: '2-digit',
                                 minute: '2-digit'
                               })}
-                            </p>
+                            </span>
                             {isMe && (
-                              <span className="text-indigo-200">
+                              <span className={msg.is_read ? 'text-indigo-500' : 'text-slate-400'}>
                                 {msg.is_read ? (
                                   <CheckCheck className="w-3 h-3" />
                                 ) : (
@@ -466,18 +471,6 @@ function ChatWidget() {
                     </div>
                   );
                 })}
-                {false && (
-                  <div className="flex justify-start mt-4">
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center mr-2">
-                      <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                    </div>
-                    <div className="bg-white dark:bg-gray-700 rounded-2xl rounded-bl-none px-4 py-3 shadow-sm flex items-center gap-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    </div>
-                  </div>
-                )}
                 {/* Rating Button - Show when session is ended */}
                 {currentSession?.status === 'ended' && (
                   <div className="flex justify-center my-6 pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -490,46 +483,39 @@ function ChatWidget() {
                     </button>
                   </div>
                 )}
-                <div ref={messagesEndRef} />
+                <div ref={messagesEndRef} className="h-4" />
               </div>
 
-              <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shrink-0">
+              <div className="relative p-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border-t border-white/40 dark:border-slate-800/60 shrink-0">
                 {currentSession?.status === 'ended' ? (
-                  <div className="text-center">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                      This chat session has been closed.
-                    </p>
-                    <button
-                      onClick={async () => {
-                        setMessages([]);
-                        await startNewSession();
-                      }}
-                      className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
-                    >
-                      Start New Chat
-                    </button>
-                  </div>
+                  <button
+                    onClick={async () => {
+                      setMessages([]);
+                      await startNewSession();
+                    }}
+                    className="w-full py-4 px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    Start New Conversation
+                  </button>
                 ) : (
-                  <form onSubmit={sendMessage} className="flex gap-2">
+                  <form onSubmit={sendMessage} className="relative group">
                     <input
                       type="text"
                       value={newMessage}
-                      onChange={(e) => {
-                        setNewMessage(e.target.value);
-                      }}
-                      placeholder="Type a message..."
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Share your thoughts..."
                       disabled={isSending || !isOnline}
-                      className="flex-1 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-50"
+                      className="w-full pl-6 pr-14 py-4 rounded-[1.5rem] border border-white/40 dark:border-slate-800/60 bg-white/40 dark:bg-slate-800/40 text-slate-900 dark:text-white text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all disabled:opacity-50 placeholder:text-slate-400"
                     />
                     <button
                       type="submit"
                       disabled={!newMessage.trim() || isSending || !isOnline}
-                      className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="absolute right-2 top-2 p-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl transition-all shadow-lg shadow-slate-900/10 dark:shadow-white/5 active:scale-90 disabled:opacity-50 group-hover:scale-105"
                     >
                       {isSending ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
                       ) : (
-                        <Send className="w-5 h-5" />
+                        <Send className="w-5 h-5 translate-x-0.5 -translate-y-0.5" />
                       )}
                     </button>
                   </form>
@@ -540,36 +526,40 @@ function ChatWidget() {
         </div>
       )}
 
-      {/* Rating Modal */}
+      {/* Ultra-Premium Rating Modal */}
       {showRatingModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4 animate-fade-in">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all animate-scale-up">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <div className="text-5xl mb-4">⭐</div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                How was your experience?
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-[20px] flex items-center justify-center z-[999] p-4 animate-in fade-in duration-500">
+          <div className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-[40px] rounded-[3rem] shadow-[0_32px_128px_-16px_rgba(0,0,0,0.5)] max-w-md w-full p-10 transform animate-in zoom-in-95 duration-500 overflow-hidden border border-white/40 dark:border-slate-800/60">
+            {/* Ambient background glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px]"></div>
+
+            <div className="relative text-center mb-10">
+              <div className="inline-flex h-20 w-20 bg-gradient-to-tr from-indigo-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-3xl items-center justify-center mb-6 shadow-inner border border-indigo-100 dark:border-slate-700">
+                <span className="text-4xl animate-bounce">⭐</span>
+              </div>
+              <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                Help Us <br />Get Better
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">
-                Your feedback helps us improve our service
+              <p className="text-slate-500 dark:text-slate-400 mt-3 text-sm font-medium max-w-[240px] mx-auto leading-relaxed">
+                Your feedback directly impacts the future of Durrah.
               </p>
             </div>
-            
-            {/* Star Rating - Interactive */}
-            <div className="flex justify-center gap-3 mb-8">
+
+            <div className="flex justify-center gap-3 mb-10">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   onClick={() => setSelectedRating(star)}
-                  className="group transition-all duration-200"
-                  onMouseEnter={() => {/* Visual feedback on hover */}}
+                  className="group relative transition-all duration-300"
                 >
+                  {star <= selectedRating && (
+                    <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-xl animate-pulse"></div>
+                  )}
                   <svg
-                    className={`w-14 h-14 transition-all duration-200 cursor-pointer ${
-                      star <= selectedRating
-                        ? 'text-yellow-400 fill-yellow-400 scale-110'
-                        : 'text-gray-300 dark:text-gray-600 hover:text-yellow-300 hover:scale-105'
-                    }`}
+                    className={`w-12 h-12 transition-all duration-300 cursor-pointer ${star <= selectedRating
+                        ? 'text-amber-400 fill-amber-400 scale-125'
+                        : 'text-slate-200 dark:text-slate-700 hover:text-amber-300 hover:scale-110'
+                      }`}
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="currentColor"
@@ -580,38 +570,15 @@ function ChatWidget() {
               ))}
             </div>
 
-            {/* Rating Label */}
-            {selectedRating > 0 && (
-              <div className="text-center mb-6 text-lg font-semibold text-indigo-600 dark:text-indigo-400">
-                {selectedRating === 5 && "Excellent! 🎉"}
-                {selectedRating === 4 && "Great! 😊"}
-                {selectedRating === 3 && "Good 👍"}
-                {selectedRating === 2 && "Fair 🤔"}
-                {selectedRating === 1 && "Poor 😞"}
-              </div>
-            )}
-
-            {/* Feedback Text */}
             <textarea
               value={ratingFeedback}
               onChange={(e) => setRatingFeedback(e.target.value)}
-              placeholder="Tell us more... (optional)"
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none mb-6 text-sm"
+              placeholder="Tell us what you liked or what to improve..."
+              className="w-full px-6 py-4 rounded-[1.5rem] border border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all resize-none mb-10 text-sm font-medium placeholder:text-slate-400"
               rows={3}
             />
 
-            {/* Buttons */}
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setShowRatingModal(false);
-                  setSelectedRating(0);
-                  setRatingFeedback('');
-                }}
-                className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                Skip
-              </button>
+            <div className="flex flex-col gap-3">
               <button
                 onClick={async () => {
                   if (selectedRating > 0 && currentSession) {
@@ -619,9 +586,19 @@ function ChatWidget() {
                   }
                 }}
                 disabled={selectedRating === 0}
-                className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                className="w-full py-5 rounded-[1.5rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center"
               >
-                Submit
+                Submit Experience
+              </button>
+              <button
+                onClick={() => {
+                  setShowRatingModal(false);
+                  setSelectedRating(0);
+                  setRatingFeedback('');
+                }}
+                className="w-full py-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              >
+                Skip for now
               </button>
             </div>
           </div>
