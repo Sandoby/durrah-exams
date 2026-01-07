@@ -84,8 +84,7 @@ export function ConvexChatWidget({
   const [isOpen, setIsOpen] = useState(false); // Changed isMinimized to isOpen to match ChatWidget logic
   const [newMessage, setNewMessage] = useState('');
   const [selectedRating, setSelectedRating] = useState(0);
-  const [ratingFeedback, setRatingFeedback] = useState('');
-  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [hasRated, setHasRated] = useState(false);
   const [sessionId, setSessionId] = useState<Id<"chatSessions"> | null>(
     existingSessionId ? existingSessionId as Id<"chatSessions"> : null
   );
@@ -96,7 +95,6 @@ export function ConvexChatWidget({
   // Mutations
   const startChatMutation = useMutation(api.chat.startChat);
   const sendMessageMutation = useMutation(api.chat.sendMessage);
-  const endChatMutation = useMutation(api.chat.endChat);
   const rateSessionMutation = useMutation(api.chat.rateSession);
 
   // Queries
@@ -133,18 +131,11 @@ export function ConvexChatWidget({
 
     // If status changed from active/waiting to ended
     if (previousStatus && previousStatus !== 'ended' && session.status === 'ended') {
-      // Check if ended by agent (not by the current user)
-      if (session.ended_by && session.ended_by !== userId) {
-        // Show rating modal for the user (tutor) side
-        if (userRole === 'tutor') {
-          setShowRatingModal(true);
-          onSessionEnded?.(true); // Notify parent that agent ended
-        }
-      }
+      onSessionEnded?.(true);
     }
 
     setPreviousStatus(session.status);
-  }, [session?.status, session?.ended_by, previousStatus, userId, userRole, onSessionEnded]);
+  }, [session?.status, previousStatus, onSessionEnded]);
 
   // Start a new chat session
   const startSession = useCallback(async () => {
@@ -192,20 +183,6 @@ export function ConvexChatWidget({
     }
   }, [newMessage, sessionId, userId, userName, userRole, sendMessageMutation]);
 
-  // End chat
-  const endSession = useCallback(async () => {
-    if (!sessionId) return;
-
-    try {
-      await endChatMutation({
-        session_id: sessionId,
-        ended_by: userId,
-        ended_by_role: userRole === 'tutor' ? 'tutor' : 'user'
-      });
-    } catch (error) {
-      console.error('Failed to end chat:', error);
-    }
-  }, [sessionId, userId, userRole, endChatMutation]);
 
   // Rate session
   const rateSession = useCallback(async (stars: number, feedback?: string) => {
@@ -231,10 +208,8 @@ export function ConvexChatWidget({
 
   const handleRate = async (stars: number) => {
     setSelectedRating(stars);
-    await rateSession(stars, ratingFeedback);
-    setShowRatingModal(false);
-    await endSession();
-    setSessionId(null);
+    await rateSession(stars);
+    setHasRated(true);
   };
 
   const getDateLabel = (date: Date): string => {
@@ -436,17 +411,52 @@ export function ConvexChatWidget({
               {/* Input Area */}
               <div className="relative p-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border-t border-white/40 dark:border-slate-800/60 shrink-0">
                 {session?.status === 'ended' ? (
-                  <div className="flex flex-col gap-3">
-                    <p className="text-center text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Chat has ended</p>
-                    <button
-                      onClick={() => {
-                        setSessionId(null);
-                        startSession();
-                      }}
-                      className="w-full py-4 px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2"
-                    >
-                      Start New Conversation
-                    </button>
+                  <div className="flex flex-col items-center gap-6 py-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    {!hasRated ? (
+                      <>
+                        <p className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Rate your experience</p>
+                        <div className="flex gap-4">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              onClick={() => handleRate(star)}
+                              className="transition-all hover:scale-125 active:scale-95 group"
+                            >
+                              <Star
+                                className={`w-8 h-8 transition-colors ${star <= selectedRating
+                                  ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.4)]'
+                                  : 'text-slate-200 dark:text-slate-700 group-hover:text-amber-300'
+                                  }`}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => setHasRated(true)}
+                          className="text-[10px] font-black text-slate-400 hover:text-indigo-600 uppercase tracking-[0.2em] transition-colors"
+                        >
+                          Skip rating
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-3 text-green-500 bg-green-50 dark:bg-green-500/10 px-6 py-3 rounded-2xl border border-green-100 dark:border-green-500/20">
+                          <Check className="w-4 h-4" />
+                          <span className="text-xs font-black uppercase tracking-widest">Thank you!</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setSessionId(null);
+                            setHasRated(false);
+                            setSelectedRating(0);
+                            startSession();
+                          }}
+                          className="w-full py-4 px-8 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2"
+                        >
+                          Start New Conversation
+                        </button>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <form onSubmit={handleSendMessage} className="relative group">
@@ -470,83 +480,6 @@ export function ConvexChatWidget({
               </div>
             </>
           )}
-        </div>
-      )}
-
-      {/* Ultra-Premium Rating Modal */}
-      {showRatingModal && (
-        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-[12px] flex items-center justify-center z-[999] p-4 animate-in fade-in duration-700">
-          <div className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-[60px] rounded-[3.5rem] shadow-[0_64px_128px_-24px_rgba(0,0,0,0.3)] dark:shadow-[0_64px_128px_-24px_rgba(0,0,0,0.6)] max-w-md w-full p-12 transform animate-in zoom-in-95 duration-700 overflow-hidden border border-white/40 dark:border-white/10 group/modal">
-            {/* Morphing ambient glows */}
-            <div className="absolute top-0 -left-1/4 w-full h-full bg-indigo-500/10 rounded-full blur-[100px] animate-pulse"></div>
-            <div className="absolute bottom-0 -right-1/4 w-full h-full bg-violet-500/10 rounded-full blur-[100px] animate-pulse [animation-delay:2s]"></div>
-
-            <div className="relative text-center mb-12">
-              <div className="inline-flex h-24 w-24 bg-gradient-to-tr from-indigo-600 to-violet-700 rounded-[2.5rem] items-center justify-center mb-8 shadow-[0_20px_40px_rgba(79,70,229,0.3)] group-hover/modal:scale-110 transition-transform duration-500">
-                <Star className="w-10 h-10 text-white fill-white/20 animate-pulse" />
-              </div>
-              <h3 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none mb-4 uppercase">
-                Rate your <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Chat Agent</span>
-              </h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium max-w-[260px] mx-auto leading-relaxed">
-                Your feedback helps us maintain our premium support standards.
-              </p>
-            </div>
-
-            <div className="flex justify-center gap-4 mb-12">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => setSelectedRating(star)}
-                  onMouseEnter={() => setSelectedRating(star)}
-                  className="group/star relative transition-all duration-500"
-                >
-                  {star <= selectedRating && (
-                    <div className="absolute inset-0 bg-amber-400/30 rounded-full blur-2xl animate-pulse"></div>
-                  )}
-                  <Star
-                    className={`w-10 h-10 transition-all duration-500 transform ${star <= selectedRating
-                        ? 'text-amber-400 fill-amber-400 scale-125 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]'
-                        : 'text-slate-200 dark:text-slate-700 group-hover/star:text-amber-300 group-hover/star:scale-110'
-                      }`}
-                  />
-                </button>
-              ))}
-            </div>
-
-            <div className="relative mb-12">
-              <textarea
-                value={ratingFeedback}
-                onChange={(e) => setRatingFeedback(e.target.value)}
-                placeholder="Share a few words about your experience..."
-                className="w-full px-8 py-6 rounded-[2.5rem] border border-white/40 dark:border-slate-800/60 bg-white/20 dark:bg-slate-900/40 text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none text-sm font-medium placeholder:text-slate-400/60 backdrop-blur-md"
-                rows={3}
-              />
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <button
-                onClick={() => handleRate(selectedRating)}
-                disabled={selectedRating === 0}
-                className="group/submit relative w-full py-6 rounded-[2.5rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl shadow-indigo-500/30 active:scale-[0.98] disabled:opacity-30 flex items-center justify-center overflow-hidden"
-              >
-                {/* Shine effect */}
-                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/submit:translate-x-full transition-transform duration-1000"></div>
-                Submit Rating
-              </button>
-              <button
-                onClick={() => {
-                  setShowRatingModal(false);
-                  endSession();
-                  setSessionId(null);
-                }}
-                className="w-full py-2 text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all hover:scale-105"
-              >
-                Skip feedback
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </>
