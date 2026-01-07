@@ -16,7 +16,8 @@ import {
   Check,
   CreditCard,
   AlertCircle,
-  GraduationCap
+  GraduationCap,
+  Star
 } from 'lucide-react';
 import { CONVEX_FEATURES } from '../main';
 import { supabase } from '../lib/supabase';
@@ -474,60 +475,65 @@ export function ConvexChatWidget({
 
       {/* Ultra-Premium Rating Modal */}
       {showRatingModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-[20px] flex items-center justify-center z-[999] p-4 animate-in fade-in duration-500">
-          <div className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-[40px] rounded-[3rem] shadow-[0_32px_128px_-16px_rgba(0,0,0,0.5)] max-w-md w-full p-10 transform animate-in zoom-in-95 duration-500 overflow-hidden border border-white/40 dark:border-slate-800/60">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px]"></div>
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-[12px] flex items-center justify-center z-[999] p-4 animate-in fade-in duration-700">
+          <div className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-[60px] rounded-[3.5rem] shadow-[0_64px_128px_-24px_rgba(0,0,0,0.3)] dark:shadow-[0_64px_128px_-24px_rgba(0,0,0,0.6)] max-w-md w-full p-12 transform animate-in zoom-in-95 duration-700 overflow-hidden border border-white/40 dark:border-white/10 group/modal">
+            {/* Morphing ambient glows */}
+            <div className="absolute top-0 -left-1/4 w-full h-full bg-indigo-500/10 rounded-full blur-[100px] animate-pulse"></div>
+            <div className="absolute bottom-0 -right-1/4 w-full h-full bg-violet-500/10 rounded-full blur-[100px] animate-pulse [animation-delay:2s]"></div>
 
-            <div className="relative text-center mb-10">
-              <div className="inline-flex h-20 w-20 bg-gradient-to-tr from-indigo-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-3xl items-center justify-center mb-6 shadow-inner border border-indigo-100 dark:border-slate-700">
-                <span className="text-4xl animate-bounce">⭐</span>
+            <div className="relative text-center mb-12">
+              <div className="inline-flex h-24 w-24 bg-gradient-to-tr from-indigo-600 to-violet-700 rounded-[2.5rem] items-center justify-center mb-8 shadow-[0_20px_40px_rgba(79,70,229,0.3)] group-hover/modal:scale-110 transition-transform duration-500">
+                <Star className="w-10 h-10 text-white fill-white/20 animate-pulse" />
               </div>
-              <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">Help Us <br />Get Better</h3>
-              <p className="text-slate-500 dark:text-slate-400 mt-3 text-sm font-medium max-w-[240px] mx-auto leading-relaxed">
-                Your feedback directly impacts the future of Durrah.
+              <h3 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none mb-4 uppercase">
+                Rate your <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Chat Agent</span>
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium max-w-[260px] mx-auto leading-relaxed">
+                Your feedback helps us maintain our premium support standards.
               </p>
             </div>
 
-            <div className="flex justify-center gap-3 mb-10">
+            <div className="flex justify-center gap-4 mb-12">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   onClick={() => setSelectedRating(star)}
-                  className="group relative transition-all duration-300"
+                  onMouseEnter={() => setSelectedRating(star)}
+                  className="group/star relative transition-all duration-500"
                 >
                   {star <= selectedRating && (
-                    <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-xl animate-pulse"></div>
+                    <div className="absolute inset-0 bg-amber-400/30 rounded-full blur-2xl animate-pulse"></div>
                   )}
-                  <svg
-                    className={`w-12 h-12 transition-all duration-300 cursor-pointer ${star <= selectedRating
-                      ? 'text-amber-400 fill-amber-400 scale-125'
-                      : 'text-slate-200 dark:text-slate-700 hover:text-amber-300 hover:scale-110'
+                  <Star
+                    className={`w-10 h-10 transition-all duration-500 transform ${star <= selectedRating
+                        ? 'text-amber-400 fill-amber-400 scale-125 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]'
+                        : 'text-slate-200 dark:text-slate-700 group-hover/star:text-amber-300 group-hover/star:scale-110'
                       }`}
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
+                  />
                 </button>
               ))}
             </div>
 
-            <textarea
-              value={ratingFeedback}
-              onChange={(e) => setRatingFeedback(e.target.value)}
-              placeholder="Tell us what you liked or what to improve..."
-              className="w-full px-6 py-4 rounded-[1.5rem] border border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all resize-none mb-10 text-sm font-medium placeholder:text-slate-400"
-              rows={3}
-            />
+            <div className="relative mb-12">
+              <textarea
+                value={ratingFeedback}
+                onChange={(e) => setRatingFeedback(e.target.value)}
+                placeholder="Share a few words about your experience..."
+                className="w-full px-8 py-6 rounded-[2.5rem] border border-white/40 dark:border-slate-800/60 bg-white/20 dark:bg-slate-900/40 text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none text-sm font-medium placeholder:text-slate-400/60 backdrop-blur-md"
+                rows={3}
+              />
+            </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               <button
                 onClick={() => handleRate(selectedRating)}
                 disabled={selectedRating === 0}
-                className="w-full py-5 rounded-[1.5rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center"
+                className="group/submit relative w-full py-6 rounded-[2.5rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl shadow-indigo-500/30 active:scale-[0.98] disabled:opacity-30 flex items-center justify-center overflow-hidden"
               >
-                Submit Experience
+                {/* Shine effect */}
+                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/submit:translate-x-full transition-transform duration-1000"></div>
+                Submit Rating
               </button>
               <button
                 onClick={() => {
@@ -535,9 +541,9 @@ export function ConvexChatWidget({
                   endSession();
                   setSessionId(null);
                 }}
-                className="w-full py-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                className="w-full py-2 text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all hover:scale-105"
               >
-                Skip for now
+                Skip feedback
               </button>
             </div>
           </div>
