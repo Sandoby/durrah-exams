@@ -98,6 +98,8 @@ export default function ExamEditor() {
     // Kids Mode helpers
     const [savedQuizCode, setSavedQuizCode] = useState<string | null>(null);
 
+    /* 
+    // Commented out as currently unused (Kids Mode Coming Soon)
     // Generate a unique exam code for all exams (not just kids)
     const generateQuizCode = () => {
         const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -111,6 +113,7 @@ export default function ExamEditor() {
         setSavedQuizCode(next);
         return next;
     };
+    */
 
     useDemoTour('create-exam', startTour && isDemo);
 
