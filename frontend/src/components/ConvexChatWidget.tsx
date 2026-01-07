@@ -15,7 +15,8 @@ import {
   Crown,
   Check,
   CreditCard,
-  AlertCircle
+  AlertCircle,
+  GraduationCap
 } from 'lucide-react';
 import { CONVEX_FEATURES } from '../main';
 import { supabase } from '../lib/supabase';
@@ -263,10 +264,10 @@ export function ConvexChatWidget({
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className={`fixed bottom-4 right-4 sm:bottom-8 sm:right-8 p-4 sm:p-4.5 rounded-[1.5rem] shadow-[0_20px_40px_rgba(79,70,229,0.3)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500 z-40 group bg-gradient-to-tr from-indigo-600 to-violet-600 text-white hover:scale-110 active:scale-95`}
+          className={`fixed bottom-4 right-4 sm:bottom-8 sm:right-8 p-4 sm:p-4.5 rounded-[1.5rem] shadow-[0_20px_40px_rgba(79,70,229,0.3)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500 z-40 group bg-gradient-to-tr from-indigo-600 to-violet-700 text-white hover:scale-110 active:scale-95`}
         >
           <div className="relative">
-            <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 group-hover:rotate-12 transition-transform duration-300" />
+            <GraduationCap className="w-6 h-6 sm:w-7 sm:h-7 group-hover:rotate-12 transition-transform duration-300" />
             {unreadCount > 0 && (
               <span className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-rose-500 text-white text-[9px] sm:text-[10px] font-black w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-lg animate-bounce">
                 {unreadCount}
@@ -288,10 +289,12 @@ export function ConvexChatWidget({
 
             <div className="relative flex items-center gap-3 sm:gap-4">
               <div className="h-10 w-10 sm:h-12 sm:w-12 bg-white/20 backdrop-blur-md rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
-                <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-md" />
+                <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-md" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-black tracking-tight leading-none uppercase">Live Support</h3>
+                <h3 className="text-base sm:text-lg font-black tracking-tight leading-none uppercase">
+                  Durrah <span className="opacity-60 font-light">Support</span>
+                </h3>
                 <div className="flex items-center gap-1.5 mt-1 sm:mt-1.5">
                   <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${session?.status === 'active' ? 'bg-green-400 animate-pulse' : 'bg-white/40'}`}></div>
                   <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest opacity-80">
