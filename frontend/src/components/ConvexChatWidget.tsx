@@ -278,12 +278,12 @@ export function ConvexChatWidget({
 
       {/* Main Chat Window */}
       {isOpen && (
-        <div className="fixed inset-0 sm:inset-auto sm:bottom-24 sm:right-8 sm:w-[400px] sm:h-[650px] bg-white/70 dark:bg-slate-900/70 backdrop-blur-[40px] shadow-[0_32px_80px_-16px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_80px_-16px_rgba(0,0,0,0.5)] rounded-none sm:rounded-[2.5rem] flex flex-col overflow-hidden border border-white/40 dark:border-slate-800/60 z-50 animate-in slide-in-from-bottom-12 fade-in duration-500 ease-out">
+        <div className="fixed inset-0 sm:inset-auto sm:bottom-24 sm:right-8 sm:w-[400px] sm:max-h-[min(700px,calc(100vh-120px))] bg-white/70 dark:bg-slate-900/70 backdrop-blur-[40px] shadow-[0_32px_80px_-16px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_80px_-16px_rgba(0,0,0,0.5)] rounded-none sm:rounded-[2.5rem] flex flex-col overflow-hidden border border-white/40 dark:border-slate-800/60 z-50 animate-in slide-in-from-bottom-12 fade-in duration-500 ease-out">
           {/* Subtle glass texture overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
 
           {/* Premium Header */}
-          <div className="relative p-5 sm:p-6 bg-gradient-to-tr from-indigo-600 via-indigo-600 to-violet-700 flex justify-between items-center text-white shrink-0 overflow-hidden">
+          <div className="relative p-5 sm:p-6 bg-gradient-to-tr from-indigo-600 via-indigo-600 to-violet-700 flex justify-between items-center text-white shrink-0 overflow-hidden min-h-[80px] sm:min-h-[96px]">
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-pulse"></div>
 
             <div className="relative flex items-center gap-3 sm:gap-4">
@@ -391,12 +391,12 @@ export function ConvexChatWidget({
 
                         <div className="flex flex-col gap-1.5 max-w-[85%]">
                           <div
-                            className={`px-4 sm:px-5 py-3 sm:py-3.5 shadow-sm transition-all hover:shadow-md ${isMe
+                            className={`px-4 sm:px-5 py-3 sm:py-3.5 shadow-sm transition-all hover:shadow-md break-words overflow-hidden ${isMe
                               ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-[1.25rem] sm:rounded-[1.5rem] rounded-tr-[0.4rem] sm:rounded-tr-[0.5rem] font-medium'
                               : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-[1.25rem] sm:rounded-[1.5rem] rounded-tl-[0.4rem] sm:rounded-tl-[0.5rem] border border-slate-100 dark:border-slate-700/50 font-medium'
                               }`}
                           >
-                            <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">{msg.body}</p>
+                            <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.body}</p>
                           </div>
 
                           <div className={`flex items-center gap-2 px-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
