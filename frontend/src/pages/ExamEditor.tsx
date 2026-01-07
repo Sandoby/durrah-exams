@@ -105,12 +105,14 @@ export default function ExamEditor() {
         return `${chunk(3)}-${chunk(3)}`;
     };
 
+    /* 
     const ensureQuizCode = () => {
         if (savedQuizCode) return savedQuizCode;
         const next = generateQuizCode();
         setSavedQuizCode(next);
         return next;
     };
+    */
 
     useDemoTour('create-exam', startTour && isDemo);
 
