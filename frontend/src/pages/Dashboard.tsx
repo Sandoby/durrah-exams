@@ -555,51 +555,43 @@ export default function Dashboard() {
 
                 {/* Mobile menu */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden mt-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 mx-4 overflow-hidden relative z-[60] animate-in slide-in-from-top-4 duration-300">
-                        <div className="px-4 py-3 space-y-1">
-                            <div className="px-3 py-2 text-xs font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800 mb-2">
+                    <div className="md:hidden border-t border-gray-200 dark:border-gray-700">
+                        <div className="px-2 pt-2 pb-3 space-y-1">
+                            <div className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
                                 {user?.user_metadata?.full_name || user?.email}
                             </div>
                             <button
                                 onClick={() => { startTour(); setIsMobileMenuOpen(false); }}
-                                className="flex items-center w-full px-4 py-3 rounded-xl text-base font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all"
+                                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-indigo-600 dark:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700"
                             >
-                                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg mr-3">
-                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
+                                <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
                                 {t('dashboard.tour.startTour', 'Tutorial')}
                             </button>
                             {profile?.subscription_status !== 'active' && (
                                 <Link
                                     to="/checkout"
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="flex items-center px-4 py-3 rounded-xl text-base font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all"
+                                    className="flex items-center px-3 py-2 rounded-md text-base font-medium text-indigo-600 dark:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700"
                                 >
-                                    <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg mr-3">
-                                        <Crown className="h-5 w-5" />
-                                    </div>
+                                    <Crown className="h-5 w-5 mr-3" />
                                     {t('settings.subscription.upgrade')}
                                 </Link>
                             )}
                             <Link
                                 to="/settings"
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="flex items-center px-4 py-3 rounded-xl text-base font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                             >
-                                <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg mr-3">
-                                    <Settings className="h-5 w-5" />
-                                </div>
+                                <Settings className="h-5 w-5 mr-3" />
                                 {t('settings.title')}
                             </Link>
                             <button
                                 onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
-                                className="flex items-center w-full px-4 py-3 rounded-xl text-base font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all"
+                                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                             >
-                                <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-lg mr-3">
-                                    <LogOut className="h-5 w-5" />
-                                </div>
+                                <LogOut className="h-5 w-5 mr-3" />
                                 {t('nav.logout', 'Logout')}
                             </button>
                         </div>
@@ -1115,9 +1107,9 @@ export default function Dashboard() {
             )}
             {/* Chat Widget - Convex or Classic */}
             {CONVEX_FEATURES.chat ? (
-                <ConvexChatWidget
-                    userId={user?.id || 'anonymous'}
-                    userName={user?.user_metadata?.full_name || user?.email || 'Tutor'}
+                <ConvexChatWidget 
+                    userId={user?.id || 'anonymous'} 
+                    userName={user?.user_metadata?.full_name || user?.email || 'Tutor'} 
                     userRole="tutor"
                 />
             ) : (

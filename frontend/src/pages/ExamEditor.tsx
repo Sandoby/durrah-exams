@@ -105,14 +105,12 @@ export default function ExamEditor() {
         return `${chunk(3)}-${chunk(3)}`;
     };
 
-    /* 
     const ensureQuizCode = () => {
         if (savedQuizCode) return savedQuizCode;
         const next = generateQuizCode();
         setSavedQuizCode(next);
         return next;
     };
-    */
 
     useDemoTour('create-exam', startTour && isDemo);
 
@@ -741,24 +739,27 @@ export default function ExamEditor() {
                                 </div>
                             </div>
 
-                            {/* Kids Mode Toggle (Disabled for now) */}
+                            {/* Kids Mode Toggle */}
                             <div className="flex items-center gap-2 ml-2 sm:ml-6 pl-2 sm:pl-6 border-l border-gray-100 dark:border-gray-800">
-                                <div className="flex items-center opacity-60 cursor-not-allowed group px-4 py-2 rounded-2xl bg-gray-100/50 dark:bg-gray-800/30 border-2 border-transparent transition-all">
+                                <label className="flex items-center cursor-pointer group px-4 py-2 rounded-2xl bg-purple-50/50 dark:bg-purple-900/20 border-2 border-transparent hover:border-purple-200 dark:hover:border-purple-800 transition-all">
                                     <input
                                         type="checkbox"
-                                        disabled
-                                        checked={false}
-                                        className="h-5 w-5 text-gray-400 border-gray-300 rounded-lg cursor-not-allowed"
+                                        checked={watch('settings.child_mode_enabled')}
+                                        onChange={(e) => {
+                                            setValue('settings.child_mode_enabled', e.target.checked);
+                                            if (e.target.checked) {
+                                                setValue('settings.attempt_limit', 1);
+                                                setValue('settings.leaderboard_visibility', 'after_submit');
+                                                ensureQuizCode();
+                                                toast.success('🎈 Kids Mode Active!');
+                                            }
+                                        }}
+                                        className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded-lg transition-all"
                                     />
-                                    <div className="ml-2 flex flex-col sm:flex-row sm:items-center gap-1">
-                                        <span className="text-sm font-black text-gray-500 dark:text-gray-400">
-                                            Kids Mode
-                                        </span>
-                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tighter bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/50">
-                                            Coming Soon
-                                        </span>
-                                    </div>
-                                </div>
+                                    <span className="ml-2 text-sm font-black text-purple-700 dark:text-purple-300">
+                                        Kids Mode
+                                    </span>
+                                </label>
                             </div>
                         </div>
 

@@ -1,20 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://tutors.durrahsystem.tech/</loc>
-    <lastmod>2025-12-16</lastmod>
+    <lastmod>2026-01-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://tutors.durrahsystem.tech/logo.png</image:loc>
+      <image:title>Durrah for Tutors Logo</image:title>
+      <image:caption>Durrah for Tutors - Online Exam Platform</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://tutors.durrahsystem.tech/og-image.png</image:loc>
+      <image:title>Durrah for Tutors</image:title>
+      <image:caption>Create Secure Online Exams with Durrah for Tutors</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://tutors.durrahsystem.tech/kids</loc>
-    <lastmod>2025-12-16</lastmod>
+    <lastmod>2026-01-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
     <loc>https://tutors.durrahsystem.tech/blog</loc>
-    <lastmod>2024-12-06</lastmod>
+    <lastmod>2026-01-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -44,10 +55,14 @@
   </url>
   <url>
     <loc>https://tutors.durrahsystem.tech/login</loc>
-    <priority>0.8</priority>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://tutors.durrahsystem.tech/register</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 </urlset>
