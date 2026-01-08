@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Logo } from '../components/Logo';
 import { LogOut, BookOpen, Clock, Trophy, Search, User, ArrowRight, History, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -13,6 +13,8 @@ export default function StudentPortal() {
   const isRTL = i18n.dir() === 'rtl';
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectPath = searchParams.get('redirect');
 
   // States
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
@@ -26,8 +28,13 @@ export default function StudentPortal() {
   useEffect(() => {
     if (user) {
       fetchStudentData();
+
+      // Handle redirection if redirect path is present
+      if (redirectPath) {
+        navigate(redirectPath);
+      }
     }
-  }, [user]);
+  }, [user, redirectPath, navigate]);
 
   const fetchStudentData = async () => {
     if (!user?.email) return;
