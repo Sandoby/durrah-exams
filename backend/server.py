@@ -1,7 +1,9 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, BackgroundTasks
 from contextlib import asynccontextmanager
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.responses import StreamingResponse, RedirectResponse
+from fastapi.responses import StreamingResponse, RedirectResponse, Response
+from cachetools import TTLCache
+
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -38,10 +40,29 @@ JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production'
 JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_HOURS = 24
 
+# In-memory cache for public exams (prevents DB spikes)
+exam_cache = TTLCache(maxsize=1000, ttl=60)
+
+
 # Lifespan context manager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
+    # Startup: Create indexes
+    try:
+        # Exams collection
+        await db.exams.create_index([("id", 1)], unique=True)
+        await db.exams.create_index([("tutor_id", 1)])
+        await db.exams.create_index([("is_active", 1)])
+        
+        # Attempts collection
+        await db.exam_attempts.create_index([("exam_id", 1)])
+        await db.exam_attempts.create_index([("student_data.email", 1)])
+        await db.exam_attempts.create_index([("created_at", -1)])
+        
+        logger.info("✅ MongoDB Indexes created/verified")
+    except Exception as e:
+        logger.error(f"❌ Failed to create indexes: {e}")
+        
     yield
     # Shutdown
     client.close()
@@ -162,7 +183,99 @@ class ViolationReport(BaseModel):
     exam_id: str
     violation: ViolationLog
 
+# ============ BACKGROUND TASKS ============
+
+async def mirror_submission_to_supabase(attempt: ExamAttempt, submission: ExamSubmission, exam: dict):
+    """
+    Background task to mirror submission to Supabase (Postgres).
+    Runs asynchronously to not block the student's response.
+    """
+    if not (SUPABASE_URL and SUPABASE_SERVICE_ROLE):
+        return
+
+    try:
+        # Prepare submission row
+        student_name = submission.student_data.get('name') or submission.student_data.get('student_name') or ''
+        student_email = submission.student_data.get('email') or submission.student_data.get('student_email') or ''
+
+        submissions_url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/submissions"
+        headers = {
+            'apikey': SUPABASE_SERVICE_ROLE,
+            'Authorization': f'Bearer {SUPABASE_SERVICE_ROLE}',
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+        }
+
+        submission_payload = {
+            'id': attempt.id,
+            'exam_id': attempt.exam_id,
+            'student_name': student_name,
+            'student_email': student_email,
+            'score': int(attempt.score),
+            'max_score': int(attempt.max_score),
+            'percentage': float(attempt.percentage),
+            'violations': submission.violations or [],
+            'browser_info': submission.browser_info or {}
+        }
+
+        # Uses synchronous requests because run_in_executor or async client is preferred, 
+        # but for simplicity in background tasks standard requests is okay if volume isn't massive.
+        # For High Scalability: replace 'requests' with 'httpx' (async).
+        # We will use simple requests here as it is already in background thread/task.
+        r = requests.post(submissions_url, json=submission_payload, headers=headers, timeout=10)
+        if not (200 <= r.status_code < 300):
+            logger.warning(f"Failed to mirror submission to Supabase: {r.status_code} {r.text}")
+
+        # Prepare submission_answers bulk insert
+        answers_payload = []
+        # We recompute per-answer correctness using the same logic as above
+        # so that submission_answers.is_correct is accurate.
+        for ans in submission.answers:
+            is_correct = False
+            # find matching question
+            q = next((q for q in exam['questions'] if q['id'] == ans.question_id), None)
+            if q and q.get('correct_answer') not in (None, ''):
+                q_correct = q.get('correct_answer')
+                try:
+                    if isinstance(q_correct, list):
+                        parsed = json.loads(ans.answer) if isinstance(ans.answer, str) else ans.answer
+                        if isinstance(parsed, list):
+                            a = sorted([str(x).strip() for x in q_correct])
+                            b = sorted([str(x).strip() for x in parsed])
+                            is_correct = (a == b)
+                    else:
+                        if q.get('type') == 'numeric':
+                            try:
+                                s = float(ans.answer)
+                                c = float(q_correct)
+                                is_correct = (s == c)
+                            except Exception:
+                                is_correct = False
+                        else:
+                            is_correct = (str(ans.answer).strip().lower() == str(q_correct).strip().lower())
+                except Exception:
+                    is_correct = False
+
+            answers_payload.append({
+                'submission_id': attempt.id,
+                'question_id': ans.question_id,
+                'answer': ans.answer,
+                'is_correct': is_correct
+            })
+
+        if answers_payload:
+            answers_url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/submission_answers"
+            r2 = requests.post(answers_url, json=answers_payload, headers=headers, timeout=10)
+            if not (200 <= r2.status_code < 300):
+                logger.warning(f"Failed to mirror submission_answers to Supabase: {r2.status_code} {r2.text}")
+                
+        logger.info(f"✅ Mirrored submission {attempt.id} to Supabase")
+
+    except Exception as e:
+        logger.exception(f"Error while mirroring submission to Supabase: {e}")
+
 # ============ AUTH HELPERS ============
+
 
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -311,8 +424,16 @@ async def delete_exam(exam_id: str, tutor_id: str = Depends(get_current_tutor)):
 
 # ============ STUDENT EXAM ROUTES (NO AUTH) ============
 
+
+
 @api_router.get("/exams/{exam_id}/public")
-async def get_public_exam(exam_id: str):
+async def get_public_exam(exam_id: str, response: Response):
+    # Check cache first
+    if exam_id in exam_cache:
+        response.headers["Cache-Control"] = "public, max-age=60"
+        response.headers["X-Cache"] = "HIT"
+        return exam_cache[exam_id]
+        
     exam = await db.exams.find_one({"id": exam_id, "is_active": True}, {"_id": 0})
     if not exam:
         raise HTTPException(status_code=404, detail="Exam not found or inactive")
@@ -332,10 +453,15 @@ async def get_public_exam(exam_id: str):
     for question in exam_copy['questions']:
         question.pop('correct_answer', None)
     
+    # Store in cache
+    exam_cache[exam_id] = exam_copy
+    
+    response.headers["Cache-Control"] = "public, max-age=60"
+    response.headers["X-Cache"] = "MISS"
     return exam_copy
 
 @api_router.post("/exams/{exam_id}/submit")
-async def submit_exam(exam_id: str, submission: ExamSubmission):
+async def submit_exam(exam_id: str, submission: ExamSubmission, background_tasks: BackgroundTasks):
     # Get exam
     exam = await db.exams.find_one({"id": exam_id})
     if not exam:
@@ -416,81 +542,9 @@ async def submit_exam(exam_id: str, submission: ExamSubmission):
     # iOS/Safari clients submit via backend even when client auth/session is
     # blocked. Use REST API with the service role key so this runs server-side
     # and does not expose credentials to browsers.
-    if SUPABASE_URL and SUPABASE_SERVICE_ROLE:
-        try:
-            # Prepare submission row
-            student_name = submission.student_data.get('name') or submission.student_data.get('student_name') or ''
-            student_email = submission.student_data.get('email') or submission.student_data.get('student_email') or ''
+    # Add background task to mirror to Supabase
+    background_tasks.add_task(mirror_submission_to_supabase, attempt, submission, exam)
 
-            submissions_url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/submissions"
-            headers = {
-                'apikey': SUPABASE_SERVICE_ROLE,
-                'Authorization': f'Bearer {SUPABASE_SERVICE_ROLE}',
-                'Content-Type': 'application/json',
-                'Prefer': 'return=representation'
-            }
-
-            submission_payload = {
-                'id': attempt.id,
-                'exam_id': exam_id,
-                'student_name': student_name,
-                'student_email': student_email,
-                'score': int(score),
-                'max_score': int(max_score),
-                'percentage': float(percentage),
-                'violations': submission.violations or [],
-                'browser_info': submission.browser_info or {}
-            }
-
-            r = requests.post(submissions_url, json=submission_payload, headers=headers, timeout=10)
-            if not (200 <= r.status_code < 300):
-                logger.warning(f"Failed to mirror submission to Supabase: {r.status_code} {r.text}")
-
-            # Prepare submission_answers bulk insert
-            answers_payload = []
-            # We recompute per-answer correctness using the same logic as above
-            # so that submission_answers.is_correct is accurate.
-            for ans in submission.answers:
-                is_correct = False
-                # find matching question
-                q = next((q for q in exam['questions'] if q['id'] == ans.question_id), None)
-                if q and q.get('correct_answer') not in (None, ''):
-                    q_correct = q.get('correct_answer')
-                    try:
-                        if isinstance(q_correct, list):
-                            parsed = json.loads(ans.answer) if isinstance(ans.answer, str) else ans.answer
-                            if isinstance(parsed, list):
-                                a = sorted([str(x).strip() for x in q_correct])
-                                b = sorted([str(x).strip() for x in parsed])
-                                is_correct = (a == b)
-                        else:
-                            if q.get('type') == 'numeric':
-                                try:
-                                    s = float(ans.answer)
-                                    c = float(q_correct)
-                                    is_correct = (s == c)
-                                except Exception:
-                                    is_correct = False
-                            else:
-                                is_correct = (str(ans.answer).strip().lower() == str(q_correct).strip().lower())
-                    except Exception:
-                        is_correct = False
-
-                answers_payload.append({
-                    'submission_id': attempt.id,
-                    'question_id': ans.question_id,
-                    'answer': ans.answer,
-                    'is_correct': is_correct
-                })
-
-            if answers_payload:
-                answers_url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/submission_answers"
-                r2 = requests.post(answers_url, json=answers_payload, headers=headers, timeout=10)
-                if not (200 <= r2.status_code < 300):
-                    logger.warning(f"Failed to mirror submission_answers to Supabase: {r2.status_code} {r2.text}")
-
-        except Exception as e:
-            logger.exception(f"Error while mirroring submission to Supabase: {e}")
     
     return {
         "attempt_id": attempt.id,
