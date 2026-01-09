@@ -36,41 +36,41 @@ interface UseExamProgressOptions {
 export function useExamProgress(options: UseExamProgressOptions) {
   const { examId, enabled = true, autoSaveInterval = 5000 } = options;
   const { user } = useAuth();
-  
+
   const [progress, setProgress] = useState<ExamProgress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasExistingProgress, setHasExistingProgress] = useState(false);
-  
+
   // Ref to track pending changes
   const pendingChangesRef = useRef<Partial<ExamProgress>>({});
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  
+
   // Load existing progress
   useEffect(() => {
     if (!enabled || !user?.id || !examId) {
       setIsLoading(false);
       return;
     }
-    
+
     const loadProgress = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         const { data, error: fetchError } = await supabase
           .from('exam_progress')
           .select('*')
           .eq('exam_id', examId)
           .eq('user_id', user.id)
           .maybeSingle();
-        
+
         if (fetchError && fetchError.code !== 'PGRST116') {
           // PGRST116 = no rows returned, which is fine
           throw fetchError;
         }
-        
+
         if (data) {
           setProgress(data as ExamProgress);
           setHasExistingProgress(true);
@@ -100,17 +100,17 @@ export function useExamProgress(options: UseExamProgressOptions) {
         setIsLoading(false);
       }
     };
-    
+
     loadProgress();
   }, [enabled, user?.id, examId]);
-  
+
   // Save progress to database
   const saveProgress = useCallback(async (updates: Partial<ExamProgress>) => {
     if (!enabled || !user?.id || !examId) return;
-    
+
     try {
       setIsSaving(true);
-      
+
       const dataToSave = {
         exam_id: examId,
         user_id: user.id,
@@ -119,7 +119,7 @@ export function useExamProgress(options: UseExamProgressOptions) {
         ...updates,
         updated_at: new Date().toISOString(),
       };
-      
+
       const { data, error: saveError } = await supabase
         .from('exam_progress')
         .upsert(dataToSave, {
@@ -127,13 +127,13 @@ export function useExamProgress(options: UseExamProgressOptions) {
         })
         .select()
         .single();
-      
+
       if (saveError) throw saveError;
-      
+
       setProgress(data as ExamProgress);
       setHasExistingProgress(true);
       pendingChangesRef.current = {};
-      
+
       return data;
     } catch (err: any) {
       console.error('Error saving exam progress:', err);
@@ -143,74 +143,76 @@ export function useExamProgress(options: UseExamProgressOptions) {
       setIsSaving(false);
     }
   }, [enabled, user?.id, user?.email, user?.user_metadata?.full_name, examId]);
-  
-  // Debounced save
-  const debouncedSave = useCallback((updates: Partial<ExamProgress>) => {
+
+  // Debounced save with dynamic delay
+  const debouncedSave = useCallback((updates: Partial<ExamProgress>, delayOverride?: number) => {
     // Merge with pending changes
     pendingChangesRef.current = {
       ...pendingChangesRef.current,
       ...updates,
     };
-    
+
     // Clear existing timeout
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
-    
-    // Set new timeout
+
+    // Set new timeout (use override or default)
+    const delay = delayOverride !== undefined ? delayOverride : autoSaveInterval;
+
     saveTimeoutRef.current = setTimeout(() => {
       if (Object.keys(pendingChangesRef.current).length > 0) {
         saveProgress(pendingChangesRef.current);
       }
-    }, autoSaveInterval);
+    }, delay);
   }, [saveProgress, autoSaveInterval]);
-  
+
   // Update specific fields
   const updateAnswers = useCallback((answers: Record<string, any>) => {
     setProgress(prev => prev ? { ...prev, answers } : null);
-    debouncedSave({ answers });
+    debouncedSave({ answers }, 2000); // Critical: Fast save (2s)
   }, [debouncedSave]);
-  
+
   const updateFlaggedQuestions = useCallback((flagged: string[]) => {
     setProgress(prev => prev ? { ...prev, flagged_questions: flagged } : null);
     debouncedSave({ flagged_questions: flagged });
   }, [debouncedSave]);
-  
+
   const updateCurrentQuestion = useCallback((index: number) => {
     setProgress(prev => prev ? { ...prev, current_question_index: index } : null);
-    debouncedSave({ current_question_index: index });
+    debouncedSave({ current_question_index: index }, 5000); // Medium save
   }, [debouncedSave]);
-  
+
   const updateTimeRemaining = useCallback((seconds: number | null) => {
     setProgress(prev => prev ? { ...prev, time_remaining_seconds: seconds } : null);
     debouncedSave({ time_remaining_seconds: seconds });
   }, [debouncedSave]);
-  
+
   const updateViolations = useCallback((violations: Array<{ type: string; timestamp: string }>) => {
     setProgress(prev => prev ? { ...prev, violations } : null);
     debouncedSave({ violations });
   }, [debouncedSave]);
-  
+
   const updateScratchpad = useCallback((content: string) => {
     setProgress(prev => prev ? { ...prev, scratchpad_content: content } : null);
-    debouncedSave({ scratchpad_content: content });
+    debouncedSave({ scratchpad_content: content }, 15000); // Low priority: Slow save (15s)
   }, [debouncedSave]);
-  
+
   const updateConfidenceLevels = useCallback((levels: Record<string, string>) => {
     setProgress(prev => prev ? { ...prev, confidence_levels: levels } : null);
-    debouncedSave({ confidence_levels: levels });
+    debouncedSave({ confidence_levels: levels }, 10000); // Medium-Low priority
   }, [debouncedSave]);
-  
+
   // Start exam (set started_at)
   const startExam = useCallback(async (timeLimitSeconds?: number) => {
     const startedAt = new Date().toISOString();
-    setProgress(prev => prev ? { 
-      ...prev, 
+    setProgress(prev => prev ? {
+      ...prev,
       started_at: startedAt,
       time_remaining_seconds: timeLimitSeconds ?? prev.time_remaining_seconds,
       status: 'in_progress'
     } : null);
-    
+
     // Immediate save for start
     return saveProgress({
       started_at: startedAt,
@@ -218,20 +220,20 @@ export function useExamProgress(options: UseExamProgressOptions) {
       status: 'in_progress',
     });
   }, [saveProgress]);
-  
+
   // Mark as submitted
   const markSubmitted = useCallback(async () => {
     setProgress(prev => prev ? { ...prev, status: 'submitted' } : null);
     return saveProgress({ status: 'submitted' });
   }, [saveProgress]);
-  
+
   // Force save (for before submit)
   const forceSave = useCallback(async () => {
     // Clear any pending timeout
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
-    
+
     // Save all current progress
     if (progress) {
       return saveProgress({
@@ -246,7 +248,7 @@ export function useExamProgress(options: UseExamProgressOptions) {
     }
     return null;
   }, [progress, saveProgress]);
-  
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -255,7 +257,7 @@ export function useExamProgress(options: UseExamProgressOptions) {
       }
     };
   }, []);
-  
+
   return {
     progress,
     isLoading,
