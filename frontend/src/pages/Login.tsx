@@ -36,19 +36,6 @@ export default function Login() {
         checkSession();
     }, [navigate]);
 
-    const [unverified, setUnverified] = useState(false);
-    const [emailForResend, setEmailForResend] = useState('');
-
-    const resendVerification = async () => {
-        try {
-            await supabase.auth.resend({ type: 'signup', email: emailForResend });
-            toast.success(t('auth.messages.verificationResent'));
-        } catch (e) {
-            console.error('Resend error:', e);
-            toast.error(t('auth.messages.verificationResendError'));
-        }
-    };
-
     const handleGoogleLogin = async () => {
         setIsLoading(true);
         try {
@@ -95,9 +82,7 @@ export default function Login() {
 
             // Check if email is verified
             if (authData.user && !authData.user.email_confirmed_at) {
-                toast.error(t('auth.messages.emailNotVerified'));
-                setUnverified(true);
-                setEmailForResend(data.email);
+                navigate('/verify-email', { state: { email: data.email } });
                 return;
             }
 
@@ -211,18 +196,6 @@ export default function Login() {
                                 )}
                             </button>
                         </div>
-                        {unverified && (
-                            <div className="mt-4 text-center">
-                                <p className="text-sm text-gray-600 dark:text-gray-400">{t('auth.messages.emailNotVerified')}</p>
-                                <button
-                                    type="button"
-                                    onClick={resendVerification}
-                                    className="mt-2 text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
-                                >
-                                    {t('auth.messages.resendVerification')}
-                                </button>
-                            </div>
-                        )}
                     </form>
 
                     <div className="mt-6">

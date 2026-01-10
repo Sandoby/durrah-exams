@@ -200,7 +200,15 @@
             "verificationResendError": "Error al reenviar el correo de verificación",
             "emailNotVerified": "Tu correo no está verificado. Por favor, revisa tu bandeja de entrada.",
             "resendVerification": "Reenviar correo de verificación",
-            "verificationSent": "¡Correo de verificación enviado! Por favor, revisa tu bandeja de entrada."
+            "verificationSent": "¡Correo electrónico de verificación enviado! Por favor, revise su bandeja de entrada.",
+            "verifyEmail": {
+                "title": "Verifica tu correo electrónico",
+                "desc": "Hemos enviado un enlace de verificación a",
+                "checkSpam": "¿No lo has recibido? Por favor, revisa tu **carpeta de spam**.",
+                "resend": "Reenviar correo electrónico de verificación",
+                "resending": "Enviando...",
+                "backToLogin": "Volver al inicio de sesión"
+            }
         }
     },
     "footer": {

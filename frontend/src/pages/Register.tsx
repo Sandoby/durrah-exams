@@ -40,19 +40,6 @@ export default function Register() {
         checkSession();
     }, [navigate]);
 
-    const [verificationSent, setVerificationSent] = useState(false);
-    const [emailForResend, setEmailForResend] = useState('');
-
-    const resendVerification = async () => {
-        try {
-            await supabase.auth.resend({ type: 'signup', email: emailForResend });
-            toast.success(t('auth.messages.verificationResent'));
-        } catch (e) {
-            console.error('Resend error:', e);
-            toast.error(t('auth.messages.verificationResendError'));
-        }
-    };
-
     const handleGoogleLogin = async () => {
         setIsLoading(true);
         try {
@@ -113,15 +100,6 @@ export default function Register() {
                     console.error('Failed to send welcome email:', emailError);
                     // Continue with registration even if email fails
                 }
-            }
-
-            // Check if email is verified
-            if (authData.user && !authData.user.email_confirmed_at) {
-                setVerificationSent(true);
-                setEmailForResend(data.email);
-                toast(t('auth.messages.verificationSent'));
-                setIsLoading(false);
-                return;
             }
 
             toast.success(t('auth.messages.registerSuccess'));
@@ -301,18 +279,6 @@ export default function Register() {
                             and acknowledge our Privacy Policy.
                         </p>
                     </div>
-                    {verificationSent && (
-                        <div className="mt-4 text-center">
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('auth.messages.verificationSent')}</p>
-                            <button
-                                type="button"
-                                onClick={resendVerification}
-                                className="mt-2 text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
-                            >
-                                {t('auth.messages.resendVerification')}
-                            </button>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
