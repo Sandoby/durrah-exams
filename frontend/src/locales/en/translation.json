@@ -156,6 +156,14 @@
             "login": "Login",
             "googleSignup": "Sign up with Google"
         },
+        "verifyEmail": {
+            "title": "Verify your email",
+            "desc": "We've sent a verification link to",
+            "checkSpam": "Didn't receive it? Please check your **spam folder**.",
+            "resend": "Resend verification email",
+            "resending": "Sending...",
+            "backToLogin": "Back to login"
+        },
         "forgotPassword": {
             "title": "Reset your password",
             "desc": "Enter your email address and we'll send you a link to reset your password.",
@@ -197,15 +205,7 @@
             "verificationResendError": "Failed to resend verification email",
             "emailNotVerified": "Your email is not verified. Please check your inbox.",
             "resendVerification": "Resend verification email",
-            "verificationSent": "Verification email sent! Please check your inbox.",
-            "verifyEmail": {
-                "title": "Verify your email",
-                "desc": "We've sent a verification link to",
-                "checkSpam": "Didn't receive it? Please check your **spam folder**.",
-                "resend": "Resend verification email",
-                "resending": "Sending...",
-                "backToLogin": "Back to login"
-            }
+            "verificationSent": "Verification email sent! Please check your inbox."
         }
     },
     "footer": {

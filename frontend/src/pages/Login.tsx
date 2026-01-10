@@ -89,6 +89,14 @@ export default function Login() {
             toast.success(t('auth.messages.loginSuccess'));
             navigate('/dashboard');
         } catch (error: any) {
+            const isUnverified = error?.message?.toLowerCase().includes('email not confirmed') ||
+                error?.message?.toLowerCase().includes('email not verified');
+
+            if (isUnverified) {
+                navigate('/verify-email', { state: { email: data.email } });
+                return;
+            }
+
             console.error('Login error:', error);
             toast.error(t('auth.messages.loginError'), {
                 duration: 5000 // Show longer for connection errors

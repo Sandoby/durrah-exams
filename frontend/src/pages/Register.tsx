@@ -102,6 +102,12 @@ export default function Register() {
                 }
             }
 
+            // Check if email needs verification
+            if (authData.user && !authData.user.email_confirmed_at) {
+                navigate('/verify-email', { state: { email: data.email } });
+                return;
+            }
+
             toast.success(t('auth.messages.registerSuccess'));
             navigate('/login');
         } catch (error: any) {
