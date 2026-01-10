@@ -139,26 +139,10 @@
             "forgotPassword": "Forgot password?",
             "submit": "Sign in",
             "noAccount": "Don't have an account?",
-            "register": {
-                "en": "Sign up",
-                "es": "Regístrate",
-                "fr": "S'inscrire"
-            },
-            "back": {
-                "en": "Back",
-                "es": "Volver",
-                "fr": "Retour"
-            },
-            "googleSignin": {
-                "en": "Sign in with Google",
-                "es": "Iniciar sesión con Google",
-                "fr": "Se connecter avec Google"
-            },
-            "or": {
-                "en": "OR",
-                "es": "O",
-                "fr": "OU"
-            }
+            "register": "Sign up",
+            "back": "Back",
+            "googleSignin": "Sign in with Google",
+            "or": "OR"
         },
         "register": {
             "title": "Create an account",
@@ -167,26 +151,10 @@
             "emailLabel": "Email address",
             "passwordLabel": "Password",
             "confirmPasswordLabel": "Confirm Password",
-            "submit": {
-                "en": "Create Account",
-                "es": "Registrarse",
-                "fr": "Créer un compte"
-            },
-            "hasAccount": {
-                "en": "Already have an account?",
-                "es": "¿Ya tienes cuenta?",
-                "fr": "Vous avez déjà un compte ?"
-            },
-            "login": {
-                "en": "Login",
-                "es": "Iniciar sesión",
-                "fr": "Connexion"
-            },
-            "googleSignup": {
-                "en": "Sign up with Google",
-                "es": "Registrarse con Google",
-                "fr": "S'inscrire avec Google"
-            }
+            "submit": "Create Account",
+            "hasAccount": "Already have an account?",
+            "login": "Login",
+            "googleSignup": "Sign up with Google"
         },
         "forgotPassword": {
             "title": "Reset your password",

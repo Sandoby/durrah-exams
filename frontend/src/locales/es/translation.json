@@ -143,7 +143,9 @@
             "submit": "Iniciar sesión",
             "noAccount": "¿No tienes cuenta?",
             "register": "Regístrate",
-            "back": "Volver"
+            "back": "Volver",
+            "googleSignin": "Iniciar sesión con Google",
+            "or": "O"
         },
         "register": {
             "title": "Crear una cuenta",
@@ -154,7 +156,8 @@
             "confirmPasswordLabel": "Confirmar Contraseña",
             "submit": "Registrarse",
             "hasAccount": "¿Ya tienes cuenta?",
-            "login": "Iniciar sesión"
+            "login": "Iniciar sesión",
+            "googleSignup": "Registrarse con Google"
         },
         "forgotPassword": {
             "title": "Restablecer tu contraseña",

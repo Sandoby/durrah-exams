@@ -151,7 +151,9 @@
             "submit": "Se connecter",
             "noAccount": "Pas de compte ?",
             "register": "S'inscrire",
-            "back": "Retour"
+            "back": "Retour",
+            "googleSignin": "Se connecter avec Google",
+            "or": "OU"
         },
         "register": {
             "title": "Créer un compte",
@@ -162,7 +164,8 @@
             "confirmPasswordLabel": "Confirmer le mot de passe",
             "submit": "S'inscrire",
             "hasAccount": "Déjà un compte ?",
-            "login": "Se connecter"
+            "login": "Se connecter",
+            "googleSignup": "S'inscrire avec Google"
         },
         "forgotPassword": {
             "title": "Réinitialiser votre mot de passe",
