@@ -173,7 +173,9 @@
             "checkSpam": "Vous ne l'avez pas reçu ? Veuillez vérifier votre **dossier de spam**.",
             "resend": "Renvoyer l'e-mail de vérification",
             "resending": "Envoi en cours...",
-            "backToLogin": "Retour à la connexion"
+            "backToLogin": "Retour à la connexion",
+            "checkStatus": "J'ai vérifié mon e-mail",
+            "resendIn": "Renvoyer dans {{seconds}}s"
         },
         "forgotPassword": {
             "title": "Réinitialiser votre mot de passe",

@@ -165,7 +165,9 @@
             "checkSpam": "¿No lo has recibido? Por favor, revisa tu **carpeta de spam**.",
             "resend": "Reenviar correo electrónico de verificación",
             "resending": "Enviando...",
-            "backToLogin": "Volver al inicio de sesión"
+            "backToLogin": "Volver al inicio de sesión",
+            "checkStatus": "He verificado mi correo",
+            "resendIn": "Reenviar en {{seconds}}s"
         },
         "forgotPassword": {
             "title": "Restablecer tu contraseña",

@@ -162,7 +162,9 @@
             "checkSpam": "Didn't receive it? Please check your **spam folder**.",
             "resend": "Resend verification email",
             "resending": "Sending...",
-            "backToLogin": "Back to login"
+            "backToLogin": "Back to login",
+            "checkStatus": "I've verified my email",
+            "resendIn": "Resend in {{seconds}}s"
         },
         "forgotPassword": {
             "title": "Reset your password",

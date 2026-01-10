@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
-import { Mail, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { Mail, ArrowLeft, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
@@ -9,8 +9,45 @@ import { useTranslation } from 'react-i18next';
 export default function EmailVerification() {
     const { t } = useTranslation();
     const location = useLocation();
+    const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const [isChecking, setIsChecking] = useState(false);
+    const [countdown, setCountdown] = useState(0);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
     const email = location.state?.email || '';
+
+    useEffect(() => {
+        if (countdown > 0) {
+            timerRef.current = setTimeout(() => {
+                setCountdown(countdown - 1);
+            }, 1000);
+        } else if (timerRef.current) {
+            clearTimeout(timerRef.current);
+        }
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, [countdown]);
+
+    const handleCheckStatus = async () => {
+        setIsChecking(true);
+        try {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error) throw error;
+
+            if (user?.email_confirmed_at) {
+                toast.success(t('auth.messages.loginSuccess'));
+                navigate('/dashboard');
+            } else {
+                toast.error(t('auth.messages.emailNotVerified'));
+            }
+        } catch (error: any) {
+            console.error('Error checking verification status:', error);
+            toast.error(t('common.error'));
+        } finally {
+            setIsChecking(false);
+        }
+    };
 
     const handleResendEmail = async () => {
         if (!email) {
@@ -27,6 +64,7 @@ export default function EmailVerification() {
 
             if (error) throw error;
             toast.success(t('auth.messages.verificationResent'));
+            setCountdown(60);
         } catch (error: any) {
             console.error('Error resending verification email:', error);
             toast.error(t('auth.messages.verificationResendError'));
@@ -64,15 +102,35 @@ export default function EmailVerification() {
 
                     <div className="space-y-6">
                         <button
+                            onClick={handleCheckStatus}
+                            disabled={isChecking}
+                            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-all transform active:scale-95"
+                        >
+                            {isChecking ? (
+                                <>
+                                    <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
+                                    {t('common.loading')}
+                                </>
+                            ) : (
+                                <>
+                                    <RefreshCw className="mr-2 h-5 w-5" />
+                                    {t('auth.verifyEmail.checkStatus')}
+                                </>
+                            )}
+                        </button>
+
+                        <button
                             onClick={handleResendEmail}
-                            disabled={isLoading || !email}
-                            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            disabled={isLoading || !email || countdown > 0}
+                            className="w-full flex justify-center py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
                             {isLoading ? (
                                 <>
-                                    <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                                    <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
                                     {t('auth.verifyEmail.resending')}
                                 </>
+                            ) : countdown > 0 ? (
+                                t('auth.verifyEmail.resendIn', { seconds: countdown })
                             ) : (
                                 t('auth.verifyEmail.resend')
                             )}
