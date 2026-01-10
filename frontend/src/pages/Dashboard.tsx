@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, Globe, AlertTriangle, Power, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, Globe, AlertTriangle, Power, Eye, Loader2 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -105,7 +105,7 @@ export default function Dashboard() {
 
     useDemoTour(new URLSearchParams(window.location.search).get('showSharing') === 'true' ? 'share-monitor' : new URLSearchParams(window.location.search).get('showAnalytics') === 'true' ? 'view-analytics' : null, startDemoTour && isDemo);
 
-    const [tourSteps] = useState<Step[]>([
+    const tourSteps = useMemo<Step[]>(() => [
         {
             target: 'body',
             content: t('dashboard.tour.welcome'),
@@ -148,7 +148,7 @@ export default function Dashboard() {
             placement: 'center',
             disableBeacon: true,
         },
-    ]);
+    ], [t]);
 
     useEffect(() => {
         console.log('Dashboard: Component Mounted', { userId: user?.id, isDemo });
@@ -173,22 +173,24 @@ export default function Dashboard() {
             console.log('Dashboard: Initializing for authenticated user...');
             fetchExams();
             fetchProfile();
-            checkFirstVisit();
         }
 
         return () => console.log('Dashboard: Component Unmounted');
     }, [user]);
 
-    const checkFirstVisit = () => {
+    // Independent effect for the tour ensuring data is loaded
+    useEffect(() => {
+        if (!user || isLoading || isDemo) return;
+
         const hasSeenTour = localStorage.getItem(`dashboard_tour_${user?.id}`);
         if (!hasSeenTour) {
-            // Delay tour start to ensure DOM is ready and elements are mounted
+            // Delay tour start to ensure DOM is ready
             setTimeout(() => {
                 if (exams.length === 0) setShowMockExam(true);
                 setRunTour(true);
-            }, 1500);
+            }, 2000);
         }
-    };
+    }, [user, isLoading, isDemo]);
 
     const handleTourCallback = (data: CallBackProps) => {
         const { status, type } = data;
@@ -734,7 +736,11 @@ export default function Dashboard() {
                         </div>
                     )}
 
-                    {exams.length === 0 ? (
+                    {isLoading ? (
+                        <div className="flex justify-center py-20">
+                            <Loader2 className="h-10 w-10 text-indigo-600 animate-spin" />
+                        </div>
+                    ) : exams.length === 0 && !showMockExam ? (
                         <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700">
                             <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 flex items-center justify-center mb-6">
                                 <FileText className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
@@ -754,7 +760,7 @@ export default function Dashboard() {
                         </div>
                     ) : (
                         <div className="grid gap-6 mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                            {showMockExam && exams.length === 0 && (
+                            {showMockExam && (
                                 <div data-tour="exam-card" className="group bg-white dark:bg-slate-800 rounded-2xl border-2 border-dashed border-indigo-300 dark:border-indigo-600 shadow-lg relative overflow-hidden animate-pulse">
                                     <div className="absolute top-0 right-0 bg-indigo-500 text-white px-3 py-1 text-[10px] font-bold uppercase rounded-bl-lg">Tutorial Card</div>
                                     <div className="p-6">
