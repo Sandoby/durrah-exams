@@ -1,4 +1,4 @@
-{
+﻿{
     "math": {
         "togglePreview": "Preview Math",
         "help": "Supports LaTeX (e.g. $$x^2$$)",
@@ -892,5 +892,10 @@
                 "answer": "Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress."
             }
         }
+    },
+    "common": {
+        "error": "An unexpected error occurred",
+        "loading": "Loading...",
+        "success": "Success"
     }
 }

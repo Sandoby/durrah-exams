@@ -1,4 +1,4 @@
-{
+﻿{
     "math": {
         "togglePreview": "Aperçu Math",
         "help": "Supporte LaTeX (ex. $$x^2$$)",
@@ -870,5 +870,10 @@
                 "answer": "Les étudiants peuvent rejoindre des examens avec seulement un code et un pseudonyme, ou utiliser le Portail Étudiant pour suivre leurs progrès à long terme."
             }
         }
+    },
+    "common": {
+        "error": "Une erreur inattendue est survenue",
+        "loading": "Chargement...",
+        "success": "Succès"
     }
 }

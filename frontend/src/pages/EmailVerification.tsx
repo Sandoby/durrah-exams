@@ -32,8 +32,18 @@ export default function EmailVerification() {
     const handleCheckStatus = async () => {
         setIsChecking(true);
         try {
-            const { data: { user }, error } = await supabase.auth.getUser();
-            if (error) throw error;
+            // First check if we even have a session
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+            if (sessionError || !session) {
+                toast.error(t('auth.messages.emailNotVerified'));
+                // If no session, it might be because email confirmation is required.
+                // We'll suggest they try logging in again if they believe they are verified.
+                return;
+            }
+
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            if (userError) throw userError;
 
             if (user?.email_confirmed_at) {
                 toast.success(t('auth.messages.loginSuccess'));
@@ -43,7 +53,12 @@ export default function EmailVerification() {
             }
         } catch (error: any) {
             console.error('Error checking verification status:', error);
-            toast.error(t('common.error'));
+            // Gracefully handle session missing error which is common here
+            if (error.name === 'AuthSessionMissingError') {
+                toast.error(t('auth.messages.emailNotVerified'));
+            } else {
+                toast.error(t('auth.messages.emailNotVerified'));
+            }
         } finally {
             setIsChecking(false);
         }

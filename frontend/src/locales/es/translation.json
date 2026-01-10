@@ -1,4 +1,4 @@
-{
+﻿{
     "math": {
         "togglePreview": "Vista Previa Matemáticas",
         "help": "Soporta LaTeX (ej. $$x^2$$)",
@@ -590,5 +590,10 @@
                 "answer": "Los estudiantes pueden unirse a los exámenes solo con un código y un apodo, o usar el Portal del Estudiante para seguir su progreso a largo plazo."
             }
         }
+    },
+    "common": {
+        "error": "Ocurrió un error inesperado",
+        "loading": "Cargando...",
+        "success": "Éxito"
     }
 }
