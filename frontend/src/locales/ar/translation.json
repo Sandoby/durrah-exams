@@ -209,6 +209,7 @@
             "verificationResent": "تم إعادة إرسال بريد التحقق بنجاح",
             "verificationResendError": "فشل إعادة إرسال بريد التحقق",
             "emailNotVerified": "بريدك الإلكتروني غير مفعل. يرجى تفقد صندوق الوارد.",
+            "loginToContinue": "يرجى تسجيل الدخول للمتابعة",
             "resendVerification": "إعادة إرسال بريد التحقق",
             "verificationSent": "تم إرسال بريد التحقق! يرجى تفقد صندوق الوارد."
         }

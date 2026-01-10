@@ -206,6 +206,7 @@
             "verificationResent": "Verification email resent successfully",
             "verificationResendError": "Failed to resend verification email",
             "emailNotVerified": "Your email is not verified. Please check your inbox.",
+            "loginToContinue": "Please log in to continue",
             "resendVerification": "Resend verification email",
             "verificationSent": "Verification email sent! Please check your inbox."
         }

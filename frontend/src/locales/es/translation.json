@@ -209,6 +209,7 @@
             "verificationResent": "Correo de verificación reenviado con éxito",
             "verificationResendError": "Error al reenviar el correo de verificación",
             "emailNotVerified": "Tu correo no está verificado. Por favor, revisa tu bandeja de entrada.",
+            "loginToContinue": "Por favor inicia sesión para continuar",
             "resendVerification": "Reenviar correo de verificación",
             "verificationSent": "¡Correo electrónico de verificación enviado! Por favor, revise su bandeja de entrada."
         }

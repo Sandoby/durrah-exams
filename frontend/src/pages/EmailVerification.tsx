@@ -32,33 +32,26 @@ export default function EmailVerification() {
     const handleCheckStatus = async () => {
         setIsChecking(true);
         try {
-            // First check if we even have a session
-            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            // Try to refresh the session to catch any updates (like email verification)
+            const { data: { user }, error } = await supabase.auth.refreshSession();
 
-            if (sessionError || !session) {
-                toast.error(t('auth.messages.emailNotVerified'));
-                // If no session, it might be because email confirmation is required.
-                // We'll suggest they try logging in again if they believe they are verified.
+            // If refresh fails or no user (e.g. no session exists), treat as "needs login"
+            if (error || !user) {
+                navigate('/login', { state: { email } });
                 return;
             }
 
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
-            if (userError) throw userError;
-
-            if (user?.email_confirmed_at) {
+            if (user.email_confirmed_at) {
+                // Verified -> Proceed to dashboard
                 toast.success(t('auth.messages.loginSuccess'));
                 navigate('/dashboard');
             } else {
+                // Session valid but not verified -> Stay and show error
                 toast.error(t('auth.messages.emailNotVerified'));
             }
-        } catch (error: any) {
-            console.error('Error checking verification status:', error);
-            // Gracefully handle session missing error which is common here
-            if (error.name === 'AuthSessionMissingError') {
-                toast.error(t('auth.messages.emailNotVerified'));
-            } else {
-                toast.error(t('auth.messages.emailNotVerified'));
-            }
+        } catch (error) {
+            console.error('Verification check failed:', error);
+            navigate('/login', { state: { email } });
         } finally {
             setIsChecking(false);
         }

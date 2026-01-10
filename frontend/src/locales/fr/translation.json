@@ -217,6 +217,7 @@
             "verificationResent": "E-mail de vérification renvoyé avec succès",
             "verificationResendError": "Échec de l'envoi de l'e-mail de vérification",
             "emailNotVerified": "Votre e-mail n'est pas vérifié. Veuillez consulter votre boîte de réception.",
+            "loginToContinue": "Veuillez vous connecter pour continuer",
             "resendVerification": "Renvoyer l'e-mail de vérification",
             "verificationSent": "E-mail de vérification envoyé ! Veuillez vérifier votre boîte de réception."
         }
