@@ -351,6 +351,21 @@
             "statusError": "Cannot change status in demo mode",
             "banner": "Demo Mode - Explore and try features. Sign up when ready to save your work!",
             "back": "Back to Demo"
+        },
+        "tour": {
+            "welcome": "Welcome to Durrah for Tutors! Let's learn how to use your dashboard.",
+            "questionBank": "Start by managing your question bank - create and organize reusable questions here",
+            "createExam": "Click here to create a new exam with custom questions and settings",
+            "examCard": "Once you create exams, they'll appear here. For this tutorial, we're showing you a sample card.",
+            "copyLink": "Share this link with your students. You can copy the code or the direct URL.",
+            "results": "View all student submissions, download results as PDF/Excel, and see performance stats.",
+            "settings": "Access your profile, change password, and manage your subscription here.",
+            "completion": "You're all set! Start creating exams and adding questions. Need help? Click 'Tutorial' anytime.",
+            "startTour": "Video Tutorial",
+            "mockExam": {
+                "title": "📐 Mathematics Quiz (Sample)",
+                "desc": "Algebra, geometry, and trigonometry assessment for Grade 10"
+            }
         }
     },
     "settings": {

@@ -354,6 +354,21 @@
             "statusError": "No se puede cambiar el estado en modo demostración",
             "banner": "Modo Demostración - Explora y prueba las funciones. ¡Regístrate cuando estés listo para guardar tu trabajo!",
             "back": "Volver a la Demostración"
+        },
+        "tour": {
+            "welcome": "¡Bienvenido a Durrah para tutores! Aprendamos a usar tu panel.",
+            "questionBank": "Comienza gestionando tu banco de preguntas: crea y organiza preguntas reutilizables aquí",
+            "createExam": "Haz clic aquí para crear un nuevo examen con preguntas y configuraciones personalizadas",
+            "examCard": "Una vez que crees exámenes, aparecerán aquí. Para este tutorial, te mostramos una tarjeta de ejemplo.",
+            "copyLink": "Comparte este enlace con tus estudiantes. Puedes copiar el código o la URL directa.",
+            "results": "Mira todos los envíos de los estudiantes, descarga resultados y consulta estadísticas de rendimiento.",
+            "settings": "Accede a tu perfil, cambia tu contraseña y gestiona tu suscripción aquí.",
+            "completion": "¡Todo listo! Comienza a crear exámenes y añadir preguntas. ¿Necesitas ayuda? Haz clic en 'Tutorial' en cualquier momento.",
+            "startTour": "Tutorial en Video",
+            "mockExam": {
+                "title": "📐 Examen de Matemáticas (Ejemplo)",
+                "desc": "Evaluación de álgebra, geometría y trigonometría para 10º grado"
+            }
         }
     },
     "mobileWelcome": {

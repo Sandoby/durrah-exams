@@ -39,6 +39,52 @@ const getProductionOrigin = () => {
     return origin;
 };
 
+const TutorialTooltip = ({
+    index,
+    step,
+    backProps,
+    primaryProps,
+    skipProps,
+}: any) => {
+    return (
+        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-2xl p-6 max-w-sm mx-4 transform transition-all duration-300">
+            <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <span className="text-white font-bold text-lg">{index + 1}</span>
+                    </div>
+                    <button {...skipProps} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xs font-medium transition-colors">
+                        {skipProps.title}
+                    </button>
+                </div>
+
+                <div className="space-y-1.5">
+                    <div className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                        {step.content}
+                    </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-2">
+                    {index > 0 && (
+                        <button
+                            {...backProps}
+                            className="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                        >
+                            {backProps.title}
+                        </button>
+                    )}
+                    <button
+                        {...primaryProps}
+                        className="px-5 py-2 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md transition-all"
+                    >
+                        {primaryProps.title}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export default function Dashboard() {
     const { t } = useTranslation();
     const { user, signOut } = useAuth();
@@ -55,49 +101,50 @@ export default function Dashboard() {
     const [kidsShareModal, setKidsShareModal] = useState<{ url: string; code: string; title?: string } | null>(null);
     const [shareModal, setShareModal] = useState<{ id?: string; url: string; code: string; title?: string; directUrl?: string } | null>(null);
     const [deleteConfirmModal, setDeleteConfirmModal] = useState<{ id: string; title: string } | null>(null);
+    const [showMockExam, setShowMockExam] = useState(false);
 
     useDemoTour(new URLSearchParams(window.location.search).get('showSharing') === 'true' ? 'share-monitor' : new URLSearchParams(window.location.search).get('showAnalytics') === 'true' ? 'view-analytics' : null, startDemoTour && isDemo);
 
     const [tourSteps] = useState<Step[]>([
         {
             target: 'body',
-            content: t('dashboard.tour.welcome', 'Welcome to Durrah for Tutors! Let\'s learn how to use your dashboard.'),
+            content: t('dashboard.tour.welcome'),
             placement: 'center',
             disableBeacon: true,
         },
         {
             target: '[data-tour="question-bank"]',
-            content: t('dashboard.tour.questionBank', 'Start by managing your question bank - create and organize reusable questions here'),
+            content: t('dashboard.tour.questionBank'),
             disableBeacon: true,
         },
         {
             target: '[data-tour="create-exam"]',
-            content: t('dashboard.tour.createExam', 'Click here to create a new exam with custom questions and settings'),
+            content: t('dashboard.tour.createExam'),
             disableBeacon: true,
         },
         {
             target: '[data-tour="exam-card"]',
-            content: t('dashboard.tour.examCard', 'Once you create exams, they\'ll appear here. Each card shows your exam details'),
+            content: t('dashboard.tour.examCard'),
             placement: 'top',
         },
         {
             target: '[data-tour="copy-link"]',
-            content: t('dashboard.tour.copyLink', 'Share this link with your students to take the exam'),
+            content: t('dashboard.tour.copyLink'),
             placement: 'top',
         },
         {
             target: '[data-tour="results"]',
-            content: t('dashboard.tour.results', 'View all student submissions and download results'),
+            content: t('dashboard.tour.results'),
             placement: 'top',
         },
         {
             target: '[data-tour="settings"]',
-            content: t('dashboard.tour.settings', 'Access your profile settings and subscription details here'),
+            content: t('dashboard.tour.settings'),
             disableBeacon: true,
         },
         {
             target: 'body',
-            content: t('dashboard.tour.completion', 'You\'re all set! Start creating exams and adding questions. Need help? Visit our support center.'),
+            content: t('dashboard.tour.completion'),
             placement: 'center',
             disableBeacon: true,
         },
@@ -136,7 +183,10 @@ export default function Dashboard() {
         const hasSeenTour = localStorage.getItem(`dashboard_tour_${user?.id}`);
         if (!hasSeenTour) {
             // Delay tour start to ensure DOM is ready and elements are mounted
-            setTimeout(() => setRunTour(true), 1500);
+            setTimeout(() => {
+                if (exams.length === 0) setShowMockExam(true);
+                setRunTour(true);
+            }, 1500);
         }
     };
 
@@ -150,11 +200,13 @@ export default function Dashboard() {
 
         if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
             setRunTour(false);
+            setShowMockExam(false);
             localStorage.setItem(`dashboard_tour_${user?.id}`, 'true');
         }
     };
 
     const startTour = () => {
+        if (exams.length === 0) setShowMockExam(true);
         setRunTour(true);
     };
 
@@ -462,35 +514,48 @@ export default function Dashboard() {
                 steps={tourSteps}
                 run={runTour}
                 continuous
-                showProgress
+                showProgress={false}
                 showSkipButton
-                disableScrolling
+                disableScrolling={false}
                 scrollToFirstStep
-                scrollOffset={100}
+                scrollOffset={120}
                 callback={handleTourCallback}
-                styles={{
-                    options: {
-                        primaryColor: '#6366f1',
-                        zIndex: 10000,
-                    },
-                    tooltip: {
-                        fontSize: 16,
-                    },
-                    buttonNext: {
-                        fontSize: 14,
-                        padding: '8px 16px',
-                    },
-                    buttonBack: {
-                        fontSize: 14,
-                        padding: '8px 16px',
-                    },
-                }}
+                tooltipComponent={TutorialTooltip}
                 locale={{
                     back: t('tour.back', 'Back'),
                     close: t('tour.close', 'Close'),
                     last: t('tour.last', 'Finish'),
                     next: t('tour.next', 'Next'),
                     skip: t('tour.skip', 'Skip Tour'),
+                }}
+                styles={{
+                    options: {
+                        primaryColor: '#6366f1',
+                        zIndex: 10000,
+                        backgroundColor: '#ffffff',
+                        arrowColor: '#ffffff',
+                        textColor: '#1f2937',
+                        overlayColor: 'rgba(0, 0, 0, 0.4)',
+                    },
+                    tooltip: {
+                        borderRadius: '20px',
+                        padding: '24px',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    },
+                    buttonNext: {
+                        borderRadius: '10px',
+                        backgroundColor: '#6366f1',
+                        padding: '10px 20px',
+                        fontWeight: '600',
+                    },
+                    buttonBack: {
+                        marginRight: '10px',
+                        color: '#6366f1',
+                        fontWeight: '600',
+                    },
+                    buttonSkip: {
+                        color: '#9ca3af',
+                    }
                 }}
             />
 
@@ -520,6 +585,15 @@ export default function Dashboard() {
                                     <span className="hidden lg:inline">{t('settings.subscription.upgrade')}</span>
                                 </Link>
                             )}
+                            <button
+                                onClick={startTour}
+                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                <svg className="h-4 w-4 lg:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="hidden lg:inline">{t('dashboard.tour.startTour', 'Tutorial')}</span>
+                            </button>
                             <Link
                                 to="/settings"
                                 data-tour="settings"
@@ -680,6 +754,43 @@ export default function Dashboard() {
                         </div>
                     ) : (
                         <div className="grid gap-6 mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                            {showMockExam && exams.length === 0 && (
+                                <div data-tour="exam-card" className="group bg-white dark:bg-slate-800 rounded-2xl border-2 border-dashed border-indigo-300 dark:border-indigo-600 shadow-lg relative overflow-hidden animate-pulse">
+                                    <div className="absolute top-0 right-0 bg-indigo-500 text-white px-3 py-1 text-[10px] font-bold uppercase rounded-bl-lg">Tutorial Card</div>
+                                    <div className="p-6">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                                                    {t('dashboard.tour.mockExam.title', '📐 Mathematics Quiz (Sample)')}
+                                                </h3>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                                                    {t('dashboard.tour.mockExam.desc', 'Algebra, geometry, and trigonometry assessment for Grade 10')}
+                                                </p>
+                                            </div>
+                                            <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-500 text-white">
+                                                {t('dashboard.status.active')}
+                                                <Power className="h-3 w-3 ml-1.5" />
+                                            </div>
+                                        </div>
+                                        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <div data-tour="copy-link" className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                                                    <Share2 className="h-4 w-4 text-green-600" />
+                                                    <span className="text-[10px] font-bold text-green-700">{t('dashboard.actions.copyLink')}</span>
+                                                </div>
+                                                <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                                                    <FileText className="h-4 w-4 text-blue-600" />
+                                                    <span className="text-[10px] font-bold text-blue-700">{t('dashboard.actions.print')}</span>
+                                                </div>
+                                                <div data-tour="results" className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800">
+                                                    <BarChart3 className="h-4 w-4 text-orange-600" />
+                                                    <span className="text-[10px] font-bold text-orange-700">{t('dashboard.actions.results')}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             {exams.map((exam, index) => (
                                 <div key={exam.id} data-tour={index === 0 ? "exam-card" : undefined} className="group bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-lg hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-2 transition-all duration-300">
                                     <div className="p-6">
@@ -1107,9 +1218,9 @@ export default function Dashboard() {
             )}
             {/* Chat Widget - Convex or Classic */}
             {CONVEX_FEATURES.chat ? (
-                <ConvexChatWidget 
-                    userId={user?.id || 'anonymous'} 
-                    userName={user?.user_metadata?.full_name || user?.email || 'Tutor'} 
+                <ConvexChatWidget
+                    userId={user?.id || 'anonymous'}
+                    userName={user?.user_metadata?.full_name || user?.email || 'Tutor'}
                     userRole="tutor"
                 />
             ) : (

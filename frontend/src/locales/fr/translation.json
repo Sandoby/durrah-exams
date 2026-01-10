@@ -318,7 +318,22 @@
         "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet examen ?",
         "linkCopied": "Lien de l'examen copié !",
         "deleteSuccess": "Examen supprimé avec succès",
-        "footerNote": "Cette copie est destinée à l'administration de l'examen sur papier. Les étudiants doivent écrire lisiblement et inclure leur nom sur chaque page."
+        "footerNote": "Cette copie est destinée à l'administration de l'examen sur papier. Les étudiants doivent écrire lisiblement et inclure leur nom sur chaque page.",
+        "tour": {
+            "welcome": "Bienvenue sur Durrah pour les tuteurs ! Apprenons à utiliser votre tableau de bord.",
+            "questionBank": "Commencez par gérer votre banque de questions - créez et organisez des questions réutilisables ici",
+            "createExam": "Cliquez ici pour créer un nouvel examen avec des questions et des paramètres personnalisés",
+            "examCard": "Une fois que vous aurez créé des examens, ils apparaîtront ici. Pour ce tutoriel, nous vous montrons une carte exemple.",
+            "copyLink": "Partagez ce lien avec vos étudiants. Vous pouvez copier le code ou l'URL directe.",
+            "results": "Consultez tous les envois des étudiants, téléchargez les résultats et voyez les statistiques de performance.",
+            "settings": "Accédez à votre profil, changez votre mot de passe et gérez votre abonnement ici.",
+            "completion": "Vous êtes prêt ! Commencez à créer des examens et à ajouter des questions. Besoin d'aide ? Cliquez sur 'Tutoriel' à tout moment.",
+            "startTour": "Tutoriel Vidéo",
+            "mockExam": {
+                "title": "📐 Quiz de Mathématiques (Exemple)",
+                "desc": "Évaluation d'algèbre, de géométrie et de trigonométrie pour la 2de"
+            }
+        }
     },
     "demo": {
         "statusError": "Impossible de changer le statut en mode démo",
