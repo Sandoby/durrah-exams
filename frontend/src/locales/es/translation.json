@@ -192,7 +192,12 @@
             "resetLinkError": "Error al enviar el enlace",
             "passwordUpdated": "Contraseña actualizada correctamente",
             "passwordUpdateError": "Error al actualizar la contraseña",
-            "invalidLink": "Enlace inválido o caducado"
+            "invalidLink": "Enlace inválido o caducado",
+            "verificationResent": "Correo de verificación reenviado con éxito",
+            "verificationResendError": "Error al reenviar el correo de verificación",
+            "emailNotVerified": "Tu correo no está verificado. Por favor, revisa tu bandeja de entrada.",
+            "resendVerification": "Reenviar correo de verificación",
+            "verificationSent": "¡Correo de verificación enviado! Por favor, revisa tu bandeja de entrada."
         }
     },
     "footer": {

@@ -139,8 +139,26 @@
             "forgotPassword": "Forgot password?",
             "submit": "Sign in",
             "noAccount": "Don't have an account?",
-            "register": "Sign up",
-            "back": "Back"
+            "register": {
+                "en": "Sign up",
+                "es": "Regístrate",
+                "fr": "S'inscrire"
+            },
+            "back": {
+                "en": "Back",
+                "es": "Volver",
+                "fr": "Retour"
+            },
+            "googleSignin": {
+                "en": "Sign in with Google",
+                "es": "Iniciar sesión con Google",
+                "fr": "Se connecter avec Google"
+            },
+            "or": {
+                "en": "OR",
+                "es": "O",
+                "fr": "OU"
+            }
         },
         "register": {
             "title": "Create an account",
@@ -149,9 +167,26 @@
             "emailLabel": "Email address",
             "passwordLabel": "Password",
             "confirmPasswordLabel": "Confirm Password",
-            "submit": "Sign up",
-            "hasAccount": "Already have an account?",
-            "login": "Sign in"
+            "submit": {
+                "en": "Create Account",
+                "es": "Registrarse",
+                "fr": "Créer un compte"
+            },
+            "hasAccount": {
+                "en": "Already have an account?",
+                "es": "¿Ya tienes cuenta?",
+                "fr": "Vous avez déjà un compte ?"
+            },
+            "login": {
+                "en": "Login",
+                "es": "Iniciar sesión",
+                "fr": "Connexion"
+            },
+            "googleSignup": {
+                "en": "Sign up with Google",
+                "es": "Registrarse con Google",
+                "fr": "S'inscrire avec Google"
+            }
         },
         "forgotPassword": {
             "title": "Reset your password",
@@ -189,7 +224,12 @@
             "resetLinkError": "Failed to send reset link",
             "passwordUpdated": "Password updated successfully",
             "passwordUpdateError": "Failed to update password",
-            "invalidLink": "Invalid or expired reset link"
+            "invalidLink": "Invalid or expired reset link",
+            "verificationResent": "Verification email resent successfully",
+            "verificationResendError": "Failed to resend verification email",
+            "emailNotVerified": "Your email is not verified. Please check your inbox.",
+            "resendVerification": "Resend verification email",
+            "verificationSent": "Verification email sent! Please check your inbox."
         }
     },
     "footer": {

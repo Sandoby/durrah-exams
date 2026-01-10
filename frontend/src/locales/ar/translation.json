@@ -143,7 +143,9 @@
             "submit": "تسجيل الدخول",
             "noAccount": "ليس لديك حساب؟",
             "register": "سجل الآن",
-            "back": "رجوع"
+            "back": "رجوع",
+            "googleSignin": "تسجيل الدخول بواسطة جوجل",
+            "or": "أو"
         },
         "register": {
             "title": "إنشاء حساب",
@@ -154,7 +156,8 @@
             "confirmPasswordLabel": "تأكيد كلمة المرور",
             "submit": "إنشاء حساب",
             "hasAccount": "لديك حساب بالفعل؟",
-            "login": "تسجيل الدخول"
+            "login": "تسجيل الدخول",
+            "googleSignup": "إنشاء حساب بواسطة جوجل"
         },
         "forgotPassword": {
             "title": "إعادة تعيين كلمة المرور",
@@ -192,7 +195,12 @@
             "resetLinkError": "فشل إرسال الرابط",
             "passwordUpdated": "تم تحديث كلمة المرور بنجاح",
             "passwordUpdateError": "فشل تحديث كلمة المرور",
-            "invalidLink": "رابط إعادة التعيين غير صالح أو منتهي الصلاحية"
+            "invalidLink": "رابط إعادة التعيين غير صالح أو منتهي الصلاحية",
+            "verificationResent": "تم إعادة إرسال بريد التحقق بنجاح",
+            "verificationResendError": "فشل إعادة إرسال بريد التحقق",
+            "emailNotVerified": "بريدك الإلكتروني غير مفعل. يرجى تفقد صندوق الوارد.",
+            "resendVerification": "إعادة إرسال بريد التحقق",
+            "verificationSent": "تم إرسال بريد التحقق! يرجى تفقد صندوق الوارد."
         }
     },
     "footer": {
