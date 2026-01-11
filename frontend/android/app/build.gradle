@@ -16,11 +16,27 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+
+    signingConfigs {
+        release {
+            // For CI, these will be provided via environment variables
+            // For local builds, use the keystore file directly
+            def keystoreFile = file('../release-keystore.jks')
+            if (keystoreFile.exists()) {
+                storeFile keystoreFile
+                storePassword System.getenv("KEYSTORE_PASSWORD") ?: "durrah2025"
+                keyAlias System.getenv("KEY_ALIAS") ?: "durrah-release"
+                keyPassword System.getenv("KEY_PASSWORD") ?: "durrah2025"
+            }
+        }
+    }
+
     buildTypes {
         debug {
             // Debug variant
         }
         release {
+            signingConfig signingConfigs.release
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
