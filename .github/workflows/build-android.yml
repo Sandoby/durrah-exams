@@ -1,5 +1,5 @@
 name: Build Android App
-# Triggering build for branded production final V52.2
+# Triggering build for branded production final V52.2 - Release Build
 
 on:
   push:
@@ -46,9 +46,13 @@ jobs:
         working-directory: ./frontend/android
         run: chmod +x gradlew
 
-      - name: Build Android APK
+      - name: Build Android APK (Release)
         working-directory: ./frontend/android
-        run: ./gradlew assembleDebug
+        env:
+          KEYSTORE_PASSWORD: durrah2025
+          KEY_ALIAS: durrah-release
+          KEY_PASSWORD: durrah2025
+        run: ./gradlew assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
