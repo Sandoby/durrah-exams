@@ -629,9 +629,8 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Mobile menu */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden border-t border-gray-200 dark:border-gray-700">
+                    <div className="md:hidden mt-2 max-w-7xl mx-auto bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700">
                         <div className="px-2 pt-2 pb-3 space-y-1">
                             <div className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
                                 {user?.user_metadata?.full_name || user?.email}

@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 
 const loginSchema = z.object({
     email: z.string().email('auth.validation.email'),
@@ -39,10 +40,14 @@ export default function Login() {
     const handleGoogleLogin = async () => {
         setIsLoading(true);
         try {
-            const { error } = await supabase.auth.signInWithOAuth({
+            const isNative = Capacitor.isNativePlatform();
+            const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${window.location.origin}/dashboard`,
+                    redirectTo: isNative
+                        ? 'com.durrah.tutors://login-callback'
+                        : `${window.location.origin}/dashboard`,
+                    skipBrowserRedirect: isNative, // Needed for native
                     queryParams: {
                         access_type: 'offline',
                         prompt: 'consent',
@@ -50,6 +55,9 @@ export default function Login() {
                 },
             });
             if (error) throw error;
+            if (isNative && data?.url) {
+                await Browser.open({ url: data.url });
+            }
         } catch (error: any) {
             console.error('Google login error:', error);
             toast.error(t('auth.messages.loginError'));
@@ -61,14 +69,21 @@ export default function Login() {
     const handleMicrosoftLogin = async () => {
         setIsLoading(true);
         try {
-            const { error } = await supabase.auth.signInWithOAuth({
+            const isNative = Capacitor.isNativePlatform();
+            const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'azure',
                 options: {
-                    redirectTo: `${window.location.origin}/dashboard`,
+                    redirectTo: isNative
+                        ? 'com.durrah.tutors://login-callback'
+                        : `${window.location.origin}/dashboard`,
+                    skipBrowserRedirect: isNative, // Needed for native
                     scopes: 'openid profile email',
                 },
             });
             if (error) throw error;
+            if (isNative && data?.url) {
+                await Browser.open({ url: data.url });
+            }
         } catch (error: any) {
             console.error('Microsoft login error:', error);
             toast.error(t('auth.messages.microsoftError'));

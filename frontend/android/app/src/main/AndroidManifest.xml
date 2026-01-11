@@ -34,6 +34,14 @@
                 <data android:scheme="https" android:host="durrahsystem.tech" />
                 <data android:scheme="https" android:host="tutors.durrahsystem.tech" />
             </intent-filter>
+
+            <!-- Native Social Login Callback -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.durrah.tutors" android:host="login-callback" />
+            </intent-filter>
         </activity>
 
         <provider

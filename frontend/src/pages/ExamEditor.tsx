@@ -105,12 +105,14 @@ export default function ExamEditor() {
         return `${chunk(3)}-${chunk(3)}`;
     };
 
+    /*
     const ensureQuizCode = () => {
         if (savedQuizCode) return savedQuizCode;
         const next = generateQuizCode();
         setSavedQuizCode(next);
         return next;
     };
+    */
 
     useDemoTour('create-exam', startTour && isDemo);
 
@@ -734,30 +736,29 @@ export default function ExamEditor() {
                                     {id ? t('examEditor.editTitle') : t('examEditor.createTitle')}
                                 </h1>
                                 <div className="flex items-center gap-2 mt-0.5">
-                                    <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Live Editor</span>
                                 </div>
                             </div>
 
                             {/* Kids Mode Toggle */}
-                            <div className="flex items-center gap-2 ml-2 sm:ml-6 pl-2 sm:pl-6 border-l border-gray-100 dark:border-gray-800">
-                                <label className="flex items-center cursor-pointer group px-4 py-2 rounded-2xl bg-purple-50/50 dark:bg-purple-900/20 border-2 border-transparent hover:border-purple-200 dark:hover:border-purple-800 transition-all">
+                            <div className="flex items-center gap-2 ml-0 sm:ml-6 pl-0 sm:pl-6 border-l-0 sm:border-l border-gray-100 dark:border-gray-800 w-full sm:w-auto mt-2 sm:mt-0 justify-between sm:justify-start">
+                                <label className="flex items-center cursor-not-allowed group px-4 py-2 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent transition-all opacity-70">
                                     <input
                                         type="checkbox"
-                                        checked={watch('settings.child_mode_enabled')}
-                                        onChange={(e) => {
-                                            setValue('settings.child_mode_enabled', e.target.checked);
-                                            if (e.target.checked) {
-                                                setValue('settings.attempt_limit', 1);
-                                                setValue('settings.leaderboard_visibility', 'after_submit');
-                                                ensureQuizCode();
-                                                toast.success('🎈 Kids Mode Active!');
-                                            }
+                                        disabled={true}
+                                        checked={false} // Force unchecked
+                                        onChange={() => {
+                                            // Disabled
+                                            // setValue('settings.child_mode_enabled', e.target.checked);
+                                            // ...
                                         }}
                                         className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded-lg transition-all"
                                     />
-                                    <span className="ml-2 text-sm font-black text-purple-700 dark:text-purple-300">
+                                    <span className="ml-2 text-sm font-black text-gray-400 dark:text-gray-600 flex items-center gap-2">
                                         Kids Mode
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                            Coming Soon
+                                        </span>
                                     </span>
                                 </label>
                             </div>

@@ -82,7 +82,54 @@ function AppContent() {
           try {
             const url = new URL(data.url);
 
-            // Handle custom scheme durrah://
+            // Handle custom scheme com.durrah.tutors://login-callback
+            if (data.url.startsWith('com.durrah.tutors://login-callback')) {
+              await Browser.close(); // Close the Chrome tab
+
+              // Extract params from hash or search
+              // Supabase PKCE flow typically returns code in search params
+              const params = new URLSearchParams(url.search);
+              const code = params.get('code');
+              const error = params.get('error');
+
+              // Supabase Implicit flow (if used) returns tokens in hash
+              const hash = url.hash.substring(1);
+              const hashParams = new URLSearchParams(hash);
+              const accessToken = hashParams.get('access_token');
+              const refreshToken = hashParams.get('refresh_token');
+
+              if (error) {
+                console.error('Auth error from callback:', error, params.get('error_description'));
+                return;
+              }
+
+              if (code) {
+                const { supabase } = await import('./lib/supabase');
+                const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
+                if (sessionError) {
+                  console.error('Error exchanging code for session:', sessionError);
+                } else {
+                  console.log('Successfully exchanged code for session');
+                  navigate('/dashboard');
+                }
+              } else if (accessToken && refreshToken) {
+                const { supabase } = await import('./lib/supabase');
+                const { error: sessionError } = await supabase.auth.setSession({
+                  access_token: accessToken,
+                  refresh_token: refreshToken
+                });
+                if (sessionError) {
+                  console.error('Error setting session from tokens:', sessionError);
+                } else {
+                  console.log('Successfully set session from tokens');
+                  navigate('/dashboard');
+                }
+              }
+
+              return;
+            }
+
+            // Handle legacy custom scheme durrah:// (if any)
             if (data.url.includes('durrah://')) {
               await Browser.close();
               if (url.hostname === 'payment-callback') {
