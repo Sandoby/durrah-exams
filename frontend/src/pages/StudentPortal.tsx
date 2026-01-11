@@ -7,6 +7,8 @@ import { Logo } from '../components/Logo';
 import { LogOut, BookOpen, Clock, Trophy, Search, User, ArrowRight, History, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
+import { Chrome, Mail } from 'lucide-react';
 
 export default function StudentPortal() {
   const { t, i18n } = useTranslation();
@@ -25,6 +27,25 @@ export default function StudentPortal() {
 
   useEffect(() => {
     if (user) {
+      // Ensure user has student role when logging into student portal
+      const ensureStudentRole = async () => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (!profile || !profile.role) {
+          await supabase.from('profiles').upsert({
+            id: user.id,
+            role: 'student',
+            full_name: user.user_metadata?.full_name || '',
+            email: user.email
+          });
+        }
+      };
+
+      ensureStudentRole();
       fetchStudentData();
     }
   }, [user]);
@@ -58,6 +79,61 @@ export default function StudentPortal() {
       }
     } catch (error) {
       console.error('Error fetching student data:', error);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      const isNative = Capacitor.isNativePlatform();
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: isNative
+            ? 'com.durrah.tutors://login-callback'
+            : `${window.location.origin}/student-portal`,
+          skipBrowserRedirect: isNative,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+      if (error) throw error;
+      if (isNative && data?.url) {
+        await Browser.open({ url: data.url });
+      }
+    } catch (error: any) {
+      console.error('Google login error:', error);
+      toast.error(t('auth.messages.loginError', 'Error connecting to Google'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMicrosoftLogin = async () => {
+    setLoading(true);
+    try {
+      const isNative = Capacitor.isNativePlatform();
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'azure',
+        options: {
+          redirectTo: isNative
+            ? 'com.durrah.tutors://login-callback'
+            : `${window.location.origin}/student-portal`,
+          skipBrowserRedirect: isNative,
+          scopes: 'openid profile email',
+        },
+      });
+      if (error) throw error;
+      if (isNative && data?.url) {
+        await Browser.open({ url: data.url });
+      }
+    } catch (error: any) {
+      console.error('Microsoft login error:', error);
+      toast.error(t('auth.messages.microsoftError', 'Error connecting to Microsoft'));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -249,6 +325,27 @@ export default function StudentPortal() {
               >
                 {loading ? t('auth.processing', 'Processing...') : authMode === 'login' ? t('auth.signIn', 'Sign In') : t('auth.createAccount', 'Create Account')}
               </button>
+
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  disabled={loading}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-gray-100 dark:border-gray-700 rounded-full bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+                >
+                  <Chrome className="w-4 h-4 text-red-500" />
+                  Google
+                </button>
+                <button
+                  type="button"
+                  onClick={handleMicrosoftLogin}
+                  disabled={loading}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-gray-100 dark:border-gray-700 rounded-full bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+                >
+                  <Mail className="w-4 h-4 text-blue-500" />
+                  Microsoft
+                </button>
+              </div>
             </form>
 
             <div className="mt-6">
