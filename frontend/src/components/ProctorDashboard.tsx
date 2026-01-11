@@ -187,8 +187,8 @@ export function ProctorDashboard({ examId, examTitle }: ProctorDashboardProps) {
             <button
               onClick={() => setSoundEnabled(!soundEnabled)}
               className={`p-2.5 rounded-xl backdrop-blur-sm border transition-all ${soundEnabled
-                  ? 'bg-white/20 border-white/30 text-white'
-                  : 'bg-white/10 border-white/10 text-white/60 hover:bg-white/15'
+                ? 'bg-white/20 border-white/30 text-white'
+                : 'bg-white/10 border-white/10 text-white/60 hover:bg-white/15'
                 }`}
               title={soundEnabled ? 'Mute notifications' : 'Enable sound'}
             >
@@ -305,8 +305,8 @@ export function ProctorDashboard({ examId, examTitle }: ProctorDashboardProps) {
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-white shadow-lg ${session.violations_count >= 3
-                        ? 'bg-gradient-to-br from-red-500 to-rose-600 shadow-red-500/30'
-                        : 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/30'
+                      ? 'bg-gradient-to-br from-red-500 to-rose-600 shadow-red-500/30'
+                      : 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/30'
                       }`}>
                       {session.student_name.charAt(0).toUpperCase()}
                     </div>
@@ -314,8 +314,8 @@ export function ProctorDashboard({ examId, examTitle }: ProctorDashboardProps) {
                       <span className="font-semibold text-slate-900 dark:text-white">{session.student_name}</span>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${session.violations_count >= 3
-                            ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300'
-                            : 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300'
+                          ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300'
+                          : 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300'
                           }`}>
                           {session.violations_count} violation{session.violations_count !== 1 ? 's' : ''}
                         </span>
@@ -365,8 +365,8 @@ export function ProctorDashboard({ examId, examTitle }: ProctorDashboardProps) {
                 key={status}
                 onClick={() => setStatusFilter(status)}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${statusFilter === status
-                    ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-indigo-400'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-indigo-400'
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                   }`}
               >
                 {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
@@ -533,7 +533,7 @@ function StudentCard({ session, onClick }: { session: ExamSession; onClick: () =
     },
   };
 
-  const config = statusConfig[session.status];
+  const config = statusConfig[session.status] || statusConfig.expired;
   const hasViolations = session.violations_count >= 2;
 
   const timeLeftText = session.time_remaining_seconds
@@ -587,8 +587,8 @@ function StudentCard({ session, onClick }: { session: ExamSession; onClick: () =
         <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${progress >= 100
-                ? 'bg-gradient-to-r from-emerald-500 to-green-500'
-                : 'bg-gradient-to-r from-indigo-500 to-purple-500'
+              ? 'bg-gradient-to-r from-emerald-500 to-green-500'
+              : 'bg-gradient-to-r from-indigo-500 to-purple-500'
               }`}
             style={{ width: `${progress}%` }}
           />
@@ -667,8 +667,8 @@ function SessionRow({ session, onClick }: { session: ExamSession; onClick: () =>
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white bg-gradient-to-br ${session.violations_count >= 2 ? 'from-red-500 to-rose-600' :
-              session.status === 'active' ? 'from-emerald-500 to-green-600' :
-                session.status === 'submitted' ? 'from-blue-500 to-indigo-600' : 'from-slate-400 to-slate-500'
+            session.status === 'active' ? 'from-emerald-500 to-green-600' :
+              session.status === 'submitted' ? 'from-blue-500 to-indigo-600' : 'from-slate-400 to-slate-500'
             }`}>
             {session.student_name.charAt(0).toUpperCase()}
           </div>
@@ -681,7 +681,7 @@ function SessionRow({ session, onClick }: { session: ExamSession; onClick: () =>
         </div>
       </td>
       <td className="px-6 py-4">
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${statusColors[session.status]}`}>
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${statusColors[session.status as keyof typeof statusColors] || statusColors.expired}`}>
           {session.status === 'active' && (
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
           )}
@@ -752,10 +752,10 @@ function StudentDetailModal({ session, onClose }: { session: ExamSession; onClos
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl text-white shadow-lg ${session.violations_count >= 2
-                  ? 'bg-gradient-to-br from-red-500 to-rose-600 shadow-red-500/30'
-                  : session.status === 'active'
-                    ? 'bg-gradient-to-br from-emerald-500 to-green-600 shadow-emerald-500/30'
-                    : 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/30'
+                ? 'bg-gradient-to-br from-red-500 to-rose-600 shadow-red-500/30'
+                : session.status === 'active'
+                  ? 'bg-gradient-to-br from-emerald-500 to-green-600 shadow-emerald-500/30'
+                  : 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/30'
                 }`}>
                 {session.student_name.charAt(0).toUpperCase()}
               </div>
@@ -782,8 +782,8 @@ function StudentDetailModal({ session, onClose }: { session: ExamSession; onClos
             <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
               <div className="text-sm text-slate-500 mb-1">Status</div>
               <div className={`font-bold capitalize ${session.status === 'active' ? 'text-emerald-600' :
-                  session.status === 'disconnected' ? 'text-amber-600' :
-                    session.status === 'submitted' ? 'text-blue-600' : 'text-slate-600'
+                session.status === 'disconnected' ? 'text-amber-600' :
+                  session.status === 'submitted' ? 'text-blue-600' : 'text-slate-600'
                 }`}>
                 {session.status}
               </div>
@@ -828,7 +828,7 @@ function StudentDetailModal({ session, onClose }: { session: ExamSession; onClos
                 <div className="flex justify-between">
                   <span className="text-slate-500">Network</span>
                   <span className={`font-medium capitalize ${session.network_quality === 'good' ? 'text-emerald-600' :
-                      session.network_quality === 'fair' ? 'text-amber-600' : 'text-red-600'
+                    session.network_quality === 'fair' ? 'text-amber-600' : 'text-red-600'
                     }`}>
                     {session.network_quality}
                   </span>
