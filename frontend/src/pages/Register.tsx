@@ -62,6 +62,25 @@ export default function Register() {
         }
     };
 
+    const handleMicrosoftLogin = async () => {
+        setIsLoading(true);
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'azure',
+                options: {
+                    redirectTo: `${window.location.origin}/dashboard`,
+                    scopes: 'email',
+                },
+            });
+            if (error) throw error;
+        } catch (error: any) {
+            console.error('Microsoft login error:', error);
+            toast.error(t('auth.messages.microsoftError'));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const onSubmit = async (data: RegisterForm) => {
         setIsLoading(true);
         try {
@@ -247,8 +266,24 @@ export default function Register() {
                             </div>
                         </div>
 
-                        <div className="mt-6">
+                        <div className="mt-6 space-y-3">
                             <button
+                                type="button"
+                                onClick={handleMicrosoftLogin}
+                                disabled={isLoading}
+                                className="w-full flex justify-center items-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-all duration-200"
+                            >
+                                <svg className="h-5 w-5 mr-2" viewBox="0 0 21 21">
+                                    <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+                                    <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+                                    <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+                                    <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+                                </svg>
+                                {t('auth.register.microsoftSignup')}
+                            </button>
+
+                            <button
+                                type="button"
                                 onClick={handleGoogleLogin}
                                 disabled={isLoading}
                                 className="w-full flex justify-center items-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-all duration-200"
@@ -274,16 +309,16 @@ export default function Register() {
                                 {t('auth.register.googleSignup')}
                             </button>
                         </div>
-                    </div>
 
-                    <div className="mt-6 text-center">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                            By creating an account, you agree to our{' '}
-                            <Link to="/terms" className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 font-medium">
-                                Terms of Service
-                            </Link>{' '}
-                            and acknowledge our Privacy Policy.
-                        </p>
+                        <div className="mt-6 text-center">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                By creating an account, you agree to our{' '}
+                                <Link to="/terms" className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 font-medium">
+                                    Terms of Service
+                                </Link>{' '}
+                                and acknowledge our Privacy Policy.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -145,6 +145,7 @@
             "register": "Regístrate",
             "back": "Volver",
             "googleSignin": "Iniciar sesión con Google",
+            "microsoftSignin": "Iniciar sesión con Microsoft",
             "or": "O"
         },
         "register": {
@@ -157,7 +158,8 @@
             "submit": "Registrarse",
             "hasAccount": "¿Ya tienes cuenta?",
             "login": "Iniciar sesión",
-            "googleSignup": "Registrarse con Google"
+            "googleSignup": "Registrarse con Google",
+            "microsoftSignup": "Registrarse con Microsoft"
         },
         "verifyEmail": {
             "title": "Verifica tu correo electrónico",
@@ -211,7 +213,8 @@
             "emailNotVerified": "Tu correo no está verificado. Por favor, revisa tu bandeja de entrada.",
             "loginToContinue": "Por favor inicia sesión para continuar",
             "resendVerification": "Reenviar correo de verificación",
-            "verificationSent": "¡Correo electrónico de verificación enviado! Por favor, revise su bandeja de entrada."
+            "verificationSent": "¡Correo electrónico de verificación enviado! Por favor, revise su bandeja de entrada.",
+            "microsoftError": "Error al iniciar sesión con Microsoft"
         }
     },
     "footer": {

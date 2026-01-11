@@ -145,6 +145,7 @@
             "register": "سجل الآن",
             "back": "رجوع",
             "googleSignin": "تسجيل الدخول بواسطة جوجل",
+            "microsoftSignin": "تسجيل الدخول بواسطة مايكروسوفت",
             "or": "أو"
         },
         "register": {
@@ -157,7 +158,8 @@
             "submit": "إنشاء حساب",
             "hasAccount": "لديك حساب بالفعل؟",
             "login": "تسجيل الدخول",
-            "googleSignup": "إنشاء حساب بواسطة جوجل"
+            "googleSignup": "إنشاء حساب بواسطة جوجل",
+            "microsoftSignup": "إنشاء حساب بواسطة مايكروسوفت"
         },
         "verifyEmail": {
             "title": "تحقق من بريدك الإلكتروني",
@@ -211,7 +213,8 @@
             "emailNotVerified": "بريدك الإلكتروني غير مفعل. يرجى تفقد صندوق الوارد.",
             "loginToContinue": "يرجى تسجيل الدخول للمتابعة",
             "resendVerification": "إعادة إرسال بريد التحقق",
-            "verificationSent": "تم إرسال بريد التحقق! يرجى تفقد صندوق الوارد."
+            "verificationSent": "تم إرسال بريد التحقق! يرجى تفقد صندوق الوارد.",
+            "microsoftError": "فشل تسجيل الدخول باستخدام Microsoft"
         }
     },
     "footer": {

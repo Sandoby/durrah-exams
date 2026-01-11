@@ -142,6 +142,7 @@
             "register": "Sign up",
             "back": "Back",
             "googleSignin": "Sign in with Google",
+            "microsoftSignin": "Sign in with Microsoft",
             "or": "OR"
         },
         "register": {
@@ -154,7 +155,8 @@
             "submit": "Create Account",
             "hasAccount": "Already have an account?",
             "login": "Login",
-            "googleSignup": "Sign up with Google"
+            "googleSignup": "Sign up with Google",
+            "microsoftSignup": "Sign up with Microsoft"
         },
         "verifyEmail": {
             "title": "Verify your email",
@@ -208,7 +210,8 @@
             "emailNotVerified": "Your email is not verified. Please check your inbox.",
             "loginToContinue": "Please log in to continue",
             "resendVerification": "Resend verification email",
-            "verificationSent": "Verification email sent! Please check your inbox."
+            "verificationSent": "Verification email sent! Please check your inbox.",
+            "microsoftError": "Microsoft login failed"
         }
     },
     "footer": {
