@@ -22,7 +22,6 @@ import {
   Bell,
   Activity,
   Timer,
-  XCircle,
   ChevronDown,
   ChevronUp,
   Wifi,
@@ -871,7 +870,7 @@ function SessionRow({ session, onClick }: { session: ExamSession; onClick: () =>
   );
 }
 
-// Student Detail Modal
+// Premium Student Detail Modal
 function StudentDetailModal({ session, onClose }: { session: ExamSession; onClose: () => void }) {
   const progress = session.total_questions > 0
     ? Math.round((session.answered_count / session.total_questions) * 100)
@@ -885,138 +884,243 @@ function StudentDetailModal({ session, onClose }: { session: ExamSession; onClos
     session.user_agent?.toLowerCase().includes('android') ||
     session.user_agent?.toLowerCase().includes('iphone');
 
+  const timeSinceHeartbeat = Date.now() - session.last_heartbeat;
+  const lastSeenText = timeSinceHeartbeat < 60000
+    ? 'Just now'
+    : `${Math.floor(timeSinceHeartbeat / 60000)} min ago`;
+
+  const statusConfig = {
+    active: {
+      gradient: 'from-emerald-500 to-green-600',
+      bg: 'bg-emerald-50 dark:bg-emerald-900/30',
+      text: 'text-emerald-600 dark:text-emerald-400',
+      border: 'border-emerald-200 dark:border-emerald-800',
+      label: 'Active'
+    },
+    disconnected: {
+      gradient: 'from-amber-500 to-orange-600',
+      bg: 'bg-amber-50 dark:bg-amber-900/30',
+      text: 'text-amber-600 dark:text-amber-400',
+      border: 'border-amber-200 dark:border-amber-800',
+      label: 'Disconnected'
+    },
+    submitted: {
+      gradient: 'from-blue-500 to-indigo-600',
+      bg: 'bg-blue-50 dark:bg-blue-900/30',
+      text: 'text-blue-600 dark:text-blue-400',
+      border: 'border-blue-200 dark:border-blue-800',
+      label: 'Submitted'
+    },
+    expired: {
+      gradient: 'from-gray-400 to-gray-500',
+      bg: 'bg-gray-50 dark:bg-gray-900/30',
+      text: 'text-gray-600 dark:text-gray-400',
+      border: 'border-gray-200 dark:border-gray-700',
+      label: 'Expired'
+    }
+  };
+
+  const config = statusConfig[session.status] || statusConfig.expired;
+  const hasViolations = session.violations_count >= 2;
+
   return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 z-50"
+      className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-end sm:items-center justify-center sm:p-4 z-50 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700"
+        className="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md max-h-[92vh] overflow-hidden border border-gray-200/50 dark:border-gray-700/50 animate-in slide-in-from-bottom-4 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Mobile drag handle */}
-        <div className="sm:hidden flex justify-center py-3">
-          <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full" />
+        <div className="sm:hidden flex justify-center py-3 bg-gray-50/50 dark:bg-gray-800/50">
+          <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
         </div>
 
-        {/* Header */}
-        <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-          <div className="flex items-center justify-between">
+        {/* Premium Header with Gradient */}
+        <div className={`relative overflow-hidden ${hasViolations ? 'bg-gradient-to-br from-red-500 via-rose-500 to-red-600' : `bg-gradient-to-br ${config.gradient}`} p-6`}>
+          {/* Decorative pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
+          </div>
+
+          <div className="relative flex items-start justify-between">
             <div className="flex items-center gap-4">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl text-white ${session.violations_count >= 2
-                ? 'bg-red-500'
-                : session.status === 'active'
-                  ? 'bg-emerald-500'
-                  : 'bg-blue-500'
-                }`}>
-                {session.student_name.charAt(0).toUpperCase()}
+              {/* Avatar with ring */}
+              <div className="relative">
+                <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center font-bold text-2xl text-white shadow-lg border-2 border-white/30">
+                  {session.student_name.charAt(0).toUpperCase()}
+                </div>
+                {/* Status indicator */}
+                {session.status === 'active' && (
+                  <span className="absolute -bottom-1 -right-1 flex h-5 w-5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-5 w-5 bg-white border-2 border-emerald-500 items-center justify-center">
+                      <Wifi className="h-2.5 w-2.5 text-emerald-500" />
+                    </span>
+                  </span>
+                )}
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{session.student_name}</h3>
+                <h3 className="text-xl font-bold text-white drop-shadow-sm">{session.student_name}</h3>
                 {session.student_email && (
-                  <p className="text-sm text-gray-500">{session.student_email}</p>
+                  <p className="text-sm text-white/80 mt-0.5">{session.student_email}</p>
                 )}
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold text-white border border-white/20">
+                    {session.status === 'active' && <Wifi className="h-3 w-3" />}
+                    {session.status === 'disconnected' && <WifiOff className="h-3 w-3" />}
+                    {session.status === 'submitted' && <CheckCircle className="h-3 w-3" />}
+                    <span className="capitalize">{config.label}</span>
+                  </span>
+                  {hasViolations && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white/90 rounded-full text-xs font-bold text-red-600">
+                      <AlertTriangle className="h-3 w-3" />
+                      {session.violations_count} violations
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+              className="p-2 hover:bg-white/20 rounded-xl transition-colors"
             >
-              <XCircle className="h-6 w-6 text-gray-400" />
+              <X className="h-5 w-5 text-white/80 hover:text-white" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Status & Time Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4">
-              <div className="text-sm text-gray-500 mb-1">Status</div>
-              <div className={`font-bold capitalize ${session.status === 'active' ? 'text-emerald-600' :
-                session.status === 'disconnected' ? 'text-amber-600' :
-                  session.status === 'submitted' ? 'text-blue-600' : 'text-gray-600'
-                }`}>
-                {session.status}
-              </div>
+        <div className="p-5 space-y-4 overflow-y-auto max-h-[60vh]">
+          {/* Quick Stats Grid */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{progress}%</div>
+              <div className="text-xs text-gray-500 mt-1">Progress</div>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4">
-              <div className="text-sm text-gray-500 mb-1">Time Left</div>
-              <div className="font-bold text-gray-900 dark:text-white">{timeLeftText}</div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{timeLeftText}</div>
+              <div className="text-xs text-gray-500 mt-1">Time Left</div>
+            </div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{lastSeenText}</div>
+              <div className="text-xs text-gray-500 mt-1">Last Seen</div>
             </div>
           </div>
 
           {/* Progress Bar */}
-          <div>
+          <div className={`p-4 rounded-xl border ${config.border} ${config.bg}`}>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-500">Progress</span>
-              <span className="font-bold text-gray-900 dark:text-white">{progress}%</span>
+              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Exam Progress</span>
+              <span className={`text-sm font-bold ${config.text}`}>{session.answered_count}/{session.total_questions}</span>
             </div>
-            <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-2.5 bg-white dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
               <div
-                className="h-full bg-teal-500 transition-all duration-500"
+                className={`h-full bg-gradient-to-r ${config.gradient} transition-all duration-500 rounded-full`}
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <div className="mt-2 text-sm text-gray-500">
-              {session.answered_count} of {session.total_questions} questions completed
+            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              {session.total_questions - session.answered_count} questions remaining
             </div>
           </div>
 
           {/* Device Info */}
-          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4">
-            <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              {isMobile ? <Smartphone className="h-4 w-4" /> : <Monitor className="h-4 w-4" />}
-              Device Information
+          <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+            <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2 text-sm">
+              {isMobile ? <Smartphone className="h-4 w-4 text-teal-500" /> : <Monitor className="h-4 w-4 text-teal-500" />}
+              Device Details
             </h4>
-            <div className="space-y-2 text-sm">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-8 h-8 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
+                  {isMobile ? <Smartphone className="h-4 w-4 text-gray-500" /> : <Monitor className="h-4 w-4 text-gray-500" />}
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Device</div>
+                  <div className="font-medium text-gray-900 dark:text-white">{isMobile ? 'Mobile' : 'Desktop'}</div>
+                </div>
+              </div>
               {session.screen_resolution && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Screen</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{session.screen_resolution}</span>
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-8 h-8 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
+                    <LayoutGrid className="h-4 w-4 text-gray-500" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500">Screen</div>
+                    <div className="font-medium text-gray-900 dark:text-white">{session.screen_resolution}</div>
+                  </div>
                 </div>
               )}
               {session.network_quality && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Network</span>
-                  <span className={`font-medium capitalize ${session.network_quality === 'good' ? 'text-emerald-600' :
-                    session.network_quality === 'fair' ? 'text-amber-600' : 'text-red-600'
+                <div className="flex items-center gap-2 text-sm">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shadow-sm ${session.network_quality === 'good' ? 'bg-emerald-100 dark:bg-emerald-900/30' :
+                    session.network_quality === 'fair' ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-red-100 dark:bg-red-900/30'
                     }`}>
-                    {session.network_quality}
-                  </span>
+                    <Wifi className={`h-4 w-4 ${session.network_quality === 'good' ? 'text-emerald-600' :
+                      session.network_quality === 'fair' ? 'text-amber-600' : 'text-red-600'
+                      }`} />
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500">Network</div>
+                    <div className={`font-medium capitalize ${session.network_quality === 'good' ? 'text-emerald-600' :
+                      session.network_quality === 'fair' ? 'text-amber-600' : 'text-red-600'
+                      }`}>{session.network_quality}</div>
+                  </div>
                 </div>
               )}
-              <div className="flex justify-between">
-                <span className="text-gray-500">Device Type</span>
-                <span className="font-medium text-gray-900 dark:text-white">{isMobile ? 'Mobile' : 'Desktop'}</span>
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-8 h-8 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
+                  <Activity className="h-4 w-4 text-gray-500" />
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Current Q</div>
+                  <div className="font-medium text-gray-900 dark:text-white">{session.current_question || '-'}</div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Violations */}
-          <div>
-            <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <AlertTriangle className={`h-4 w-4 ${session.violations_count > 0 ? 'text-red-500' : 'text-gray-400'}`} />
-              Violations ({session.violations_count})
+          {/* Violations Section */}
+          <div className={`p-4 rounded-xl ${session.violations_count > 0 ? 'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50' : 'bg-gray-50 dark:bg-gray-800/50'}`}>
+            <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className={`h-4 w-4 ${session.violations_count > 0 ? 'text-red-500' : 'text-gray-400'}`} />
+                Violations History
+              </div>
+              {session.violations_count > 0 && (
+                <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
+                  {session.violations_count}
+                </span>
+              )}
             </h4>
             {session.violations.length === 0 ? (
-              <div className="text-gray-500 text-sm p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl text-center">
-                ✓ No violations recorded
+              <div className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800/50">
+                <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">
+                  No violations recorded - Clean record!
+                </div>
               </div>
             ) : (
-              <div className="space-y-2 max-h-48 overflow-y-auto">
+              <div className="space-y-2 max-h-40 overflow-y-auto">
                 {session.violations.map((v, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between bg-red-50 dark:bg-red-950/30 rounded-xl p-3 border border-red-100 dark:border-red-900/50"
+                    className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-red-100 dark:border-red-900/30"
                   >
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
-                      <span className="font-medium text-sm text-red-700 dark:text-red-300">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                        <AlertTriangle className="h-4 w-4 text-red-500" />
+                      </div>
+                      <span className="font-medium text-sm text-gray-900 dark:text-white">
                         {VIOLATION_LABELS[v.type] || v.type}
                       </span>
                     </div>
-                    <span className="text-xs text-red-500 font-medium">
+                    <span className="text-xs text-gray-500 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
                       {new Date(v.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>

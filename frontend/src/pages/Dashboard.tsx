@@ -895,10 +895,17 @@ export default function Dashboard() {
                                                 {CONVEX_FEATURES.proctoring && (
                                                     <button
                                                         onClick={() => navigate(`/exam/${exam.id}/proctor`)}
-                                                        className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border border-teal-200 dark:border-teal-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                                                        className="relative flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 border border-teal-400/50 hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105 transition-all duration-200 group overflow-hidden"
                                                     >
-                                                        <Eye className="h-5 w-5 text-teal-600 dark:text-teal-400 group-hover:scale-110 transition-transform" />
-                                                        <span className="text-xs font-semibold text-teal-700 dark:text-teal-300">{t('dashboard.actions.proctor', 'Proctor')}</span>
+                                                        {/* Shimmer effect */}
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                                        {/* Live indicator */}
+                                                        <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                                                        </span>
+                                                        <Eye className="h-5 w-5 text-white group-hover:scale-110 transition-transform drop-shadow-sm" />
+                                                        <span className="text-xs font-bold text-white drop-shadow-sm">{t('dashboard.actions.proctor', 'Live')}</span>
                                                     </button>
                                                 )}
 
