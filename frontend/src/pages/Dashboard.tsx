@@ -14,7 +14,7 @@ import Joyride, { STATUS } from 'react-joyride';
 import type { Step, CallBackProps } from 'react-joyride';
 import { useDemoTour } from '../hooks/useDemoTour';
 import { printerService } from '../lib/printer';
-import { ProctorDashboard } from '../components/ProctorDashboard';
+
 import { CONVEX_FEATURES } from '../main';
 
 interface Exam {
@@ -92,7 +92,7 @@ export default function Dashboard() {
     const [exams, setExams] = useState<Exam[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedExamForResults, setSelectedExamForResults] = useState<Exam | null>(null);
-    const [selectedExamForProctoring, setSelectedExamForProctoring] = useState<Exam | null>(null);
+
     const [profile, setProfile] = useState<any>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [runTour, setRunTour] = useState(false);
@@ -894,7 +894,7 @@ export default function Dashboard() {
                                                 {/* Proctor Button - Convex Live Monitoring */}
                                                 {CONVEX_FEATURES.proctoring && (
                                                     <button
-                                                        onClick={() => setSelectedExamForProctoring(exam)}
+                                                        onClick={() => navigate(`/exam/${exam.id}/proctor`)}
                                                         className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border border-teal-200 dark:border-teal-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
                                                     >
                                                         <Eye className="h-5 w-5 text-teal-600 dark:text-teal-400 group-hover:scale-110 transition-transform" />
@@ -1197,30 +1197,7 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {/* Proctor Dashboard Modal - Convex Real-time Monitoring */}
-            {selectedExamForProctoring && CONVEX_FEATURES.proctoring && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col">
-                        <div className="sticky top-0 z-10 bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-4 flex items-center justify-between">
-                            <div>
-                                <h2 className="text-xl font-bold text-white">
-                                    {selectedExamForProctoring.title}
-                                </h2>
-                                <p className="text-sm text-teal-100">{t('dashboard.modals.proctor.subtitle', 'Live Exam Monitoring')}</p>
-                            </div>
-                            <button
-                                onClick={() => setSelectedExamForProctoring(null)}
-                                className="p-2 hover:bg-white/10 rounded-full transition-colors group"
-                            >
-                                <X className="h-5 w-5 text-white/80 group-hover:text-white" />
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-6">
-                            <ProctorDashboard examId={selectedExamForProctoring.id} />
-                        </div>
-                    </div>
-                </div>
-            )}
+
             {/* Chat Widget - Convex or Classic */}
             {CONVEX_FEATURES.chat ? (
                 <ConvexChatWidget

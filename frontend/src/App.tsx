@@ -34,6 +34,7 @@ import { BlogList } from './pages/blog/BlogList';
 import { BlogPost } from './pages/blog/BlogPost';
 import { SubmissionSync } from './components/SubmissionSync';
 import { ExamAnalyticsDashboard } from "./components/analytics/ExamAnalyticsDashboard";
+import { ProctorDashboard } from "./components/ProctorDashboard";
 
 import KidsLanding from './pages/KidsLanding';
 import KidsExamView from './pages/KidsExamView';
@@ -239,6 +240,7 @@ function AppContent() {
         <Route path="/exam/:id/edit" element={<ProtectedRoute><ExamEditor /></ProtectedRoute>} />
         <Route path="/payment-history" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
         <Route path="/exam/:examId/analytics" element={<ProtectedRoute><ExamAnalyticsDashboard /></ProtectedRoute>} />
+        <Route path="/exam/:examId/proctor" element={<ProtectedRoute><ProctorDashboard /></ProtectedRoute>} />
 
         {/* Student Routes (Some have internal auth logic) */}
         <Route path="/exam/:id" element={<ExamView />} />
