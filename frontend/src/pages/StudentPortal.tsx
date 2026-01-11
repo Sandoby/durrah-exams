@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
-import { LogOut, BookOpen, Clock, Trophy, Search, User, ArrowRight, History, ArrowLeft } from 'lucide-react';
+import { LogOut, BookOpen, Clock, Trophy, Search, User, ArrowRight, History, ArrowLeft, Mail, Lock, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
@@ -90,7 +90,7 @@ export default function StudentPortal() {
         options: {
           redirectTo: isNative
             ? 'com.durrah.tutors://login-callback'
-            : `${window.location.origin}/student-portal`,
+            : `${window.location.origin}/student-portal?type=student`,
           skipBrowserRedirect: isNative,
           queryParams: {
             access_type: 'offline',
@@ -119,7 +119,7 @@ export default function StudentPortal() {
         options: {
           redirectTo: isNative
             ? 'com.durrah.tutors://login-callback'
-            : `${window.location.origin}/student-portal`,
+            : `${window.location.origin}/student-portal?type=student`,
           skipBrowserRedirect: isNative,
           scopes: 'openid profile email',
         },
@@ -277,7 +277,7 @@ export default function StudentPortal() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.profile.email', 'Email address')}</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-gray-400" />
+                    <Mail className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
                     type="email"
@@ -295,14 +295,19 @@ export default function StudentPortal() {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {t('settings.password.new', 'Password')}
                   </label>
-                  <input
-                    type="password"
-                    required
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all"
-                    placeholder="••••••••"
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all"
+                      placeholder="••••••••"
+                    />
+                  </div>
                   {authMode === 'login' && (
                     <div className="mt-2 flex justify-end">
                       <button
@@ -320,19 +325,41 @@ export default function StudentPortal() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform hover:scale-[1.02] transition-all"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform hover:scale-[1.02] transition-all disabled:opacity-50"
               >
-                {loading ? t('auth.processing', 'Processing...') : authMode === 'login' ? t('auth.signIn', 'Sign In') : t('auth.createAccount', 'Create Account')}
+                {loading ? (
+                  <>
+                    <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                    {t('auth.processing', 'Processing...')}
+                  </>
+                ) : (
+                  authMode === 'login' ? t('auth.signIn', 'Sign In') : t('auth.createAccount', 'Create Account')
+                )}
               </button>
 
-              <div className="grid grid-cols-2 gap-3 mt-4">
+              <div className="mt-6 space-y-3">
+                <button
+                  type="button"
+                  onClick={handleMicrosoftLogin}
+                  disabled={loading}
+                  className="relative w-full flex justify-center items-center py-2.5 px-4 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-all"
+                >
+                  <svg className="absolute left-6 h-5 w-5" viewBox="0 0 21 21">
+                    <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+                    <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+                    <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+                    <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+                  </svg>
+                  {authMode === 'login' ? t('auth.login.microsoftSignin', 'Sign in with Microsoft') : t('auth.register.microsoftSignup', 'Sign up with Microsoft')}
+                </button>
+
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
                   disabled={loading}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-full bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm"
+                  className="relative w-full flex justify-center items-center py-2.5 px-4 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-all"
                 >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24">
+                  <svg className="absolute left-6 h-5 w-5" viewBox="0 0 24 24">
                     <path
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                       fill="#4285F4"
@@ -350,21 +377,7 @@ export default function StudentPortal() {
                       fill="#EA4335"
                     />
                   </svg>
-                  Google
-                </button>
-                <button
-                  type="button"
-                  onClick={handleMicrosoftLogin}
-                  disabled={loading}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-full bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm"
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 21 21">
-                    <rect x="1" y="1" width="9" height="9" fill="#f25022" />
-                    <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
-                    <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
-                    <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
-                  </svg>
-                  Microsoft
+                  {authMode === 'login' ? t('auth.login.googleSignin', 'Sign in with Google') : t('auth.register.googleSignup', 'Sign up with Google')}
                 </button>
               </div>
             </form>

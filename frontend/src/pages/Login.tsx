@@ -36,14 +36,27 @@ export default function Login() {
         const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
-                // Check role before navigating
+                const params = new URLSearchParams(window.location.search);
+                const isTutorRequested = params.get('type') === 'tutor' || window.location.pathname.includes('/login');
+
+                // Check if profile exists
                 const { data: profile } = await supabase
                     .from('profiles')
                     .select('role')
                     .eq('id', session.user.id)
-                    .single();
+                    .maybeSingle();
 
-                if (profile?.role === 'student') {
+                // If no profile exists, create one as tutor. 
+                // If they specifically came from the tutor flow (type=tutor), also ensure they are a tutor
+                if (!profile || (profile.role === 'student' && isTutorRequested)) {
+                    await supabase.from('profiles').upsert({
+                        id: session.user.id,
+                        role: 'tutor',
+                        full_name: session.user.user_metadata?.full_name || '',
+                        email: session.user.email
+                    });
+                    navigate('/dashboard');
+                } else if (profile.role === 'student') {
                     setStudentUserInfo({
                         email: session.user.email || '',
                         id: session.user.id
@@ -66,7 +79,7 @@ export default function Login() {
                 options: {
                     redirectTo: isNative
                         ? 'com.durrah.tutors://login-callback'
-                        : `${window.location.origin}/login`,
+                        : `${window.location.origin}/login?type=tutor`,
                     skipBrowserRedirect: isNative, // Needed for native
                     queryParams: {
                         access_type: 'offline',
@@ -95,7 +108,7 @@ export default function Login() {
                 options: {
                     redirectTo: isNative
                         ? 'com.durrah.tutors://login-callback'
-                        : `${window.location.origin}/login`,
+                        : `${window.location.origin}/login?type=tutor`,
                     skipBrowserRedirect: isNative, // Needed for native
                     scopes: 'openid profile email',
                 },

@@ -40,14 +40,26 @@ export default function Register() {
         const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
-                // Check role before navigating
+                const params = new URLSearchParams(window.location.search);
+                const isTutorRequested = params.get('type') === 'tutor' || window.location.pathname.includes('/register');
+
+                // Check if profile exists
                 const { data: profile } = await supabase
                     .from('profiles')
                     .select('role')
                     .eq('id', session.user.id)
-                    .single();
+                    .maybeSingle();
 
-                if (profile?.role === 'student') {
+                // If no profile, or if they specifically came from the tutor register page/flow, ensure they are a tutor
+                if (!profile || (profile.role === 'student' && isTutorRequested)) {
+                    await supabase.from('profiles').upsert({
+                        id: session.user.id,
+                        role: 'tutor',
+                        full_name: session.user.user_metadata?.full_name || '',
+                        email: session.user.email
+                    });
+                    navigate('/dashboard');
+                } else if (profile.role === 'student') {
                     setStudentUserInfo({
                         email: session.user.email || '',
                         id: session.user.id

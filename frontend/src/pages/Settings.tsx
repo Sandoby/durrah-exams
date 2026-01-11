@@ -36,6 +36,7 @@ export default function Settings() {
     });
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [userRole, setUserRole] = useState<string>('tutor');
 
     const handleLogout = async () => {
         try {
@@ -75,6 +76,9 @@ export default function Settings() {
                 subscription_plan: profileData?.subscription_plan,
                 subscription_end_date: profileData?.subscription_end_date,
             });
+            if (profileData?.role) {
+                setUserRole(profileData.role);
+            }
         } catch (error: any) {
             console.error('Error fetching profile:', error);
             toast.error(t('settings.profile.error'));
@@ -96,6 +100,7 @@ export default function Settings() {
                     full_name: profile.full_name,
                     phone: profile.phone,
                     institution: profile.institution,
+                    role: userRole
                 }, {
                     onConflict: 'id'
                 });
