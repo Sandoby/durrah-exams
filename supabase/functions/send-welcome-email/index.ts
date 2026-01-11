@@ -102,7 +102,7 @@ const getEmailTemplate = (type: EmailType, name: string, expiryDate?: string, re
         'REGISTRATION SUCCESSFUL',
         `We're excited to help you take your tutoring practice to the next level. Your account is now active and you can start creating secure, high-quality exams immediately.`,
         'Get Started',
-        'https://tutors.durrahsystem.tech/dashboard'
+        'https://durrahtutors.com/dashboard'
       )
     },
     subscription_reminder_7d: {
@@ -112,7 +112,7 @@ const getEmailTemplate = (type: EmailType, name: string, expiryDate?: string, re
         '7 DAYS LEFT',
         `This is a friendly reminder that your subscription will expire on <strong>${expiryDate}</strong>. Renew today to keep your dashboard and student data accessible.`,
         'Renew Subscription',
-        'https://tutors.durrahsystem.tech/settings',
+        'https://durrahtutors.com/settings',
         '#eab308'
       )
     },
@@ -123,7 +123,7 @@ const getEmailTemplate = (type: EmailType, name: string, expiryDate?: string, re
         '3 DAYS LEFT',
         `Your subscription expires on <strong>${expiryDate}</strong>. Don't let your exams go offline—renew now to maintain full access to all features.`,
         'Renew Now',
-        'https://tutors.durrahsystem.tech/settings',
+        'https://durrahtutors.com/settings',
         '#f97316'
       )
     },
@@ -134,7 +134,7 @@ const getEmailTemplate = (type: EmailType, name: string, expiryDate?: string, re
         'EXPIRED',
         `Your subscription expired on <strong>${expiryDate}</strong>. Your data is safely stored, but you will need to renew to continue using the platform.`,
         'Reactivate Now',
-        'https://tutors.durrahsystem.tech/settings',
+        'https://durrahtutors.com/settings',
         '#ef4444'
       )
     },
@@ -145,7 +145,7 @@ const getEmailTemplate = (type: EmailType, name: string, expiryDate?: string, re
         'WE MISS YOU',
         `It's been a few days since your subscription ended. Your exams and data are waiting for you—reactivate now to continue your journey.`,
         'Return to Dashboard',
-        'https://tutors.durrahsystem.tech/settings',
+        'https://durrahtutors.com/settings',
         '#4f46e5'
       )
     },
@@ -202,9 +202,9 @@ serve(async (req: Request) => {
 
     // Handle password reset and email verification URLs
     if (emailType === 'password_reset' && resetToken) {
-      resetUrl = `https://tutors.durrahsystem.tech/update-password?token=${resetToken}`
+      resetUrl = `https://durrahtutors.com/update-password?token=${resetToken}`
     } else if (emailType === 'email_verification' && verificationToken) {
-      resetUrl = `https://tutors.durrahsystem.tech/verify-email?token=${verificationToken}`
+      resetUrl = `https://durrahtutors.com/verify-email?token=${verificationToken}`
     }
 
     if (emailType !== 'welcome' && emailType !== 'password_reset' && emailType !== 'email_verification' && userId) {

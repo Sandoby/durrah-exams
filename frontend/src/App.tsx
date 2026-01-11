@@ -139,7 +139,7 @@ function AppContent() {
             }
 
             // Handle Universal/App Links (https)
-            if (url.hostname.includes('durrahsystem.tech')) {
+            if (url.hostname.includes('durrahsystem.tech') || url.hostname.includes('durrahtutors.com')) {
               const path = url.pathname + url.search + url.hash;
               console.log('Deep linking to path:', path);
               navigate(path);

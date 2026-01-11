@@ -106,6 +106,7 @@ export default function Register() {
                     data: {
                         full_name: data.name,
                     },
+                    emailRedirectTo: `${window.location.origin}/login`,
                 },
             });
 

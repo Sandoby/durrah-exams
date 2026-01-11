@@ -135,7 +135,7 @@ serve(async (req) => {
                 orderId: merchantOrderId,
                 date: new Date().toISOString(),
                 subscriptionEndDate: endDate.toISOString(),
-                dashboardUrl: `https://tutors.durrahsystem.tech/dashboard`
+                dashboardUrl: `https://durrahtutors.com/dashboard`
               }
             }
           })

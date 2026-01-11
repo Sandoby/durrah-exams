@@ -21,7 +21,7 @@ serve(async (req) => {
     switch (type) {
       case 'payment_success':
         subject = 'Invoice & Payment Confirmation: Durrah for Tutors'
-        const logoUrl = 'https://tutors.durrahsystem.tech/Picture1.png'
+        const logoUrl = 'https://durrahtutors.com/Picture1.png'
         html = `
           <!DOCTYPE html>
           <html>
@@ -210,7 +210,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Durrah for Tutors <noreply@durrahsystem.tech>',
+        from: 'Durrah for Tutors <noreply@durrahtutors.com>',
         to: [email],
         subject: subject,
         html: html,
