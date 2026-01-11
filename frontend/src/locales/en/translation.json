@@ -8,7 +8,10 @@
         "dir": "ltr",
         "forTutors": "for Tutors",
         "true": "True",
-        "false": "False"
+        "false": "False",
+        "error": "An unexpected error occurred",
+        "loading": "Loading...",
+        "success": "Success"
     },
     "hero": {
         "title": "Create Exams That",
@@ -896,10 +899,5 @@
                 "answer": "Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress."
             }
         }
-    },
-    "common": {
-        "error": "An unexpected error occurred",
-        "loading": "Loading...",
-        "success": "Success"
     }
 }

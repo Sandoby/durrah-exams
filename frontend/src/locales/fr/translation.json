@@ -8,7 +8,10 @@
         "dir": "ltr",
         "forTutors": "for Tutors",
         "true": "Vrai",
-        "false": "Faux"
+        "false": "Faux",
+        "error": "Une erreur inattendue est survenue",
+        "loading": "Chargement...",
+        "success": "Succès"
     },
     "hero": {
         "title": "Créez des Examens Qui",
@@ -874,10 +877,5 @@
                 "answer": "Les étudiants peuvent rejoindre des examens avec seulement un code et un pseudonyme, ou utiliser le Portail Étudiant pour suivre leurs progrès à long terme."
             }
         }
-    },
-    "common": {
-        "error": "Une erreur inattendue est survenue",
-        "loading": "Chargement...",
-        "success": "Succès"
     }
 }
