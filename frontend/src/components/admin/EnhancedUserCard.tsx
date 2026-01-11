@@ -16,6 +16,7 @@ interface User {
     subscription_status?: string;
     subscription_plan?: string;
     subscription_end_date?: string;
+    role?: 'tutor' | 'student' | null;
     created_at: string;
 }
 
@@ -266,8 +267,13 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
                                     <h3 className="font-semibold text-gray-900 dark:text-white">
                                         {user.full_name || 'No Name'}
                                     </h3>
+                                    {user.role === 'student' && (
+                                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                                            Student
+                                        </span>
+                                    )}
                                     {getStatusBadge()}
-                                    {user.subscription_plan && (
+                                    {user.subscription_plan && user.role !== 'student' && (
                                         <span className="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
                                             {user.subscription_plan}
                                         </span>
@@ -336,111 +342,114 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
                                 </div>
                             </div>
 
-                            {/* Subscription Info */}
-                            <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-                                <h5 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-2">
-                                    <CreditCard className="h-4 w-4" />
-                                    Subscription
-                                </h5>
-                                <div className="space-y-2 text-sm">
-                                    <div>
-                                        <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                                        <div className="mt-1">{getStatusBadge()}</div>
+                            {user.role !== 'student' && (
+                                <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                                    <h5 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-2">
+                                        <CreditCard className="h-4 w-4" />
+                                        Subscription
+                                    </h5>
+                                    <div className="space-y-2 text-sm">
+                                        <div>
+                                            <span className="text-gray-500 dark:text-gray-400">Status:</span>
+                                            <div className="mt-1">{getStatusBadge()}</div>
+                                        </div>
+                                        {user.subscription_plan && (
+                                            <div>
+                                                <span className="text-gray-500 dark:text-gray-400">Plan:</span>
+                                                <p className="text-gray-900 dark:text-white capitalize">{user.subscription_plan}</p>
+                                            </div>
+                                        )}
+                                        {user.subscription_end_date && (
+                                            <div>
+                                                <span className="text-gray-500 dark:text-gray-400">Expires:</span>
+                                                <p className="text-gray-900 dark:text-white">{formatDate(user.subscription_end_date)}</p>
+                                            </div>
+                                        )}
                                     </div>
-                                    {user.subscription_plan && (
-                                        <div>
-                                            <span className="text-gray-500 dark:text-gray-400">Plan:</span>
-                                            <p className="text-gray-900 dark:text-white capitalize">{user.subscription_plan}</p>
-                                        </div>
-                                    )}
-                                    {user.subscription_end_date && (
-                                        <div>
-                                            <span className="text-gray-500 dark:text-gray-400">Expires:</span>
-                                            <p className="text-gray-900 dark:text-white">{formatDate(user.subscription_end_date)}</p>
-                                        </div>
-                                    )}
                                 </div>
-                            </div>
+                            )}
                         </div>
 
-                        {/* User Statistics */}
-                        <div className="space-y-3">
-                            <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                <FileText className="h-4 w-4" />
-                                Statistics
-                            </h4>
-                            {isLoadingStats ? (
-                                <div className="space-y-2">
-                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                                </div>
-                            ) : stats ? (
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500 dark:text-gray-400">Total Exams:</span>
-                                        <span className="font-semibold text-gray-900 dark:text-white">{stats.total_exams}</span>
+                        {/* User Statistics / Management (Tutor Only) */}
+                        {user.role !== 'student' && (
+                            <div className="space-y-3">
+                                <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <FileText className="h-4 w-4" />
+                                    Statistics
+                                </h4>
+                                {isLoadingStats ? (
+                                    <div className="space-y-2">
+                                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500 dark:text-gray-400">Submissions:</span>
-                                        <span className="font-semibold text-gray-900 dark:text-white">{stats.total_submissions}</span>
+                                ) : stats ? (
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500 dark:text-gray-400">Total Exams:</span>
+                                            <span className="font-semibold text-gray-900 dark:text-white">{stats.total_exams}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500 dark:text-gray-400">Submissions:</span>
+                                            <span className="font-semibold text-gray-900 dark:text-white">{stats.total_submissions}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500 dark:text-gray-400">Active Exams:</span>
+                                            <span className="font-semibold text-gray-900 dark:text-white">{stats.active_exams}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500 dark:text-gray-400">Active Exams:</span>
-                                        <span className="font-semibold text-gray-900 dark:text-white">{stats.active_exams}</span>
-                                    </div>
-                                </div>
-                            ) : null}
+                                ) : null}
 
-                            {/* Subscription Management */}
-                            <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-                                <h5 className="font-semibold text-gray-900 dark:text-white mb-2">Subscription Management</h5>
-                                <div className="space-y-2">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSubscriptionAction('activate');
-                                            setShowSubscriptionModal(true);
-                                        }}
-                                        className="w-full px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
-                                    >
-                                        <Check className="h-4 w-4" />
-                                        Activate Subscription
-                                    </button>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSubscriptionAction('extend');
-                                            setShowSubscriptionModal(true);
-                                        }}
-                                        className="w-full px-3 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
-                                    >
-                                        <Calendar className="h-4 w-4" />
-                                        Extend Subscription
-                                    </button>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSubscriptionAction('deactivate');
-                                            setShowSubscriptionModal(true);
-                                        }}
-                                        className="w-full px-3 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
-                                    >
-                                        <X className="h-4 w-4" />
-                                        Deactivate Subscription
-                                    </button>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            sendEmail();
-                                        }}
-                                        className="w-full px-3 py-2 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-                                    >
-                                        Send Email
-                                    </button>
+                                {/* Subscription Management */}
+                                <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                                    <h5 className="font-semibold text-gray-900 dark:text-white mb-2">Subscription Management</h5>
+                                    <div className="space-y-2">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSubscriptionAction('activate');
+                                                setShowSubscriptionModal(true);
+                                            }}
+                                            className="w-full px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <Check className="h-4 w-4" />
+                                            Activate Subscription
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSubscriptionAction('extend');
+                                                setShowSubscriptionModal(true);
+                                            }}
+                                            className="w-full px-3 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <Calendar className="h-4 w-4" />
+                                            Extend Subscription
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSubscriptionAction('deactivate');
+                                                setShowSubscriptionModal(true);
+                                            }}
+                                            className="w-full px-3 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <X className="h-4 w-4" />
+                                            Deactivate Subscription
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                sendEmail();
+                                            }}
+                                            className="w-full px-3 py-2 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                                        >
+                                            Send Email
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Support Notes */}
                         <div className="space-y-3">

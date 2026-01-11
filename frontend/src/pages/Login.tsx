@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
+import { StudentAccountModal } from '../components/StudentAccountModal';
 
 const loginSchema = z.object({
     email: z.string().email('auth.validation.email'),
@@ -27,11 +28,30 @@ export default function Login() {
         resolver: zodResolver(loginSchema),
     });
 
+    // Student account modal state
+    const [showStudentModal, setShowStudentModal] = useState(false);
+    const [studentUserInfo, setStudentUserInfo] = useState<{ email: string; id: string } | null>(null);
+
     useEffect(() => {
         const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
-                navigate('/dashboard');
+                // Check role before navigating
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (profile?.role === 'student') {
+                    setStudentUserInfo({
+                        email: session.user.email || '',
+                        id: session.user.id
+                    });
+                    setShowStudentModal(true);
+                } else {
+                    navigate('/dashboard');
+                }
             }
         };
         checkSession();
@@ -46,7 +66,7 @@ export default function Login() {
                 options: {
                     redirectTo: isNative
                         ? 'com.durrah.tutors://login-callback'
-                        : `${window.location.origin}/dashboard`,
+                        : `${window.location.origin}/login`,
                     skipBrowserRedirect: isNative, // Needed for native
                     queryParams: {
                         access_type: 'offline',
@@ -75,7 +95,7 @@ export default function Login() {
                 options: {
                     redirectTo: isNative
                         ? 'com.durrah.tutors://login-callback'
-                        : `${window.location.origin}/dashboard`,
+                        : `${window.location.origin}/login`,
                     skipBrowserRedirect: isNative, // Needed for native
                     scopes: 'openid profile email',
                 },
@@ -121,6 +141,27 @@ export default function Login() {
             }
 
             toast.success(t('auth.messages.loginSuccess'));
+
+            // Check if user is a student account
+            if (authData.user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', authData.user.id)
+                    .single();
+
+                if (profile?.role === 'student') {
+                    // Show student account warning modal
+                    setStudentUserInfo({
+                        email: authData.user.email || '',
+                        id: authData.user.id
+                    });
+                    setShowStudentModal(true);
+                    setIsLoading(false);
+                    return;
+                }
+            }
+
             navigate('/dashboard');
         } catch (error: any) {
             const isUnverified = error?.message?.toLowerCase().includes('email not confirmed') ||
@@ -298,6 +339,21 @@ export default function Login() {
                     </div>
                 </div>
             </div>
+
+            {/* Student Account Warning Modal */}
+            <StudentAccountModal
+                isOpen={showStudentModal}
+                userEmail={studentUserInfo?.email || ''}
+                userId={studentUserInfo?.id || ''}
+                onClose={() => {
+                    setShowStudentModal(false);
+                    supabase.auth.signOut();
+                }}
+                onConverted={() => {
+                    setShowStudentModal(false);
+                    navigate('/dashboard');
+                }}
+            />
         </div>
     );
 }

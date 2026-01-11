@@ -21,6 +21,7 @@ interface User {
     email: string;
     created_at: string;
     full_name?: string;
+    role?: 'tutor' | 'student' | null;
     subscription_status?: string;
     subscription_plan?: string;
     subscription_end_date?: string;
@@ -110,6 +111,7 @@ export default function AdminPanel() {
         sortBy: 'created_at',
         sortOrder: 'desc'
     });
+    const [roleFilter, setRoleFilter] = useState<'all' | 'tutor' | 'student'>('all');
 
     // Coupons
     const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -294,6 +296,16 @@ export default function AdminPanel() {
     useEffect(() => {
         let result = [...users];
 
+        // Role Filter
+        if (roleFilter !== 'all') {
+            if (roleFilter === 'student') {
+                result = result.filter(user => user.role === 'student');
+            } else if (roleFilter === 'tutor') {
+                // Tutors are those with role='tutor' or no role set (legacy users)
+                result = result.filter(user => user.role === 'tutor' || !user.role);
+            }
+        }
+
         // Search
         if (filters.searchTerm) {
             const term = filters.searchTerm.toLowerCase();
@@ -386,7 +398,7 @@ export default function AdminPanel() {
         });
 
         setFilteredUsers(result);
-    }, [users, filters]);
+    }, [users, filters, roleFilter]);
 
 
 
@@ -859,6 +871,32 @@ export default function AdminPanel() {
                                         Showing: {filteredUsers.length}
                                     </span>
                                 </div>
+                            </div>
+
+                            {/* Role Filter Tabs */}
+                            <div className="flex gap-2 mb-4 p-1 bg-gray-100 dark:bg-gray-700 rounded-xl w-fit">
+                                {[
+                                    { id: 'all', label: 'All Users', count: users.length },
+                                    { id: 'tutor', label: 'Tutors', count: users.filter(u => u.role === 'tutor' || !u.role).length },
+                                    { id: 'student', label: 'Students', count: users.filter(u => u.role === 'student').length }
+                                ].map((tab) => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setRoleFilter(tab.id as 'all' | 'tutor' | 'student')}
+                                        className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${roleFilter === tab.id
+                                            ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                                            }`}
+                                    >
+                                        {tab.label}
+                                        <span className={`ml-2 px-1.5 py-0.5 text-xs rounded-full ${roleFilter === tab.id
+                                            ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400'
+                                            : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400'
+                                            }`}>
+                                            {tab.count}
+                                        </span>
+                                    </button>
+                                ))}
                             </div>
 
                             <UserFiltersComponent
@@ -1554,9 +1592,13 @@ const NotificationManager = () => {
                             className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white"
                         >
                             <option value="all">All Users (Broadcast)</option>
+                            <option value="tutors_only">Tutors Only</option>
+                            <option value="students_only">Students Only</option>
+                            <option value="subscribed_only">Subscribed Users Only</option>
+                            <option value="free_only">Free Users Only</option>
                             <option value="custom">Specific User ID (Enter manually)</option>
                         </select>
-                        {targetUserId !== 'all' && (
+                        {targetUserId === 'custom' && (
                             <input
                                 type="text"
                                 placeholder="Enter User UUID"

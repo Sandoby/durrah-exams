@@ -94,7 +94,16 @@ Deno.serve(async (req: Request) => {
         const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
         let query = `${SUPABASE_URL}/rest/v1/profiles?select=id,email,fcm_token`
-        if (targetUserId !== 'all') {
+        if (targetUserId === 'tutors_only') {
+            query += `&role=eq.tutor`
+        } else if (targetUserId === 'students_only') {
+            query += `&role=eq.student`
+        } else if (targetUserId === 'subscribed_only') {
+            query += `&subscription_status=eq.active`
+        } else if (targetUserId === 'free_only') {
+            // Get users where status is NOT active (null or something else)
+            query += `&subscription_status=neq.active`
+        } else if (targetUserId !== 'all') {
             query += `&id=eq.${targetUserId}`
         }
 

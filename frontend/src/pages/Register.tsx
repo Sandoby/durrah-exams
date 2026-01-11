@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
+import { StudentAccountModal } from '../components/StudentAccountModal';
 const registerSchema = z.object({
     name: z.string().min(2, 'auth.validation.name'),
     email: z.string().email('auth.validation.email'),
@@ -31,11 +32,30 @@ export default function Register() {
         resolver: zodResolver(registerSchema),
     });
 
+    // Student account modal state
+    const [showStudentModal, setShowStudentModal] = useState(false);
+    const [studentUserInfo, setStudentUserInfo] = useState<{ email: string; id: string } | null>(null);
+
     useEffect(() => {
         const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
-                navigate('/dashboard');
+                // Check role before navigating
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (profile?.role === 'student') {
+                    setStudentUserInfo({
+                        email: session.user.email || '',
+                        id: session.user.id
+                    });
+                    setShowStudentModal(true);
+                } else {
+                    navigate('/dashboard');
+                }
             }
         };
         checkSession();
@@ -50,7 +70,7 @@ export default function Register() {
                 options: {
                     redirectTo: isNative
                         ? 'com.durrah.tutors://login-callback'
-                        : `${window.location.origin}/dashboard`,
+                        : `${window.location.origin}/register`,
                     skipBrowserRedirect: isNative,
                     queryParams: {
                         access_type: 'offline',
@@ -79,7 +99,7 @@ export default function Register() {
                 options: {
                     redirectTo: isNative
                         ? 'com.durrah.tutors://login-callback'
-                        : `${window.location.origin}/dashboard`,
+                        : `${window.location.origin}/register`,
                     skipBrowserRedirect: isNative,
                     scopes: 'openid profile email',
                 },
@@ -122,6 +142,14 @@ export default function Register() {
 
             // Send welcome email (don't block on this)
             if (authData.user) {
+                // Create tutor profile
+                await supabase.from('profiles').upsert({
+                    id: authData.user.id,
+                    role: 'tutor',
+                    full_name: data.name,
+                    email: data.email
+                });
+
                 try {
                     await supabase.functions.invoke('send-welcome-email', {
                         body: {
@@ -338,6 +366,21 @@ export default function Register() {
                     </div>
                 </div>
             </div>
+
+            {/* Student Account Warning Modal */}
+            <StudentAccountModal
+                isOpen={showStudentModal}
+                userEmail={studentUserInfo?.email || ''}
+                userId={studentUserInfo?.id || ''}
+                onClose={() => {
+                    setShowStudentModal(false);
+                    supabase.auth.signOut();
+                }}
+                onConverted={() => {
+                    setShowStudentModal(false);
+                    navigate('/dashboard');
+                }}
+            />
         </div>
     );
 }
