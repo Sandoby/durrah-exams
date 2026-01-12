@@ -879,6 +879,22 @@
                 }
             }
         },
+        "howto": {
+            "title": "How to Create an Online Exam in 3 Simple Steps",
+            "subtitle": "Get your assessment up and running in minutes with our streamlined process.",
+            "step1": {
+                "title": "1. Build Your Content",
+                "desc": "Use our lightning-fast editor to create multiple-choice, numeric, or open-ended questions. Add images and math formulas with ease."
+            },
+            "step2": {
+                "title": "2. Set Security Rules",
+                "desc": "Enable one-click anti-cheating features like tab detection, fullscreen enforcement, and violation tracking to ensure academic integrity."
+            },
+            "step3": {
+                "title": "3. Share & Analyze",
+                "desc": "Generate a unique exam link or QR code. Once students submit, get instant reports and beautiful per-student performance analytics."
+            }
+        },
         "faq": {
             "title": "Frequently Asked Questions",
             "subtitle": "Everything you need to know about Durrah",

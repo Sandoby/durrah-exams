@@ -145,20 +145,20 @@ export default function LandingPage() {
 
     const faqs = [
         {
-            question: t('faq.q1.question', 'Is Durrah really safe for kids?'),
-            answer: t('faq.q1.answer', 'Yes! We prioritize safety with filtered content, secure nickname-only access options, and zero data selling.')
+            question: t('landing.faq.q1.question', 'Is Durrah really safe for kids?'),
+            answer: t('landing.faq.q1.answer', 'Yes! We prioritize safety with filtered content, secure nickname-only access options, and zero data selling.')
         },
         {
-            question: t('faq.q2.question', 'How does the anti-cheating system work?'),
-            answer: t('faq.q2.answer', 'Our system uses AI to detect tab switching, fullscreen escapes, and suspicious behavior patterns without intrusive software.')
+            question: t('landing.faq.q2.question', 'How does the anti-cheating system work?'),
+            answer: t('landing.faq.q2.answer', 'Our system uses AI to detect tab switching, fullscreen escapes, and suspicious behavior patterns without intrusive software.')
         },
         {
-            question: t('faq.q3.question', 'Can I use Durrah for large school groups?'),
-            answer: t('faq.q3.answer', 'Absolutely. Our "Professional" and "Yearly" plans are designed for high-capacity testing with detailed analytics.')
+            question: t('landing.faq.q3.question', 'Can I use Durrah for large school groups?'),
+            answer: t('landing.faq.q3.answer', 'Absolutely. Our "Professional" and "Yearly" plans are designed for high-capacity testing with detailed analytics.')
         },
         {
-            question: t('faq.q4.question', 'Do students need an account?'),
-            answer: t('faq.q4.answer', 'Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress.')
+            question: t('landing.faq.q4.question', 'Do students need an account?'),
+            answer: t('landing.faq.q4.answer', 'Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress.')
         }
     ];
 
@@ -772,10 +772,10 @@ export default function LandingPage() {
                         className="text-center mb-16"
                     >
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                            {t('faq.title', 'Frequently Asked Questions')}
+                            {t('landing.faq.title', 'Frequently Asked Questions')}
                         </h2>
                         <p className="text-gray-600 dark:text-gray-400">
-                            {t('faq.subtitle', 'Everything you need to know about Durrah')}
+                            {t('landing.faq.subtitle', 'Everything you need to know about Durrah')}
                         </p>
                     </motion.div>
 
@@ -794,7 +794,7 @@ export default function LandingPage() {
                                     className="w-full px-6 py-5 text-left flex justify-between items-center group"
                                 >
                                     <span className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                        {t(`faq.q${index + 1}.question`, faq.question)}
+                                        {t(`landing.faq.q${index + 1}.question`, faq.question)}
                                     </span>
                                     <motion.div
                                         animate={{ rotate: activeFaq === index ? 180 : 0 }}
@@ -812,7 +812,7 @@ export default function LandingPage() {
                                             transition={{ duration: 0.3, ease: 'easeInOut' }}
                                         >
                                             <div className="px-6 pb-5 text-gray-600 dark:text-gray-400 text-sm leading-relaxed border-t border-gray-100 dark:border-slate-700/50 pt-4">
-                                                {t(`faq.q${index + 1}.answer`, faq.answer)}
+                                                {t(`landing.faq.q${index + 1}.answer`, faq.answer)}
                                             </div>
                                         </motion.div>
                                     )}
@@ -1035,30 +1035,30 @@ export default function LandingPage() {
                             {t('landing.howto.title', 'How to Create an Online Exam in 3 Simple Steps')}
                         </h2>
                         <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                            {t('landing.howto.subtitle', 'Durrah makes digital assessment easy for teachers, tutors, and schools.')}
+                            {t('landing.howto.subtitle', 'Get your assessment up and running in minutes with our streamlined process.')}
                         </p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-12">
                         <div className="flex flex-col items-center text-center">
                             <div className="mb-6 w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">1</div>
-                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step1.title', 'Register as a Tutor')}</h3>
+                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step1.title', '1. Build Your Content')}</h3>
                             <p className="text-gray-600 dark:text-gray-400">
-                                {t('landing.howto.step1.desc', 'Sign up in seconds and access your professional exam dashboard immediately.')}
+                                {t('landing.howto.step1.desc', 'Use our lightning-fast editor to create multiple-choice, numeric, or open-ended questions. Add images and math formulas with ease.')}
                             </p>
                         </div>
                         <div className="flex flex-col items-center text-center">
                             <div className="mb-6 w-16 h-16 bg-violet-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">2</div>
-                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step2.title', 'Create Your Exam')}</h3>
+                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step2.title', '2. Set Security Rules')}</h3>
                             <p className="text-gray-600 dark:text-gray-400">
-                                {t('landing.howto.step2.desc', 'Add multiple choice, true/false, or essay questions with our intuitive builder.')}
+                                {t('landing.howto.step2.desc', 'Enable one-click anti-cheating features like tab detection, fullscreen enforcement, and violation tracking to ensure academic integrity.')}
                             </p>
                         </div>
                         <div className="flex flex-col items-center text-center">
                             <div className="mb-6 w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">3</div>
-                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step3.title', 'Share and Grade')}</h3>
+                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step3.title', '3. Share & Analyze')}</h3>
                             <p className="text-gray-600 dark:text-gray-400">
-                                {t('landing.howto.step3.desc', 'Distribute via a simple code. Let our AI handle the grading and anti-cheating monitoring.')}
+                                {t('landing.howto.step3.desc', 'Generate a unique exam link or QR code. Once students submit, get instant reports and beautiful per-student performance analytics.')}
                             </p>
                         </div>
                     </div>

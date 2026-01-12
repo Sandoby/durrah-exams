@@ -857,6 +857,22 @@
                 }
             }
         },
+        "howto": {
+            "title": "Comment Créer un Examen en Ligne en 3 Étapes Simples",
+            "subtitle": "Mettez votre évaluation en place et opérationnelle en quelques minutes grâce à notre processus simplifié.",
+            "step1": {
+                "title": "1. Construisez votre Contenu",
+                "desc": "Utilisez notre éditeur ultra-rapide pour créer des questions à choix multiples, numériques ou ouvertes. Ajoutez des images et des formules mathématiques en toute simplicité."
+            },
+            "step2": {
+                "title": "2. Définissez les Règles de Sécurité",
+                "desc": "Activez en un clic des fonctionnalités anti-triche telles que la détection d'onglets, l'imposition du plein écran et le suivi des violations."
+            },
+            "step3": {
+                "title": "3. Partagez et Analysez",
+                "desc": "Générez un lien d'examen unique ou un code QR. Une fois que les étudiants ont soumis, obtenez des rapports instantanés et des analyses de performance par étudiant."
+            }
+        },
         "faq": {
             "title": "Foire Aux Questions",
             "subtitle": "Tout ce que vous devez savoir sur Durrah",

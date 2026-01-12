@@ -577,6 +577,22 @@
                 }
             }
         },
+        "howto": {
+            "title": "Cómo Crear un Examen Online en 3 Sencillos Pasos",
+            "subtitle": "Configure su evaluación y hágala funcionar en minutos con nuestro proceso optimizado.",
+            "step1": {
+                "title": "1. Construya su Contenido",
+                "desc": "Utilice nuestro editor ultrarrápido para crear preguntas de opción múltiple, numéricas o abiertas. Añada imágenes y fórmulas matemáticas con facilidad."
+            },
+            "step2": {
+                "title": "2. Establezca Reglas de Seguridad",
+                "desc": "Active funciones anti-trampa con un solo clic, como detección de pestañas, obligatoriedad de pantalla completa y seguimiento de infracciones."
+            },
+            "step3": {
+                "title": "3. Comparta y Analice",
+                "desc": "Genere un enlace de examen único o un código QR. Una vez que los estudiantes envíen, obtenga informes instantáneos y análisis de rendimiento por estudiante."
+            }
+        },
         "faq": {
             "title": "Preguntas Frecuentes",
             "subtitle": "Todo lo que necesitas saber sobre Durrah",
