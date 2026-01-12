@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, User, Mail, Lock, Save, Loader2, Crown, Menu, X, LogOut, Settings as SettingsIcon, Globe } from 'lucide-react';
+import { ArrowLeft, User, Mail, Lock, Save, Loader2, Crown, Menu, X, LogOut, Settings as SettingsIcon, Globe, ExternalLink } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import toast from 'react-hot-toast';
@@ -16,6 +16,7 @@ interface TutorProfile {
     subscription_status?: string;
     subscription_plan?: string;
     subscription_end_date?: string;
+    dodo_customer_id?: string;
 }
 
 export default function Settings() {
@@ -37,6 +38,7 @@ export default function Settings() {
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [userRole, setUserRole] = useState<string>('tutor');
+    const [isCreatingPortalSession, setIsCreatingPortalSession] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -75,6 +77,7 @@ export default function Settings() {
                 subscription_status: profileData?.subscription_status,
                 subscription_plan: profileData?.subscription_plan,
                 subscription_end_date: profileData?.subscription_end_date,
+                dodo_customer_id: profileData?.dodo_customer_id,
             });
             if (profileData?.role) {
                 setUserRole(profileData.role);
@@ -156,6 +159,30 @@ export default function Settings() {
             toast.error(error.message || t('settings.password.error'));
         } finally {
             setIsChangingPassword(false);
+        }
+    };
+
+    const handleManageSubscription = async () => {
+        if (!profile.dodo_customer_id) {
+            toast.error('Subscription management is not available for this account.');
+            return;
+        }
+
+        setIsCreatingPortalSession(true);
+        try {
+            const { data, error } = await supabase.functions.invoke('create-dodo-portal-session');
+
+            if (error || !data?.portal_url) {
+                throw new Error(error?.message || 'Failed to create management session');
+            }
+
+            // Redirect to Dodo Portal
+            window.location.href = data.portal_url;
+        } catch (error: any) {
+            console.error('Portal session error:', error);
+            toast.error(error.message || 'Error opening subscription management');
+        } finally {
+            setIsCreatingPortalSession(false);
         }
     };
 
@@ -437,10 +464,25 @@ export default function Settings() {
                                         </div>
                                         <div>
                                             <p className="text-xs text-gray-500">{t('settings.subscription.expires', 'Expires on')}</p>
-                                            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                            <p className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
                                                 {profile.subscription_end_date ? new Date(profile.subscription_end_date).toLocaleDateString() : 'Lifetime'}
                                             </p>
                                         </div>
+
+                                        {profile.dodo_customer_id && (
+                                            <button
+                                                onClick={handleManageSubscription}
+                                                disabled={isCreatingPortalSession}
+                                                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 rounded-xl font-bold text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all disabled:opacity-50 group"
+                                            >
+                                                {isCreatingPortalSession ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                                                )}
+                                                Manage Subscription
+                                            </button>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
