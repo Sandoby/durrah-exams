@@ -17,7 +17,7 @@ export default function StudentPortal() {
 
   // States
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
-  const [formData, setFormData] = useState({ email: '', password: '', name: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '', name: '' });
   const [loading, setLoading] = useState(false);
   const [examCode, setExamCode] = useState('');
   const [joining, setJoining] = useState(false);
@@ -141,6 +141,11 @@ export default function StudentPortal() {
     setLoading(true);
     try {
       if (authMode === 'register') {
+        if (formData.password !== formData.confirmPassword) {
+          toast.error(t('auth.validation.passwordMatch', "Passwords don't match"));
+          setLoading(false);
+          return;
+        }
         const { data: authData, error } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
@@ -247,7 +252,7 @@ export default function StudentPortal() {
             <Logo size="lg" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-            {authMode === 'login' ? t('studentPortal.signIn', 'Sign in to Student Portal') : t('studentPortal.createAccount', 'Create Student Account')}
+            {authMode === 'login' ? t('auth.login.title') : t('auth.register.title')}
           </h2>
         </div>
 
@@ -256,7 +261,7 @@ export default function StudentPortal() {
             <form className="space-y-6" onSubmit={handleAuth}>
               {authMode === 'register' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.profile.fullName', 'Full Name')}</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('auth.register.nameLabel')}</label>
                   <div className="mt-1 relative rounded-md shadow-sm">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <User className="h-5 w-5 text-gray-400" />
@@ -274,7 +279,7 @@ export default function StudentPortal() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.profile.email', 'Email address')}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('auth.login.emailLabel')}</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Mail className="h-5 w-5 text-gray-400" />
@@ -293,7 +298,7 @@ export default function StudentPortal() {
               <div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t('settings.password.new', 'Password')}
+                    {t('auth.login.passwordLabel')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -315,11 +320,32 @@ export default function StudentPortal() {
                         onClick={() => navigate('/forgot-password')}
                         className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
                       >
-                        {t('auth.forgotPassword', 'Forgot password?')}
+                        {t('auth.login.forgotPassword')}
                       </button>
                     </div>
                   )}
                 </div>
+
+                {authMode === 'register' && (
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {t('auth.register.confirmPasswordLabel')}
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Lock className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        type="password"
+                        required
+                        value={formData.confirmPassword}
+                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               <button
@@ -330,10 +356,10 @@ export default function StudentPortal() {
                 {loading ? (
                   <>
                     <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                    {t('auth.processing', 'Processing...')}
+                    {t('common.loading')}
                   </>
                 ) : (
-                  authMode === 'login' ? t('auth.signIn', 'Sign In') : t('auth.createAccount', 'Create Account')
+                  authMode === 'login' ? t('auth.login.submit') : t('auth.register.submit')
                 )}
               </button>
 
@@ -389,7 +415,7 @@ export default function StudentPortal() {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
-                    {authMode === 'login' ? t('auth.newToDurrah', 'New to Durrah?') : t('auth.alreadyHaveAccount', 'Already have an account?')}
+                    {authMode === 'login' ? t('auth.login.noAccount') : t('auth.register.hasAccount')}
                   </span>
                 </div>
               </div>
@@ -399,7 +425,7 @@ export default function StudentPortal() {
                   onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
                   className="w-full flex justify-center py-3 px-4 border-2 border-indigo-100 dark:border-gray-600 rounded-full shadow-sm text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                 >
-                  {authMode === 'login' ? t('studentPortal.createAccount', 'Create Student Account') : t('auth.signInInstead', 'Sign In instead')}
+                  {authMode === 'login' ? t('studentPortal.createAccount', 'Create Student Account') : t('auth.register.login')}
                 </button>
               </div>
             </div>
