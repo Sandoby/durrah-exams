@@ -46,8 +46,20 @@ export function useCurrency(basePriceEGP: number) {
 
                 const rate = rates[location.currency];
                 if (rate) {
-                    const converted = (basePriceEGP * rate).toFixed(2);
-                    setConvertedPrice(converted);
+                    // Special case: show fixed USD prices (5/50) instead of calculated ones
+                    if (location.currency === 'USD') {
+                        if (basePriceEGP === 250 || basePriceEGP === 200) {
+                            setConvertedPrice('5.00');
+                        } else if (basePriceEGP === 2500 || basePriceEGP === 2000) {
+                            setConvertedPrice('50.00');
+                        } else {
+                            const converted = (basePriceEGP * rate).toFixed(2);
+                            setConvertedPrice(converted);
+                        }
+                    } else {
+                        const converted = (basePriceEGP * rate).toFixed(2);
+                        setConvertedPrice(converted);
+                    }
                     setCurrencyCode(location.currency);
                 } else {
                     // Fallback if currency not found

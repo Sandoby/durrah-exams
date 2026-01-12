@@ -23,8 +23,8 @@ export default function LandingPage() {
 
     // No auto-redirect - show authenticated UI instead
 
-    const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(200);
-    const { price: yearlyPrice } = useCurrency(2000);
+    const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(250);
+    const { price: yearlyPrice } = useCurrency(2500);
 
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -186,7 +186,7 @@ export default function LandingPage() {
                 <meta name="author" content="Durrah System" />
                 <meta name="language" content={i18n.language === 'ar' ? 'Arabic' : 'English'} />
                 <link rel="canonical" href="https://tutors.durrahsystem.tech/" />
-                
+
                 {/* Open Graph / Facebook */}
                 <meta property="og:type" content="website" />
                 <meta property="og:site_name" content="Durrah for Tutors" />
@@ -198,7 +198,7 @@ export default function LandingPage() {
                 <meta property="og:image:height" content="630" />
                 <meta property="og:image:alt" content="Durrah for Tutors - Online Exam Platform" />
                 <meta property="og:locale" content={i18n.language === 'ar' ? 'ar_SA' : 'en_US'} />
-                
+
                 {/* Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:site" content="@durrahsystem" />
@@ -208,12 +208,12 @@ export default function LandingPage() {
                 <meta name="twitter:description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
                 <meta name="twitter:image" content="https://tutors.durrahsystem.tech/og-image.png" />
                 <meta name="twitter:image:alt" content="Durrah for Tutors - Online Exam Platform" />
-                
+
                 {/* Additional SEO Meta Tags */}
                 <meta name="theme-color" content="#6366f1" />
                 <meta name="apple-mobile-web-app-title" content="Durrah for Tutors" />
                 <meta name="application-name" content="Durrah for Tutors" />
-                
+
                 {/* Organization Schema - For Google Knowledge Panel & Logo */}
                 <script type="application/ld+json">{`
                     {
@@ -241,7 +241,7 @@ export default function LandingPage() {
                         "sameAs": []
                     }
                 `}</script>
-                
+
                 {/* WebSite Schema - For Sitelinks Search Box */}
                 <script type="application/ld+json">{`
                     {
@@ -265,7 +265,7 @@ export default function LandingPage() {
                         }
                     }
                 `}</script>
-                
+
                 {/* SoftwareApplication Schema - For Rich Results */}
                 <script type="application/ld+json">{`
                     {
@@ -292,7 +292,7 @@ export default function LandingPage() {
                         "featureList": "Anti-cheating detection, Auto-grading, Kids mode, Real-time analytics, Multiple question types"
                     }
                 `}</script>
-                
+
                 {/* WebPage Schema */}
                 <script type="application/ld+json">{`
                     {
@@ -315,7 +315,7 @@ export default function LandingPage() {
                         "inLanguage": "${i18n.language === 'ar' ? 'ar' : 'en'}"
                     }
                 `}</script>
-                
+
                 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
             </Helmet>
 

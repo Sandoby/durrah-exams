@@ -9,8 +9,8 @@ export default function PricingPage() {
     const { user } = useAuth();
 
     // Currency hooks
-    const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(200);
-    const { price: yearlyPrice } = useCurrency(2000);
+    const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(250);
+    const { price: yearlyPrice } = useCurrency(2500);
 
     const handleGetStarted = () => {
         if (user) {

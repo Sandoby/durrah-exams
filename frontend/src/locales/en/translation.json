@@ -90,7 +90,7 @@
         },
         "professional": {
             "title": "Professional",
-            "price": "200 EGP",
+            "price": "250 EGP",
             "period": "/month",
             "badge": "Most Popular",
             "features": [
@@ -103,7 +103,7 @@
         },
         "yearly": {
             "title": "Yearly",
-            "price": "2000 EGP",
+            "price": "2500 EGP",
             "period": "/year",
             "badge": "Save 20%",
             "features": [
