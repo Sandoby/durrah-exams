@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { Lock, Mail, Loader2, ArrowLeft } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
@@ -196,6 +197,10 @@ export default function Login() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-gray-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
+            <Helmet>
+                <title>{t('auth.login.seo.title', 'Tutor Login - Create & Manage Exams | Durrah')}</title>
+                <meta name="description" content={t('auth.login.seo.description', 'Log in to your Durrah tutor account to create secure exams, manage questions, and view student results with advanced anti-cheating features.')} />
+            </Helmet>
             {/* Mobile Back Button */}
             {Capacitor.isNativePlatform() && (
                 <button
