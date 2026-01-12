@@ -154,7 +154,7 @@ export default function UpdatePassword() {
 
     if (status === 'validating') {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center items-center p-4">
+            <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-gray-900 dark:to-indigo-950 flex flex-col justify-center items-center p-4">
                 <div className="text-center space-y-4">
                     <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto" />
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Checking reset link...</h2>
@@ -166,7 +166,7 @@ export default function UpdatePassword() {
 
     if (status === 'error' || status === 'expired') {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center items-center p-4">
+            <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-gray-900 dark:to-indigo-950 flex flex-col justify-center items-center p-4">
                 <div className="max-w-md w-full bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg text-center space-y-6">
                     <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/30 mb-2">
                         <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
@@ -204,7 +204,7 @@ export default function UpdatePassword() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-gray-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="flex justify-center">
                     <Logo size="lg" />
