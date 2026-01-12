@@ -185,15 +185,15 @@ export default function LandingPage() {
                 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
                 <meta name="author" content="Durrah System" />
                 <meta name="language" content={i18n.language === 'ar' ? 'Arabic' : 'English'} />
-                <link rel="canonical" href="https://tutors.durrahsystem.tech/" />
+                <link rel="canonical" href="https://durrahtutors.com/" />
 
                 {/* Open Graph / Facebook */}
                 <meta property="og:type" content="website" />
                 <meta property="og:site_name" content="Durrah for Tutors" />
-                <meta property="og:url" content="https://tutors.durrahsystem.tech/" />
+                <meta property="og:url" content="https://durrahtutors.com/" />
                 <meta property="og:title" content={t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')} />
                 <meta property="og:description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
-                <meta property="og:image" content="https://tutors.durrahsystem.tech/og-image.png" />
+                <meta property="og:image" content="https://durrahtutors.com/og-image.png" />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
                 <meta property="og:image:alt" content="Durrah for Tutors - Online Exam Platform" />
@@ -203,10 +203,10 @@ export default function LandingPage() {
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:site" content="@durrahsystem" />
                 <meta name="twitter:creator" content="@durrahsystem" />
-                <meta name="twitter:url" content="https://tutors.durrahsystem.tech/" />
+                <meta name="twitter:url" content="https://durrahtutors.com/" />
                 <meta name="twitter:title" content={t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')} />
                 <meta name="twitter:description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
-                <meta name="twitter:image" content="https://tutors.durrahsystem.tech/og-image.png" />
+                <meta name="twitter:image" content="https://durrahtutors.com/og-image.png" />
                 <meta name="twitter:image:alt" content="Durrah for Tutors - Online Exam Platform" />
 
                 {/* Additional SEO Meta Tags */}
@@ -219,26 +219,47 @@ export default function LandingPage() {
                     {
                         "@context": "https://schema.org",
                         "@type": "Organization",
-                        "@id": "https://tutors.durrahsystem.tech/#organization",
+                        "@id": "https://durrahtutors.com/#organization",
                         "name": "Durrah for Tutors",
                         "alternateName": "Durrah System",
-                        "url": "https://tutors.durrahsystem.tech",
+                        "url": "https://durrahtutors.com",
                         "logo": {
                             "@type": "ImageObject",
-                            "@id": "https://tutors.durrahsystem.tech/#logo",
-                            "url": "https://tutors.durrahsystem.tech/logo.png",
-                            "contentUrl": "https://tutors.durrahsystem.tech/logo.png",
-                            "width": 277,
-                            "height": 241,
+                            "@id": "https://durrahtutors.com/#logo",
+                            "url": "https://durrahtutors.com/logo.png",
+                            "contentUrl": "https://durrahtutors.com/logo.png",
+                            "width": 512,
+                            "height": 512,
                             "caption": "Durrah for Tutors Logo"
+                        },
+                        "brand": {
+                            "@type": "Brand",
+                            "name": "Durrah",
+                            "logo": "https://durrahtutors.com/logo.png"
                         },
                         "image": {
                             "@type": "ImageObject",
-                            "url": "https://tutors.durrahsystem.tech/og-image.png"
+                            "url": "https://durrahtutors.com/og-image.png"
                         },
                         "description": "Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.",
                         "foundingDate": "2024",
-                        "sameAs": []
+                        "sameAs": ["https://durrahtutors.com"]
+                    }
+                `}</script>
+
+                {/* FAQ Schema for Search Rich Snippets */}
+                <script type="application/ld+json">{`
+                    {
+                        "@context": "https://schema.org",
+                        "@type": "FAQPage",
+                        "mainEntity": ${JSON.stringify(faqs.map(f => ({
+                    "@type": "Question",
+                    "name": f.question,
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": f.answer
+                    }
+                })))}
                     }
                 `}</script>
 
@@ -909,21 +930,21 @@ export default function LandingPage() {
                                 animate={{ y: [0, -20, 0], rotate: [0, 5, 0], scale: [1, 1.02, 1] }}
                                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886149420.png"
-                                alt=""
+                                alt="Kids Space Illustration"
                                 className="absolute w-32 h-32 z-20 drop-shadow-[0_0_20px_rgba(129,140,248,0.4)]"
                             />
                             <motion.img
                                 animate={{ y: [0, 30, 0], rotate: [0, -8, 0] }}
                                 transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886176188.png"
-                                alt=""
+                                alt="Floating Star Illustration"
                                 className="absolute bottom-4 right-10 w-24 h-24 z-10 opacity-50 filter blur-[0.5px]"
                             />
                             <motion.img
                                 animate={{ x: [0, 15, 0], y: [0, -15, 0] }}
                                 transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886214428.png"
-                                alt=""
+                                alt="Rocket Path Illustration"
                                 className="absolute top-4 left-10 w-20 h-20 z-10 opacity-30 filter blur-[1px]"
                             />
                         </div>
@@ -1003,6 +1024,44 @@ export default function LandingPage() {
                             </Link>
                         </div>
                     </motion.div>
+                </div>
+            </section>
+
+            {/* How to Section (SEO Optimization) */}
+            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900/50 border-y border-gray-100 dark:border-slate-800">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-6">
+                            {t('landing.howto.title', 'How to Create an Online Exam in 3 Simple Steps')}
+                        </h2>
+                        <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                            {t('landing.howto.subtitle', 'Durrah makes digital assessment easy for teachers, tutors, and schools.')}
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-12">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="mb-6 w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">1</div>
+                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step1.title', 'Register as a Tutor')}</h3>
+                            <p className="text-gray-600 dark:text-gray-400">
+                                {t('landing.howto.step1.desc', 'Sign up in seconds and access your professional exam dashboard immediately.')}
+                            </p>
+                        </div>
+                        <div className="flex flex-col items-center text-center">
+                            <div className="mb-6 w-16 h-16 bg-violet-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">2</div>
+                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step2.title', 'Create Your Exam')}</h3>
+                            <p className="text-gray-600 dark:text-gray-400">
+                                {t('landing.howto.step2.desc', 'Add multiple choice, true/false, or essay questions with our intuitive builder.')}
+                            </p>
+                        </div>
+                        <div className="flex flex-col items-center text-center">
+                            <div className="mb-6 w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">3</div>
+                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step3.title', 'Share and Grade')}</h3>
+                            <p className="text-gray-600 dark:text-gray-400">
+                                {t('landing.howto.step3.desc', 'Distribute via a simple code. Let our AI handle the grading and anti-cheating monitoring.')}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </section>
 

@@ -427,7 +427,7 @@ export function BlogPost() {
         <meta property="og:title" content={post.title} />
         <meta property="og:description" content={post.excerpt} />
         <meta property="og:type" content="article" />
-        <link rel="canonical" href={`https://tutors.durrahsystem.tech/blog/${post.slug}`} />
+        <link rel="canonical" href={`https://durrahtutors.com/blog/${post.slug}`} />
       </Helmet>
 
       <article className="min-h-screen bg-white dark:bg-gray-900">
@@ -588,7 +588,7 @@ export function BlogPost() {
                 </span>
               </a>
               <a
-                href="https://tutors.durrahsystem.tech/"
+                href="https://durrahtutors.com/"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-10 py-5 border-2 border-white text-white rounded-2xl font-bold text-lg hover:bg-white/10 transition-all"

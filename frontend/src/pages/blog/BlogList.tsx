@@ -100,7 +100,7 @@ export function BlogList() {
         <title>Blog | Durrah for Tutors - Online Exam Platform Insights</title>
         <meta name="description" content="Read expert articles on online exam best practices, preventing cheating, essay grading automation, and effective online tutoring strategies." />
         <meta name="keywords" content="online tutoring blog, exam tips, educational technology, tutoring best practices" />
-        <link rel="canonical" href="https://tutors.durrahsystem.tech/blog" />
+        <link rel="canonical" href="https://durrahtutors.com/blog" />
       </Helmet>
 
       <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -214,8 +214,8 @@ export function BlogList() {
                   key={category}
                   onClick={() => setSelectedCategory(category)}
                   className={`px-4 py-2 rounded-full font-semibold transition-all duration-200 ${selectedCategory === category
-                      ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                     }`}
                 >
                   {category}
