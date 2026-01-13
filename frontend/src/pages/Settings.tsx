@@ -445,7 +445,7 @@ export default function Settings() {
                                             </p>
                                         </div>
 
-                                        {profile.dodo_customer_id && (
+                                        {profile.subscription_status === 'active' && (
                                             <a
                                                 href="https://customer.dodopayments.com/login/bus_0NVDOv8mOGPj5tQXpDBCg"
                                                 target="_blank"
