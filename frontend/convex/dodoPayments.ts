@@ -327,9 +327,11 @@ export const verifyPayment = internalAction({
                 });
                 if (res.ok) {
                     const data = await res.json();
+                    console.log('[DirectVerify] Dodo Subscription Response:', JSON.stringify(data, null, 2));
                     status = (data.status === 'active') ? 'active' : data.status;
                     userEmail = data.customer?.email;
-                    dodoCustomerId = data.customer?.customer_id;
+                    // Robust extraction similar to webhook
+                    dodoCustomerId = data.customer?.id || data.customer?.customer_id || data.customer_id;
                     billingCycle = data.metadata?.billingCycle || 'monthly';
                     nextBillingDate = data.next_billing_date;
                 }
@@ -340,9 +342,11 @@ export const verifyPayment = internalAction({
                 });
                 if (res.ok) {
                     const data = await res.json();
+                    console.log('[DirectVerify] Dodo Payment Response:', JSON.stringify(data, null, 2));
                     status = (data.status === 'succeeded') ? 'active' : data.status;
                     userEmail = data.customer?.email;
-                    dodoCustomerId = data.customer?.customer_id;
+                    // Robust extraction similar to webhook
+                    dodoCustomerId = data.customer?.id || data.customer?.customer_id || data.customer_id;
                     billingCycle = data.metadata?.billingCycle || 'monthly';
                 }
             }
