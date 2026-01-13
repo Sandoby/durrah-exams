@@ -1,6 +1,6 @@
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
+
 
 // Core logic for updating subscription - extracted to avoid circular type issues
 async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string, args: any) {
