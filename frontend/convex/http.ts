@@ -158,48 +158,48 @@ http.route({
           subscriptionId: data.subscription_id,
         });
       }
-    } else if(eventType === 'subscription.renewed') {
-  // Subscription renewed - just push the date and record payment
-  await ctx.runAction(internal.dodoPayments.updateSubscription, {
-    userId,
-    userEmail,
-    status: 'active',
-    nextBillingDate: data?.next_billing_date,
-    billingCycle: metadata.billingCycle,
-  });
+      if (eventType === 'subscription.renewed') {
+        // Subscription renewed - just push the date and record payment
+        await ctx.runAction(internal.dodoPayments.updateSubscription, {
+          userId,
+          userEmail,
+          status: 'active',
+          nextBillingDate: data?.next_billing_date,
+          billingCycle: metadata.billingCycle,
+        });
 
-  if (data?.amount) {
-    await ctx.runAction(internal.dodoPayments.recordPayment, {
-      userId: userId || 'unknown',
-      amount: data.amount,
-      currency: data.currency || 'USD',
-      status: 'completed',
-      merchantReference: data.payment_id,
-      subscriptionId: data.subscription_id,
-    });
-  }
-} else if (eventType === 'subscription.on_hold' || eventType === 'subscription.failed') {
-  await ctx.runAction(internal.dodoPayments.updateSubscription, {
-    userId,
-    userEmail,
-    status: 'payment_failed',
-  });
-} else if (eventType === 'subscription.cancelled') {
-  await ctx.runAction(internal.dodoPayments.updateSubscription, {
-    userId,
-    userEmail,
-    status: 'cancelled',
-  });
-}
+        if (data?.amount) {
+          await ctx.runAction(internal.dodoPayments.recordPayment, {
+            userId: userId || 'unknown',
+            amount: data.amount,
+            currency: data.currency || 'USD',
+            status: 'completed',
+            merchantReference: data.payment_id,
+            subscriptionId: data.subscription_id,
+          });
+        }
+      } else if (eventType === 'subscription.on_hold' || eventType === 'subscription.failed') {
+        await ctx.runAction(internal.dodoPayments.updateSubscription, {
+          userId,
+          userEmail,
+          status: 'payment_failed',
+        });
+      } else if (eventType === 'subscription.cancelled') {
+        await ctx.runAction(internal.dodoPayments.updateSubscription, {
+          userId,
+          userEmail,
+          status: 'cancelled',
+        });
+      }
 
-return new Response(JSON.stringify({ received: true }), {
-  status: 200,
-  headers: { 'Content-Type': 'application/json' }
-});
+      return new Response(JSON.stringify({ received: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
     } catch (err: any) {
-  console.error('Webhook error:', err);
-  return new Response(JSON.stringify({ error: err.message }), { status: 500 });
-}
+      console.error('Webhook error:', err);
+      return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    }
   }),
 });
 
