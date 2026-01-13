@@ -1,26 +1,30 @@
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
-
-/**
- * Core Dodo Payments logic for Convex.
- * These internal actions handle interactions with Supabase and Dodo APIs.
- */
+import { internal } from "./_generated/api";
 
 // Core logic for updating subscription - extracted to avoid circular type issues
 async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string, args: any) {
     // Identity verification/lookup
     let userId = args.userId;
 
+    // Use consistent headers
+    const headers = {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+    };
+
     // If no userId, try to lookup by email
+    const emailHeaders = {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`
+    };
+
     if (!userId && args.userEmail) {
         const lookupRes = await fetch(
             `${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(args.userEmail)}&select=id`,
-            {
-                headers: {
-                    'apikey': supabaseKey,
-                    'Authorization': `Bearer ${supabaseKey}`
-                }
-            }
+            { headers: emailHeaders }
         );
 
         if (lookupRes.ok) {
@@ -45,61 +49,73 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
 
     // Use the same RPC functions as the admin panel for consistent behavior
     if (args.status === 'active') {
-        // Activate/extend subscription using the admin RPC
         const days = args.billingCycle === 'yearly' ? 365 : 30;
-        const res = await fetch(`${supabaseUrl}/rest/v1/rpc/extend_subscription`, {
-            method: 'POST',
-            headers: {
-                'apikey': supabaseKey,
-                'Authorization': `Bearer ${supabaseKey}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                p_user_id: userId,
-                p_agent_id: null,
-                p_days: days,
-                p_plan: args.plan || 'Professional',
-                p_reason: 'Activated via Dodo Payments'
-            })
-        });
+        let shouldExtend = true;
 
-        if (!res.ok) {
-            const errTxt = await res.text();
-            console.error(`[DB] Supabase RPC extend_subscription failed for user ${userId}: ${res.status} ${errTxt}`);
-            return { success: false, error: 'Database RPC failed' };
-        }
+        // Idempotency: Fetch current profile to check if already extended recently
+        try {
+            const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=subscription_status,subscription_end_date`, { headers: emailHeaders });
+            if (profileRes.ok) {
+                const profiles = await profileRes.json();
+                const profile = profiles?.[0];
+                if (profile?.subscription_status === 'active' && profile?.subscription_end_date) {
+                    const currentEnd = new Date(profile.subscription_end_date).getTime();
+                    const now = new Date();
+                    // Target date if we were to extend now
+                    const targetDate = new Date();
+                    targetDate.setDate(now.getDate() + days);
 
-        const result = await res.json();
-        if (result?.success) {
-            console.log(`[DB] Successfully activated subscription for user ${userId} via RPC`);
+                    // If current end date is roughly equal to target (within 24 hours), it's likely a duplicate call
+                    const timeDiff = Math.abs(currentEnd - targetDate.getTime());
+                    const oneDayMs = 24 * 60 * 60 * 1000;
 
-            // Also store dodo_customer_id if provided (RPC may not handle this)
-            if (args.dodoCustomerId) {
-                await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'apikey': supabaseKey,
-                        'Authorization': `Bearer ${supabaseKey}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({ dodo_customer_id: args.dodoCustomerId })
-                });
+                    if (timeDiff < oneDayMs) {
+                        console.log(`[DB] Subscription extension skipped via Idempotency Check. Current End: ${profile.subscription_end_date}`);
+                        shouldExtend = false;
+                    }
+                }
             }
-            return { success: true, userId };
-        } else {
-            console.error(`[DB] RPC extend_subscription returned failure for user ${userId}:`, result);
-            return { success: false, error: result?.error || 'RPC returned failure' };
+        } catch (e) {
+            console.warn('[DB] Idempotency check error, proceeding with extension:', e);
         }
+
+        if (shouldExtend) {
+            // Activate/extend subscription using the admin RPC
+            const res = await fetch(`${supabaseUrl}/rest/v1/rpc/extend_subscription`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    p_user_id: userId,
+                    p_agent_id: null,
+                    p_days: days,
+                    p_plan: args.plan || 'Professional',
+                    p_reason: 'Activated via Dodo Payments'
+                })
+            });
+
+            if (!res.ok) {
+                const errTxt = await res.text();
+                console.error(`[DB] Supabase RPC extend_subscription failed for user ${userId}: ${res.status} ${errTxt}`);
+                return { success: false, error: 'Database RPC failed' };
+            }
+            console.log(`[DB] Successfully activated subscription for user ${userId} via RPC`);
+        }
+
+        // ALWAYS update dodo_customer_id if it's there (Critical for Settings button)
+        if (args.dodoCustomerId) {
+            await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
+                method: 'PATCH',
+                headers,
+                body: JSON.stringify({ dodo_customer_id: args.dodoCustomerId })
+            });
+            console.log(`[DB] Updated dodo_customer_id for user ${userId}`);
+        }
+        return { success: true, userId };
     } else if (args.status === 'cancelled' || args.status === 'payment_failed') {
         // Deactivate subscription using the admin RPC
         const res = await fetch(`${supabaseUrl}/rest/v1/rpc/cancel_subscription`, {
             method: 'POST',
-            headers: {
-                'apikey': supabaseKey,
-                'Authorization': `Bearer ${supabaseKey}`,
-                'Content-Type': 'application/json',
-            },
+            headers,
             body: JSON.stringify({
                 p_user_id: userId,
                 p_agent_id: null,
@@ -122,17 +138,17 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
 }
 
 // ============================================
-// INTERNAL: Update user subscription in Supabase
+// INTERNAL: Update Subscription Status (called by webhook)
 // ============================================
 export const updateSubscription = internalAction({
     args: {
-        userId: v.optional(v.string()), // Optional because we might need to look up by email
+        userId: v.optional(v.string()),
         userEmail: v.optional(v.string()),
-        status: v.string(), // active, payment_failed, cancelled
+        status: v.string(),
         plan: v.optional(v.string()),
         dodoCustomerId: v.optional(v.string()),
         subscriptionId: v.optional(v.string()),
-        nextBillingDate: v.optional(v.string()),
+        nextBillingDate: v.optional(v.string()), // Used for sync
         billingCycle: v.optional(v.string()),
     },
     handler: async (_ctx, args) => {
@@ -140,8 +156,8 @@ export const updateSubscription = internalAction({
         const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
         if (!supabaseUrl || !supabaseKey) {
-            console.error('Missing Supabase environment variables');
-            return { success: false, error: 'Internal configuration error' };
+            console.error('SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing');
+            return { success: false, error: 'Configuration missing' };
         }
 
         return await updateSubscriptionLogic(supabaseUrl, supabaseKey, args);
