@@ -432,7 +432,7 @@ export default function Settings() {
                                 <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('settings.subscription.title', 'Subscription')}</h2>
                             </div>
                             <div className="p-6 flex-1 flex flex-col justify-center items-center text-center">
-                                {subscriptionStatus === 'active' ? (
+                                {profile.subscription_status === 'active' ? (
                                     <div className="w-full space-y-4">
                                         <div className="p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
                                             <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">{t('settings.subscription.plan', 'Current Plan')}</p>

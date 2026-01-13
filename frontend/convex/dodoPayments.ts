@@ -103,12 +103,17 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
 
         // ALWAYS update dodo_customer_id if it's there (Critical for Settings button)
         if (args.dodoCustomerId) {
-            await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
+            const patchRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
                 method: 'PATCH',
                 headers,
                 body: JSON.stringify({ dodo_customer_id: args.dodoCustomerId })
             });
-            console.log(`[DB] Updated dodo_customer_id for user ${userId}`);
+            if (!patchRes.ok) {
+                const patchErr = await patchRes.text();
+                console.error(`[DB] Failed to update dodo_customer_id for user ${userId}: ${patchRes.status} ${patchErr}`);
+            } else {
+                console.log(`[DB] Successfully updated dodo_customer_id for user ${userId}`);
+            }
         }
         return { success: true, userId };
     } else if (args.status === 'cancelled' || args.status === 'payment_failed') {

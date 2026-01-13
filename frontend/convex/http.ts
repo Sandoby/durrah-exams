@@ -88,7 +88,7 @@ http.route({
 
       let userId = metadata.userId;
       const userEmail = data?.customer?.email || data?.email;
-      const dodoCustomerId = data?.customer?.customer_id || data?.customer_id;
+      const dodoCustomerId = data?.customer_id || data?.customer?.customer_id || data?.customer?.id || data?.id;
 
       // Fallback: If userId is missing from metadata, look up via dodo_customer_id in Supabase
       if (!userId && dodoCustomerId) {
