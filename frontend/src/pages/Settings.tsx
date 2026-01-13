@@ -38,7 +38,6 @@ export default function Settings() {
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [userRole, setUserRole] = useState<string>('tutor');
-    const [isCreatingPortalSession, setIsCreatingPortalSession] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -162,42 +161,6 @@ export default function Settings() {
         }
     };
 
-    const handleManageSubscription = async () => {
-        if (!profile.dodo_customer_id) {
-            toast.error('Subscription management is not available for this account.');
-            return;
-        }
-
-        setIsCreatingPortalSession(true);
-        try {
-            const convexUrl = import.meta.env.VITE_CONVEX_URL;
-            if (!convexUrl) {
-                throw new Error('Payment configuration missing');
-            }
-
-            const siteUrl = convexUrl.replace('.cloud', '.site');
-
-            const response = await fetch(`${siteUrl}/dodoPortalSession`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ dodoCustomerId: profile.dodo_customer_id })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok || !data?.portal_url) {
-                throw new Error(data?.error || 'Failed to create management session');
-            }
-
-            // Redirect to Dodo Portal
-            window.location.href = data.portal_url;
-        } catch (error: any) {
-            console.error('Portal session error:', error);
-            toast.error(error.message || 'Error opening subscription management');
-        } finally {
-            setIsCreatingPortalSession(false);
-        }
-    };
 
     if (isLoading) {
         return (
@@ -483,18 +446,15 @@ export default function Settings() {
                                         </div>
 
                                         {profile.dodo_customer_id && (
-                                            <button
-                                                onClick={handleManageSubscription}
-                                                disabled={isCreatingPortalSession}
-                                                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 rounded-xl font-bold text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all disabled:opacity-50 group"
+                                            <a
+                                                href="https://customer.dodopayments.com/login/bus_0NVDOv8mOGPj5tQXpDBCg"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 rounded-xl font-bold text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all group"
                                             >
-                                                {isCreatingPortalSession ? (
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
-                                                    <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                                                )}
+                                                <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                                                 Manage Subscription
-                                            </button>
+                                            </a>
                                         )}
                                     </div>
                                 ) : (
