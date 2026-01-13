@@ -7,6 +7,89 @@ import { v } from "convex/values";
  * These internal actions handle interactions with Supabase and Dodo APIs.
  */
 
+// Core logic for updating subscription - extracted to avoid circular type issues
+async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string, args: any) {
+    // Calculate subscription end date based on next billing or cycle if provided
+    let endDate = args.nextBillingDate;
+    if (!endDate && args.billingCycle) {
+        const now = new Date();
+        if (args.billingCycle === 'yearly') {
+            now.setFullYear(now.getFullYear() + 1);
+        } else {
+            now.setMonth(now.getMonth() + 1);
+        }
+        endDate = now.toISOString();
+    }
+
+    // Build update payload for Supabase profiles table
+    const updateData: Record<string, any> = {
+        subscription_status: args.status,
+    };
+
+    if (args.plan) updateData.subscription_plan = args.plan;
+    if (args.dodoCustomerId) updateData.dodo_customer_id = args.dodoCustomerId;
+    if (endDate) updateData.subscription_end_date = endDate;
+
+    // Identity verification/lookup
+    let userId = args.userId;
+
+    // If no userId, try to lookup by email
+    if (!userId && args.userEmail) {
+        const lookupRes = await fetch(
+            `${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(args.userEmail)}&select=id`,
+            {
+                headers: {
+                    'apikey': supabaseKey,
+                    'Authorization': `Bearer ${supabaseKey}`
+                }
+            }
+        );
+
+        if (lookupRes.ok) {
+            const users = await lookupRes.json();
+            if (users?.[0]?.id) {
+                userId = users[0].id;
+                console.log(`[AUTH] Successfully identified user via email: ${userId}`);
+            } else {
+                console.warn(`[AUTH] No user found with email: ${args.userEmail}`);
+            }
+        } else {
+            console.error(`[AUTH] Supabase email lookup failed: ${lookupRes.status}`);
+        }
+    } else if (userId) {
+        console.log(`[AUTH] Proceeding with provided userId: ${userId}`);
+    }
+
+    if (!userId) {
+        console.error('COULD NOT IDENTIFY USER for Dodo event:', { email: args.userEmail, subId: args.subscriptionId });
+        return { success: false, error: 'User not identified' };
+    }
+
+    // Update Supabase profile
+    const res = await fetch(
+        `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`,
+        {
+            method: 'PATCH',
+            headers: {
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${supabaseKey}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify(updateData)
+        }
+    );
+
+    if (!res.ok) {
+        const errTxt = await res.text();
+        console.error(`[DB] Supabase PATCH failed for user ${userId}: ${res.status} ${errTxt}`);
+        return { success: false, error: 'Database update failed' };
+    }
+
+    console.log(`[DB] Successfully updated Supabase profile for user ${userId}. Status: ${args.status}`);
+    return { success: true, userId };
+}
+
 // ============================================
 // INTERNAL: Update user subscription in Supabase
 // ============================================
@@ -30,85 +113,7 @@ export const updateSubscription = internalAction({
             return { success: false, error: 'Internal configuration error' };
         }
 
-        // Calculate subscription end date based on next billing or cycle if provided
-        let endDate = args.nextBillingDate;
-        if (!endDate && args.billingCycle) {
-            const now = new Date();
-            if (args.billingCycle === 'yearly') {
-                now.setFullYear(now.getFullYear() + 1);
-            } else {
-                now.setMonth(now.getMonth() + 1);
-            }
-            endDate = now.toISOString();
-        }
-
-        // Build update payload for Supabase profiles table
-        const updateData: Record<string, any> = {
-            subscription_status: args.status,
-        };
-
-        if (args.plan) updateData.subscription_plan = args.plan;
-        if (args.dodoCustomerId) updateData.dodo_customer_id = args.dodoCustomerId;
-        if (endDate) updateData.subscription_end_date = endDate;
-
-        // Identity verification/lookup
-        let userId = args.userId;
-
-        // If no userId, try to lookup by email
-        if (!userId && args.userEmail) {
-            const lookupRes = await fetch(
-                `${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(args.userEmail)}&select=id`,
-                {
-                    headers: {
-                        'apikey': supabaseKey,
-                        'Authorization': `Bearer ${supabaseKey}`
-                    }
-                }
-            );
-
-            if (lookupRes.ok) {
-                const users = await lookupRes.json();
-                if (users?.[0]?.id) {
-                    userId = users[0].id;
-                    console.log(`[AUTH] Successfully identified user via email: ${userId}`);
-                } else {
-                    console.warn(`[AUTH] No user found with email: ${args.userEmail}`);
-                }
-            } else {
-                console.error(`[AUTH] Supabase email lookup failed: ${lookupRes.status}`);
-            }
-        } else if (userId) {
-            console.log(`[AUTH] Proceeding with provided userId: ${userId}`);
-        }
-
-        if (!userId) {
-            console.error('COULD NOT IDENTIFY USER for Dodo event:', { email: args.userEmail, subId: args.subscriptionId });
-            return { success: false, error: 'User not identified' };
-        }
-
-        // Update Supabase profile
-        const res = await fetch(
-            `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`,
-            {
-                method: 'PATCH',
-                headers: {
-                    'apikey': supabaseKey,
-                    'Authorization': `Bearer ${supabaseKey}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify(updateData)
-            }
-        );
-
-        if (!res.ok) {
-            const errTxt = await res.text();
-            console.error(`[DB] Supabase PATCH failed for user ${userId}: ${res.status} ${errTxt}`);
-            return { success: false, error: 'Database update failed' };
-        }
-
-        console.log(`[DB] Successfully updated Supabase profile for user ${userId}. Status: ${args.status}`);
-        return { success: true, userId };
+        return await updateSubscriptionLogic(supabaseUrl, supabaseKey, args);
     }
 });
 
@@ -297,7 +302,11 @@ export const verifyPayment = internalAction({
 
             if (status === 'active') {
                 console.log(`[DirectVerify] ID ${args.orderId} is confirmed active. Triggering update...`);
-                return await ctx.runAction(internal.dodoPayments.updateSubscription, {
+                const supabaseUrl = process.env.SUPABASE_URL;
+                const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+                if (!supabaseUrl || !supabaseKey) throw new Error('Supabase config missing');
+
+                return await updateSubscriptionLogic(supabaseUrl, supabaseKey, {
                     userId: args.userId,
                     userEmail,
                     status: 'active',
