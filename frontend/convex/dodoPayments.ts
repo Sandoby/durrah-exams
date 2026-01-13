@@ -1,4 +1,5 @@
 import { internalAction } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
 /**
@@ -240,5 +241,78 @@ export const createPortal = internalAction({
         }
 
         return { portal_url: data.link || data.url };
+    }
+});
+
+// ============================================
+// INTERNAL: Verify Dodo Payment/Subscription Status Directly
+// ============================================
+export const verifyPayment = internalAction({
+    args: {
+        orderId: v.string(), // paymentId or subscriptionId
+        userId: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        const apiKey = process.env.DODO_PAYMENTS_API_KEY;
+        if (!apiKey) throw new Error('DODO_PAYMENTS_API_KEY not configured');
+
+        const isTest = apiKey.startsWith('test_');
+        const baseUrl = isTest ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
+
+        let status = 'pending';
+        let userEmail = '';
+        let dodoCustomerId = '';
+        let billingCycle = 'monthly';
+        let nextBillingDate = undefined;
+
+        console.log(`[DirectVerify] Starting verification for ID: ${args.orderId}`);
+
+        try {
+            // Try as subscription first
+            if (args.orderId.startsWith('sub_')) {
+                const res = await fetch(`${baseUrl}/subscriptions/${args.orderId}`, {
+                    headers: { 'Authorization': `Bearer ${apiKey}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    status = (data.status === 'active') ? 'active' : data.status;
+                    userEmail = data.customer?.email;
+                    dodoCustomerId = data.customer?.customer_id;
+                    billingCycle = data.metadata?.billingCycle || 'monthly';
+                    nextBillingDate = data.next_billing_date;
+                }
+            } else {
+                // Try as payment
+                const res = await fetch(`${baseUrl}/payments/${args.orderId}`, {
+                    headers: { 'Authorization': `Bearer ${apiKey}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    status = (data.status === 'succeeded') ? 'active' : data.status;
+                    userEmail = data.customer?.email;
+                    dodoCustomerId = data.customer?.customer_id;
+                    billingCycle = data.metadata?.billingCycle || 'monthly';
+                }
+            }
+
+            if (status === 'active') {
+                console.log(`[DirectVerify] ID ${args.orderId} is confirmed active. Triggering update...`);
+                return await ctx.runAction(internal.dodoPayments.updateSubscription, {
+                    userId: args.userId,
+                    userEmail,
+                    status: 'active',
+                    plan: 'Professional',
+                    dodoCustomerId,
+                    subscriptionId: args.orderId.startsWith('sub_') ? args.orderId : undefined,
+                    nextBillingDate,
+                    billingCycle
+                });
+            }
+
+            return { success: false, status, message: 'Payment not yet active' };
+        } catch (error: any) {
+            console.error('[DirectVerify] Error:', error);
+            return { success: false, error: error.message };
+        }
     }
 });

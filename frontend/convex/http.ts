@@ -36,7 +36,17 @@ http.route({
       // Verify signature (Standard Webhooks format)
       if (secret && signature && webhookId && webhookTimestamp) {
         const secretValue = secret.startsWith('whsec_') ? secret.slice(6) : secret;
-        const keyBytes = Uint8Array.from(atob(secretValue), c => c.charCodeAt(0));
+
+        // Robust base64 decoding for various secret formats
+        const safeAtob = (str: string) => {
+          try {
+            return atob(str.replace(/-/g, '+').replace(/_/g, '/'));
+          } catch (e) {
+            return atob(str);
+          }
+        };
+
+        const keyBytes = Uint8Array.from(safeAtob(secretValue), c => c.charCodeAt(0));
 
         const signedContent = `${webhookId}.${webhookTimestamp}.${rawBody}`;
         const message = new TextEncoder().encode(signedContent);
@@ -266,7 +276,47 @@ http.route({
   }),
 });
 
+// ============================================
+// VERIFY DODO PAYMENT (Direct Check)
+// POST /verifyDodoPayment
+// ============================================
+http.route({
+  path: "/verifyDodoPayment",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    try {
+      const body = await request.json();
+      const { orderId, userId } = body;
+
+      if (!orderId) {
+        return new Response(JSON.stringify({ error: 'Missing orderId' }), {
+          status: 400,
+          headers: corsHeaders
+        });
+      }
+
+      console.log(`[HTTP] Direct verification request for ${orderId}`);
+      const result = await ctx.runAction(internal.dodoPayments.verifyPayment, {
+        orderId,
+        userId
+      });
+
+      return new Response(JSON.stringify(result), {
+        status: 200,
+        headers: corsHeaders,
+      });
+    } catch (error: any) {
+      console.error('Direct verification endpoint error:', error);
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 400,
+        headers: corsHeaders
+      });
+    }
+  }),
+});
+
 // OPTIONS routes for CORS preflight
+http.route({ path: "/verifyDodoPayment", method: "OPTIONS", handler: httpAction(async () => new Response(null, { headers: corsHeaders })) });
 http.route({ path: "/createDodoPayment", method: "OPTIONS", handler: httpAction(async () => new Response(null, { headers: corsHeaders })) });
 http.route({ path: "/dodoPortalSession", method: "OPTIONS", handler: httpAction(async () => new Response(null, { headers: corsHeaders })) });
 

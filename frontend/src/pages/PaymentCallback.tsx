@@ -37,15 +37,47 @@ export default function PaymentCallback() {
           const data = localStorage.getItem(`paysky_payment_${orderId}`);
           if (data) metadata = JSON.parse(data);
         } else if (provider === 'dodo') {
-          // Dodo polling logic
+          // Dodo polling logic with Direct Verification
           setMessage('Checking your subscription status...');
 
           try {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session?.user) throw new Error('Authentication required');
 
-            // Poll for activation
-            for (let attempt = 0; attempt < 15; attempt++) {
+            const convexUrl = import.meta.env.VITE_CONVEX_URL;
+            const siteUrl = convexUrl?.replace('.cloud', '.site');
+
+            // 1. Immediate Direct Verification (Plan B)
+            if (siteUrl) {
+              try {
+                const verifyRes = await fetch(`${siteUrl}/verifyDodoPayment`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ orderId, userId: session.user.id })
+                });
+
+                if (verifyRes.ok) {
+                  const result = await verifyRes.json();
+                  if (result.success) {
+                    console.log('✅ Dodo subscription activated via direct verification');
+                    setStatus('success');
+                    setMessage(t('checkout.callback.success_message', 'Your subscription is now active!'));
+                    setOrderDetails({
+                      planId: 'Professional',
+                      provider: 'dodo'
+                    });
+                    toast.success(t('checkout.callback.toast_success', 'Subscription activated!'));
+                    setTimeout(() => navigate('/dashboard', { replace: true }), 1500);
+                    return;
+                  }
+                }
+              } catch (directErr) {
+                console.warn('Direct verification failed, falling back to polling:', directErr);
+              }
+            }
+
+            // 2. Fallback: Polling (Plan A/Webhook)
+            for (let attempt = 0; attempt < 10; attempt++) {
               const { data: profile } = await supabase
                 .from('profiles')
                 .select('subscription_status, subscription_plan')
