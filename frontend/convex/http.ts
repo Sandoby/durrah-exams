@@ -35,12 +35,14 @@ http.route({
 
       // Verify signature (Standard Webhooks format)
       if (secret && signature && webhookId && webhookTimestamp) {
+        const secretValue = secret.startsWith('whsec_') ? secret.slice(6) : secret;
+        const keyBytes = Uint8Array.from(atob(secretValue), c => c.charCodeAt(0));
+
         const signedContent = `${webhookId}.${webhookTimestamp}.${rawBody}`;
-        const key = new TextEncoder().encode(secret);
         const message = new TextEncoder().encode(signedContent);
 
         const cryptoKey = await crypto.subtle.importKey(
-          'raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+          'raw', keyBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
         );
         const signatureBytes = await crypto.subtle.sign('HMAC', cryptoKey, message);
 
@@ -69,7 +71,10 @@ http.route({
       const data = body.data;
       const metadata = data?.metadata || body.metadata || {};
 
-      console.log(`Processing Dodo event: ${eventType}`, { id: data?.subscription_id || data?.payment_id });
+      console.log(`Processing Dodo event: ${eventType}`, {
+        id: data?.subscription_id || data?.payment_id,
+        metadata: JSON.stringify(metadata)
+      });
 
       const userId = metadata.userId;
       const userEmail = data?.customer?.email || data?.email;
@@ -82,7 +87,7 @@ http.route({
         eventType === 'checkout.succeeded'
       ) {
         // Activate or renew subscription
-        await ctx.runAction(internal.dodoPayments.updateSubscription, {
+        const res = await ctx.runAction(internal.dodoPayments.updateSubscription, {
           userId,
           userEmail,
           status: 'active',
@@ -92,6 +97,7 @@ http.route({
           nextBillingDate: data?.next_billing_date,
           billingCycle: metadata.billingCycle,
         });
+        console.log(`[Webhook] updateSubscription result:`, res);
 
         // Record the payment
         if (data?.total_amount || data?.amount) {

@@ -55,7 +55,6 @@ export const updateSubscription = internalAction({
 
         // If no userId, try to lookup by email
         if (!userId && args.userEmail) {
-            console.log(`Looking up user by email: ${args.userEmail}`);
             const lookupRes = await fetch(
                 `${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(args.userEmail)}&select=id`,
                 {
@@ -70,17 +69,21 @@ export const updateSubscription = internalAction({
                 const users = await lookupRes.json();
                 if (users?.[0]?.id) {
                     userId = users[0].id;
-                    console.log(`Found user ID: ${userId}`);
+                    console.log(`[AUTH] Successfully identified user via email: ${userId}`);
+                } else {
+                    console.warn(`[AUTH] No user found with email: ${args.userEmail}`);
                 }
+            } else {
+                console.error(`[AUTH] Supabase email lookup failed: ${lookupRes.status}`);
             }
+        } else if (userId) {
+            console.log(`[AUTH] Proceeding with provided userId: ${userId}`);
         }
 
         if (!userId) {
             console.error('COULD NOT IDENTIFY USER for Dodo event:', { email: args.userEmail, subId: args.subscriptionId });
             return { success: false, error: 'User not identified' };
         }
-
-        console.log(`Updating Supabase profile for user ${userId} to status ${args.status}`);
 
         // Update Supabase profile
         const res = await fetch(
@@ -99,10 +102,11 @@ export const updateSubscription = internalAction({
 
         if (!res.ok) {
             const errTxt = await res.text();
-            console.error(`Failed to update Supabase profile: ${res.status} ${errTxt}`);
+            console.error(`[DB] Supabase PATCH failed for user ${userId}: ${res.status} ${errTxt}`);
             return { success: false, error: 'Database update failed' };
         }
 
+        console.log(`[DB] Successfully updated Supabase profile for user ${userId}. Status: ${args.status}`);
         return { success: true, userId };
     }
 });
@@ -186,7 +190,8 @@ export const createCheckout = internalAction({
             return_url: args.returnUrl,
         };
 
-        const res = await fetch(`${baseUrl}/subscriptions`, {
+        // Use /checkouts for the modern Dodo Payments API
+        const res = await fetch(`${baseUrl}/checkouts`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
@@ -198,7 +203,7 @@ export const createCheckout = internalAction({
         const data = await res.json();
         if (!res.ok) {
             console.error('Dodo API Error:', data);
-            throw new Error(data.message || 'Failed to create subscription checkout');
+            throw new Error(data.message || 'Failed to create checkout session');
         }
 
         return { checkout_url: data.payment_link || data.checkout_url };
@@ -216,8 +221,6 @@ export const createPortal = internalAction({
 
         const isTest = apiKey.startsWith('test_');
         const baseUrl = isTest ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
-
-        console.log(`Creating portal session for Dodo customer: ${args.dodoCustomerId}`);
 
         const res = await fetch(
             `${baseUrl}/customers/${args.dodoCustomerId}/customer-portal/session`,

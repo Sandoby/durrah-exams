@@ -18,7 +18,10 @@ export default function PaymentCallback() {
   useEffect(() => {
     const processPayment = async () => {
       try {
-        const orderId = searchParams.get('orderId') || searchParams.get('merchantOrderId');
+        const orderId = searchParams.get('orderId') ||
+          searchParams.get('merchantOrderId') ||
+          searchParams.get('subscription_id') ||
+          searchParams.get('payment_id');
         const paymentStatus = searchParams.get('paymentStatus');
         const provider = searchParams.get('provider') || 'kashier';
 
