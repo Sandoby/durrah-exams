@@ -1,5 +1,4 @@
 import { internalAction } from "./_generated/server";
-import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
 /**
@@ -257,7 +256,7 @@ export const verifyPayment = internalAction({
         orderId: v.string(), // paymentId or subscriptionId
         userId: v.optional(v.string()),
     },
-    handler: async (ctx, args) => {
+    handler: async (_ctx, args) => {
         const apiKey = process.env.DODO_PAYMENTS_API_KEY;
         if (!apiKey) throw new Error('DODO_PAYMENTS_API_KEY not configured');
 
