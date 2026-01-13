@@ -224,32 +224,35 @@ export default function Checkout() {
 
         try {
             if (selectedPaymentProvider === 'dodo') {
-                // Call our Edge Function to create Dodo session
-                const { data, error } = await supabase.functions.invoke('create-dodo-payment', {
-                    body: {
-                        amount: finalPrice,
-                        currency: 'USD',
-                        billingCycle,
-                        metadata: {
-                            userId: user?.id,
-                            planId: plan.id,
-                            userEmail: user?.email
-                        },
-                        customer: {
-                            name: user?.user_metadata?.full_name || user?.email?.split('@')[0],
-                            email: user?.email,
-                            phone: user?.phone // if available
-                        }
-                    }
-                });
-
-                if (error || !data || (!data.payment_link && !data.checkout_url)) {
-                    console.error('Dodo Init Error:', data);
-                    throw new Error(error?.message || 'Failed to initialize Dodo payment');
+                const convexUrl = import.meta.env.VITE_CONVEX_URL;
+                if (!convexUrl) {
+                    toast.error('Payment system configuration missing');
+                    return;
                 }
 
-                // Dodo returns `checkout_url` in the response
-                const redirectUrl = data.checkout_url || data.payment_link;
+                const siteUrl = convexUrl.replace('.cloud', '.site');
+
+                const response = await fetch(`${siteUrl}/createDodoPayment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: user?.id,
+                        userEmail: user?.email,
+                        userName: user?.user_metadata?.full_name || user?.email?.split('@')[0],
+                        billingCycle,
+                        returnUrl: `${window.location.origin}/payment/callback?provider=dodo&paymentStatus=SUCCESS`
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data || !data.checkout_url) {
+                    console.error('Dodo payment error:', data);
+                    toast.error(data?.error || t('checkout.payment.error', 'Error initiating payment'));
+                    return;
+                }
+
+                const redirectUrl = data.checkout_url;
 
                 if (redirectUrl) {
                     window.location.href = redirectUrl;

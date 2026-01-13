@@ -34,11 +34,47 @@ export default function PaymentCallback() {
           const data = localStorage.getItem(`paysky_payment_${orderId}`);
           if (data) metadata = JSON.parse(data);
         } else if (provider === 'dodo') {
-          // Dodo usually sends session_id or id. We might need to fetch details or rely on webhook.
-          // For now, assume success if we are here and existing params look good.
-          console.log('Using Dodo provider logic');
-          // We can try to look up the payment by the orderId (which might be the session ID passed back)
-          // But since we rely on webhooks, let's just display success for now or poll.
+          // Dodo polling logic
+          setMessage('Checking your subscription status...');
+
+          try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user) throw new Error('Authentication required');
+
+            // Poll for activation
+            for (let attempt = 0; attempt < 15; attempt++) {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('subscription_status, subscription_plan')
+                .eq('id', session.user.id)
+                .single();
+
+              if (profile?.subscription_status === 'active') {
+                console.log('✅ Dodo subscription activated via webhook');
+                setStatus('success');
+                setMessage(t('checkout.callback.success_message', 'Your subscription is now active!'));
+                setOrderDetails({
+                  planId: profile.subscription_plan || 'Professional',
+                  provider: 'dodo'
+                });
+                toast.success(t('checkout.callback.toast_success', 'Subscription activated!'));
+                setTimeout(() => navigate('/dashboard', { replace: true }), 1500);
+                return;
+              }
+              // Wait 2 seconds between polls
+              await new Promise(r => setTimeout(r, 2000));
+            }
+
+            // Fallback: Webhook might be slow but payment was likely fine
+            console.log('⏳ Dodo webhook taking longer than expected');
+            setStatus('success');
+            setMessage('Payment received! Your subscription will be activated shortly.');
+            setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
+            return;
+          } catch (err: any) {
+            console.error('Dodo callback error:', err);
+            throw err;
+          }
         } else {
           metadata = kashierIntegration.getPaymentMetadata(orderId);
         }

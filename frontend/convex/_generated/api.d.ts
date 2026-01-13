@@ -12,6 +12,7 @@ import type * as chat from "../chat.js";
 import type * as chatQueries from "../chatQueries.js";
 import type * as cronHandlers from "../cronHandlers.js";
 import type * as crons from "../crons.js";
+import type * as dodoPayments from "../dodoPayments.js";
 import type * as http from "../http.js";
 import type * as leaderboard from "../leaderboard.js";
 import type * as presence from "../presence.js";
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   chatQueries: typeof chatQueries;
   cronHandlers: typeof cronHandlers;
   crons: typeof crons;
+  dodoPayments: typeof dodoPayments;
   http: typeof http;
   leaderboard: typeof leaderboard;
   presence: typeof presence;

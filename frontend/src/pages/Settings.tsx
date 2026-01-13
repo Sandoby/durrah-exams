@@ -170,10 +170,23 @@ export default function Settings() {
 
         setIsCreatingPortalSession(true);
         try {
-            const { data, error } = await supabase.functions.invoke('create-dodo-portal-session');
+            const convexUrl = import.meta.env.VITE_CONVEX_URL;
+            if (!convexUrl) {
+                throw new Error('Payment configuration missing');
+            }
 
-            if (error || !data?.portal_url) {
-                throw new Error(error?.message || 'Failed to create management session');
+            const siteUrl = convexUrl.replace('.cloud', '.site');
+
+            const response = await fetch(`${siteUrl}/dodoPortalSession`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dodoCustomerId: profile.dodo_customer_id })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data?.portal_url) {
+                throw new Error(data?.error || 'Failed to create management session');
             }
 
             // Redirect to Dodo Portal
