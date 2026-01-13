@@ -8,27 +8,6 @@ import { v } from "convex/values";
 
 // Core logic for updating subscription - extracted to avoid circular type issues
 async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string, args: any) {
-    // Calculate subscription end date based on next billing or cycle if provided
-    let endDate = args.nextBillingDate;
-    if (!endDate && args.billingCycle) {
-        const now = new Date();
-        if (args.billingCycle === 'yearly') {
-            now.setFullYear(now.getFullYear() + 1);
-        } else {
-            now.setMonth(now.getMonth() + 1);
-        }
-        endDate = now.toISOString();
-    }
-
-    // Build update payload for Supabase profiles table
-    const updateData: Record<string, any> = {
-        subscription_status: args.status,
-    };
-
-    if (args.plan) updateData.subscription_plan = args.plan;
-    if (args.dodoCustomerId) updateData.dodo_customer_id = args.dodoCustomerId;
-    if (endDate) updateData.subscription_end_date = endDate;
-
     // Identity verification/lookup
     let userId = args.userId;
 
@@ -64,29 +43,82 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
         return { success: false, error: 'User not identified' };
     }
 
-    // Update Supabase profile
-    const res = await fetch(
-        `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`,
-        {
-            method: 'PATCH',
+    // Use the same RPC functions as the admin panel for consistent behavior
+    if (args.status === 'active') {
+        // Activate/extend subscription using the admin RPC
+        const days = args.billingCycle === 'yearly' ? 365 : 30;
+        const res = await fetch(`${supabaseUrl}/rest/v1/rpc/extend_subscription`, {
+            method: 'POST',
             headers: {
                 'apikey': supabaseKey,
                 'Authorization': `Bearer ${supabaseKey}`,
                 'Content-Type': 'application/json',
-                'Prefer': 'return=minimal'
             },
-            body: JSON.stringify(updateData)
-        }
-    );
+            body: JSON.stringify({
+                p_user_id: userId,
+                p_agent_id: null,
+                p_days: days,
+                p_plan: args.plan || 'Professional',
+                p_reason: 'Activated via Dodo Payments'
+            })
+        });
 
-    if (!res.ok) {
-        const errTxt = await res.text();
-        console.error(`[DB] Supabase PATCH failed for user ${userId}: ${res.status} ${errTxt}`);
-        return { success: false, error: 'Database update failed' };
+        if (!res.ok) {
+            const errTxt = await res.text();
+            console.error(`[DB] Supabase RPC extend_subscription failed for user ${userId}: ${res.status} ${errTxt}`);
+            return { success: false, error: 'Database RPC failed' };
+        }
+
+        const result = await res.json();
+        if (result?.success) {
+            console.log(`[DB] Successfully activated subscription for user ${userId} via RPC`);
+
+            // Also store dodo_customer_id if provided (RPC may not handle this)
+            if (args.dodoCustomerId) {
+                await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ dodo_customer_id: args.dodoCustomerId })
+                });
+            }
+            return { success: true, userId };
+        } else {
+            console.error(`[DB] RPC extend_subscription returned failure for user ${userId}:`, result);
+            return { success: false, error: result?.error || 'RPC returned failure' };
+        }
+    } else if (args.status === 'cancelled' || args.status === 'payment_failed') {
+        // Deactivate subscription using the admin RPC
+        const res = await fetch(`${supabaseUrl}/rest/v1/rpc/cancel_subscription`, {
+            method: 'POST',
+            headers: {
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${supabaseKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                p_user_id: userId,
+                p_agent_id: null,
+                p_reason: args.status === 'cancelled' ? 'Cancelled via Dodo' : 'Payment failed via Dodo'
+            })
+        });
+
+        if (!res.ok) {
+            const errTxt = await res.text();
+            console.error(`[DB] Supabase RPC cancel_subscription failed for user ${userId}: ${res.status} ${errTxt}`);
+            return { success: false, error: 'Database RPC failed' };
+        }
+
+        const result = await res.json();
+        console.log(`[DB] Deactivated subscription for user ${userId} via RPC`);
+        return { success: result?.success ?? true, userId };
     }
 
-    console.log(`[DB] Successfully updated Supabase profile for user ${userId}. Status: ${args.status}`);
-    return { success: true, userId };
+    return { success: false, error: 'Unknown status' };
 }
 
 // ============================================
