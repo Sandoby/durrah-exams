@@ -240,7 +240,7 @@ export default function Checkout() {
                         userEmail: user?.email,
                         userName: user?.user_metadata?.full_name || user?.email?.split('@')[0],
                         billingCycle,
-                        returnUrl: `${window.location.origin}/payment/callback?provider=dodo&paymentStatus=SUCCESS`
+                        returnUrl: `${window.location.origin}/payment-callback?provider=dodo&paymentStatus=SUCCESS`
                     })
                 });
 

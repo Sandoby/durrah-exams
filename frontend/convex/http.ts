@@ -76,9 +76,38 @@ http.route({
         metadata: JSON.stringify(metadata)
       });
 
-      const userId = metadata.userId;
+      let userId = metadata.userId;
       const userEmail = data?.customer?.email || data?.email;
       const dodoCustomerId = data?.customer?.customer_id || data?.customer_id;
+
+      // Fallback: If userId is missing from metadata, look up via dodo_customer_id in Supabase
+      if (!userId && dodoCustomerId) {
+        console.log(`[Webhook] No userId in metadata, attempting fallback lookup for customer: ${dodoCustomerId}`);
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+        if (supabaseUrl && supabaseKey) {
+          try {
+            const lookupRes = await fetch(
+              `${supabaseUrl}/rest/v1/profiles?dodo_customer_id=eq.${encodeURIComponent(dodoCustomerId)}&select=id`,
+              { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+            );
+            if (lookupRes.ok) {
+              const profiles = await lookupRes.json();
+              if (profiles?.[0]?.id) {
+                userId = profiles[0].id;
+                console.log(`[Webhook] Found userId via dodo_customer_id: ${userId}`);
+              } else {
+                console.warn(`[Webhook] No user found with dodo_customer_id: ${dodoCustomerId}`);
+              }
+            } else {
+              console.error(`[Webhook] Fallback lookup failed with status: ${lookupRes.status}`);
+            }
+          } catch (lookupErr) {
+            console.error('[Webhook] Error during fallback lookup:', lookupErr);
+          }
+        }
+      }
 
       // Routing based on event type
       if (
@@ -98,6 +127,10 @@ http.route({
           billingCycle: metadata.billingCycle,
         });
         console.log(`[Webhook] updateSubscription result:`, res);
+
+        if (!res?.success) {
+          console.error(`[Webhook] Subscription activation FAILED for user ${userId || 'unknown'} and event ${eventType}`);
+        }
 
         // Record the payment
         if (data?.total_amount || data?.amount) {
