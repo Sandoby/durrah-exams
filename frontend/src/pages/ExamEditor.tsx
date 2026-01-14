@@ -619,7 +619,7 @@ export default function ExamEditor() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1120] font-sans pb-40 relative overflow-hidden pt-20 selection:bg-indigo-500/20 selection:text-indigo-600 dark:selection:bg-indigo-500/30 dark:selection:text-indigo-400">
+        <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1120] font-sans pb-40 relative overflow-x-hidden pt-20 selection:bg-indigo-500/20 selection:text-indigo-600 dark:selection:bg-indigo-500/30 dark:selection:text-indigo-400">
             {/* Ambient Background Lights */}
             <div className="fixed top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-indigo-50/50 via-white/0 to-transparent dark:from-indigo-950/20 dark:via-gray-950/0 pointer-events-none" />
             <div className="fixed -top-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -712,10 +712,10 @@ export default function ExamEditor() {
                 </div>
             )}
 
-            {/* Sticky Header */}
-            <div className="sticky top-20 z-40 px-4 sm:px-6 lg:px-8 transition-all duration-300 mb-6">
-                <div className="max-w-[1600px] mx-auto">
-                    <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50 shadow-sm rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+            {/* Fixed Header Container */}
+            <div className="fixed top-16 sm:top-20 left-0 right-0 z-40 px-3 sm:px-6 lg:px-8 transition-all duration-300 pointer-events-none">
+                <div className="max-w-[1600px] mx-auto pointer-events-auto">
+                    <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50 shadow-md rounded-2xl sm:rounded-3xl p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between">
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => navigate(isDemo ? '/demo' : '/dashboard')}
@@ -772,7 +772,7 @@ export default function ExamEditor() {
                 </div>
             </div>
 
-            <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+            <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pt-44 sm:pt-48 lg:pt-52">
                 <div className="flex flex-col xl:flex-row gap-4 sm:gap-8 items-start">
                     {/* Left Column: Form Editor */}
                     <div className="flex-1 w-full space-y-4 sm:space-y-8 min-w-0">
@@ -1637,7 +1637,7 @@ export default function ExamEditor() {
                     )}
 
                     {/* Right Column: Live Preview (Desktop Only) */}
-                    <div className="xl:w-[400px] sticky top-8">
+                    <div className="xl:w-[400px] sticky top-48">
                         <ExamPreviewPanel data={watch()} />
                     </div>
                 </div>
