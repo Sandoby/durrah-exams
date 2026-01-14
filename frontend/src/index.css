@@ -601,3 +601,75 @@ body {
     left: 200%;
   }
 }
+
+/* Phone Frame Mockup */
+.phone-frame {
+  position: relative;
+  width: 280px;
+  height: 580px;
+  background: #0f172a;
+  border-radius: 40px;
+  border: 8px solid #334155;
+  box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.phone-frame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 25px;
+  background: #334155;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  z-index: 10;
+}
+
+/* Stepper Connector */
+.stepper-line {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  width: 2px;
+  height: calc(100% - 2rem);
+  background: linear-gradient(to bottom, #6366f1, #a855f7, transparent);
+  z-index: 0;
+}
+
+@media (min-width: 768px) {
+  .stepper-line-horizontal {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    width: calc(100% - 4rem);
+    height: 2px;
+    background: linear-gradient(to right, #6366f1, #a855f7, #6366f1);
+    z-index: 0;
+  }
+}
+
+/* Mask Fade */
+.mask-fade-bottom {
+  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animate-spin-slow {
+  animation: spin 8s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
