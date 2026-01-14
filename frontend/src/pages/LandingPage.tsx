@@ -883,55 +883,74 @@ export default function LandingPage() {
             </section>
 
 
-            {/* CTA Section - Geometric Flow */}
-            <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
-                <div className="absolute inset-0 bg-slate-900">
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/50 via-purple-900/50 to-slate-900/50 animate-gradient bg-[length:200%_200%]" />
-                    {/* Geometric Flow Background */}
-                    <div className="absolute inset-0 opacity-30">
-                        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-500/20 via-slate-900/0 to-slate-900/0" />
-                        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-purple-500/20 via-slate-900/0 to-slate-900/0" />
+            {/* CTA Section - Premium Boxed Command Center */}
+            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 relative">
+                <div className="max-w-6xl mx-auto relative group">
+                    {/* Outer Glow */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
+
+                    <div className="relative bg-slate-950 rounded-[2rem] p-8 md:p-20 overflow-hidden border border-slate-800 ring-1 ring-white/10">
+                        {/* Dynamic Background */}
+                        <div className="absolute inset-0 bg-grid-pattern opacity-[0.07]" />
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none" />
+                        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
+
+                        {/* Content */}
+                        <div className="relative z-10 flex flex-col items-center text-center">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8"
+                            >
+                                <Sparkles className="w-4 h-4" />
+                                <span>{t('ctaSection.tagline', 'Join the Future of Assessment')}</span>
+                            </motion.div>
+
+                            <motion.h2
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight"
+                            >
+                                {t('ctaSection.title', 'Ready to Transform?')}
+                            </motion.h2>
+                            <motion.p
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.1 }}
+                                className="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl leading-relaxed"
+                            >
+                                {t('ctaSection.subtitle', 'Join thousands of educators delivering secure, professional exams with Durrah.')}
+                            </motion.p>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.2 }}
+                                className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
+                            >
+                                <a
+                                    href={registrationUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-lg shadow-indigo-600/25 transition-all hover:-translate-y-1"
+                                >
+                                    {t('ctaSection.cta', 'Start Free Trial')}
+                                    <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+                                </a>
+                                <Link
+                                    to="/demo"
+                                    className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 px-8 py-4 rounded-xl text-lg font-bold backdrop-blur-sm transition-all hover:-translate-y-1"
+                                >
+                                    <Zap className="w-5 h-5" />
+                                    {t('ctaSection.demo', 'Live Demo')}
+                                </Link>
+                            </motion.div>
+                        </div>
                     </div>
-                    {/* Animated Particles/Grid */}
-                    <div className="absolute inset-0 bg-grid-pattern opacity-10" />
-                </div>
-
-                <div className="max-w-5xl mx-auto text-center relative z-10">
-                    <motion.h2
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tight leading-none"
-                    >
-                        {t('ctaSection.title', 'Ready to Transform?')}
-                    </motion.h2>
-                    <motion.p
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.1 }}
-                        className="text-xl md:text-2xl text-indigo-100/80 mb-12 max-w-3xl mx-auto"
-                    >
-                        {t('ctaSection.subtitle', 'Join thousands of educators delivering secure, professional exams with Durrah.')}
-                    </motion.p>
-
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        <a
-                            href={registrationUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="group relative inline-flex items-center gap-4 bg-white text-indigo-900 px-12 py-6 rounded-2xl text-xl font-black shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300 hover:scale-105"
-                        >
-                            <span>{t('ctaSection.cta', 'Start Your Free Trial')}</span>
-                            <ArrowRight className={`w-6 h-6 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180' : ''}`} />
-                            <div className="absolute inset-0 rounded-2xl ring-2 ring-white/50 group-hover:ring-4 group-hover:ring-white/80 transition-all duration-500" />
-                        </a>
-                    </motion.div>
                 </div>
             </section>
 
@@ -940,8 +959,8 @@ export default function LandingPage() {
                 {/* Space Atmosphere Background */}
                 <div className="absolute inset-0 pointer-events-none" >
                     <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-60" />
-                    {/* Top Fade: Blend from CTA purple to Space Dark */}
-                    <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-[#4c1d95]/80 via-[#050616]/80 to-transparent"></div>
+                    {/* Top Fade: Blend from CTA slate to Space Dark */}
+                    <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-slate-900 via-[#050616]/80 to-transparent"></div>
                     {/* Bottom Fade: Blend from Space Dark to next section (White/Slate) */}
                     <div className="absolute bottom-0 left-0 w-full h-96 bg-gradient-to-t from-white dark:from-slate-900 via-[#050616]/50 to-transparent"></div>
 
@@ -1013,12 +1032,13 @@ export default function LandingPage() {
                                         <motion.div
                                             key={i}
                                             variants={fadeIn}
-                                            className={`glass-panel p-4 rounded-2xl border ${item.border} hover:bg-white/5 transition-colors group/card`}
+                                            className={`relative overflow-hidden rounded-2xl border ${item.border} bg-white/5 backdrop-blur-sm p-4 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_20px_-5px_rgba(99,102,241,0.5)] group/card`}
                                         >
-                                            <div className={`${item.bg} w-10 h-10 rounded-xl flex items-center justify-center mb-3 group-hover/card:scale-110 transition-transform duration-300`}>
-                                                <item.icon className={`w-5 h-5 ${item.color}`} />
+                                            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity" />
+                                            <div className={`${item.bg} w-10 h-10 rounded-xl flex items-center justify-center mb-3 group-hover/card:scale-110 transition-transform duration-300 border border-white/5`}>
+                                                <item.icon className={`w-5 h-5 ${item.color} drop-shadow-lg`} />
                                             </div>
-                                            <span className="text-white/90 text-sm font-bold block leading-tight">
+                                            <span className="relative z-10 text-white/90 text-sm font-bold block leading-tight tracking-wide">
                                                 {t(`landing.marketing.kids.features.${i}`)}
                                             </span>
                                         </motion.div>
