@@ -100,11 +100,10 @@ export default function PaymentCallback() {
               await new Promise(r => setTimeout(r, 2000));
             }
 
-            // Fallback: Webhook might be slow but payment was likely fine
-            console.log('⏳ Dodo webhook taking longer than expected');
-            setStatus('success');
-            setMessage('Payment received! Your subscription will be activated shortly.');
-            setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
+            // Fail if not active after 10 attempts
+            console.log('⏳ Dodo verification timed out');
+            setStatus('error');
+            setMessage(t('checkout.callback.timeout_message', 'Verification is taking longer than usual. Please check your dashboard in a few minutes or contact support.'));
             return;
           } catch (err: any) {
             console.error('Dodo callback error:', err);
@@ -278,9 +277,11 @@ export default function PaymentCallback() {
                         </span>
                         <span className="font-semibold text-gray-900 dark:text-white">{new Date().toLocaleDateString()}</span>
                       </div>
-                      <div className="border-t border-slate-200 dark:border-slate-700 pt-4 flex justify-between items-center">
-                        <span className="text-gray-900 dark:text-white font-bold">Total Paid</span>
-                        <span className="text-xl font-black text-gray-900 dark:text-white">EGP {orderDetails.amount}</span>
+                      <div className="flex justify-between items-center pt-2">
+                        <span className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
+                          <ShieldCheck className="h-4 w-4" /> Provider
+                        </span>
+                        <span className="font-semibold text-gray-900 dark:text-white capitalize">{orderDetails.provider === 'dodo' ? 'Dodo Payments' : orderDetails.provider}</span>
                       </div>
                     </div>
                   </div>

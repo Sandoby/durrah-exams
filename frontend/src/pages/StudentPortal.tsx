@@ -4,11 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
-import { LogOut, BookOpen, Clock, Trophy, Search, User, ArrowRight, History, ArrowLeft, Mail, Lock, Loader2 } from 'lucide-react';
+import { LogOut, BookOpen, Clock, Trophy, Search, User, ArrowRight, History, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Capacitor } from '@capacitor/core';
-import { Browser } from '@capacitor/browser';
-import { Helmet } from 'react-helmet-async';
 
 export default function StudentPortal() {
   const { t, i18n } = useTranslation();
@@ -18,7 +16,7 @@ export default function StudentPortal() {
 
   // States
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
-  const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '', name: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', name: '' });
   const [loading, setLoading] = useState(false);
   const [examCode, setExamCode] = useState('');
   const [joining, setJoining] = useState(false);
@@ -27,25 +25,6 @@ export default function StudentPortal() {
 
   useEffect(() => {
     if (user) {
-      // Ensure user has student role when logging into student portal
-      const ensureStudentRole = async () => {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-
-        if (!profile || !profile.role) {
-          await supabase.from('profiles').upsert({
-            id: user.id,
-            role: 'student',
-            full_name: user.user_metadata?.full_name || '',
-            email: user.email
-          });
-        }
-      };
-
-      ensureStudentRole();
       fetchStudentData();
     }
   }, [user]);
@@ -82,71 +61,11 @@ export default function StudentPortal() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    try {
-      const isNative = Capacitor.isNativePlatform();
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: isNative
-            ? 'com.durrah.tutors://login-callback'
-            : `${window.location.origin}/student-portal?type=student`,
-          skipBrowserRedirect: isNative,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-        },
-      });
-      if (error) throw error;
-      if (isNative && data?.url) {
-        await Browser.open({ url: data.url });
-      }
-    } catch (error: any) {
-      console.error('Google login error:', error);
-      toast.error(t('auth.messages.loginError', 'Error connecting to Google'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleMicrosoftLogin = async () => {
-    setLoading(true);
-    try {
-      const isNative = Capacitor.isNativePlatform();
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'azure',
-        options: {
-          redirectTo: isNative
-            ? 'com.durrah.tutors://login-callback'
-            : `${window.location.origin}/student-portal?type=student`,
-          skipBrowserRedirect: isNative,
-          scopes: 'openid profile email',
-        },
-      });
-      if (error) throw error;
-      if (isNative && data?.url) {
-        await Browser.open({ url: data.url });
-      }
-    } catch (error: any) {
-      console.error('Microsoft login error:', error);
-      toast.error(t('auth.messages.microsoftError', 'Error connecting to Microsoft'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       if (authMode === 'register') {
-        if (formData.password !== formData.confirmPassword) {
-          toast.error(t('auth.validation.passwordMatch', "Passwords don't match"));
-          setLoading(false);
-          return;
-        }
         const { data: authData, error } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
@@ -233,10 +152,6 @@ export default function StudentPortal() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-gray-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
-        <Helmet>
-          <title>{t('studentPortal.seo.title', 'Student Portal - Take Your Exams | Durrah')}</title>
-          <meta name="description" content={t('studentPortal.seo.description', 'Access your exams on Durrah. Log in or register to join exams using a code, view your results, and track your progress in a secure environment.')} />
-        </Helmet>
         {/* Mobile Back Button */}
         {Capacitor.isNativePlatform() && (
           <button
@@ -257,7 +172,7 @@ export default function StudentPortal() {
             <Logo size="lg" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-            {authMode === 'login' ? t('auth.login.title') : t('auth.register.title')}
+            {authMode === 'login' ? t('studentPortal.signIn', 'Sign in to Student Portal') : t('studentPortal.createAccount', 'Create Student Account')}
           </h2>
         </div>
 
@@ -266,7 +181,7 @@ export default function StudentPortal() {
             <form className="space-y-6" onSubmit={handleAuth}>
               {authMode === 'register' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('auth.register.nameLabel')}</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.profile.fullName', 'Full Name')}</label>
                   <div className="mt-1 relative rounded-md shadow-sm">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <User className="h-5 w-5 text-gray-400" />
@@ -284,10 +199,10 @@ export default function StudentPortal() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('auth.login.emailLabel')}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.profile.email', 'Email address')}</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
+                    <User className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
                     type="email"
@@ -303,21 +218,16 @@ export default function StudentPortal() {
               <div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t('auth.login.passwordLabel')}
+                    {t('settings.password.new', 'Password')}
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="password"
-                      required
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all"
-                      placeholder="••••••••"
-                    />
-                  </div>
+                  <input
+                    type="password"
+                    required
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all"
+                    placeholder="••••••••"
+                  />
                   {authMode === 'login' && (
                     <div className="mt-2 flex justify-end">
                       <button
@@ -325,92 +235,20 @@ export default function StudentPortal() {
                         onClick={() => navigate('/forgot-password')}
                         className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
                       >
-                        {t('auth.login.forgotPassword')}
+                        {t('auth.forgotPassword', 'Forgot password?')}
                       </button>
                     </div>
                   )}
                 </div>
-
-                {authMode === 'register' && (
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {t('auth.register.confirmPasswordLabel')}
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Lock className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        type="password"
-                        required
-                        value={formData.confirmPassword}
-                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 transition-all"
-                        placeholder="••••••••"
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform hover:scale-[1.02] transition-all disabled:opacity-50"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform hover:scale-[1.02] transition-all"
               >
-                {loading ? (
-                  <>
-                    <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                    {t('common.loading')}
-                  </>
-                ) : (
-                  authMode === 'login' ? t('auth.login.submit') : t('auth.register.submit')
-                )}
+                {loading ? t('auth.processing', 'Processing...') : authMode === 'login' ? t('auth.signIn', 'Sign In') : t('auth.createAccount', 'Create Account')}
               </button>
-
-              <div className="mt-6 space-y-3">
-                <button
-                  type="button"
-                  onClick={handleMicrosoftLogin}
-                  disabled={loading}
-                  className="relative w-full flex justify-center items-center py-2.5 px-4 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-all"
-                >
-                  <svg className="absolute left-6 h-5 w-5" viewBox="0 0 21 21">
-                    <rect x="1" y="1" width="9" height="9" fill="#f25022" />
-                    <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
-                    <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
-                    <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
-                  </svg>
-                  {authMode === 'login' ? t('auth.login.microsoftSignin', 'Sign in with Microsoft') : t('auth.register.microsoftSignup', 'Sign up with Microsoft')}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleGoogleLogin}
-                  disabled={loading}
-                  className="relative w-full flex justify-center items-center py-2.5 px-4 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-all"
-                >
-                  <svg className="absolute left-6 h-5 w-5" viewBox="0 0 24 24">
-                    <path
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      fill="#4285F4"
-                    />
-                    <path
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      fill="#34A853"
-                    />
-                    <path
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
-                      fill="#FBBC05"
-                    />
-                    <path
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z"
-                      fill="#EA4335"
-                    />
-                  </svg>
-                  {authMode === 'login' ? t('auth.login.googleSignin', 'Sign in with Google') : t('auth.register.googleSignup', 'Sign up with Google')}
-                </button>
-              </div>
             </form>
 
             <div className="mt-6">
@@ -420,7 +258,7 @@ export default function StudentPortal() {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
-                    {authMode === 'login' ? t('auth.login.noAccount') : t('auth.register.hasAccount')}
+                    {authMode === 'login' ? t('auth.newToDurrah', 'New to Durrah?') : t('auth.alreadyHaveAccount', 'Already have an account?')}
                   </span>
                 </div>
               </div>
@@ -430,7 +268,7 @@ export default function StudentPortal() {
                   onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
                   className="w-full flex justify-center py-3 px-4 border-2 border-indigo-100 dark:border-gray-600 rounded-full shadow-sm text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                 >
-                  {authMode === 'login' ? t('studentPortal.createAccount', 'Create Student Account') : t('auth.register.login')}
+                  {authMode === 'login' ? t('studentPortal.createAccount', 'Create Student Account') : t('auth.signInInstead', 'Sign In instead')}
                 </button>
               </div>
             </div>
@@ -442,10 +280,6 @@ export default function StudentPortal() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24">
-      <Helmet>
-        <title>{t('studentPortal.seo.titleLogged', 'Student Dashboard - My Exams | Durrah')}</title>
-        <meta name="description" content={t('studentPortal.seo.descriptionLogged', 'View your exam history, check your performance stats, and join new assessments in the Durrah student dashboard.')} />
-      </Helmet>
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
         <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">

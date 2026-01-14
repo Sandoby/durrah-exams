@@ -21,7 +21,6 @@ interface User {
     email: string;
     created_at: string;
     full_name?: string;
-    role?: 'tutor' | 'student' | null;
     subscription_status?: string;
     subscription_plan?: string;
     subscription_end_date?: string;
@@ -96,7 +95,7 @@ export default function AdminPanel() {
     const [accessCode, setAccessCode] = useState('');
     const [userRole, setUserRole] = useState<'super_admin' | 'support_agent' | null>(null);
     const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'coupons' | 'chat' | 'agents' | 'notifications'>('analytics');
+    const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'coupons' | 'chat' | 'agents' | 'notifications' | 'web-notifications'>('analytics');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Users
@@ -111,7 +110,6 @@ export default function AdminPanel() {
         sortBy: 'created_at',
         sortOrder: 'desc'
     });
-    const [roleFilter, setRoleFilter] = useState<'all' | 'tutor' | 'student'>('all');
 
     // Coupons
     const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -296,16 +294,6 @@ export default function AdminPanel() {
     useEffect(() => {
         let result = [...users];
 
-        // Role Filter
-        if (roleFilter !== 'all') {
-            if (roleFilter === 'student') {
-                result = result.filter(user => user.role === 'student');
-            } else if (roleFilter === 'tutor') {
-                // Tutors are those with role='tutor' or no role set (legacy users)
-                result = result.filter(user => user.role === 'tutor' || !user.role);
-            }
-        }
-
         // Search
         if (filters.searchTerm) {
             const term = filters.searchTerm.toLowerCase();
@@ -398,7 +386,7 @@ export default function AdminPanel() {
         });
 
         setFilteredUsers(result);
-    }, [users, filters, roleFilter]);
+    }, [users, filters]);
 
 
 
@@ -814,7 +802,8 @@ export default function AdminPanel() {
                         { id: 'coupons', icon: Tag, label: 'Coupons' },
                         { id: 'chat', icon: MessageCircle, label: 'Support Chat' },
                         ...(userRole === 'super_admin' ? [{ id: 'agents', icon: UserPlus, label: 'Agents' }] : []),
-                        { id: 'notifications', icon: Bell, label: 'Push Notifications' }
+                        { id: 'notifications', icon: Bell, label: 'Push Notifications' },
+                        { id: 'web-notifications', icon: Bell, label: 'Web Notifications' }
                     ].map((item) => (
                         <button
                             key={item.id}
@@ -871,32 +860,6 @@ export default function AdminPanel() {
                                         Showing: {filteredUsers.length}
                                     </span>
                                 </div>
-                            </div>
-
-                            {/* Role Filter Tabs */}
-                            <div className="flex gap-2 mb-4 p-1 bg-gray-100 dark:bg-gray-700 rounded-xl w-fit">
-                                {[
-                                    { id: 'all', label: 'All Users', count: users.length },
-                                    { id: 'tutor', label: 'Tutors', count: users.filter(u => u.role === 'tutor' || !u.role).length },
-                                    { id: 'student', label: 'Students', count: users.filter(u => u.role === 'student').length }
-                                ].map((tab) => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setRoleFilter(tab.id as 'all' | 'tutor' | 'student')}
-                                        className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${roleFilter === tab.id
-                                            ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                                            }`}
-                                    >
-                                        {tab.label}
-                                        <span className={`ml-2 px-1.5 py-0.5 text-xs rounded-full ${roleFilter === tab.id
-                                            ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400'
-                                            : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400'
-                                            }`}>
-                                            {tab.count}
-                                        </span>
-                                    </button>
-                                ))}
                             </div>
 
                             <UserFiltersComponent
@@ -1529,11 +1492,159 @@ export default function AdminPanel() {
                             <NotificationManager />
                         </div>
                     )}
+
+                    {activeTab === 'web-notifications' && (
+                        <div className="p-0 sm:p-6">
+                            <WebNotificationManager users={users} />
+                        </div>
+                    )}
                 </div>
             </main>
         </div>
     );
 }
+
+function WebNotificationManager({ users }: { users: User[] }) {
+    const [title, setTitle] = useState('');
+    const [message, setMessage] = useState('');
+    const [targetUserId, setTargetUserId] = useState('all');
+    const [type, setType] = useState<'info' | 'success' | 'warning' | 'error'>('info');
+    const [isSending, setIsSending] = useState(false);
+
+    const handleSend = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSending(true);
+
+        try {
+            if (targetUserId === 'all') {
+                const notifications = users.map(u => ({
+                    user_id: u.id,
+                    title,
+                    message,
+                    type,
+                    is_read: false
+                }));
+
+                const { error } = await supabase
+                    .from('notifications')
+                    .insert(notifications);
+
+                if (error) throw error;
+            } else {
+                const { error } = await supabase
+                    .from('notifications')
+                    .insert({
+                        user_id: targetUserId,
+                        title,
+                        message,
+                        type,
+                        is_read: false
+                    });
+
+                if (error) throw error;
+            }
+
+            toast.success('Web notification sent successfully!');
+            setTitle('');
+            setMessage('');
+        } catch (error: any) {
+            console.error('Error sending web notification:', error);
+            toast.error('Failed to send notification');
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Web Notifications</h2>
+                <p className="text-sm text-gray-500 mt-1">Send in-app notifications that appear in the user's dashboard bell icon</p>
+            </div>
+
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 max-w-2xl shadow-sm">
+                <form onSubmit={handleSend} className="space-y-6">
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            Recipient
+                        </label>
+                        <select
+                            value={targetUserId}
+                            onChange={(e) => setTargetUserId(e.target.value)}
+                            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white transition-all"
+                        >
+                            <option value="all">Broadcast to All Users</option>
+                            {users.map(user => (
+                                <option key={user.id} value={user.id}>
+                                    {user.full_name || user.email} ({user.email})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                Title
+                            </label>
+                            <input
+                                type="text"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white font-bold"
+                                placeholder="e.g., Maintenance Update"
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                Notification Type
+                            </label>
+                            <select
+                                value={type}
+                                onChange={(e) => setType(e.target.value as any)}
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white"
+                            >
+                                <option value="info">Information (Blue)</option>
+                                <option value="success">Success (Green)</option>
+                                <option value="warning">Warning (Amber)</option>
+                                <option value="error">Error (Red)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            Message Content
+                        </label>
+                        <textarea
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            rows={4}
+                            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white resize-none"
+                            placeholder="Write your message here..."
+                            required
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={isSending || !title || !message}
+                        className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 disabled:opacity-50"
+                    >
+                        {isSending ? (
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : (
+                            <Send className="h-5 w-5" />
+                        )}
+                        Send Web Notification
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
+};
 
 const NotificationManager = () => {
     const [title, setTitle] = useState('');
@@ -1592,13 +1703,9 @@ const NotificationManager = () => {
                             className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white"
                         >
                             <option value="all">All Users (Broadcast)</option>
-                            <option value="tutors_only">Tutors Only</option>
-                            <option value="students_only">Students Only</option>
-                            <option value="subscribed_only">Subscribed Users Only</option>
-                            <option value="free_only">Free Users Only</option>
                             <option value="custom">Specific User ID (Enter manually)</option>
                         </select>
-                        {targetUserId === 'custom' && (
+                        {targetUserId !== 'all' && (
                             <input
                                 type="text"
                                 placeholder="Enter User UUID"

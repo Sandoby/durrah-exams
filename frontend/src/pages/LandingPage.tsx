@@ -23,8 +23,8 @@ export default function LandingPage() {
 
     // No auto-redirect - show authenticated UI instead
 
-    const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(250);
-    const { price: yearlyPrice } = useCurrency(2500);
+    const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(200);
+    const { price: yearlyPrice } = useCurrency(2000);
 
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -145,20 +145,20 @@ export default function LandingPage() {
 
     const faqs = [
         {
-            question: t('landing.faq.q1.question', 'Is Durrah really safe for kids?'),
-            answer: t('landing.faq.q1.answer', 'Yes! We prioritize safety with filtered content, secure nickname-only access options, and zero data selling.')
+            question: t('faq.q1.question', 'Is Durrah really safe for kids?'),
+            answer: t('faq.q1.answer', 'Yes! We prioritize safety with filtered content, secure nickname-only access options, and zero data selling.')
         },
         {
-            question: t('landing.faq.q2.question', 'How does the anti-cheating system work?'),
-            answer: t('landing.faq.q2.answer', 'Our system uses AI to detect tab switching, fullscreen escapes, and suspicious behavior patterns without intrusive software.')
+            question: t('faq.q2.question', 'How does the anti-cheating system work?'),
+            answer: t('faq.q2.answer', 'Our system uses AI to detect tab switching, fullscreen escapes, and suspicious behavior patterns without intrusive software.')
         },
         {
-            question: t('landing.faq.q3.question', 'Can I use Durrah for large school groups?'),
-            answer: t('landing.faq.q3.answer', 'Absolutely. Our "Professional" and "Yearly" plans are designed for high-capacity testing with detailed analytics.')
+            question: t('faq.q3.question', 'Can I use Durrah for large school groups?'),
+            answer: t('faq.q3.answer', 'Absolutely. Our "Professional" and "Yearly" plans are designed for high-capacity testing with detailed analytics.')
         },
         {
-            question: t('landing.faq.q4.question', 'Do students need an account?'),
-            answer: t('landing.faq.q4.answer', 'Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress.')
+            question: t('faq.q4.question', 'Do students need an account?'),
+            answer: t('faq.q4.answer', 'Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress.')
         }
     ];
 
@@ -185,84 +185,63 @@ export default function LandingPage() {
                 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
                 <meta name="author" content="Durrah System" />
                 <meta name="language" content={i18n.language === 'ar' ? 'Arabic' : 'English'} />
-                <link rel="canonical" href="https://durrahtutors.com/" />
-
+                <link rel="canonical" href="https://tutors.durrahsystem.tech/" />
+                
                 {/* Open Graph / Facebook */}
                 <meta property="og:type" content="website" />
                 <meta property="og:site_name" content="Durrah for Tutors" />
-                <meta property="og:url" content="https://durrahtutors.com/" />
+                <meta property="og:url" content="https://tutors.durrahsystem.tech/" />
                 <meta property="og:title" content={t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')} />
                 <meta property="og:description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
-                <meta property="og:image" content="https://durrahtutors.com/og-image.png" />
+                <meta property="og:image" content="https://tutors.durrahsystem.tech/og-image.png" />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
                 <meta property="og:image:alt" content="Durrah for Tutors - Online Exam Platform" />
                 <meta property="og:locale" content={i18n.language === 'ar' ? 'ar_SA' : 'en_US'} />
-
+                
                 {/* Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:site" content="@durrahsystem" />
                 <meta name="twitter:creator" content="@durrahsystem" />
-                <meta name="twitter:url" content="https://durrahtutors.com/" />
+                <meta name="twitter:url" content="https://tutors.durrahsystem.tech/" />
                 <meta name="twitter:title" content={t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')} />
                 <meta name="twitter:description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
-                <meta name="twitter:image" content="https://durrahtutors.com/og-image.png" />
+                <meta name="twitter:image" content="https://tutors.durrahsystem.tech/og-image.png" />
                 <meta name="twitter:image:alt" content="Durrah for Tutors - Online Exam Platform" />
-
+                
                 {/* Additional SEO Meta Tags */}
                 <meta name="theme-color" content="#6366f1" />
                 <meta name="apple-mobile-web-app-title" content="Durrah for Tutors" />
                 <meta name="application-name" content="Durrah for Tutors" />
-
+                
                 {/* Organization Schema - For Google Knowledge Panel & Logo */}
                 <script type="application/ld+json">{`
                     {
                         "@context": "https://schema.org",
                         "@type": "Organization",
-                        "@id": "https://durrahtutors.com/#organization",
+                        "@id": "https://tutors.durrahsystem.tech/#organization",
                         "name": "Durrah for Tutors",
                         "alternateName": "Durrah System",
-                        "url": "https://durrahtutors.com",
+                        "url": "https://tutors.durrahsystem.tech",
                         "logo": {
                             "@type": "ImageObject",
-                            "@id": "https://durrahtutors.com/#logo",
-                            "url": "https://durrahtutors.com/logo.png",
-                            "contentUrl": "https://durrahtutors.com/logo.png",
-                            "width": 512,
-                            "height": 512,
+                            "@id": "https://tutors.durrahsystem.tech/#logo",
+                            "url": "https://tutors.durrahsystem.tech/logo.png",
+                            "contentUrl": "https://tutors.durrahsystem.tech/logo.png",
+                            "width": 277,
+                            "height": 241,
                             "caption": "Durrah for Tutors Logo"
-                        },
-                        "brand": {
-                            "@type": "Brand",
-                            "name": "Durrah",
-                            "logo": "https://durrahtutors.com/logo.png"
                         },
                         "image": {
                             "@type": "ImageObject",
-                            "url": "https://durrahtutors.com/og-image.png"
+                            "url": "https://tutors.durrahsystem.tech/og-image.png"
                         },
                         "description": "Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.",
                         "foundingDate": "2024",
-                        "sameAs": ["https://durrahtutors.com"]
+                        "sameAs": []
                     }
                 `}</script>
-
-                {/* FAQ Schema for Search Rich Snippets */}
-                <script type="application/ld+json">{`
-                    {
-                        "@context": "https://schema.org",
-                        "@type": "FAQPage",
-                        "mainEntity": ${JSON.stringify(faqs.map(f => ({
-                    "@type": "Question",
-                    "name": f.question,
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": f.answer
-                    }
-                })))}
-                    }
-                `}</script>
-
+                
                 {/* WebSite Schema - For Sitelinks Search Box */}
                 <script type="application/ld+json">{`
                     {
@@ -286,7 +265,7 @@ export default function LandingPage() {
                         }
                     }
                 `}</script>
-
+                
                 {/* SoftwareApplication Schema - For Rich Results */}
                 <script type="application/ld+json">{`
                     {
@@ -313,7 +292,7 @@ export default function LandingPage() {
                         "featureList": "Anti-cheating detection, Auto-grading, Kids mode, Real-time analytics, Multiple question types"
                     }
                 `}</script>
-
+                
                 {/* WebPage Schema */}
                 <script type="application/ld+json">{`
                     {
@@ -336,7 +315,7 @@ export default function LandingPage() {
                         "inLanguage": "${i18n.language === 'ar' ? 'ar' : 'en'}"
                     }
                 `}</script>
-
+                
                 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
             </Helmet>
 
@@ -772,10 +751,10 @@ export default function LandingPage() {
                         className="text-center mb-16"
                     >
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                            {t('landing.faq.title', 'Frequently Asked Questions')}
+                            {t('faq.title', 'Frequently Asked Questions')}
                         </h2>
                         <p className="text-gray-600 dark:text-gray-400">
-                            {t('landing.faq.subtitle', 'Everything you need to know about Durrah')}
+                            {t('faq.subtitle', 'Everything you need to know about Durrah')}
                         </p>
                     </motion.div>
 
@@ -794,7 +773,7 @@ export default function LandingPage() {
                                     className="w-full px-6 py-5 text-left flex justify-between items-center group"
                                 >
                                     <span className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                        {t(`landing.faq.q${index + 1}.question`, faq.question)}
+                                        {t(`faq.q${index + 1}.question`, faq.question)}
                                     </span>
                                     <motion.div
                                         animate={{ rotate: activeFaq === index ? 180 : 0 }}
@@ -812,7 +791,7 @@ export default function LandingPage() {
                                             transition={{ duration: 0.3, ease: 'easeInOut' }}
                                         >
                                             <div className="px-6 pb-5 text-gray-600 dark:text-gray-400 text-sm leading-relaxed border-t border-gray-100 dark:border-slate-700/50 pt-4">
-                                                {t(`landing.faq.q${index + 1}.answer`, faq.answer)}
+                                                {t(`faq.q${index + 1}.answer`, faq.answer)}
                                             </div>
                                         </motion.div>
                                     )}
@@ -930,21 +909,21 @@ export default function LandingPage() {
                                 animate={{ y: [0, -20, 0], rotate: [0, 5, 0], scale: [1, 1.02, 1] }}
                                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886149420.png"
-                                alt="Kids Space Illustration"
+                                alt=""
                                 className="absolute w-32 h-32 z-20 drop-shadow-[0_0_20px_rgba(129,140,248,0.4)]"
                             />
                             <motion.img
                                 animate={{ y: [0, 30, 0], rotate: [0, -8, 0] }}
                                 transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886176188.png"
-                                alt="Floating Star Illustration"
+                                alt=""
                                 className="absolute bottom-4 right-10 w-24 h-24 z-10 opacity-50 filter blur-[0.5px]"
                             />
                             <motion.img
                                 animate={{ x: [0, 15, 0], y: [0, -15, 0] }}
                                 transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886214428.png"
-                                alt="Rocket Path Illustration"
+                                alt=""
                                 className="absolute top-4 left-10 w-20 h-20 z-10 opacity-30 filter blur-[1px]"
                             />
                         </div>
@@ -1024,44 +1003,6 @@ export default function LandingPage() {
                             </Link>
                         </div>
                     </motion.div>
-                </div>
-            </section>
-
-            {/* How to Section (SEO Optimization) */}
-            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900/50 border-y border-gray-100 dark:border-slate-800">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-6">
-                            {t('landing.howto.title', 'How to Create an Online Exam in 3 Simple Steps')}
-                        </h2>
-                        <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                            {t('landing.howto.subtitle', 'Get your assessment up and running in minutes with our streamlined process.')}
-                        </p>
-                    </div>
-
-                    <div className="grid md:grid-cols-3 gap-12">
-                        <div className="flex flex-col items-center text-center">
-                            <div className="mb-6 w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">1</div>
-                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step1.title', '1. Build Your Content')}</h3>
-                            <p className="text-gray-600 dark:text-gray-400">
-                                {t('landing.howto.step1.desc', 'Use our lightning-fast editor to create multiple-choice, numeric, or open-ended questions. Add images and math formulas with ease.')}
-                            </p>
-                        </div>
-                        <div className="flex flex-col items-center text-center">
-                            <div className="mb-6 w-16 h-16 bg-violet-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">2</div>
-                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step2.title', '2. Set Security Rules')}</h3>
-                            <p className="text-gray-600 dark:text-gray-400">
-                                {t('landing.howto.step2.desc', 'Enable one-click anti-cheating features like tab detection, fullscreen enforcement, and violation tracking to ensure academic integrity.')}
-                            </p>
-                        </div>
-                        <div className="flex flex-col items-center text-center">
-                            <div className="mb-6 w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">3</div>
-                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step3.title', '3. Share & Analyze')}</h3>
-                            <p className="text-gray-600 dark:text-gray-400">
-                                {t('landing.howto.step3.desc', 'Generate a unique exam link or QR code. Once students submit, get instant reports and beautiful per-student performance analytics.')}
-                            </p>
-                        </div>
-                    </div>
                 </div>
             </section>
 

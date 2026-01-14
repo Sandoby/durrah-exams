@@ -115,6 +115,20 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
                 console.log(`[DB] Successfully updated dodo_customer_id for user ${userId}`);
             }
         }
+
+        // INSERT WEB NOTIFICATION: Success
+        if (shouldExtend) {
+            await fetch(`${supabaseUrl}/rest/v1/notifications`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    user_id: userId,
+                    title: 'Subscription Activated! 🎊',
+                    message: `Your professional access is now active until ${args.nextBillingDate || 'the next billing cycle'}. Thank you for choosing Durrah!`,
+                    type: 'success'
+                })
+            });
+        }
         return { success: true, userId };
     } else if (args.status === 'cancelled' || args.status === 'payment_failed') {
         // Deactivate subscription using the admin RPC
@@ -136,6 +150,21 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
 
         const result = await res.json();
         console.log(`[DB] Deactivated subscription for user ${userId} via RPC`);
+
+        // INSERT WEB NOTIFICATION: Failure/Cancellation
+        await fetch(`${supabaseUrl}/rest/v1/notifications`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+                user_id: userId,
+                title: args.status === 'cancelled' ? 'Subscription Cancelled' : 'Payment Action Required ⚠️',
+                message: args.status === 'cancelled'
+                    ? 'Your premium access has been cancelled. You will retain access until the end of your current period.'
+                    : 'We were unable to process your subscription renewal. Please update your payment method in Settings to avoid losing access.',
+                type: args.status === 'cancelled' ? 'info' : 'error'
+            })
+        });
+
         return { success: result?.success ?? true, userId };
     }
 
