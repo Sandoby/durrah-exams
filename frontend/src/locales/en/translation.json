@@ -308,9 +308,25 @@
             "desc": "Get started by creating a new exam.",
             "button": "Create New Exam"
         },
-        "status": {
+        "searchPlaceholder": "Search exams by title or keyword...",
+        "filter": {
+            "all": "All",
             "active": "Active",
             "inactive": "Inactive"
+        },
+        "stats": {
+            "totalExams": "Total Exams",
+            "activeExams": "Active Exams",
+            "totalStudents": "Students Reached",
+            "avgScore": "Avg. Score"
+        },
+        "status": {
+            "active": "Active",
+            "inactive": "Inactive",
+            "activate": "Activate",
+            "deactivate": "Deactivate",
+            "clickToActivate": "Click to Activate",
+            "clickToDeactivate": "Click to Deactivate"
         },
         "actions": {
             "copyLink": "Share",
