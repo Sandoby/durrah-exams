@@ -5,8 +5,9 @@ import { GraduationCap, Users, Rocket, ArrowRight } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { cn } from '../lib/utils';
 
-export default function MobileWelcome({ className = "min-h-screen" }: { className?: string }) {
+export default function MobileWelcome({ className }: { className?: string }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
@@ -52,7 +53,7 @@ export default function MobileWelcome({ className = "min-h-screen" }: { classNam
     };
 
     return (
-        <div className={`${className} bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center p-6 relative overflow-hidden`}>
+        <div className={cn("min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center p-6 relative overflow-hidden", className)}>
             {/* Background decoration */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute -top-20 -right-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl" />
@@ -137,7 +138,7 @@ export default function MobileWelcome({ className = "min-h-screen" }: { classNam
                 </div>
 
                 <motion.p variants={itemVariants} className="text-center text-xs text-gray-400 mt-8">
-                    v1.0.1 • {t('mobileWelcome.version', 'Mobile App')}
+                    v1.1.0 • {t('mobileWelcome.version', 'Mobile App')}
                 </motion.p>
             </motion.div>
         </div>

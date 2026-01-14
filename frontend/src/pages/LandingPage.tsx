@@ -1206,8 +1206,13 @@ export default function LandingPage() {
 
                             <div className="phone-frame scale-90 md:scale-100 rotate-y-n12 transform-style-3d">
                                 <div className="absolute inset-0 bg-slate-900 overflow-hidden">
-                                    <div className="w-full h-full bg-gray-50 dark:bg-gray-900 pointer-events-none select-none">
-                                        <MobileWelcome className="h-full w-full" />
+                                    <div className="w-full h-full flex items-center justify-center bg-gray-900 select-none overflow-hidden">
+                                        <div
+                                            style={{ width: '360px', height: '746px', transform: 'scale(0.778)' }}
+                                            className="flex-shrink-0 bg-gray-50 dark:bg-gray-950 pointer-events-none origin-center"
+                                        >
+                                            <MobileWelcome className="w-full h-full pt-16" />
+                                        </div>
                                     </div>
                                     {/* Gradient Overlay for depth */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/40 via-transparent to-transparent pointer-events-none" />
