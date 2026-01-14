@@ -1,10 +1,9 @@
 ﻿import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, Trophy, ChevronDown, Rocket, Orbit, Smartphone, Download, Bell, GraduationCap } from 'lucide-react';
+import { Check, Zap, Shield, Globe, Users, ArrowRight, Layout, Sparkles, Award, Menu, X, Trophy, ChevronDown, Rocket, Orbit, Smartphone, Download, Bell, GraduationCap } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { Logo } from '../components/Logo';
-import { LottiePlayer } from '../components/LottiePlayer';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -109,7 +108,7 @@ export default function LandingPage() {
 
         const init = () => {
             particles = []; comets = [new Comet(canvas.width, canvas.height), new Comet(canvas.width, canvas.height)];
-            for (let i = 0; i <particleCount; i++) particles.push(new Particle(canvas.width, canvas.height));
+            for (let i = 0; i < particleCount; i++) particles.push(new Particle(canvas.width, canvas.height));
         };
 
         const animate = () => {
@@ -566,7 +565,7 @@ export default function LandingPage() {
                             </a>
                             <Link to="/demo" className="group px-8 py-4 rounded-xl font-bold text-lg text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center gap-2">
                                 {t('hero.watchDemo', 'Interactive Demo')}
-                                <Zip className="w-5 h-5" />
+                                <Zap className="w-5 h-5" />
                             </Link>
                         </motion.div>
                     </div>
@@ -907,8 +906,8 @@ export default function LandingPage() {
             </section>
 
 
-    {/* CTA Section */ }
-    <section className = "py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 relative overflow-hidden" >
+            {/* CTA Section */}
+            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 relative overflow-hidden" >
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJsLTEtMWgtMWwtMS0xaC0ybC0xLTFoLTJsLTEgMWgtMWwtMSAxaC0ybC0xIDFoLTJsLTEgMWgtMWwtMSAxdjFsLTEgMXYxbC0xIDF2MWwtMSAxdjJsLTEgMXYxbC0xIDF2MmwtMSAxdjJsLTEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMWgxbDEgMWgxbDEgMWgxbDEgMWgybDEgMWgybDEgMWgybDEtMWgxbDEtMWgybDEtMWgybDEtMWgybDEtMWgxbDEtMWgxbDEtMWgxbDEtMXYtMWwxLTF2LTFsMS0xdi0xbDEtMXYtMWwxLTF2LTFsMS0xdi0ybDEtMXYtMWwxLTF2LTJsMS0xdi0ybC0xLTF2LTFsLTEtMXYtMWwtMS0xdi0xbC0xLTF2LTFsLTEtMXYtMWwtMS0xdi0xbC0xLTF2LTFsLTEtMWgtMWwtMS0xaC0xbC0xLTFoLTFsLTEtMWgtMmwtMS0xaC0yeiIvPjwvZz48L2c+PC9zdmc+')] opacity-10"></div>
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">{t('ctaSection.title')}</h2>
@@ -920,394 +919,394 @@ export default function LandingPage() {
                 </div>
             </section>
 
-    {/* Kids Mode Feature Section - Enhanced Space Theme */ }
-    <section className = "py-32 relative overflow-hidden bg-[#050616] text-white" >
-        {/* Space Atmosphere Background */ }
-        <div className = "absolute inset-0 pointer-events-none" >
-            <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-60" />
-{/* Top Fade: Blend from CTA purple to Space Dark */ }
-<div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-[#4c1d95]/80 via-[#050616]/80 to-transparent"></div>
-{/* Bottom Fade: Blend from Space Dark to next section (White/Slate) */ }
-<div className="absolute bottom-0 left-0 w-full h-96 bg-gradient-to-t from-white dark:from-slate-900 via-[#050616]/50 to-transparent"></div>
+            {/* Kids Mode Feature Section - Enhanced Space Theme */}
+            <section className="py-32 relative overflow-hidden bg-[#050616] text-white" >
+                {/* Space Atmosphere Background */}
+                <div className="absolute inset-0 pointer-events-none" >
+                    <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-60" />
+                    {/* Top Fade: Blend from CTA purple to Space Dark */}
+                    <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-[#4c1d95]/80 via-[#050616]/80 to-transparent"></div>
+                    {/* Bottom Fade: Blend from Space Dark to next section (White/Slate) */}
+                    <div className="absolute bottom-0 left-0 w-full h-96 bg-gradient-to-t from-white dark:from-slate-900 via-[#050616]/50 to-transparent"></div>
 
-{/* Nebula Glows */ }
+                    {/* Nebula Glows */}
                     <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse"></div>
                     <div className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
                 </div>
 
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex justify-center mb-12">
-            <div className="glass-panel px-6 py-2 rounded-full flex items-center gap-2 border-indigo-500/30">
-                <Orbit className="h-5 w-5 text-indigo-400 animate-spin-slow" />
-                <span className="text-sm font-bold text-indigo-100/80 tracking-widest uppercase">{t('kidsLanding.missionCenter', 'Mission Center')}</span>
-            </div>
-        </div>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="flex justify-center mb-12">
+                        <div className="glass-panel px-6 py-2 rounded-full flex items-center gap-2 border-indigo-500/30">
+                            <Orbit className="h-5 w-5 text-indigo-400 animate-spin-slow" />
+                            <span className="text-sm font-bold text-indigo-100/80 tracking-widest uppercase">{t('kidsLanding.missionCenter', 'Mission Center')}</span>
+                        </div>
+                    </div>
 
-        <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="grid lg:grid-cols-2 gap-16 items-center"
-        >
-            <div className="order-2 lg:order-1">
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-6"
-                >
-                    <Zap className="h-4 w-4 fill-current animate-pulse" />
-                    <span>{t('kidsLanding.readySystem', 'SYSTEM READY FOR TAKEOFF')}</span>
-                </motion.div>
-
-                <div className="glass-panel p-8 sm:p-10 rounded-[2.5rem] border-white/10 shadow-3xl">
-                    <motion.h2
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.1 }}
-                        className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight uppercase"
-                    >
-                        {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[0]}
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 animate-gradient">{t('landing.marketing.kids.titleSpan', 'Ultimate')}</span>
-                        {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[1]}
-                    </motion.h2>
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2 }}
-                        className="text-lg text-indigo-100/70 mb-8 font-medium"
-                    >
-                        {t('landing.marketing.kids.desc', 'Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.')}
-                    </motion.p>
-                    <motion.ul
-                        variants={staggerContainer}
-                        initial="initial"
-                        whileInView="whileInView"
-                        viewport={{ once: true }}
-                        className="grid sm:grid-cols-2 gap-4 mb-8"
-                    >
-                        {[0, 1, 2, 3].map((i) => (
-                            <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
-                                <div className="bg-indigo-500/20 p-1 rounded-full border border-indigo-400/20">
-                                    <Check className="w-4 h-4 text-indigo-400" />
-                                </div>
-                                <span className="text-indigo-100 font-medium">{t(`landing.marketing.kids.features.${i}`)}</span>
-                            </motion.li>
-                        ))}
-                    </motion.ul>
-                    <Link
-                        to="/kids"
-                        className="w-full py-5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-2xl text-white font-black text-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group overflow-hidden relative"
-                    >
-                        <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 slant" />
-                        <span className="tracking-widest uppercase">{t('landing.marketing.kids.cta', 'Blast Off!')}</span>
-                        <Rocket className="h-6 w-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                    </Link>
-                </div>
-            </div>
-            <div className="order-1 lg:order-2 relative flex justify-center items-center h-[400px]">
-                {/* Animated Space Assets scaled down for distance */}
-                <motion.img
-                    animate={{ y: [0, -20, 0], rotate: [0, 5, 0], scale: [1, 1.02, 1] }}
-                    transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                    src="/kids/image-1765886149420.png"
-                    alt="Kids Space Illustration"
-                    className="absolute w-32 h-32 z-20 drop-shadow-[0_0_20px_rgba(129,140,248,0.4)]"
-                />
-                <motion.img
-                    animate={{ y: [0, 30, 0], rotate: [0, -8, 0] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-                    src="/kids/image-1765886176188.png"
-                    alt="Floating Star Illustration"
-                    className="absolute bottom-4 right-10 w-24 h-24 z-10 opacity-50 filter blur-[0.5px]"
-                />
-                <motion.img
-                    animate={{ x: [0, 15, 0], y: [0, -15, 0] }}
-                    transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-                    src="/kids/image-1765886214428.png"
-                    alt="Rocket Path Illustration"
-                    className="absolute top-4 left-10 w-20 h-20 z-10 opacity-30 filter blur-[1px]"
-                />
-            </div>
-        </motion.div>
-    </div>
-            </section>
-
-    {/* Student Portal Section - Modern Dashboard Style */ }
-    <section className = "py-24 relative overflow-hidden bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800" >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="grid lg:grid-cols-2 gap-16 items-center"
-            >
-                <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 to-violet-500 blur-3xl opacity-20 animate-pulse"></div>
-                    <motion.img
-                        animate={{ y: [0, -10, 0] }}
-                        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                        src="/illustrations/techny-standardized-test-as-method-of-assessment.png"
-                        alt="Student Portal Marketing"
-                        className="relative z-10 rounded-3xl shadow-2xl"
-                    />
-                </div>
-                <div>
                     <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-6"
+                        transition={{ duration: 0.8 }}
+                        className="grid lg:grid-cols-2 gap-16 items-center"
                     >
-                        <Trophy className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                        <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('landing.marketing.student.badge', 'Track & Grow')}</span>
+                        <div className="order-2 lg:order-1">
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-6"
+                            >
+                                <Zap className="h-4 w-4 fill-current animate-pulse" />
+                                <span>{t('kidsLanding.readySystem', 'SYSTEM READY FOR TAKEOFF')}</span>
+                            </motion.div>
+
+                            <div className="glass-panel p-8 sm:p-10 rounded-[2.5rem] border-white/10 shadow-3xl">
+                                <motion.h2
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: 0.1 }}
+                                    className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight uppercase"
+                                >
+                                    {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[0]}
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 animate-gradient">{t('landing.marketing.kids.titleSpan', 'Ultimate')}</span>
+                                    {t('landing.marketing.kids.title', 'Kids Mode: The Ultimate Quiz Adventure').split(t('landing.marketing.kids.titleSpan', 'Ultimate'))[1]}
+                                </motion.h2>
+                                <motion.p
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: 0.2 }}
+                                    className="text-lg text-indigo-100/70 mb-8 font-medium"
+                                >
+                                    {t('landing.marketing.kids.desc', 'Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.')}
+                                </motion.p>
+                                <motion.ul
+                                    variants={staggerContainer}
+                                    initial="initial"
+                                    whileInView="whileInView"
+                                    viewport={{ once: true }}
+                                    className="grid sm:grid-cols-2 gap-4 mb-8"
+                                >
+                                    {[0, 1, 2, 3].map((i) => (
+                                        <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
+                                            <div className="bg-indigo-500/20 p-1 rounded-full border border-indigo-400/20">
+                                                <Check className="w-4 h-4 text-indigo-400" />
+                                            </div>
+                                            <span className="text-indigo-100 font-medium">{t(`landing.marketing.kids.features.${i}`)}</span>
+                                        </motion.li>
+                                    ))}
+                                </motion.ul>
+                                <Link
+                                    to="/kids"
+                                    className="w-full py-5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-2xl text-white font-black text-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group overflow-hidden relative"
+                                >
+                                    <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 slant" />
+                                    <span className="tracking-widest uppercase">{t('landing.marketing.kids.cta', 'Blast Off!')}</span>
+                                    <Rocket className="h-6 w-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                </Link>
+                            </div>
+                        </div>
+                        <div className="order-1 lg:order-2 relative flex justify-center items-center h-[400px]">
+                            {/* Animated Space Assets scaled down for distance */}
+                            <motion.img
+                                animate={{ y: [0, -20, 0], rotate: [0, 5, 0], scale: [1, 1.02, 1] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                                src="/kids/image-1765886149420.png"
+                                alt="Kids Space Illustration"
+                                className="absolute w-32 h-32 z-20 drop-shadow-[0_0_20px_rgba(129,140,248,0.4)]"
+                            />
+                            <motion.img
+                                animate={{ y: [0, 30, 0], rotate: [0, -8, 0] }}
+                                transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+                                src="/kids/image-1765886176188.png"
+                                alt="Floating Star Illustration"
+                                className="absolute bottom-4 right-10 w-24 h-24 z-10 opacity-50 filter blur-[0.5px]"
+                            />
+                            <motion.img
+                                animate={{ x: [0, 15, 0], y: [0, -15, 0] }}
+                                transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+                                src="/kids/image-1765886214428.png"
+                                alt="Rocket Path Illustration"
+                                className="absolute top-4 left-10 w-20 h-20 z-10 opacity-30 filter blur-[1px]"
+                            />
+                        </div>
                     </motion.div>
-                    <motion.h2
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.1 }}
-                        className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight"
-                    >
-                        {t('landing.marketing.student.title', 'Empower Students with a Unified Portal').split(t('landing.marketing.student.titleSpan', 'Unified Portal'))[0]}
-                        <span className="text-indigo-600">{t('landing.marketing.student.titleSpan', 'Unified Portal')}</span>
-                        {t('landing.marketing.student.title', 'Empower Students with a Unified Portal').split(t('landing.marketing.student.titleSpan', 'Unified Portal'))[1]}
-                    </motion.h2>
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2 }}
-                        className="text-lg text-gray-600 dark:text-gray-300 mb-8"
-                    >
-                        {t('landing.marketing.student.desc', 'Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.')}
-                    </motion.p>
-                    <motion.ul
-                        variants={staggerContainer}
-                        initial="initial"
-                        whileInView="whileInView"
-                        viewport={{ once: true }}
-                        className="space-y-4 mb-8"
-                    >
-                        {[0, 1, 2, 3].map((i) => (
-                            <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
-                                <div className="bg-indigo-100 dark:bg-indigo-900/50 p-1 rounded-full">
-                                    <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                                </div>
-                                <span className="text-gray-700 dark:text-gray-300 font-medium">{t(`landing.marketing.student.features.${i}`)}</span>
-                            </motion.li>
-                        ))}
-                    </motion.ul>
-                    <Link to="/student-portal" className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95">
-                        {t('landing.marketing.student.cta', 'Visit Student Portal')}
-                        <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
-                    </Link>
                 </div>
-            </motion.div>
-        </div>
             </section>
 
-    {/* How to Section (SEO Optimization) */ }
-    <section className = "py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900/50 border-y border-gray-100 dark:border-slate-800" >
-        <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-6">
-                    {t('landing.howto.title', 'How to Create an Online Exam in 3 Simple Steps')}
-                </h2>
-                <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                    {t('landing.howto.subtitle', 'Get your assessment up and running in minutes with our streamlined process.')}
-                </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-12">
-                <div className="flex flex-col items-center text-center">
-                    <div className="mb-6 w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">1</div>
-                    <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step1.title', '1. Build Your Content')}</h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                        {t('landing.howto.step1.desc', 'Use our lightning-fast editor to create multiple-choice, numeric, or open-ended questions. Add images and math formulas with ease.')}
-                    </p>
+            {/* Student Portal Section - Modern Dashboard Style */}
+            <section className="py-24 relative overflow-hidden bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800" >
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8 }}
+                        className="grid lg:grid-cols-2 gap-16 items-center"
+                    >
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 to-violet-500 blur-3xl opacity-20 animate-pulse"></div>
+                            <motion.img
+                                animate={{ y: [0, -10, 0] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                                src="/illustrations/techny-standardized-test-as-method-of-assessment.png"
+                                alt="Student Portal Marketing"
+                                className="relative z-10 rounded-3xl shadow-2xl"
+                            />
+                        </div>
+                        <div>
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-6"
+                            >
+                                <Trophy className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('landing.marketing.student.badge', 'Track & Grow')}</span>
+                            </motion.div>
+                            <motion.h2
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.1 }}
+                                className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight"
+                            >
+                                {t('landing.marketing.student.title', 'Empower Students with a Unified Portal').split(t('landing.marketing.student.titleSpan', 'Unified Portal'))[0]}
+                                <span className="text-indigo-600">{t('landing.marketing.student.titleSpan', 'Unified Portal')}</span>
+                                {t('landing.marketing.student.title', 'Empower Students with a Unified Portal').split(t('landing.marketing.student.titleSpan', 'Unified Portal'))[1]}
+                            </motion.h2>
+                            <motion.p
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.2 }}
+                                className="text-lg text-gray-600 dark:text-gray-300 mb-8"
+                            >
+                                {t('landing.marketing.student.desc', 'Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.')}
+                            </motion.p>
+                            <motion.ul
+                                variants={staggerContainer}
+                                initial="initial"
+                                whileInView="whileInView"
+                                viewport={{ once: true }}
+                                className="space-y-4 mb-8"
+                            >
+                                {[0, 1, 2, 3].map((i) => (
+                                    <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
+                                        <div className="bg-indigo-100 dark:bg-indigo-900/50 p-1 rounded-full">
+                                            <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                        </div>
+                                        <span className="text-gray-700 dark:text-gray-300 font-medium">{t(`landing.marketing.student.features.${i}`)}</span>
+                                    </motion.li>
+                                ))}
+                            </motion.ul>
+                            <Link to="/student-portal" className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95">
+                                {t('landing.marketing.student.cta', 'Visit Student Portal')}
+                                <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+                            </Link>
+                        </div>
+                    </motion.div>
                 </div>
-                <div className="flex flex-col items-center text-center">
-                    <div className="mb-6 w-16 h-16 bg-violet-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">2</div>
-                    <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step2.title', '2. Set Security Rules')}</h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                        {t('landing.howto.step2.desc', 'Enable one-click anti-cheating features like tab detection, fullscreen enforcement, and violation tracking to ensure academic integrity.')}
-                    </p>
-                </div>
-                <div className="flex flex-col items-center text-center">
-                    <div className="mb-6 w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">3</div>
-                    <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step3.title', '3. Share & Analyze')}</h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                        {t('landing.howto.step3.desc', 'Generate a unique exam link or QR code. Once students submit, get instant reports and beautiful per-student performance analytics.')}
-                    </p>
-                </div>
-            </div>
-        </div>
             </section>
 
-    {/* Mobile App Section */ }
-    <section className = "py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950" >
-        <div className="max-w-7xl mx-auto">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-center mb-16"
-            >
-                <div className="inline-flex items-center justify-center p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-full mb-4">
-                    <Smartphone className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                </div>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-                    {t('landing.mobileApp.title', 'Get the Mobile App')}
-                </h2>
-                <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                    {t('landing.mobileApp.subtitle', 'Access exams anywhere with our native Android application')}
-                </p>
-            </motion.div>
-
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-                {/* App Preview Card */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    className="relative"
-                >
-                    <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center gap-5 mb-8">
-                            <div className="w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-[30%] flex items-center justify-center shadow-[0_20px_40px_-10px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] border border-white/60 dark:border-gray-600/50 transition-transform hover:scale-105 group relative overflow-hidden">
-                                {/* Subtle internal glow */}
-                                <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <GraduationCap className="w-12 h-12 text-indigo-600 dark:text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.3)]" />
-                            </div>
-                            <div>
-                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">{t('landing.mobileApp.appName', 'Durrah Tutors')}</h3>
-                                <p className="text-gray-500 dark:text-gray-400 font-medium">{t('landing.mobileApp.version', 'Version 1.1.0')}</p>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4 mb-8">
-                            {[
-                                { icon: Users, text: t('landing.mobileApp.features.tutorAccess', 'Tutor & Student Access') },
-                                { icon: Bell, text: t('landing.mobileApp.features.notifications', 'Real-time Push Notifications') },
-                                { icon: Rocket, text: t('landing.mobileApp.features.kidsMode', 'Kids Mode with Gamification') },
-                                { icon: Shield, text: t('landing.mobileApp.features.secure', 'Secure Exam Taking') }
-                            ].map((item, idx) => (
-                                <div key={idx} className="flex items-center gap-3">
-                                    <item.icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                                    <span className="text-gray-700 dark:text-gray-300">{item.text}</span>
-                                </div>
-                            ))}
-                        </div>
-
-                        <a
-                            href="https://khogxhpnuhhebkevaqlg.supabase.co/storage/v1/object/public/app-releases/DurrahTutors-latest.apk"
-                            className="w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg transition-all hover:scale-105 active:scale-95"
-                        >
-                            <Download className="w-6 h-6" />
-                            {t('landing.mobileApp.download', 'Download for Android')}
-                        </a>
-
-                        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-                            {t('landing.mobileApp.specs', 'Free • ~35 MB • Android 7.0+')}
+            {/* How to Section (SEO Optimization) */}
+            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900/50 border-y border-gray-100 dark:border-slate-800" >
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-6">
+                            {t('landing.howto.title', 'How to Create an Online Exam in 3 Simple Steps')}
+                        </h2>
+                        <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                            {t('landing.howto.subtitle', 'Get your assessment up and running in minutes with our streamlined process.')}
                         </p>
                     </div>
-                </motion.div>
 
-                {/* Features Grid */}
-                <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    className="grid sm:grid-cols-2 gap-6"
-                >
-                    {[
-                        {
-                            icon: Bell,
-                            title: t('landing.mobileApp.grid.alerts.title', 'Instant Alerts'),
-                            desc: t('landing.mobileApp.grid.alerts.desc', 'Get notified when tutors publish new exams')
-                        },
-                        {
-                            icon: Users,
-                            title: t('landing.mobileApp.grid.modes.title', 'Multiple Modes'),
-                            desc: t('landing.mobileApp.grid.modes.desc', 'Switch between tutor, student, and kids modes')
-                        },
-                        {
-                            icon: Rocket,
-                            title: t('landing.mobileApp.grid.adventure.title', 'Kids Adventure'),
-                            desc: t('landing.mobileApp.grid.adventure.desc', 'Gamified space-themed quizzes for children')
-                        },
-                        {
-                            icon: Shield,
-                            title: t('landing.mobileApp.grid.security.title', 'Secure & Fast'),
-                            desc: t('landing.mobileApp.grid.security.desc', 'Native performance with secure authentication')
-                        }
-                    ].map((feature, idx) => (
-                        <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.1 + idx * 0.1 }}
-                            className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors"
-                        >
-                            <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center mb-4">
-                                <feature.icon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-                            </div>
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{feature.title}</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{feature.desc}</p>
-                        </motion.div>
-                    ))}
-                </motion.div>
-            </div>
-        </div>
+                    <div className="grid md:grid-cols-3 gap-12">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="mb-6 w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">1</div>
+                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step1.title', '1. Build Your Content')}</h3>
+                            <p className="text-gray-600 dark:text-gray-400">
+                                {t('landing.howto.step1.desc', 'Use our lightning-fast editor to create multiple-choice, numeric, or open-ended questions. Add images and math formulas with ease.')}
+                            </p>
+                        </div>
+                        <div className="flex flex-col items-center text-center">
+                            <div className="mb-6 w-16 h-16 bg-violet-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">2</div>
+                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step2.title', '2. Set Security Rules')}</h3>
+                            <p className="text-gray-600 dark:text-gray-400">
+                                {t('landing.howto.step2.desc', 'Enable one-click anti-cheating features like tab detection, fullscreen enforcement, and violation tracking to ensure academic integrity.')}
+                            </p>
+                        </div>
+                        <div className="flex flex-col items-center text-center">
+                            <div className="mb-6 w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">3</div>
+                            <h3 className="text-2xl font-bold mb-4">{t('landing.howto.step3.title', '3. Share & Analyze')}</h3>
+                            <p className="text-gray-600 dark:text-gray-400">
+                                {t('landing.howto.step3.desc', 'Generate a unique exam link or QR code. Once students submit, get instant reports and beautiful per-student performance analytics.')}
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </section>
 
-    {/* Footer */ }
-    <footer dir = "ltr" className = "bg-slate-900 text-gray-300 py-12 px-4 sm:px-6 lg:px-8 relative z-10 text-left" >
-        <div className="max-w-7xl mx-auto">
-            <div className="grid md:grid-cols-4 gap-8 mb-8">
-                <div>
-                    <div className="flex items-center gap-2 mb-4">
-                        <Logo className="h-8 w-8" showText={false} />
-                        <span className="text-xl font-bold text-white">Durrah</span>
+            {/* Mobile App Section */}
+            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950" >
+                <div className="max-w-7xl mx-auto">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-16"
+                    >
+                        <div className="inline-flex items-center justify-center p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-full mb-4">
+                            <Smartphone className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                            {t('landing.mobileApp.title', 'Get the Mobile App')}
+                        </h2>
+                        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                            {t('landing.mobileApp.subtitle', 'Access exams anywhere with our native Android application')}
+                        </p>
+                    </motion.div>
+
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        {/* App Preview Card */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            className="relative"
+                        >
+                            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
+                                <div className="flex items-center gap-5 mb-8">
+                                    <div className="w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-[30%] flex items-center justify-center shadow-[0_20px_40px_-10px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] border border-white/60 dark:border-gray-600/50 transition-transform hover:scale-105 group relative overflow-hidden">
+                                        {/* Subtle internal glow */}
+                                        <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <GraduationCap className="w-12 h-12 text-indigo-600 dark:text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.3)]" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">{t('landing.mobileApp.appName', 'Durrah Tutors')}</h3>
+                                        <p className="text-gray-500 dark:text-gray-400 font-medium">{t('landing.mobileApp.version', 'Version 1.1.0')}</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4 mb-8">
+                                    {[
+                                        { icon: Users, text: t('landing.mobileApp.features.tutorAccess', 'Tutor & Student Access') },
+                                        { icon: Bell, text: t('landing.mobileApp.features.notifications', 'Real-time Push Notifications') },
+                                        { icon: Rocket, text: t('landing.mobileApp.features.kidsMode', 'Kids Mode with Gamification') },
+                                        { icon: Shield, text: t('landing.mobileApp.features.secure', 'Secure Exam Taking') }
+                                    ].map((item, idx) => (
+                                        <div key={idx} className="flex items-center gap-3">
+                                            <item.icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                            <span className="text-gray-700 dark:text-gray-300">{item.text}</span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <a
+                                    href="https://khogxhpnuhhebkevaqlg.supabase.co/storage/v1/object/public/app-releases/DurrahTutors-latest.apk"
+                                    className="w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg transition-all hover:scale-105 active:scale-95"
+                                >
+                                    <Download className="w-6 h-6" />
+                                    {t('landing.mobileApp.download', 'Download for Android')}
+                                </a>
+
+                                <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+                                    {t('landing.mobileApp.specs', 'Free • ~35 MB • Android 7.0+')}
+                                </p>
+                            </div>
+                        </motion.div>
+
+                        {/* Features Grid */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            className="grid sm:grid-cols-2 gap-6"
+                        >
+                            {[
+                                {
+                                    icon: Bell,
+                                    title: t('landing.mobileApp.grid.alerts.title', 'Instant Alerts'),
+                                    desc: t('landing.mobileApp.grid.alerts.desc', 'Get notified when tutors publish new exams')
+                                },
+                                {
+                                    icon: Users,
+                                    title: t('landing.mobileApp.grid.modes.title', 'Multiple Modes'),
+                                    desc: t('landing.mobileApp.grid.modes.desc', 'Switch between tutor, student, and kids modes')
+                                },
+                                {
+                                    icon: Rocket,
+                                    title: t('landing.mobileApp.grid.adventure.title', 'Kids Adventure'),
+                                    desc: t('landing.mobileApp.grid.adventure.desc', 'Gamified space-themed quizzes for children')
+                                },
+                                {
+                                    icon: Shield,
+                                    title: t('landing.mobileApp.grid.security.title', 'Secure & Fast'),
+                                    desc: t('landing.mobileApp.grid.security.desc', 'Native performance with secure authentication')
+                                }
+                            ].map((feature, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: 0.1 + idx * 0.1 }}
+                                    className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors"
+                                >
+                                    <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center mb-4">
+                                        <feature.icon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{feature.title}</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{feature.desc}</p>
+                                </motion.div>
+                            ))}
+                        </motion.div>
                     </div>
-                    <p className="text-gray-400">Modern exam platform for educators</p>
                 </div>
-                <div>
-                    <h3 className="font-bold text-white mb-4">Product</h3>
-                    <ul className="space-y-4">
-                        <li><Link to="/pricing" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.pricing')}</Link></li>
-                        <li><a href="#testimonials" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.testimonials')}</a></li>
-                        <li><Link to="/blog" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.blog')}</Link></li>
-                        <li><a href="mailto:abdelrahmansandoby@gmail.com" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.contact')}</a></li>
-                    </ul>
+            </section>
+
+            {/* Footer */}
+            <footer dir="ltr" className="bg-slate-900 text-gray-300 py-12 px-4 sm:px-6 lg:px-8 relative z-10 text-left" >
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-4 gap-8 mb-8">
+                        <div>
+                            <div className="flex items-center gap-2 mb-4">
+                                <Logo className="h-8 w-8" showText={false} />
+                                <span className="text-xl font-bold text-white">Durrah</span>
+                            </div>
+                            <p className="text-gray-400">Modern exam platform for educators</p>
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-white mb-4">Product</h3>
+                            <ul className="space-y-4">
+                                <li><Link to="/pricing" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.pricing')}</Link></li>
+                                <li><a href="#testimonials" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.testimonials')}</a></li>
+                                <li><Link to="/blog" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.blog')}</Link></li>
+                                <li><a href="mailto:abdelrahmansandoby@gmail.com" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.contact')}</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-white mb-4">Company</h3>
+                            <ul className="space-y-2">
+                                <li><Link to="/about" className="hover:text-white transition">About</Link></li>
+                                <li><Link to="/contact" className="hover:text-white transition">Contact</Link></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="text-white font-bold mb-6">{t('footer.legalTitle')}</h4>
+                            <ul className="space-y-4">
+                                <li><Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.privacy')}</Link></li>
+                                <li><Link to="/terms" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.terms')}</Link></li>
+                                <li><Link to="/refund-policy" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.refund')}</Link></li>
+                                <li><Link to="/refund-policy" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.cancellation', 'Cancellation Policy')}</Link></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
+                        <p>&copy; 2025 Durrah. All rights reserved.</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 className="font-bold text-white mb-4">Company</h3>
-                    <ul className="space-y-2">
-                        <li><Link to="/about" className="hover:text-white transition">About</Link></li>
-                        <li><Link to="/contact" className="hover:text-white transition">Contact</Link></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 className="text-white font-bold mb-6">{t('footer.legalTitle')}</h4>
-                    <ul className="space-y-4">
-                        <li><Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.privacy')}</Link></li>
-                        <li><Link to="/terms" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.terms')}</Link></li>
-                        <li><Link to="/refund-policy" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.refund')}</Link></li>
-                        <li><Link to="/refund-policy" className="text-gray-400 hover:text-white transition-colors">{t('footer.legal.cancellation', 'Cancellation Policy')}</Link></li>
-                    </ul>
-                </div>
-            </div>
-            <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-                <p>&copy; 2025 Durrah. All rights reserved.</p>
-            </div>
-        </div>
             </footer>
         </div>
     );
