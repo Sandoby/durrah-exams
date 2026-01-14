@@ -1554,8 +1554,39 @@ function WebNotificationManager({ users }: { users: User[] }) {
         setIsSending(true);
 
         try {
+            let recipients: User[] = [];
+
             if (targetUserId === 'all') {
-                const notifications = users.map(u => ({
+                recipients = users;
+            } else if (targetUserId === 'free') {
+                recipients = users.filter(u => !u.subscription_status || u.subscription_status !== 'active');
+            } else if (targetUserId === 'subscribed') {
+                recipients = users.filter(u => u.subscription_status === 'active');
+            } else if (targetUserId === 'custom') {
+                // If custom ID, we create a partial user object or just use the ID directly
+                // Logic below handles single ID differently
+            } else {
+                // Specific user from dropdown
+                const user = users.find(u => u.id === targetUserId);
+                if (user) recipients = [user];
+            }
+
+            if (targetUserId === 'custom') {
+                // For custom ID (manual entry), wrap in array
+                const notification = [{
+                    user_id: customId,
+                    title,
+                    message,
+                    type,
+                    is_read: false
+                }];
+                const { error } = await supabase.rpc('send_notifications_batch', {
+                    notifications_data: notification
+                });
+                if (error) throw error;
+
+            } else if (recipients.length > 0) {
+                const notifications = recipients.map(u => ({
                     user_id: u.id,
                     title,
                     message,
@@ -1566,27 +1597,13 @@ function WebNotificationManager({ users }: { users: User[] }) {
                 const { error } = await supabase.rpc('send_notifications_batch', {
                     notifications_data: notifications
                 });
-
-                if (error) throw error;
-            } else {
-                const notifications = [{
-                    user_id: targetUserId,
-                    title,
-                    message,
-                    type,
-                    is_read: false
-                }];
-
-                const { error } = await supabase.rpc('send_notifications_batch', {
-                    notifications_data: notifications
-                });
-
                 if (error) throw error;
             }
 
             toast.success('Web notification sent successfully!');
             setTitle('');
             setMessage('');
+            setCustomId('');
         } catch (error: any) {
             console.error('Error sending web notification:', error);
             toast.error('Failed to send notification');
@@ -1594,6 +1611,8 @@ function WebNotificationManager({ users }: { users: User[] }) {
             setIsSending(false);
         }
     };
+
+    const [customId, setCustomId] = useState('');
 
     return (
         <div className="space-y-6">
@@ -1614,12 +1633,27 @@ function WebNotificationManager({ users }: { users: User[] }) {
                             className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white transition-all"
                         >
                             <option value="all">Broadcast to All Users</option>
-                            {users.map(user => (
-                                <option key={user.id} value={user.id}>
-                                    {user.full_name || user.email} ({user.email})
-                                </option>
-                            ))}
+                            <option value="free">Free Users Only</option>
+                            <option value="subscribed">Subscribed Users Only</option>
+                            <option value="custom">Specific User ID (Manual Entry)</option>
+                            <optgroup label="Select Specific User">
+                                {users.map(user => (
+                                    <option key={user.id} value={user.id}>
+                                        {user.full_name || user.email} ({user.email})
+                                    </option>
+                                ))}
+                            </optgroup>
                         </select>
+                        {targetUserId === 'custom' && (
+                            <input
+                                type="text"
+                                value={customId}
+                                onChange={(e) => setCustomId(e.target.value)}
+                                className="mt-2 w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white"
+                                placeholder="Enter User UUID"
+                                required
+                            />
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
