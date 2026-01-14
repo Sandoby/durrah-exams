@@ -38,6 +38,7 @@ import { ProctorDashboard } from "./components/ProctorDashboard";
 
 import KidsLanding from './pages/KidsLanding';
 import KidsExamView from './pages/KidsExamView';
+import ExamResultsPage from './pages/ExamResultsPage';
 import { ProtectedRoute, AgentRoute } from './components/ProtectedRoute';
 
 import { useTranslation } from 'react-i18next';
@@ -181,6 +182,7 @@ function AppContent() {
         <Route path="/exam/:id/edit" element={<ProtectedRoute><ExamEditor /></ProtectedRoute>} />
         <Route path="/payment-history" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
         <Route path="/exam/:examId/analytics" element={<ProtectedRoute><ExamAnalyticsDashboard /></ProtectedRoute>} />
+        <Route path="/exam/:examId/results" element={<ProtectedRoute><ExamResultsPage /></ProtectedRoute>} />
         <Route path="/exam/:examId/proctor" element={<ProtectedRoute><ProctorDashboard /></ProtectedRoute>} />
 
         {/* Student Routes (Some have internal auth logic) */}

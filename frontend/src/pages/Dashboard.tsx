@@ -6,7 +6,6 @@ import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { ExamResults } from '../components/ExamResults';
 import { ChatWidget } from '../components/ChatWidget';
 import { ConvexChatWidget } from '../components/ConvexChatWidget';
 import { CardSkeleton } from '../components/skeletons';
@@ -92,7 +91,6 @@ export default function Dashboard() {
     const navigate = useNavigate();
     const [exams, setExams] = useState<Exam[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedExamForResults, setSelectedExamForResults] = useState<Exam | null>(null);
 
     const [profile, setProfile] = useState<any>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -887,7 +885,7 @@ export default function Dashboard() {
 
                                                 {/* Results Button */}
                                                 <button
-                                                    onClick={() => setSelectedExamForResults(exam)}
+                                                    onClick={() => navigate(`/exam/${exam.id}/results`)}
                                                     data-tour={index === 0 ? "results" : undefined}
                                                     className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
                                                 >
@@ -1212,30 +1210,6 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {/* Results Modal */}
-            {selectedExamForResults && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto border border-gray-100 dark:border-gray-700">
-                        <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
-                            <div>
-                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                                    {selectedExamForResults.title}
-                                </h2>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.modals.results.subtitle', 'Results & Performance Analytics')}</p>
-                            </div>
-                            <button
-                                onClick={() => setSelectedExamForResults(null)}
-                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors group"
-                            >
-                                <X className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200" />
-                            </button>
-                        </div>
-                        <div className="p-6">
-                            <ExamResults examId={selectedExamForResults.id} examTitle={selectedExamForResults.title} />
-                        </div>
-                    </div>
-                </div>
-            )}
 
 
             {/* Chat Widget - Convex or Classic */}
