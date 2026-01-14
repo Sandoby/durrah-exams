@@ -13,15 +13,15 @@ import { Calculator } from '../components/Calculator';
 import Latex from 'react-latex-next';
 import { useConvexProctoring } from '../hooks/useConvexProctoring';
 import { useExamProgress } from '../hooks/useExamProgress';
-import { 
-    Confetti, 
-    QuestionSkeleton, 
-    SuccessCheck, 
-    ShakeWrapper, 
+import {
+    Confetti,
+    QuestionSkeleton,
+    SuccessCheck,
+    ShakeWrapper,
     SlideTransition,
     useScreenReaderAnnounce,
     useImagePreloader,
-    useDyslexiaFont 
+    useDyslexiaFont
 } from '../components/ExamAnimations';
 
 interface Question {
@@ -76,7 +76,7 @@ export default function ExamView() {
     const [searchParams] = useSearchParams();
     const submissionId = searchParams.get('submission');
     const isReviewMode = !!submissionId;
-    
+
     // Supabase-based exam progress (for authenticated users)
     const {
         progress: savedProgress,
@@ -97,9 +97,9 @@ export default function ExamView() {
     } = useExamProgress({
         examId: id || '',
         enabled: !!user && !isReviewMode,
-        autoSaveInterval: 3000,
+        autoSaveInterval: 30000,
     });
-    
+
     // Check if exam was accessed via portal (code entry)
     useEffect(() => {
         // Allow review mode and submission view
@@ -114,7 +114,7 @@ export default function ExamView() {
         }
         // If logged in or portalFlag, allow access
     }, [loading, user, navigate]);
-    
+
     const [exam, setExam] = useState<Exam | null>(null);
     // Initialize studentData from authenticated user if available
     const [studentData, setStudentData] = useState<Record<string, string>>(() => {
@@ -162,7 +162,7 @@ export default function ExamView() {
     const [showUnansweredModal, setShowUnansweredModal] = useState(false);
     const [unansweredQuestions, setUnansweredQuestions] = useState<number[]>([]);
     const [showAutoSubmitWarning, setShowAutoSubmitWarning] = useState(false);
-    
+
     // Initialize student data from authenticated user
     useEffect(() => {
         if (user && studentInfo) {
@@ -174,19 +174,19 @@ export default function ExamView() {
             }));
         }
     }, [user, studentInfo]);
-    
+
     // Flag to track if we just restored progress (to prevent immediate re-sync)
     const justRestoredRef = useRef(false);
     // Flag to track if we've already shown the restore toast (prevent duplicates)
     const hasShownRestoreToastRef = useRef(false);
     // Flag to track if we've verified submission status
     const hasVerifiedSubmissionRef = useRef(false);
-    
+
     // Verify submission status against the server (source of truth)
     // This handles the case where tutor allows retake but local state thinks exam is submitted
     const verifySubmissionStatus = useCallback(async (studentEmail: string) => {
         if (!id || hasVerifiedSubmissionRef.current) return null;
-        
+
         try {
             const { data, error } = await supabase
                 .from('submissions')
@@ -194,21 +194,21 @@ export default function ExamView() {
                 .eq('exam_id', id)
                 .eq('student_email', studentEmail)
                 .maybeSingle();
-            
+
             hasVerifiedSubmissionRef.current = true;
-            
+
             if (error) {
                 console.warn('Error verifying submission:', error);
                 return null;
             }
-            
+
             return !!data; // true if submission exists, false if not
         } catch (err) {
             console.warn('Failed to verify submission status:', err);
             return null;
         }
     }, [id]);
-    
+
     // Restore progress from Supabase for authenticated users
     useEffect(() => {
         if (!progressLoading && savedProgress && hasExistingProgress && isAuthenticated) {
@@ -216,13 +216,13 @@ export default function ExamView() {
             const hasAnswers = savedProgress.answers && Object.keys(savedProgress.answers).length > 0;
             const hasStarted = !!savedProgress.started_at;
             const hasMeaningfulProgress = hasAnswers || hasStarted;
-            
+
             // Skip if no meaningful progress
             if (!hasMeaningfulProgress) return;
-            
+
             // Mark that we're restoring to prevent immediate re-sync
             justRestoredRef.current = true;
-            
+
             // Restore answers
             if (hasAnswers) {
                 setAnswers(savedProgress.answers);
@@ -256,7 +256,7 @@ export default function ExamView() {
                 setStarted(true);
                 setStartedAt(new Date(savedProgress.started_at).getTime());
                 setHasPreviousSession(true);
-                
+
                 // Only show toast once per session and if we have actual answers
                 if (!hasShownRestoreToastRef.current && hasAnswers) {
                     hasShownRestoreToastRef.current = true;
@@ -296,7 +296,7 @@ export default function ExamView() {
                     setSubmitted(true);
                 }
             }
-            
+
             // Clear the flag after a short delay
             setTimeout(() => {
                 justRestoredRef.current = false;
@@ -361,7 +361,7 @@ export default function ExamView() {
     const [inactivityCountdown, setInactivityCountdown] = useState(60);
     const lastActivityRef = useRef(Date.now());
     const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
-    
+
     // Network/Connection tracking for robust timer
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [connectionQuality, setConnectionQuality] = useState<'good' | 'fair' | 'poor'>('good');
@@ -394,7 +394,7 @@ export default function ExamView() {
     const proctoringStudentId = useRef(
         studentData.email || studentData.student_id || `anon_${Date.now()}_${Math.random().toString(36).slice(2)}`
     );
-    
+
     // Convex Proctoring Integration with answer backup and server-side timer
     const {
         startSession: startProctoringSession,
@@ -436,7 +436,7 @@ export default function ExamView() {
                     ...prev,
                     ...data.savedAnswers
                 }));
-                toast.success(t('examView.sessionRecovered'), { 
+                toast.success(t('examView.sessionRecovered'), {
                     duration: 4000,
                     icon: '💾'
                 });
@@ -458,9 +458,9 @@ export default function ExamView() {
                 const ans = answers[qId]?.answer;
                 return ans !== undefined && ans !== '' && (!Array.isArray(ans) || ans.length > 0);
             }).length;
-            
+
             updateProctoringProgress(currentQuestionIndex, answeredCount, timeLeft ?? undefined);
-            
+
             // Sync answers to Convex (debounced in the hook)
             if (Object.keys(answers).length > 0) {
                 syncAnswersToConvex(answers, currentQuestionIndex, answeredCount).catch(err => {
@@ -484,28 +484,28 @@ export default function ExamView() {
     useEffect(() => {
         if (sessionStatus === 'auto_submitted' && !submitted) {
             setSubmitted(true);
-            toast.success(t('examView.autoSubmittedByServer'), { 
+            toast.success(t('examView.autoSubmittedByServer'), {
                 duration: 6000,
                 icon: '⏰'
             });
         }
     }, [sessionStatus, submitted, t]);
-    
+
     // Network status monitoring for robust timer
     useEffect(() => {
         const handleOnline = async () => {
             setIsOnline(true);
             setConnectionQuality('good');
             reconnectAttemptsRef.current = 0;
-            
+
             if (started && !submitted) {
                 // Calculate time elapsed while offline
-                const offlineDuration = timerPausedAtRef.current 
+                const offlineDuration = timerPausedAtRef.current
                     ? Math.floor((Date.now() - timerPausedAtRef.current) / 1000)
                     : 0;
-                
+
                 console.log(`🌐 Back online after ${offlineDuration}s offline`);
-                
+
                 // Adjust timer if we were offline (subtract elapsed time)
                 if (offlineDuration > 0) {
                     setTimeLeft(prev => {
@@ -515,9 +515,9 @@ export default function ExamView() {
                         return prev;
                     });
                 }
-                
+
                 timerPausedAtRef.current = null;
-                
+
                 // Attempt to resync with Convex
                 if (proctoringEnabled) {
                     try {
@@ -536,7 +536,7 @@ export default function ExamView() {
                         console.warn('Failed to resync proctoring session:', err);
                     }
                 }
-                
+
                 // Also sync to Supabase if authenticated
                 if (isAuthenticated) {
                     setTimeLeft(prev => {
@@ -549,15 +549,15 @@ export default function ExamView() {
                 }
             }
         };
-        
+
         const handleOffline = () => {
             setIsOnline(false);
             setConnectionQuality('poor');
-            
+
             if (started && !submitted) {
                 // Record when we went offline to calculate duration
                 timerPausedAtRef.current = Date.now();
-                
+
                 console.log('⚠️ Network offline, timer continues locally');
                 toast.error(t('examView.connectionLost', 'Connection lost - your progress is being saved locally'), {
                     duration: 3000,
@@ -565,10 +565,10 @@ export default function ExamView() {
                 });
             }
         };
-        
+
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
-        
+
         // Check connection quality periodically
         const connectionCheck = setInterval(() => {
             if (navigator.onLine && started && !submitted) {
@@ -581,14 +581,14 @@ export default function ExamView() {
                 }
             }
         }, 10000);
-        
+
         return () => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
             clearInterval(connectionCheck);
         };
     }, [started, submitted, proctoringEnabled, isAuthenticated, startProctoringSession, updateProgressTimeRemaining, forceSaveProgress, t]);
-    
+
     // Update server sync timestamp when we receive server time
     useEffect(() => {
         if (serverTimeRemaining !== null && serverTimeRemaining !== undefined) {
@@ -707,7 +707,7 @@ export default function ExamView() {
     // Save state to localStorage whenever it changes (fallback for non-authenticated)
     // Use a ref to prevent infinite loops when syncing to Supabase
     const lastSyncedRef = useRef<string>('');
-    
+
     useEffect(() => {
         if (!id || submitted) return;
 
@@ -725,18 +725,18 @@ export default function ExamView() {
                 confidenceLevels,
                 scratchpadContent
             };
-            
+
             // Save to localStorage as fallback
             localStorage.setItem(`durrah_exam_${id}_state`, JSON.stringify(stateToSave));
         }
     }, [id, studentData, answers, violations, timeLeft, started, startedAt, submitted, flaggedQuestions, confidenceLevels, scratchpadContent]);
-    
+
     // Separate effect for Supabase sync to avoid infinite loops
     useEffect(() => {
         // Skip if we just restored progress (prevent immediate re-sync)
         if (justRestoredRef.current) return;
         if (!id || submitted || !isAuthenticated || !started) return;
-        
+
         // Create a hash of current state to avoid duplicate syncs
         const stateHash = JSON.stringify({
             answers: Object.keys(answers).length,
@@ -745,16 +745,16 @@ export default function ExamView() {
             time: timeLeft,
             violations: violations.length,
         });
-        
+
         // Skip if nothing changed
         if (stateHash === lastSyncedRef.current) return;
         lastSyncedRef.current = stateHash;
-        
+
         // Debounce the sync
         const syncTimeout = setTimeout(() => {
             // Double-check we're not in restore mode
             if (justRestoredRef.current) return;
-            
+
             updateProgressAnswers(answers);
             updateProgressFlagged(Array.from(flaggedQuestions));
             updateProgressCurrentQuestion(currentQuestionIndex);
@@ -764,8 +764,8 @@ export default function ExamView() {
             updateProgressViolations(violations);
             updateProgressConfidence(confidenceLevels);
             updateProgressScratchpad(scratchpadContent);
-        }, 2000); // 2 second debounce
-        
+        }, 30000); // 30 second debounce
+
         return () => clearTimeout(syncTimeout);
     }, [id, submitted, isAuthenticated, started, answers, flaggedQuestions, currentQuestionIndex, timeLeft, violations, confidenceLevels, scratchpadContent, updateProgressAnswers, updateProgressFlagged, updateProgressCurrentQuestion, updateProgressTimeRemaining, updateProgressViolations, updateProgressConfidence, updateProgressScratchpad]);
 
@@ -773,10 +773,10 @@ export default function ExamView() {
     useEffect(() => {
         const answeredCount = Object.keys(answers).filter(id => {
             const answer = answers[id]?.answer;
-            return answer !== undefined && answer !== '' && 
-                   (!Array.isArray(answer) || answer.length > 0);
+            return answer !== undefined && answer !== '' &&
+                (!Array.isArray(answer) || answer.length > 0);
         }).length;
-        
+
         const percentage = exam ? (answeredCount / exam.questions.length) * 100 : 0;
         setProgressPercentage(percentage);
     }, [answers, exam]);
@@ -792,7 +792,7 @@ export default function ExamView() {
             setHasShownWarning(prev => ({ ...prev, fiveMin: true }));
             toast('⏰ 5 minutes remaining!', { icon: '⚠️', duration: 4000 });
         }
-        
+
         // 1 minute warning
         if (timeLeft <= 60 && timeLeft > 30 && !hasShownWarning.oneMin) {
             setWarningLevel('orange');
@@ -800,7 +800,7 @@ export default function ExamView() {
             setHasShownWarning(prev => ({ ...prev, oneMin: true }));
             toast.error('⏰ 1 minute remaining!', { duration: 4000 });
         }
-        
+
         // 30 seconds critical
         if (timeLeft <= 30 && !hasShownWarning.thirtySec) {
             setWarningLevel('red');
@@ -808,7 +808,7 @@ export default function ExamView() {
             setHasShownWarning(prev => ({ ...prev, thirtySec: true }));
             toast.error('⏰ 30 seconds left!', { duration: 4000 });
         }
-        
+
         // Hide warning after 5 seconds
         if (showTimerWarning) {
             const timer = setTimeout(() => setShowTimerWarning(false), 5000);
@@ -865,15 +865,15 @@ export default function ExamView() {
             // Show warning after 15 minutes of inactivity
             if (inactiveMinutes >= 15 && !showInactivityWarning) {
                 setShowInactivityWarning(true);
-                
+
                 // Start countdown
                 let countdown = 60;
                 setInactivityCountdown(countdown);
-                
+
                 inactivityTimerRef.current = setInterval(() => {
                     countdown -= 1;
                     setInactivityCountdown(countdown);
-                    
+
                     if (countdown <= 0) {
                         // Auto-save and notify
                         toast.success('Progress saved due to inactivity', { duration: 5000 });
@@ -1060,12 +1060,12 @@ export default function ExamView() {
 
     const logViolation = useCallback((type: string, detail?: string) => {
         const violation: Violation = { type, timestamp: new Date().toISOString() };
-        
+
         // Log to Convex proctoring system (real-time for tutors)
         if (proctoringEnabled) {
             logConvexViolation(type, detail);
         }
-        
+
         setViolations((prev) => {
             const newViolations = [...prev, violation];
             const violationCount = newViolations.length;
@@ -1232,31 +1232,31 @@ export default function ExamView() {
                 console.warn('Fullscreen request failed or not supported', e);
             }
         }
-        
+
         // Start Convex proctoring session for real-time monitoring and server-side timer
         if (proctoringEnabled) {
             try {
                 const sessionResult = await startProctoringSession();
-                
+
                 if (sessionResult) {
                     console.log('📡 Proctoring session started:', sessionResult);
-                    
+
                     // If session was resumed, restore state
                     if (sessionResult.is_resume) {
                         console.log('🔄 Resuming previous session');
-                        
+
                         // Restore saved answers from Convex
                         if (sessionResult.saved_answers && Object.keys(sessionResult.saved_answers).length > 0) {
                             setAnswers(prev => ({
                                 ...prev,
                                 ...sessionResult.saved_answers
                             }));
-                            toast.success(t('examView.answersRestored'), { 
+                            toast.success(t('examView.answersRestored'), {
                                 duration: 3000,
                                 icon: '💾'
                             });
                         }
-                        
+
                         // Use server time (tamper-proof)
                         if (sessionResult.time_remaining_seconds !== null) {
                             setTimeLeft(sessionResult.time_remaining_seconds);
@@ -1272,17 +1272,17 @@ export default function ExamView() {
                 console.warn('Failed to start proctoring session:', err);
             }
         }
-        
+
         // For authenticated users, record exam start in Supabase
         if (isAuthenticated) {
-            const timeLimitSeconds = exam?.settings?.time_limit_minutes 
-                ? exam.settings.time_limit_minutes * 60 
+            const timeLimitSeconds = exam?.settings?.time_limit_minutes
+                ? exam.settings.time_limit_minutes * 60
                 : undefined;
             startProgressExam(timeLimitSeconds).catch(err => {
                 console.warn('Failed to record exam start in Supabase:', err);
             });
         }
-        
+
         setStarted(true);
         setStartedAt(Date.now());
     };
@@ -1313,55 +1313,55 @@ export default function ExamView() {
             }
 
             const currentQuestion = exam?.questions[currentQuestionIndex];
-            
-            switch(e.key) {
+
+            switch (e.key) {
                 case 'ArrowLeft':
                     if (viewMode === 'single' && currentQuestionIndex > 0) {
                         e.preventDefault();
                         setCurrentQuestionIndex(prev => prev - 1);
                     }
                     break;
-                    
+
                 case 'ArrowRight':
                     if (viewMode === 'single' && currentQuestionIndex < (exam?.questions.length || 0) - 1) {
                         e.preventDefault();
                         setCurrentQuestionIndex(prev => prev + 1);
                     }
                     break;
-                    
+
                 case ' ':
                     if (currentQuestion) {
                         e.preventDefault();
                         toggleFlag(currentQuestion.id);
                     }
                     break;
-                    
+
                 case 's':
                     if (e.ctrlKey || e.metaKey) {
                         e.preventDefault();
                         toast.success('Progress saved!', { icon: '💾', duration: 1500 });
                     }
                     break;
-                    
+
                 case 'Enter':
                     if (e.ctrlKey || e.metaKey) {
                         e.preventDefault();
                         handleSubmitWithCheck();
                     }
                     break;
-                    
+
                 case 'g':
                 case 'G':
                     e.preventDefault();
                     setShowQuestionGrid(prev => !prev);
                     break;
-                    
+
                 case 'Escape':
                     setShowQuestionGrid(false);
                     setShowAccessMenu(false);
                     setShowKeyboardHelp(false);
                     break;
-                    
+
                 case '1':
                 case '2':
                 case '3':
@@ -1374,7 +1374,7 @@ export default function ExamView() {
                         }
                     }
                     break;
-                    
+
                 case '?':
                     e.preventDefault();
                     setShowKeyboardHelp(prev => !prev);
@@ -1406,11 +1406,11 @@ export default function ExamView() {
 
     const onTouchEnd = () => {
         if (!touchStart || !touchEnd) return;
-        
+
         const distanceX = touchStart.x - touchEnd.x;
         const distanceY = touchStart.y - touchEnd.y;
         const isHorizontalSwipe = Math.abs(distanceX) > Math.abs(distanceY);
-        
+
         if (isHorizontalSwipe && Math.abs(distanceX) > minSwipeDistance) {
             if (distanceX > 0) {
                 // Swipe left - next question
@@ -1438,7 +1438,7 @@ export default function ExamView() {
     const speakQuestion = (text: string) => {
         // Cancel any ongoing speech
         window.speechSynthesis.cancel();
-        
+
         if (isSpeaking) {
             setIsSpeaking(false);
             return;
@@ -1473,7 +1473,7 @@ export default function ExamView() {
     // Feature 9: Enhanced answer update with change tracking + success animation
     const handleAnswerUpdate = (questionId: string, newAnswer: any) => {
         const previousAnswer = answers[questionId]?.answer;
-        
+
         // Track answer changes (only if previously set and different)
         if (previousAnswer !== undefined && previousAnswer !== newAnswer) {
             setAnswerChanges(prev => ({
@@ -1494,7 +1494,7 @@ export default function ExamView() {
         // Show success animation
         setShowSuccessAnimation(questionId);
         setTimeout(() => setShowSuccessAnimation(null), 600);
-        
+
         // Announce for screen readers
         announce(`Answer selected for question ${currentQuestionIndex + 1}`);
 
@@ -1521,10 +1521,10 @@ export default function ExamView() {
             // Shake the submit button to indicate error
             setShakeSubmitButton(true);
             setTimeout(() => setShakeSubmitButton(false), 500);
-            
+
             // Announce for screen readers
             announce(`${unanswered.length} questions unanswered. Please review before submitting.`);
-            
+
             setUnansweredQuestions(unanswered);
             setShowUnansweredModal(true);
             return;
@@ -1696,13 +1696,13 @@ export default function ExamView() {
                 });
 
                 setSubmitted(true);
-                
+
                 // Show confetti animation on successful submission
                 setShowConfetti(true);
-                
+
                 // Announce for screen readers
                 announce(`Exam submitted successfully! Your score is ${result.percentage.toFixed(1)} percent.`);
-                
+
                 // End Convex proctoring session with submission result
                 if (proctoringEnabled) {
                     endProctoringSession('submitted', {
@@ -1727,7 +1727,7 @@ export default function ExamView() {
 
                 // Clear temporary state
                 localStorage.removeItem(`durrah_exam_${id}_state`);
-                
+
                 // Mark as submitted in Supabase for authenticated users
                 if (isAuthenticated) {
                     try {
@@ -1882,10 +1882,10 @@ export default function ExamView() {
             // Determine direction based on navigation
             setSlideDirection(index > currentQuestionIndex ? 'left' : 'right');
             setIsLoadingQuestion(true);
-            
+
             // Announce for screen readers
             announce(`Navigating to question ${index + 1} of ${exam.questions.length}`);
-            
+
             setTimeout(() => {
                 setCurrentQuestionIndex(index);
                 setIsLoadingQuestion(false);
@@ -1947,7 +1947,7 @@ export default function ExamView() {
             <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 relative overflow-hidden">
                 {/* Confetti Animation */}
                 {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
-                
+
                 <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-2xl w-full mb-8 animate-scale-pop relative z-10">
                     <div className="animate-success-pop">
                         <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
@@ -2276,7 +2276,7 @@ export default function ExamView() {
         <div ref={containerRef} className={`min-h-screen p-3 sm:p-6 bg-gray-50 dark:bg-gray-900 ${dyslexiaFont ? 'dyslexia-font' : ''}`}>
             {/* Screen Reader Announcer */}
             <announce.Announcer />
-            
+
             {/* Watermark Overlay */}
             {started && (
                 <div className={`fixed inset-0 pointer-events-none z-50 overflow-hidden select-none flex flex-wrap content-center justify-center gap-24 rotate-[-15deg] transition-opacity duration-300 ${highContrast ? 'opacity-[0.08]' : 'opacity-[0.03]'}`}>
@@ -2334,16 +2334,15 @@ export default function ExamView() {
                                                 <span className="flex items-center gap-1">
                                                     Time remaining: <span className="font-semibold text-gray-800 dark:text-gray-200">{formatTimeLeft(timeLeft)}</span>
                                                     {proctoringEnabled && (
-                                                        <span className={`inline-flex items-center ml-1 ${
-                                                            !isOnline || !proctoringConnected ? 'text-red-500' : 
-                                                            connectionQuality === 'poor' ? 'text-yellow-500' : 
-                                                            'text-green-500'
-                                                        }`} title={
-                                                            !isOnline ? 'Offline - timer running locally' :
-                                                            !proctoringConnected ? 'Reconnecting...' :
-                                                            connectionQuality === 'poor' ? 'Poor connection' :
-                                                            'Connected to server'
-                                                        }>
+                                                        <span className={`inline-flex items-center ml-1 ${!isOnline || !proctoringConnected ? 'text-red-500' :
+                                                            connectionQuality === 'poor' ? 'text-yellow-500' :
+                                                                'text-green-500'
+                                                            }`} title={
+                                                                !isOnline ? 'Offline - timer running locally' :
+                                                                    !proctoringConnected ? 'Reconnecting...' :
+                                                                        connectionQuality === 'poor' ? 'Poor connection' :
+                                                                            'Connected to server'
+                                                            }>
                                                             {!isOnline || !proctoringConnected ? (
                                                                 <Wifi className="w-3 h-3 animate-pulse" />
                                                             ) : connectionQuality === 'poor' ? (
@@ -2477,7 +2476,7 @@ export default function ExamView() {
                             </div>
                         ) : (
                             // Single Question Mode (Pagination)
-                            <div 
+                            <div
                                 className="space-y-6"
                                 onTouchStart={onTouchStart}
                                 onTouchMove={onTouchMove}
@@ -2489,12 +2488,11 @@ export default function ExamView() {
                                 ) : exam.questions[currentQuestionIndex] && (() => {
                                     const question = exam.questions[currentQuestionIndex];
                                     return (
-                                        <SlideTransition 
-                                            key={`question-${currentQuestionIndex}`} 
+                                        <SlideTransition
+                                            key={`question-${currentQuestionIndex}`}
                                             direction={slideDirection}
-                                            className={`bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 min-h-[50vh] transition-transform duration-150 ${exam.settings.disable_copy_paste ? 'select-none' : ''} ${isBlurActive ? 'blur-sm pointer-events-none' : ''} ${
-                                                swipeDirection === 'left' ? '-translate-x-4 opacity-75' : swipeDirection === 'right' ? 'translate-x-4 opacity-75' : ''
-                                            }`}
+                                            className={`bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 min-h-[50vh] transition-transform duration-150 ${exam.settings.disable_copy_paste ? 'select-none' : ''} ${isBlurActive ? 'blur-sm pointer-events-none' : ''} ${swipeDirection === 'left' ? '-translate-x-4 opacity-75' : swipeDirection === 'right' ? 'translate-x-4 opacity-75' : ''
+                                                }`}
                                         >
                                             {/* Success Animation Overlay */}
                                             {showSuccessAnimation === question.id && (
@@ -2502,7 +2500,7 @@ export default function ExamView() {
                                                     <SuccessCheck />
                                                 </div>
                                             )}
-                                            
+
                                             {/* Feature 8: Read Aloud Button */}
                                             <div className="flex items-center justify-between mb-4 gap-2">
                                                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
@@ -2515,7 +2513,7 @@ export default function ExamView() {
                                                         className={`p-2 rounded-full border transition-colors ${flaggedQuestions.has(question.id)
                                                             ? 'border-red-400 bg-red-50 text-red-600 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200'
                                                             : 'border-gray-200 text-gray-500 hover:border-gray-300 dark:border-gray-700 dark:text-gray-300'
-                                                        }`}
+                                                            }`}
                                                         aria-label={flaggedQuestions.has(question.id) ? 'Unflag question' : 'Flag question'}
                                                     >
                                                         <Flag size={18} fill={flaggedQuestions.has(question.id) ? 'currentColor' : 'none'} />
@@ -2635,8 +2633,8 @@ export default function ExamView() {
                                                                     flex-1 px-3 py-2 rounded-lg text-xs font-semibold border-2 
                                                                     transition-all duration-200 hover:scale-105
                                                                     ${confidenceLevels[question.id] === level
-                                                                        ? color === 'red' 
-                                                                            ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 shadow-md' 
+                                                                        ? color === 'red'
+                                                                            ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 shadow-md'
                                                                             : color === 'yellow'
                                                                                 ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 shadow-md'
                                                                                 : 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 shadow-md'
@@ -2743,7 +2741,7 @@ export default function ExamView() {
                     </form>
                 </div>
 
-                    {/* Floating Toolbar */}
+                {/* Floating Toolbar */}
                 <div className={`fixed bottom-4 sm:bottom-6 right-4 sm:right-6 flex flex-col items-end gap-2 z-50 transition-all duration-300 ${isZenMode ? 'opacity-20 hover:opacity-100' : 'opacity-100'}`}>
                     {showAccessMenu && (
                         <div className="mb-2 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 p-4 min-w-[240px] animate-in fade-in slide-in-from-bottom-4 duration-200">
@@ -3008,14 +3006,14 @@ export default function ExamView() {
                                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
                                     ⌨️ Keyboard Shortcuts
                                 </h3>
-                                <button 
+                                <button
                                     onClick={() => setShowKeyboardHelp(false)}
                                     className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            
+
                             <div className="p-6 space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {[
@@ -3032,7 +3030,7 @@ export default function ExamView() {
                                             <span className="text-sm text-gray-700 dark:text-gray-300">{shortcut.desc}</span>
                                             <div className="flex gap-1">
                                                 {shortcut.keys.map(key => (
-                                                    <kbd 
+                                                    <kbd
                                                         key={key}
                                                         className="px-2 py-1 text-xs font-semibold text-gray-800 bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded shadow-sm"
                                                     >
@@ -3050,9 +3048,8 @@ export default function ExamView() {
 
                 {/* Feature 3: Timer Warning */}
                 {timeLeft !== null && timeLeft <= 300 && (
-                    <div className={`fixed top-4 right-4 z-40 transition-all duration-300 ${
-                        showTimerWarning ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
-                    }`}>
+                    <div className={`fixed top-4 right-4 z-40 transition-all duration-300 ${showTimerWarning ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+                        }`}>
                         <div className={`
                             px-4 py-3 rounded-lg shadow-xl border-2 backdrop-blur-sm
                             ${warningLevel === 'yellow' ? 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-400 text-yellow-800 dark:text-yellow-200' : ''}
@@ -3060,9 +3057,8 @@ export default function ExamView() {
                             ${warningLevel === 'red' ? 'bg-red-50 dark:bg-red-900/30 border-red-500 text-red-800 dark:text-red-200 animate-pulse' : ''}
                         `}>
                             <div className="flex items-center gap-2">
-                                <AlertTriangle className={`w-5 h-5 ${
-                                    warningLevel === 'red' ? 'animate-bounce' : ''
-                                }`} />
+                                <AlertTriangle className={`w-5 h-5 ${warningLevel === 'red' ? 'animate-bounce' : ''
+                                    }`} />
                                 <div>
                                     <p className="font-bold text-sm">
                                         {timeLeft > 60 ? `${Math.floor(timeLeft / 60)} minutes` : `${timeLeft} seconds`} remaining
@@ -3078,7 +3074,7 @@ export default function ExamView() {
 
                 {/* Feature 4: Scratchpad Panel */}
                 {showScratchpad && !isScratchpadMinimized && (
-                    <div 
+                    <div
                         className="fixed bottom-24 sm:bottom-20 right-3 left-3 sm:left-auto sm:right-6 w-full max-w-[360px] sm:w-80 h-[280px] sm:h-[300px] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-indigo-200 dark:border-indigo-700 flex flex-col z-40 overflow-hidden"
                         style={{ maxWidth: 'calc(100vw - 1.5rem)', maxHeight: 'calc(100vh - 12rem)' }}
                     >
@@ -3178,26 +3174,26 @@ export default function ExamView() {
                                 <div className="flex justify-center">
                                     <div className="relative w-24 h-24">
                                         <svg className="w-24 h-24 transform -rotate-90">
-                                            <circle 
-                                                cx="48" 
-                                                cy="48" 
-                                                r="44" 
-                                                stroke="currentColor" 
-                                                strokeWidth="6" 
-                                                fill="none" 
-                                                className="text-gray-200 dark:text-gray-700" 
+                                            <circle
+                                                cx="48"
+                                                cy="48"
+                                                r="44"
+                                                stroke="currentColor"
+                                                strokeWidth="6"
+                                                fill="none"
+                                                className="text-gray-200 dark:text-gray-700"
                                             />
-                                            <circle 
-                                                cx="48" 
-                                                cy="48" 
-                                                r="44" 
-                                                stroke="currentColor" 
-                                                strokeWidth="6" 
-                                                fill="none" 
+                                            <circle
+                                                cx="48"
+                                                cy="48"
+                                                r="44"
+                                                stroke="currentColor"
+                                                strokeWidth="6"
+                                                fill="none"
                                                 strokeDasharray={`${2 * Math.PI * 44}`}
                                                 strokeDashoffset={`${2 * Math.PI * 44 * (1 - inactivityCountdown / 60)}`}
-                                                className="text-orange-500 transition-all duration-1000" 
-                                                strokeLinecap="round" 
+                                                className="text-orange-500 transition-all duration-1000"
+                                                strokeLinecap="round"
                                             />
                                         </svg>
                                         <div className="absolute inset-0 flex items-center justify-center">

@@ -8,7 +8,10 @@
         "dir": "ltr",
         "forTutors": "for Tutors",
         "true": "True",
-        "false": "False"
+        "false": "False",
+        "error": "An unexpected error occurred",
+        "loading": "Loading...",
+        "success": "Success"
     },
     "hero": {
         "title": "Create Exams That",
@@ -87,7 +90,7 @@
         },
         "professional": {
             "title": "Professional",
-            "price": "200 EGP",
+            "price": "250 EGP",
             "period": "/month",
             "badge": "Most Popular",
             "features": [
@@ -100,7 +103,7 @@
         },
         "yearly": {
             "title": "Yearly",
-            "price": "2000 EGP",
+            "price": "2500 EGP",
             "period": "/year",
             "badge": "Save 20%",
             "features": [
@@ -140,7 +143,10 @@
             "submit": "Sign in",
             "noAccount": "Don't have an account?",
             "register": "Sign up",
-            "back": "Back"
+            "back": "Back",
+            "googleSignin": "Sign in with Google",
+            "microsoftSignin": "Sign in with Microsoft",
+            "or": "OR"
         },
         "register": {
             "title": "Create an account",
@@ -149,9 +155,21 @@
             "emailLabel": "Email address",
             "passwordLabel": "Password",
             "confirmPasswordLabel": "Confirm Password",
-            "submit": "Sign up",
+            "submit": "Create Account",
             "hasAccount": "Already have an account?",
-            "login": "Sign in"
+            "login": "Login",
+            "googleSignup": "Sign up with Google",
+            "microsoftSignup": "Sign up with Microsoft"
+        },
+        "verifyEmail": {
+            "title": "Verify your email",
+            "desc": "We've sent a verification link to",
+            "checkSpam": "Didn't receive it? Please check your **spam folder**.",
+            "resend": "Resend verification email",
+            "resending": "Sending...",
+            "backToLogin": "Back to login",
+            "checkStatus": "I've verified my email",
+            "resendIn": "Resend in {{seconds}}s"
         },
         "forgotPassword": {
             "title": "Reset your password",
@@ -189,7 +207,14 @@
             "resetLinkError": "Failed to send reset link",
             "passwordUpdated": "Password updated successfully",
             "passwordUpdateError": "Failed to update password",
-            "invalidLink": "Invalid or expired reset link"
+            "invalidLink": "Invalid or expired reset link",
+            "verificationResent": "Verification email resent successfully",
+            "verificationResendError": "Failed to resend verification email",
+            "emailNotVerified": "Your email is not verified. Please check your inbox.",
+            "loginToContinue": "Please log in to continue",
+            "resendVerification": "Resend verification email",
+            "verificationSent": "Verification email sent! Please check your inbox.",
+            "microsoftError": "Microsoft login failed"
         }
     },
     "footer": {
@@ -343,6 +368,21 @@
             "statusError": "Cannot change status in demo mode",
             "banner": "Demo Mode - Explore and try features. Sign up when ready to save your work!",
             "back": "Back to Demo"
+        },
+        "tour": {
+            "welcome": "Welcome to Durrah for Tutors! Let's learn how to use your dashboard.",
+            "questionBank": "Start by managing your question bank - create and organize reusable questions here",
+            "createExam": "Click here to create a new exam with custom questions and settings",
+            "examCard": "Once you create exams, they'll appear here. For this tutorial, we're showing you a sample card.",
+            "copyLink": "Share this link with your students. You can copy the code or the direct URL.",
+            "results": "View all student submissions, download results as PDF/Excel, and see performance stats.",
+            "settings": "Access your profile, change password, and manage your subscription here.",
+            "completion": "You're all set! Start creating exams and adding questions. Need help? Click 'Tutorial' anytime.",
+            "startTour": "Video Tutorial",
+            "mockExam": {
+                "title": "📐 Mathematics Quiz (Sample)",
+                "desc": "Algebra, geometry, and trigonometry assessment for Grade 10"
+            }
         }
     },
     "settings": {
@@ -837,6 +877,22 @@
                     "title": "Secure & Fast",
                     "desc": "Native performance with secure authentication"
                 }
+            }
+        },
+        "howto": {
+            "title": "How to Create an Online Exam in 3 Simple Steps",
+            "subtitle": "Get your assessment up and running in minutes with our streamlined process.",
+            "step1": {
+                "title": "1. Build Your Content",
+                "desc": "Use our lightning-fast editor to create multiple-choice, numeric, or open-ended questions. Add images and math formulas with ease."
+            },
+            "step2": {
+                "title": "2. Set Security Rules",
+                "desc": "Enable one-click anti-cheating features like tab detection, fullscreen enforcement, and violation tracking to ensure academic integrity."
+            },
+            "step3": {
+                "title": "3. Share & Analyze",
+                "desc": "Generate a unique exam link or QR code. Once students submit, get instant reports and beautiful per-student performance analytics."
             }
         },
         "faq": {

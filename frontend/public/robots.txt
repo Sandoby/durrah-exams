@@ -10,6 +10,4 @@ Allow: /
 User-agent: Googlebot-Image
 Allow: /
 
-Sitemap: https://tutors.durrahsystem.tech/sitemap.xml
-
-Sitemap: https://tutors.durrahsystem.tech/sitemap.xml
+Sitemap: https://durrahtutors.com/sitemap.xml

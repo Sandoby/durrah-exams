@@ -8,7 +8,10 @@
         "dir": "ltr",
         "forTutors": "for Tutors",
         "true": "Vrai",
-        "false": "Faux"
+        "false": "Faux",
+        "error": "Une erreur inattendue est survenue",
+        "loading": "Chargement...",
+        "success": "Succès"
     },
     "hero": {
         "title": "Créez des Examens Qui",
@@ -96,7 +99,7 @@
         },
         "professional": {
             "title": "Professionnel",
-            "price": "200 EGP",
+            "price": "250 EGP",
             "period": "/mois",
             "features": [
                 "Examens illimités",
@@ -110,7 +113,7 @@
         },
         "yearly": {
             "title": "Professionnel Annuel",
-            "price": "2000 EGP",
+            "price": "2500 EGP",
             "period": "/an",
             "features": [
                 "Toutes les fonctionnalités professionnelles",
@@ -151,7 +154,10 @@
             "submit": "Se connecter",
             "noAccount": "Pas de compte ?",
             "register": "S'inscrire",
-            "back": "Retour"
+            "back": "Retour",
+            "googleSignin": "Se connecter avec Google",
+            "microsoftSignin": "Se connecter avec Microsoft",
+            "or": "OU"
         },
         "register": {
             "title": "Créer un compte",
@@ -162,7 +168,19 @@
             "confirmPasswordLabel": "Confirmer le mot de passe",
             "submit": "S'inscrire",
             "hasAccount": "Déjà un compte ?",
-            "login": "Se connecter"
+            "login": "Se connecter",
+            "googleSignup": "S'inscrire avec Google",
+            "microsoftSignup": "S'inscrire avec Microsoft"
+        },
+        "verifyEmail": {
+            "title": "Vérifiez votre e-mail",
+            "desc": "Nous avons envoyé un lien de vérification à",
+            "checkSpam": "Vous ne l'avez pas reçu ? Veuillez vérifier votre **dossier de spam**.",
+            "resend": "Renvoyer l'e-mail de vérification",
+            "resending": "Envoi en cours...",
+            "backToLogin": "Retour à la connexion",
+            "checkStatus": "J'ai vérifié mon e-mail",
+            "resendIn": "Renvoyer dans {{seconds}}s"
         },
         "forgotPassword": {
             "title": "Réinitialiser votre mot de passe",
@@ -200,7 +218,14 @@
             "resetLinkError": "Échec de l'envoi du lien",
             "passwordUpdated": "Mot de passe mis à jour avec succès",
             "passwordUpdateError": "Échec de la mise à jour",
-            "invalidLink": "Lien invalide ou expiré"
+            "invalidLink": "Lien invalide ou expiré",
+            "verificationResent": "E-mail de vérification renvoyé avec succès",
+            "verificationResendError": "Échec de l'envoi de l'e-mail de vérification",
+            "emailNotVerified": "Votre e-mail n'est pas vérifié. Veuillez consulter votre boîte de réception.",
+            "loginToContinue": "Veuillez vous connecter pour continuer",
+            "resendVerification": "Renvoyer l'e-mail de vérification",
+            "verificationSent": "E-mail de vérification envoyé ! Veuillez vérifier votre boîte de réception.",
+            "microsoftError": "Échec de la connexion Microsoft"
         }
     },
     "footer": {
@@ -310,7 +335,22 @@
         "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet examen ?",
         "linkCopied": "Lien de l'examen copié !",
         "deleteSuccess": "Examen supprimé avec succès",
-        "footerNote": "Cette copie est destinée à l'administration de l'examen sur papier. Les étudiants doivent écrire lisiblement et inclure leur nom sur chaque page."
+        "footerNote": "Cette copie est destinée à l'administration de l'examen sur papier. Les étudiants doivent écrire lisiblement et inclure leur nom sur chaque page.",
+        "tour": {
+            "welcome": "Bienvenue sur Durrah pour les tuteurs ! Apprenons à utiliser votre tableau de bord.",
+            "questionBank": "Commencez par gérer votre banque de questions - créez et organisez des questions réutilisables ici",
+            "createExam": "Cliquez ici pour créer un nouvel examen avec des questions et des paramètres personnalisés",
+            "examCard": "Une fois que vous aurez créé des examens, ils apparaîtront ici. Pour ce tutoriel, nous vous montrons une carte exemple.",
+            "copyLink": "Partagez ce lien avec vos étudiants. Vous pouvez copier le code ou l'URL directe.",
+            "results": "Consultez tous les envois des étudiants, téléchargez les résultats et voyez les statistiques de performance.",
+            "settings": "Accédez à votre profil, changez votre mot de passe et gérez votre abonnement ici.",
+            "completion": "Vous êtes prêt ! Commencez à créer des examens et à ajouter des questions. Besoin d'aide ? Cliquez sur 'Tutoriel' à tout moment.",
+            "startTour": "Tutoriel Vidéo",
+            "mockExam": {
+                "title": "📐 Quiz de Mathématiques (Exemple)",
+                "desc": "Évaluation d'algèbre, de géométrie et de trigonométrie pour la 2de"
+            }
+        }
     },
     "demo": {
         "statusError": "Impossible de changer le statut en mode démo",
@@ -815,6 +855,22 @@
                     "title": "Sécurisé & Rapide",
                     "desc": "Performance native avec authentification sécurisée"
                 }
+            }
+        },
+        "howto": {
+            "title": "Comment Créer un Examen en Ligne en 3 Étapes Simples",
+            "subtitle": "Mettez votre évaluation en place et opérationnelle en quelques minutes grâce à notre processus simplifié.",
+            "step1": {
+                "title": "1. Construisez votre Contenu",
+                "desc": "Utilisez notre éditeur ultra-rapide pour créer des questions à choix multiples, numériques ou ouvertes. Ajoutez des images et des formules mathématiques en toute simplicité."
+            },
+            "step2": {
+                "title": "2. Définissez les Règles de Sécurité",
+                "desc": "Activez en un clic des fonctionnalités anti-triche telles que la détection d'onglets, l'imposition du plein écran et le suivi des violations."
+            },
+            "step3": {
+                "title": "3. Partagez et Analysez",
+                "desc": "Générez un lien d'examen unique ou un code QR. Une fois que les étudiants ont soumis, obtenez des rapports instantanés et des analyses de performance par étudiant."
             }
         },
         "faq": {

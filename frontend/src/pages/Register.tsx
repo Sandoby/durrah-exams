@@ -58,15 +58,6 @@ export default function Register() {
                         full_name: session.user.user_metadata?.full_name || '',
                         email: session.user.email
                     });
-
-                    // Add welcome notification
-                    await supabase.from('notifications').insert({
-                        user_id: session.user.id,
-                        title: 'Welcome to Durrah! 🎓',
-                        message: 'Welcome to the ultimate platform for tutors. Start creating your first exam today!',
-                        type: 'success'
-                    });
-
                     navigate('/dashboard');
                 } else if (profile.role === 'student') {
                     setStudentUserInfo({
@@ -153,12 +144,15 @@ export default function Register() {
 
             if (error) throw error;
 
+            // Handle existing user (enumeration protection)
+            // If user exists but no identities, they are already registered
             if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
                 toast.error(t('auth.messages.emailInUse'));
                 setIsLoading(false);
                 return;
             }
 
+            // Send welcome email (don't block on this)
             if (authData.user) {
                 // Create tutor profile
                 await supabase.from('profiles').upsert({
@@ -166,14 +160,6 @@ export default function Register() {
                     role: 'tutor',
                     full_name: data.name,
                     email: data.email
-                });
-
-                // Add welcome notification
-                await supabase.from('notifications').insert({
-                    user_id: authData.user.id,
-                    title: 'Welcome to Durrah! 🎓',
-                    message: 'Welcome to the ultimate platform for tutors. Start creating your first exam today!',
-                    type: 'success'
                 });
 
                 try {
@@ -187,9 +173,11 @@ export default function Register() {
                     });
                 } catch (emailError) {
                     console.error('Failed to send welcome email:', emailError);
+                    // Continue with registration even if email fails
                 }
             }
 
+            // Check if email needs verification
             if (authData.user && !authData.user.email_confirmed_at) {
                 navigate('/verify-email', { state: { email: data.email } });
                 return;

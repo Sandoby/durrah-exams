@@ -48,6 +48,7 @@ import MobileWelcome from './pages/MobileWelcome';
 import { PushNotificationHandler } from './components/PushNotificationHandler';
 import { LocationLanguageHandler } from './components/LocationLanguageHandler';
 import { BackButtonHandler } from './components/BackButtonHandler';
+import { PaymentNotification } from './components/PaymentNotification';
 import { Browser } from '@capacitor/browser';
 import { App as CapApp } from '@capacitor/app';
 
@@ -157,6 +158,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+      <PaymentNotification />
       <Routes>
         <Route path="/" element={isNative ? <MobileWelcome /> : <LandingPage />} />
         <Route path="/mobile-welcome" element={<MobileWelcome />} />
