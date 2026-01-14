@@ -744,7 +744,8 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
         p_user_id: userProfile.id,
         p_agent_id: agentId,
         p_days: extendDays,
-        p_reason: extendReason || 'Extended by support agent'
+        p_reason: extendReason || 'Extended by support agent',
+        p_plan: userProfile.subscription_plan || 'pro'
       });
 
       if (error) throw error;
