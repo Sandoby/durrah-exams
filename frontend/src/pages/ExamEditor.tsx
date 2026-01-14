@@ -950,13 +950,13 @@ export default function ExamEditor() {
                                         {/* Anti-Cheating Group */}
                                         <div className="col-span-2">
                                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 ml-1">Anti-Cheating Measures</h4>
-                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                                                 {[
                                                     { id: 'fullscreen_required', icon: Maximize, label: 'Fullscreen Force', desc: 'Requires students to stay in fullscreen', field: 'settings.require_fullscreen' },
                                                     { id: 'tab_switch_prohibited', icon: MonitorOff, label: 'Tab Detection', desc: 'Logs tab switches as violations', field: 'settings.detect_tab_switch' },
                                                     { id: 'copy_paste_prohibited', icon: ClipboardX, label: 'Anti-Cheat Mode', desc: 'Disables Copy, Paste & Right Click', field: 'settings.disable_copy_paste' }
                                                 ].map((item) => (
-                                                    <label key={item.id} className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-slate-50 dark:hover:bg-gray-800 transition-all cursor-pointer group/item">
+                                                    <label key={item.id} className="flex items-start gap-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-slate-50 dark:hover:bg-gray-800 transition-all cursor-pointer group/item">
                                                         <div className="mt-1">
                                                             <input
                                                                 type="checkbox"
@@ -1026,7 +1026,7 @@ export default function ExamEditor() {
                                                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">MIN</span>
                                                 </div>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
                                                     <label className="block text-xs font-bold uppercase text-gray-400 mb-2 ml-1">{t('examEditor.settings.startTime')}</label>
                                                     <input
