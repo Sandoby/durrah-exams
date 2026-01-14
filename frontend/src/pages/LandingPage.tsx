@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Check, Zap, Shield, Globe, Users, ArrowRight, Layout, Sparkles, Award, Menu, X, Trophy, ChevronDown, Rocket, Orbit, Smartphone, Download, Bell, GraduationCap } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { Logo } from '../components/Logo';
+import MobileWelcome from './MobileWelcome';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -1204,12 +1205,10 @@ export default function LandingPage() {
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" />
 
                             <div className="phone-frame scale-90 md:scale-100 rotate-y-n12 transform-style-3d">
-                                <div className="absolute inset-0 bg-slate-900">
-                                    <img
-                                        src="/mockups/mobile-app-mockup.png"
-                                        alt="Mobile App Interface"
-                                        className="w-full h-full object-cover"
-                                    />
+                                <div className="absolute inset-0 bg-slate-900 overflow-hidden">
+                                    <div className="w-full h-full bg-gray-50 dark:bg-gray-900 pointer-events-none select-none">
+                                        <MobileWelcome className="h-full w-full" />
+                                    </div>
                                     {/* Gradient Overlay for depth */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/40 via-transparent to-transparent pointer-events-none" />
                                 </div>

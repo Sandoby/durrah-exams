@@ -6,7 +6,7 @@ import { Logo } from '../components/Logo';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
-export default function MobileWelcome() {
+export default function MobileWelcome({ className = "min-h-screen" }: { className?: string }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
@@ -52,7 +52,7 @@ export default function MobileWelcome() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        <div className={`${className} bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center p-6 relative overflow-hidden`}>
             {/* Background decoration */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute -top-20 -right-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl" />
