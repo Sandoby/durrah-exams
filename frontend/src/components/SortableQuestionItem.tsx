@@ -27,19 +27,22 @@ export function SortableQuestionItem({ id, children }: SortableQuestionItemProps
     };
 
     return (
-        <div ref={setNodeRef} style={style} className="bg-white dark:bg-gray-800 shadow rounded-lg p-0 transition-shadow hover:shadow-md mb-6">
+        <div ref={setNodeRef} style={style} className="bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800 rounded-3xl transition-all hover:shadow-md mb-6 relative group overflow-hidden">
+            {/* Gradient accent on hover */}
+            <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+
             <div className="flex">
                 {/* Drag Handle Area */}
                 <div
                     {...attributes}
                     {...listeners}
-                    className="w-10 flex flex-col items-center justify-center border-r border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-l-lg cursor-grab active:cursor-grabbing hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    className="w-12 flex flex-col items-center justify-center border-r border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 cursor-grab active:cursor-grabbing hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
-                    <GripVertical className="h-5 w-5 text-gray-400" />
+                    <GripVertical className="h-5 w-5 text-gray-400 group-hover:text-indigo-400 transition-colors" />
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 p-6 min-w-0">
+                <div className="flex-1 p-6 sm:p-8 min-w-0">
                     {children}
                 </div>
             </div>
