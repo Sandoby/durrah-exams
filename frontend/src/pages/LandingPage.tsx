@@ -1205,23 +1205,13 @@ export default function LandingPage() {
 
                             <div className="phone-frame scale-90 md:scale-100 rotate-y-n12 transform-style-3d">
                                 <div className="absolute inset-0 bg-slate-900">
-                                    {/* App Loading State Placeholder / UI */}
-                                    <div className="h-full flex flex-col pt-16 px-6">
-                                        <div className="flex items-center gap-3 mb-10">
-                                            <Logo className="h-10 w-10" showText={false} />
-                                            <div className="h-4 w-24 bg-white/10 rounded" />
-                                        </div>
-                                        <div className="space-y-6">
-                                            <div className="h-32 w-full bg-white/5 rounded-2xl border border-white/10" />
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="h-24 bg-indigo-500/20 rounded-2xl border border-indigo-500/30" />
-                                                <div className="h-24 bg-white/5 rounded-2xl border border-white/10" />
-                                            </div>
-                                            <div className="h-40 w-full bg-white/5 rounded-2xl border border-white/10" />
-                                        </div>
-                                    </div>
-                                    {/* Real Screenshot Overlay if available, else use a gradient */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-indigo-600/20 via-transparent to-transparent pointer-events-none" />
+                                    <img
+                                        src="/mockups/mobile-app-mockup.png"
+                                        alt="Mobile App Interface"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    {/* Gradient Overlay for depth */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/40 via-transparent to-transparent pointer-events-none" />
                                 </div>
                             </div>
 
