@@ -589,45 +589,30 @@ export default function LandingPage() {
                                     </div>
                                 </div>
                                 {/* Mockup Content (Screenshot Placeholder) */}
-                                <div className="aspect-[16/10] bg-slate-950 rounded-b-xl overflow-hidden relative">
-                                    {/* Sidebar */}
-                                    <div className="absolute left-0 top-0 bottom-0 w-64 bg-slate-900 border-r border-slate-800 p-4 hidden md:block">
-                                        <div className="h-8 w-32 bg-indigo-500/20 rounded-lg mb-8" />
-                                        <div className="space-y-4">
-                                            {[1, 2, 3, 4, 5].map(i => (
-                                                <div key={i} className="h-4 w-full bg-slate-800 rounded opacity-60" />
-                                            ))}
-                                        </div>
-                                    </div>
-                                    {/* Main Content */}
-                                    <div className="absolute top-0 right-0 bottom-0 left-0 md:left-64 p-8 bg-slate-950/50 grid grid-cols-3 gap-6">
-                                        {/* Cards */}
-                                        <div className="col-span-2 h-48 bg-slate-900/50 border border-slate-800 rounded-xl p-4">
-                                            <div className="h-full w-full bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-lg flex items-center justify-center">
-                                                <div className="text-slate-600 font-mono text-sm">Activity Chart</div>
-                                            </div>
-                                        </div>
-                                        <div className="h-48 bg-slate-900/50 border border-slate-800 rounded-xl p-4">
-                                            <div className="h-8 w-8 rounded-full bg-emerald-500/20 mb-4" />
-                                            <div className="h-4 w-12 bg-slate-800 rounded mb-2" />
-                                            <div className="h-8 w-20 bg-slate-700 rounded" />
-                                        </div>
-                                        {[1, 2, 3].map(i => (
-                                            <div key={i} className="h-32 bg-slate-900/50 border border-slate-800 rounded-xl" />
-                                        ))}
-                                    </div>
+                                <div className="aspect-[16/10] bg-slate-950 rounded-b-xl overflow-hidden relative group">
+                                    <motion.img
+                                        initial={{ opacity: 0, scale: 1.1 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ duration: 1 }}
+                                        src="/mockups/dashboard-analytics.png"
+                                        alt="Durrah Dashboard Analytics"
+                                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
+                                    />
 
-                                    {/* Floating Badges */}
+                                    {/* Glass Overlay for Depth */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
+
+                                    {/* Floating Badges (Re-positioned for the real screenshot) */}
                                     <motion.div
                                         animate={{ y: [0, -10, 0] }}
                                         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                        className="absolute top-10 right-10 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-xl"
+                                        className="absolute top-10 right-10 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-xl z-20"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">A+</div>
+                                            <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold">A+</div>
                                             <div>
-                                                <div className="text-xs text-white/60">Average Score</div>
-                                                <div className="text-lg font-bold text-white">92%</div>
+                                                <div className="text-xs text-white/60">Live Analytics</div>
+                                                <div className="text-sm font-bold text-white">System Pulse</div>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -635,13 +620,13 @@ export default function LandingPage() {
                                     <motion.div
                                         animate={{ y: [0, 15, 0] }}
                                         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                                        className="absolute bottom-20 left-72 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-xl hidden md:block"
+                                        className="absolute bottom-10 left-10 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-xl hidden md:block z-20"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <Shield className="w-8 h-8 text-indigo-400" />
+                                            <Shield className="w-6 h-6 text-indigo-400" />
                                             <div>
-                                                <div className="text-xs text-white/60">Status</div>
-                                                <div className="text-sm font-bold text-white">Anti-Cheat Active</div>
+                                                <div className="text-xs text-white/60">Integrity</div>
+                                                <div className="text-sm font-bold text-white">AI Proctoring Enabled</div>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -655,19 +640,32 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Infinite Logo Marquee */}
-            <div className="w-full py-10 bg-white dark:bg-slate-950 border-y border-slate-100 dark:border-slate-900 overflow-hidden">
-                <div className="max-w-7xl mx-auto px-4 text-center mb-6">
-                    <p className="text-sm font-medium text-slate-500 uppercase tracking-widest">Trusted by educators at</p>
-                </div>
-                <div className="relative flex overflow-x-hidden group">
-                    <div className="animate-marquee whitespace-nowrap flex gap-16 px-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-                        {/* Placeholder Company Logos - Repeated */}
-                        {[1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6].map((i, idx) => (
-                            <div key={idx} className="flex items-center gap-2 text-xl font-bold font-serif text-slate-400">
-                                <div className="w-8 h-8 bg-slate-200 dark:bg-slate-800 rounded-full" />
-                                <span>University {i}</span>
-                            </div>
+            {/* Platform Highlights Banner */}
+            <div className="w-full py-12 bg-white dark:bg-slate-950 border-y border-slate-100 dark:border-slate-900 overflow-hidden">
+                <div className="max-w-7xl mx-auto px-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+                        {[
+                            { label: "High Availability", value: "99.9% Uptime", icon: Globe, color: "text-indigo-500" },
+                            { label: "Security", value: "SSL Encrypted", icon: Shield, color: "text-emerald-500" },
+                            { label: "Global Reach", value: "Any Device", icon: Smartphone, color: "text-purple-500" },
+                            { label: "Reporting", value: "Instant Result", icon: Zap, color: "text-yellow-500" },
+                        ].map((stat, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, y: 10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="flex flex-col items-center md:items-start text-center md:text-left"
+                            >
+                                <div className={`flex items-center gap-2 mb-2 ${stat.color}`}>
+                                    <stat.icon className="w-4 h-4" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">{stat.label}</span>
+                                </div>
+                                <div className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-200">
+                                    {stat.value}
+                                </div>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
