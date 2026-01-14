@@ -7,7 +7,7 @@ import { Logo } from '../components/Logo';
 import MobileWelcome from './MobileWelcome';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
 export default function LandingPage() {
@@ -25,6 +25,11 @@ export default function LandingPage() {
 
     const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(250);
     const { price: yearlyPrice } = useCurrency(2500);
+
+    const { scrollY } = useScroll();
+    const heroRotateX = useTransform(scrollY, [0, 500], [15, 30]);
+    const heroTranslateY = useTransform(scrollY, [0, 500], [0, 100]);
+    const heroScale = useTransform(scrollY, [0, 500], [1, 0.95]);
 
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -573,9 +578,10 @@ export default function LandingPage() {
 
                     {/* 3D Dashboard Mockup */}
                     <motion.div
-                        initial={{ opacity: 0, y: 60, rotateX: 20 }}
-                        animate={{ opacity: 1, y: 0, rotateX: 10 }}
-                        transition={{ duration: 0.8, type: "spring" }}
+                        style={{ rotateX: heroRotateX, y: heroTranslateY, scale: heroScale }}
+                        initial={{ opacity: 0, y: 60 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, type: "spring", delay: 0.2 }}
                         className="relative perspective-2000"
                     >
                         <div className="relative transform-style-3d rotate-x-12 mx-auto max-w-5xl">
@@ -877,16 +883,55 @@ export default function LandingPage() {
             </section>
 
 
-            {/* CTA Section */}
-            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 relative overflow-hidden" >
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJsLTEtMWgtMWwtMS0xaC0ybC0xLTFoLTJsLTEgMWgtMWwtMSAxaC0ybC0xIDFoLTJsLTEgMWgtMWwtMSAxdjFsLTEgMXYxbC0xIDF2MWwtMSAxdjJsLTEgMXYxbC0xIDF2MmwtMSAxdjJsLTEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMWgxbDEgMWgxbDEgMWgxbDEgMWgybDEgMWgybDEgMWgybDEtMWgxbDEtMWgybDEtMWgybDEtMWgybDEtMWgxbDEtMWgxbDEtMWgxbDEtMXYtMWwxLTF2LTFsMS0xdi0xbDEtMXYtMWwxLTF2LTFsMS0xdi0ybDEtMXYtMWwxLTF2LTJsMS0xdi0ybC0xLTF2LTFsLTEtMXYtMWwtMS0xdi0xbC0xLTF2LTFsLTEtMXYtMWwtMS0xdi0xbC0xLTF2LTFsLTEtMWgtMWwtMS0xaC0xbC0xLTFoLTFsLTEtMWgtMmwtMS0xaC0yeiIvPjwvZz48L2c+PC9zdmc+')] opacity-10"></div>
-                <div className="max-w-4xl mx-auto text-center relative z-10">
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">{t('ctaSection.title')}</h2>
-                    <p className="text-xl text-indigo-100 mb-8">{t('ctaSection.subtitle')}</p>
-                    <a href={registrationUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-white text-indigo-600 px-10 py-5 rounded-2xl text-lg font-bold hover:shadow-2xl hover:scale-105 transition-all duration-300">
-                        {t('ctaSection.cta')}
-                        <ArrowRight className={`w-6 h-6 ${isRTL ? 'rotate-180' : ''}`} />
-                    </a>
+            {/* CTA Section - Geometric Flow */}
+            <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+                <div className="absolute inset-0 bg-slate-900">
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/50 via-purple-900/50 to-slate-900/50 animate-gradient bg-[length:200%_200%]" />
+                    {/* Geometric Flow Background */}
+                    <div className="absolute inset-0 opacity-30">
+                        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-500/20 via-slate-900/0 to-slate-900/0" />
+                        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-purple-500/20 via-slate-900/0 to-slate-900/0" />
+                    </div>
+                    {/* Animated Particles/Grid */}
+                    <div className="absolute inset-0 bg-grid-pattern opacity-10" />
+                </div>
+
+                <div className="max-w-5xl mx-auto text-center relative z-10">
+                    <motion.h2
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tight leading-none"
+                    >
+                        {t('ctaSection.title', 'Ready to Transform?')}
+                    </motion.h2>
+                    <motion.p
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.1 }}
+                        className="text-xl md:text-2xl text-indigo-100/80 mb-12 max-w-3xl mx-auto"
+                    >
+                        {t('ctaSection.subtitle', 'Join thousands of educators delivering secure, professional exams with Durrah.')}
+                    </motion.p>
+
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <a
+                            href={registrationUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="group relative inline-flex items-center gap-4 bg-white text-indigo-900 px-12 py-6 rounded-2xl text-xl font-black shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300 hover:scale-105"
+                        >
+                            <span>{t('ctaSection.cta', 'Start Your Free Trial')}</span>
+                            <ArrowRight className={`w-6 h-6 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180' : ''}`} />
+                            <div className="absolute inset-0 rounded-2xl ring-2 ring-white/50 group-hover:ring-4 group-hover:ring-white/80 transition-all duration-500" />
+                        </a>
+                    </motion.div>
                 </div>
             </section>
 
@@ -952,22 +997,33 @@ export default function LandingPage() {
                                 >
                                     {t('landing.marketing.kids.desc', 'Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.')}
                                 </motion.p>
-                                <motion.ul
+                                <motion.div
                                     variants={staggerContainer}
                                     initial="initial"
                                     whileInView="whileInView"
                                     viewport={{ once: true }}
-                                    className="grid sm:grid-cols-2 gap-4 mb-8"
+                                    className="grid grid-cols-2 gap-4 mb-8"
                                 >
-                                    {[0, 1, 2, 3].map((i) => (
-                                        <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
-                                            <div className="bg-indigo-500/20 p-1 rounded-full border border-indigo-400/20">
-                                                <Check className="w-4 h-4 text-indigo-400" />
+                                    {[
+                                        { icon: Shield, color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
+                                        { icon: Sparkles, color: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/20" },
+                                        { icon: Trophy, color: "text-pink-400", bg: "bg-pink-400/10", border: "border-pink-400/20" },
+                                        { icon: Rocket, color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20" }
+                                    ].map((item, i) => (
+                                        <motion.div
+                                            key={i}
+                                            variants={fadeIn}
+                                            className={`glass-panel p-4 rounded-2xl border ${item.border} hover:bg-white/5 transition-colors group/card`}
+                                        >
+                                            <div className={`${item.bg} w-10 h-10 rounded-xl flex items-center justify-center mb-3 group-hover/card:scale-110 transition-transform duration-300`}>
+                                                <item.icon className={`w-5 h-5 ${item.color}`} />
                                             </div>
-                                            <span className="text-indigo-100 font-medium">{t(`landing.marketing.kids.features.${i}`)}</span>
-                                        </motion.li>
+                                            <span className="text-white/90 text-sm font-bold block leading-tight">
+                                                {t(`landing.marketing.kids.features.${i}`)}
+                                            </span>
+                                        </motion.div>
                                     ))}
-                                </motion.ul>
+                                </motion.div>
                                 <Link
                                     to="/kids"
                                     className="w-full py-5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-2xl text-white font-black text-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group overflow-hidden relative"
