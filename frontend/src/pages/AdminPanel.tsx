@@ -1563,21 +1563,23 @@ function WebNotificationManager({ users }: { users: User[] }) {
                     is_read: false
                 }));
 
-                const { error } = await supabase
-                    .from('notifications')
-                    .insert(notifications);
+                const { error } = await supabase.rpc('send_notifications_batch', {
+                    notifications_data: notifications
+                });
 
                 if (error) throw error;
             } else {
-                const { error } = await supabase
-                    .from('notifications')
-                    .insert({
-                        user_id: targetUserId,
-                        title,
-                        message,
-                        type,
-                        is_read: false
-                    });
+                const notifications = [{
+                    user_id: targetUserId,
+                    title,
+                    message,
+                    type,
+                    is_read: false
+                }];
+
+                const { error } = await supabase.rpc('send_notifications_batch', {
+                    notifications_data: notifications
+                });
 
                 if (error) throw error;
             }
