@@ -111,10 +111,26 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
             if (!patchRes.ok) {
                 const patchErr = await patchRes.text();
                 console.error(`[DB] Failed to update dodo_customer_id for user ${userId}: ${patchRes.status} ${patchErr}`);
-            } else {
-                console.log(`[DB] Successfully updated dodo_customer_id for user ${userId}`);
             }
         }
+
+        // Add success notification
+        try {
+            await fetch(`${supabaseUrl}/rest/v1/notifications`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    user_id: userId,
+                    title: 'Subscription Activated! 💎',
+                    message: `Welcome to the ${args.plan || 'Professional'} plan. Your premium features are now active.`,
+                    type: 'success',
+                    is_read: false
+                })
+            });
+        } catch (e) {
+            console.error('[NOTIF] Failed to send success notification:', e);
+        }
+
         return { success: true, userId };
     } else if (args.status === 'cancelled' || args.status === 'payment_failed') {
         // Deactivate subscription using the admin RPC
@@ -136,6 +152,27 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
 
         const result = await res.json();
         console.log(`[DB] Deactivated subscription for user ${userId} via RPC`);
+        console.log(`[DB] Deactivated subscription for user ${userId} via RPC`);
+
+        // Add failure notification if it was a payment failure
+        if (args.status === 'payment_failed') {
+            try {
+                await fetch(`${supabaseUrl}/rest/v1/notifications`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({
+                        user_id: userId,
+                        title: 'Payment Failed ⚠️',
+                        message: 'We were unable to process your subscription payment. Please update your payment method to avoid service interruption.',
+                        type: 'error',
+                        is_read: false
+                    })
+                });
+            } catch (e) {
+                console.error('[NOTIF] Failed to send failure notification:', e);
+            }
+        }
+
         return { success: result?.success ?? true, userId };
     }
 

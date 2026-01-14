@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, Globe, AlertTriangle, Power, Eye, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, Globe, AlertTriangle, Power, Eye, Loader2, AlertCircle } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -14,6 +14,7 @@ import Joyride, { STATUS } from 'react-joyride';
 import type { Step, CallBackProps } from 'react-joyride';
 import { useDemoTour } from '../hooks/useDemoTour';
 import { printerService } from '../lib/printer';
+import { NotificationCenter } from '../components/NotificationCenter';
 
 import { CONVEX_FEATURES } from '../main';
 
@@ -611,6 +612,8 @@ export default function Dashboard() {
                                 <LogOut className="h-4 w-4 lg:mr-2" />
                                 <span className="hidden lg:inline">{t('nav.logout', 'Logout')}</span>
                             </button>
+
+                            <NotificationCenter />
                         </div>
 
                         {/* Mobile menu button */}
@@ -717,6 +720,36 @@ export default function Dashboard() {
                             </button>
                         </div>
                     </div>
+
+                    {profile?.subscription_status === 'payment_failed' && (
+                        <div className="bg-white/40 dark:bg-red-950/20 backdrop-blur-xl border border-red-200/50 dark:border-red-800/50 p-6 rounded-[2rem] flex flex-col sm:flex-row items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-500 shadow-xl shadow-red-500/5 mb-8">
+                            <div className="h-16 w-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-3xl flex items-center justify-center shadow-lg shadow-red-500/20 shrink-0">
+                                <AlertCircle className="h-8 w-8 text-white" />
+                            </div>
+                            <div className="flex-1 text-center sm:text-left">
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                                    {t('dashboard.paymentFailed.title', 'Payment Action Required')}
+                                </h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 max-w-xl">
+                                    {t('dashboard.paymentFailed.desc', 'Your last subscription payment was unsuccessful. To maintain your premium access and avoid service interruption, please update your payment method.')}
+                                </p>
+                            </div>
+                            <div className="flex gap-3 shrink-0">
+                                <Link
+                                    to="/settings"
+                                    className="px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-bold text-sm hover:scale-105 transition-all shadow-lg"
+                                >
+                                    {t('dashboard.paymentFailed.manage', 'Manage Billing')}
+                                </Link>
+                                <Link
+                                    to="/checkout"
+                                    className="px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-2xl font-bold text-sm hover:scale-105 transition-all shadow-lg shadow-red-500/20"
+                                >
+                                    {t('dashboard.paymentFailed.retry', 'Retry Payment')}
+                                </Link>
+                            </div>
+                        </div>
+                    )}
 
                     {profile?.subscription_status !== 'active' && exams.length >= 3 && (
                         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-start gap-3 animate-fade-in shadow-sm mb-4">

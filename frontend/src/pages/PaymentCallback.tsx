@@ -270,17 +270,21 @@ export default function PaymentCallback() {
                         <span className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
                           <ShieldCheck className="h-4 w-4" /> Plan
                         </span>
-                        <span className="font-bold text-indigo-600 dark:text-indigo-400 uppercase">{orderDetails.planId} ({orderDetails.billingCycle})</span>
+                        <span className="font-bold text-indigo-600 dark:text-indigo-400 uppercase">{orderDetails.planId}</span>
                       </div>
+                      {orderDetails.billingCycle && (
+                        <div className="flex justify-between items-center">
+                          <span className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
+                            <Calendar className="h-4 w-4" /> Billing Cycle
+                          </span>
+                          <span className="font-semibold text-gray-900 dark:text-white capitalize">{orderDetails.billingCycle}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between items-center">
                         <span className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
                           <Calendar className="h-4 w-4" /> Date
                         </span>
                         <span className="font-semibold text-gray-900 dark:text-white">{new Date().toLocaleDateString()}</span>
-                      </div>
-                      <div className="border-t border-slate-200 dark:border-slate-700 pt-4 flex justify-between items-center">
-                        <span className="text-gray-900 dark:text-white font-bold">Total Paid</span>
-                        <span className="text-xl font-black text-gray-900 dark:text-white">EGP {orderDetails.amount}</span>
                       </div>
                     </div>
                   </div>
