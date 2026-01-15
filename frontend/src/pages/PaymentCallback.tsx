@@ -207,7 +207,7 @@ export default function PaymentCallback() {
     processPayment();
   }, [searchParams, navigate, t]);
 
-  const contactSupportEmail = "abdelrahmansandoby@gmail.com";
+  const contactSupportEmail = "support@durrahtutors.com";
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 relative overflow-hidden font-sans flex items-center justify-center p-4">

@@ -233,7 +233,7 @@ This is a companion mobile app for the Durrah Exams platform. Changes should ali
 
 For issues or questions:
 - Open an issue on GitHub
-- Contact: support@durrahexams.com
+- Contact: support@durrahtutors.com
 
 ## 📈 Roadmap
 

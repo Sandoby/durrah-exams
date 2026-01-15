@@ -1427,7 +1427,7 @@ export default function LandingPage() {
                                 <li><Link to="/pricing" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.pricing')}</Link></li>
                                 <li><a href="#testimonials" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.testimonials')}</a></li>
                                 <li><Link to="/blog" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.blog')}</Link></li>
-                                <li><a href="mailto:abdelrahmansandoby@gmail.com" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.contact')}</a></li>
+                                <li><a href="mailto:info@durrahtutors.com" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.contact')}</a></li>
                             </ul>
                         </div>
                         <div>
