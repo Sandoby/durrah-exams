@@ -37,7 +37,7 @@ export default function PricingPage() {
     const faqs = [
         {
             question: "How does the free trial work?",
-            answer: "You can create up to 3 exams for free with basic features. No credit card is required to start."
+            answer: "You get a 14-day free trial for any paid plan. You can explore all professional features without any commitment. After the trial, you can choose to subscribe or continue with the free starter plan."
         },
         {
             question: "Can I cancel my subscription anytime?",
@@ -135,6 +135,7 @@ export default function PricingPage() {
                             <div className="mb-6">
                                 <span className="text-5xl font-black text-white tracking-tight">{isCurrencyLoading ? '...' : `${currencyCode} ${monthlyPrice}`}</span>
                                 <span className="text-slate-400 dark:text-indigo-200 text-sm font-medium ml-2">{t('pricing.professional.period')}</span>
+                                <div className="mt-1 text-indigo-300 text-xs font-semibold">{t('pricing.professional.freeTrial', '14-day free trial')}</div>
                             </div>
                             <ul className="space-y-4 mb-8 flex-1">
                                 {[0, 1, 2, 3].map(i => (
@@ -153,6 +154,7 @@ export default function PricingPage() {
                             <div className="mb-6">
                                 <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">{isCurrencyLoading ? '...' : `${currencyCode} ${yearlyPrice}`}</span>
                                 <span className="text-slate-500 dark:text-slate-400 text-sm font-medium ml-2">{t('pricing.yearly.period')}</span>
+                                <div className="mt-1 text-green-600 dark:text-green-400 text-xs font-semibold">{t('pricing.yearly.freeTrial', '14-day free trial')}</div>
                             </div>
                             <ul className="space-y-4 mb-8 flex-1">
                                 {[0, 1, 2].map(i => (

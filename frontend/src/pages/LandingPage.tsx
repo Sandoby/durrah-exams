@@ -833,6 +833,7 @@ export default function LandingPage() {
                             <div className="mb-6">
                                 <span className="text-5xl font-black text-white tracking-tight">{isCurrencyLoading ? '...' : `${currencyCode} ${monthlyPrice}`}</span>
                                 <span className="text-slate-400 dark:text-indigo-200 text-sm font-medium ml-2">{t('pricing.professional.period')}</span>
+                                <div className="mt-1 text-indigo-300 text-xs font-semibold">{t('pricing.professional.freeTrial', '14-day free trial')}</div>
                             </div>
                             <ul className="space-y-4 mb-8 flex-1">
                                 {[0, 1, 2, 3].map(i => (
@@ -850,6 +851,7 @@ export default function LandingPage() {
                             <div className="mb-6">
                                 <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">{isCurrencyLoading ? '...' : `${currencyCode} ${yearlyPrice}`}</span>
                                 <span className="text-slate-500 dark:text-slate-400 text-sm font-medium ml-2">{t('pricing.yearly.period')}</span>
+                                <div className="mt-1 text-green-600 dark:text-green-400 text-xs font-semibold">{t('pricing.yearly.freeTrial', '14-day free trial')}</div>
                             </div>
                             <ul className="space-y-4 mb-8 flex-1">
                                 {[0, 1, 2].map(i => (

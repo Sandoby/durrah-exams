@@ -111,7 +111,8 @@
                 "2 months free",
                 "Premium support"
             ],
-            "cta": "Get Started"
+            "cta": "Get Started",
+            "freeTrial": "14-day free trial"
         }
     },
     "testimonials": {

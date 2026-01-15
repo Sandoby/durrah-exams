@@ -122,7 +122,8 @@
                 "2 mois gratuits vs mensuel"
             ],
             "cta": "Essai Gratuit",
-            "badge": "MEILLEURE VALEUR"
+            "badge": "MEILLEURE VALEUR",
+            "freeTrial": "Essai gratuit de 14 jours"
         }
     },
     "testimonials": {
