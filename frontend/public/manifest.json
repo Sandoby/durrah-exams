@@ -1,0 +1,17 @@
+{
+    "name": "Durrah for Tutors",
+    "short_name": "Durrah",
+    "description": "Create secure online exams in minutes with anti-cheating features, auto-grading, and detailed analytics.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f8fafc",
+    "theme_color": "#6366f1",
+    "icons": [
+        {
+            "src": "/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

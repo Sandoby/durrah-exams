@@ -11,6 +11,10 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/logo.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/logo.png" />
 
+  <!-- Core Web Vitals: Preload Critical Assets -->
+  <link rel="preload" href="/logo.png" as="image" />
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,6 +34,21 @@
   <meta property="og:url" content="https://durrahtutors.com/" />
   <meta property="og:site_name" content="Durrah for Tutors" />
   <meta property="og:image" content="https://durrahtutors.com/og-image.png" />
+
+  <!-- Web Manifest for PWA -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Organization Schema for Google Knowledge Panel & Logo (static for initial crawl) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Durrah for Tutors",
+    "url": "https://durrahtutors.com",
+    "logo": "https://durrahtutors.com/logo.png",
+    "description": "Create secure, professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide."
+  }
+  </script>
 </head>
 
 <body>

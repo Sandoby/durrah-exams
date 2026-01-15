@@ -186,11 +186,18 @@ export default function LandingPage() {
                 {/* Primary Meta Tags */}
                 <title>{t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')}</title>
                 <meta name="description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
-                <meta name="keywords" content={t('landing.seo.keywords', 'online exams, anti-cheating, kids mode, educator tools, digital assessment, exam creator, quiz maker, online testing platform, secure exams, auto grading')} />
+                <meta name="keywords" content={t('landing.seo.keywords', 'online exam platform, create online exams, anti-cheating exam software, quiz maker for teachers, online assessment tool, proctored exams, exam creator software, auto grading exams, secure online testing, digital assessment platform, virtual exam software, remote proctoring, kids mode exams, educator tools')} />
                 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
                 <meta name="author" content="Durrah System" />
                 <meta name="language" content={i18n.language === 'ar' ? 'Arabic' : 'English'} />
                 <link rel="canonical" href="https://durrahtutors.com/" />
+
+                {/* Hreflang for Multilingual SEO */}
+                <link rel="alternate" hrefLang="en" href="https://durrahtutors.com/" />
+                <link rel="alternate" hrefLang="ar" href="https://durrahtutors.com/?lang=ar" />
+                <link rel="alternate" hrefLang="es" href="https://durrahtutors.com/?lang=es" />
+                <link rel="alternate" hrefLang="fr" href="https://durrahtutors.com/?lang=fr" />
+                <link rel="alternate" hrefLang="x-default" href="https://durrahtutors.com/" />
 
                 {/* Open Graph / Facebook */}
                 <meta property="og:type" content="website" />
@@ -252,6 +259,41 @@ export default function LandingPage() {
                     }
                 `}</script>
 
+                {/* BreadcrumbList Schema for Better SERP Display */}
+                <script type="application/ld+json">{`
+                    {
+                        "@context": "https://schema.org",
+                        "@type": "BreadcrumbList",
+                        "itemListElement": [{
+                            "@type": "ListItem",
+                            "position": 1,
+                            "name": "Home",
+                            "item": "https://durrahtutors.com/"
+                        }]
+                    }
+                `}</script>
+
+                {/* Service Schema for Service Searches */}
+                <script type="application/ld+json">{`
+                    {
+                        "@context": "https://schema.org",
+                        "@type": "Service",
+                        "name": "Online Exam Platform",
+                        "provider": {
+                            "@id": "https://durrahtutors.com/#organization"
+                        },
+                        "serviceType": "Educational Technology",
+                        "areaServed": "Worldwide",
+                        "description": "Create and administer secure online exams with anti-cheating features, auto-grading, and detailed analytics.",
+                        "offers": {
+                            "@type": "Offer",
+                            "price": "0",
+                            "priceCurrency": "USD",
+                            "description": "Free tier available with up to 3 exams"
+                        }
+                    }
+                `}</script>
+
                 {/* FAQ Schema for Search Rich Snippets */}
                 <script type="application/ld+json">{`
                     {
@@ -273,19 +315,19 @@ export default function LandingPage() {
                     {
                         "@context": "https://schema.org",
                         "@type": "WebSite",
-                        "@id": "https://tutors.durrahsystem.tech/#website",
+                        "@id": "https://durrahtutors.com/#website",
                         "name": "Durrah for Tutors",
-                        "url": "https://tutors.durrahsystem.tech/",
+                        "url": "https://durrahtutors.com/",
                         "description": "Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.",
                         "inLanguage": "${i18n.language === 'ar' ? 'ar' : 'en'}",
                         "publisher": {
-                            "@id": "https://tutors.durrahsystem.tech/#organization"
+                            "@id": "https://durrahtutors.com/#organization"
                         },
                         "potentialAction": {
                             "@type": "SearchAction",
                             "target": {
                                 "@type": "EntryPoint",
-                                "urlTemplate": "https://tutors.durrahsystem.tech/search?q={search_term_string}"
+                                "urlTemplate": "https://durrahtutors.com/search?q={search_term_string}"
                             },
                             "query-input": "required name=search_term_string"
                         }
@@ -314,7 +356,7 @@ export default function LandingPage() {
                             "worstRating": "1"
                         },
                         "description": "Create professional exams in minutes with powerful anti-cheating features, auto-grading, and detailed analytics.",
-                        "screenshot": "https://tutors.durrahsystem.tech/og-image.png",
+                        "screenshot": "https://durrahtutors.com/og-image.png",
                         "featureList": "Anti-cheating detection, Auto-grading, Kids mode, Real-time analytics, Multiple question types"
                     }
                 `}</script>
@@ -324,19 +366,19 @@ export default function LandingPage() {
                     {
                         "@context": "https://schema.org",
                         "@type": "WebPage",
-                        "@id": "https://tutors.durrahsystem.tech/#webpage",
-                        "url": "https://tutors.durrahsystem.tech/",
+                        "@id": "https://durrahtutors.com/#webpage",
+                        "url": "https://durrahtutors.com/",
                         "name": "Durrah for Tutors | Create Secure Online Exams",
                         "description": "Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.",
                         "isPartOf": {
-                            "@id": "https://tutors.durrahsystem.tech/#website"
+                            "@id": "https://durrahtutors.com/#website"
                         },
                         "about": {
-                            "@id": "https://tutors.durrahsystem.tech/#organization"
+                            "@id": "https://durrahtutors.com/#organization"
                         },
                         "primaryImageOfPage": {
                             "@type": "ImageObject",
-                            "url": "https://tutors.durrahsystem.tech/og-image.png"
+                            "url": "https://durrahtutors.com/og-image.png"
                         },
                         "inLanguage": "${i18n.language === 'ar' ? 'ar' : 'en'}"
                     }
