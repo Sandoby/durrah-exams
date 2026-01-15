@@ -869,6 +869,11 @@ export default function ExamEditor() {
                                                 className="sr-only peer"
                                                 checked={watch('settings.restrict_by_email')}
                                                 onChange={(e) => {
+                                                    if (profile?.subscription_status !== 'active' && e.target.checked) {
+                                                        toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
+                                                        navigate('/checkout');
+                                                        return;
+                                                    }
                                                     setValue('settings.restrict_by_email', e.target.checked);
                                                     if (e.target.checked && !watch('required_fields')?.includes('email')) {
                                                         const current = watch('required_fields') || [];
@@ -878,6 +883,14 @@ export default function ExamEditor() {
                                             />
                                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
                                         </label>
+                                        {profile?.subscription_status !== 'active' && (
+                                            <div className="absolute -top-1 -right-1">
+                                                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                                                    <Crown className="w-2.5 h-2.5" />
+                                                    PRO
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {watch('settings.restrict_by_email') && (
@@ -952,17 +965,35 @@ export default function ExamEditor() {
                                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 ml-1">Anti-Cheating Measures</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                                                 {[
-                                                    { id: 'fullscreen_required', icon: Maximize, label: 'Fullscreen Force', desc: 'Requires students to stay in fullscreen', field: 'settings.require_fullscreen' },
-                                                    { id: 'tab_switch_prohibited', icon: MonitorOff, label: 'Tab Detection', desc: 'Logs tab switches as violations', field: 'settings.detect_tab_switch' },
-                                                    { id: 'copy_paste_prohibited', icon: ClipboardX, label: 'Anti-Cheat Mode', desc: 'Disables Copy, Paste & Right Click', field: 'settings.disable_copy_paste' }
+                                                    { id: 'fullscreen_required', icon: Maximize, label: 'Fullscreen Force', desc: 'Requires students to stay in fullscreen', field: 'settings.require_fullscreen', isPremium: false },
+                                                    { id: 'tab_switch_prohibited', icon: MonitorOff, label: 'Tab Detection', desc: 'Logs tab switches as violations', field: 'settings.detect_tab_switch', isPremium: true },
+                                                    { id: 'copy_paste_prohibited', icon: ClipboardX, label: 'Anti-Cheat Mode', desc: 'Disables Copy, Paste & Right Click', field: 'settings.disable_copy_paste', isPremium: true }
                                                 ].map((item) => (
-                                                    <label key={item.id} className="flex items-start gap-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-slate-50 dark:hover:bg-gray-800 transition-all cursor-pointer group/item">
+                                                    <label key={item.id} className="relative flex items-start gap-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-slate-50 dark:hover:bg-gray-800 transition-all cursor-pointer group/item">
+                                                        {item.isPremium && profile?.subscription_status !== 'active' && (
+                                                            <div className="absolute -top-2 -right-2 z-10">
+                                                                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                                                                    <Crown className="w-2.5 h-2.5" />
+                                                                    PRO
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                         <div className="mt-1">
                                                             <input
                                                                 type="checkbox"
                                                                 id={item.id}
                                                                 className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition-all"
                                                                 {...register(item.field as any)}
+                                                                onChange={(e) => {
+                                                                    if (item.isPremium && profile?.subscription_status !== 'active' && e.target.checked) {
+                                                                        e.preventDefault();
+                                                                        toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
+                                                                        navigate('/checkout');
+                                                                        return;
+                                                                    }
+                                                                    const field = item.field as any;
+                                                                    setValue(field, e.target.checked);
+                                                                }}
                                                             />
                                                         </div>
                                                         <div className="flex flex-col">
@@ -997,11 +1028,28 @@ export default function ExamEditor() {
                                                     />
                                                     <span className="ml-3 text-sm font-bold text-gray-700 dark:text-gray-300">{t('examEditor.settings.showResults')}</span>
                                                 </label>
-                                                <label className="flex items-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 cursor-pointer transition-all">
+                                                <label className="relative flex items-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 cursor-pointer transition-all">
+                                                    {profile?.subscription_status !== 'active' && (
+                                                        <div className="absolute -top-2 -right-2 z-10">
+                                                            <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                                                                <Crown className="w-2.5 h-2.5" />
+                                                                PRO
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                     <input
                                                         type="checkbox"
                                                         className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                                                         {...register('settings.show_detailed_results')}
+                                                        onChange={(e) => {
+                                                            if (profile?.subscription_status !== 'active' && e.target.checked) {
+                                                                e.preventDefault();
+                                                                toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
+                                                                navigate('/checkout');
+                                                                return;
+                                                            }
+                                                            setValue('settings.show_detailed_results', e.target.checked);
+                                                        }}
                                                     />
                                                     <div className="ml-3">
                                                         <span className="block text-sm font-bold text-gray-700 dark:text-gray-300">Show answers after submission</span>

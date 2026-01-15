@@ -2,9 +2,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
     Share2, FileText, BarChart3, Edit, Trash2, Power, Eye,
-    MoreVertical, TrendingUp, Lock, Clock
+    MoreVertical, TrendingUp, Lock, Clock, Crown
 } from 'lucide-react';
 import { CONVEX_FEATURES } from '../../main';
+import { PremiumFeatureModal } from './PremiumFeatureModal';
+import { useState } from 'react';
+
 
 interface Exam {
     id: string;
@@ -40,6 +43,11 @@ export function ImprovedExamCard({
 }: ImprovedExamCardProps) {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const [premiumModal, setPremiumModal] = useState<{ isOpen: boolean; feature: 'analytics' | 'proctoring' }>({
+        isOpen: false,
+        feature: 'analytics'
+    });
+
 
     return (
         <div
@@ -159,23 +167,69 @@ export function ImprovedExamCard({
                             if (profile?.subscription_status === 'active') {
                                 navigate(`/exam/${exam.id}/analytics`);
                             } else {
-                                navigate('/checkout');
+                                setPremiumModal({ isOpen: true, feature: 'analytics' });
                             }
                         }}
-                        className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm border transition-all ${profile?.subscription_status === 'active'
+                        className={`relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm border transition-all ${profile?.subscription_status === 'active'
                             ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-100 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/30'
-                            : 'bg-gray-50 dark:bg-slate-800 text-gray-400 border-gray-100 dark:border-slate-700 opacity-60'
+                            : 'bg-gray-50 dark:bg-slate-800/50 text-gray-400 border-gray-100 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-700'
                             }`}
                     >
+                        {profile?.subscription_status !== 'active' && (
+                            <div className="absolute -top-2 -right-1 z-10">
+                                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
+                                    <Crown className="w-2 h-2" />
+                                    PRO
+                                </div>
+                            </div>
+                        )}
                         {profile?.subscription_status === 'active' ? (
                             <TrendingUp className="w-4 h-4" />
                         ) : (
                             <Lock className="w-4 h-4" />
                         )}
-                        {t('dashboard.actions.analytics', 'Analytics')}
+                        {t('dashboard.actions.analytics', 'Stats')}
                     </button>
+
+                    {CONVEX_FEATURES.proctoring && (
+                        <button
+                            onClick={() => {
+                                if (profile?.subscription_status === 'active') {
+                                    navigate(`/exam/${exam.id}/proctor`);
+                                } else {
+                                    setPremiumModal({ isOpen: true, feature: 'proctoring' });
+                                }
+                            }}
+                            className={`relative col-span-2 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm border transition-all ${profile?.subscription_status === 'active'
+                                ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400 border-teal-100 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/30'
+                                : 'bg-gray-50 dark:bg-slate-800/50 text-gray-400 border-gray-100 dark:border-slate-700 hover:border-teal-300 dark:hover:border-teal-700'
+                                }`}
+                        >
+                            {profile?.subscription_status !== 'active' && (
+                                <div className="absolute -top-2 -right-1 z-10">
+                                    <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
+                                        <Crown className="w-2 h-2" />
+                                        PRO
+                                    </div>
+                                </div>
+                            )}
+                            {profile?.subscription_status === 'active' ? (
+                                <Eye className="w-4 h-4" />
+                            ) : (
+                                <Lock className="w-4 h-4" />
+                            )}
+                            {t('dashboard.actions.proctor', 'Live Monitoring')}
+                        </button>
+                    )}
                 </div>
             </div>
+
+            {/* Premium Feature Modal */}
+            <PremiumFeatureModal
+                isOpen={premiumModal.isOpen}
+                onClose={() => setPremiumModal({ ...premiumModal, isOpen: false })}
+                feature={premiumModal.feature}
+            />
         </div>
     );
 }

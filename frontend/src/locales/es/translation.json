@@ -619,5 +619,23 @@
                 "answer": "Los estudiantes pueden unirse a los exámenes solo con un código y un apodo, o usar el Portal del Estudiante para seguir su progreso a largo plazo."
             }
         }
+    },
+    "premiumModal": {
+        "upgradeBtn": "Actualizar ahora",
+        "cancelBtn": "Tal vez más tarde",
+        "analytics": {
+            "title": "Análisis avanzado de exámenes",
+            "desc": "Obtenga información detallada sobre el rendimiento de los estudiantes, la dificultad de las preguntas y la distribución del tiempo.",
+            "benefit1": "Informes de rendimiento detallados",
+            "benefit2": "Análisis pregunta por pregunta",
+            "benefit3": "Datos exportables para registros"
+        },
+        "proctoring": {
+            "title": "Supervisión en vivo con IA",
+            "desc": "Supervise sus exámenes en tiempo real con detección de cambio de pestaña y medidas anti-trampas.",
+            "benefit1": "Supervisión de estudiantes en tiempo real",
+            "benefit2": "Alertas de infracción instantáneas",
+            "benefit3": "Cumplimiento de navegador seguro"
+        }
     }
 }

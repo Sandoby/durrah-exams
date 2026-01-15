@@ -920,6 +920,24 @@
                 "question": "Do students need an account?",
                 "answer": "Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress."
             }
+        },
+        "premiumModal": {
+            "upgradeBtn": "Upgrade Now",
+            "cancelBtn": "Maybe Later",
+            "analytics": {
+                "title": "Advanced Exam Analytics",
+                "desc": "Get deep insights into student performance, question difficulty, and time distribution.",
+                "benefit1": "Detailed performance reports",
+                "benefit2": "Question-by-question analysis",
+                "benefit3": "Exportable data for records"
+            },
+            "proctoring": {
+                "title": "Live AI Proctoring",
+                "desc": "Monitor your exams in real-time with AI-powered tab detection and anti-cheat measures.",
+                "benefit1": "Real-time student monitoring",
+                "benefit2": "Instant violation alerts",
+                "benefit3": "Secure browser enforcement"
+            }
         }
     }
 }

@@ -898,6 +898,24 @@
                 "question": "Les étudiants ont-ils besoin d'un compte ?",
                 "answer": "Les étudiants peuvent rejoindre des examens avec seulement un code et un pseudonyme, ou utiliser le Portail Étudiant pour suivre leurs progrès à long terme."
             }
+        },
+        "premiumModal": {
+            "upgradeBtn": "Mettre à niveau maintenant",
+            "cancelBtn": "Peut-être plus tard",
+            "analytics": {
+                "title": "Analyses d'examen avancées",
+                "desc": "Obtenez des informations approfondies sur les performances des étudiants, la difficulté des questions et la répartition du temps.",
+                "benefit1": "Rapports de performance détaillés",
+                "benefit2": "Analyse question par question",
+                "benefit3": "Données exportables pour les dossiers"
+            },
+            "proctoring": {
+                "title": "Surveillance IA en direct",
+                "desc": "Surveillez vos examens en temps réel avec la détection de changement d'onglet et des mesures anti-triche.",
+                "benefit1": "Surveillance des étudiants en temps réel",
+                "benefit2": "Alertes d'infraction instantanées",
+                "benefit3": "Application d'un navigateur sécurisé"
+            }
         }
     }
 }

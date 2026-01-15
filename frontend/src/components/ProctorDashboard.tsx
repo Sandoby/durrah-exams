@@ -90,6 +90,13 @@ export function ProctorDashboard({ examId: propExamId, examTitle: propExamTitle 
   const isFullPage = !propExamId && !!paramExamId;
 
   const { sessions, stats, alerts, isLoading, enabled } = useProctorDashboard(examId);
+  const { subscriptionStatus } = useAuth();
+
+  useEffect(() => {
+    if (subscriptionStatus !== 'active') {
+      navigate('/checkout');
+    }
+  }, [subscriptionStatus, navigate]);
 
   const [examTitle, setExamTitle] = useState(propExamTitle || '');
   const [searchQuery, setSearchQuery] = useState('');

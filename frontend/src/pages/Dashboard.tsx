@@ -16,6 +16,8 @@ import { printerService } from '../lib/printer';
 import { NotificationCenter } from '../components/NotificationCenter';
 
 import { CONVEX_FEATURES } from '../main';
+import { PremiumFeatureModal } from '../components/dashboard/PremiumFeatureModal';
+
 
 interface Exam {
     id: string;
@@ -98,6 +100,11 @@ export default function Dashboard() {
     const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
     const [startDemoTour, setStartDemoTour] = useState(false);
     const [kidsShareModal, setKidsShareModal] = useState<{ url: string; code: string; title?: string } | null>(null);
+    const [premiumModal, setPremiumModal] = useState<{ isOpen: boolean; feature: 'analytics' | 'proctoring' }>({
+        isOpen: false,
+        feature: 'analytics'
+    });
+
     const [shareModal, setShareModal] = useState<{ id?: string; url: string; code: string; title?: string; directUrl?: string } | null>(null);
     const [deleteConfirmModal, setDeleteConfirmModal] = useState<{ id: string; title: string } | null>(null);
     const [showMockExam, setShowMockExam] = useState(false);
@@ -899,24 +906,30 @@ export default function Dashboard() {
                                                         if (profile?.subscription_status === 'active') {
                                                             navigate(`/exam/${exam.id}/analytics`);
                                                         } else {
-                                                            toast.error(t('dashboard.actions.analyticsLocked'));
-                                                            navigate('/checkout');
+                                                            setPremiumModal({ isOpen: true, feature: 'analytics' });
                                                         }
                                                     }}
-                                                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl ${profile?.subscription_status === 'active'
+                                                    className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 group ${profile?.subscription_status === 'active'
                                                         ? 'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 hover:shadow-lg hover:scale-105'
-                                                        : 'bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 opacity-60 cursor-not-allowed'
-                                                        } transition-all duration-200 group`}
-                                                    disabled={profile?.subscription_status !== 'active'}
+                                                        : 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700'
+                                                        }`}
                                                 >
+                                                    {profile?.subscription_status !== 'active' && (
+                                                        <div className="absolute -top-2 -right-1 z-10">
+                                                            <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
+                                                                <Crown className="w-2 h-2" />
+                                                                PRO
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                     {profile?.subscription_status === 'active' ? (
                                                         <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" />
                                                     ) : (
-                                                        <Lock className="h-5 w-5 text-gray-400" />
+                                                        <Lock className="h-5 w-5 text-gray-400 group-hover:text-purple-500 transition-colors" />
                                                     )}
                                                     <span className={`text-xs font-semibold ${profile?.subscription_status === 'active'
                                                         ? 'text-purple-700 dark:text-purple-300'
-                                                        : 'text-gray-500'
+                                                        : 'text-gray-500 group-hover:text-purple-600 transition-colors'
                                                         }`}>
                                                         {t('dashboard.actions.analytics', 'Stats')}
                                                     </span>
@@ -925,18 +938,45 @@ export default function Dashboard() {
                                                 {/* Proctor Button - Convex Live Monitoring */}
                                                 {CONVEX_FEATURES.proctoring && (
                                                     <button
-                                                        onClick={() => navigate(`/exam/${exam.id}/proctor`)}
-                                                        className="relative flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 border border-teal-400/50 hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105 transition-all duration-200 group overflow-hidden"
+                                                        onClick={() => {
+                                                            if (profile?.subscription_status === 'active') {
+                                                                navigate(`/exam/${exam.id}/proctor`);
+                                                            } else {
+                                                                setPremiumModal({ isOpen: true, feature: 'proctoring' });
+                                                            }
+                                                        }}
+                                                        className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 group overflow-hidden ${profile?.subscription_status === 'active'
+                                                            ? 'bg-gradient-to-br from-teal-500 to-cyan-600 border border-teal-400/50 hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105'
+                                                            : 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-teal-300 dark:hover:border-teal-700'
+                                                            }`}
                                                     >
-                                                        {/* Shimmer effect */}
-                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                                                        {/* Live indicator */}
-                                                        <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                                                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                                                        {profile?.subscription_status !== 'active' && (
+                                                            <div className="absolute -top-2 -right-1 z-10">
+                                                                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
+                                                                    <Crown className="w-2 h-2" />
+                                                                    PRO
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        {profile?.subscription_status === 'active' && (
+                                                            <>
+                                                                {/* Shimmer effect */}
+                                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                                                {/* Live indicator */}
+                                                                <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                                                                </span>
+                                                            </>
+                                                        )}
+                                                        {profile?.subscription_status === 'active' ? (
+                                                            <Eye className="h-5 w-5 text-white group-hover:scale-110 transition-transform drop-shadow-sm" />
+                                                        ) : (
+                                                            <Lock className="h-5 w-5 text-gray-400 group-hover:text-teal-500 transition-colors" />
+                                                        )}
+                                                        <span className={`text-xs font-bold drop-shadow-sm ${profile?.subscription_status === 'active' ? 'text-white' : 'text-gray-500 group-hover:text-teal-600 transition-colors'}`}>
+                                                            {t('dashboard.actions.proctor', 'Live')}
                                                         </span>
-                                                        <Eye className="h-5 w-5 text-white group-hover:scale-110 transition-transform drop-shadow-sm" />
-                                                        <span className="text-xs font-bold text-white drop-shadow-sm">{t('dashboard.actions.proctor', 'Live')}</span>
                                                     </button>
                                                 )}
 
@@ -1222,6 +1262,12 @@ export default function Dashboard() {
             ) : (
                 <ChatWidget />
             )}
+            {/* Premium Feature Modal */}
+            <PremiumFeatureModal
+                isOpen={premiumModal.isOpen}
+                onClose={() => setPremiumModal({ ...premiumModal, isOpen: false })}
+                feature={premiumModal.feature}
+            />
         </div>
     );
 }

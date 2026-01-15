@@ -210,6 +210,11 @@ export default function QuestionBank() {
             toast(t('questionBank.demo.save', 'Demo mode: Sign up to save your own question banks'));
             return;
         }
+        if (profile?.subscription_status !== 'active' && banks.length >= 1) {
+            toast.error(t('dashboard.upgradeLimit', 'Upgrade to create more question banks!'));
+            navigate('/checkout');
+            return;
+        }
         if (!newBankName.trim()) {
             toast.error(t('questionBank.validation.name', 'Please enter a bank name'));
             return;
