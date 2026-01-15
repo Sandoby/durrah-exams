@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, LogOut, FileText, Settings, X, Lock, Copy, Globe, AlertTriangle, Loader2, AlertCircle, ChevronDown, CreditCard, Crown, Menu, BookOpen } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, Globe, AlertTriangle, Power, Eye, Loader2, AlertCircle } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -14,9 +14,6 @@ import type { Step, CallBackProps } from 'react-joyride';
 import { useDemoTour } from '../hooks/useDemoTour';
 import { printerService } from '../lib/printer';
 import { NotificationCenter } from '../components/NotificationCenter';
-import { StatsOverview } from '../components/dashboard/StatsOverview';
-import { SearchFilterBar } from '../components/dashboard/SearchFilterBar';
-import { ImprovedExamCard } from '../components/dashboard/ImprovedExamCard';
 
 import { CONVEX_FEATURES } from '../main';
 
@@ -103,40 +100,7 @@ export default function Dashboard() {
     const [kidsShareModal, setKidsShareModal] = useState<{ url: string; code: string; title?: string } | null>(null);
     const [shareModal, setShareModal] = useState<{ id?: string; url: string; code: string; title?: string; directUrl?: string } | null>(null);
     const [deleteConfirmModal, setDeleteConfirmModal] = useState<{ id: string; title: string } | null>(null);
-    const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [showMockExam, setShowMockExam] = useState(false);
-
-    // New State for Professional Dashboard
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
-    // Computed Stats
-    const stats = useMemo(() => {
-        const totalExams = exams.length;
-        const activeExams = exams.filter(e => e.is_active).length;
-        // Mock data for now until backend aggregate support is added
-        const totalStudents = Math.floor(totalExams * 12.5);
-        const avgScore = totalExams > 0 ? 78 : 0;
-
-        return {
-            totalExams,
-            activeExams,
-            totalStudents,
-            avgScore
-        };
-    }, [exams]);
-
-    // Filtered Exams
-    const filteredExams = useMemo(() => {
-        return exams.filter(exam => {
-            const matchesSearch = exam.title.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesStatus = filterStatus === 'all'
-                ? true
-                : filterStatus === 'active' ? exam.is_active : !exam.is_active;
-            return matchesSearch && matchesStatus;
-        });
-    }, [exams, searchQuery, filterStatus]);
 
     useDemoTour(new URLSearchParams(window.location.search).get('showSharing') === 'true' ? 'share-monitor' : new URLSearchParams(window.location.search).get('showAnalytics') === 'true' ? 'view-analytics' : null, startDemoTour && isDemo);
 
@@ -640,62 +604,11 @@ export default function Dashboard() {
                                 <span className="hidden lg:inline">{t('settings.title')}</span>
                             </Link>
                             <button
-                                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                                className="relative flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                onClick={handleLogout}
+                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                             >
-                                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs ring-2 ring-white dark:ring-slate-900 shadow-sm">
-                                    {user?.email?.charAt(0).toUpperCase() || 'U'}
-                                </div>
-                                <span className="hidden lg:inline max-w-[100px] truncate">
-                                    {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
-                                </span>
-                                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
-
-                                {/* Dropdown Menu */}
-                                <div className={`absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-2 transition-all duration-200 origin-top-right ${userMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
-                                    <div className="px-3 py-2 mb-2 border-b border-gray-100 dark:border-slate-700">
-                                        <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                            {user?.user_metadata?.full_name || 'Tutor'}
-                                        </p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                            {user?.email}
-                                        </p>
-                                    </div>
-
-                                    <Link
-                                        to="/settings"
-                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-                                        onClick={() => setUserMenuOpen(false)}
-                                    >
-                                        <div className="p-1.5 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">
-                                            <Settings className="w-4 h-4" />
-                                        </div>
-                                        {t('settings.title', 'Settings')}
-                                    </Link>
-
-                                    <Link
-                                        to="/checkout"
-                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-                                        onClick={() => setUserMenuOpen(false)}
-                                    >
-                                        <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400">
-                                            <CreditCard className="w-4 h-4" />
-                                        </div>
-                                        {t('settings.billing', 'Billing')}
-                                    </Link>
-
-                                    <div className="h-px bg-gray-100 dark:bg-slate-700 my-1" />
-
-                                    <button
-                                        onClick={handleLogout}
-                                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
-                                    >
-                                        <div className="p-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400">
-                                            <LogOut className="w-4 h-4" />
-                                        </div>
-                                        {t('nav.logout', 'Sign Out')}
-                                    </button>
-                                </div>
+                                <LogOut className="h-4 w-4 lg:mr-2" />
+                                <span className="hidden lg:inline">{t('nav.logout', 'Logout')}</span>
                             </button>
 
                             <NotificationCenter />
@@ -787,7 +700,7 @@ export default function Dashboard() {
                             <Link
                                 to="/question-bank"
                                 data-tour="question-bank"
-                                className="inline-flex items-center justify-center px-5 py-3 rounded-2xl text-sm font-bold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg transition-all w-full sm:w-auto"
+                                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg transition-all w-full sm:w-auto"
                             >
                                 <BookOpen className="h-5 w-5 mr-2" />
                                 {t('dashboard.questionBank')}
@@ -795,29 +708,16 @@ export default function Dashboard() {
                             <button
                                 onClick={handleCreateExam}
                                 data-tour="create-exam"
-                                className="group relative inline-flex items-center justify-center px-6 py-3 rounded-2xl text-sm font-bold text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300 w-full sm:w-auto"
+                                className="group relative inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300 w-full sm:w-auto"
                             >
                                 <span className="relative z-10 flex items-center">
                                     <Plus className="h-5 w-5 mr-2" />
                                     {t('dashboard.createExam')}
                                 </span>
-                                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </button>
                         </div>
                     </div>
-
-                    {/* Stats Overview */}
-                    <StatsOverview stats={stats} />
-
-                    {/* Search & Filters */}
-                    <SearchFilterBar
-                        searchQuery={searchQuery}
-                        onSearchChange={setSearchQuery}
-                        filterStatus={filterStatus}
-                        onFilterChange={setFilterStatus}
-                        viewMode={viewMode}
-                        onViewChange={setViewMode}
-                    />
 
                     {profile?.subscription_status === 'payment_failed' && (
                         <div className="bg-white/40 dark:bg-red-950/20 backdrop-blur-xl border border-red-200/50 dark:border-red-800/50 p-6 rounded-[2rem] flex flex-col sm:flex-row items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-500 shadow-xl shadow-red-500/5 mb-8">
@@ -889,19 +789,178 @@ export default function Dashboard() {
                             </button>
                         </div>
                     ) : (
-                        <div className={`grid gap-6 mb-8 ${viewMode === 'list' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}`}>
-                            {filteredExams.map((exam, index) => (
-                                <ImprovedExamCard
-                                    key={exam.id}
-                                    exam={exam}
-                                    index={index}
-                                    profile={profile}
-                                    onToggleStatus={handleToggleStatus}
-                                    onCopyLink={copyExamLink}
-                                    onDownloadPDF={downloadExamPDF}
-                                    onDelete={handleDelete}
-                                    showTour={index === 0}
-                                />
+                        <div className="grid gap-6 mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                            {showMockExam && (
+                                <div data-tour="exam-card" className="group bg-white dark:bg-slate-800 rounded-2xl border-2 border-dashed border-indigo-300 dark:border-indigo-600 shadow-lg relative overflow-hidden animate-pulse">
+                                    <div className="absolute top-0 right-0 bg-indigo-500 text-white px-3 py-1 text-[10px] font-bold uppercase rounded-bl-lg">Tutorial Card</div>
+                                    <div className="p-6">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                                                    {t('dashboard.tour.mockExam.title', '📐 Mathematics Quiz (Sample)')}
+                                                </h3>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                                                    {t('dashboard.tour.mockExam.desc', 'Algebra, geometry, and trigonometry assessment for Grade 10')}
+                                                </p>
+                                            </div>
+                                            <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-500 text-white">
+                                                {t('dashboard.status.active')}
+                                                <Power className="h-3 w-3 ml-1.5" />
+                                            </div>
+                                        </div>
+                                        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <div data-tour="copy-link" className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                                                    <Share2 className="h-4 w-4 text-green-600" />
+                                                    <span className="text-[10px] font-bold text-green-700">{t('dashboard.actions.copyLink')}</span>
+                                                </div>
+                                                <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                                                    <FileText className="h-4 w-4 text-blue-600" />
+                                                    <span className="text-[10px] font-bold text-blue-700">{t('dashboard.actions.print')}</span>
+                                                </div>
+                                                <div data-tour="results" className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800">
+                                                    <BarChart3 className="h-4 w-4 text-orange-600" />
+                                                    <span className="text-[10px] font-bold text-orange-700">{t('dashboard.actions.results')}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            {exams.map((exam, index) => (
+                                <div key={exam.id} data-tour={index === 0 ? "exam-card" : undefined} className="group bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-lg hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-2 transition-all duration-300">
+                                    <div className="p-6">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                                                    {exam.title}
+                                                </h3>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                                                    {exam.description}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={(e) => handleToggleStatus(exam.id, exam.is_active, e)}
+                                                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${exam.is_active ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md shadow-green-500/20' : 'bg-gradient-to-r from-gray-500 to-slate-500 text-white'} hover:shadow-lg hover:scale-105 transition-all cursor-pointer`}
+                                                title={exam.is_active ? t('dashboard.status.clickToDeactivate', "Click to Deactivate") : t('dashboard.status.clickToActivate', "Click to Activate")}
+                                            >
+                                                {exam.is_active ? t('dashboard.status.active') : t('dashboard.status.inactive')}
+                                                <Power className="h-3 w-3 ml-1.5" />
+                                            </button>
+                                        </div>
+                                        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                        {new Date(exam.created_at).toLocaleDateString()}
+                                                    </span>
+                                                    {exam.quiz_code && (
+                                                        <span className="px-2 py-0.5 text-xs font-mono bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded border border-indigo-200 dark:border-indigo-800">
+                                                            {exam.quiz_code}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Action Buttons */}
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2">
+                                                {/* Share Button */}
+                                                <button
+                                                    onClick={() => copyExamLink(exam.id)}
+                                                    data-tour={index === 0 ? "copy-link" : undefined}
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                                                >
+                                                    <Share2 className="h-5 w-5 text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform" />
+                                                    <span className="text-xs font-semibold text-green-700 dark:text-green-300">{t('dashboard.actions.copyLink', 'Share')}</span>
+                                                </button>
+
+                                                {/* Print Button */}
+                                                <button
+                                                    onClick={() => downloadExamPDF(exam.id)}
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                                                >
+                                                    <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
+                                                    <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">{t('dashboard.actions.print', 'Print')}</span>
+                                                </button>
+
+                                                {/* Results Button */}
+                                                <button
+                                                    onClick={() => navigate(`/exam/${exam.id}/results`)}
+                                                    data-tour={index === 0 ? "results" : undefined}
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                                                >
+                                                    <BarChart3 className="h-5 w-5 text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform" />
+                                                    <span className="text-xs font-semibold text-orange-700 dark:text-orange-300">{t('dashboard.actions.results', 'Results')}</span>
+                                                </button>
+
+                                                {/* Analytics Button */}
+                                                <button
+                                                    onClick={() => {
+                                                        if (profile?.subscription_status === 'active') {
+                                                            navigate(`/exam/${exam.id}/analytics`);
+                                                        } else {
+                                                            toast.error(t('dashboard.actions.analyticsLocked'));
+                                                            navigate('/checkout');
+                                                        }
+                                                    }}
+                                                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl ${profile?.subscription_status === 'active'
+                                                        ? 'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 hover:shadow-lg hover:scale-105'
+                                                        : 'bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 opacity-60 cursor-not-allowed'
+                                                        } transition-all duration-200 group`}
+                                                    disabled={profile?.subscription_status !== 'active'}
+                                                >
+                                                    {profile?.subscription_status === 'active' ? (
+                                                        <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" />
+                                                    ) : (
+                                                        <Lock className="h-5 w-5 text-gray-400" />
+                                                    )}
+                                                    <span className={`text-xs font-semibold ${profile?.subscription_status === 'active'
+                                                        ? 'text-purple-700 dark:text-purple-300'
+                                                        : 'text-gray-500'
+                                                        }`}>
+                                                        {t('dashboard.actions.analytics', 'Stats')}
+                                                    </span>
+                                                </button>
+
+                                                {/* Proctor Button - Convex Live Monitoring */}
+                                                {CONVEX_FEATURES.proctoring && (
+                                                    <button
+                                                        onClick={() => navigate(`/exam/${exam.id}/proctor`)}
+                                                        className="relative flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 border border-teal-400/50 hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105 transition-all duration-200 group overflow-hidden"
+                                                    >
+                                                        {/* Shimmer effect */}
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                                        {/* Live indicator */}
+                                                        <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                                                        </span>
+                                                        <Eye className="h-5 w-5 text-white group-hover:scale-110 transition-transform drop-shadow-sm" />
+                                                        <span className="text-xs font-bold text-white drop-shadow-sm">{t('dashboard.actions.proctor', 'Live')}</span>
+                                                    </button>
+                                                )}
+
+                                                {/* Edit Button */}
+                                                <Link
+                                                    to={`/exam/${exam.id}/edit`}
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 border border-indigo-200 dark:border-indigo-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                                                >
+                                                    <Edit className="h-5 w-5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                                                    <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">{t('dashboard.actions.edit', 'Edit')}</span>
+                                                </Link>
+
+                                                {/* Delete Button */}
+                                                <button
+                                                    onClick={() => handleDelete(exam.id)}
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border border-red-200 dark:border-red-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                                                >
+                                                    <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400 group-hover:scale-110 transition-transform" />
+                                                    <span className="text-xs font-semibold text-red-700 dark:text-red-300">{t('dashboard.actions.delete', 'Delete')}</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     )}

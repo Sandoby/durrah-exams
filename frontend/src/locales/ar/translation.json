@@ -310,25 +310,9 @@
             "desc": "ابدأ بإنشاء امتحان جديد.",
             "button": "إنشاء امتحان جديد"
         },
-        "searchPlaceholder": "ابحث عن الامتحانات بالعنوان أو الكلمات الرئيسية...",
-        "filter": {
-            "all": "الكل",
-            "active": "نشط",
-            "inactive": "غير نشط"
-        },
-        "stats": {
-            "totalExams": "إجمالي الامتحانات",
-            "activeExams": "الامتحانات النشطة",
-            "totalStudents": "الطلاب الذين تم الوصول إليهم",
-            "avgScore": "متوسط الدرجات"
-        },
         "status": {
             "active": "نشط",
-            "inactive": "غير نشط",
-            "activate": "تنشيط",
-            "deactivate": "إلغاء التنشيط",
-            "clickToActivate": "انقر للتنشيط",
-            "clickToDeactivate": "انقر لإلغاء التنشيط"
+            "inactive": "غير نشط"
         },
         "actions": {
             "copyLink": "مشاركة",
