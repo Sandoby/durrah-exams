@@ -8,6 +8,7 @@ import { paySkyIntegration } from '../lib/paysky';
 import { kashierIntegration } from '../lib/kashier';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
+import { useCurrency } from '../hooks/useCurrency';
 
 
 
@@ -37,7 +38,11 @@ export default function Checkout() {
         }
     }, [location.state]);
 
-    // Provider-specific pricing definitions
+    // Currency hooks for display
+    const { price: dynamicMonthlyPrice, currency: dynamicCurrencyCode, isLoading: isCurrencyLoading } = useCurrency(5);
+    const { price: dynamicYearlyPrice } = useCurrency(50);
+
+    // Provider-specific pricing definitions (actual payment amounts)
     const pricingConfig = {
         dodo: {
             currency: 'USD',
@@ -63,7 +68,6 @@ export default function Checkout() {
     const currencyCode = currentPricing.currency;
     const monthlyPrice = currentPricing.displayMonthly;
     const yearlyPrice = currentPricing.displayYearly;
-    const isCurrencyLoading = false;
 
     // ---------- Plans ----------
     const plans = [
@@ -457,7 +461,7 @@ export default function Checkout() {
                                         {isCurrencyLoading ? (
                                             <span className="animate-pulse opacity-50">---</span>
                                         ) : (
-                                            plan.price === 0 ? t('pricing.starter.price') : `${plan.currency} ${plan.displayPrice}`
+                                            plan.id === 'basic' ? t('pricing.starter.price') : `${dynamicCurrencyCode} ${plan.id === 'pro' ? (billingCycle === 'monthly' ? dynamicMonthlyPrice : dynamicYearlyPrice) : plan.displayPrice}`
                                         )}
                                     </span>
                                     <span className="ml-2 text-gray-500 dark:text-gray-400 font-medium">{billingCycle === 'monthly' ? t('pricing.professional.period') : t('pricing.yearly.period')}</span>

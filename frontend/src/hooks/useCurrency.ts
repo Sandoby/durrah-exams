@@ -4,19 +4,19 @@ import { useLocation } from './useLocation';
 const EXCHANGE_CACHE_KEY = 'exchange_rates';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
-export function useCurrency(basePriceEGP: number) {
+export function useCurrency(basePriceUSD: number) {
     const { location, isLoading: isLocationLoading } = useLocation();
     const [convertedPrice, setConvertedPrice] = useState<string | null>(null);
-    const [currencyCode, setCurrencyCode] = useState('EGP');
+    const [currencyCode, setCurrencyCode] = useState('USD');
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const convertCurrency = async () => {
             if (isLocationLoading) return;
 
-            if (!location || location.currency === 'EGP') {
-                setConvertedPrice(basePriceEGP.toString());
-                setCurrencyCode('EGP');
+            if (!location || location.currency === 'USD') {
+                setConvertedPrice(basePriceUSD.toFixed(2));
+                setCurrencyCode('USD');
                 setIsLoading(false);
                 return;
             }
@@ -33,7 +33,7 @@ export function useCurrency(basePriceEGP: number) {
                 }
 
                 if (!rates) {
-                    const response = await fetch('https://api.exchangerate-api.com/v4/latest/EGP');
+                    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
                     if (!response.ok) throw new Error('Failed to fetch rates');
                     const data = await response.json();
                     rates = data.rates;
@@ -46,37 +46,25 @@ export function useCurrency(basePriceEGP: number) {
 
                 const rate = rates[location.currency];
                 if (rate) {
-                    // Special case: show fixed USD prices (5/50) instead of calculated ones
-                    if (location.currency === 'USD') {
-                        if (basePriceEGP === 250 || basePriceEGP === 200) {
-                            setConvertedPrice('5.00');
-                        } else if (basePriceEGP === 2500 || basePriceEGP === 2000) {
-                            setConvertedPrice('50.00');
-                        } else {
-                            const converted = (basePriceEGP * rate).toFixed(2);
-                            setConvertedPrice(converted);
-                        }
-                    } else {
-                        const converted = (basePriceEGP * rate).toFixed(2);
-                        setConvertedPrice(converted);
-                    }
+                    const converted = (basePriceUSD * rate).toFixed(2);
+                    setConvertedPrice(converted);
                     setCurrencyCode(location.currency);
                 } else {
-                    // Fallback if currency not found
-                    setConvertedPrice(basePriceEGP.toString());
-                    setCurrencyCode('EGP');
+                    // Fallback to USD if currency not found
+                    setConvertedPrice(basePriceUSD.toFixed(2));
+                    setCurrencyCode('USD');
                 }
             } catch (err) {
                 console.error('Currency conversion failed:', err);
-                setConvertedPrice(basePriceEGP.toString());
-                setCurrencyCode('EGP');
+                setConvertedPrice(basePriceUSD.toFixed(2));
+                setCurrencyCode('USD');
             } finally {
                 setIsLoading(false);
             }
         };
 
         convertCurrency();
-    }, [basePriceEGP, location, isLocationLoading]);
+    }, [basePriceUSD, location, isLocationLoading]);
 
     return {
         price: convertedPrice,

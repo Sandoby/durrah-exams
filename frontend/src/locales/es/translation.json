@@ -91,7 +91,7 @@
         },
         "professional": {
             "title": "Profesional",
-            "price": "250 EGP",
+            "price": "5 USD",
             "period": "/mes",
             "features": [
                 "Exámenes ilimitados",
@@ -105,7 +105,7 @@
         },
         "yearly": {
             "title": "Profesional Anual",
-            "price": "2500 EGP",
+            "price": "50 USD",
             "period": "/año",
             "features": [
                 "Todas las funciones profesionales",

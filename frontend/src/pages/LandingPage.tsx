@@ -23,8 +23,8 @@ export default function LandingPage() {
 
     // No auto-redirect - show authenticated UI instead
 
-    const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(250);
-    const { price: yearlyPrice } = useCurrency(2500);
+    const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(5);
+    const { price: yearlyPrice } = useCurrency(50);
 
     const { scrollY } = useScroll();
     const heroRotateX = useTransform(scrollY, [0, 500], [15, 30]);
