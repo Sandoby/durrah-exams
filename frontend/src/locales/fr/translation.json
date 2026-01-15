@@ -263,6 +263,11 @@
         "save": "ÉCONOMISEZ 17%",
         "save20": "ÉCONOMISEZ 20%",
         "mostPopular": "LE PLUS POPULAIRE",
+        "insideEgypt": "Êtes-vous en Égypte ?",
+        "localPayments": "Méthodes de paiement locales égyptiennes",
+        "internationalPayments": "Méthodes de paiement internationales",
+        "freeTrialNote": "Essai gratuit de 14 jours inclus",
+        "firstTimeOnly": "Nouveaux abonnés uniquement",
         "plans": {
             "starter": {
                 "name": "Gratuit",

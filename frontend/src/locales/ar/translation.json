@@ -255,6 +255,11 @@
         "save": "وفر 17%",
         "save20": "وفر 20%",
         "mostPopular": "الأكثر شيوعاً",
+        "insideEgypt": "هل أنت داخل مصر؟",
+        "localPayments": "طرق الدفع المحلية في مصر",
+        "internationalPayments": "طرق الدفع الدولية",
+        "freeTrialNote": "تتضمن تجربة مجانية لمدة 14 يومًا",
+        "firstTimeOnly": "للمشتركين لأول مرة فقط",
         "plans": {
             "starter": {
                 "name": "مجاني",

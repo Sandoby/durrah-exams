@@ -23,11 +23,13 @@ export default function Checkout() {
     const { user } = useAuth();
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-    const [selectedPaymentProvider, setSelectedPaymentProvider] = useState<'paysky' | 'kashier' | 'dodo'>('paysky');
+    const [isInsideEgypt, setIsInsideEgypt] = useState(false);
+    const [selectedPaymentProvider, setSelectedPaymentProvider] = useState<'paysky' | 'kashier' | 'dodo'>('dodo');
     const [isProcessing, setIsProcessing] = useState(false);
     const [couponCode, setCouponCode] = useState('');
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
     const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+    const [isFirstTimeSubscriber, setIsFirstTimeSubscriber] = useState(true);
 
     // Handle errors from payment callback
     useEffect(() => {
@@ -37,6 +39,30 @@ export default function Checkout() {
             window.history.replaceState({}, '');
         }
     }, [location.state]);
+
+    // Check if user is a first-time subscriber
+    useEffect(() => {
+        const checkSubscriptionHistory = async () => {
+            if (!user) return;
+            try {
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('subscription_plan, subscription_status, dodo_customer_id')
+                    .eq('id', user.id)
+                    .single();
+
+                if (data) {
+                    // If they have a plan or a dodo customer ID, they are not first-time
+                    if (data.subscription_plan || data.dodo_customer_id) {
+                        setIsFirstTimeSubscriber(false);
+                    }
+                }
+            } catch (err) {
+                console.error('Error checking subscription history:', err);
+            }
+        };
+        checkSubscriptionHistory();
+    }, [user]);
 
     // Currency hooks for display
     const { price: dynamicMonthlyPrice, currency: dynamicCurrencyCode, isLoading: isCurrencyLoading } = useCurrency(5);
@@ -60,7 +86,7 @@ export default function Checkout() {
         }
     };
 
-    const currentPricing = selectedPaymentProvider === 'dodo' ? pricingConfig.dodo : pricingConfig.local;
+    const currentPricing = (isInsideEgypt && selectedPaymentProvider !== 'dodo') ? pricingConfig.local : pricingConfig.dodo;
 
     const proMonthlyPrice = currentPricing.monthly;
     const proYearlyPrice = currentPricing.yearly;
@@ -100,6 +126,7 @@ export default function Checkout() {
                 t('pricing.professional.features.1'),
             ],
             recommended: true,
+            hasTrial: isFirstTimeSubscriber,
         },
     ];
 
@@ -263,24 +290,7 @@ export default function Checkout() {
                     return;
                 }
 
-                // If using Embedded SDK, we would use the token here.
-                // If using Hosted Page (as fallback or if API returns link), redirect.
-                // Based on search results saying "redirect to hosted page", let's use the link.
-                // "Embedded" often just means an iframe or overlay that uses this link.
-                // But user requested "native/embedded".
-                // If the `dodopayments-checkout` package provides a Component, we usually pass the `clientSecret`.
-                // For now, let's assume `data.payment_link` works as a redirect or we verify SDK usage.
-
-                // Let's implement the Redirect first as it's guaranteed to work with the Function we wrote,
-                // AND then IF we see `clientSecret` in the response, we could use the SDK.
-                // But the user insisted on "native".
-                // Let's assume the function returns what's needed.
-                // For "native" feel using only a link, we can open in a Capacitor Browser or standard window.
-
                 window.location.href = data.payment_link;
-                // If `data.client_secret` exists, we would use the SDK component.
-                // Since I am writing this "blind" to the exact response shape without running it, 
-                // Redirect is the safest first step.
 
             } else if (selectedPaymentProvider === 'kashier') {
                 await kashierIntegration.pay({
@@ -467,6 +477,15 @@ export default function Checkout() {
                                     <span className="ml-2 text-gray-500 dark:text-gray-400 font-medium">{billingCycle === 'monthly' ? t('pricing.professional.period') : t('pricing.yearly.period')}</span>
                                 </div>
 
+                                {(plan as any).hasTrial && (
+                                    <div className="mb-6 p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl border border-indigo-100 dark:border-indigo-800 flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
+                                        <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300">
+                                            {t('checkout.freeTrialNote')}
+                                        </span>
+                                    </div>
+                                )}
+
                                 <div className="space-y-4 mb-8">
                                     {plan.features.map((f, i) => (
                                         <div key={i} className="flex items-start group/item">
@@ -523,6 +542,32 @@ export default function Checkout() {
 
                             <div className="grid md:grid-cols-2 gap-10">
                                 <div className="space-y-6">
+                                    {/* Inside Egypt Toggle */}
+                                    <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
+                                                <svg viewBox="0 0 3 2" className="w-full h-full"><rect width="3" height="2" fill="#CE1126" /><rect width="3" height="0.66" y="0.66" fill="#fff" /><rect width="3" height="0.66" y="1.33" fill="#000" /><circle cx="1.5" cy="1" r="0.2" fill="#C09300" /></svg>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-gray-900 dark:text-white">{t('checkout.insideEgypt')}</p>
+                                                <p className="text-[10px] text-gray-500">{t('checkout.localPayments')}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                setIsInsideEgypt(!isInsideEgypt);
+                                                if (!isInsideEgypt) {
+                                                    setSelectedPaymentProvider('paysky');
+                                                } else {
+                                                    setSelectedPaymentProvider('dodo');
+                                                }
+                                            }}
+                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${isInsideEgypt ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                                        >
+                                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isInsideEgypt ? 'translate-x-6' : 'translate-x-1'}`} />
+                                        </button>
+                                    </div>
+
                                     {/* Coupon section */}
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{t('checkout.coupon.label')}</label>
@@ -618,108 +663,113 @@ export default function Checkout() {
                                         <div className="mb-6 space-y-8">
 
                                             {/* International Providers */}
-                                            <div>
-                                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                                                    <Globe className="w-4 h-4 text-indigo-500" />
-                                                    International Payment Providers
-                                                </label>
-                                                <div className="space-y-3">
-                                                    {/* Dodo Payments */}
-                                                    <button
-                                                        onClick={() => setSelectedPaymentProvider('dodo')}
-                                                        className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'dodo'
-                                                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
-                                                            : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
-                                                            }`}
-                                                    >
-                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'dodo' ? 'border-indigo-600' : 'border-gray-300'}`}>
-                                                            {selectedPaymentProvider === 'dodo' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
-                                                        </div>
-                                                        <div className="flex-1 flex items-center justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <img
-                                                                    src="https://logo.clearbit.com/dodopayments.com"
-                                                                    alt="Dodo Payments"
-                                                                    className="h-8 w-8 rounded-lg object-contain bg-white p-1"
-                                                                    onError={(e) => {
-                                                                        e.currentTarget.style.display = 'none';
-                                                                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                                                    }}
-                                                                />
-                                                                <div className="hidden font-bold text-gray-900 dark:text-white">Dodo Payments</div>
+                                            {!isInsideEgypt && (
+                                                <div>
+                                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                                                        <Globe className="w-4 h-4 text-indigo-500" />
+                                                        {t('checkout.internationalPayments')}
+                                                    </label>
+                                                    <div className="space-y-3">
+                                                        {/* Dodo Payments */}
+                                                        <button
+                                                            onClick={() => setSelectedPaymentProvider('dodo')}
+                                                            className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'dodo'
+                                                                ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
+                                                                : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                                                                }`}
+                                                        >
+                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'dodo' ? 'border-indigo-600' : 'border-gray-300'}`}>
+                                                                {selectedPaymentProvider === 'dodo' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
                                                             </div>
-                                                            <div className="text-xs font-semibold px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-gray-500">Global</div>
-                                                        </div>
-                                                    </button>
+                                                            <div className="flex-1 flex items-center justify-between">
+                                                                <div className="flex items-center gap-3">
+                                                                    <img
+                                                                        src="https://logo.clearbit.com/dodopayments.com"
+                                                                        alt="Dodo Payments"
+                                                                        className="h-8 w-8 rounded-lg object-contain bg-white p-1"
+                                                                        onError={(e) => {
+                                                                            e.currentTarget.style.display = 'none';
+                                                                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                                                        }}
+                                                                    />
+                                                                    <div className="hidden font-bold text-gray-900 dark:text-white">Dodo Payments</div>
+                                                                </div>
+                                                                <div className="text-xs font-semibold px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-gray-500">Global</div>
+                                                            </div>
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )}
 
                                             {/* Egyptian Providers */}
-                                            <div>
-                                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                                                    <div className="w-4 h-4 rounded-full overflow-hidden border border-gray-200">
-                                                        <svg viewBox="0 0 3 2" className="w-full h-full"><rect width="3" height="2" fill="#CE1126" /><rect width="3" height="0.66" y="0.66" fill="#fff" /><rect width="3" height="0.66" y="1.33" fill="#000" /><circle cx="1.5" cy="1" r="0.2" fill="#C09300" /></svg>
-                                                    </div>
-                                                    Egyptian Payment Providers
-                                                </label>
-                                                <div className="space-y-3">
-                                                    {/* PaySky */}
-                                                    <button
-                                                        onClick={() => setSelectedPaymentProvider('paysky')}
-                                                        className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'paysky'
-                                                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
-                                                            : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
-                                                            }`}
-                                                    >
-                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'paysky' ? 'border-indigo-600' : 'border-gray-300'}`}>
-                                                            {selectedPaymentProvider === 'paysky' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                                            {isInsideEgypt && (
+                                                <div>
+                                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                                                        <div className="w-4 h-4 rounded-full overflow-hidden border border-gray-200">
+                                                            <svg viewBox="0 0 3 2" className="w-full h-full"><rect width="3" height="2" fill="#CE1126" /><rect width="3" height="0.66" y="0.66" fill="#fff" /><rect width="3" height="0.66" y="1.33" fill="#000" /><circle cx="1.5" cy="1" r="0.2" fill="#C09300" /></svg>
                                                         </div>
-                                                        <div className="flex-1 flex items-center justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <img
-                                                                    src="https://logo.clearbit.com/paysky.io"
-                                                                    alt="PaySky"
-                                                                    className="h-8 w-8 rounded-lg object-contain bg-white p-1"
-                                                                    onError={(e) => {
-                                                                        e.currentTarget.style.display = 'none';
-                                                                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                                                    }}
-                                                                />
-                                                                <div className="hidden font-bold text-gray-900 dark:text-white">PaySky</div>
+                                                        {t('checkout.localPayments')}
+                                                    </label>
+                                                    <div className="space-y-3">
+                                                        {/* PaySky */}
+                                                        <button
+                                                            onClick={() => setSelectedPaymentProvider('paysky')}
+                                                            className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'paysky'
+                                                                ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
+                                                                : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                                                                }`}
+                                                        >
+                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'paysky' ? 'border-indigo-600' : 'border-gray-300'}`}>
+                                                                {selectedPaymentProvider === 'paysky' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
                                                             </div>
-                                                        </div>
-                                                    </button>
+                                                            <div className="flex-1 flex items-center justify-between">
+                                                                <div className="flex items-center gap-3">
+                                                                    <img
+                                                                        src="https://logo.clearbit.com/paysky.io"
+                                                                        alt="PaySky"
+                                                                        className="h-8 w-8 rounded-lg object-contain bg-white p-1"
+                                                                        onError={(e) => {
+                                                                            e.currentTarget.style.display = 'none';
+                                                                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                                                        }}
+                                                                    />
+                                                                    <div className="hidden font-bold text-gray-900 dark:text-white">PaySky</div>
+                                                                </div>
+                                                            </div>
+                                                        </button>
 
-                                                    {/* Kashier */}
-                                                    <button
-                                                        onClick={() => setSelectedPaymentProvider('kashier')}
-                                                        className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'kashier'
-                                                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
-                                                            : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
-                                                            }`}
-                                                    >
-                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'kashier' ? 'border-indigo-600' : 'border-gray-300'}`}>
-                                                            {selectedPaymentProvider === 'kashier' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
-                                                        </div>
-                                                        <div className="flex-1 flex items-center justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <img
-                                                                    src="https://logo.clearbit.com/kashier.io"
-                                                                    alt="Kashier"
-                                                                    className="h-8 w-8 rounded-lg object-contain bg-white p-1"
-                                                                    onError={(e) => {
-                                                                        e.currentTarget.style.display = 'none';
-                                                                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                                                    }}
-                                                                />
-                                                                <div className="hidden font-bold text-gray-900 dark:text-white">Kashier</div>
+                                                        {/* Kashier */}
+                                                        <button
+                                                            onClick={() => setSelectedPaymentProvider('kashier')}
+                                                            className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'kashier'
+                                                                ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
+                                                                : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                                                                }`}
+                                                        >
+                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'kashier' ? 'border-indigo-600' : 'border-gray-300'}`}>
+                                                                {selectedPaymentProvider === 'kashier' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
                                                             </div>
-                                                        </div>
-                                                    </button>
+                                                            <div className="flex-1 flex items-center justify-between">
+                                                                <div className="flex items-center gap-3">
+                                                                    <img
+                                                                        src="https://logo.clearbit.com/kashier.io"
+                                                                        alt="Kashier"
+                                                                        className="h-8 w-8 rounded-lg object-contain bg-white p-1"
+                                                                        onError={(e) => {
+                                                                            e.currentTarget.style.display = 'none';
+                                                                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                                                        }}
+                                                                    />
+                                                                    <div className="hidden font-bold text-gray-900 dark:text-white">Kashier</div>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )}
                                         </div>
-                                    )}<button
+                                    )}
+                                    <button
                                         onClick={handlePayment}
                                         disabled={isProcessing}
                                         className="w-full py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all disabled:opacity-70 disabled:hover:scale-100 flex items-center justify-center gap-2"
