@@ -173,7 +173,7 @@ export default function EmailVerification() {
 
                 <div className="mt-8 text-center">
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                        &copy; {new Date().getFullYear()} Durrah Exams. All rights reserved.
+                        &copy; 2026 Durrah for Tutors. All rights reserved.
                     </p>
                 </div>
             </div>

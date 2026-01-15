@@ -93,7 +93,7 @@ export default function EmailConfirmed() {
 
                 <div className="mt-6 text-center">
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        © 2025 Durrah for Tutors. All Rights Reserved.
+                        © 2026 Durrah for Tutors. All Rights Reserved.
                     </p>
                 </div>
             </div>

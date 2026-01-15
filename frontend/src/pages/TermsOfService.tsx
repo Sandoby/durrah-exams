@@ -185,7 +185,7 @@ export default function TermsOfService() {
 
                 <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
                     <p>Last updated: January 2026</p>
-                    <p className="mt-2 text-xs opacity-60">Durrah for Tutors © 2025. All rights reserved.</p>
+                    <p className="mt-2 text-xs opacity-60">Durrah for Tutors © 2026. All rights reserved.</p>
                 </div>
             </main>
         </div>
