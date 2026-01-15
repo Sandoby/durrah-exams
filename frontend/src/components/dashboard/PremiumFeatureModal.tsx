@@ -18,7 +18,7 @@ export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeature
         analytics: {
             title: t('premiumModal.analytics.title', 'Advanced Exam Analytics'),
             desc: t('premiumModal.analytics.desc', 'Get deep insights into student performance, question difficulty, and time distribution.'),
-            image: '/C:/Users/Elsaid Ahmed/.gemini/antigravity/brain/e3ef1958-c6b2-434a-ad8f-6dcebb29436d/exam_analytics_illustration_1768479347547.png',
+            image: '/illustrations/analytics-premium.png',
             color: 'from-purple-600 to-pink-600',
             accent: 'text-purple-600',
             bgAccent: 'bg-purple-50 dark:bg-purple-900/20',
@@ -31,7 +31,7 @@ export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeature
         proctoring: {
             title: t('premiumModal.proctoring.title', 'Live AI Proctoring'),
             desc: t('premiumModal.proctoring.desc', 'Monitor your exams in real-time with AI-powered tab detection and anti-cheat measures.'),
-            image: '/C:/Users/Elsaid Ahmed/.gemini/antigravity/brain/e3ef1958-c6b2-434a-ad8f-6dcebb29436d/live_proctoring_illustration_1768479365891.png',
+            image: '/illustrations/proctoring-premium.png',
             color: 'from-teal-600 to-cyan-600',
             accent: 'text-teal-600',
             bgAccent: 'bg-teal-50 dark:bg-teal-900/20',
