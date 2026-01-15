@@ -173,11 +173,11 @@ export default function TermsOfService() {
                                 </div>
                             </div>
                             <a
-                                href="mailto:support@durrahtutors.com"
+                                href="mailto:info@durrahtutors.com"
                                 className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 font-medium rounded-lg border border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors shadow-sm"
                             >
                                 <Mail className="w-4 h-4" />
-                                support@durrahtutors.com
+                                info@durrahtutors.com
                             </a>
                         </div>
                     </div>

@@ -29,7 +29,7 @@ export default function PrivacyPolicy() {
         {
             icon: Trash2,
             title: "5. Data Subjects' Rights",
-            content: "Users have the right to access, rectify, or request the deletion of their personal data. Tutors can manage and delete student data at any time. To exercise these rights, contact us at support@durrahtutors.com."
+            content: "Users have the right to access, rectify, or request the deletion of their personal data. Tutors can manage and delete student data at any time. To exercise these rights, contact us at info@durrahtutors.com."
         }
     ];
 
@@ -93,10 +93,10 @@ export default function PrivacyPolicy() {
                                 <p className="text-sm text-gray-600 dark:text-gray-400">Contact our Data Protection Officer</p>
                             </div>
                             <a
-                                href="mailto:support@durrahtutors.com"
+                                href="mailto:info@durrahtutors.com"
                                 className="px-6 py-3 bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 font-medium rounded-lg border border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors shadow-sm"
                             >
-                                support@durrahtutors.com
+                                info@durrahtutors.com
                             </a>
                         </div>
                     </div>

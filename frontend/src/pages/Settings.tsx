@@ -472,15 +472,28 @@ export default function Settings() {
                         </section>
                     </div>
 
-                    {/* Metadata Footer */}
-                    <div className="flex flex-col sm:flex-row justify-between items-center px-6 py-4 border border-gray-200 dark:border-gray-800 rounded-lg gap-4 text-xs font-semibold text-gray-400">
-                        <div className="flex gap-2">
-                            <span>{t('settings.footer.id', 'User ID')}:</span>
-                            <code className="text-indigo-600">{user?.id}</code>
+                    {/* Metadata & Help Footer */}
+                    <div className="flex flex-col sm:flex-row justify-between items-center px-6 py-6 border border-gray-200 dark:border-gray-800 rounded-xl gap-6 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2 text-xs font-semibold text-gray-400">
+                                <span>{t('settings.footer.id', 'User ID')}:</span>
+                                <code className="text-indigo-600">{user?.id}</code>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs font-semibold text-gray-400">
+                                <span>{t('settings.footer.created', 'Joined')}:</span>
+                                <span className="ml-1">{new Date(user?.created_at || '').toLocaleDateString()}</span>
+                            </div>
                         </div>
-                        <div>
-                            <span>{t('settings.footer.created', 'Joined')}:</span>
-                            <span className="ml-2">{new Date(user?.created_at || '').toLocaleDateString()}</span>
+
+                        <div className="flex flex-col items-center sm:items-end gap-2">
+                            <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Need Help?</span>
+                            <a
+                                href="mailto:support@durrahtutors.com"
+                                className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg font-bold text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all border border-indigo-100/50 dark:border-indigo-800/50"
+                            >
+                                <Mail className="w-4 h-4" />
+                                support@durrahtutors.com
+                            </a>
                         </div>
                     </div>
                 </div>
