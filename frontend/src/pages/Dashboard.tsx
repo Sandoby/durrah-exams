@@ -915,9 +915,9 @@ export default function Dashboard() {
                                                         }`}
                                                 >
                                                     {profile?.subscription_status !== 'active' && (
-                                                        <div className="absolute -top-2 -right-1 z-10">
-                                                            <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
-                                                                <Crown className="w-2 h-2" />
+                                                        <div className="absolute -top-2.5 -right-1.5 z-20">
+                                                            <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg border border-white/20 flex items-center gap-1">
+                                                                <Crown className="w-2.5 h-2.5" />
                                                                 PRO
                                                             </div>
                                                         </div>
@@ -945,15 +945,15 @@ export default function Dashboard() {
                                                                 setPremiumModal({ isOpen: true, feature: 'proctoring' });
                                                             }
                                                         }}
-                                                        className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 group overflow-hidden ${profile?.subscription_status === 'active'
-                                                            ? 'bg-gradient-to-br from-teal-500 to-cyan-600 border border-teal-400/50 hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105'
+                                                        className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 group ${profile?.subscription_status === 'active'
+                                                            ? 'bg-gradient-to-br from-teal-500 to-cyan-600 border border-teal-400/50 hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105 overflow-hidden'
                                                             : 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-teal-300 dark:hover:border-teal-700'
                                                             }`}
                                                     >
                                                         {profile?.subscription_status !== 'active' && (
-                                                            <div className="absolute -top-2 -right-1 z-10">
-                                                                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
-                                                                    <Crown className="w-2 h-2" />
+                                                            <div className="absolute -top-2.5 -right-1.5 z-20">
+                                                                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg border border-white/20 flex items-center gap-1">
+                                                                    <Crown className="w-2.5 h-2.5" />
                                                                     PRO
                                                                 </div>
                                                             </div>
