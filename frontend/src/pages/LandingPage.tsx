@@ -1,7 +1,7 @@
 ﻿import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Check, Zap, Shield, Globe, Users, ArrowRight, Layout, Sparkles, Award, Menu, X, Trophy, ChevronDown, Rocket, Orbit, Smartphone, Download, Bell, GraduationCap } from 'lucide-react';
+import { Check, Zap, Shield, Globe, Users, ArrowRight, Layout, Sparkles, Award, Menu, X, Trophy, ChevronDown, Rocket, Orbit, Smartphone, Download, Bell, GraduationCap, Facebook } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { Logo } from '../components/Logo';
 import MobileWelcome from './MobileWelcome';
@@ -1419,7 +1419,18 @@ export default function LandingPage() {
                                 <Logo className="h-8 w-8" showText={false} />
                                 <span className="text-xl font-bold text-white">Durrah</span>
                             </div>
-                            <p className="text-gray-400">Modern exam platform for educators</p>
+                            <p className="text-gray-400 mb-6">Modern exam platform for educators</p>
+                            <div className="flex items-center gap-4">
+                                <a
+                                    href="https://web.facebook.com/profile.php?id=61584207453651"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-gray-400 hover:bg-indigo-600 hover:text-white transition-all transform hover:-translate-y-1"
+                                    title="Follow us on Facebook"
+                                >
+                                    <Facebook className="w-5 h-5" />
+                                </a>
+                            </div>
                         </div>
                         <div>
                             <h3 className="font-bold text-white mb-4">Product</h3>
