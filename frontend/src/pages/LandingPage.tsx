@@ -1,7 +1,7 @@
 ﻿import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Check, Zap, Shield, Globe, Users, ArrowRight, Layout, Sparkles, Award, Menu, X, Trophy, ChevronDown, Rocket, Orbit, Smartphone, Download, Bell, GraduationCap, Facebook } from 'lucide-react';
+import { ArrowRight, CaretDown, Check, GraduationCap, Layout, Lightning, Lock, List, X, ShieldCheck, Sparkle, GlobeHemisphereWest, UsersThree, Medal, Rocket, DeviceMobile, Bell, FacebookLogo, ChartLineUp, DownloadSimple } from '@phosphor-icons/react';
 import { useState, useEffect, useRef } from 'react';
 import { Logo } from '../components/Logo';
 import MobileWelcome from './MobileWelcome';
@@ -9,6 +9,9 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { ParallaxFloatingIcons } from '../components/ParallaxFloatingIcons';
+import { GridSpotlight } from '../components/GridSpotlight';
+import { InteractiveHowTo } from '../components/InteractiveHowTo';
 
 export default function LandingPage() {
     const { t, i18n } = useTranslation();
@@ -179,6 +182,8 @@ export default function LandingPage() {
         whileInView: { transition: { staggerChildren: 0.1 } },
         viewport: { once: true }
     };
+
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -406,6 +411,8 @@ export default function LandingPage() {
                 .animate-spin-slow { animation: spin 12s linear infinite; }
             `}</style>
 
+
+
             {/* Navigation */}
             <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
                 <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl shadow-xl shadow-indigo-500/5">
@@ -432,10 +439,10 @@ export default function LandingPage() {
                                                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
                                             >
                                                 <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                                                    <Users className="w-4 h-4" />
+                                                    <UsersThree weight="duotone" className="w-4 h-4" />
                                                 </div>
                                                 <span className="max-w-[150px] truncate">{user.email}</span>
-                                                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${userDropdownOpen ? 'rotate-180' : ''}`} />
+                                                <CaretDown weight="bold" className={`w-4 h-4 transition-transform duration-300 ${userDropdownOpen ? 'rotate-180' : ''}`} />
                                             </button>
 
                                             <AnimatePresence>
@@ -451,11 +458,11 @@ export default function LandingPage() {
                                                             <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user.email}</p>
                                                         </div>
                                                         <Link to="/dashboard" onClick={() => setUserDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all">
-                                                            <Layout className="w-4 h-4" />
+                                                            <Layout weight="duotone" className="w-4 h-4" />
                                                             {t('nav.goToDashboard', 'Go to Dashboard')}
                                                         </Link>
                                                         <Link to="/settings" onClick={() => setUserDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all">
-                                                            <Trophy className="w-4 h-4" />
+                                                            <Medal weight="duotone" className="w-4 h-4" />
                                                             {t('nav.settings', 'Account Settings')}
                                                         </Link>
                                                         <div className="h-px bg-gray-100 dark:bg-gray-800 my-2 mx-2"></div>
@@ -487,7 +494,7 @@ export default function LandingPage() {
 
                             {/* Mobile Menu Button */}
                             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                                {mobileMenuOpen ? <X weight="bold" className="w-6 h-6" /> : <List weight="bold" className="w-6 h-6" />}
                             </button>
                         </div>
                     </div>
@@ -556,10 +563,13 @@ export default function LandingPage() {
             )}
 
             {/* Hero Section */}
-            <section className="relative pt-40 pb-32 overflow-hidden bg-slate-50 dark:bg-slate-950">
-                {/* Background Grid & Noise */}
-                <div className="absolute inset-0 bg-grid-pattern opacity-[0.4] pointer-events-none" />
-                <div className="absolute inset-0 bg-noise pointer-events-none" />
+            <section className="relative pt-40 pb-32 overflow-hidden bg-slate-50 dark:bg-slate-950 min-h-screen">
+                {/* Background Effects */}
+                <GridSpotlight />
+                <ParallaxFloatingIcons />
+
+                {/* Noise */}
+                <div className="absolute inset-0 bg-noise opacity-[0.4] pointer-events-none" />
 
                 {/* Mesh Gradients */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-500/20 rounded-full blur-[100px] opacity-70 animate-pulse-slow pointer-events-none" />
@@ -572,7 +582,7 @@ export default function LandingPage() {
                             animate={{ opacity: 1, y: 0 }}
                             className="inline-flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-indigo-100 dark:border-indigo-900/50 rounded-full px-4 py-2 mb-8 shadow-sm"
                         >
-                            <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <Sparkle weight="fill" className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                             <span className="text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
                                 {t('hero.trustedBadge')}
                             </span>
@@ -608,12 +618,12 @@ export default function LandingPage() {
                             <a href={registrationUrl} target="_blank" rel="noreferrer" className="group relative bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-xl font-bold text-lg shadow-2xl hover:scale-[1.02] transition-all duration-300 shine-effect overflow-hidden">
                                 <span className="relative z-10 flex items-center gap-2">
                                     {t('hero.cta')}
-                                    <ArrowRight className={`w-5 h-5 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180' : ''}`} />
+                                    <ArrowRight weight="bold" className={`w-5 h-5 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180' : ''}`} />
                                 </span>
                             </a>
                             <Link to="/demo" className="group px-8 py-4 rounded-xl font-bold text-lg text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center gap-2">
                                 {t('hero.watchDemo', 'Interactive Demo')}
-                                <Zap className="w-5 h-5" />
+                                <Lightning weight="duotone" className="w-5 h-5" />
                             </Link>
                         </motion.div>
                     </div>
@@ -666,10 +676,10 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
                         {[
-                            { label: "High Availability", value: "99.9% Uptime", icon: Globe, color: "text-indigo-500" },
-                            { label: "Security", value: "SSL Encrypted", icon: Shield, color: "text-emerald-500" },
-                            { label: "Global Reach", value: "Any Device", icon: Smartphone, color: "text-purple-500" },
-                            { label: "Reporting", value: "Instant Result", icon: Zap, color: "text-yellow-500" },
+                            { label: "High Availability", value: "99.9% Uptime", icon: GlobeHemisphereWest, color: "text-indigo-500" },
+                            { label: "Security", value: "SSL Encrypted", icon: ShieldCheck, color: "text-emerald-500" },
+                            { label: "Global Reach", value: "Any Device", icon: DeviceMobile, color: "text-purple-500" },
+                            { label: "Reporting", value: "Instant Result", icon: Lightning, color: "text-yellow-500" },
                         ].map((stat, idx) => (
                             <motion.div
                                 key={idx}
@@ -680,7 +690,7 @@ export default function LandingPage() {
                                 className="flex flex-col items-center md:items-start text-center md:text-left"
                             >
                                 <div className={`flex items-center gap-2 mb-2 ${stat.color}`}>
-                                    <stat.icon className="w-4 h-4" />
+                                    <stat.icon weight="duotone" className="w-4 h-4" />
                                     <span className="text-[10px] font-black uppercase tracking-[0.2em]">{stat.label}</span>
                                 </div>
                                 <div className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-200">
@@ -698,7 +708,7 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="text-center mb-16 max-w-3xl mx-auto">
                         <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-4">
-                            <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <Sparkle weight="fill" className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                             <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('features.badge')}</span>
                         </div>
                         <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">{t('features.title')}</h2>
@@ -718,7 +728,7 @@ export default function LandingPage() {
                             <div className="relative z-10 h-full flex flex-col justify-between">
                                 <div>
                                     <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl flex items-center justify-center mb-6 text-indigo-600 dark:text-indigo-400">
-                                        <Shield className="w-6 h-6" />
+                                        <ShieldCheck weight="duotone" className="w-6 h-6" />
                                     </div>
                                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">{t('features.antiCheating.title')}</h3>
                                     <p className="text-slate-600 dark:text-slate-400 text-lg max-w-md">{t('features.antiCheating.desc')}</p>
@@ -744,7 +754,7 @@ export default function LandingPage() {
 
                             <div className="relative z-10 flex flex-col h-full items-center text-center">
                                 <div className="w-16 h-16 bg-pink-100 dark:bg-pink-900/50 rounded-2xl flex items-center justify-center mb-6 text-pink-600 dark:text-pink-400 shadow-lg shadow-pink-500/20">
-                                    <Globe className="w-8 h-8" />
+                                    <GlobeHemisphereWest weight="duotone" className="w-8 h-8" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">{t('features.globalAccess.title')}</h3>
                                 <p className="text-slate-600 dark:text-slate-400 mb-8">{t('features.globalAccess.desc')}</p>
@@ -769,7 +779,7 @@ export default function LandingPage() {
                             className="glass-card rounded-3xl p-8 relative overflow-hidden group hover:border-yellow-500/30 transition-colors"
                         >
                             <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/50 rounded-2xl flex items-center justify-center mb-4 text-yellow-600 dark:text-yellow-400">
-                                <Zap className="w-6 h-6" />
+                                <Lightning weight="duotone" className="w-6 h-6" />
                             </div>
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('features.fastCreation.title')}</h3>
                             <p className="text-slate-600 dark:text-slate-400">{t('features.fastCreation.desc')}</p>
@@ -784,7 +794,7 @@ export default function LandingPage() {
                             className="glass-card rounded-3xl p-8 relative overflow-hidden group hover:border-green-500/30 transition-colors"
                         >
                             <div className="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-2xl flex items-center justify-center mb-4 text-green-600 dark:text-green-400">
-                                <Users className="w-6 h-6" />
+                                <UsersThree weight="duotone" className="w-6 h-6" />
                             </div>
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('features.unlimitedStudents.title')}</h3>
                             <p className="text-slate-600 dark:text-slate-400">{t('features.unlimitedStudents.desc')}</p>
@@ -798,7 +808,7 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-4">
-                            <Award className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <Medal weight="duotone" className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                             <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('pricing.badge')}</span>
                         </div>
                         <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">{t('pricing.title')}</h2>
@@ -817,9 +827,9 @@ export default function LandingPage() {
                             <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('pricing.starter.title')}</h3>
                             <div className="mb-6"><span className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">{t('pricing.starter.price')}</span></div>
                             <ul className="space-y-4 mb-8 flex-1">
-                                <li className="flex items-start"><Check className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" /><span className="text-slate-600 dark:text-slate-300 text-sm font-medium">{t('pricing.starter.features.0')}</span></li>
-                                <li className="flex items-start"><Check className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" /><span className="text-slate-600 dark:text-slate-300 text-sm font-medium">{t('pricing.starter.features.1')}</span></li>
-                                <li className="flex items-start"><Check className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" /><span className="text-slate-600 dark:text-slate-300 text-sm font-medium">{t('pricing.starter.features.2')}</span></li>
+                                <li className="flex items-start"><Check weight="bold" className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" /><span className="text-slate-600 dark:text-slate-300 text-sm font-medium">{t('pricing.starter.features.0')}</span></li>
+                                <li className="flex items-start"><Check weight="bold" className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" /><span className="text-slate-600 dark:text-slate-300 text-sm font-medium">{t('pricing.starter.features.1')}</span></li>
+                                <li className="flex items-start"><Check weight="bold" className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" /><span className="text-slate-600 dark:text-slate-300 text-sm font-medium">{t('pricing.starter.features.2')}</span></li>
                             </ul>
                             <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white py-4 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">{t('pricing.starter.cta')}</a>
                         </motion.div>
@@ -837,7 +847,7 @@ export default function LandingPage() {
                             </div>
                             <ul className="space-y-4 mb-8 flex-1">
                                 {[0, 1, 2, 3].map(i => (
-                                    <li key={i} className="flex items-start"><Check className="h-5 w-5 text-green-400 mr-3 flex-shrink-0" /><span className="text-slate-300 dark:text-indigo-50 text-sm font-medium">{t(`pricing.professional.features.${i}`)}</span></li>
+                                    <li key={i} className="flex items-start"><Check weight="bold" className="h-5 w-5 text-green-400 mr-3 flex-shrink-0" /><span className="text-slate-300 dark:text-indigo-50 text-sm font-medium">{t(`pricing.professional.features.${i}`)}</span></li>
                                 ))}
                             </ul>
                             <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-white text-slate-900 dark:text-indigo-600 py-4 rounded-xl font-bold hover:bg-slate-100 transition-colors shadow-lg">{t('pricing.professional.cta')}</a>
@@ -855,7 +865,7 @@ export default function LandingPage() {
                             </div>
                             <ul className="space-y-4 mb-8 flex-1">
                                 {[0, 1, 2].map(i => (
-                                    <li key={i} className="flex items-start"><Check className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" /><span className="text-slate-600 dark:text-slate-300 text-sm font-medium">{t(`pricing.yearly.features.${i}`)}</span></li>
+                                    <li key={i} className="flex items-start"><Check weight="bold" className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" /><span className="text-slate-600 dark:text-slate-300 text-sm font-medium">{t(`pricing.yearly.features.${i}`)}</span></li>
                                 ))}
                             </ul>
                             <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/20">{t('pricing.yearly.cta')}</a>
@@ -903,7 +913,7 @@ export default function LandingPage() {
                                         animate={{ rotate: activeFaq === index ? 180 : 0 }}
                                         transition={{ duration: 0.3 }}
                                     >
-                                        <ChevronDown className={`w-5 h-5 ${activeFaq === index ? 'text-indigo-600' : 'text-slate-400'}`} />
+                                        <CaretDown weight="bold" className={`w-5 h-5 ${activeFaq === index ? 'text-indigo-600' : 'text-slate-400'}`} />
                                     </motion.div>
                                 </button>
                                 <AnimatePresence>
@@ -947,7 +957,7 @@ export default function LandingPage() {
                                 viewport={{ once: true }}
                                 className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8"
                             >
-                                <Sparkles className="w-4 h-4" />
+                                <Sparkle weight="fill" className="w-4 h-4" />
                                 <span>{t('ctaSection.tagline', 'Join the Future of Assessment')}</span>
                             </motion.div>
 
@@ -989,7 +999,7 @@ export default function LandingPage() {
                                     to="/demo"
                                     className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 px-8 py-4 rounded-xl text-lg font-bold backdrop-blur-sm transition-all hover:-translate-y-1"
                                 >
-                                    <Zap className="w-5 h-5" />
+                                    <Lightning weight="duotone" className="w-5 h-5" />
                                     {t('ctaSection.demo', 'Live Demo')}
                                 </Link>
                             </motion.div>
@@ -1016,7 +1026,7 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="flex justify-center mb-12">
                         <div className="glass-panel px-6 py-2 rounded-full flex items-center gap-2 border-indigo-500/30">
-                            <Orbit className="h-5 w-5 text-indigo-400 animate-spin-slow" />
+                            <Rocket weight="duotone" className="h-5 w-5 text-indigo-400 animate-spin-slow" />
                             <span className="text-sm font-bold text-indigo-100/80 tracking-widest uppercase">{t('kidsLanding.missionCenter', 'Mission Center')}</span>
                         </div>
                     </div>
@@ -1035,7 +1045,7 @@ export default function LandingPage() {
                                 viewport={{ once: true }}
                                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-6"
                             >
-                                <Zap className="h-4 w-4 fill-current animate-pulse" />
+                                <Lightning weight="fill" className="h-4 w-4 fill-current animate-pulse" />
                                 <span>{t('kidsLanding.readySystem', 'SYSTEM READY FOR TAKEOFF')}</span>
                             </motion.div>
 
@@ -1068,9 +1078,9 @@ export default function LandingPage() {
                                     className="grid grid-cols-2 gap-4 mb-8"
                                 >
                                     {[
-                                        { icon: Shield, color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
-                                        { icon: Sparkles, color: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/20" },
-                                        { icon: Trophy, color: "text-pink-400", bg: "bg-pink-400/10", border: "border-pink-400/20" },
+                                        { icon: ShieldCheck, color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
+                                        { icon: Sparkle, color: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/20" },
+                                        { icon: Medal, color: "text-pink-400", bg: "bg-pink-400/10", border: "border-pink-400/20" },
                                         { icon: Rocket, color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20" }
                                     ].map((item, i) => (
                                         <motion.div
@@ -1172,7 +1182,7 @@ export default function LandingPage() {
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                                            <Trophy className="w-5 h-5" />
+                                            <Medal weight="duotone" className="w-5 h-5" />
                                         </div>
                                         <div>
                                             <div className="text-[10px] font-black uppercase tracking-wider text-slate-500">Academic Standing</div>
@@ -1206,9 +1216,9 @@ export default function LandingPage() {
                                 <div className="grid sm:grid-cols-2 gap-6 mb-12">
                                     {[
                                         { icon: Layout, title: "Centralized Access" },
-                                        { icon: Sparkles, title: "Performance Insights" },
-                                        { icon: Award, title: "Achievement Badges" },
-                                        { icon: Shield, title: "Secure History" }
+                                        { icon: ChartLineUp, title: "Performance Insights" },
+                                        { icon: Medal, title: "Achievement Badges" },
+                                        { icon: ShieldCheck, title: "Secure History" }
                                     ].map((item, i) => (
                                         <div key={i} className="flex items-center gap-4 group">
                                             <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-500 group-hover:text-white transition-all">
@@ -1230,83 +1240,8 @@ export default function LandingPage() {
             </section>
 
             {/* How to Section - Timeline Layout */}
-            <section className="py-32 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-24">
-                        <motion.h2
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight"
-                        >
-                            {t('landing.howto.title', 'Go from Concept to Exam in Minutes')}
-                        </motion.h2>
-                        <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                            {t('landing.howto.subtitle', 'Our streamlined process allows you to focus on education, not administration.')}
-                        </p>
-                    </div>
-
-                    <div className="relative">
-                        {/* Connecting Line (Desktop) */}
-                        <div className="hidden md:block stepper-line-horizontal" />
-
-                        <div className="grid md:grid-cols-3 gap-16 md:gap-8">
-                            {[
-                                {
-                                    step: "1",
-                                    title: t('landing.howto.step1.title', 'Craft Your Questions'),
-                                    desc: t('landing.howto.step1.desc', 'Use our intuitive editor for MCQs, essays, or math-heavy technical exams.'),
-                                    icon: Layout,
-                                    color: "bg-indigo-600"
-                                },
-                                {
-                                    step: "2",
-                                    title: t('landing.howto.step2.title', 'Configure Security'),
-                                    desc: t('landing.howto.step2.desc', 'Enable AI proctoring, tab tracking, and time limits with a single click.'),
-                                    icon: Shield,
-                                    color: "bg-violet-600"
-                                },
-                                {
-                                    step: "3",
-                                    title: t('landing.howto.step3.title', 'Launch & Analyze'),
-                                    desc: t('landing.howto.step3.desc', 'Share via QR or link, and watch as automated reports generate in real-time.'),
-                                    icon: Rocket,
-                                    color: "bg-emerald-600"
-                                }
-                            ].map((item, idx) => (
-                                <motion.div
-                                    key={idx}
-                                    initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: idx * 0.2 }}
-                                    className="relative flex flex-col items-center text-center group"
-                                >
-                                    {/* Circle / Icon */}
-                                    <div className="relative z-10 mb-8">
-                                        <div className={`w-20 h-20 ${item.color} rounded-2xl flex items-center justify-center text-white shadow-2xl transform transition-transform group-hover:scale-110 group-hover:rotate-6`}>
-                                            <item.icon className="w-8 h-8" />
-                                        </div>
-                                        <div className="absolute -top-3 -right-3 w-8 h-8 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center font-black text-slate-900 dark:text-white border-2 border-slate-100 dark:border-slate-700 shadow-lg">
-                                            {item.step}
-                                        </div>
-                                    </div>
-
-                                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{item.title}</h3>
-                                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed max-w-[280px]">
-                                        {item.desc}
-                                    </p>
-
-                                    {/* Mobile Connector */}
-                                    {idx < 2 && (
-                                        <div className="md:hidden w-px h-12 bg-slate-200 dark:bg-slate-700 my-4" />
-                                    )}
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
+            {/* How to Section - Interactive Tabs */}
+            <InteractiveHowTo />
 
             {/* Mobile App Section */}
             <section className="py-32 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-950 relative overflow-hidden">
@@ -1324,14 +1259,14 @@ export default function LandingPage() {
                             {/* Decorative Background Elements */}
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" />
 
-                            <div className="phone-frame scale-90 md:scale-100 rotate-y-n12 transform-style-3d">
+                            <div className="phone-frame scale-[0.7] sm:scale-90 md:scale-100 rotate-y-n12 transform-style-3d">
                                 <div className="absolute inset-0 bg-slate-900 overflow-hidden">
                                     <div className="w-full h-full flex items-center justify-center bg-gray-900 select-none overflow-hidden">
                                         <div
-                                            style={{ width: '360px', height: '746px', transform: 'scale(0.778)' }}
+                                            style={{ width: '360px', height: '770px', transform: 'scale(0.733)' }}
                                             className="flex-shrink-0 bg-gray-50 dark:bg-gray-950 pointer-events-none origin-center"
                                         >
-                                            <MobileWelcome className="w-full h-full pt-16" />
+                                            <MobileWelcome className="h-full" />
                                         </div>
                                     </div>
                                     {/* Gradient Overlay for depth */}
@@ -1361,7 +1296,7 @@ export default function LandingPage() {
                                 viewport={{ once: true }}
                             >
                                 <div className="inline-flex items-center gap-2 bg-pink-50 dark:bg-pink-900/30 border border-pink-200 dark:border-pink-800 rounded-full px-4 py-1.5 mb-6">
-                                    <Smartphone className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+                                    <DeviceMobile weight="duotone" className="w-4 h-4 text-pink-600 dark:text-pink-400" />
                                     <span className="text-[10px] font-black uppercase tracking-widest text-pink-600 dark:text-pink-400">Mobile First</span>
                                 </div>
 
@@ -1376,9 +1311,9 @@ export default function LandingPage() {
                                 <div className="grid sm:grid-cols-2 gap-4 mb-12">
                                     {[
                                         { icon: Bell, text: "Push Notifications", color: "bg-indigo-500" },
-                                        { icon: Shield, text: "Biometric Control", color: "bg-emerald-500" },
+                                        { icon: ShieldCheck, text: "Biometric Control", color: "bg-emerald-500" },
                                         { icon: Rocket, text: "Kids Adventure", color: "bg-purple-500" },
-                                        { icon: Download, text: "Offline Mode", color: "bg-amber-500" }
+                                        { icon: Lock, text: "Offline Mode", color: "bg-amber-500" }
                                     ].map((feat, i) => (
                                         <div key={i} className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 backdrop-blur-sm transition-colors hover:border-indigo-500/30 group">
                                             <feat.icon className="w-5 h-5 text-indigo-500 group-hover:scale-110 transition-transform" />
@@ -1392,7 +1327,7 @@ export default function LandingPage() {
                                         href="https://khogxhpnuhhebkevaqlg.supabase.co/storage/v1/object/public/app-releases/DurrahTutors-latest.apk"
                                         className="inline-flex items-center gap-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl font-bold shadow-xl hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white transition-all transform hover:-translate-y-1"
                                     >
-                                        <Download className="w-5 h-5" />
+                                        <DownloadSimple className="w-5 h-5" />
                                         {t('landing.mobileApp.download', 'Download APK')}
                                     </a>
 
@@ -1428,7 +1363,7 @@ export default function LandingPage() {
                                     className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-gray-400 hover:bg-indigo-600 hover:text-white transition-all transform hover:-translate-y-1"
                                     title="Follow us on Facebook"
                                 >
-                                    <Facebook className="w-5 h-5" />
+                                    <FacebookLogo weight="fill" className="w-5 h-5" />
                                 </a>
                             </div>
                         </div>

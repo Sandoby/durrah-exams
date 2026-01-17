@@ -53,7 +53,7 @@ export default function MobileWelcome({ className }: { className?: string }) {
     };
 
     return (
-        <div className={cn("min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center p-6 relative overflow-hidden", className)}>
+        <div className={cn("min-h-full h-full bg-gray-50 dark:bg-gray-950 flex flex-col items-center p-8 sm:p-10 relative overflow-hidden", className)}>
             {/* Background decoration */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute -top-20 -right-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl" />
@@ -65,79 +65,81 @@ export default function MobileWelcome({ className }: { className?: string }) {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="w-full max-w-md z-10 flex flex-col gap-8"
+                className="w-full max-w-md z-10 flex flex-col items-center flex-1 justify-between h-full"
             >
-                {/* Header / Logo */}
-                <motion.div variants={itemVariants} className="flex flex-col items-center text-center space-y-4 mb-4">
-                    <Logo size="lg" />
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-4">Durrah for Tutors</h1>
-                        <p className="text-gray-500 dark:text-gray-400">{t('mobileWelcome.title', 'Choose your learning path')}</p>
+                {/* Header / Logo Section */}
+                <motion.div variants={itemVariants} className="flex flex-col items-center text-center pt-4">
+                    <Logo size="lg" showText={false} />
+                    <div className="mt-8">
+                        <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Durrah for Tutors</h1>
+                        <p className="text-gray-500 dark:text-gray-400 mt-2">{t('mobileWelcome.title', 'Choose your learning path')}</p>
                     </div>
                 </motion.div>
 
-                {/* Language Switcher */}
-                <motion.div variants={itemVariants} className="flex justify-center">
-                    <LanguageSwitcher />
-                </motion.div>
+                {/* Main Action Section */}
+                <div className="w-full flex flex-col items-center gap-10">
+                    {/* Language Switcher */}
+                    <motion.div variants={itemVariants}>
+                        <LanguageSwitcher />
+                    </motion.div>
 
-                {/* Options */}
-                <div className="space-y-4">
+                    {/* Options Stack */}
+                    <div className="space-y-4 w-full">
+                        {/* Tutor Option */}
+                        <motion.button
+                            variants={itemVariants}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => handleNavigation('/login')}
+                            className="w-full bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-4 group hover:border-indigo-500/50 transition-colors"
+                        >
+                            <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                <Users className="w-6 h-6" />
+                            </div>
+                            <div className="flex-1 text-left">
+                                <h3 className="font-bold text-gray-900 dark:text-white text-lg">{t('mobileWelcome.tutor.title', 'Tutor Access')}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{t('mobileWelcome.tutor.desc', 'Manage exams & students')}</p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-indigo-600 transition-colors" />
+                        </motion.button>
 
-                    {/* Tutor Option */}
-                    <motion.button
-                        variants={itemVariants}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleNavigation('/login')}
-                        className="w-full bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-4 group hover:border-indigo-500/50 transition-colors"
-                    >
-                        <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                            <Users className="w-6 h-6" />
-                        </div>
-                        <div className="flex-1 text-left">
-                            <h3 className="font-bold text-gray-900 dark:text-white text-lg">{t('mobileWelcome.tutor.title', 'Tutor Access')}</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{t('mobileWelcome.tutor.desc', 'Manage exams & students')}</p>
-                        </div>
-                        <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-indigo-600 transition-colors" />
-                    </motion.button>
+                        {/* Student Portal */}
+                        <motion.button
+                            variants={itemVariants}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => handleNavigation('/student-portal')}
+                            className="w-full bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-4 group hover:border-emerald-500/50 transition-colors"
+                        >
+                            <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                <GraduationCap className="w-6 h-6" />
+                            </div>
+                            <div className="flex-1 text-left">
+                                <h3 className="font-bold text-gray-900 dark:text-white text-lg">{t('mobileWelcome.student.title', 'Student Portal')}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{t('mobileWelcome.student.desc', 'Take exams & track progress')}</p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-emerald-600 transition-colors" />
+                        </motion.button>
 
-                    {/* Student Portal */}
-                    <motion.button
-                        variants={itemVariants}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleNavigation('/student-portal')}
-                        className="w-full bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-4 group hover:border-emerald-500/50 transition-colors"
-                    >
-                        <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                            <GraduationCap className="w-6 h-6" />
-                        </div>
-                        <div className="flex-1 text-left">
-                            <h3 className="font-bold text-gray-900 dark:text-white text-lg">{t('mobileWelcome.student.title', 'Student Portal')}</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{t('mobileWelcome.student.desc', 'Take exams & track progress')}</p>
-                        </div>
-                        <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-emerald-600 transition-colors" />
-                    </motion.button>
-
-                    {/* Kids Adventure */}
-                    <motion.button
-                        variants={itemVariants}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleNavigation('/kids')}
-                        className="w-full bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-4 group hover:border-violet-500/50 transition-colors"
-                    >
-                        <div className="p-3 bg-violet-50 dark:bg-violet-900/30 rounded-xl text-violet-600 dark:text-violet-400 group-hover:bg-violet-600 group-hover:text-white transition-colors">
-                            <Rocket className="w-6 h-6" />
-                        </div>
-                        <div className="flex-1 text-left">
-                            <h3 className="font-bold text-gray-900 dark:text-white text-lg">{t('mobileWelcome.kids.title', 'Kids Adventure')}</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{t('mobileWelcome.kids.desc', 'Fun learning & games')}</p>
-                        </div>
-                        <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-violet-600 transition-colors" />
-                    </motion.button>
-
+                        {/* Kids Adventure */}
+                        <motion.button
+                            variants={itemVariants}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => handleNavigation('/kids')}
+                            className="w-full bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-4 group hover:border-violet-500/50 transition-colors"
+                        >
+                            <div className="p-3 bg-violet-50 dark:bg-violet-900/30 rounded-xl text-violet-600 dark:text-violet-400 group-hover:bg-violet-600 group-hover:text-white transition-colors">
+                                <Rocket className="w-6 h-6" />
+                            </div>
+                            <div className="flex-1 text-left">
+                                <h3 className="font-bold text-gray-900 dark:text-white text-lg">{t('mobileWelcome.kids.title', 'Kids Adventure')}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{t('mobileWelcome.kids.desc', 'Fun learning & games')}</p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-violet-600 transition-colors" />
+                        </motion.button>
+                    </div>
                 </div>
 
-                <motion.p variants={itemVariants} className="text-center text-xs text-gray-400 mt-8">
+                {/* Footer Section */}
+                <motion.p variants={itemVariants} className="text-center text-xs text-gray-400 pb-2">
                     v1.1.0 • {t('mobileWelcome.version', 'Mobile App')}
                 </motion.p>
             </motion.div>
