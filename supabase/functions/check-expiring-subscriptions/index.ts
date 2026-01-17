@@ -251,7 +251,7 @@ serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'Durrah for Tutors <noreply@durrahsystem.tech>',
+            from: 'Durrah for Tutors <info@durrahtutors.com>',
             to: [profile.email],
             subject: template.subject,
             html: template.html,

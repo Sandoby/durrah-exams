@@ -210,7 +210,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Durrah for Tutors <noreply@durrahtutors.com>',
+        from: 'Durrah for Tutors <support@durrahtutors.com>',
         to: [email],
         subject: subject,
         html: html,
