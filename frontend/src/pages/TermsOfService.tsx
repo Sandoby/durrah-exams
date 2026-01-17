@@ -5,6 +5,7 @@ import {
     HelpCircle, Mail
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { Helmet } from 'react-helmet-async';
 
 export default function TermsOfService() {
     const navigate = useNavigate();
@@ -62,6 +63,16 @@ export default function TermsOfService() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            <Helmet>
+                <title>Terms of Service - Durrah for Tutors</title>
+                <meta name="description" content="Review the Terms of Service for Durrah for Tutors. Understand the agreement, academic integrity measures, and legal framework for using our exam platform." />
+                <meta name="robots" content="index, follow" />
+                <link rel="canonical" href="https://durrahtutors.com/terms" />
+                <meta property="og:title" content="Terms of Service - Durrah for Tutors" />
+                <meta property="og:description" content="Understand your rights and responsibilities when using Durrah for Tutors." />
+                <meta property="og:url" content="https://durrahtutors.com/terms" />
+                <meta property="og:type" content="website" />
+            </Helmet>
             {/* Header */}
             <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">

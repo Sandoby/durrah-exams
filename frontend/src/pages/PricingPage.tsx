@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 
 const fadeIn = {
     initial: { opacity: 0, y: 20 },
@@ -25,7 +26,7 @@ const staggerContainer = {
 export default function PricingPage() {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
     // Currency hooks - now using USD base
@@ -55,6 +56,56 @@ export default function PricingPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+            <Helmet>
+                <title>{t('pricing.seo.title', 'Pricing Plans - Affordable Online Exam Platform | Durrah for Tutors')}</title>
+                <meta name="description" content={t('pricing.seo.description', 'Flexible pricing plans for educators. Start free with 3 exams or upgrade to Professional for unlimited exams, analytics, and anti-cheating features. 14-day free trial available.')} />
+                <meta name="keywords" content="exam platform pricing, online assessment pricing, quiz maker cost, educational software pricing, exam creator subscription, durrah pricing" />
+                <meta name="robots" content="index, follow" />
+                <link rel="canonical" href="https://durrahtutors.com/pricing" />
+
+                {/* Hreflang for Multilingual SEO */}
+                <link rel="alternate" hrefLang="en" href="https://durrahtutors.com/pricing" />
+                <link rel="alternate" hrefLang="ar" href="https://durrahtutors.com/pricing?lang=ar" />
+                <link rel="alternate" hrefLang="es" href="https://durrahtutors.com/pricing?lang=es" />
+                <link rel="alternate" hrefLang="fr" href="https://durrahtutors.com/pricing?lang=fr" />
+                <link rel="alternate" hrefLang="x-default" href="https://durrahtutors.com/pricing" />
+
+                {/* Open Graph / Facebook */}
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://durrahtutors.com/pricing" />
+                <meta property="og:title" content={t('pricing.seo.title')} />
+                <meta property="og:description" content={t('pricing.seo.description')} />
+                <meta property="og:image" content="https://durrahtutors.com/og-image.png" />
+                <meta property="og:locale" content={i18n.language === 'ar' ? 'ar_SA' : 'en_US'} />
+
+                {/* Twitter */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={t('pricing.seo.title')} />
+                <meta name="twitter:description" content={t('pricing.seo.description')} />
+                <meta name="twitter:image" content="https://durrahtutors.com/og-image.png" />
+
+                {/* Product/Offer Schema for Pricing */}
+                <script type="application/ld+json">{`
+                    {
+                        "@context": "https://schema.org",
+                        "@type": "Product",
+                        "name": "Durrah for Tutors Professional Plan",
+                        "description": "Premium online exam platform for educators",
+                        "brand": {
+                            "@type": "Brand",
+                            "name": "Durrah"
+                        },
+                        "offers": {
+                            "@type": "AggregateOffer",
+                            "priceCurrency": "USD",
+                            "lowPrice": "0",
+                            "highPrice": "50",
+                            "offerCount": "3"
+                        }
+                    }
+                `}</script>
+            </Helmet>
+
             {/* Header */}
             <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
                 <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-slate-200/50 dark:border-slate-700/50">

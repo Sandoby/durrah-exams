@@ -200,6 +200,12 @@ export default function Login() {
             <Helmet>
                 <title>{t('auth.login.seo.title', 'Tutor Login - Create & Manage Exams | Durrah')}</title>
                 <meta name="description" content={t('auth.login.seo.description', 'Log in to your Durrah tutor account to create secure exams, manage questions, and view student results with advanced anti-cheating features.')} />
+                <meta name="robots" content="noindex, nofollow" />
+                <link rel="canonical" href="https://durrahtutors.com/login" />
+                <meta property="og:title" content={t('auth.login.seo.title')} />
+                <meta property="og:description" content={t('auth.login.seo.description')} />
+                <meta property="og:url" content="https://durrahtutors.com/login" />
+                <meta property="og:type" content="website" />
             </Helmet>
             {/* Mobile Back Button */}
             {Capacitor.isNativePlatform() && (

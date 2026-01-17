@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Database, Eye, Lock, Globe, Trash2 } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { Helmet } from 'react-helmet-async';
 
 export default function PrivacyPolicy() {
     const navigate = useNavigate();
@@ -35,6 +36,16 @@ export default function PrivacyPolicy() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            <Helmet>
+                <title>Privacy Policy - Durrah for Tutors</title>
+                <meta name="description" content="Read the Durrah for Tutors Privacy Policy. Learn how we collect, process, and protect data for educators and students in compliance with GDPR and COPPA." />
+                <meta name="robots" content="index, follow" />
+                <link rel="canonical" href="https://durrahtutors.com/privacy" />
+                <meta property="og:title" content="Privacy Policy - Durrah for Tutors" />
+                <meta property="og:description" content="Learn how Durrah protects your data and privacy during online exams." />
+                <meta property="og:url" content="https://durrahtutors.com/privacy" />
+                <meta property="og:type" content="website" />
+            </Helmet>
             {/* Header */}
             <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">

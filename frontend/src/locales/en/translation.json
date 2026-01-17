@@ -113,6 +113,10 @@
             ],
             "cta": "Get Started",
             "freeTrial": "14-day free trial"
+        },
+        "seo": {
+            "title": "Pricing Plans - Affordable Online Exam Platform | Durrah for Tutors",
+            "description": "Flexible pricing plans for educators. Start free with 3 exams or upgrade to Professional for unlimited exams, analytics, and anti-cheating features. 14-day free trial available."
         }
     },
     "testimonials": {
@@ -147,7 +151,11 @@
             "back": "Back",
             "googleSignin": "Sign in with Google",
             "microsoftSignin": "Sign in with Microsoft",
-            "or": "OR"
+            "or": "OR",
+            "seo": {
+                "title": "Tutor Login - Create & Manage Exams | Durrah",
+                "description": "Log in to your Durrah tutor account to create secure exams, manage questions, and view student results with advanced anti-cheating features."
+            }
         },
         "register": {
             "title": "Create an account",
@@ -593,7 +601,13 @@
         "recentActivity": "Recent Activity",
         "noExams": "No exams found yet. Join your first exam above!",
         "untitled": "Untitled Exam",
-        "noDesc": "No description"
+        "noDesc": "No description",
+        "seo": {
+            "title": "Student Portal - Take Your Exams | Durrah",
+            "titleLogged": "Student Dashboard - My Exams | Durrah",
+            "description": "Access your exams on Durrah. Log in or register to join exams using a code, view your results, and track your progress in a secure environment.",
+            "descriptionLogged": "View your exam history, check your performance stats, and join new assessments in the Durrah student dashboard."
+        }
     },
     "kidsLanding": {
         "missionCenter": "Mission Center",

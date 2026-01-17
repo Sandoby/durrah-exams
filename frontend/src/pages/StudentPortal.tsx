@@ -236,6 +236,14 @@ export default function StudentPortal() {
         <Helmet>
           <title>{t('studentPortal.seo.title', 'Student Portal - Take Your Exams | Durrah')}</title>
           <meta name="description" content={t('studentPortal.seo.description', 'Access your exams on Durrah. Log in or register to join exams using a code, view your results, and track your progress in a secure environment.')} />
+          <meta name="robots" content="index, follow" />
+          <link rel="canonical" href="https://durrahtutors.com/student-portal" />
+
+          {/* Open Graph */}
+          <meta property="og:title" content={t('studentPortal.seo.title')} />
+          <meta property="og:description" content={t('studentPortal.seo.description')} />
+          <meta property="og:url" content="https://durrahtutors.com/student-portal" />
+          <meta property="og:type" content="website" />
         </Helmet>
         {/* Mobile Back Button */}
         {Capacitor.isNativePlatform() && (
@@ -445,6 +453,8 @@ export default function StudentPortal() {
       <Helmet>
         <title>{t('studentPortal.seo.titleLogged', 'Student Dashboard - My Exams | Durrah')}</title>
         <meta name="description" content={t('studentPortal.seo.descriptionLogged', 'View your exam history, check your performance stats, and join new assessments in the Durrah student dashboard.')} />
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://durrahtutors.com/student-portal" />
       </Helmet>
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
