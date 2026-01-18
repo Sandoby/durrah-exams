@@ -1,4 +1,59 @@
 import { config, getAIKey } from './config';
+import { GoogleGenAI } from "@google/genai";
+
+/**
+ * Configure AI Client
+ */
+const getClient = (apiKey: string) => {
+    return new GoogleGenAI({ apiKey });
+};
+
+/**
+ * Helper to generate content with fallback
+ */
+const generateWithGemini = async (prompt: string, apiKey: string, temperature: number = 0.3): Promise<string> => {
+    const ai = getClient(apiKey);
+
+    // Primary Model: gemini-3-flash-preview (as requested)
+    try {
+        console.log('Attempting generation with gemini-2.0-flash-exp...');
+        const response = await ai.models.generateContent({
+            model: "gemini-2.0-flash-exp",
+            config: {
+                temperature,
+                responseMimeType: "application/json",
+            },
+            contents: [{ parts: [{ text: prompt }] }],
+        });
+
+        const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (typeof text === 'string') return text;
+        throw new Error('Empty response from gemini-2.0-flash-exp');
+    } catch (primaryError) {
+        console.warn('gemini-2.0-flash-exp failed, falling back to stable model:', primaryError);
+
+        // Fallback Model: config reference (e.g. gemini-1.5-flash)
+        try {
+            console.log(`Attempting fallback to ${config.gemini.model}...`);
+            // Re-instantiate or use same client depending on SDK structure (usually same client is fine)
+            const response = await ai.models.generateContent({
+                model: config.gemini.model,
+                config: {
+                    temperature,
+                    responseMimeType: "application/json",
+                },
+                contents: [{ parts: [{ text: prompt }] }],
+            });
+
+            const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (typeof text === 'string') return text;
+            throw new Error(`Empty response from ${config.gemini.model}`);
+        } catch (fallbackError: any) {
+            throw new Error(`AI generation failed: ${fallbackError.message || 'Unknown error'}`);
+        }
+    }
+}
+
 
 /**
  * Extract questions from document content using Google Gemini AI
@@ -9,8 +64,6 @@ export const extractQuestionsWithGemini = async (content: string): Promise<any[]
     if (!apiKey) {
         throw new Error('Gemini API key not configured');
     }
-
-    const apiURL = `https://generativelanguage.googleapis.com/v1beta/models/${config.gemini.model}:generateContent?key=${apiKey}`;
 
     const prompt = `Extract all exam questions from the following text and return them as a JSON array. 
 IMPORTANT: Return ONLY the JSON array, no other text or explanation. 
@@ -30,44 +83,17 @@ Text to analyze:
 ${content}`;
 
     try {
-        const response = await fetch(apiURL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                contents: [
-                    {
-                        parts: [
-                            {
-                                text: prompt
-                            }
-                        ]
-                    }
-                ],
-                generationConfig: {
-                    temperature: config.gemini.temperature,
-                    topP: 0.95,
-                    topK: 40,
-                    maxOutputTokens: 8192,
-                    responseMimeType: "application/json",
-                }
-            }),
-        });
+        const responseText = await generateWithGemini(prompt, apiKey, config.gemini.temperature);
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'Failed to extract questions with Gemini');
+        // Clean markdown if present
+        let cleanJson = responseText.trim();
+        if (cleanJson.startsWith('```json')) {
+            cleanJson = cleanJson.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+        } else if (cleanJson.startsWith('```')) {
+            cleanJson = cleanJson.replace(/```\n?/g, '');
         }
 
-        const data = await response.json();
-        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (!responseText) {
-            throw new Error('No content returned from Gemini');
-        }
-
-        const questions = JSON.parse(responseText.trim());
+        const questions = JSON.parse(cleanJson);
         return Array.isArray(questions) ? questions : [questions];
     } catch (error: any) {
         console.error('Gemini extraction error:', error);
@@ -197,7 +223,8 @@ export const generateQuestionsWithGemini = async (
     type?: string
 ): Promise<any[]> => {
     const apiKey = getAIKey('gemini');
-    const apiURL = `https://generativelanguage.googleapis.com/v1beta/models/${config.gemini.model}:generateContent?key=${apiKey}`;
+
+    if (!apiKey) throw new Error('Gemini API key not configured');
 
     const typeFilter = type ? `All questions should be of type: ${type}` : 'Use a variety of question types (multiple_choice, true_false, etc.)';
 
@@ -216,32 +243,23 @@ Return a JSON array where each question has:
 Return ONLY the JSON array, no other text.`;
 
     try {
-        const response = await fetch(apiURL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    temperature: 0.7,
-                    responseMimeType: "application/json",
-                }
-            }),
-        });
+        const responseText = await generateWithGemini(prompt, apiKey, 0.7);
 
-        if (!response.ok) throw new Error('Failed to generate questions');
+        // Clean markdown if present
+        let cleanJson = responseText.trim();
+        if (cleanJson.startsWith('```json')) {
+            cleanJson = cleanJson.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+        } else if (cleanJson.startsWith('```')) {
+            cleanJson = cleanJson.replace(/```\n?/g, '');
+        }
 
-        const data = await response.json();
-        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        const questions = JSON.parse(responseText.trim());
+        const questions = JSON.parse(cleanJson);
         return Array.isArray(questions) ? questions : [questions];
     } catch (error: any) {
         console.error('Gemini generation error:', error);
         throw new Error('Failed to generate questions with AI');
     }
 };
-
 /**
  * Read file content as text
  */
