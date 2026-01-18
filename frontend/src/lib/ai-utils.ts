@@ -106,13 +106,18 @@ ${content}`;
  */
 export const extractQuestionsWithAI = async (content: string): Promise<any[]> => {
     try {
+        console.log('Starting AI extraction with Gemini...');
         return await extractQuestionsWithGemini(content);
-    } catch (geminiError) {
-        console.warn('Gemini failed, falling back to Groq:', geminiError);
+    } catch (geminiError: any) {
+        console.warn('Gemini extraction failed:', geminiError.message);
         try {
+            console.log('Falling back to Groq extraction...');
             return await extractQuestionsWithGroq(content);
-        } catch (groqError) {
-            throw new Error('AI extraction failed on all providers');
+        } catch (groqError: any) {
+            console.error('Groq extraction failed:', groqError.message);
+            // Combine errors for better debugging
+            const combinedMessage = `AI extraction failed on all providers.\nGemini: ${geminiError.message}\nGroq: ${groqError.message}`;
+            throw new Error(combinedMessage);
         }
     }
 };
@@ -257,7 +262,7 @@ Return ONLY the JSON array, no other text.`;
         return Array.isArray(questions) ? questions : [questions];
     } catch (error: any) {
         console.error('Gemini generation error:', error);
-        throw new Error('Failed to generate questions with AI');
+        throw new Error(`Failed to generate questions with AI: ${error.message}`);
     }
 };
 /**
