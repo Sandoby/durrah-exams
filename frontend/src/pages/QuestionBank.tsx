@@ -12,6 +12,7 @@ import { useAuth } from '../context/AuthContext';
 import { exportToJSON, exportToPDF, exportToWord } from '../lib/exportUtils';
 import { useDemoTour } from '../hooks/useDemoTour';
 import { AIQuestionGeneratorModal } from '../components/AIQuestionGeneratorModal';
+import { config, getAIKey } from '../lib/config';
 
 interface Question {
     id: string;
@@ -44,6 +45,7 @@ export default function QuestionBank() {
     const [selectedBank, setSelectedBank] = useState<QuestionBank | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const apiKey = getAIKey('gemini');
 
     // UI State
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -442,6 +444,19 @@ export default function QuestionBank() {
                         <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-2 hidden md:block" />
 
                         <div className="flex gap-2">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-slate-400 hidden sm:inline">AI Status:</span>
+                                <div className="flex gap-1">
+                                    <div
+                                        className={`w-2 h-2 rounded-full ${apiKey ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-red-500'}`}
+                                        title={apiKey ? 'Gemini Connected' : 'Gemini Disconnected'}
+                                    />
+                                    <div
+                                        className={`w-2 h-2 rounded-full ${config.groq.apiKey ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-slate-300 dark:bg-slate-700'}`}
+                                        title={config.groq.apiKey ? 'Groq Connected' : 'Groq Disconnected'}
+                                    />
+                                </div>
+                            </div>
                             <button
                                 onClick={() => setShowAIModal(true)}
                                 disabled={!selectedBank}
