@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown, LogOut, Menu, Sigma, Mail } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown, LogOut, Menu, Sigma, Mail, Users } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -624,20 +624,20 @@ export default function ExamEditor() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1120] font-sans pb-40 relative overflow-x-hidden pt-20 selection:bg-indigo-500/20 selection:text-indigo-600 dark:selection:bg-indigo-500/30 dark:selection:text-indigo-400">
-            {/* Ambient Background Lights */}
-            <div className="fixed top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-indigo-50/50 via-white/0 to-transparent dark:from-indigo-950/20 dark:via-gray-950/0 pointer-events-none" />
-            <div className="fixed -top-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
-            <div className="fixed top-40 -left-20 w-72 h-72 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12 font-sans relative overflow-hidden pt-24">
+            {/* Background Gradients */}
+            <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent pointer-events-none" />
+            <div className="absolute top-20 right-20 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
 
             {/* Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 pt-4 pb-2">
-                <div className="max-w-7xl mx-auto bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl rounded-2xl shadow-sm border border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
-                    <div className="flex justify-between h-14 sm:h-16 px-4 sm:px-6">
+            <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
+                <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
+                    <div className="flex justify-between h-16 px-6">
                         <div className="flex items-center gap-3">
-                            <Logo className="h-8 w-8" showText={false} />
+                            <Logo className="h-9 w-9" showText={false} />
                             <div className="flex flex-col">
-                                <span className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Durrah</span>
+                                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
                             </div>
                         </div>
 
@@ -717,84 +717,91 @@ export default function ExamEditor() {
                 </div>
             )}
 
-            {/* Fixed Header Container */}
-            <div className="fixed top-16 sm:top-20 left-0 right-0 z-40 px-3 sm:px-6 lg:px-8 transition-all duration-300 pointer-events-none">
-                <div className="max-w-[1600px] mx-auto pointer-events-auto">
-                    <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50 shadow-md rounded-2xl sm:rounded-3xl p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between">
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => navigate(isDemo ? '/demo' : '/dashboard')}
-                                className="group p-2.5 rounded-xl bg-white dark:bg-gray-800 text-gray-500 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all shadow-sm"
-                            >
-                                <ArrowLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
-                            </button>
-                            <div>
-                                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-                                    {id ? t('examEditor.editTitle') : t('examEditor.createTitle')}
-                                </h1>
-                                <p className="text-xs text-gray-500 font-medium mt-0.5">
-                                    {savedQuizCode ? `Code: ${savedQuizCode}` : 'Draft Mode'}
-                                </p>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mt-8">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => navigate(isDemo ? '/demo' : '/dashboard')}
+                            className="p-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-all shadow-sm"
+                        >
+                            <ArrowLeft className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                        </button>
+                        <div>
+                            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-indigo-800 to-indigo-900 dark:from-white dark:via-indigo-200 dark:to-indigo-400">
+                                {id ? t('examEditor.editTitle') : t('examEditor.createTitle')}
+                            </h1>
+                            <div className="flex items-center gap-2 mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+                                {savedQuizCode ? (
+                                    <>
+                                        <span className="font-mono bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded text-xs border border-indigo-100 dark:border-indigo-800">
+                                            Code: {savedQuizCode}
+                                        </span>
+                                    </>
+                                ) : (
+                                    <span>Draft Mode</span>
+                                )}
                             </div>
                         </div>
+                    </div>
 
-                        <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-                            {/* Imports Button */}
-                            <button
-                                onClick={() => setShowImportModal(true)}
-                                type="button"
-                                className="inline-flex items-center px-4 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-750 hover:border-gray-300 dark:hover:border-gray-600 transition-all shadow-sm whitespace-nowrap"
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setShowImportModal(true)}
+                            type="button"
+                            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-xl transition-all shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 font-medium whitespace-nowrap"
+                        >
+                            <BookOpen className="h-5 w-5 text-indigo-500" />
+                            <span className="hidden sm:inline">Import Questions</span>
+                        </button>
+
+                        {isDemo ? (
+                            <Link
+                                to="/register"
+                                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95 font-medium whitespace-nowrap"
                             >
-                                <BookOpen className="h-4 w-4 mr-2 text-indigo-500" />
-                                Import
+                                <Sparkles className="h-5 w-5" />
+                                <span>Sign Up to Save</span>
+                            </Link>
+                        ) : (
+                            <button
+                                onClick={handleSubmit(onSubmit)}
+                                disabled={isLoading}
+                                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95 font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isLoading ? (
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : (
+                                    <Save className="h-5 w-5" />
+                                )}
+                                <span>{isLoading ? t('examEditor.saving') : t('examEditor.save')}</span>
                             </button>
-
-                            {/* Save Button */}
-                            {isDemo ? (
-                                <Link
-                                    to="/register"
-                                    className="inline-flex items-center px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-bold shadow-lg shadow-gray-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap"
-                                >
-                                    <Sparkles className="h-4 w-4 mr-2" />
-                                    Sign Up to Save
-                                </Link>
-                            ) : (
-                                <button
-                                    onClick={handleSubmit(onSubmit)}
-                                    disabled={isLoading}
-                                    className="inline-flex items-center px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-bold shadow-lg shadow-gray-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ml-auto sm:ml-0"
-                                >
-                                    {isLoading ? (
-                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    ) : (
-                                        <Save className="h-4 w-4 mr-2" />
-                                    )}
-                                    {isLoading ? t('examEditor.saving') : t('examEditor.save')}
-                                </button>
-                            )}
-                        </div>
+                        )}
                     </div>
                 </div>
-            </div>
 
-            <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pt-44 sm:pt-48 lg:pt-52">
-                <div className="flex flex-col xl:flex-row gap-4 sm:gap-8 items-start">
+                <div className="flex flex-col xl:flex-row gap-8 items-start">
                     {/* Left Column: Form Editor */}
-                    <div className="flex-1 w-full space-y-4 sm:space-y-8 min-w-0">
+                    <div className="flex-1 w-full space-y-6 min-w-0">
                         {/* Basic Info */}
-                        <div className="bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden group">
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative group">
                             {/* Decorative highlight */}
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <Sparkles className="h-20 w-20 text-indigo-600" />
+                            </div>
 
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2.5">
-                                <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
-                                    <Sparkles className="w-4 h-4" />
-                                </div>
-                                {t('examEditor.basicInfo.title')}
-                            </h3>
-                            <div className="space-y-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                                    <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-600 dark:text-indigo-400">
+                                        <LayoutList className="w-5 h-5" />
+                                    </div>
+                                    {t('examEditor.basicInfo.title')}
+                                </h3>
+                            </div>
+
+                             <div className="space-y-6 relative z-10">
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ml-1">
                                         {t('examEditor.basicInfo.examTitle')}
                                         <span className="text-red-500 ml-1">*</span>
                                     </label>
@@ -823,9 +830,14 @@ export default function ExamEditor() {
 
                         {/* Student Fields - Hidden in Kids Mode */}
                         {!watch('settings.child_mode_enabled') && (
-                            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-sm border border-gray-100 dark:border-gray-800 rounded-[2rem] p-8" id="required-fields">
-                                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">{t('examEditor.studentInfo.title')}</h3>
-                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-8">{t('examEditor.studentInfo.desc')}</p>
+                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700" id="required-fields">
+                                <div className="flex items-center gap-3 mb-6">
+                                     <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-600 dark:text-indigo-400">
+                                        <Users className="w-5 h-5" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">{t('examEditor.studentInfo.title')}</h3>
+                                </div>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 ml-1">{t('examEditor.studentInfo.desc')}</p>
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     {['name', 'email', 'student_id', 'phone'].map((field) => (
                                         <label key={field} className="flex items-center p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 border-2 border-transparent hover:border-indigo-500/20 cursor-pointer transition-all">
@@ -853,7 +865,7 @@ export default function ExamEditor() {
 
                         {/* Email Access Control */}
                         {!watch('settings.child_mode_enabled') && (
-                            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden group">
+                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
                                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                                 <div className="space-y-6">
                                     <div className="flex items-center justify-between">
@@ -911,7 +923,7 @@ export default function ExamEditor() {
                         )}
 
                         {/* Settings */}
-                        <div className="bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden group" id="exam-settings">
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group" id="exam-settings">
                             {/* Decorative highlight */}
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-500 to-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
 
@@ -1690,7 +1702,7 @@ export default function ExamEditor() {
                     )}
 
                     {/* Right Column: Live Preview (Desktop Only) */}
-                    <div className="xl:w-[400px] sticky top-48">
+                    <div className="xl:w-[400px] sticky top-24">
                         <ExamPreviewPanel data={watch()} />
                     </div>
                 </div>

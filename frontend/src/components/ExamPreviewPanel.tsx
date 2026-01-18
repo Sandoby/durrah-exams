@@ -18,8 +18,8 @@ interface ExamForm {
 
 export function ExamPreviewPanel({ data }: { data: ExamForm }) {
     return (
-        <div className="hidden xl:block w-96 shrink-0">
-            <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-200 dark:border-gray-700 sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto custom-scrollbar">
+        <div className="hidden xl:block w-full">
+            <div className="bg-white dark:bg-gray-800 shadow-sm rounded-2xl border border-gray-100 dark:border-gray-700 max-h-[calc(100vh-8rem)] overflow-y-auto custom-scrollbar">
                 <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm sticky top-0 z-10">
                     <div className="flex items-center gap-2 mb-1">
                         <Eye className="w-4 h-4 text-indigo-600" />
