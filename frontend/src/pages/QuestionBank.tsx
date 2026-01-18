@@ -1155,8 +1155,13 @@ export default function QuestionBank() {
                     </div>
                 )
             }
-            onAddQuestions={handleAddAIQuestions}
-            bankName={selectedBank?.name || ''}
+
+            {/* AI Generator Modal */}
+            <AIQuestionGeneratorModal
+                isOpen={showAIModal}
+                onClose={() => setShowAIModal(false)}
+                onAddQuestions={handleAddAIQuestions}
+                bankName={selectedBank?.name || ''}
             />
         </div>
     );
