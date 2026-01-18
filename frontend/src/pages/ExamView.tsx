@@ -13,6 +13,7 @@ import { Calculator } from '../components/Calculator';
 import Latex from 'react-latex-next';
 import { useConvexProctoring } from '../hooks/useConvexProctoring';
 import { useExamProgress } from '../hooks/useExamProgress';
+import { PrivacyScreen } from '@capacitor-community/privacy-screen';
 import {
     Confetti,
     QuestionSkeleton,
@@ -355,6 +356,7 @@ export default function ExamView() {
 
     // Anti-cheat: temporary blur/lock during copy/print attempts
     const [blurQuestionsUntil, setBlurQuestionsUntil] = useState<number>(0);
+    const [isBlackout, setIsBlackout] = useState(false);
 
     // Feature 10: Session timeout
     const [showInactivityWarning, setShowInactivityWarning] = useState(false);
@@ -1118,6 +1120,19 @@ export default function ExamView() {
             }
         };
 
+        const handleBlur = () => {
+            // Only blackout if started and not submitted
+            if (started && !submitted) {
+                setIsBlackout(true);
+                logViolation('focus_lost_potential_screenshot');
+            }
+        };
+
+        const handleFocus = () => {
+            // Restore screen when focused
+            setIsBlackout(false);
+        };
+
         const handleContextMenu = (e: MouseEvent) => {
             if (exam.settings.disable_right_click) {
                 e.preventDefault();
@@ -1153,13 +1168,31 @@ export default function ExamView() {
                     e.preventDefault();
                     logViolation('print_attempt');
                     setBlurQuestionsUntil(Date.now() + 4000);
+                    setIsBlackout(true);
+                    setTimeout(() => setIsBlackout(false), 3000);
                 }
+            }
+
+            // Trap PrintScreen key (standard for screenshotting)
+            if (e.key === 'PrintScreen') {
+                e.preventDefault();
+                logViolation('print_screen_attempt');
+                setIsBlackout(true);
+                // Long blackout to deter repeated attempts
+                setTimeout(() => setIsBlackout(false), 5000);
+
+                // Try to overwrite clipboard with a warning
+                try {
+                    navigator.clipboard.writeText("Security Alert: Screenshots are prohibited. Your identity and activity have been recorded as a violation.").catch(() => { });
+                } catch (err) { }
             }
         };
 
         const handleBeforePrint = () => {
             logViolation('print_detected');
             setBlurQuestionsUntil(Date.now() + 4000);
+            setIsBlackout(true);
+            setTimeout(() => setIsBlackout(false), 4000);
         };
 
         const handleFullscreenChange = () => {
@@ -1182,6 +1215,8 @@ export default function ExamView() {
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         window.addEventListener('beforeprint', handleBeforePrint);
+        window.addEventListener('blur', handleBlur);
+        window.addEventListener('focus', handleFocus);
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -1191,8 +1226,31 @@ export default function ExamView() {
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
             window.removeEventListener('beforeprint', handleBeforePrint);
+            window.removeEventListener('blur', handleBlur);
+            window.removeEventListener('focus', handleFocus);
         };
     }, [started, exam, violations.length, submitted]);
+
+    // Capacitor Privacy Screen - Native app security
+    useEffect(() => {
+        const enablePrivacy = async () => {
+            try {
+                // Shows blank screen in task switcher and blocks standard screenshots on Android/iOS
+                await PrivacyScreen.enable();
+            } catch (e) {
+                // Not in a Capacitor environment or not supported
+            }
+        };
+
+        if (started && !submitted) {
+            enablePrivacy();
+        }
+
+        return () => {
+            // Disable when leaving or submitting
+            PrivacyScreen.disable().catch(() => { });
+        };
+    }, [started, submitted]);
 
     const startExam = async () => {
         const required = exam?.required_fields || ['name', 'email'];
@@ -1945,6 +2003,21 @@ export default function ExamView() {
 
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 relative overflow-hidden">
+                {/* Blackout Overlay */}
+                {isBlackout && (
+                    <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center p-8 select-none pointer-events-none">
+                        <div className="text-center animate-in fade-in duration-300">
+                            <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-6 opacity-80" />
+                            <h2 className="text-3xl font-black text-white mb-4 tracking-tight">SECURITY PROTOCOL ACTIVE</h2>
+                            <p className="text-gray-400 text-lg max-w-md mx-auto leading-relaxed">
+                                Content visibility is restricted during window switching or screenshot attempts.
+                                <br />
+                                <span className="text-red-500/80 font-bold uppercase text-sm mt-4 inline-block">Violation recorded</span>
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 {/* Confetti Animation */}
                 {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
 
@@ -2012,7 +2085,21 @@ export default function ExamView() {
     // Review Mode - Show exam with answers
     if (isReviewMode && reviewData && exam) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 relative overflow-hidden">
+                {/* Blackout Overlay */}
+                {isBlackout && (
+                    <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center p-8 select-none pointer-events-none">
+                        <div className="text-center animate-in fade-in duration-300">
+                            <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-6 opacity-80" />
+                            <h2 className="text-3xl font-black text-white mb-4 tracking-tight">SECURITY PROTOCOL ACTIVE</h2>
+                            <p className="text-gray-400 text-lg max-w-md mx-auto leading-relaxed">
+                                Content visibility is restricted during window switching or screenshot attempts.
+                                <br />
+                                <span className="text-red-500/80 font-bold uppercase text-sm mt-4 inline-block">Violation recorded</span>
+                            </p>
+                        </div>
+                    </div>
+                )}
                 <div className="max-w-4xl mx-auto">
                     {/* Header */}
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
@@ -2273,9 +2360,32 @@ export default function ExamView() {
     );
 
     return (
-        <div ref={containerRef} className={`min-h-screen p-3 sm:p-6 bg-gray-50 dark:bg-gray-900 ${dyslexiaFont ? 'dyslexia-font' : ''}`}>
+        <div ref={containerRef} className={`min-h-screen p-3 sm:p-6 bg-gray-50 dark:bg-gray-900 ${dyslexiaFont ? 'dyslexia-font' : ''} relative overflow-hidden`}>
             {/* Screen Reader Announcer */}
             <announce.Announcer />
+
+            {/* Blackout Overlay */}
+            {isBlackout && (
+                <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center p-8 select-none pointer-events-none">
+                    <div className="text-center animate-in fade-in duration-300">
+                        <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-6 opacity-80" />
+                        <h2 className="text-3xl font-black text-white mb-4 tracking-tight">SECURITY PROTOCOL ACTIVE</h2>
+                        <p className="text-gray-400 text-lg max-w-md mx-auto leading-relaxed">
+                            Content visibility is restricted during window switching or screenshot attempts.
+                            <br />
+                            <span className="text-red-500/80 font-bold uppercase text-sm mt-4 inline-block">Violation recorded</span>
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* Print Blackout */}
+            <style>{`
+                @media print {
+                    body { display: none !important; }
+                    .no-print { display: none !important; }
+                }
+            `}</style>
 
             {/* Watermark Overlay */}
             {started && (
