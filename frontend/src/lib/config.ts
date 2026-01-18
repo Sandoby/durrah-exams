@@ -29,11 +29,19 @@ export const config = {
  */
 export const getAIKey = (provider: 'gemini' | 'groq' = 'gemini'): string => {
     if (provider === 'gemini') {
+        const envKey = config.gemini.apiKey;
+        // Only use .env if it looks valid and isn't the leaked one (handled by user already)
+        if (envKey && envKey.startsWith('AIza')) return envKey;
+
         const saved = localStorage.getItem(config.storage.geminiApiKey);
-        return saved || config.gemini.apiKey;
+        return saved || envKey;
     }
+
+    const envKey = config.groq.apiKey;
+    if (envKey && envKey.startsWith('gsk_')) return envKey;
+
     const saved = localStorage.getItem(config.storage.aiApiKey);
-    return saved || config.groq.apiKey;
+    return saved || envKey;
 };
 
 /**

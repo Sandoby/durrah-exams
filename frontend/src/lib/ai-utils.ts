@@ -13,6 +13,7 @@ const getClient = (apiKey: string) => {
  */
 const generateWithGemini = async (prompt: string, apiKey: string, temperature: number = 0.3): Promise<string> => {
     const ai = getClient(apiKey);
+    console.log(`Debug: Using Gemini Key starting with: ${apiKey.substring(0, 6)}...`);
 
     // Models to try in order
     const models = ["gemini-3-flash-preview", "gemini-2.0-flash-exp", config.gemini.model];
