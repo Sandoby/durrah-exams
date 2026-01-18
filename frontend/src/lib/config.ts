@@ -3,7 +3,7 @@
 export const config = {
     // Groq API Configuration (Free & Fast AI)
     groq: {
-        apiKey: import.meta.env.VITE_GROQ_API_KEY || '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',
+        apiKey: import.meta.env.VITE_GROQ_API_KEY || '',
         model: 'llama-3.3-70b-versatile',
         temperature: 0.3,
     },
