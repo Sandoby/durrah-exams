@@ -14,6 +14,7 @@ import { EmailWhitelist } from '../components/EmailWhitelist';
 import { useDemoTour } from '../hooks/useDemoTour';
 import { SortableQuestionItem } from '../components/SortableQuestionItem';
 import { ExamPreviewPanel } from '../components/ExamPreviewPanel';
+import { QuestionTextEditor } from '../components/QuestionTextEditor';
 import { ImageUploader } from '../components/ImageUploader';
 import Latex from 'react-latex-next';
 
@@ -1241,17 +1242,12 @@ export default function ExamEditor() {
                                                             </label>
                                                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                                                                 <div className="lg:col-span-8">
-                                                                    <textarea
-                                                                        {...register(`questions.${index}.question_text`)}
-                                                                        className="w-full px-5 py-4 border border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder-gray-400 text-base font-medium resize-none"
+                                                                    <QuestionTextEditor
+                                                                        value={watch(`questions.${index}.question_text`) || ''}
+                                                                        onChange={(val: string) => setValue(`questions.${index}.question_text`, val, { shouldDirty: true })}
                                                                         placeholder={t('examEditor.questions.questionTextPlaceholder')}
-                                                                        rows={index === 0 ? 3 : 2}
+                                                                        showPreview={showMathPreview}
                                                                     />
-                                                                    {showMathPreview && watch(`questions.${index}.question_text`) && (
-                                                                        <div className="mt-3 p-4 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800 text-sm">
-                                                                            <Latex>{watch(`questions.${index}.question_text`)}</Latex>
-                                                                        </div>
-                                                                    )}
                                                                 </div>
                                                                 <div className="lg:col-span-4">
                                                                     <div className="bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-2 h-full min-h-[120px] flex items-center justify-center hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
