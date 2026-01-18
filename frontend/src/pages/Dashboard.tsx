@@ -1,12 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, Globe, AlertTriangle, Power, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, Globe, AlertTriangle, Power, Eye, Loader2, AlertCircle } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { ExamResults } from '../components/ExamResults';
 import { ChatWidget } from '../components/ChatWidget';
 import { ConvexChatWidget } from '../components/ConvexChatWidget';
 import { CardSkeleton } from '../components/skeletons';
@@ -14,8 +13,11 @@ import Joyride, { STATUS } from 'react-joyride';
 import type { Step, CallBackProps } from 'react-joyride';
 import { useDemoTour } from '../hooks/useDemoTour';
 import { printerService } from '../lib/printer';
-import { ProctorDashboard } from '../components/ProctorDashboard';
+import { NotificationCenter } from '../components/NotificationCenter';
+
 import { CONVEX_FEATURES } from '../main';
+import { PremiumFeatureModal } from '../components/dashboard/PremiumFeatureModal';
+
 
 interface Exam {
     id: string;
@@ -39,69 +41,120 @@ const getProductionOrigin = () => {
     return origin;
 };
 
+const TutorialTooltip = ({
+    index,
+    step,
+    backProps,
+    primaryProps,
+    skipProps,
+}: any) => {
+    return (
+        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-2xl p-6 max-w-sm mx-4 transform transition-all duration-300">
+            <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <span className="text-white font-bold text-lg">{index + 1}</span>
+                    </div>
+                    <button {...skipProps} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xs font-medium transition-colors">
+                        {skipProps.title}
+                    </button>
+                </div>
+
+                <div className="space-y-1.5">
+                    <div className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                        {step.content}
+                    </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-2">
+                    {index > 0 && (
+                        <button
+                            {...backProps}
+                            className="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                        >
+                            {backProps.title}
+                        </button>
+                    )}
+                    <button
+                        {...primaryProps}
+                        className="px-5 py-2 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md transition-all"
+                    >
+                        {primaryProps.title}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export default function Dashboard() {
     const { t } = useTranslation();
     const { user, signOut } = useAuth();
     const navigate = useNavigate();
     const [exams, setExams] = useState<Exam[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedExamForResults, setSelectedExamForResults] = useState<Exam | null>(null);
-    const [selectedExamForProctoring, setSelectedExamForProctoring] = useState<Exam | null>(null);
+
     const [profile, setProfile] = useState<any>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [runTour, setRunTour] = useState(false);
     const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
     const [startDemoTour, setStartDemoTour] = useState(false);
     const [kidsShareModal, setKidsShareModal] = useState<{ url: string; code: string; title?: string } | null>(null);
+    const [premiumModal, setPremiumModal] = useState<{ isOpen: boolean; feature: 'analytics' | 'proctoring' }>({
+        isOpen: false,
+        feature: 'analytics'
+    });
+
     const [shareModal, setShareModal] = useState<{ id?: string; url: string; code: string; title?: string; directUrl?: string } | null>(null);
     const [deleteConfirmModal, setDeleteConfirmModal] = useState<{ id: string; title: string } | null>(null);
+    const [showMockExam, setShowMockExam] = useState(false);
 
     useDemoTour(new URLSearchParams(window.location.search).get('showSharing') === 'true' ? 'share-monitor' : new URLSearchParams(window.location.search).get('showAnalytics') === 'true' ? 'view-analytics' : null, startDemoTour && isDemo);
 
-    const [tourSteps] = useState<Step[]>([
+    const tourSteps = useMemo<Step[]>(() => [
         {
             target: 'body',
-            content: t('dashboard.tour.welcome', 'Welcome to Durrah for Tutors! Let\'s learn how to use your dashboard.'),
+            content: t('dashboard.tour.welcome'),
             placement: 'center',
             disableBeacon: true,
         },
         {
             target: '[data-tour="question-bank"]',
-            content: t('dashboard.tour.questionBank', 'Start by managing your question bank - create and organize reusable questions here'),
+            content: t('dashboard.tour.questionBank'),
             disableBeacon: true,
         },
         {
             target: '[data-tour="create-exam"]',
-            content: t('dashboard.tour.createExam', 'Click here to create a new exam with custom questions and settings'),
+            content: t('dashboard.tour.createExam'),
             disableBeacon: true,
         },
         {
             target: '[data-tour="exam-card"]',
-            content: t('dashboard.tour.examCard', 'Once you create exams, they\'ll appear here. Each card shows your exam details'),
+            content: t('dashboard.tour.examCard'),
             placement: 'top',
         },
         {
             target: '[data-tour="copy-link"]',
-            content: t('dashboard.tour.copyLink', 'Share this link with your students to take the exam'),
+            content: t('dashboard.tour.copyLink'),
             placement: 'top',
         },
         {
             target: '[data-tour="results"]',
-            content: t('dashboard.tour.results', 'View all student submissions and download results'),
+            content: t('dashboard.tour.results'),
             placement: 'top',
         },
         {
             target: '[data-tour="settings"]',
-            content: t('dashboard.tour.settings', 'Access your profile settings and subscription details here'),
+            content: t('dashboard.tour.settings'),
             disableBeacon: true,
         },
         {
             target: 'body',
-            content: t('dashboard.tour.completion', 'You\'re all set! Start creating exams and adding questions. Need help? Visit our support center.'),
+            content: t('dashboard.tour.completion'),
             placement: 'center',
             disableBeacon: true,
         },
-    ]);
+    ], [t]);
 
     useEffect(() => {
         console.log('Dashboard: Component Mounted', { userId: user?.id, isDemo });
@@ -126,19 +179,24 @@ export default function Dashboard() {
             console.log('Dashboard: Initializing for authenticated user...');
             fetchExams();
             fetchProfile();
-            checkFirstVisit();
         }
 
         return () => console.log('Dashboard: Component Unmounted');
     }, [user]);
 
-    const checkFirstVisit = () => {
+    // Independent effect for the tour ensuring data is loaded
+    useEffect(() => {
+        if (!user || isLoading || isDemo) return;
+
         const hasSeenTour = localStorage.getItem(`dashboard_tour_${user?.id}`);
         if (!hasSeenTour) {
-            // Delay tour start to ensure DOM is ready and elements are mounted
-            setTimeout(() => setRunTour(true), 1500);
+            // Delay tour start to ensure DOM is ready
+            setTimeout(() => {
+                if (exams.length === 0) setShowMockExam(true);
+                setRunTour(true);
+            }, 2000);
         }
-    };
+    }, [user, isLoading, isDemo]);
 
     const handleTourCallback = (data: CallBackProps) => {
         const { status, type } = data;
@@ -150,11 +208,13 @@ export default function Dashboard() {
 
         if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
             setRunTour(false);
+            setShowMockExam(false);
             localStorage.setItem(`dashboard_tour_${user?.id}`, 'true');
         }
     };
 
     const startTour = () => {
+        if (exams.length === 0) setShowMockExam(true);
         setRunTour(true);
     };
 
@@ -462,35 +522,48 @@ export default function Dashboard() {
                 steps={tourSteps}
                 run={runTour}
                 continuous
-                showProgress
+                showProgress={false}
                 showSkipButton
-                disableScrolling
+                disableScrolling={false}
                 scrollToFirstStep
-                scrollOffset={100}
+                scrollOffset={120}
                 callback={handleTourCallback}
-                styles={{
-                    options: {
-                        primaryColor: '#6366f1',
-                        zIndex: 10000,
-                    },
-                    tooltip: {
-                        fontSize: 16,
-                    },
-                    buttonNext: {
-                        fontSize: 14,
-                        padding: '8px 16px',
-                    },
-                    buttonBack: {
-                        fontSize: 14,
-                        padding: '8px 16px',
-                    },
-                }}
+                tooltipComponent={TutorialTooltip}
                 locale={{
                     back: t('tour.back', 'Back'),
                     close: t('tour.close', 'Close'),
                     last: t('tour.last', 'Finish'),
                     next: t('tour.next', 'Next'),
                     skip: t('tour.skip', 'Skip Tour'),
+                }}
+                styles={{
+                    options: {
+                        primaryColor: '#6366f1',
+                        zIndex: 10000,
+                        backgroundColor: '#ffffff',
+                        arrowColor: '#ffffff',
+                        textColor: '#1f2937',
+                        overlayColor: 'rgba(0, 0, 0, 0.4)',
+                    },
+                    tooltip: {
+                        borderRadius: '20px',
+                        padding: '24px',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    },
+                    buttonNext: {
+                        borderRadius: '10px',
+                        backgroundColor: '#6366f1',
+                        padding: '10px 20px',
+                        fontWeight: '600',
+                    },
+                    buttonBack: {
+                        marginRight: '10px',
+                        color: '#6366f1',
+                        fontWeight: '600',
+                    },
+                    buttonSkip: {
+                        color: '#9ca3af',
+                    }
                 }}
             />
 
@@ -520,6 +593,15 @@ export default function Dashboard() {
                                     <span className="hidden lg:inline">{t('settings.subscription.upgrade')}</span>
                                 </Link>
                             )}
+                            <button
+                                onClick={startTour}
+                                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                <svg className="h-4 w-4 lg:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="hidden lg:inline">{t('dashboard.tour.startTour', 'Tutorial')}</span>
+                            </button>
                             <Link
                                 to="/settings"
                                 data-tour="settings"
@@ -535,6 +617,8 @@ export default function Dashboard() {
                                 <LogOut className="h-4 w-4 lg:mr-2" />
                                 <span className="hidden lg:inline">{t('nav.logout', 'Logout')}</span>
                             </button>
+
+                            <NotificationCenter />
                         </div>
 
                         {/* Mobile menu button */}
@@ -553,9 +637,8 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Mobile menu */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden border-t border-gray-200 dark:border-gray-700">
+                    <div className="md:hidden mt-2 max-w-7xl mx-auto bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700">
                         <div className="px-2 pt-2 pb-3 space-y-1">
                             <div className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
                                 {user?.user_metadata?.full_name || user?.email}
@@ -643,6 +726,36 @@ export default function Dashboard() {
                         </div>
                     </div>
 
+                    {profile?.subscription_status === 'payment_failed' && (
+                        <div className="bg-white/40 dark:bg-red-950/20 backdrop-blur-xl border border-red-200/50 dark:border-red-800/50 p-6 rounded-[2rem] flex flex-col sm:flex-row items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-500 shadow-xl shadow-red-500/5 mb-8">
+                            <div className="h-16 w-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-3xl flex items-center justify-center shadow-lg shadow-red-500/20 shrink-0">
+                                <AlertCircle className="h-8 w-8 text-white" />
+                            </div>
+                            <div className="flex-1 text-center sm:text-left">
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                                    {t('dashboard.paymentFailed.title', 'Payment Action Required')}
+                                </h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 max-w-xl">
+                                    {t('dashboard.paymentFailed.desc', 'Your last subscription payment was unsuccessful. To maintain your premium access and avoid service interruption, please update your payment method.')}
+                                </p>
+                            </div>
+                            <div className="flex gap-3 shrink-0">
+                                <Link
+                                    to="/settings"
+                                    className="px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-bold text-sm hover:scale-105 transition-all shadow-lg"
+                                >
+                                    {t('dashboard.paymentFailed.manage', 'Manage Billing')}
+                                </Link>
+                                <Link
+                                    to="/checkout"
+                                    className="px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-2xl font-bold text-sm hover:scale-105 transition-all shadow-lg shadow-red-500/20"
+                                >
+                                    {t('dashboard.paymentFailed.retry', 'Retry Payment')}
+                                </Link>
+                            </div>
+                        </div>
+                    )}
+
                     {profile?.subscription_status !== 'active' && exams.length >= 3 && (
                         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-start gap-3 animate-fade-in shadow-sm mb-4">
                             <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
@@ -660,7 +773,11 @@ export default function Dashboard() {
                         </div>
                     )}
 
-                    {exams.length === 0 ? (
+                    {isLoading ? (
+                        <div className="flex justify-center py-20">
+                            <Loader2 className="h-10 w-10 text-indigo-600 animate-spin" />
+                        </div>
+                    ) : exams.length === 0 && !showMockExam ? (
                         <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700">
                             <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 flex items-center justify-center mb-6">
                                 <FileText className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
@@ -680,6 +797,43 @@ export default function Dashboard() {
                         </div>
                     ) : (
                         <div className="grid gap-6 mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                            {showMockExam && (
+                                <div data-tour="exam-card" className="group bg-white dark:bg-slate-800 rounded-2xl border-2 border-dashed border-indigo-300 dark:border-indigo-600 shadow-lg relative overflow-hidden animate-pulse">
+                                    <div className="absolute top-0 right-0 bg-indigo-500 text-white px-3 py-1 text-[10px] font-bold uppercase rounded-bl-lg">Tutorial Card</div>
+                                    <div className="p-6">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                                                    {t('dashboard.tour.mockExam.title', '📐 Mathematics Quiz (Sample)')}
+                                                </h3>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                                                    {t('dashboard.tour.mockExam.desc', 'Algebra, geometry, and trigonometry assessment for Grade 10')}
+                                                </p>
+                                            </div>
+                                            <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-500 text-white">
+                                                {t('dashboard.status.active')}
+                                                <Power className="h-3 w-3 ml-1.5" />
+                                            </div>
+                                        </div>
+                                        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <div data-tour="copy-link" className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                                                    <Share2 className="h-4 w-4 text-green-600" />
+                                                    <span className="text-[10px] font-bold text-green-700">{t('dashboard.actions.copyLink')}</span>
+                                                </div>
+                                                <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                                                    <FileText className="h-4 w-4 text-blue-600" />
+                                                    <span className="text-[10px] font-bold text-blue-700">{t('dashboard.actions.print')}</span>
+                                                </div>
+                                                <div data-tour="results" className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800">
+                                                    <BarChart3 className="h-4 w-4 text-orange-600" />
+                                                    <span className="text-[10px] font-bold text-orange-700">{t('dashboard.actions.results')}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             {exams.map((exam, index) => (
                                 <div key={exam.id} data-tour={index === 0 ? "exam-card" : undefined} className="group bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-lg hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-2 transition-all duration-300">
                                     <div className="p-6">
@@ -738,7 +892,7 @@ export default function Dashboard() {
 
                                                 {/* Results Button */}
                                                 <button
-                                                    onClick={() => setSelectedExamForResults(exam)}
+                                                    onClick={() => navigate(`/exam/${exam.id}/results`)}
                                                     data-tour={index === 0 ? "results" : undefined}
                                                     className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
                                                 >
@@ -752,24 +906,30 @@ export default function Dashboard() {
                                                         if (profile?.subscription_status === 'active') {
                                                             navigate(`/exam/${exam.id}/analytics`);
                                                         } else {
-                                                            toast.error(t('dashboard.actions.analyticsLocked'));
-                                                            navigate('/checkout');
+                                                            setPremiumModal({ isOpen: true, feature: 'analytics' });
                                                         }
                                                     }}
-                                                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl ${profile?.subscription_status === 'active'
+                                                    className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 group ${profile?.subscription_status === 'active'
                                                         ? 'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 hover:shadow-lg hover:scale-105'
-                                                        : 'bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 opacity-60 cursor-not-allowed'
-                                                        } transition-all duration-200 group`}
-                                                    disabled={profile?.subscription_status !== 'active'}
+                                                        : 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700'
+                                                        }`}
                                                 >
+                                                    {profile?.subscription_status !== 'active' && (
+                                                        <div className="absolute -top-2.5 -right-1.5 z-20">
+                                                            <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg border border-white/20 flex items-center gap-1">
+                                                                <Crown className="w-2.5 h-2.5" />
+                                                                PRO
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                     {profile?.subscription_status === 'active' ? (
                                                         <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" />
                                                     ) : (
-                                                        <Lock className="h-5 w-5 text-gray-400" />
+                                                        <Lock className="h-5 w-5 text-gray-400 group-hover:text-purple-500 transition-colors" />
                                                     )}
                                                     <span className={`text-xs font-semibold ${profile?.subscription_status === 'active'
                                                         ? 'text-purple-700 dark:text-purple-300'
-                                                        : 'text-gray-500'
+                                                        : 'text-gray-500 group-hover:text-purple-600 transition-colors'
                                                         }`}>
                                                         {t('dashboard.actions.analytics', 'Stats')}
                                                     </span>
@@ -778,11 +938,45 @@ export default function Dashboard() {
                                                 {/* Proctor Button - Convex Live Monitoring */}
                                                 {CONVEX_FEATURES.proctoring && (
                                                     <button
-                                                        onClick={() => setSelectedExamForProctoring(exam)}
-                                                        className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border border-teal-200 dark:border-teal-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                                                        onClick={() => {
+                                                            if (profile?.subscription_status === 'active') {
+                                                                navigate(`/exam/${exam.id}/proctor`);
+                                                            } else {
+                                                                setPremiumModal({ isOpen: true, feature: 'proctoring' });
+                                                            }
+                                                        }}
+                                                        className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 group ${profile?.subscription_status === 'active'
+                                                            ? 'bg-gradient-to-br from-teal-500 to-cyan-600 border border-teal-400/50 hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105 overflow-hidden'
+                                                            : 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-teal-300 dark:hover:border-teal-700'
+                                                            }`}
                                                     >
-                                                        <Eye className="h-5 w-5 text-teal-600 dark:text-teal-400 group-hover:scale-110 transition-transform" />
-                                                        <span className="text-xs font-semibold text-teal-700 dark:text-teal-300">{t('dashboard.actions.proctor', 'Proctor')}</span>
+                                                        {profile?.subscription_status !== 'active' && (
+                                                            <div className="absolute -top-2.5 -right-1.5 z-20">
+                                                                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg border border-white/20 flex items-center gap-1">
+                                                                    <Crown className="w-2.5 h-2.5" />
+                                                                    PRO
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        {profile?.subscription_status === 'active' && (
+                                                            <>
+                                                                {/* Shimmer effect */}
+                                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                                                {/* Live indicator */}
+                                                                <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                                                                </span>
+                                                            </>
+                                                        )}
+                                                        {profile?.subscription_status === 'active' ? (
+                                                            <Eye className="h-5 w-5 text-white group-hover:scale-110 transition-transform drop-shadow-sm" />
+                                                        ) : (
+                                                            <Lock className="h-5 w-5 text-gray-400 group-hover:text-teal-500 transition-colors" />
+                                                        )}
+                                                        <span className={`text-xs font-bold drop-shadow-sm ${profile?.subscription_status === 'active' ? 'text-white' : 'text-gray-500 group-hover:text-teal-600 transition-colors'}`}>
+                                                            {t('dashboard.actions.proctor', 'Live')}
+                                                        </span>
                                                     </button>
                                                 )}
 
@@ -1056,65 +1250,24 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {/* Results Modal */}
-            {selectedExamForResults && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto border border-gray-100 dark:border-gray-700">
-                        <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
-                            <div>
-                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                                    {selectedExamForResults.title}
-                                </h2>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.modals.results.subtitle', 'Results & Performance Analytics')}</p>
-                            </div>
-                            <button
-                                onClick={() => setSelectedExamForResults(null)}
-                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors group"
-                            >
-                                <X className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200" />
-                            </button>
-                        </div>
-                        <div className="p-6">
-                            <ExamResults examId={selectedExamForResults.id} examTitle={selectedExamForResults.title} />
-                        </div>
-                    </div>
-                </div>
-            )}
 
-            {/* Proctor Dashboard Modal - Convex Real-time Monitoring */}
-            {selectedExamForProctoring && CONVEX_FEATURES.proctoring && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col">
-                        <div className="sticky top-0 z-10 bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-4 flex items-center justify-between">
-                            <div>
-                                <h2 className="text-xl font-bold text-white">
-                                    {selectedExamForProctoring.title}
-                                </h2>
-                                <p className="text-sm text-teal-100">{t('dashboard.modals.proctor.subtitle', 'Live Exam Monitoring')}</p>
-                            </div>
-                            <button
-                                onClick={() => setSelectedExamForProctoring(null)}
-                                className="p-2 hover:bg-white/10 rounded-full transition-colors group"
-                            >
-                                <X className="h-5 w-5 text-white/80 group-hover:text-white" />
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-6">
-                            <ProctorDashboard examId={selectedExamForProctoring.id} />
-                        </div>
-                    </div>
-                </div>
-            )}
+
             {/* Chat Widget - Convex or Classic */}
             {CONVEX_FEATURES.chat ? (
-                <ConvexChatWidget 
-                    userId={user?.id || 'anonymous'} 
-                    userName={user?.user_metadata?.full_name || user?.email || 'Tutor'} 
+                <ConvexChatWidget
+                    userId={user?.id || 'anonymous'}
+                    userName={user?.user_metadata?.full_name || user?.email || 'Tutor'}
                     userRole="tutor"
                 />
             ) : (
                 <ChatWidget />
             )}
+            {/* Premium Feature Modal */}
+            <PremiumFeatureModal
+                isOpen={premiumModal.isOpen}
+                onClose={() => setPremiumModal({ ...premiumModal, isOpen: false })}
+                feature={premiumModal.feature}
+            />
         </div>
     );
 }

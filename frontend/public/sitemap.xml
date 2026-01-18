@@ -1,39 +1,141 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://tutors.durrahsystem.tech/</loc>
-    <lastmod>2026-01-08</lastmod>
+    <loc>https://durrahtutors.com/</loc>
+    <lastmod>2026-01-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://tutors.durrahsystem.tech/kids</loc>
-    <lastmod>2026-01-08</lastmod>
+    <loc>https://durrahtutors.com/kids</loc>
+    <lastmod>2026-01-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://tutors.durrahsystem.tech/blog</loc>
-    <lastmod>2026-01-08</lastmod>
+    <loc>https://durrahtutors.com/pricing</loc>
+    <lastmod>2026-01-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tutors.durrahsystem.tech/blog/how-to-prevent-cheating-online-exams</loc>
+    <loc>https://durrahtutors.com/blog</loc>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/blog/how-to-prevent-cheating-online-exams</loc>
     <lastmod>2024-12-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tutors.durrahsystem.tech/blog/grading-essays-faster-ai-tutors</loc>
+    <loc>https://durrahtutors.com/blog/grading-essays-faster-ai-tutors</loc>
     <lastmod>2024-12-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tutors.durrahsystem.tech/blog/online-tutoring-effectiveness-vs-traditional</loc>
+    <loc>https://durrahtutors.com/blog/online-tutoring-effectiveness-vs-traditional</loc>
     <lastmod>2024-12-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tutors.durrahsystem.tech/blog/student-dropout-rates-online-exams-solutions</loc>
+    <loc>https://durrahtutors.com/blog/student-dropout-rates-online-exams-solutions</loc>
     <lastmod>2024-12-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tutors.durrahsystem.tech/login</loc>
-    <lastmod>2026-01-08</lastmod>
+    <loc>https://durrahtutors.com/blog/top-10-online-tutoring-tools-2024</loc>
+    <lastmod>2025-01-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tutors.durrahsystem.tech/register</loc>
-    <lastmod>2026-01-08</lastmod>
+    <loc>https://durrahtutors.com/blog/ai-personalized-learning-paths</loc>
+    <lastmod>2025-01-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/blog/increase-student-participation-virtual-classroom</loc>
+    <lastmod>2025-01-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/blog/scaling-tutoring-business-10k-blueprint</loc>
+    <lastmod>2025-01-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/blog/science-of-memory-retain-90-percent</loc>
+    <lastmod>2025-01-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/blog/automate-tutoring-6-figures-no-burnout</loc>
+    <lastmod>2025-01-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/blog/psychology-of-aplus-student-growth-mindset</loc>
+    <lastmod>2025-01-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/blog/future-proofing-tutoring-career-ai-era</loc>
+    <lastmod>2025-01-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/blog/80-20-study-method-high-marks-minimal-effort</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/blog/feynman-technique-learn-anything-5-minutes</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/blog/time-blocking-deep-work-for-students</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/login</loc>
+    <lastmod>2026-01-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/register</loc>
+    <lastmod>2026-01-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/privacy</loc>
+    <lastmod>2026-01-15</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/terms</loc>
+    <lastmod>2026-01-15</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>

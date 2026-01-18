@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown, LogOut, Menu, Sigma } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown, LogOut, Menu, Sigma, Mail } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -105,12 +105,14 @@ export default function ExamEditor() {
         return `${chunk(3)}-${chunk(3)}`;
     };
 
+    /*
     const ensureQuizCode = () => {
         if (savedQuizCode) return savedQuizCode;
         const next = generateQuizCode();
         setSavedQuizCode(next);
         return next;
     };
+    */
 
     useDemoTour('create-exam', startTour && isDemo);
 
@@ -617,34 +619,26 @@ export default function ExamEditor() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 font-sans pb-20 relative overflow-hidden pt-24">
-            {/* Animated background blobs */}
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
-            <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-purple-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
-
-            <style>{`
-                @keyframes blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
-                .animate-blob { animation: blob 7s infinite; }
-                .animation-delay-2000 { animation-delay: 2s; }
-                .animation-delay-4000 { animation-delay: 4s; }
-            `}</style>
+        <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1120] font-sans pb-40 relative overflow-x-hidden pt-20 selection:bg-indigo-500/20 selection:text-indigo-600 dark:selection:bg-indigo-500/30 dark:selection:text-indigo-400">
+            {/* Ambient Background Lights */}
+            <div className="fixed top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-indigo-50/50 via-white/0 to-transparent dark:from-indigo-950/20 dark:via-gray-950/0 pointer-events-none" />
+            <div className="fixed -top-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="fixed top-40 -left-20 w-72 h-72 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
 
             {/* Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
-                <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
-                    <div className="flex justify-between h-16 px-6">
+            <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 pt-4 pb-2">
+                <div className="max-w-7xl mx-auto bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl rounded-2xl shadow-sm border border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
+                    <div className="flex justify-between h-14 sm:h-16 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
-                            <Logo className="h-9 w-9" showText={false} />
+                            <Logo className="h-8 w-8" showText={false} />
                             <div className="flex flex-col">
-                                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
+                                <span className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Durrah</span>
                             </div>
                         </div>
 
                         {/* Desktop Navigation */}
-                        <div className="hidden md:flex items-center space-x-3">
-                            <span className="hidden lg:inline text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
+                        <div className="hidden md:flex items-center gap-2">
+                            <span className="hidden lg:inline-block px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 mr-2">
                                 {user?.user_metadata?.full_name || user?.email}
                             </span>
 
@@ -718,65 +712,43 @@ export default function ExamEditor() {
                 </div>
             )}
 
-            {/* Sticky Header */}
-            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 sticky top-24 z-40 transition-all">
-                <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-                        <div className="flex flex-wrap items-center gap-4">
+            {/* Fixed Header Container */}
+            <div className="fixed top-16 sm:top-20 left-0 right-0 z-40 px-3 sm:px-6 lg:px-8 transition-all duration-300 pointer-events-none">
+                <div className="max-w-[1600px] mx-auto pointer-events-auto">
+                    <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50 shadow-md rounded-2xl sm:rounded-3xl p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between">
+                        <div className="flex items-center gap-4">
                             <button
                                 onClick={() => navigate(isDemo ? '/demo' : '/dashboard')}
-                                className="p-2.5 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-500 hover:text-indigo-600 border border-gray-100 dark:border-gray-750 transition-all shadow-sm group"
+                                className="group p-2.5 rounded-xl bg-white dark:bg-gray-800 text-gray-500 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all shadow-sm"
                             >
-                                <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+                                <ArrowLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
                             </button>
-                            <div className="min-w-0">
-                                <h1 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white truncate tracking-tight">
+                            <div>
+                                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
                                     {id ? t('examEditor.editTitle') : t('examEditor.createTitle')}
                                 </h1>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                    <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Live Editor</span>
-                                </div>
-                            </div>
-
-                            {/* Kids Mode Toggle */}
-                            <div className="flex items-center gap-2 ml-2 sm:ml-6 pl-2 sm:pl-6 border-l border-gray-100 dark:border-gray-800">
-                                <label className="flex items-center cursor-pointer group px-4 py-2 rounded-2xl bg-purple-50/50 dark:bg-purple-900/20 border-2 border-transparent hover:border-purple-200 dark:hover:border-purple-800 transition-all">
-                                    <input
-                                        type="checkbox"
-                                        checked={watch('settings.child_mode_enabled')}
-                                        onChange={(e) => {
-                                            setValue('settings.child_mode_enabled', e.target.checked);
-                                            if (e.target.checked) {
-                                                setValue('settings.attempt_limit', 1);
-                                                setValue('settings.leaderboard_visibility', 'after_submit');
-                                                ensureQuizCode();
-                                                toast.success('🎈 Kids Mode Active!');
-                                            }
-                                        }}
-                                        className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded-lg transition-all"
-                                    />
-                                    <span className="ml-2 text-sm font-black text-purple-700 dark:text-purple-300">
-                                        Kids Mode
-                                    </span>
-                                </label>
+                                <p className="text-xs text-gray-500 font-medium mt-0.5">
+                                    {savedQuizCode ? `Code: ${savedQuizCode}` : 'Draft Mode'}
+                                </p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                            {/* Imports Button */}
                             <button
                                 onClick={() => setShowImportModal(true)}
                                 type="button"
-                                className="inline-flex items-center px-5 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-2 border-gray-50 dark:border-gray-800 rounded-2xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-gray-750 transition-all shadow-sm"
+                                className="inline-flex items-center px-4 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-750 hover:border-gray-300 dark:hover:border-gray-600 transition-all shadow-sm whitespace-nowrap"
                             >
-                                <BookOpen className="h-4 w-4 mr-2 text-indigo-600" />
+                                <BookOpen className="h-4 w-4 mr-2 text-indigo-500" />
                                 Import
                             </button>
 
+                            {/* Save Button */}
                             {isDemo ? (
                                 <Link
                                     to="/register"
-                                    className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-indigo-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                    className="inline-flex items-center px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-bold shadow-lg shadow-gray-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap"
                                 >
                                     <Sparkles className="h-4 w-4 mr-2" />
                                     Sign Up to Save
@@ -785,7 +757,7 @@ export default function ExamEditor() {
                                 <button
                                     onClick={handleSubmit(onSubmit)}
                                     disabled={isLoading}
-                                    className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-indigo-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                                    className="inline-flex items-center px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-bold shadow-lg shadow-gray-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ml-auto sm:ml-0"
                                 >
                                     {isLoading ? (
                                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -800,32 +772,43 @@ export default function ExamEditor() {
                 </div>
             </div>
 
-            <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+            <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pt-44 sm:pt-48 lg:pt-52">
                 <div className="flex flex-col xl:flex-row gap-4 sm:gap-8 items-start">
                     {/* Left Column: Form Editor */}
                     <div className="flex-1 w-full space-y-4 sm:space-y-8 min-w-0">
                         {/* Basic Info */}
-                        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-sm border border-gray-100 dark:border-gray-800 rounded-[2rem] p-8" id="exam-title">
-                            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                                <Sparkles className="w-5 h-5 text-indigo-600" />
+                        <div className="bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden group">
+                            {/* Decorative highlight */}
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2.5">
+                                <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
+                                    <Sparkles className="w-4 h-4" />
+                                </div>
                                 {t('examEditor.basicInfo.title')}
                             </h3>
                             <div className="space-y-6">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('examEditor.basicInfo.examTitle')}</label>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">
+                                        {t('examEditor.basicInfo.examTitle')}
+                                        <span className="text-red-500 ml-1">*</span>
+                                    </label>
                                     <input
                                         type="text"
                                         required
-                                        className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none"
+                                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none placeholder:text-gray-400 font-medium"
                                         placeholder="e.g., Final Physics Assessment"
                                         {...register('title')}
                                     />
                                 </div>
                                 <div id="exam-description">
-                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('examEditor.basicInfo.description')}</label>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">
+                                        {t('examEditor.basicInfo.description')}
+                                        <span className="text-red-500 ml-1">*</span>
+                                    </label>
                                     <textarea
                                         rows={3}
-                                        className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none resize-none"
+                                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none resize-none placeholder:text-gray-400 font-medium"
                                         placeholder="Briefly describe the purpose of this exam..."
                                         {...register('description')}
                                     />
@@ -863,14 +846,20 @@ export default function ExamEditor() {
                             </div>
                         )}
 
-                        {/* Email Access Control - Hidden in Kids Mode */}
+                        {/* Email Access Control */}
                         {!watch('settings.child_mode_enabled') && (
-                            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-sm border border-gray-100 dark:border-gray-800 rounded-[2rem] p-8">
+                            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden group">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                                 <div className="space-y-6">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <h3 className="text-xl font-black text-gray-900 dark:text-white">{t('examEditor.emailAccess.title')}</h3>
-                                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">
+                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
+                                                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
+                                                    <Mail className="w-4 h-4" />
+                                                </div>
+                                                {t('examEditor.emailAccess.title')}
+                                            </h3>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 ml-11">
                                                 {t('examEditor.emailAccess.desc')}
                                             </p>
                                         </div>
@@ -880,6 +869,11 @@ export default function ExamEditor() {
                                                 className="sr-only peer"
                                                 checked={watch('settings.restrict_by_email')}
                                                 onChange={(e) => {
+                                                    if (profile?.subscription_status !== 'active' && e.target.checked) {
+                                                        toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
+                                                        navigate('/checkout');
+                                                        return;
+                                                    }
                                                     setValue('settings.restrict_by_email', e.target.checked);
                                                     if (e.target.checked && !watch('required_fields')?.includes('email')) {
                                                         const current = watch('required_fields') || [];
@@ -889,56 +883,71 @@ export default function ExamEditor() {
                                             />
                                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
                                         </label>
+                                        {profile?.subscription_status !== 'active' && (
+                                            <div className="absolute -top-1 -right-1">
+                                                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                                                    <Crown className="w-2.5 h-2.5" />
+                                                    PRO
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {watch('settings.restrict_by_email') && (
-                                        <EmailWhitelist
-                                            emails={watch('settings.allowed_emails') || []}
-                                            onChange={(emails) => setValue('settings.allowed_emails', emails)}
-                                        />
+                                        <div className="ml-1">
+                                            <EmailWhitelist
+                                                emails={watch('settings.allowed_emails') || []}
+                                                onChange={(emails) => setValue('settings.allowed_emails', emails)}
+                                            />
+                                        </div>
                                     )}
                                 </div>
                             </div>
                         )}
 
                         {/* Settings */}
-                        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-sm border border-gray-100 dark:border-gray-800 rounded-[2rem] p-8" id="exam-settings">
-                            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-8 flex items-center gap-2">
-                                <Settings className="w-5 h-5 text-indigo-600" />
+                        <div className="bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden group" id="exam-settings">
+                            {/* Decorative highlight */}
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-500 to-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-2.5">
+                                <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-600 dark:text-gray-400">
+                                    <Settings className="w-4 h-4" />
+                                </div>
                                 {t('examEditor.settings.title')}
                             </h3>
 
                             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
                                 {watch('settings.child_mode_enabled') ? (
                                     <div className="col-span-2">
-                                        <div className="p-8 rounded-[2rem] border-2 border-purple-100 dark:border-purple-800 bg-gradient-to-br from-purple-50/50 to-pink-50/50 dark:from-purple-900/20 dark:to-pink-900/20 relative overflow-hidden">
+                                        <div className="p-8 rounded-[2rem] border border-purple-100 dark:border-purple-800 bg-gradient-to-br from-purple-50/50 to-pink-50/50 dark:from-purple-900/20 dark:to-pink-900/20 relative overflow-hidden">
                                             <div className="absolute top-0 right-0 p-4 opacity-10">
-                                                <Sparkles className="w-20 h-20 text-purple-600" />
+                                                <Sparkles className="w-32 h-32 text-purple-600" />
                                             </div>
-                                            <div className="flex items-center gap-3 mb-8">
-                                                <span className="text-3xl">🎈</span>
-                                                <h4 className="text-xl font-black text-purple-900 dark:text-purple-200">{t('examEditor.settings.kidsMode.title')}</h4>
+                                            <div className="flex items-center gap-3 mb-8 relative z-10">
+                                                <div className="text-3xl bg-white dark:bg-gray-800 p-2 rounded-2xl shadow-sm">🎈</div>
+                                                <h4 className="text-xl font-bold text-purple-900 dark:text-purple-200">{t('examEditor.settings.kidsMode.title')}</h4>
                                             </div>
-                                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 rounded-2xl border border-purple-50 dark:border-purple-800 shadow-sm">
-                                                    <label className="flex items-center gap-2 text-sm font-bold text-purple-900 dark:text-purple-200 mb-3">
-                                                        <span className="text-xl">🎯</span>
+                                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 relative z-10">
+                                                <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-6 rounded-2xl border border-purple-100 dark:border-purple-800/50 shadow-sm hover:shadow-md transition-all">
+                                                    <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                                                        <span className="text-lg">🎯</span>
                                                         {t('examEditor.settings.kidsMode.attemptLimit')}
                                                     </label>
                                                     <input
                                                         type="number"
                                                         min="1"
-                                                        className="w-full px-4 py-3 border-2 border-purple-50 dark:border-purple-800 rounded-xl bg-purple-50/30 dark:bg-gray-900/50 focus:border-purple-500/50 outline-none transition-all"
+                                                        className="w-full px-4 py-3 border border-purple-200 dark:border-purple-800/50 rounded-xl bg-purple-50/30 dark:bg-gray-800/50 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all"
                                                         {...register('settings.attempt_limit', { valueAsNumber: true })}
                                                     />
                                                 </div>
-                                                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 rounded-2xl border border-purple-50 dark:border-purple-800 shadow-sm">
-                                                    <label className="flex items-center gap-2 text-sm font-bold text-purple-900 dark:text-purple-200 mb-3">
-                                                        <span className="text-xl">🏆</span>
+                                                <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-6 rounded-2xl border border-purple-100 dark:border-purple-800/50 shadow-sm hover:shadow-md transition-all">
+                                                    <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                                                        <span className="text-lg">🏆</span>
                                                         {t('examEditor.settings.kidsMode.leaderboardVisibility')}
                                                     </label>
                                                     <select
-                                                        className="w-full px-4 py-3 border-2 border-purple-50 dark:border-purple-800 rounded-xl bg-purple-50/30 dark:bg-gray-900/50 focus:border-purple-500/50 outline-none transition-all cursor-pointer"
+                                                        className="w-full px-4 py-3 border border-purple-200 dark:border-purple-800/50 rounded-xl bg-purple-50/30 dark:bg-gray-800/50 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all cursor-pointer"
                                                         {...register('settings.leaderboard_visibility')}
                                                     >
                                                         <option value="hidden">{t('examEditor.settings.kidsMode.visibilityHidden')}</option>
@@ -953,131 +962,142 @@ export default function ExamEditor() {
                                     <>
                                         {/* Anti-Cheating Group */}
                                         <div className="col-span-2">
-                                            <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Anti-Cheating</h4>
-                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                                <div className="flex items-center gap-3 p-4 bg-white/50 dark:bg-gray-800/50 rounded-2xl border-2 border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/30 transition-all cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        id="fullscreen_required"
-                                                        className="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-2 border-gray-200 dark:border-gray-700 rounded-xl transition-all"
-                                                        {...register('settings.require_fullscreen')}
-                                                    />
-                                                    <label htmlFor="fullscreen_required" className="flex items-center gap-3 cursor-pointer select-none">
-                                                        <Maximize className="h-4 w-4 text-gray-400" />
+                                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 ml-1">Anti-Cheating Measures</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                                                {[
+                                                    { id: 'fullscreen_required', icon: Maximize, label: 'Fullscreen Force', desc: 'Requires students to stay in fullscreen', field: 'settings.require_fullscreen', isPremium: false },
+                                                    { id: 'tab_switch_prohibited', icon: MonitorOff, label: 'Tab Detection', desc: 'Logs tab switches as violations', field: 'settings.detect_tab_switch', isPremium: true },
+                                                    { id: 'copy_paste_prohibited', icon: ClipboardX, label: 'Anti-Cheat Mode', desc: 'Disables Copy, Paste & Right Click', field: 'settings.disable_copy_paste', isPremium: true }
+                                                ].map((item) => (
+                                                    <label key={item.id} className="relative flex items-start gap-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-slate-50 dark:hover:bg-gray-800 transition-all cursor-pointer group/item">
+                                                        {item.isPremium && profile?.subscription_status !== 'active' && (
+                                                            <div className="absolute -top-2 -right-2 z-10">
+                                                                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                                                                    <Crown className="w-2.5 h-2.5" />
+                                                                    PRO
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        <div className="mt-1">
+                                                            <input
+                                                                type="checkbox"
+                                                                id={item.id}
+                                                                className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition-all"
+                                                                {...register(item.field as any)}
+                                                                onChange={(e) => {
+                                                                    if (item.isPremium && profile?.subscription_status !== 'active' && e.target.checked) {
+                                                                        e.preventDefault();
+                                                                        toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
+                                                                        navigate('/checkout');
+                                                                        return;
+                                                                    }
+                                                                    const field = item.field as any;
+                                                                    setValue(field, e.target.checked);
+                                                                }}
+                                                            />
+                                                        </div>
                                                         <div className="flex flex-col">
-                                                            <span className="text-sm font-black text-gray-700 dark:text-gray-300">Fullscreen Force</span>
-                                                            <span className="text-[10px] font-bold text-gray-400">Requires students to stay in fullscreen</span>
+                                                            <div className="flex items-center gap-2 mb-0.5">
+                                                                <item.icon className="h-4 w-4 text-gray-400 group-hover/item:text-indigo-500 transition-colors" />
+                                                                <span className="text-sm font-bold text-gray-700 dark:text-gray-200 group-hover/item:text-gray-900 dark:group-hover/item:text-white transition-colors">{item.label}</span>
+                                                            </div>
+                                                            <span className="text-xs font-medium text-gray-400 leading-snug">{item.desc}</span>
                                                         </div>
                                                     </label>
-                                                </div>
-
-                                                <div className="flex items-center gap-3 p-4 bg-white/50 dark:bg-gray-800/50 rounded-2xl border-2 border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/30 transition-all cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        id="tab_switch_prohibited"
-                                                        className="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-2 border-gray-200 dark:border-gray-700 rounded-xl transition-all"
-                                                        {...register('settings.detect_tab_switch')}
-                                                    />
-                                                    <label htmlFor="tab_switch_prohibited" className="flex items-center gap-3 cursor-pointer select-none">
-                                                        <MonitorOff className="h-4 w-4 text-gray-400" />
-                                                        <div className="flex flex-col">
-                                                            <span className="text-sm font-black text-gray-700 dark:text-gray-300">Tab Detection</span>
-                                                            <span className="text-[10px] font-bold text-gray-400">Logs tab switches as violations</span>
-                                                        </div>
-                                                    </label>
-                                                </div>
-
-                                                <div className="flex items-center gap-3 p-4 bg-white/50 dark:bg-gray-800/50 rounded-2xl border-2 border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/30 transition-all cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        id="copy_paste_prohibited"
-                                                        className="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-2 border-gray-200 dark:border-gray-700 rounded-xl transition-all"
-                                                        {...register('settings.disable_copy_paste')}
-                                                    />
-                                                    <label htmlFor="copy_paste_prohibited" className="flex items-center gap-3 cursor-pointer select-none">
-                                                        <ClipboardX className="h-4 w-4 text-gray-400" />
-                                                        <div className="flex flex-col">
-                                                            <span className="text-sm font-black text-gray-700 dark:text-gray-300">Anti-Cheat Mode</span>
-                                                            <span className="text-[10px] font-bold text-gray-400">Disables Copy, Paste & Right Click</span>
-                                                        </div>
-                                                    </label>
-                                                </div>
+                                                ))}
                                             </div>
                                         </div>
 
                                         <div className="space-y-6">
-                                            <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Submission Rules</h4>
+                                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 ml-1">Submission Rules</h4>
                                             <div>
-                                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('examEditor.settings.maxViolations')}</label>
+                                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('examEditor.settings.maxViolations')}</label>
                                                 <input
                                                     type="number"
                                                     min="0"
-                                                    className="w-full px-5 py-3.5 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 outline-none transition-all"
+                                                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium"
                                                     {...register('settings.max_violations', { valueAsNumber: true })}
                                                 />
                                             </div>
-                                            <div className="space-y-4">
-                                                <label className="flex items-center p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 border-2 border-transparent hover:border-indigo-500/20 cursor-pointer transition-all">
+                                            <div className="space-y-3">
+                                                <label className="flex items-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 cursor-pointer transition-all">
                                                     <input
                                                         type="checkbox"
-                                                        className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded-lg"
+                                                        className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                                                         {...register('settings.show_results_immediately')}
                                                     />
                                                     <span className="ml-3 text-sm font-bold text-gray-700 dark:text-gray-300">{t('examEditor.settings.showResults')}</span>
                                                 </label>
-                                                <label className="flex items-center p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 border-2 border-transparent hover:border-indigo-500/20 cursor-pointer transition-all">
+                                                <label className="relative flex items-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 cursor-pointer transition-all">
+                                                    {profile?.subscription_status !== 'active' && (
+                                                        <div className="absolute -top-2 -right-2 z-10">
+                                                            <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                                                                <Crown className="w-2.5 h-2.5" />
+                                                                PRO
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                     <input
                                                         type="checkbox"
-                                                        className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded-lg"
+                                                        className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                                                         {...register('settings.show_detailed_results')}
+                                                        onChange={(e) => {
+                                                            if (profile?.subscription_status !== 'active' && e.target.checked) {
+                                                                e.preventDefault();
+                                                                toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
+                                                                navigate('/checkout');
+                                                                return;
+                                                            }
+                                                            setValue('settings.show_detailed_results', e.target.checked);
+                                                        }}
                                                     />
                                                     <div className="ml-3">
                                                         <span className="block text-sm font-bold text-gray-700 dark:text-gray-300">Show answers after submission</span>
-                                                        <span className="text-[10px] text-gray-500 font-medium">Students can see which questions they got wrong.</span>
+                                                        <span className="text-xs text-gray-500 font-medium">Students can see which questions they got wrong.</span>
                                                     </div>
                                                 </label>
                                             </div>
                                         </div>
 
                                         <div className="space-y-6">
-                                            <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4 ml-1">Timing & Zone</h4>
+                                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 ml-1">Timing & Zone</h4>
                                             <div id="time-settings">
-                                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('examEditor.settings.timeLimit')}</label>
+                                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('examEditor.settings.timeLimit')}</label>
                                                 <div className="relative">
                                                     <input
                                                         type="number"
                                                         min="0"
                                                         placeholder="No limit"
-                                                        className="w-full px-5 py-3.5 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 outline-none transition-all pr-12"
+                                                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all pr-12 font-medium"
                                                         {...register('settings.time_limit_minutes', { valueAsNumber: true })}
                                                     />
-                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-gray-400">MIN</span>
+                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">MIN</span>
                                                 </div>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 ml-1">{t('examEditor.settings.startTime')}</label>
+                                                    <label className="block text-xs font-bold uppercase text-gray-400 mb-2 ml-1">{t('examEditor.settings.startTime')}</label>
                                                     <input
                                                         type="datetime-local"
-                                                        className="w-full px-4 py-3 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 outline-none transition-all text-sm"
+                                                        className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-sm font-medium"
                                                         {...register('settings.start_time')}
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 ml-1">{t('examEditor.settings.endTime')}</label>
+                                                    <label className="block text-xs font-bold uppercase text-gray-400 mb-2 ml-1">{t('examEditor.settings.endTime')}</label>
                                                     <input
                                                         type="datetime-local"
-                                                        className="w-full px-4 py-3 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 outline-none transition-all text-sm"
+                                                        className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-sm font-medium"
                                                         {...register('settings.end_time')}
                                                     />
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">
+                                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">
                                                     {t('examEditor.settings.timezone', 'Timezone')}
                                                 </label>
                                                 <select
-                                                    className="w-full px-5 py-3.5 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 outline-none transition-all cursor-pointer text-sm"
+                                                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer text-sm font-medium"
                                                     {...register('settings.timezone')}
                                                 >
                                                     {typeof Intl !== 'undefined' && 'supportedValuesOf' in Intl ? (
@@ -1088,7 +1108,7 @@ export default function ExamEditor() {
                                                         <option value="UTC">UTC</option>
                                                     )}
                                                 </select>
-                                                <p className="mt-2 text-[10px] font-medium text-gray-400 ml-1">
+                                                <p className="mt-2 text-xs font-medium text-gray-400 ml-1">
                                                     Current: {watch('settings.timezone')}
                                                 </p>
                                             </div>
@@ -1101,28 +1121,30 @@ export default function ExamEditor() {
                         {/* Questions */}
                         <div className="w-full space-y-8" id="questions-section">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
-                                    <LayoutList className="w-6 h-6 text-indigo-600" />
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                                    <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
+                                        <LayoutList className="w-4 h-4" />
+                                    </div>
                                     {t('examEditor.questions.title')}
                                 </h3>
                                 <div className="flex items-center gap-3">
                                     <button
                                         type="button"
                                         onClick={() => setShowMathPreview(!showMathPreview)}
-                                        className={`px-4 py-3 rounded-2xl text-sm font-black flex items-center gap-2 transition-all ${showMathPreview
+                                        className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${showMathPreview
                                             ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-                                            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                            : 'bg-white text-gray-600 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750'
                                             }`}
                                     >
-                                        <Sigma className="w-5 h-5" />
+                                        <Sigma className="w-4 h-4" />
                                         {t('math.togglePreview', 'Math')}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => append(defaultQuestion)}
-                                        className="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-50 dark:border-indigo-900/30 rounded-2xl text-sm font-black hover:bg-indigo-50 dark:hover:bg-indigo-900/20 active:scale-95 transition-all shadow-sm"
+                                        className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 active:scale-95 transition-all shadow-lg shadow-indigo-200 dark:shadow-none"
                                     >
-                                        <Plus className="h-5 w-5 mr-2" />
+                                        <Plus className="h-4 w-4 mr-2" />
                                         {t('examEditor.questions.add')}
                                     </button>
                                 </div>
@@ -1133,20 +1155,17 @@ export default function ExamEditor() {
                                     <div className="space-y-6 w-full">
                                         {fields.map((field, index) => (
                                             <SortableQuestionItem key={field.id} id={field.id}>
-                                                <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-sm border border-gray-100 dark:border-gray-800 rounded-3xl p-4 sm:p-8 mb-6 relative overflow-hidden group/card text-left">
-                                                    {/* Background Gradient Accent */}
-                                                    <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-indigo-500 to-violet-500 opacity-0 group-hover/card:opacity-100 transition-opacity" />
-
-                                                    <div className="flex items-center justify-between mb-8">
+                                                <div className="group/card">
+                                                    <div className="flex items-center justify-between mb-6">
                                                         <div className="flex items-center gap-4">
-                                                            <div className="flex items-center justify-center h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-50 to-white dark:from-gray-800 dark:to-gray-900 border-2 border-indigo-100 dark:border-gray-700 text-indigo-600 dark:text-indigo-400 font-black text-lg shadow-sm">
+                                                            <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-bold text-lg border border-indigo-100 dark:border-indigo-800">
                                                                 {index + 1}
                                                             </div>
                                                             <div className="min-w-0">
-                                                                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500/60 dark:text-indigo-400/60">{t('examEditor.questions.question')} #{index + 1}</p>
+                                                                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{t('examEditor.questions.question')} {index + 1}</p>
                                                                 <div className="flex items-center gap-2 mt-0.5">
-                                                                    <span className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg text-[9px] font-black uppercase">
-                                                                        {questionsWatch?.[index]?.type?.replace('_', ' ') || 'standard'}
+                                                                    <span className="text-sm font-bold text-gray-900 dark:text-gray-200">
+                                                                        {questionsWatch?.[index]?.type?.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Multiple Choice'}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -1154,19 +1173,20 @@ export default function ExamEditor() {
                                                         <button
                                                             type="button"
                                                             onClick={() => remove(index)}
-                                                            className="p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-all border-2 border-transparent hover:border-red-100 dark:hover:border-red-900/30"
+                                                            className="p-2.5 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all opacity-100 lg:opacity-0 lg:group-hover/card:opacity-100"
+                                                            title="Delete Question"
                                                         >
                                                             <Trash2 className="h-5 w-5" />
                                                         </button>
                                                     </div>
 
-                                                    <div className="space-y-8">
-                                                        {/* Type and Points Grid */}
-                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                                            <div>
-                                                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('examEditor.questions.type')}</label>
+                                                    <div className="space-y-6">
+                                                        {/* Type and Points Row */}
+                                                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-6">
+                                                            <div className="sm:col-span-8">
+                                                                <label className="block text-xs font-bold uppercase text-gray-400 mb-1.5 ml-1">{t('examEditor.questions.type')}</label>
                                                                 <select
-                                                                    className="w-full px-5 py-3.5 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 outline-none transition-all cursor-pointer text-sm font-bold"
+                                                                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer font-medium"
                                                                     {...register(`questions.${index}.type`)}
                                                                 >
                                                                     <option value="multiple_choice">{t('examEditor.questions.types.multipleChoice')}</option>
@@ -1183,68 +1203,66 @@ export default function ExamEditor() {
                                                                     )}
                                                                 </select>
                                                             </div>
-                                                            <div>
-                                                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('examEditor.questions.points')}</label>
+                                                            <div className="sm:col-span-4">
+                                                                <label className="block text-xs font-bold uppercase text-gray-400 mb-1.5 ml-1">{t('examEditor.questions.points')}</label>
                                                                 <div className="relative">
                                                                     <input
                                                                         type="number"
                                                                         min="1"
-                                                                        className="w-full px-5 py-3.5 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 outline-none transition-all pr-12 font-black"
+                                                                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all pr-12 font-bold"
                                                                         {...register(`questions.${index}.points`, { valueAsNumber: true })}
                                                                     />
-                                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-gray-400">PTS</span>
+                                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">PTS</span>
                                                                 </div>
                                                             </div>
                                                         </div>
 
-                                                        {/* Question Content Grid */}
-                                                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                                                            <div className="lg:col-span-8 space-y-4">
-                                                                <label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">
-                                                                    {t('examEditor.questions.questionText')}
-                                                                </label>
-                                                                <textarea
-                                                                    {...register(`questions.${index}.question_text`)}
-                                                                    className="w-full px-8 py-6 border-2 border-gray-50 dark:border-gray-800 rounded-[2rem] bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 outline-none transition-all placeholder-gray-300 text-lg font-medium"
-                                                                    placeholder={t('examEditor.questions.questionTextPlaceholder')}
-                                                                    rows={index === 0 ? 3 : 2}
-                                                                />
-                                                                {showMathPreview && watch(`questions.${index}.question_text`) && (
-                                                                    <div className="mt-2 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-xl border border-gray-100 dark:border-gray-800 text-sm">
-                                                                        <Latex>{watch(`questions.${index}.question_text`)}</Latex>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-
-                                                            <div className="lg:col-span-4 space-y-4">
-                                                                <label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">
-                                                                    {t('examEditor.questions.questionImage')}
-                                                                </label>
-                                                                <div className="bg-gray-50/50 dark:bg-gray-900/50 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] p-4 h-[calc(100%-2.5rem)] flex items-center justify-center min-h-[160px]">
-                                                                    <ImageUploader
-                                                                        userId={user?.id || 'anon'}
-                                                                        value={questionsWatch?.[index]?.media_url || ''}
-                                                                        onChange={(url) => {
-                                                                            setValue(`questions.${index}.media_url`, url);
-                                                                            setValue(`questions.${index}.media_type`, 'image');
-                                                                        }}
+                                                        {/* Question Content */}
+                                                        <div className="space-y-4">
+                                                            <label className="text-xs font-bold uppercase text-gray-400 ml-1">
+                                                                {t('examEditor.questions.questionText')}
+                                                            </label>
+                                                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                                                                <div className="lg:col-span-8">
+                                                                    <textarea
+                                                                        {...register(`questions.${index}.question_text`)}
+                                                                        className="w-full px-5 py-4 border border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder-gray-400 text-base font-medium resize-none"
+                                                                        placeholder={t('examEditor.questions.questionTextPlaceholder')}
+                                                                        rows={index === 0 ? 3 : 2}
                                                                     />
+                                                                    {showMathPreview && watch(`questions.${index}.question_text`) && (
+                                                                        <div className="mt-3 p-4 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800 text-sm">
+                                                                            <Latex>{watch(`questions.${index}.question_text`)}</Latex>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <div className="lg:col-span-4">
+                                                                    <div className="bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-2 h-full min-h-[120px] flex items-center justify-center hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
+                                                                        <ImageUploader
+                                                                            userId={user?.id || 'anon'}
+                                                                            value={questionsWatch?.[index]?.media_url || ''}
+                                                                            onChange={(url) => {
+                                                                                setValue(`questions.${index}.media_url`, url);
+                                                                                setValue(`questions.${index}.media_type`, 'image');
+                                                                            }}
+                                                                        />
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
 
                                                         {/* Options / Answer Input */}
                                                         {['multiple_choice', 'multiple_select', 'dropdown'].includes(questionsWatch?.[index]?.type || '') && (
-                                                            <div className="space-y-6">
+                                                            <div className="space-y-4 mt-8">
                                                                 <div className="flex items-center justify-between ml-1">
-                                                                    <label className="text-sm font-black text-gray-400 uppercase tracking-widest">{t('examEditor.questions.options')}</label>
-                                                                    <span className="text-[10px] font-black text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-full uppercase tracking-widest">
+                                                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('examEditor.questions.options')}</label>
+                                                                    <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-full uppercase tracking-widest border border-indigo-100 dark:border-indigo-800">
                                                                         {t('examEditor.questions.selectCorrect')}
                                                                     </span>
                                                                 </div>
-                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                                     {questionsWatch?.[index]?.options?.map((_, optionIndex) => (
-                                                                        <div key={`${index}-${optionIndex}`} className="relative group/option flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-[1.8rem] border-2 border-gray-50 dark:border-gray-700 hover:border-indigo-100 dark:hover:border-indigo-900/40 transition-all">
+                                                                        <div key={`${index}-${optionIndex}`} className="relative group/option flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all">
                                                                             <input
                                                                                 type={questionsWatch?.[index]?.type === 'multiple_select' ? 'checkbox' : 'radio'}
                                                                                 name={`correct_${index}`}
@@ -1265,15 +1283,15 @@ export default function ExamEditor() {
                                                                                         setValue(`questions.${index}.correct_answer`, currentVal || '');
                                                                                     }
                                                                                 }}
-                                                                                className="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-2 border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer transition-transform group-hover/option:scale-110"
+                                                                                className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded cursor-pointer"
                                                                             />
                                                                             <input
                                                                                 {...register(`questions.${index}.options.${optionIndex}`)}
-                                                                                className="flex-1 bg-transparent border-0 text-sm font-bold text-gray-900 dark:text-white placeholder-gray-300 focus:ring-0 min-w-0"
+                                                                                className="flex-1 bg-transparent border-0 text-sm font-semibold text-gray-900 dark:text-white placeholder-gray-400 focus:ring-0 min-w-0 p-0"
                                                                                 placeholder={`${t('examEditor.questions.option')} ${optionIndex + 1}`}
                                                                             />
                                                                             {showMathPreview && watch(`questions.${index}.options.${optionIndex}`) && (
-                                                                                <div className="px-3 py-1 bg-gray-50 dark:bg-gray-900/30 rounded-lg border border-gray-100 dark:border-gray-800 text-xs">
+                                                                                <div className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">
                                                                                     <Latex>{watch(`questions.${index}.options.${optionIndex}`)}</Latex>
                                                                                 </div>
                                                                             )}
@@ -1284,12 +1302,13 @@ export default function ExamEditor() {
                                                                                     currentOpts.splice(optionIndex, 1);
                                                                                     setValue(`questions.${index}.options`, currentOpts);
                                                                                 }}
-                                                                                className="p-2 text-gray-200 hover:text-red-500 transition-colors opacity-0 group-hover/option:opacity-100"
+                                                                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all opacity-0 group-hover/option:opacity-100"
                                                                             >
                                                                                 <Trash2 className="h-4 w-4" />
                                                                             </button>
                                                                         </div>
                                                                     ))}
+
 
                                                                     <button
                                                                         type="button"
@@ -1298,7 +1317,7 @@ export default function ExamEditor() {
                                                                             currentOpts.push('');
                                                                             setValue(`questions.${index}.options`, currentOpts);
                                                                         }}
-                                                                        className="flex items-center justify-center gap-3 p-4 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-[1.8rem] text-sm font-black text-gray-400 hover:border-indigo-200 hover:text-indigo-600 hover:bg-indigo-50/30 transition-all group"
+                                                                        className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl text-xs font-bold text-gray-500 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all group"
                                                                     >
                                                                         <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />
                                                                         {t('examEditor.questions.addOption')}
@@ -1437,7 +1456,7 @@ export default function ExamEditor() {
                                                         )}
 
                                                         {questionsWatch?.[index]?.type === 'kids_picture_pairing' && (
-                                                            <div className="p-6 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-[2rem] border-2 border-indigo-100/50 dark:border-indigo-900/30 space-y-6">
+                                                            <div className="p-6 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-3xl border border-indigo-100 dark:border-indigo-900/30 space-y-6">
                                                                 <div className="flex items-center gap-3 mb-2">
                                                                     <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-indigo-600">
                                                                         <Sparkles className="w-5 h-5" />
@@ -1455,7 +1474,7 @@ export default function ExamEditor() {
                                                                                 <input
                                                                                     type="text"
                                                                                     placeholder={`Side A - ${i + 1}`}
-                                                                                    className="w-full bg-transparent border-0 text-xs font-bold focus:ring-0 placeholder-gray-300"
+                                                                                    className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-gray-400"
                                                                                     {...register(`questions.${index}.options.${i}`)}
                                                                                 />
                                                                                 <ImageUploader
@@ -1474,7 +1493,7 @@ export default function ExamEditor() {
                                                                                 <input
                                                                                     type="text"
                                                                                     placeholder={`Side B - ${i - 3}`}
-                                                                                    className="w-full bg-transparent border-0 text-xs font-bold focus:ring-0 placeholder-gray-300"
+                                                                                    className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-gray-400"
                                                                                     {...register(`questions.${index}.options.${i}`)}
                                                                                 />
                                                                                 <ImageUploader
@@ -1491,7 +1510,7 @@ export default function ExamEditor() {
                                                         )}
 
                                                         {questionsWatch?.[index]?.type === 'kids_story_sequence' && (
-                                                            <div className="p-6 bg-amber-50/30 dark:bg-amber-900/10 rounded-[2rem] border-2 border-amber-100/50 dark:border-amber-900/30 space-y-4">
+                                                            <div className="p-6 bg-amber-50/30 dark:bg-amber-900/10 rounded-3xl border border-amber-100 dark:border-amber-900/30 space-y-4">
                                                                 <div className="flex items-center gap-3 mb-2">
                                                                     <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-amber-600">
                                                                         <BookOpen className="w-5 h-5" />
@@ -1537,7 +1556,7 @@ export default function ExamEditor() {
                     {/* Import from Question Bank Modal */}
                     {showImportModal && (
                         <div className="fixed inset-0 bg-gray-950/40 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
-                            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl border border-white dark:border-gray-800 max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col scale-in-center">
+                            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white dark:border-gray-800 max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col scale-in-center">
                                 <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white/50 dark:bg-gray-900/50">
                                     <div className="flex items-center gap-4">
                                         <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl text-indigo-600">
@@ -1570,7 +1589,7 @@ export default function ExamEditor() {
                                     </button>
                                 </div>
 
-                                <div className="p-8 space-y-8 overflow-y-auto">
+                                <div className="p-8 space-y-8 overflow-y-auto custom-scrollbar">
                                     {/* Number of questions input */}
                                     <div className="space-y-3">
                                         <label className="flex items-center gap-2 text-sm font-black text-gray-700 dark:text-gray-300 ml-1">
@@ -1583,7 +1602,7 @@ export default function ExamEditor() {
                                                 min="1"
                                                 value={questionCount}
                                                 onChange={(e) => setQuestionCount(parseInt(e.target.value) || 1)}
-                                                className="w-full px-6 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-[1.5rem] bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 outline-none transition-all pr-20 font-black"
+                                                className="w-full px-6 py-4 border border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all pr-20 font-bold"
                                             />
                                             <span className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black text-gray-400">RANDOM</span>
                                         </div>
@@ -1666,7 +1685,7 @@ export default function ExamEditor() {
                     )}
 
                     {/* Right Column: Live Preview (Desktop Only) */}
-                    <div className="xl:w-[400px] sticky top-8">
+                    <div className="xl:w-[400px] sticky top-48">
                         <ExamPreviewPanel data={watch()} />
                     </div>
                 </div>
