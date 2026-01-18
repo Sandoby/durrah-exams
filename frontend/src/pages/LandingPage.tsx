@@ -1,17 +1,14 @@
 ﻿import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, CaretDown, Check, GraduationCap, Layout, Lightning, Lock, List, X, ShieldCheck, Sparkle, GlobeHemisphereWest, UsersThree, Medal, Rocket, DeviceMobile, Bell, FacebookLogo, ChartLineUp, DownloadSimple } from '@phosphor-icons/react';
+import { Check, Zap, Shield, Globe, Users, MessageCircle, ArrowRight, Star, Layout, Sparkles, Award, TrendingUp, Clock, Menu, X, Trophy, ChevronDown, Rocket, Orbit, Smartphone, Download, Bell, GraduationCap } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { Logo } from '../components/Logo';
-import MobileWelcome from './MobileWelcome';
+import { LottiePlayer } from '../components/LottiePlayer';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-
-import { GridSpotlight } from '../components/GridSpotlight';
-import { InteractiveHowTo } from '../components/InteractiveHowTo';
 
 export default function LandingPage() {
     const { t, i18n } = useTranslation();
@@ -26,13 +23,8 @@ export default function LandingPage() {
 
     // No auto-redirect - show authenticated UI instead
 
-    const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(5);
-    const { price: yearlyPrice } = useCurrency(50);
-
-    const { scrollY } = useScroll();
-    const heroRotateX = useTransform(scrollY, [0, 500], [15, 30]);
-    const heroTranslateY = useTransform(scrollY, [0, 500], [0, 100]);
-    const heroScale = useTransform(scrollY, [0, 500], [1, 0.95]);
+    const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(200);
+    const { price: yearlyPrice } = useCurrency(2000);
 
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -153,20 +145,20 @@ export default function LandingPage() {
 
     const faqs = [
         {
-            question: t('landing.faq.q1.question', 'Is Durrah really safe for kids?'),
-            answer: t('landing.faq.q1.answer', 'Yes! We prioritize safety with filtered content, secure nickname-only access options, and zero data selling.')
+            question: t('faq.q1.question', 'Is Durrah really safe for kids?'),
+            answer: t('faq.q1.answer', 'Yes! We prioritize safety with filtered content, secure nickname-only access options, and zero data selling.')
         },
         {
-            question: t('landing.faq.q2.question', 'How does the anti-cheating system work?'),
-            answer: t('landing.faq.q2.answer', 'Our system uses AI to detect tab switching, fullscreen escapes, and suspicious behavior patterns without intrusive software.')
+            question: t('faq.q2.question', 'How does the anti-cheating system work?'),
+            answer: t('faq.q2.answer', 'Our system uses AI to detect tab switching, fullscreen escapes, and suspicious behavior patterns without intrusive software.')
         },
         {
-            question: t('landing.faq.q3.question', 'Can I use Durrah for large school groups?'),
-            answer: t('landing.faq.q3.answer', 'Absolutely. Our "Professional" and "Yearly" plans are designed for high-capacity testing with detailed analytics.')
+            question: t('faq.q3.question', 'Can I use Durrah for large school groups?'),
+            answer: t('faq.q3.answer', 'Absolutely. Our "Professional" and "Yearly" plans are designed for high-capacity testing with detailed analytics.')
         },
         {
-            question: t('landing.faq.q4.question', 'Do students need an account?'),
-            answer: t('landing.faq.q4.answer', 'Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress.')
+            question: t('faq.q4.question', 'Do students need an account?'),
+            answer: t('faq.q4.answer', 'Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress.')
         }
     ];
 
@@ -183,162 +175,97 @@ export default function LandingPage() {
         viewport: { once: true }
     };
 
-
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" dir={isRTL ? 'rtl' : 'ltr'}>
             <Helmet>
                 {/* Primary Meta Tags */}
                 <title>{t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')}</title>
                 <meta name="description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
-                <meta name="keywords" content={t('landing.seo.keywords', 'online exam platform, create online exams, anti-cheating exam software, quiz maker for teachers, online assessment tool, proctored exams, exam creator software, auto grading exams, secure online testing, digital assessment platform, virtual exam software, remote proctoring, kids mode exams, educator tools')} />
+                <meta name="keywords" content={t('landing.seo.keywords', 'online exams, anti-cheating, kids mode, educator tools, digital assessment, exam creator, quiz maker, online testing platform, secure exams, auto grading')} />
                 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
                 <meta name="author" content="Durrah System" />
                 <meta name="language" content={i18n.language === 'ar' ? 'Arabic' : 'English'} />
-                <link rel="canonical" href="https://durrahtutors.com/" />
-
-                {/* Hreflang for Multilingual SEO */}
-                <link rel="alternate" hrefLang="en" href="https://durrahtutors.com/" />
-                <link rel="alternate" hrefLang="ar" href="https://durrahtutors.com/?lang=ar" />
-                <link rel="alternate" hrefLang="es" href="https://durrahtutors.com/?lang=es" />
-                <link rel="alternate" hrefLang="fr" href="https://durrahtutors.com/?lang=fr" />
-                <link rel="alternate" hrefLang="x-default" href="https://durrahtutors.com/" />
-
+                <link rel="canonical" href="https://tutors.durrahsystem.tech/" />
+                
                 {/* Open Graph / Facebook */}
                 <meta property="og:type" content="website" />
                 <meta property="og:site_name" content="Durrah for Tutors" />
-                <meta property="og:url" content="https://durrahtutors.com/" />
+                <meta property="og:url" content="https://tutors.durrahsystem.tech/" />
                 <meta property="og:title" content={t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')} />
                 <meta property="og:description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
-                <meta property="og:image" content="https://durrahtutors.com/og-image.png" />
+                <meta property="og:image" content="https://tutors.durrahsystem.tech/og-image.png" />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
                 <meta property="og:image:alt" content="Durrah for Tutors - Online Exam Platform" />
                 <meta property="og:locale" content={i18n.language === 'ar' ? 'ar_SA' : 'en_US'} />
-
+                
                 {/* Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:site" content="@durrahsystem" />
                 <meta name="twitter:creator" content="@durrahsystem" />
-                <meta name="twitter:url" content="https://durrahtutors.com/" />
+                <meta name="twitter:url" content="https://tutors.durrahsystem.tech/" />
                 <meta name="twitter:title" content={t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')} />
                 <meta name="twitter:description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
-                <meta name="twitter:image" content="https://durrahtutors.com/og-image.png" />
+                <meta name="twitter:image" content="https://tutors.durrahsystem.tech/og-image.png" />
                 <meta name="twitter:image:alt" content="Durrah for Tutors - Online Exam Platform" />
-
+                
                 {/* Additional SEO Meta Tags */}
                 <meta name="theme-color" content="#6366f1" />
                 <meta name="apple-mobile-web-app-title" content="Durrah for Tutors" />
                 <meta name="application-name" content="Durrah for Tutors" />
-
+                
                 {/* Organization Schema - For Google Knowledge Panel & Logo */}
                 <script type="application/ld+json">{`
                     {
                         "@context": "https://schema.org",
                         "@type": "Organization",
-                        "@id": "https://durrahtutors.com/#organization",
+                        "@id": "https://tutors.durrahsystem.tech/#organization",
                         "name": "Durrah for Tutors",
                         "alternateName": "Durrah System",
-                        "url": "https://durrahtutors.com",
+                        "url": "https://tutors.durrahsystem.tech",
                         "logo": {
                             "@type": "ImageObject",
-                            "@id": "https://durrahtutors.com/#logo",
-                            "url": "https://durrahtutors.com/logo.png",
-                            "contentUrl": "https://durrahtutors.com/logo.png",
-                            "width": 512,
-                            "height": 512,
+                            "@id": "https://tutors.durrahsystem.tech/#logo",
+                            "url": "https://tutors.durrahsystem.tech/logo.png",
+                            "contentUrl": "https://tutors.durrahsystem.tech/logo.png",
+                            "width": 277,
+                            "height": 241,
                             "caption": "Durrah for Tutors Logo"
-                        },
-                        "brand": {
-                            "@type": "Brand",
-                            "name": "Durrah",
-                            "logo": "https://durrahtutors.com/logo.png"
                         },
                         "image": {
                             "@type": "ImageObject",
-                            "url": "https://durrahtutors.com/og-image.png"
+                            "url": "https://tutors.durrahsystem.tech/og-image.png"
                         },
                         "description": "Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.",
                         "foundingDate": "2024",
-                        "sameAs": ["https://durrahtutors.com"]
+                        "sameAs": []
                     }
                 `}</script>
-
-                {/* BreadcrumbList Schema for Better SERP Display */}
-                <script type="application/ld+json">{`
-                    {
-                        "@context": "https://schema.org",
-                        "@type": "BreadcrumbList",
-                        "itemListElement": [{
-                            "@type": "ListItem",
-                            "position": 1,
-                            "name": "Home",
-                            "item": "https://durrahtutors.com/"
-                        }]
-                    }
-                `}</script>
-
-                {/* Service Schema for Service Searches */}
-                <script type="application/ld+json">{`
-                    {
-                        "@context": "https://schema.org",
-                        "@type": "Service",
-                        "name": "Online Exam Platform",
-                        "provider": {
-                            "@id": "https://durrahtutors.com/#organization"
-                        },
-                        "serviceType": "Educational Technology",
-                        "areaServed": "Worldwide",
-                        "description": "Create and administer secure online exams with anti-cheating features, auto-grading, and detailed analytics.",
-                        "offers": {
-                            "@type": "Offer",
-                            "price": "0",
-                            "priceCurrency": "USD",
-                            "description": "Free tier available with up to 3 exams"
-                        }
-                    }
-                `}</script>
-
-                {/* FAQ Schema for Search Rich Snippets */}
-                <script type="application/ld+json">{`
-                    {
-                        "@context": "https://schema.org",
-                        "@type": "FAQPage",
-                        "mainEntity": ${JSON.stringify(faqs.map(f => ({
-                    "@type": "Question",
-                    "name": f.question,
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": f.answer
-                    }
-                })))}
-                    }
-                `}</script>
-
+                
                 {/* WebSite Schema - For Sitelinks Search Box */}
                 <script type="application/ld+json">{`
                     {
                         "@context": "https://schema.org",
                         "@type": "WebSite",
-                        "@id": "https://durrahtutors.com/#website",
+                        "@id": "https://tutors.durrahsystem.tech/#website",
                         "name": "Durrah for Tutors",
-                        "url": "https://durrahtutors.com/",
+                        "url": "https://tutors.durrahsystem.tech/",
                         "description": "Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.",
                         "inLanguage": "${i18n.language === 'ar' ? 'ar' : 'en'}",
                         "publisher": {
-                            "@id": "https://durrahtutors.com/#organization"
+                            "@id": "https://tutors.durrahsystem.tech/#organization"
                         },
                         "potentialAction": {
                             "@type": "SearchAction",
                             "target": {
                                 "@type": "EntryPoint",
-                                "urlTemplate": "https://durrahtutors.com/search?q={search_term_string}"
+                                "urlTemplate": "https://tutors.durrahsystem.tech/search?q={search_term_string}"
                             },
                             "query-input": "required name=search_term_string"
                         }
                     }
                 `}</script>
-
+                
                 {/* SoftwareApplication Schema - For Rich Results */}
                 <script type="application/ld+json">{`
                     {
@@ -361,34 +288,34 @@ export default function LandingPage() {
                             "worstRating": "1"
                         },
                         "description": "Create professional exams in minutes with powerful anti-cheating features, auto-grading, and detailed analytics.",
-                        "screenshot": "https://durrahtutors.com/og-image.png",
+                        "screenshot": "https://tutors.durrahsystem.tech/og-image.png",
                         "featureList": "Anti-cheating detection, Auto-grading, Kids mode, Real-time analytics, Multiple question types"
                     }
                 `}</script>
-
+                
                 {/* WebPage Schema */}
                 <script type="application/ld+json">{`
                     {
                         "@context": "https://schema.org",
                         "@type": "WebPage",
-                        "@id": "https://durrahtutors.com/#webpage",
-                        "url": "https://durrahtutors.com/",
+                        "@id": "https://tutors.durrahsystem.tech/#webpage",
+                        "url": "https://tutors.durrahsystem.tech/",
                         "name": "Durrah for Tutors | Create Secure Online Exams",
                         "description": "Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.",
                         "isPartOf": {
-                            "@id": "https://durrahtutors.com/#website"
+                            "@id": "https://tutors.durrahsystem.tech/#website"
                         },
                         "about": {
-                            "@id": "https://durrahtutors.com/#organization"
+                            "@id": "https://tutors.durrahsystem.tech/#organization"
                         },
                         "primaryImageOfPage": {
                             "@type": "ImageObject",
-                            "url": "https://durrahtutors.com/og-image.png"
+                            "url": "https://tutors.durrahsystem.tech/og-image.png"
                         },
                         "inLanguage": "${i18n.language === 'ar' ? 'ar' : 'en'}"
                     }
                 `}</script>
-
+                
                 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
             </Helmet>
 
@@ -410,8 +337,6 @@ export default function LandingPage() {
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                 .animate-spin-slow { animation: spin 12s linear infinite; }
             `}</style>
-
-
 
             {/* Navigation */}
             <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
@@ -439,10 +364,10 @@ export default function LandingPage() {
                                                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
                                             >
                                                 <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                                                    <UsersThree weight="duotone" className="w-4 h-4" />
+                                                    <Users className="w-4 h-4" />
                                                 </div>
                                                 <span className="max-w-[150px] truncate">{user.email}</span>
-                                                <CaretDown weight="bold" className={`w-4 h-4 transition-transform duration-300 ${userDropdownOpen ? 'rotate-180' : ''}`} />
+                                                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${userDropdownOpen ? 'rotate-180' : ''}`} />
                                             </button>
 
                                             <AnimatePresence>
@@ -458,11 +383,11 @@ export default function LandingPage() {
                                                             <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user.email}</p>
                                                         </div>
                                                         <Link to="/dashboard" onClick={() => setUserDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all">
-                                                            <Layout weight="duotone" className="w-4 h-4" />
+                                                            <Layout className="w-4 h-4" />
                                                             {t('nav.goToDashboard', 'Go to Dashboard')}
                                                         </Link>
                                                         <Link to="/settings" onClick={() => setUserDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all">
-                                                            <Medal weight="duotone" className="w-4 h-4" />
+                                                            <Trophy className="w-4 h-4" />
                                                             {t('nav.settings', 'Account Settings')}
                                                         </Link>
                                                         <div className="h-px bg-gray-100 dark:bg-gray-800 my-2 mx-2"></div>
@@ -494,7 +419,7 @@ export default function LandingPage() {
 
                             {/* Mobile Menu Button */}
                             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                                {mobileMenuOpen ? <X weight="bold" className="w-6 h-6" /> : <List weight="bold" className="w-6 h-6" />}
+                                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                             </button>
                         </div>
                     </div>
@@ -563,263 +488,166 @@ export default function LandingPage() {
             )}
 
             {/* Hero Section */}
-            <section className="relative pt-40 pb-32 overflow-hidden bg-slate-50 dark:bg-slate-950 min-h-screen">
-                {/* Background Effects */}
-                <GridSpotlight />
+            <section className="pt-40 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+                <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+                <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-purple-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
 
-
-                {/* Noise */}
-                <div className="absolute inset-0 bg-noise opacity-[0.4] pointer-events-none" />
-
-                {/* Mesh Gradients */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-500/20 rounded-full blur-[100px] opacity-70 animate-pulse-slow pointer-events-none" />
-                <div className="absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[80px] opacity-50 pointer-events-none" />
-
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="text-center max-w-4xl mx-auto mb-20">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="inline-flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-indigo-100 dark:border-indigo-900/50 rounded-full px-4 py-2 mb-8 shadow-sm"
-                        >
-                            <Sparkle weight="fill" className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                            <span className="text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                                {t('hero.trustedBadge')}
-                            </span>
-                        </motion.div>
-
-                        <motion.h1
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white mb-8 tracking-tight leading-[1.1]"
-                        >
-                            {t('hero.title')} <br />
-                            <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent pb-2">
-                                {t('hero.titleHighlight')}
-                            </span>
-                        </motion.h1>
-
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-10 leading-relaxed"
-                        >
-                            {t('hero.subtitle')}
-                        </motion.p>
-
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-                        >
-                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="group relative bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-xl font-bold text-lg shadow-2xl hover:scale-[1.02] transition-all duration-300 shine-effect overflow-hidden">
-                                <span className="relative z-10 flex items-center gap-2">
-                                    {t('hero.cta')}
-                                    <ArrowRight weight="bold" className={`w-5 h-5 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180' : ''}`} />
-                                </span>
-                            </a>
-                            <div className="relative group cursor-not-allowed">
-                                <button disabled className="px-8 py-4 rounded-xl font-bold text-lg text-slate-400 dark:text-slate-600 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 flex items-center gap-2 opacity-70">
-                                    {t('hero.watchDemo', 'Interactive Demo')}
-                                    <Lightning weight="duotone" className="w-5 h-5" />
-                                </button>
-                                <span className="absolute -top-3 -right-3 px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-[10px] font-black rounded-lg shadow-sm border border-white/20 uppercase tracking-wider">
-                                    Coming Soon
-                                </span>
+                <div className="max-w-7xl mx-auto relative z-10">
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        <div className="text-center lg:text-left">
+                            <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-6">
+                                <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('hero.trustedBadge')}</span>
                             </div>
-                        </motion.div>
-                    </div>
 
-                    {/* 3D Dashboard Mockup */}
-                    <motion.div
-                        style={{ rotateX: heroRotateX, y: heroTranslateY, scale: heroScale }}
-                        initial={{ opacity: 0, y: 60 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, type: "spring", delay: 0.2 }}
-                        className="relative perspective-2000"
-                    >
-                        <div className="relative transform-style-3d rotate-x-12 mx-auto max-w-5xl">
-                            <div className="relative bg-slate-900 rounded-2xl p-2 shadow-2xl border border-slate-700/50">
-                                {/* Browser Chrome */}
-                                <div className="h-8 bg-slate-800/50 rounded-t-xl flex items-center px-4 gap-2 border-b border-slate-700/50">
-                                    <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                                    <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                                    <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                                    <div className="mx-auto w-1/2 h-5 bg-slate-700/30 rounded-md text-center text-[10px] text-slate-400 flex items-center justify-center font-mono">
-                                        durrahtutors.com/dashboard
+                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 dark:text-white mb-6 leading-[1.1]">
+                                {t('hero.title')}<br />
+                                <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">{t('hero.titleHighlight')}</span>
+                            </h1>
+
+                            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0">
+                                {t('hero.subtitle')}
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
+                                <a href={registrationUrl} target="_blank" rel="noreferrer" className="group relative bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-2xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center">
+                                    <span className="relative z-10 flex items-center gap-2">
+                                        {t('hero.cta')}
+                                        <ArrowRight className={`w-5 h-5 group-hover:translate-x-1 transition-transform ${isRTL ? 'rotate-180' : ''}`} />
+                                    </span>
+                                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                </a>
+                                <Link to="/demo" className="group bg-white dark:bg-slate-800 text-gray-900 dark:text-white px-8 py-4 rounded-2xl font-semibold text-lg border-2 border-gray-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-xl transition-all duration-300 flex items-center justify-center">
+                                    {t('hero.watchDemo', 'Interactive Demo')}
+                                    <svg className="w-5 h-5 ml-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                                    </svg>
+                                </Link>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-gray-600 dark:text-gray-400">
+                                <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>{t('hero.features.noCreditCard')}</span></div>
+                                <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>{t('hero.features.freeExams')}</span></div>
+                                <div className="flex items-center gap-2"><Check className="w-5 h-5 text-green-500" /><span>{t('hero.features.cancelAnytime')}</span></div>
+                            </div>
+                        </div>
+
+                        <div className="relative">
+                            <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl shadow-indigo-500/10 p-8 border border-gray-100 dark:border-slate-700">
+                                <LottiePlayer src="/illustrations/juicy-woman-focused-on-online-learning.json" background="transparent" speed={1} className="w-full h-80" autoplay loop />
+
+                                <div className="absolute -top-6 -left-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-indigo-500/10 p-4 border border-gray-100 dark:border-slate-700 animate-float">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
+                                            <TrendingUp className="w-6 h-6 text-white" />
+                                        </div>
+                                        <div>
+                                            <div className="text-2xl font-bold text-gray-900 dark:text-white">98%</div>
+                                            <div className="text-xs text-gray-600 dark:text-gray-400">{t('hero.stats.satisfaction')}</div>
+                                        </div>
                                     </div>
                                 </div>
-                                {/* Mockup Content (Screenshot Placeholder) */}
-                                <div className="aspect-[16/10] bg-slate-950 rounded-b-xl overflow-hidden relative group">
-                                    <motion.img
-                                        initial={{ opacity: 0, scale: 1.1 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ duration: 1 }}
-                                        src="/mockups/dashboard-analytics.png"
-                                        alt="Durrah Dashboard Analytics"
-                                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
-                                    />
 
-                                    {/* Glass Overlay for Depth */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
-
+                                <div className="absolute -bottom-6 -right-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-violet-500/10 p-4 border border-gray-100 dark:border-slate-700 animate-float animation-delay-2000">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl flex items-center justify-center">
+                                            <Clock className="w-6 h-6 text-white" />
+                                        </div>
+                                        <div>
+                                            <div className="text-2xl font-bold text-gray-900 dark:text-white">2 min</div>
+                                            <div className="text-xs text-gray-600 dark:text-gray-400">{t('hero.stats.setupTime')}</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Reflection on floor */}
-                            <div className="absolute top-full left-0 right-0 h-40 bg-gradient-to-b from-indigo-500/10 to-transparent blur-3xl transform -scale-y-100 opacity-50 pointer-events-none" />
+                            <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full">
+                                <div className="absolute top-0 right-0 w-72 h-72 bg-indigo-300/30 dark:bg-indigo-600/20 rounded-full filter blur-3xl"></div>
+                                <div className="absolute bottom-0 left-0 w-72 h-72 bg-violet-300/30 dark:bg-violet-600/20 rounded-full filter blur-3xl"></div>
+                            </div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Stats Banner */}
+            <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                        <div className="text-center">
+                            <div className="text-4xl font-bold text-white mb-2">10K+</div>
+                            <div className="text-indigo-100">{t('stats.tutors')}</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-4xl font-bold text-white mb-2">500K+</div>
+                            <div className="text-indigo-100">{t('stats.exams')}</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-4xl font-bold text-white mb-2">2M+</div>
+                            <div className="text-indigo-100">{t('stats.students')}</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-4xl font-bold text-white mb-2">98%</div>
+                            <div className="text-indigo-100">{t('stats.satisfaction')}</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Features Section */}
+            <section id="features" className="py-24 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-4">
+                            <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('features.badge')}</span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('features.title')}</h2>
+                        <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">{t('features.subtitle')}</p>
+                    </div>
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    >
+                        {[
+                            { icon: Zap, title: t('features.fastCreation.title'), desc: t('features.fastCreation.desc', 'Create professional exams in minutes'), gradient: 'from-yellow-400 to-orange-500' },
+                            { icon: Shield, title: t('features.antiCheating.title'), desc: t('features.antiCheating.desc', 'Fullscreen mode, tab detection, violation tracking'), gradient: 'from-indigo-400 to-violet-500' },
+                            { icon: Globe, title: t('features.globalAccess.title'), desc: t('features.globalAccess.desc', 'Students can take exams anywhere, anytime'), gradient: 'from-pink-400 to-rose-500' },
+                            { icon: Users, title: t('features.unlimitedStudents.title'), desc: t('features.unlimitedStudents.desc', 'No limits on the number of students'), gradient: 'from-green-400 to-emerald-500' },
+                            { icon: MessageCircle, title: t('features.support.title'), desc: t('features.support.desc', 'Always here to help you succeed'), gradient: 'from-blue-400 to-cyan-500' },
+                            { icon: Layout, title: t('features.interface.title'), desc: t('features.interface.desc', 'Easy to use, powerful features'), gradient: 'from-purple-400 to-fuchsia-500' }
+                        ].map((feature, index) => (
+                            <motion.div
+                                key={index}
+                                variants={fadeIn}
+                                className="group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-slate-700 p-8"
+                            >
+                                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                                    <feature.icon className="w-7 h-7 text-white" />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
+                                <p className="text-gray-600 dark:text-gray-400">{feature.desc}</p>
+                            </motion.div>
+                        ))}
                     </motion.div>
                 </div>
             </section>
 
-            {/* Platform Highlights Banner */}
-            <div className="w-full py-12 bg-white dark:bg-slate-950 border-y border-slate-100 dark:border-slate-900 overflow-hidden">
-                <div className="max-w-7xl mx-auto px-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-                        {[
-                            { label: "High Availability", value: "99.9% Uptime", icon: GlobeHemisphereWest, color: "text-indigo-500" },
-                            { label: "Security", value: "SSL Encrypted", icon: ShieldCheck, color: "text-emerald-500" },
-                            { label: "Global Reach", value: "Any Device", icon: DeviceMobile, color: "text-purple-500" },
-                            { label: "Reporting", value: "Instant Result", icon: Lightning, color: "text-yellow-500" },
-                        ].map((stat, idx) => (
-                            <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, y: 10 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: idx * 0.1 }}
-                                className="flex flex-col items-center md:items-start text-center md:text-left"
-                            >
-                                <div className={`flex items-center gap-2 mb-2 ${stat.color}`}>
-                                    <stat.icon weight="duotone" className="w-4 h-4" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">{stat.label}</span>
-                                </div>
-                                <div className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-200">
-                                    {stat.value}
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Features Section - Bento Grid */}
-            <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 relative bg-white dark:bg-slate-950">
-                <div className="absolute inset-0 bg-grid-pattern opacity-[0.3] pointer-events-none" />
-                <div className="max-w-7xl mx-auto relative z-10">
-                    <div className="text-center mb-16 max-w-3xl mx-auto">
-                        <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-4">
-                            <Sparkle weight="fill" className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                            <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('features.badge')}</span>
-                        </div>
-                        <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">{t('features.title')}</h2>
-                        <p className="text-xl text-slate-600 dark:text-slate-400">{t('features.subtitle')}</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(250px,auto)]">
-                        {/* 1. Large Feature - Anti Cheating */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            className="md:col-span-2 glass-card rounded-3xl p-8 relative overflow-hidden group hover:border-indigo-500/30 transition-colors"
-                        >
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/20 transition-colors" />
-
-                            <div className="relative z-10 h-full flex flex-col justify-between">
-                                <div>
-                                    <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl flex items-center justify-center mb-6 text-indigo-600 dark:text-indigo-400">
-                                        <ShieldCheck weight="duotone" className="w-6 h-6" />
-                                    </div>
-                                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">{t('features.antiCheating.title')}</h3>
-                                    <p className="text-slate-600 dark:text-slate-400 text-lg max-w-md">{t('features.antiCheating.desc')}</p>
-                                </div>
-                                <div className="mt-8 flex gap-3 text-sm font-medium text-slate-500">
-                                    <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg">Tab Detection</span>
-                                    <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg">Fullscreen Lock</span>
-                                    <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg">AI Proctor</span>
-                                </div>
-                            </div>
-                        </motion.div>
-
-                        {/* 2. Tall Feature - Global Access */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.1 }}
-                            className="md:row-span-2 glass-card rounded-3xl p-8 relative overflow-hidden group hover:border-pink-500/30 transition-colors"
-                        >
-                            <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-pink-500/5 to-transparent opacity-50" />
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-pink-500/20 rounded-full blur-3xl group-hover:bg-pink-500/30 transition-colors" />
-
-                            <div className="relative z-10 flex flex-col h-full items-center text-center">
-                                <div className="w-16 h-16 bg-pink-100 dark:bg-pink-900/50 rounded-2xl flex items-center justify-center mb-6 text-pink-600 dark:text-pink-400 shadow-lg shadow-pink-500/20">
-                                    <GlobeHemisphereWest weight="duotone" className="w-8 h-8" />
-                                </div>
-                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">{t('features.globalAccess.title')}</h3>
-                                <p className="text-slate-600 dark:text-slate-400 mb-8">{t('features.globalAccess.desc')}</p>
-
-                                {/* Decoration: Rotating Globe/Map Graphic Placeholder */}
-                                <div className="mt-auto relative w-full aspect-square opacity-80">
-                                    <div className="absolute inset-0 border border-pink-200 dark:border-pink-800 rounded-full animate-spin-slow" />
-                                    <div className="absolute inset-4 border border-pink-200 dark:border-pink-800 rounded-full animate-spin-slow animation-delay-2000" style={{ animationDirection: 'reverse' }} />
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="w-2 h-2 bg-pink-500 rounded-full animate-ping" />
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-
-                        {/* 3. Standard Feature - Fast Creation */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.2 }}
-                            className="glass-card rounded-3xl p-8 relative overflow-hidden group hover:border-yellow-500/30 transition-colors"
-                        >
-                            <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/50 rounded-2xl flex items-center justify-center mb-4 text-yellow-600 dark:text-yellow-400">
-                                <Lightning weight="duotone" className="w-6 h-6" />
-                            </div>
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('features.fastCreation.title')}</h3>
-                            <p className="text-slate-600 dark:text-slate-400">{t('features.fastCreation.desc')}</p>
-                        </motion.div>
-
-                        {/* 4. Standard Feature - Unlimited Students */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.3 }}
-                            className="glass-card rounded-3xl p-8 relative overflow-hidden group hover:border-green-500/30 transition-colors"
-                        >
-                            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-2xl flex items-center justify-center mb-4 text-green-600 dark:text-green-400">
-                                <UsersThree weight="duotone" className="w-6 h-6" />
-                            </div>
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('features.unlimitedStudents.title')}</h3>
-                            <p className="text-slate-600 dark:text-slate-400">{t('features.unlimitedStudents.desc')}</p>
-                        </motion.div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Pricing Section - Modernized */}
-            <section id="pricing" className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900">
+            {/* Pricing Section */}
+            <section id="pricing" className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-4">
-                            <Medal weight="duotone" className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <Award className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                             <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('pricing.badge')}</span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">{t('pricing.title')}</h2>
-                        <p className="text-xl text-slate-600 dark:text-slate-400">{t('pricing.subtitle')}</p>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('pricing.title')}</h2>
+                        <p className="text-xl text-gray-600 dark:text-gray-300">{t('pricing.subtitle')}</p>
                     </div>
-
                     <motion.div
                         variants={staggerContainer}
                         initial="initial"
@@ -827,73 +655,106 @@ export default function LandingPage() {
                         viewport={{ once: true }}
                         className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
                     >
-                        {/* Wrapper for Pricing Cards to keep them uniform height */}
-                        <motion.div variants={fadeIn} className="flex flex-col bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 hover:shadow-xl transition-all duration-300">
-                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{t('pricing.starter.title')}</h3>
-                            <div className="mb-6"><span className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">{t('pricing.starter.price')}</span></div>
-                            <ul className="space-y-4 mb-8 flex-1">
-                                <li className="flex items-start"><Check weight="bold" className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" /><span className="text-slate-600 dark:text-slate-300 text-sm font-medium">{t('pricing.starter.features.0')}</span></li>
-                                <li className="flex items-start"><Check weight="bold" className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" /><span className="text-slate-600 dark:text-slate-300 text-sm font-medium">{t('pricing.starter.features.1')}</span></li>
-                                <li className="flex items-start"><Check weight="bold" className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" /><span className="text-slate-600 dark:text-slate-300 text-sm font-medium">{t('pricing.starter.features.2')}</span></li>
+                        <motion.div variants={fadeIn} className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-200 dark:border-slate-700 p-8">
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('pricing.starter.title')}</h3>
+                            <div className="mb-6"><span className="text-5xl font-bold text-gray-900 dark:text-white">{t('pricing.starter.price')}</span></div>
+                            <ul className="space-y-4 mb-8">
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.starter.features.0')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.starter.features.1')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.starter.features.2')}</span></li>
                             </ul>
-                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white py-4 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">{t('pricing.starter.cta')}</a>
+                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-slate-600 transition">{t('pricing.starter.cta')}</a>
                         </motion.div>
-
                         <motion.div
                             variants={fadeIn}
-                            className="flex flex-col relative bg-slate-900 dark:bg-indigo-600 rounded-3xl shadow-2xl p-8 transform md:-translate-y-4 border border-slate-700 dark:border-indigo-500 ring-4 ring-indigo-500/10"
+                            className="relative bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 rounded-3xl shadow-2xl p-8 transform hover:scale-105 transition-all duration-300"
                         >
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-1 rounded-full font-bold text-xs uppercase tracking-wider shadow-lg">Most Popular</div>
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-gray-900 px-4 py-1 rounded-full font-bold text-sm shadow-lg">{t('pricing.professional.badge')}</div>
                             <h3 className="text-2xl font-bold text-white mb-2">{t('pricing.professional.title')}</h3>
                             <div className="mb-6">
-                                <span className="text-5xl font-black text-white tracking-tight">{isCurrencyLoading ? '...' : `${currencyCode} ${monthlyPrice}`}</span>
-                                <span className="text-slate-400 dark:text-indigo-200 text-sm font-medium ml-2">{t('pricing.professional.period')}</span>
-                                <div className="mt-1 text-indigo-300 text-xs font-semibold">{t('pricing.professional.freeTrial', '14-day free trial')}</div>
+                                <span className="text-5xl font-bold text-white">{isCurrencyLoading ? '...' : `${currencyCode} ${monthlyPrice}`}</span>
+                                <span className="text-indigo-100">{t('pricing.professional.period')}</span>
                             </div>
-                            <ul className="space-y-4 mb-8 flex-1">
-                                {[0, 1, 2, 3].map(i => (
-                                    <li key={i} className="flex items-start"><Check weight="bold" className="h-5 w-5 text-green-400 mr-3 flex-shrink-0" /><span className="text-slate-300 dark:text-indigo-50 text-sm font-medium">{t(`pricing.professional.features.${i}`)}</span></li>
-                                ))}
+                            <ul className="space-y-4 mb-8">
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">{t('pricing.professional.features.0')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">{t('pricing.professional.features.1')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">{t('pricing.professional.features.2')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-white mr-3 flex-shrink-0" /><span className="text-white/90">{t('pricing.professional.features.3')}</span></li>
                             </ul>
-                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-white text-slate-900 dark:text-indigo-600 py-4 rounded-xl font-bold hover:bg-slate-100 transition-colors shadow-lg">{t('pricing.professional.cta')}</a>
+                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-white text-indigo-600 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition shadow-lg">{t('pricing.professional.cta')}</a>
                         </motion.div>
-
-                        <motion.div variants={fadeIn} className="flex flex-col bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 hover:shadow-xl transition-all duration-300">
-                            <div className="flex justify-between items-center mb-2">
-                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{t('pricing.yearly.title')}</h3>
-                                <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs px-2 py-1 rounded-md font-bold">SAVE 20%</span>
-                            </div>
+                        <motion.div variants={fadeIn} className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-indigo-200 dark:border-indigo-800 p-8">
+                            <div className="inline-block bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full font-semibold text-sm mb-4">{t('pricing.yearly.badge')}</div>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('pricing.yearly.title')}</h3>
                             <div className="mb-6">
-                                <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">{isCurrencyLoading ? '...' : `${currencyCode} ${yearlyPrice}`}</span>
-                                <span className="text-slate-500 dark:text-slate-400 text-sm font-medium ml-2">{t('pricing.yearly.period')}</span>
-                                <div className="mt-1 text-green-600 dark:text-green-400 text-xs font-semibold">{t('pricing.yearly.freeTrial', '14-day free trial')}</div>
+                                <span className="text-5xl font-bold text-gray-900 dark:text-white">{isCurrencyLoading ? '...' : `${currencyCode} ${yearlyPrice}`}</span>
+                                <span className="text-gray-600 dark:text-gray-400">{t('pricing.yearly.period')}</span>
                             </div>
-                            <ul className="space-y-4 mb-8 flex-1">
-                                {[0, 1, 2].map(i => (
-                                    <li key={i} className="flex items-start"><Check weight="bold" className="h-5 w-5 text-indigo-500 mr-3 flex-shrink-0" /><span className="text-slate-600 dark:text-slate-300 text-sm font-medium">{t(`pricing.yearly.features.${i}`)}</span></li>
-                                ))}
+                            <ul className="space-y-4 mb-8">
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.yearly.features.0')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.yearly.features.1')}</span></li>
+                                <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" /><span className="text-gray-600 dark:text-gray-300">{t('pricing.yearly.features.2')}</span></li>
                             </ul>
-                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/20">{t('pricing.yearly.cta')}</a>
+                            <a href={registrationUrl} target="_blank" rel="noreferrer" className="block w-full text-center bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition">{t('pricing.yearly.cta')}</a>
                         </motion.div>
                     </motion.div>
                 </div>
             </section>
 
-            {/* FAQ Section - Cleaned Up */}
-            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-950/50 relative overflow-hidden">
-                <div className="absolute inset-0 bg-noise opacity-50 pointer-events-none" />
-                <div className="max-w-3xl mx-auto relative z-10">
+            {/* Testimonials Section */}
+            <section id="testimonials" className="py-24 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">{t('testimonials.title')}</h2>
+                        <p className="text-xl text-gray-600 dark:text-gray-300">{t('testimonials.subtitle')}</p>
+                    </div>
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="initial"
+                        whileInView="whileInView"
+                        viewport={{ once: true }}
+                        className="grid md:grid-cols-3 gap-8"
+                    >
+                        {[
+                            { name: t('testimonials.t1.name'), role: t('testimonials.t1.role'), content: t('testimonials.t1.content'), rating: 5 },
+                            { name: t('testimonials.t2.name'), role: t('testimonials.t2.role'), content: t('testimonials.t2.content'), rating: 5 },
+                            { name: t('testimonials.t3.name'), role: t('testimonials.t3.role'), content: t('testimonials.t3.content'), rating: 5 }
+                        ].map((testimonial, index) => (
+                            <motion.div
+                                key={index}
+                                variants={fadeIn}
+                                className="group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 dark:border-slate-700 p-8"
+                            >
+                                <div className="flex mb-4">
+                                    {[...Array(testimonial.rating)].map((_, i) => (
+                                        <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                                    ))}
+                                </div>
+                                <p className="text-gray-600 dark:text-gray-300 mb-6 italic">"{testimonial.content}"</p>
+                                <div>
+                                    <div className="font-bold text-gray-900 dark:text-white">{testimonial.name}</div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">{testimonial.role}</div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* FAQ Section */}
+            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900/50">
+                <div className="max-w-3xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         className="text-center mb-16"
                     >
-                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-                            {t('landing.faq.title', 'Frequently Asked Questions')}
+                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                            {t('faq.title', 'Frequently Asked Questions')}
                         </h2>
-                        <p className="text-slate-600 dark:text-slate-400">
-                            {t('landing.faq.subtitle', 'Everything you need to know about Durrah')}
+                        <p className="text-gray-600 dark:text-gray-400">
+                            {t('faq.subtitle', 'Everything you need to know about Durrah')}
                         </p>
                     </motion.div>
 
@@ -905,20 +766,20 @@ export default function LandingPage() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.1 }}
-                                className={`bg-white dark:bg-slate-800 rounded-2xl border ${activeFaq === index ? 'border-indigo-500 dark:border-indigo-500 ring-4 ring-indigo-500/10' : 'border-slate-200 dark:border-slate-700'} overflow-hidden shadow-sm hover:shadow-md transition-all duration-300`}
+                                className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                             >
                                 <button
                                     onClick={() => setActiveFaq(activeFaq === index ? null : index)}
                                     className="w-full px-6 py-5 text-left flex justify-between items-center group"
                                 >
-                                    <span className="font-bold text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                        {t(`landing.faq.q${index + 1}.question`, faq.question)}
+                                    <span className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                        {t(`faq.q${index + 1}.question`, faq.question)}
                                     </span>
                                     <motion.div
                                         animate={{ rotate: activeFaq === index ? 180 : 0 }}
-                                        transition={{ duration: 0.3 }}
+                                        className="text-gray-400"
                                     >
-                                        <CaretDown weight="bold" className={`w-5 h-5 ${activeFaq === index ? 'text-indigo-600' : 'text-slate-400'}`} />
+                                        <ChevronDown className="w-5 h-5" />
                                     </motion.div>
                                 </button>
                                 <AnimatePresence>
@@ -927,10 +788,10 @@ export default function LandingPage() {
                                             initial={{ height: 0, opacity: 0 }}
                                             animate={{ height: 'auto', opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
-                                            transition={{ duration: 0.3 }}
+                                            transition={{ duration: 0.3, ease: 'easeInOut' }}
                                         >
-                                            <div className="px-6 pb-6 text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-700/50 pt-4">
-                                                {t(`landing.faq.q${index + 1}.answer`, faq.answer)}
+                                            <div className="px-6 pb-5 text-gray-600 dark:text-gray-400 text-sm leading-relaxed border-t border-gray-100 dark:border-slate-700/50 pt-4">
+                                                {t(`faq.q${index + 1}.answer`, faq.answer)}
                                             </div>
                                         </motion.div>
                                     )}
@@ -941,85 +802,26 @@ export default function LandingPage() {
                 </div>
             </section>
 
-
-            {/* CTA Section - Premium Boxed Command Center */}
-            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 relative">
-                <div className="max-w-6xl mx-auto relative group">
-                    {/* Outer Glow */}
-                    <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
-
-                    <div className="relative bg-slate-950 rounded-[2rem] p-8 md:p-20 overflow-hidden border border-slate-800 ring-1 ring-white/10">
-                        {/* Dynamic Background */}
-                        <div className="absolute inset-0 bg-grid-pattern opacity-[0.07]" />
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none" />
-                        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
-
-                        {/* Content */}
-                        <div className="relative z-10 flex flex-col items-center text-center">
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8"
-                            >
-                                <Sparkle weight="fill" className="w-4 h-4" />
-                                <span>{t('ctaSection.tagline', 'Join the Future of Assessment')}</span>
-                            </motion.div>
-
-                            <motion.h2
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight"
-                            >
-                                {t('ctaSection.title', 'Ready to Transform?')}
-                            </motion.h2>
-                            <motion.p
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: 0.1 }}
-                                className="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl leading-relaxed"
-                            >
-                                {t('ctaSection.subtitle', 'Join thousands of educators delivering secure, professional exams with Durrah.')}
-                            </motion.p>
-
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: 0.2 }}
-                                className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
-                            >
-                                <a
-                                    href={registrationUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-lg shadow-indigo-600/25 transition-all hover:-translate-y-1"
-                                >
-                                    {t('ctaSection.cta', 'Start Free Trial')}
-                                    <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
-                                </a>
-                                <Link
-                                    to="/demo"
-                                    className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 px-8 py-4 rounded-xl text-lg font-bold backdrop-blur-sm transition-all hover:-translate-y-1"
-                                >
-                                    <Lightning weight="duotone" className="w-5 h-5" />
-                                    {t('ctaSection.demo', 'Live Demo')}
-                                </Link>
-                            </motion.div>
-                        </div>
-                    </div>
+            {/* CTA Section */}
+            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJsLTEtMWgtMWwtMS0xaC0ybC0xLTFoLTJsLTEgMWgtMWwtMSAxaC0ybC0xIDFoLTJsLTEgMWgtMWwtMSAxdjFsLTEgMXYxbC0xIDF2MWwtMSAxdjJsLTEgMXYxbC0xIDF2MmwtMSAxdjJsLTEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMXYxbDEgMWgxbDEgMWgxbDEgMWgxbDEgMWgybDEgMWgybDEgMWgybDEtMWgxbDEtMWgybDEtMWgybDEtMWgybDEtMWgxbDEtMWgxbDEtMWgxbDEtMXYtMWwxLTF2LTFsMS0xdi0xbDEtMXYtMWwxLTF2LTFsMS0xdi0ybDEtMXYtMWwxLTF2LTJsMS0xdi0ybC0xLTF2LTFsLTEtMXYtMWwtMS0xdi0xbC0xLTF2LTFsLTEtMXYtMWwtMS0xdi0xbC0xLTF2LTFsLTEtMWgtMWwtMS0xaC0xbC0xLTFoLTFsLTEtMWgtMmwtMS0xaC0yeiIvPjwvZz48L2c+PC9zdmc+')] opacity-10"></div>
+                <div className="max-w-4xl mx-auto text-center relative z-10">
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">{t('ctaSection.title')}</h2>
+                    <p className="text-xl text-indigo-100 mb-8">{t('ctaSection.subtitle')}</p>
+                    <a href={registrationUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-white text-indigo-600 px-10 py-5 rounded-2xl text-lg font-bold hover:shadow-2xl hover:scale-105 transition-all duration-300">
+                        {t('ctaSection.cta')}
+                        <ArrowRight className={`w-6 h-6 ${isRTL ? 'rotate-180' : ''}`} />
+                    </a>
                 </div>
             </section>
 
             {/* Kids Mode Feature Section - Enhanced Space Theme */}
-            <section className="py-32 relative overflow-hidden bg-[#050616] text-white" >
+            <section className="py-32 relative overflow-hidden bg-[#050616] text-white">
                 {/* Space Atmosphere Background */}
-                <div className="absolute inset-0 pointer-events-none" >
+                <div className="absolute inset-0 pointer-events-none">
                     <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-60" />
-                    {/* Top Fade: Blend from CTA slate to Space Dark */}
-                    <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-slate-900 via-[#050616]/80 to-transparent"></div>
+                    {/* Top Fade: Blend from CTA purple to Space Dark */}
+                    <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-[#4c1d95]/80 via-[#050616]/80 to-transparent"></div>
                     {/* Bottom Fade: Blend from Space Dark to next section (White/Slate) */}
                     <div className="absolute bottom-0 left-0 w-full h-96 bg-gradient-to-t from-white dark:from-slate-900 via-[#050616]/50 to-transparent"></div>
 
@@ -1031,7 +833,7 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="flex justify-center mb-12">
                         <div className="glass-panel px-6 py-2 rounded-full flex items-center gap-2 border-indigo-500/30">
-                            <Rocket weight="duotone" className="h-5 w-5 text-indigo-400 animate-spin-slow" />
+                            <Orbit className="h-5 w-5 text-indigo-400 animate-spin-slow" />
                             <span className="text-sm font-bold text-indigo-100/80 tracking-widest uppercase">{t('kidsLanding.missionCenter', 'Mission Center')}</span>
                         </div>
                     </div>
@@ -1050,7 +852,7 @@ export default function LandingPage() {
                                 viewport={{ once: true }}
                                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-6"
                             >
-                                <Lightning weight="fill" className="h-4 w-4 fill-current animate-pulse" />
+                                <Zap className="h-4 w-4 fill-current animate-pulse" />
                                 <span>{t('kidsLanding.readySystem', 'SYSTEM READY FOR TAKEOFF')}</span>
                             </motion.div>
 
@@ -1075,34 +877,22 @@ export default function LandingPage() {
                                 >
                                     {t('landing.marketing.kids.desc', 'Transform assessments into a fun journey. Our Kids Mode features vibrant visuals, simplified navigation, and a world-class anti-cheating system that feels like a game, not a test.')}
                                 </motion.p>
-                                <motion.div
+                                <motion.ul
                                     variants={staggerContainer}
                                     initial="initial"
                                     whileInView="whileInView"
                                     viewport={{ once: true }}
-                                    className="grid grid-cols-2 gap-4 mb-8"
+                                    className="grid sm:grid-cols-2 gap-4 mb-8"
                                 >
-                                    {[
-                                        { icon: ShieldCheck, color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
-                                        { icon: Sparkle, color: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/20" },
-                                        { icon: Medal, color: "text-pink-400", bg: "bg-pink-400/10", border: "border-pink-400/20" },
-                                        { icon: Rocket, color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20" }
-                                    ].map((item, i) => (
-                                        <motion.div
-                                            key={i}
-                                            variants={fadeIn}
-                                            className={`relative overflow-hidden rounded-2xl border ${item.border} bg-white/5 backdrop-blur-sm p-4 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_20px_-5px_rgba(99,102,241,0.5)] group/card`}
-                                        >
-                                            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity" />
-                                            <div className={`${item.bg} w-10 h-10 rounded-xl flex items-center justify-center mb-3 group-hover/card:scale-110 transition-transform duration-300 border border-white/5`}>
-                                                <item.icon className={`w-5 h-5 ${item.color} drop-shadow-lg`} />
+                                    {[0, 1, 2, 3].map((i) => (
+                                        <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
+                                            <div className="bg-indigo-500/20 p-1 rounded-full border border-indigo-400/20">
+                                                <Check className="w-4 h-4 text-indigo-400" />
                                             </div>
-                                            <span className="relative z-10 text-white/90 text-sm font-bold block leading-tight tracking-wide">
-                                                {t(`landing.marketing.kids.features.${i}`)}
-                                            </span>
-                                        </motion.div>
+                                            <span className="text-indigo-100 font-medium">{t(`landing.marketing.kids.features.${i}`)}</span>
+                                        </motion.li>
                                     ))}
-                                </motion.div>
+                                </motion.ul>
                                 <Link
                                     to="/kids"
                                     className="w-full py-5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-2xl text-white font-black text-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group overflow-hidden relative"
@@ -1119,21 +909,21 @@ export default function LandingPage() {
                                 animate={{ y: [0, -20, 0], rotate: [0, 5, 0], scale: [1, 1.02, 1] }}
                                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886149420.png"
-                                alt="Kids Space Illustration"
+                                alt=""
                                 className="absolute w-32 h-32 z-20 drop-shadow-[0_0_20px_rgba(129,140,248,0.4)]"
                             />
                             <motion.img
                                 animate={{ y: [0, 30, 0], rotate: [0, -8, 0] }}
                                 transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886176188.png"
-                                alt="Floating Star Illustration"
+                                alt=""
                                 className="absolute bottom-4 right-10 w-24 h-24 z-10 opacity-50 filter blur-[0.5px]"
                             />
                             <motion.img
                                 animate={{ x: [0, 15, 0], y: [0, -15, 0] }}
                                 transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
                                 src="/kids/image-1765886214428.png"
-                                alt="Rocket Path Illustration"
+                                alt=""
                                 className="absolute top-4 left-10 w-20 h-20 z-10 opacity-30 filter blur-[1px]"
                             />
                         </div>
@@ -1141,217 +931,201 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Student Portal section */}
-            <section className="py-32 relative overflow-hidden bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800/50">
-                <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
-
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="grid lg:grid-cols-2 gap-20 items-center">
-                        {/* Mockup Stack */}
-                        <motion.div
-                            initial={{ opacity: 0, x: -30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            className="relative perspective-2000"
-                        >
-                            <div className="relative transform-style-3d rotate-y-12">
-                                {/* Back Mockup (Exam View) */}
-                                <motion.div
-                                    animate={{ y: [0, -15, 0], x: [0, 10, 0] }}
-                                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                                    className="absolute -top-12 -right-8 w-full aspect-video bg-slate-800 rounded-2xl shadow-2xl border border-white/10 overflow-hidden opacity-40 blur-[1px]"
-                                >
-                                    <img src="/mockups/exam-view.png" alt="Exam Interface" className="w-full h-full object-cover" />
-                                </motion.div>
-
-                                {/* Front Mockup (Portal Dashboard) */}
-                                <motion.div
-                                    className="relative z-10 w-full aspect-video bg-white dark:bg-slate-800 rounded-2xl shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-slate-700 overflow-hidden"
-                                >
-                                    {/* Browser Header */}
-                                    <div className="h-10 bg-slate-50 dark:bg-slate-800/50 flex items-center px-4 gap-2 border-b border-slate-200 dark:border-slate-700">
-                                        <div className="flex gap-1.5">
-                                            <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700" />
-                                            <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700" />
-                                            <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700" />
-                                        </div>
-                                    </div>
-                                    <img src="/mockups/student-portal.png" alt="Student Dashboard" className="w-full h-full object-top object-cover" />
-                                </motion.div>
-
-                                {/* Floating Stats Badge */}
-                                <motion.div
-                                    animate={{ y: [0, 20, 0] }}
-                                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                                    className="absolute -bottom-6 -left-6 z-20 glass-card p-4 rounded-2xl shadow-xl border border-indigo-500/20"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                                            <Medal weight="duotone" className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <div className="text-[10px] font-black uppercase tracking-wider text-slate-500">Academic Standing</div>
-                                            <div className="text-sm font-bold text-slate-900 dark:text-white">Top 5% of Class</div>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            </div>
-                        </motion.div>
-
-                        {/* Content */}
+            {/* Student Portal Section - Modern Dashboard Style */}
+            <section className="py-24 relative overflow-hidden bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8 }}
+                        className="grid lg:grid-cols-2 gap-16 items-center"
+                    >
                         <div className="relative">
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                            >
-                                <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-1.5 mb-6">
-                                    <GraduationCap className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{t('landing.marketing.student.badge', 'Unified Hub')}</span>
-                                </div>
-
-                                <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-8 tracking-tight leading-[1.1]">
-                                    {t('landing.marketing.student.title', 'One Place for Every Student Goal')}
-                                </h2>
-
-                                <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed">
-                                    {t('landing.marketing.student.desc', 'Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.')}
-                                </p>
-
-                                <div className="grid sm:grid-cols-2 gap-6 mb-12">
-                                    {[
-                                        { icon: Layout, title: "Centralized Access" },
-                                        { icon: ChartLineUp, title: "Performance Insights" },
-                                        { icon: Medal, title: "Achievement Badges" },
-                                        { icon: ShieldCheck, title: "Secure History" }
-                                    ].map((item, i) => (
-                                        <div key={i} className="flex items-center gap-4 group">
-                                            <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-500 group-hover:text-white transition-all">
-                                                <item.icon className="w-5 h-5" />
-                                            </div>
-                                            <span className="font-semibold text-slate-700 dark:text-slate-200">{item.title}</span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <Link to="/student-portal" className="group inline-flex items-center gap-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl font-bold shadow-2xl hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white transition-all transform hover:-translate-y-1">
-                                    {t('landing.marketing.student.cta', 'Explore Student Hub')}
-                                    <ArrowRight className={`w-5 h-5 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180' : ''}`} />
-                                </Link>
-                            </motion.div>
+                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 to-violet-500 blur-3xl opacity-20 animate-pulse"></div>
+                            <motion.img
+                                animate={{ y: [0, -10, 0] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                                src="/illustrations/techny-standardized-test-as-method-of-assessment.png"
+                                alt="Student Portal Marketing"
+                                className="relative z-10 rounded-3xl shadow-2xl"
+                            />
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* How to Section - Timeline Layout */}
-            {/* How to Section - Interactive Tabs */}
-            <InteractiveHowTo />
-
-            {/* Mobile App Section */}
-            <section className="py-32 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-950 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
-
-                <div className="max-w-7xl mx-auto relative z-10">
-                    <div className="grid lg:grid-cols-2 gap-20 items-center">
-                        {/* 3D Phone Mockup Container */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            className="flex justify-center relative"
-                        >
-                            {/* Decorative Background Elements */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" />
-
-                            <div className="phone-frame scale-[0.7] sm:scale-90 md:scale-100 rotate-y-n12 transform-style-3d">
-                                <div className="absolute inset-0 bg-slate-900 overflow-hidden">
-                                    <div className="w-full h-full flex items-center justify-center bg-gray-900 select-none overflow-hidden">
-                                        <div
-                                            style={{ width: '360px', height: '770px', transform: 'scale(0.733)' }}
-                                            className="flex-shrink-0 bg-gray-50 dark:bg-gray-950 pointer-events-none origin-center"
-                                        >
-                                            <MobileWelcome className="h-full" />
-                                        </div>
-                                    </div>
-                                    {/* Gradient Overlay for depth */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/40 via-transparent to-transparent pointer-events-none" />
-                                </div>
-                            </div>
-
-                            {/* Floating QR Code Card */}
-                            <motion.div
-                                animate={{ y: [0, -15, 0] }}
-                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute -bottom-8 -right-4 md:right-0 bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 z-20 flex flex-col items-center"
-                            >
-                                <div className="w-24 h-24 bg-slate-100 dark:bg-slate-900 rounded-xl mb-3 flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                                    {/* QR Code Placeholder */}
-                                    <div className="w-16 h-16 bg-[url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://khogxhpnuhhebkevaqlg.supabase.co/storage/v1/object/public/app-releases/DurrahTutors-latest.apk')] bg-cover opacity-80" />
-                                </div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('landing.mobileApp.scan', 'Scan to Install')}</span>
-                            </motion.div>
-                        </motion.div>
-
-                        {/* Content */}
                         <div>
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
+                                className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-6"
                             >
-                                <div className="inline-flex items-center gap-2 bg-pink-50 dark:bg-pink-900/30 border border-pink-200 dark:border-pink-800 rounded-full px-4 py-1.5 mb-6">
-                                    <DeviceMobile weight="duotone" className="w-4 h-4 text-pink-600 dark:text-pink-400" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-pink-600 dark:text-pink-400">Mobile First</span>
+                                <Trophy className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('landing.marketing.student.badge', 'Track & Grow')}</span>
+                            </motion.div>
+                            <motion.h2
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.1 }}
+                                className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight"
+                            >
+                                {t('landing.marketing.student.title', 'Empower Students with a Unified Portal').split(t('landing.marketing.student.titleSpan', 'Unified Portal'))[0]}
+                                <span className="text-indigo-600">{t('landing.marketing.student.titleSpan', 'Unified Portal')}</span>
+                                {t('landing.marketing.student.title', 'Empower Students with a Unified Portal').split(t('landing.marketing.student.titleSpan', 'Unified Portal'))[1]}
+                            </motion.h2>
+                            <motion.p
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.2 }}
+                                className="text-lg text-gray-600 dark:text-gray-300 mb-8"
+                            >
+                                {t('landing.marketing.student.desc', 'Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.')}
+                            </motion.p>
+                            <motion.ul
+                                variants={staggerContainer}
+                                initial="initial"
+                                whileInView="whileInView"
+                                viewport={{ once: true }}
+                                className="space-y-4 mb-8"
+                            >
+                                {[0, 1, 2, 3].map((i) => (
+                                    <motion.li key={i} variants={fadeIn} className="flex items-center gap-3">
+                                        <div className="bg-indigo-100 dark:bg-indigo-900/50 p-1 rounded-full">
+                                            <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                        </div>
+                                        <span className="text-gray-700 dark:text-gray-300 font-medium">{t(`landing.marketing.student.features.${i}`)}</span>
+                                    </motion.li>
+                                ))}
+                            </motion.ul>
+                            <Link to="/student-portal" className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95">
+                                {t('landing.marketing.student.cta', 'Visit Student Portal')}
+                                <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+                            </Link>
+                        </div>
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* Mobile App Section */}
+            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+                <div className="max-w-7xl mx-auto">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-16"
+                    >
+                        <div className="inline-flex items-center justify-center p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-full mb-4">
+                            <Smartphone className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                            {t('landing.mobileApp.title', 'Get the Mobile App')}
+                        </h2>
+                        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                            {t('landing.mobileApp.subtitle', 'Access exams anywhere with our native Android application')}
+                        </p>
+                    </motion.div>
+
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        {/* App Preview Card */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            className="relative"
+                        >
+                            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
+                                <div className="flex items-center gap-5 mb-8">
+                                    <div className="w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-[30%] flex items-center justify-center shadow-[0_20px_40px_-10px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] border border-white/60 dark:border-gray-600/50 transition-transform hover:scale-105 group relative overflow-hidden">
+                                        {/* Subtle internal glow */}
+                                        <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <GraduationCap className="w-12 h-12 text-indigo-600 dark:text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.3)]" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">{t('landing.mobileApp.appName', 'Durrah Tutors')}</h3>
+                                        <p className="text-gray-500 dark:text-gray-400 font-medium">{t('landing.mobileApp.version', 'Version 1.1.0')}</p>
+                                    </div>
                                 </div>
 
-                                <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-8 tracking-tight leading-[1.1]">
-                                    {t('landing.mobileApp.title', 'Assessments on the Move')}
-                                </h2>
-
-                                <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed">
-                                    {t('landing.mobileApp.subtitle', 'Access exams anywhere with our native Android application. Seamlessly transition between desktop and mobile.')}
-                                </p>
-
-                                <div className="grid sm:grid-cols-2 gap-4 mb-12">
+                                <div className="space-y-4 mb-8">
                                     {[
-                                        { icon: Bell, text: "Push Notifications", color: "bg-indigo-500" },
-                                        { icon: ShieldCheck, text: "Biometric Control", color: "bg-emerald-500" },
-                                        { icon: Rocket, text: "Kids Adventure", color: "bg-purple-500" },
-                                        { icon: Lock, text: "Offline Mode", color: "bg-amber-500" }
-                                    ].map((feat, i) => (
-                                        <div key={i} className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 backdrop-blur-sm transition-colors hover:border-indigo-500/30 group">
-                                            <feat.icon className="w-5 h-5 text-indigo-500 group-hover:scale-110 transition-transform" />
-                                            <span className="font-semibold text-slate-700 dark:text-slate-200">{feat.text}</span>
+                                        { icon: Users, text: t('landing.mobileApp.features.tutorAccess', 'Tutor & Student Access') },
+                                        { icon: Bell, text: t('landing.mobileApp.features.notifications', 'Real-time Push Notifications') },
+                                        { icon: Rocket, text: t('landing.mobileApp.features.kidsMode', 'Kids Mode with Gamification') },
+                                        { icon: Shield, text: t('landing.mobileApp.features.secure', 'Secure Exam Taking') }
+                                    ].map((item, idx) => (
+                                        <div key={idx} className="flex items-center gap-3">
+                                            <item.icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                            <span className="text-gray-700 dark:text-gray-300">{item.text}</span>
                                         </div>
                                     ))}
                                 </div>
 
-                                <div className="flex flex-wrap gap-4 items-center">
-                                    <a
-                                        href="https://khogxhpnuhhebkevaqlg.supabase.co/storage/v1/object/public/app-releases/DurrahTutors-latest.apk"
-                                        className="inline-flex items-center gap-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl font-bold shadow-xl hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white transition-all transform hover:-translate-y-1"
-                                    >
-                                        <DownloadSimple className="w-5 h-5" />
-                                        {t('landing.mobileApp.download', 'Download APK')}
-                                    </a>
+                                <a
+                                    href="https://khogxhpnuhhebkevaqlg.supabase.co/storage/v1/object/public/app-releases/DurrahTutors-latest.apk"
+                                    className="w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg transition-all hover:scale-105 active:scale-95"
+                                >
+                                    <Download className="w-6 h-6" />
+                                    {t('landing.mobileApp.download', 'Download for Android')}
+                                </a>
 
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Coming Soon to</span>
-                                        <div className="flex gap-4 opacity-40 grayscale">
-                                            <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Play Store" className="h-8" />
-                                            <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" className="h-8" />
-                                        </div>
+                                <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+                                    {t('landing.mobileApp.specs', 'Free • ~35 MB • Android 7.0+')}
+                                </p>
+                            </div>
+                        </motion.div>
+
+                        {/* Features Grid */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            className="grid sm:grid-cols-2 gap-6"
+                        >
+                            {[
+                                {
+                                    icon: Bell,
+                                    title: t('landing.mobileApp.grid.alerts.title', 'Instant Alerts'),
+                                    desc: t('landing.mobileApp.grid.alerts.desc', 'Get notified when tutors publish new exams')
+                                },
+                                {
+                                    icon: Users,
+                                    title: t('landing.mobileApp.grid.modes.title', 'Multiple Modes'),
+                                    desc: t('landing.mobileApp.grid.modes.desc', 'Switch between tutor, student, and kids modes')
+                                },
+                                {
+                                    icon: Rocket,
+                                    title: t('landing.mobileApp.grid.adventure.title', 'Kids Adventure'),
+                                    desc: t('landing.mobileApp.grid.adventure.desc', 'Gamified space-themed quizzes for children')
+                                },
+                                {
+                                    icon: Shield,
+                                    title: t('landing.mobileApp.grid.security.title', 'Secure & Fast'),
+                                    desc: t('landing.mobileApp.grid.security.desc', 'Native performance with secure authentication')
+                                }
+                            ].map((feature, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: 0.1 + idx * 0.1 }}
+                                    className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors"
+                                >
+                                    <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center mb-4">
+                                        <feature.icon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                                     </div>
-                                </div>
-                            </motion.div>
-                        </div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{feature.title}</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{feature.desc}</p>
+                                </motion.div>
+                            ))}
+                        </motion.div>
                     </div>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer dir="ltr" className="bg-slate-900 text-gray-300 py-12 px-4 sm:px-6 lg:px-8 relative z-10 text-left" >
+            <footer dir="ltr" className="bg-slate-900 text-gray-300 py-12 px-4 sm:px-6 lg:px-8 relative z-10 text-left">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid md:grid-cols-4 gap-8 mb-8">
                         <div>
@@ -1359,18 +1133,7 @@ export default function LandingPage() {
                                 <Logo className="h-8 w-8" showText={false} />
                                 <span className="text-xl font-bold text-white">Durrah</span>
                             </div>
-                            <p className="text-gray-400 mb-6">Modern exam platform for educators</p>
-                            <div className="flex items-center gap-4">
-                                <a
-                                    href="https://web.facebook.com/profile.php?id=61584207453651"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-gray-400 hover:bg-indigo-600 hover:text-white transition-all transform hover:-translate-y-1"
-                                    title="Follow us on Facebook"
-                                >
-                                    <FacebookLogo weight="fill" className="w-5 h-5" />
-                                </a>
-                            </div>
+                            <p className="text-gray-400">Modern exam platform for educators</p>
                         </div>
                         <div>
                             <h3 className="font-bold text-white mb-4">Product</h3>
@@ -1378,13 +1141,14 @@ export default function LandingPage() {
                                 <li><Link to="/pricing" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.pricing')}</Link></li>
                                 <li><a href="#testimonials" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.testimonials')}</a></li>
                                 <li><Link to="/blog" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.blog')}</Link></li>
+                                <li><a href="mailto:abdelrahmansandoby@gmail.com" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.contact')}</a></li>
                             </ul>
                         </div>
                         <div>
                             <h3 className="font-bold text-white mb-4">Company</h3>
-                            <ul className="space-y-4">
-                                <li><Link to="/about" className="text-gray-400 hover:text-white transition-colors">About</Link></li>
-                                <li><a href="mailto:info@durrahtutors.com" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.contact')}</a></li>
+                            <ul className="space-y-2">
+                                <li><Link to="/about" className="hover:text-white transition">About</Link></li>
+                                <li><Link to="/contact" className="hover:text-white transition">Contact</Link></li>
                             </ul>
                         </div>
                         <div>
@@ -1398,10 +1162,10 @@ export default function LandingPage() {
                         </div>
                     </div>
                     <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-                        <p>&copy; 2026 Durrah for Tutors. All rights reserved.</p>
+                        <p>&copy; 2025 Durrah. All rights reserved.</p>
                     </div>
                 </div>
             </footer>
-        </div>
+        </div >
     );
 }

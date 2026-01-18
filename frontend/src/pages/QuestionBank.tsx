@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { exportToJSON, exportToPDF, exportToWord } from '../lib/exportUtils';
 import { useDemoTour } from '../hooks/useDemoTour';
+import { AIQuestionGeneratorModal } from '../components/AIQuestionGeneratorModal';
 
 interface Question {
     id: string;
@@ -40,6 +41,7 @@ export default function QuestionBank() {
     const [isLoading, setIsLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showAddQuestionModal, setShowAddQuestionModal] = useState(false);
+    const [showAIModal, setShowAIModal] = useState(false);
     const [newBankName, setNewBankName] = useState('');
     const [newBankDescription, setNewBankDescription] = useState('');
     const [isCreating, setIsCreating] = useState(false);
@@ -360,6 +362,40 @@ export default function QuestionBank() {
         } catch (error: any) {
             console.error('Error adding question:', error);
             toast.error(t('questionBank.error.add', 'Failed to add question'));
+        } finally {
+            setIsAdding(false);
+        }
+    };
+
+    const handleAddAIQuestions = async (newQuestions: any[]) => {
+        if (!selectedBank) return;
+
+        setIsAdding(true);
+        try {
+            const batchData = newQuestions.map(q => ({
+                bank_id: selectedBank.id,
+                question_text: q.question_text,
+                type: q.type,
+                options: q.options || [],
+                correct_answer: q.correct_answer,
+                points: q.points || 1,
+                difficulty: q.difficulty || 'medium',
+                category: q.category || selectedBank.name,
+                tags: Array.isArray(q.tags) ? q.tags : []
+            }));
+
+            const { error } = await supabase
+                .from('question_bank_questions')
+                .insert(batchData);
+
+            if (error) throw error;
+
+            toast.success(t('questionBank.success.aiQuestionsAdded', `Added ${newQuestions.length} questions from AI!`));
+            fetchQuestions(selectedBank.id);
+            fetchBanks();
+        } catch (error: any) {
+            console.error('Error adding AI questions:', error);
+            toast.error(t('questionBank.error.aiAdd', 'Failed to save AI generated questions'));
         } finally {
             setIsAdding(false);
         }
@@ -694,13 +730,22 @@ export default function QuestionBank() {
                                             <span>{t('questionBank.collectionLibrary')}</span>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => setShowAddQuestionModal(true)}
-                                        className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-md"
-                                    >
-                                        <Plus className="h-5 w-5" />
-                                        {t('questionBank.addQuestion')}
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => setShowAIModal(true)}
+                                            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-indigo-500/20 active:scale-[0.98] transition-all"
+                                        >
+                                            <Sparkles className="h-5 w-5" />
+                                            {t('questionBank.generateAI', 'Generate with AI')}
+                                        </button>
+                                        <button
+                                            onClick={() => setShowAddQuestionModal(true)}
+                                            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-md"
+                                        >
+                                            <Plus className="h-5 w-5" />
+                                            {t('questionBank.addQuestion')}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Search Bar */}
@@ -1108,8 +1153,15 @@ export default function QuestionBank() {
                             </div>
                         </div>
                     </div>
-                )
-            }
+                )}
+
+            {/* AI Generator Modal */}
+            <AIQuestionGeneratorModal
+                isOpen={showAIModal}
+                onClose={() => setShowAIModal(false)}
+                onAddQuestions={handleAddAIQuestions}
+                bankName={selectedBank?.name || ''}
+            />
         </div>
     );
 }

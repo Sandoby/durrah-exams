@@ -1,13 +1,104 @@
-import { getAIKey } from './config';
+import { config, getAIKey } from './config';
 
 /**
- * Extract questions from document content using Groq AI
+ * Extract questions from document content using Google Gemini AI
+ */
+export const extractQuestionsWithGemini = async (content: string): Promise<any[]> => {
+    const apiKey = getAIKey('gemini');
+
+    if (!apiKey) {
+        throw new Error('Gemini API key not configured');
+    }
+
+    const apiURL = `https://generativelanguage.googleapis.com/v1beta/models/${config.gemini.model}:generateContent?key=${apiKey}`;
+
+    const prompt = `Extract all exam questions from the following text and return them as a JSON array. 
+IMPORTANT: Return ONLY the JSON array, no other text or explanation. 
+If the text is in Arabic, keep the questions and options in Arabic.
+
+The JSON should be an array of objects with exactly these fields:
+- type: "multiple_choice", "multiple_select", "true_false", "dropdown", "numeric", or "short_answer"
+- question_text: the text of the question
+- options: array of strings (required for multiple_choice, multiple_select, dropdown)
+- correct_answer: the correct answer (string for single answer, array for multiple answers)
+- points: number (default 1)
+- difficulty: "easy", "medium", or "hard"
+- category: subject area
+- tags: array of strings
+
+Text to analyze:
+${content}`;
+
+    try {
+        const response = await fetch(apiURL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                contents: [
+                    {
+                        parts: [
+                            {
+                                text: prompt
+                            }
+                        ]
+                    }
+                ],
+                generationConfig: {
+                    temperature: config.gemini.temperature,
+                    topP: 0.95,
+                    topK: 40,
+                    maxOutputTokens: 8192,
+                    responseMimeType: "application/json",
+                }
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'Failed to extract questions with Gemini');
+        }
+
+        const data = await response.json();
+        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!responseText) {
+            throw new Error('No content returned from Gemini');
+        }
+
+        const questions = JSON.parse(responseText.trim());
+        return Array.isArray(questions) ? questions : [questions];
+    } catch (error: any) {
+        console.error('Gemini extraction error:', error);
+        throw new Error(error.message || 'Failed to extract questions with Gemini');
+    }
+};
+
+/**
+ * Extract questions from document content using AI (Gemini preferred)
  */
 export const extractQuestionsWithAI = async (content: string): Promise<any[]> => {
-    const apiKey = getAIKey();
-    
+    try {
+        return await extractQuestionsWithGemini(content);
+    } catch (geminiError) {
+        console.warn('Gemini failed, falling back to Groq:', geminiError);
+        try {
+            return await extractQuestionsWithGroq(content);
+        } catch (groqError) {
+            throw new Error('AI extraction failed on all providers');
+        }
+    }
+};
+
+/**
+ * Extract questions from document content using Groq AI (Legacy/Fallback)
+ */
+export const extractQuestionsWithGroq = async (content: string): Promise<any[]> => {
+    const apiKey = getAIKey('groq');
+
     if (!apiKey) {
-        throw new Error('AI API key not configured');
+        throw new Error('Groq AI API key not configured');
     }
 
     const prompt = `Extract all exam questions from the following text and return them as a JSON array. Each question should be an object with these fields:
@@ -33,7 +124,7 @@ Return ONLY the JSON array, no other text.`;
                 'Authorization': `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
+                model: config.groq.model,
                 messages: [
                     {
                         role: 'system',
@@ -54,14 +145,14 @@ Return ONLY the JSON array, no other text.`;
         }
 
         const data = await response.json();
-        const content = data.choices[0]?.message?.content;
+        const responseContent = data.choices[0]?.message?.content;
 
-        if (!content) {
+        if (!responseContent) {
             throw new Error('No content returned from AI');
         }
 
-        // Parse JSON from response (handle markdown code blocks)
-        let jsonStr = content.trim();
+        // Parse JSON from response
+        let jsonStr = responseContent.trim();
         if (jsonStr.startsWith('```json')) {
             jsonStr = jsonStr.replace(/```json\n?/g, '').replace(/```\n?/g, '');
         } else if (jsonStr.startsWith('```')) {
@@ -71,8 +162,8 @@ Return ONLY the JSON array, no other text.`;
         const questions = JSON.parse(jsonStr);
         return Array.isArray(questions) ? questions : [questions];
     } catch (error: any) {
-        console.error('AI extraction error:', error);
-        throw new Error(error.message || 'Failed to extract questions with AI');
+        console.error('Groq extraction error:', error);
+        throw new Error(error.message || 'Failed to extract questions with Groq');
     }
 };
 
@@ -85,14 +176,31 @@ export const generateQuestionsWithAI = async (
     difficulty: 'easy' | 'medium' | 'hard' = 'medium',
     type?: string
 ): Promise<any[]> => {
-    const apiKey = getAIKey();
-    
-    if (!apiKey) {
-        throw new Error('AI API key not configured');
+    const geminiKey = getAIKey('gemini');
+
+    // We'll prefer Gemini for generation too
+    if (geminiKey) {
+        return generateQuestionsWithGemini(topic, count, difficulty, type);
     }
 
+    // Fallback logic could go here, but let's stick to implementing Gemini first
+    throw new Error('Gemini API key not configured for generation');
+};
+
+/**
+ * Generate exam questions using Gemini
+ */
+export const generateQuestionsWithGemini = async (
+    topic: string,
+    count: number = 5,
+    difficulty: 'easy' | 'medium' | 'hard' = 'medium',
+    type?: string
+): Promise<any[]> => {
+    const apiKey = getAIKey('gemini');
+    const apiURL = `https://generativelanguage.googleapis.com/v1beta/models/${config.gemini.model}:generateContent?key=${apiKey}`;
+
     const typeFilter = type ? `All questions should be of type: ${type}` : 'Use a variety of question types (multiple_choice, true_false, etc.)';
-    
+
     const prompt = `Generate ${count} exam questions about "${topic}" with ${difficulty} difficulty level. ${typeFilter}
 
 Return a JSON array where each question has:
@@ -108,53 +216,29 @@ Return a JSON array where each question has:
 Return ONLY the JSON array, no other text.`;
 
     try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const response = await fetch(apiURL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are an expert educator that creates high-quality exam questions.'
-                    },
-                    {
-                        role: 'user',
-                        content: prompt
-                    }
-                ],
-                temperature: 0.7,
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    temperature: 0.7,
+                    responseMimeType: "application/json",
+                }
             }),
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'Failed to generate questions');
-        }
+        if (!response.ok) throw new Error('Failed to generate questions');
 
         const data = await response.json();
-        const content = data.choices[0]?.message?.content;
-
-        if (!content) {
-            throw new Error('No content returned from AI');
-        }
-
-        // Parse JSON from response
-        let jsonStr = content.trim();
-        if (jsonStr.startsWith('```json')) {
-            jsonStr = jsonStr.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-        } else if (jsonStr.startsWith('```')) {
-            jsonStr = jsonStr.replace(/```\n?/g, '');
-        }
-
-        const questions = JSON.parse(jsonStr);
+        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        const questions = JSON.parse(responseText.trim());
         return Array.isArray(questions) ? questions : [questions];
     } catch (error: any) {
-        console.error('AI generation error:', error);
-        throw new Error(error.message || 'Failed to generate questions with AI');
+        console.error('Gemini generation error:', error);
+        throw new Error('Failed to generate questions with AI');
     }
 };
 

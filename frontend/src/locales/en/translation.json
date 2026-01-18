@@ -8,10 +8,7 @@
         "dir": "ltr",
         "forTutors": "for Tutors",
         "true": "True",
-        "false": "False",
-        "error": "An unexpected error occurred",
-        "loading": "Loading...",
-        "success": "Success"
+        "false": "False"
     },
     "hero": {
         "title": "Create Exams That",
@@ -90,7 +87,7 @@
         },
         "professional": {
             "title": "Professional",
-            "price": "5 USD",
+            "price": "200 EGP",
             "period": "/month",
             "badge": "Most Popular",
             "features": [
@@ -103,7 +100,7 @@
         },
         "yearly": {
             "title": "Yearly",
-            "price": "50 USD",
+            "price": "2000 EGP",
             "period": "/year",
             "badge": "Save 20%",
             "features": [
@@ -111,12 +108,7 @@
                 "2 months free",
                 "Premium support"
             ],
-            "cta": "Get Started",
-            "freeTrial": "14-day free trial"
-        },
-        "seo": {
-            "title": "Pricing Plans - Affordable Online Exam Platform | Durrah for Tutors",
-            "description": "Flexible pricing plans for educators. Start free with 3 exams or upgrade to Professional for unlimited exams, analytics, and anti-cheating features. 14-day free trial available."
+            "cta": "Get Started"
         }
     },
     "testimonials": {
@@ -148,14 +140,7 @@
             "submit": "Sign in",
             "noAccount": "Don't have an account?",
             "register": "Sign up",
-            "back": "Back",
-            "googleSignin": "Sign in with Google",
-            "microsoftSignin": "Sign in with Microsoft",
-            "or": "OR",
-            "seo": {
-                "title": "Tutor Login - Create & Manage Exams | Durrah",
-                "description": "Log in to your Durrah tutor account to create secure exams, manage questions, and view student results with advanced anti-cheating features."
-            }
+            "back": "Back"
         },
         "register": {
             "title": "Create an account",
@@ -164,21 +149,9 @@
             "emailLabel": "Email address",
             "passwordLabel": "Password",
             "confirmPasswordLabel": "Confirm Password",
-            "submit": "Create Account",
+            "submit": "Sign up",
             "hasAccount": "Already have an account?",
-            "login": "Login",
-            "googleSignup": "Sign up with Google",
-            "microsoftSignup": "Sign up with Microsoft"
-        },
-        "verifyEmail": {
-            "title": "Verify your email",
-            "desc": "We've sent a verification link to",
-            "checkSpam": "Didn't receive it? Please check your **spam folder**.",
-            "resend": "Resend verification email",
-            "resending": "Sending...",
-            "backToLogin": "Back to login",
-            "checkStatus": "I've verified my email",
-            "resendIn": "Resend in {{seconds}}s"
+            "login": "Sign in"
         },
         "forgotPassword": {
             "title": "Reset your password",
@@ -216,14 +189,7 @@
             "resetLinkError": "Failed to send reset link",
             "passwordUpdated": "Password updated successfully",
             "passwordUpdateError": "Failed to update password",
-            "invalidLink": "Invalid or expired reset link",
-            "verificationResent": "Verification email resent successfully",
-            "verificationResendError": "Failed to resend verification email",
-            "emailNotVerified": "Your email is not verified. Please check your inbox.",
-            "loginToContinue": "Please log in to continue",
-            "resendVerification": "Resend verification email",
-            "verificationSent": "Verification email sent! Please check your inbox.",
-            "microsoftError": "Microsoft login failed"
+            "invalidLink": "Invalid or expired reset link"
         }
     },
     "footer": {
@@ -231,7 +197,7 @@
         "product": "Product",
         "features": "Features",
         "signup": "Sign Up",
-        "copyright": "© 2026 Durrah for Tutors. All rights reserved.",
+        "copyright": "© 2025 Durrah for Tutors. All rights reserved.",
         "legalTitle": "Legal",
         "links": {
             "pricing": "Pricing",
@@ -260,11 +226,6 @@
         "save": "SAVE 17%",
         "save20": "SAVE 20%",
         "mostPopular": "MOST POPULAR",
-        "insideEgypt": "Are you inside Egypt?",
-        "localPayments": "Local Egyptian Payment Methods",
-        "internationalPayments": "International Payment Methods",
-        "freeTrialNote": "14-day free trial included",
-        "firstTimeOnly": "First-time subscribers only",
         "plans": {
             "starter": {
                 "name": "Free",
@@ -382,21 +343,6 @@
             "statusError": "Cannot change status in demo mode",
             "banner": "Demo Mode - Explore and try features. Sign up when ready to save your work!",
             "back": "Back to Demo"
-        },
-        "tour": {
-            "welcome": "Welcome to Durrah for Tutors! Let's learn how to use your dashboard.",
-            "questionBank": "Start by managing your question bank - create and organize reusable questions here",
-            "createExam": "Click here to create a new exam with custom questions and settings",
-            "examCard": "Once you create exams, they'll appear here. For this tutorial, we're showing you a sample card.",
-            "copyLink": "Share this link with your students. You can copy the code or the direct URL.",
-            "results": "View all student submissions, download results as PDF/Excel, and see performance stats.",
-            "settings": "Access your profile, change password, and manage your subscription here.",
-            "completion": "You're all set! Start creating exams and adding questions. Need help? Click 'Tutorial' anytime.",
-            "startTour": "Video Tutorial",
-            "mockExam": {
-                "title": "📐 Mathematics Quiz (Sample)",
-                "desc": "Algebra, geometry, and trigonometry assessment for Grade 10"
-            }
         }
     },
     "settings": {
@@ -579,6 +525,22 @@
         "confirm": {
             "deleteBank": "Are you sure you want to delete this question bank? All questions will be removed.",
             "deleteQuestion": "Delete this question?"
+        },
+        "generateAI": "Generate with AI",
+        "ai": {
+            "title": "AI Question Generator",
+            "subtitle": "Generating for library:",
+            "clickToUpload": "Click to upload",
+            "dragDrop": "or drag and drop",
+            "noFile": "Please select a file first",
+            "tooShort": "The document doesn't contain enough text to generate questions.",
+            "noQuestionsFound": "No questions could be extracted from this document.",
+            "error": "Failed to process document. Please try again.",
+            "extractButton": "Start Question Extraction",
+            "reading": "Working our AI Magic...",
+            "processingInfo": "We are reading your document and crafting the perfect exam questions for you.",
+            "success": "Extraction Complete!",
+            "addToBank": "Add to My Bank"
         }
     },
     "studentPortal": {
@@ -601,13 +563,7 @@
         "recentActivity": "Recent Activity",
         "noExams": "No exams found yet. Join your first exam above!",
         "untitled": "Untitled Exam",
-        "noDesc": "No description",
-        "seo": {
-            "title": "Student Portal - Take Your Exams | Durrah",
-            "titleLogged": "Student Dashboard - My Exams | Durrah",
-            "description": "Access your exams on Durrah. Log in or register to join exams using a code, view your results, and track your progress in a secure environment.",
-            "descriptionLogged": "View your exam history, check your performance stats, and join new assessments in the Durrah student dashboard."
-        }
+        "noDesc": "No description"
     },
     "kidsLanding": {
         "missionCenter": "Mission Center",
@@ -899,22 +855,6 @@
                 }
             }
         },
-        "howto": {
-            "title": "How to Create an Online Exam in 3 Simple Steps",
-            "subtitle": "Get your assessment up and running in minutes with our streamlined process.",
-            "step1": {
-                "title": "1. Build Your Content",
-                "desc": "Use our lightning-fast editor to create multiple-choice, numeric, or open-ended questions. Add images and math formulas with ease."
-            },
-            "step2": {
-                "title": "2. Set Security Rules",
-                "desc": "Enable one-click anti-cheating features like tab detection, fullscreen enforcement, and violation tracking to ensure academic integrity."
-            },
-            "step3": {
-                "title": "3. Share & Analyze",
-                "desc": "Generate a unique exam link or QR code. Once students submit, get instant reports and beautiful per-student performance analytics."
-            }
-        },
         "faq": {
             "title": "Frequently Asked Questions",
             "subtitle": "Everything you need to know about Durrah",
@@ -933,24 +873,6 @@
             "q4": {
                 "question": "Do students need an account?",
                 "answer": "Students can join exams with just a code and nickname, or use the Student Portal to track their long-term progress."
-            }
-        },
-        "premiumModal": {
-            "upgradeBtn": "Upgrade Now",
-            "cancelBtn": "Maybe Later",
-            "analytics": {
-                "title": "Advanced Exam Analytics",
-                "desc": "Get deep insights into student performance, question difficulty, and time distribution.",
-                "benefit1": "Detailed performance reports",
-                "benefit2": "Question-by-question analysis",
-                "benefit3": "Exportable data for records"
-            },
-            "proctoring": {
-                "title": "Live AI Proctoring",
-                "desc": "Monitor your exams in real-time with AI-powered tab detection and anti-cheat measures.",
-                "benefit1": "Real-time student monitoring",
-                "benefit2": "Instant violation alerts",
-                "benefit3": "Secure browser enforcement"
             }
         }
     }

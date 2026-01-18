@@ -8,8 +8,6 @@ import App from './App.tsx'
 import { HelmetProvider } from 'react-helmet-async';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { HeroUIProvider } from "@heroui/react";
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from './lib/queryClient';
 
 // Convex imports
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
@@ -20,9 +18,9 @@ const convexUrl = import.meta.env.VITE_CONVEX_URL;
 // Conditionally create Convex client only if URL is configured
 const convex = convexUrl
   ? new ConvexReactClient(convexUrl, {
-    // Bridge Supabase auth to Convex
-    // This passes the Supabase JWT for identity verification
-  })
+      // Bridge Supabase auth to Convex
+      // This passes the Supabase JWT for identity verification
+    })
   : null;
 
 // Feature flags for gradual rollout
@@ -36,19 +34,17 @@ export const CONVEX_FEATURES = {
 const AppWithProviders = () => (
   <StrictMode>
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <HelmetProvider>
-          <HeroUIProvider>
-            {convex ? (
-              <ConvexProvider client={convex}>
-                <App />
-              </ConvexProvider>
-            ) : (
+      <HelmetProvider>
+        <HeroUIProvider>
+          {convex ? (
+            <ConvexProvider client={convex}>
               <App />
-            )}
-          </HeroUIProvider>
-        </HelmetProvider>
-      </QueryClientProvider>
+            </ConvexProvider>
+          ) : (
+            <App />
+          )}
+        </HeroUIProvider>
+      </HelmetProvider>
     </ErrorBoundary>
   </StrictMode>
 );
