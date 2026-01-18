@@ -14,30 +14,16 @@ const getClient = (apiKey: string) => {
 const generateWithGemini = async (prompt: string, apiKey: string, temperature: number = 0.3): Promise<string> => {
     const ai = getClient(apiKey);
 
-    // Primary Model: gemini-3-flash-preview (as requested)
-    try {
-        console.log('Attempting generation with gemini-2.0-flash-exp...');
-        const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash-exp",
-            config: {
-                temperature,
-                responseMimeType: "application/json",
-            },
-            contents: [{ parts: [{ text: prompt }] }],
-        });
+    // Models to try in order
+    const models = ["gemini-3-flash-preview", "gemini-2.0-flash-exp", config.gemini.model];
 
-        const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (typeof text === 'string') return text;
-        throw new Error('Empty response from gemini-2.0-flash-exp');
-    } catch (primaryError) {
-        console.warn('gemini-2.0-flash-exp failed, falling back to stable model:', primaryError);
+    let lastError: any = null;
 
-        // Fallback Model: config reference (e.g. gemini-1.5-flash)
+    for (const modelName of models) {
         try {
-            console.log(`Attempting fallback to ${config.gemini.model}...`);
-            // Re-instantiate or use same client depending on SDK structure (usually same client is fine)
+            console.log(`Attempting generation with ${modelName}...`);
             const response = await ai.models.generateContent({
-                model: config.gemini.model,
+                model: modelName,
                 config: {
                     temperature,
                     responseMimeType: "application/json",
@@ -45,13 +31,26 @@ const generateWithGemini = async (prompt: string, apiKey: string, temperature: n
                 contents: [{ parts: [{ text: prompt }] }],
             });
 
-            const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (typeof text === 'string') return text;
-            throw new Error(`Empty response from ${config.gemini.model}`);
-        } catch (fallbackError: any) {
-            throw new Error(`AI generation failed: ${fallbackError.message || 'Unknown error'}`);
+            // Try to extract text using multiple methods
+            const text = (response as any).text ||
+                (typeof (response as any).text === 'function' ? (response as any).text() : null) ||
+                response.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (typeof text === 'string' && text.trim()) {
+                console.log(`Successfully generated content using ${modelName}`);
+                return text;
+            }
+            throw new Error(`Empty or invalid response from ${modelName}`);
+        } catch (error: any) {
+            lastError = error;
+            const statusCode = error.status || (error.message?.includes('404') ? 404 : error.message?.includes('429') ? 429 : null);
+            console.warn(`${modelName} failed with status: ${statusCode || 'unknown'}. Error: ${error.message}`);
+
+            if (modelName === config.gemini.model) break;
         }
     }
+
+    throw new Error(`AI generation failed after trying all models. Last error: ${lastError?.message || 'Unknown error'}`);
 }
 
 
