@@ -236,8 +236,13 @@ export default function ExamEditor() {
                 },
             });
             setIsFetching(false);
-        } else if (id && user) {
-            fetchExam();
+        } else if (user) {
+            // Clear demo mode if we have a real user
+            localStorage.removeItem('demoMode');
+            localStorage.removeItem('demoScenario');
+            if (id) {
+                fetchExam();
+            }
         }
     }, [id, user]);
 

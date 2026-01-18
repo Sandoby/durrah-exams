@@ -177,6 +177,9 @@ export default function Dashboard() {
             setTimeout(() => setStartDemoTour(true), 1000);
         } else if (user) {
             console.log('Dashboard: Initializing for authenticated user...');
+            // Clear demo mode if we have a real user
+            localStorage.removeItem('demoMode');
+            localStorage.removeItem('demoScenario');
             fetchExams();
             fetchProfile();
         }

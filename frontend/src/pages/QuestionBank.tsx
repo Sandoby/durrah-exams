@@ -72,7 +72,7 @@ export default function QuestionBank() {
         tags: ''
     });
 
-    const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true' || localStorage.getItem('demoMode') === 'true';
+    const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true' || (!user && localStorage.getItem('demoMode') === 'true');
     const [startDemoTour] = useState(isDemo);
 
     useDemoTour('question-bank', startDemoTour && isDemo);
@@ -142,6 +142,9 @@ export default function QuestionBank() {
         }
 
         if (user) {
+            // Clear demo mode if we have a real user
+            localStorage.removeItem('demoMode');
+            localStorage.removeItem('demoScenario');
             fetchBanks();
             fetchProfile();
         }
