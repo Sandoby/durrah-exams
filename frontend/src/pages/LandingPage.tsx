@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { ArrowRight, CaretDown, Check, GraduationCap, Layout, Lightning, Lock, List, X, ShieldCheck, Sparkle, GlobeHemisphereWest, UsersThree, Medal, Rocket, DeviceMobile, Bell, FacebookLogo, ChartLineUp, DownloadSimple } from '@phosphor-icons/react';
 import { useState, useEffect, useRef } from 'react';
 import { Logo } from '../components/Logo';
+import { OwlMascot } from '../components/OwlMascot';
 import MobileWelcome from './MobileWelcome';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { ParallaxFloatingIcons } from '../components/ParallaxFloatingIcons';
 import { GridSpotlight } from '../components/GridSpotlight';
 import { InteractiveHowTo } from '../components/InteractiveHowTo';
 
@@ -566,7 +566,6 @@ export default function LandingPage() {
             <section className="relative pt-40 pb-32 overflow-hidden bg-slate-50 dark:bg-slate-950 min-h-screen">
                 {/* Background Effects */}
                 <GridSpotlight />
-                <ParallaxFloatingIcons />
 
                 {/* Noise */}
                 <div className="absolute inset-0 bg-noise opacity-[0.4] pointer-events-none" />
@@ -612,6 +611,30 @@ export default function LandingPage() {
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.25 }}
+                            className="flex justify-center mb-8"
+                        >
+                            <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900 px-4 py-2 shadow-sm">
+                                <OwlMascot
+                                    variant="guide"
+                                    className="h-10 w-10"
+                                    alt="Durrah Owl mascot"
+                                    loading="eager"
+                                />
+                                <div className="text-left">
+                                    <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                                        Your learning guide
+                                    </div>
+                                    <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                        Durrah Owl
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
                             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
                         >
@@ -621,10 +644,6 @@ export default function LandingPage() {
                                     <ArrowRight weight="bold" className={`w-5 h-5 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180' : ''}`} />
                                 </span>
                             </a>
-                            <Link to="/demo" className="group px-8 py-4 rounded-xl font-bold text-lg text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center gap-2">
-                                {t('hero.watchDemo', 'Interactive Demo')}
-                                <Lightning weight="duotone" className="w-5 h-5" />
-                            </Link>
                         </motion.div>
                     </div>
 

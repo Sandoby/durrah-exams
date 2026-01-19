@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
+import { OwlMascot } from '../components/OwlMascot';
 import { LogOut, BookOpen, Clock, Trophy, Search, User, ArrowRight, History, ArrowLeft, Mail, Lock, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Capacitor } from '@capacitor/core';
@@ -558,7 +559,9 @@ export default function StudentPortal() {
 
           {previousExams.length === 0 ? (
             <div className="p-12 text-center text-gray-500 dark:text-gray-400">
-              <Clock className="h-12 w-12 mx-auto mb-4 opacity-20" />
+              <div className="mx-auto w-20 h-20 bg-gray-50 dark:bg-gray-900/60 rounded-full flex items-center justify-center mb-4 border border-gray-200 dark:border-gray-700">
+                <OwlMascot variant="guide" className="h-12 w-12" alt="Durrah Owl guide" loading="lazy" />
+              </div>
               <p>{t('studentPortal.noExams', 'No exams found yet. Join your first exam above!')}</p>
             </div>
           ) : (

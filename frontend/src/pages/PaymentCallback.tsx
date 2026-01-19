@@ -100,10 +100,10 @@ export default function PaymentCallback() {
               await new Promise(r => setTimeout(r, 2000));
             }
 
-            // Fallback: Webhook might be slow but payment was likely fine
+            // Fallback: Webhook might be slow; do NOT mark success without confirmation
             console.log('⏳ Dodo webhook taking longer than expected');
-            setStatus('success');
-            setMessage('Payment received! Your subscription will be activated shortly.');
+            setStatus('loading');
+            setMessage('Payment received. Activation is pending verification. You will see Pro features shortly.');
             setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
             return;
           } catch (err: any) {

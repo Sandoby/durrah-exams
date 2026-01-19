@@ -263,15 +263,25 @@ export default function Checkout() {
 
                 const siteUrl = convexUrl.replace('.cloud', '.site');
 
+                // Get Supabase access token for authenticated server call
+                const { data: authData } = await supabase.auth.getSession();
+                const accessToken = authData?.session?.access_token;
+                if (!accessToken) {
+                    toast.error('Please login again to continue');
+                    return;
+                }
+
                 const response = await fetch(`${siteUrl}/createDodoPayment`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
                     body: JSON.stringify({
-                        userId: user?.id,
-                        userEmail: user?.email,
+                        // Server derives userId/email from token; send only presentational fields
                         userName: user?.user_metadata?.full_name || user?.email?.split('@')[0],
                         billingCycle,
-                        returnUrl: `${window.location.origin}/payment-callback?provider=dodo&paymentStatus=SUCCESS`
+                        returnUrl: `${window.location.origin}/payment-callback?provider=dodo`
                     })
                 });
 

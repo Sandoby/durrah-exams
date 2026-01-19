@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { OwlMascot } from './OwlMascot';
 
 function formatTimeAgo(date: Date): string {
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
@@ -209,7 +210,7 @@ export function NotificationCenter() {
                         ) : notifications.length === 0 ? (
                             <div className="p-12 text-center">
                                 <div className="mx-auto w-16 h-16 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                                    <Bell className="h-8 w-8 text-gray-300 dark:text-gray-600" />
+                                    <OwlMascot variant="calm" className="h-10 w-10" alt="Durrah Owl waiting" loading="lazy" />
                                 </div>
                                 <p className="text-gray-500 dark:text-gray-400 font-medium">{t('notifications.empty', 'No notifications yet')}</p>
                                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">We\'ll notify you when things happen</p>

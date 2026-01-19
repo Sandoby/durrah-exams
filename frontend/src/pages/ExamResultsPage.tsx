@@ -10,6 +10,7 @@ import {
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Logo } from '../components/Logo';
+import { OwlMascot } from '../components/OwlMascot';
 import toast from 'react-hot-toast';
 import { printerService } from '../lib/printer';
 import { downloaderService } from '../lib/downloader';
@@ -487,7 +488,13 @@ export default function ExamResultsPage() {
                             </div>
                         </div>
                         {submissions.length === 0 ? (
-                            <div className="p-20 text-center text-gray-500">No submissions found yet.</div>
+                            <div className="p-16 text-center text-gray-500">
+                                <div className="mx-auto w-20 h-20 bg-gray-50 dark:bg-gray-900/60 rounded-full flex items-center justify-center mb-4 border border-gray-200 dark:border-gray-700">
+                                    <OwlMascot variant="analytics" className="h-12 w-12" alt="Durrah Owl analytics" loading="lazy" />
+                                </div>
+                                <p className="font-semibold text-gray-700 dark:text-gray-300">No submissions found yet.</p>
+                                <p className="text-sm text-gray-400 mt-1">Share the exam link to start collecting results.</p>
+                            </div>
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="w-full">

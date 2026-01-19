@@ -1,4 +1,4 @@
-import { GraduationCap } from 'lucide-react';
+import { OwlMascot } from './OwlMascot';
 
 interface LogoProps {
     className?: string;
@@ -24,8 +24,13 @@ export function Logo({ className = '', showText = true, size = 'md' }: LogoProps
     return (
         <div className={`flex items-center logo ${className}`}>
             <div className="relative flex items-center justify-center">
-                <div className={`absolute inset-0 bg-indigo-600 rounded-full opacity-20 blur-sm transform scale-110`}></div>
-                <GraduationCap className={`${sizeClasses[size]} text-indigo-600 relative z-10`} />
+                <div className="absolute inset-0 bg-indigo-600/10 rounded-full blur-sm transform scale-110" />
+                <OwlMascot
+                    variant="logo"
+                    className={`${sizeClasses[size]} relative z-10`}
+                    loading="eager"
+                    alt="Durrah Owl logo"
+                />
             </div>
             {showText && (
                 <div className={`ml-3 font-bold text-gray-900 dark:text-white ${textClasses[size]} tracking-tight flex items-baseline`}>

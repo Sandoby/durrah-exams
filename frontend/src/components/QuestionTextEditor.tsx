@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { OwlMascot } from './OwlMascot';
 // react-quill uses findDOMNode which is removed in React 19; react-quill-new ships a patched build
 import ReactQuill from 'react-quill-new';
 import katex from 'katex';
@@ -82,6 +83,15 @@ export function QuestionTextEditor({ value, onChange, placeholder }: QuestionTex
                 <span className="ql-formats">
                     <button className="ql-clean" aria-label="Clear formatting" />
                 </span>
+                <div className="ml-auto flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                    <OwlMascot
+                        variant="guide"
+                        className="h-7 w-7"
+                        alt="Durrah Owl helper"
+                        loading="lazy"
+                    />
+                    <span className="whitespace-nowrap">Durrah Owl</span>
+                </div>
             </div>
 
             <div className="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 dark:focus-within:ring-indigo-900">

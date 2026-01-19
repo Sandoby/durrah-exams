@@ -17,6 +17,100 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-client-info, apikey',
   'Content-Type': 'application/json',
 };
+// In-memory idempotency for webhook events (best-effort; add durable storage later)
+const processedWebhookIds = new Map<string, number>();
+const WEBHOOK_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+function isDuplicateWebhook(id?: string | null) {
+  if (!id) return false;
+  const now = Date.now();
+  // Cleanup expired
+  for (const [k, v] of processedWebhookIds) {
+    if (now - v > WEBHOOK_TTL_MS) processedWebhookIds.delete(k);
+  }
+  const ts = processedWebhookIds.get(id);
+  return !!(ts && now - ts < WEBHOOK_TTL_MS);
+}
+
+function rememberWebhookId(id?: string | null) {
+  if (!id) return;
+  processedWebhookIds.set(id, Date.now());
+}
+
+// Constant-time comparison for signatures
+function timingSafeEqual(a: string, b: string) {
+  const ba = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ba.length !== bb.length) return false;
+  let out = 0;
+  for (let i = 0; i < ba.length; i++) out |= ba[i] ^ bb[i];
+  return out === 0;
+}
+
+// Verify Dodo webhook signature (HMAC-SHA256 over "webhookId.webhookTimestamp.rawBody")
+async function verifyDodoSignature(
+  secretRaw: string,
+  webhookId: string | null,
+  webhookTimestamp: string | null,
+  rawBody: string,
+  headerSignature: string | null
+) {
+  if (!secretRaw || !webhookId || !webhookTimestamp || !headerSignature) return false;
+
+  // Secrets may be provided as "whsec_<base64>" or raw base64
+  const secretB64 = secretRaw.replace(/^\s*whsec_/, '').trim();
+
+  let keyBytes: Uint8Array;
+  try {
+    keyBytes = new Uint8Array(Buffer.from(secretB64, 'base64'));
+  } catch {
+    return false;
+  }
+
+  const signedContent = `${webhookId}.${webhookTimestamp}.${rawBody}`;
+  const message = new TextEncoder().encode(signedContent);
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyBytes as unknown as BufferSource,
+    { name: 'HMAC', hash: 'SHA-256' } as HmacImportParams,
+    false,
+    ['sign']
+  );
+  const signatureBytes = await crypto.subtle.sign('HMAC', cryptoKey, message);
+  const computedSig = Buffer.from(new Uint8Array(signatureBytes)).toString('base64');
+
+  // Header can be "v1,<sig1> v2,<sig2>" or a simple "<sig>"
+  const parts = headerSignature.split(' ');
+  const v1Part = parts.find((p) => p.startsWith('v1,')) || '';
+  const expectedSig = v1Part ? v1Part.slice(3) : headerSignature.split(',')[1] || headerSignature;
+
+  return timingSafeEqual(computedSig, expectedSig);
+}
+
+// Resolve Supabase user from Authorization header (Bearer <access_token>)
+async function getSupabaseUser(authHeader: string) {
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const token = authHeader.slice('Bearer '.length);
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !supabaseKey) return null;
+
+  try {
+    const res = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return { id: data?.id as string | undefined, email: data?.email as string | undefined };
+  } catch {
+    return null;
+  }
+}
 
 // ============================================
 // DODO WEBHOOK - Subscription Events
@@ -33,47 +127,20 @@ http.route({
       const webhookTimestamp = request.headers.get('webhook-timestamp');
       const rawBody = await request.text();
 
-      // Verify signature (Standard Webhooks format)
-      if (secret && signature && webhookId && webhookTimestamp) {
-        const secretValue = secret.startsWith('whsec_') ? secret.slice(6) : secret;
-
-        // Robust base64 decoding for various secret formats
-        const safeAtob = (str: string) => {
-          try {
-            return atob(str.replace(/-/g, '+').replace(/_/g, '/'));
-          } catch (e) {
-            return atob(str);
-          }
-        };
-
-        const keyBytes = Uint8Array.from(safeAtob(secretValue), c => c.charCodeAt(0));
-
-        const signedContent = `${webhookId}.${webhookTimestamp}.${rawBody}`;
-        const message = new TextEncoder().encode(signedContent);
-
-        const cryptoKey = await crypto.subtle.importKey(
-          'raw', keyBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-        );
-        const signatureBytes = await crypto.subtle.sign('HMAC', cryptoKey, message);
-
-        // Convert to base64
-        const computedSig = btoa(String.fromCharCode(...new Uint8Array(signatureBytes)));
-
-        // Extract v1 signature from header (format: "v1,<sig1> v2,<sig2>" or just "v1,<sig>")
-        const signatureParts = signature.split(' ');
-        const v1Part = signatureParts.find(p => p.startsWith('v1,'));
-        const expectedSig = v1Part ? v1Part.slice(3) : signature.split(',')[1] || signature;
-
-        if (computedSig !== expectedSig) {
-          console.error('Invalid Dodo webhook signature detail:', {
-            received: expectedSig,
-            computed: computedSig,
-            webhookId
-          });
+      // Verify signature and deduplicate
+      if (secret) {
+        const ok = await verifyDodoSignature(secret, webhookId, webhookTimestamp, rawBody, signature);
+        if (!ok) {
+          console.error('Invalid Dodo webhook signature', { webhookId });
           return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 401 });
         }
-      } else if (secret) {
-        console.warn('Webhook secret is set but signature headers are missing.');
+        if (isDuplicateWebhook(webhookId)) {
+          console.log('[Webhook] Duplicate delivery detected, ignoring', { webhookId });
+          return new Response(JSON.stringify({ received: true, duplicate: true }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
       }
 
       const body = JSON.parse(rawBody);
@@ -146,7 +213,7 @@ http.route({
 
       // Record the payment
       if (
-        (eventType === 'payment.succeeded' || eventType === 'checkout.succeeded' || eventType === 'subscription.active') &&
+        (eventType === 'payment.succeeded' || eventType === 'subscription.active') &&
         (data?.total_amount || data?.amount)
       ) {
         await ctx.runAction(internal.dodoPayments.recordPayment, {
@@ -192,6 +259,7 @@ http.route({
         });
       }
 
+      rememberWebhookId(webhookId);
       return new Response(JSON.stringify({ received: true }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
@@ -212,22 +280,24 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     try {
-      const body = await request.json();
-      const { userId, userEmail, userName, billingCycle, returnUrl } = body;
-
-      if (!userId || !userEmail) {
-        return new Response(JSON.stringify({ error: 'Missing required fields' }), {
-          status: 400,
+      const authHeader = request.headers.get('Authorization') || '';
+      const authUser = await getSupabaseUser(authHeader);
+      if (!authUser?.id || !authUser.email) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
           headers: corsHeaders
         });
       }
 
+      const body = await request.json();
+      const { userName, billingCycle, returnUrl } = body;
+
       const result = await ctx.runAction(internal.dodoPayments.createCheckout, {
-        userId,
-        userEmail,
-        userName: userName || userEmail.split('@')[0],
+        userId: authUser.id,
+        userEmail: authUser.email,
+        userName: userName || authUser.email.split('@')[0],
         billingCycle: billingCycle || 'monthly',
-        returnUrl: returnUrl || 'https://tutors.durrahsystem.tech/payment/callback?provider=dodo',
+        returnUrl: returnUrl || 'https://tutors.durrahsystem.tech/payment-callback?provider=dodo',
       });
 
       return new Response(JSON.stringify(result), {
@@ -253,6 +323,15 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     try {
+      const authHeader = request.headers.get('Authorization') || '';
+      const authUser = await getSupabaseUser(authHeader);
+      if (!authUser?.id) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: corsHeaders
+        });
+      }
+
       const body = await request.json();
       const { dodoCustomerId } = body;
 
@@ -261,6 +340,29 @@ http.route({
           status: 400,
           headers: corsHeaders
         });
+      }
+
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+      if (!supabaseUrl || !supabaseKey) {
+        return new Response(JSON.stringify({ error: 'Server configuration missing' }), {
+          status: 500,
+          headers: corsHeaders
+        });
+      }
+
+      const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${authUser.id}&select=dodo_customer_id`, {
+        headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
+      });
+      if (!profileRes.ok) {
+        return new Response(JSON.stringify({ error: 'Profile lookup failed' }), { status: 403, headers: corsHeaders });
+      }
+      const profiles = await profileRes.json();
+      const userDodoId = profiles?.[0]?.dodo_customer_id as string | undefined;
+
+      if (!userDodoId || userDodoId !== dodoCustomerId) {
+        return new Response(JSON.stringify({ error: 'Forbidden: customer mismatch' }), { status: 403, headers: corsHeaders });
       }
 
       const result = await ctx.runAction(internal.dodoPayments.createPortal, {

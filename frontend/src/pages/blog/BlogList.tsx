@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, Calendar, User, ArrowRight, Search, Sparkles } from 'lucide-react';
+import { OwlMascot } from '../../components/OwlMascot';
 
 interface BlogPost {
   id: string;
@@ -275,6 +276,9 @@ export function BlogList() {
             </>
           ) : (
             <div className="text-center py-12">
+              <div className="mx-auto w-20 h-20 bg-slate-50 dark:bg-slate-900/60 rounded-full flex items-center justify-center mb-4 border border-slate-200 dark:border-slate-700">
+                <OwlMascot variant="idea" className="h-12 w-12" alt="Durrah Owl idea" loading="lazy" />
+              </div>
               <p className="text-gray-600 dark:text-gray-400 text-lg">No articles found matching your search.</p>
             </div>
           )}

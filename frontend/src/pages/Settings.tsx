@@ -39,6 +39,50 @@ export default function Settings() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [userRole, setUserRole] = useState<string>('tutor');
 
+    // Open Dodo Customer Portal via authenticated Convex endpoint
+    const handleOpenDodoPortal = async () => {
+        try {
+            if (!profile.dodo_customer_id) {
+                toast.error('No subscription found for portal access');
+                return;
+            }
+            const convexUrl = import.meta.env.VITE_CONVEX_URL;
+            if (!convexUrl) {
+                toast.error('Configuration missing');
+                return;
+            }
+            const siteUrl = convexUrl.replace('.cloud', '.site');
+
+            const { data: authData } = await supabase.auth.getSession();
+            const accessToken = authData?.session?.access_token;
+            if (!accessToken) {
+                toast.error('Please login again');
+                return;
+            }
+
+            const res = await fetch(`${siteUrl}/dodoPortalSession`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({ dodoCustomerId: profile.dodo_customer_id })
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data?.portal_url) {
+                console.error('Portal session error:', data);
+                toast.error(data?.error || 'Unable to open subscription portal');
+                return;
+            }
+
+            window.open(data.portal_url, '_blank', 'noopener,noreferrer');
+        } catch (err) {
+            console.error('Open portal error:', err);
+            toast.error('Unable to open subscription portal');
+        }
+    };
+
     const handleLogout = async () => {
         try {
             await supabase.auth.signOut();
@@ -446,15 +490,15 @@ export default function Settings() {
                                         </div>
 
                                         {profile.subscription_status === 'active' && (
-                                            <a
-                                                href="https://customer.dodopayments.com/login/bus_0NVDOv8mOGPj5tQXpDBCg"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
+                                            <button
+                                                onClick={handleOpenDodoPortal}
                                                 className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 rounded-xl font-bold text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all group"
+                                                disabled={!profile.dodo_customer_id}
+                                                title={!profile.dodo_customer_id ? 'Dodo subscription not linked yet' : 'Open Subscription Portal'}
                                             >
                                                 <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                                                 Manage Subscription
-                                            </a>
+                                            </button>
                                         )}
                                     </div>
                                 ) : (

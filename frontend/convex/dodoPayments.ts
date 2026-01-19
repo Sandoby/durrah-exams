@@ -233,7 +233,8 @@ export const recordPayment = internalAction({
             },
             body: JSON.stringify({
                 user_id: args.userId,
-                amount: args.amount / 100, // Convert from cents to main unit
+                // Store in smallest currency unit to match Dodo responses
+                amount: args.amount,
                 currency: args.currency,
                 status: args.status,
                 merchant_reference: args.merchantReference,
