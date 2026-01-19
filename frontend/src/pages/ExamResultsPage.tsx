@@ -17,7 +17,7 @@ import * as XLSX from 'xlsx';
 import { KidsLeaderboard } from '../components/kids/KidsLeaderboard';
 import { ConvexLeaderboard } from '../components/ConvexLeaderboard';
 import { CONVEX_FEATURES } from '../main';
-import { useMutation } from 'convex/react';
+import { useConvex } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 
 interface Submission {
@@ -60,7 +60,15 @@ export default function ExamResultsPage() {
     const [filterStatus, setFilterStatus] = useState<'all' | 'passed' | 'failed'>('all');
     const [sortBy, setSortBy] = useState<'date' | 'score' | 'duration'>('date');
 
-    const deleteConvexSession = useMutation(api.sessions.deleteSessionForRetake);
+    // Get Convex client safely (will be null if no provider)
+    const convex = (() => {
+        try {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            return useConvex();
+        } catch {
+            return null;
+        }
+    })();
 
     const fieldLabels: Record<string, string> = {
         name: 'Name',
@@ -259,8 +267,9 @@ export default function ExamResultsPage() {
             await supabase.from('submissions').delete().eq('id', submission.id).eq('exam_id', examId);
             if (submission.student_email) {
                 await supabase.from('exam_progress').delete().eq('exam_id', examId).eq('student_email', submission.student_email);
-                if (CONVEX_FEATURES.proctoring) {
+                if (CONVEX_FEATURES.proctoring && convex) {
                     try {
+                        const deleteConvexSession = convex.mutation(api.sessions.deleteSessionForRetake);
                         await deleteConvexSession({ exam_id: examId!, student_email: submission.student_email });
                     } catch (e) { console.warn('Convex session delete failed', e); }
                 }

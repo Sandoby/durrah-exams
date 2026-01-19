@@ -10,7 +10,7 @@ import { TableSkeleton } from './skeletons';
 import { KidsLeaderboard } from './kids/KidsLeaderboard';
 import { ConvexLeaderboard } from './ConvexLeaderboard';
 import { CONVEX_FEATURES } from '../main';
-import { useMutation } from 'convex/react';
+import { useConvex } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 
 
@@ -48,8 +48,15 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
     const [questionMap, setQuestionMap] = useState<Record<string, any>>({});
     const [isKidsMode, setIsKidsMode] = useState(false);
 
-    // Convex mutation for deleting session on retake
-    const deleteConvexSession = useMutation(api.sessions.deleteSessionForRetake);
+    // Get Convex client safely (will be null if no provider)
+    const convex = (() => {
+        try {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            return useConvex();
+        } catch {
+            return null;
+        }
+    })();
 
     // Filtering & Sorting State
     const [searchQuery, setSearchQuery] = useState('');
@@ -292,7 +299,7 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
                     .delete()
                     .eq('exam_id', examId)
                     .eq('student_email', submission.student_email);
-                
+
                 if (progressErr) {
                     console.warn('Could not delete exam_progress (may not exist):', progressErr);
                     // Don't throw - this is optional cleanup
@@ -300,8 +307,9 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
             }
 
             // 4. Delete Convex proctoring session (if enabled)
-            if (CONVEX_FEATURES.proctoring && submission.student_email) {
+            if (CONVEX_FEATURES.proctoring && submission.student_email && convex) {
                 try {
+                    const deleteConvexSession = convex.mutation(api.sessions.deleteSessionForRetake);
                     await deleteConvexSession({
                         exam_id: examId,
                         student_email: submission.student_email,
