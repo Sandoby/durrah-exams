@@ -3,56 +3,32 @@
 export const config = {
     // Groq API Configuration (Free & Fast AI)
     groq: {
-        apiKey: import.meta.env.VITE_GROQ_API_KEY || '',
+        apiKey: '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',
         model: 'llama-3.3-70b-versatile',
         temperature: 0.3,
     },
-
-    // Google Gemini API (Free & Smart AI)
-    gemini: {
-        apiKey: import.meta.env.VITE_GEMINI_API_KEY || '',
-        model: 'gemini-1.5-flash',
-        temperature: 0.3,
-    },
-
+    
     // LocalStorage keys
     storage: {
         aiApiKey: 'durrah_ai_api_key',
-        geminiApiKey: 'durrah_gemini_api_key',
         theme: 'durrah_theme',
         language: 'durrah_language',
     },
 };
 
 /**
- * Get the AI API key (Gemini preferred, then Groq)
+ * Get the Groq API key from localStorage or use default
  */
-export const getAIKey = (provider: 'gemini' | 'groq' = 'gemini'): string => {
-    if (provider === 'gemini') {
-        const envKey = config.gemini.apiKey;
-        // Only use .env if it looks valid and isn't the leaked one (handled by user already)
-        if (envKey && envKey.startsWith('AIza')) return envKey;
-
-        const saved = localStorage.getItem(config.storage.geminiApiKey);
-        return saved || envKey;
-    }
-
-    const envKey = config.groq.apiKey;
-    if (envKey && envKey.startsWith('gsk_')) return envKey;
-
+export const getAIKey = (): string => {
     const saved = localStorage.getItem(config.storage.aiApiKey);
-    return saved || envKey;
+    return saved || config.groq.apiKey;
 };
 
 /**
  * Save AI API key to localStorage
  */
-export const setAIKey = (key: string, provider: 'gemini' | 'groq' = 'gemini'): void => {
-    if (provider === 'gemini') {
-        localStorage.setItem(config.storage.geminiApiKey, key);
-    } else {
-        localStorage.setItem(config.storage.aiApiKey, key);
-    }
+export const setAIKey = (key: string): void => {
+    localStorage.setItem(config.storage.aiApiKey, key);
 };
 
 // Keep old names for backwards compatibility

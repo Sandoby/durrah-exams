@@ -1,17 +1,19 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown, LogOut, Menu, Sigma, Mail, Users } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown, LogOut, Menu, Sigma, Mail } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { EmailWhitelist } from '../components/EmailWhitelist';
 import { useDemoTour } from '../hooks/useDemoTour';
+import { SortableQuestionItem } from '../components/SortableQuestionItem';
 import { ExamPreviewPanel } from '../components/ExamPreviewPanel';
-import { QuestionTextEditor } from '../components/QuestionTextEditor';
 import { ImageUploader } from '../components/ImageUploader';
 import Latex from 'react-latex-next';
 
@@ -133,6 +135,16 @@ export default function ExamEditor() {
         }
     };
 
+
+
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
     const { register, control, handleSubmit, reset, watch, setValue } = useForm<ExamForm>({
         defaultValues: {
             title: '',
@@ -158,10 +170,20 @@ export default function ExamEditor() {
         },
     });
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove, move } = useFieldArray({
         control,
         name: 'questions',
     });
+
+    const handleDragEnd = (event: any) => {
+        const { active, over } = event;
+
+        if (active.id !== over.id) {
+            const oldIndex = fields.findIndex((f) => f.id === active.id);
+            const newIndex = fields.findIndex((f) => f.id === over.id);
+            move(oldIndex, newIndex); // Use react-hook-form's move
+        }
+    };
 
 
     useEffect(() => {
@@ -169,7 +191,7 @@ export default function ExamEditor() {
         if (demoMode) {
             // Load demo exam data
             reset({
-                title: 'Mathematics Quiz - Grade 10',
+                title: 'ًں“گ Mathematics Quiz - Grade 10',
                 description: 'A comprehensive mathematics assessment covering algebra, geometry, and trigonometry concepts.',
                 required_fields: ['name', 'email'],
                 questions: [
@@ -214,13 +236,8 @@ export default function ExamEditor() {
                 },
             });
             setIsFetching(false);
-        } else if (user) {
-            // Clear demo mode if we have a real user
-            localStorage.removeItem('demoMode');
-            localStorage.removeItem('demoScenario');
-            if (id) {
-                fetchExam();
-            }
+        } else if (id && user) {
+            fetchExam();
         }
     }, [id, user]);
 
@@ -602,20 +619,20 @@ export default function ExamEditor() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12 font-sans relative overflow-hidden pt-24">
-            {/* Background Gradients */}
-            <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent pointer-events-none" />
-            <div className="absolute top-20 right-20 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
+        <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1120] font-sans pb-40 relative overflow-x-hidden pt-20 selection:bg-indigo-500/20 selection:text-indigo-600 dark:selection:bg-indigo-500/30 dark:selection:text-indigo-400">
+            {/* Ambient Background Lights */}
+            <div className="fixed top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-indigo-50/50 via-white/0 to-transparent dark:from-indigo-950/20 dark:via-gray-950/0 pointer-events-none" />
+            <div className="fixed -top-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="fixed top-40 -left-20 w-72 h-72 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
 
             {/* Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
-                <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
-                    <div className="flex justify-between h-16 px-6">
+            <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 pt-4 pb-2">
+                <div className="max-w-7xl mx-auto bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl rounded-2xl shadow-sm border border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
+                    <div className="flex justify-between h-14 sm:h-16 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
-                            <Logo className="h-9 w-9" showText={false} />
+                            <Logo className="h-8 w-8" showText={false} />
                             <div className="flex flex-col">
-                                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
+                                <span className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Durrah</span>
                             </div>
                         </div>
 
@@ -695,91 +712,84 @@ export default function ExamEditor() {
                 </div>
             )}
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mt-8">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => navigate(isDemo ? '/demo' : '/dashboard')}
-                            className="p-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-all shadow-sm"
-                        >
-                            <ArrowLeft className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                        </button>
-                        <div>
-                            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-indigo-800 to-indigo-900 dark:from-white dark:via-indigo-200 dark:to-indigo-400">
-                                {id ? t('examEditor.editTitle') : t('examEditor.createTitle')}
-                            </h1>
-                            <div className="flex items-center gap-2 mt-1.5 text-sm text-gray-500 dark:text-gray-400">
-                                {savedQuizCode ? (
-                                    <>
-                                        <span className="font-mono bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded text-xs border border-indigo-100 dark:border-indigo-800">
-                                            Code: {savedQuizCode}
-                                        </span>
-                                    </>
-                                ) : (
-                                    <span>Draft Mode</span>
-                                )}
+            {/* Fixed Header Container */}
+            <div className="fixed top-16 sm:top-20 left-0 right-0 z-40 px-3 sm:px-6 lg:px-8 transition-all duration-300 pointer-events-none">
+                <div className="max-w-[1600px] mx-auto pointer-events-auto">
+                    <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50 shadow-md rounded-2xl sm:rounded-3xl p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => navigate(isDemo ? '/demo' : '/dashboard')}
+                                className="group p-2.5 rounded-xl bg-white dark:bg-gray-800 text-gray-500 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all shadow-sm"
+                            >
+                                <ArrowLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
+                            </button>
+                            <div>
+                                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                                    {id ? t('examEditor.editTitle') : t('examEditor.createTitle')}
+                                </h1>
+                                <p className="text-xs text-gray-500 font-medium mt-0.5">
+                                    {savedQuizCode ? `Code: ${savedQuizCode}` : 'Draft Mode'}
+                                </p>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => setShowImportModal(true)}
-                            type="button"
-                            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-xl transition-all shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 font-medium whitespace-nowrap"
-                        >
-                            <BookOpen className="h-5 w-5 text-indigo-500" />
-                            <span className="hidden sm:inline">Import Questions</span>
-                        </button>
-
-                        {isDemo ? (
-                            <Link
-                                to="/register"
-                                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95 font-medium whitespace-nowrap"
-                            >
-                                <Sparkles className="h-5 w-5" />
-                                <span>Sign Up to Save</span>
-                            </Link>
-                        ) : (
+                        <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                            {/* Imports Button */}
                             <button
-                                onClick={handleSubmit(onSubmit)}
-                                disabled={isLoading}
-                                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95 font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={() => setShowImportModal(true)}
+                                type="button"
+                                className="inline-flex items-center px-4 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-750 hover:border-gray-300 dark:hover:border-gray-600 transition-all shadow-sm whitespace-nowrap"
                             >
-                                {isLoading ? (
-                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                ) : (
-                                    <Save className="h-5 w-5" />
-                                )}
-                                <span>{isLoading ? t('examEditor.saving') : t('examEditor.save')}</span>
+                                <BookOpen className="h-4 w-4 mr-2 text-indigo-500" />
+                                Import
                             </button>
-                        )}
+
+                            {/* Save Button */}
+                            {isDemo ? (
+                                <Link
+                                    to="/register"
+                                    className="inline-flex items-center px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-bold shadow-lg shadow-gray-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap"
+                                >
+                                    <Sparkles className="h-4 w-4 mr-2" />
+                                    Sign Up to Save
+                                </Link>
+                            ) : (
+                                <button
+                                    onClick={handleSubmit(onSubmit)}
+                                    disabled={isLoading}
+                                    className="inline-flex items-center px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-bold shadow-lg shadow-gray-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ml-auto sm:ml-0"
+                                >
+                                    {isLoading ? (
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    ) : (
+                                        <Save className="h-4 w-4 mr-2" />
+                                    )}
+                                    {isLoading ? t('examEditor.saving') : t('examEditor.save')}
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div className="flex flex-col xl:flex-row gap-8 items-start">
+            <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pt-44 sm:pt-48 lg:pt-52">
+                <div className="flex flex-col xl:flex-row gap-4 sm:gap-8 items-start">
                     {/* Left Column: Form Editor */}
-                    <div className="flex-1 w-full space-y-6 min-w-0">
+                    <div className="flex-1 w-full space-y-4 sm:space-y-8 min-w-0">
                         {/* Basic Info */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative group">
+                        <div className="bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden group">
                             {/* Decorative highlight */}
-                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <Sparkles className="h-20 w-20 text-indigo-600" />
-                            </div>
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                                    <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-600 dark:text-indigo-400">
-                                        <LayoutList className="w-5 h-5" />
-                                    </div>
-                                    {t('examEditor.basicInfo.title')}
-                                </h3>
-                            </div>
-
-                             <div className="space-y-6 relative z-10">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2.5">
+                                <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
+                                    <Sparkles className="w-4 h-4" />
+                                </div>
+                                {t('examEditor.basicInfo.title')}
+                            </h3>
+                            <div className="space-y-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ml-1">
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">
                                         {t('examEditor.basicInfo.examTitle')}
                                         <span className="text-red-500 ml-1">*</span>
                                     </label>
@@ -808,14 +818,9 @@ export default function ExamEditor() {
 
                         {/* Student Fields - Hidden in Kids Mode */}
                         {!watch('settings.child_mode_enabled') && (
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700" id="required-fields">
-                                <div className="flex items-center gap-3 mb-6">
-                                     <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-600 dark:text-indigo-400">
-                                        <Users className="w-5 h-5" />
-                                    </div>
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">{t('examEditor.studentInfo.title')}</h3>
-                                </div>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 ml-1">{t('examEditor.studentInfo.desc')}</p>
+                            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-sm border border-gray-100 dark:border-gray-800 rounded-[2rem] p-8" id="required-fields">
+                                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">{t('examEditor.studentInfo.title')}</h3>
+                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-8">{t('examEditor.studentInfo.desc')}</p>
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     {['name', 'email', 'student_id', 'phone'].map((field) => (
                                         <label key={field} className="flex items-center p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 border-2 border-transparent hover:border-indigo-500/20 cursor-pointer transition-all">
@@ -843,7 +848,7 @@ export default function ExamEditor() {
 
                         {/* Email Access Control */}
                         {!watch('settings.child_mode_enabled') && (
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden group">
                                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                                 <div className="space-y-6">
                                     <div className="flex items-center justify-between">
@@ -901,7 +906,7 @@ export default function ExamEditor() {
                         )}
 
                         {/* Settings */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group" id="exam-settings">
+                        <div className="bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden group" id="exam-settings">
                             {/* Decorative highlight */}
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-500 to-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
 
@@ -920,13 +925,13 @@ export default function ExamEditor() {
                                                 <Sparkles className="w-32 h-32 text-purple-600" />
                                             </div>
                                             <div className="flex items-center gap-3 mb-8 relative z-10">
-                                                <div className="text-3xl bg-white dark:bg-gray-800 p-2 rounded-2xl shadow-sm">★</div>
+                                                <div className="text-3xl bg-white dark:bg-gray-800 p-2 rounded-2xl shadow-sm">🎈</div>
                                                 <h4 className="text-xl font-bold text-purple-900 dark:text-purple-200">{t('examEditor.settings.kidsMode.title')}</h4>
                                             </div>
                                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 relative z-10">
                                                 <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-6 rounded-2xl border border-purple-100 dark:border-purple-800/50 shadow-sm hover:shadow-md transition-all">
                                                     <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
-                                                        <span className="text-lg">★</span>
+                                                        <span className="text-lg">🎯</span>
                                                         {t('examEditor.settings.kidsMode.attemptLimit')}
                                                     </label>
                                                     <input
@@ -938,7 +943,7 @@ export default function ExamEditor() {
                                                 </div>
                                                 <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-6 rounded-2xl border border-purple-100 dark:border-purple-800/50 shadow-sm hover:shadow-md transition-all">
                                                     <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
-                                                        <span className="text-lg">★</span>
+                                                        <span className="text-lg">🏆</span>
                                                         {t('examEditor.settings.kidsMode.leaderboardVisibility')}
                                                     </label>
                                                     <select
@@ -1145,536 +1150,546 @@ export default function ExamEditor() {
                                 </div>
                             </div>
 
-                            <div className="space-y-6 w-full">
-                                {fields.map((field, index) => (
-                                    <div key={field.id} className="group/card">
-                                        <div className="flex items-center justify-between mb-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-bold text-lg border border-indigo-100 dark:border-indigo-800">
-                                                    {index + 1}
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{t('examEditor.questions.question')} {index + 1}</p>
-                                                    <div className="flex items-center gap-2 mt-0.5">
-                                                        <span className="text-sm font-bold text-gray-900 dark:text-gray-200">
-                                                            {questionsWatch?.[index]?.type?.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Multiple Choice'}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => remove(index)}
-                                                className="p-2.5 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all opacity-100 lg:opacity-0 lg:group-hover/card:opacity-100"
-                                                title="Delete Question"
-                                            >
-                                                <Trash2 className="h-5 w-5" />
-                                            </button>
-                                        </div>
-
-                                        <div className="space-y-6">
-                                            {/* Type and Points Row */}
-                                            <div className="grid grid-cols-1 sm:grid-cols-12 gap-6">
-                                                <div className="sm:col-span-8">
-                                                    <label className="block text-xs font-bold uppercase text-gray-400 mb-1.5 ml-1">{t('examEditor.questions.type')}</label>
-                                                    <select
-                                                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer font-medium"
-                                                        {...register(`questions.${index}.type`)}
-                                                    >
-                                                        <option value="multiple_choice">{t('examEditor.questions.types.multipleChoice')}</option>
-                                                        <option value="multiple_select">{t('examEditor.questions.types.multipleSelect')}</option>
-                                                        <option value="dropdown">{t('examEditor.questions.types.dropdown')}</option>
-                                                        <option value="true_false">{t('examEditor.questions.types.trueFalse')}</option>
-                                                        {watch('settings.child_mode_enabled') && (
-                                                            <>
-                                                                <option value="kids_color_picker">Kids: Color Picker</option>
-                                                                <option value="kids_odd_one_out">Kids: Odd One Out</option>
-                                                                <option value="kids_picture_pairing">Kids: Picture Pairing</option>
-                                                                <option value="kids_story_sequence">Kids: Story Sequence</option>
-                                                            </>
-                                                        )}
-                                                    </select>
-                                                </div>
-                                                <div className="sm:col-span-4">
-                                                    <label className="block text-xs font-bold uppercase text-gray-400 mb-1.5 ml-1">{t('examEditor.questions.points')}</label>
-                                                    <div className="relative">
-                                                        <input
-                                                            type="number"
-                                                            min="1"
-                                                            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all pr-12 font-bold"
-                                                            {...register(`questions.${index}.points`, { valueAsNumber: true })}
-                                                        />
-                                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">PTS</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Question Content */}
-                                            <div className="space-y-4">
-                                                <label className="text-xs font-bold uppercase text-gray-400 ml-1">
-                                                    {t('examEditor.questions.questionText')}
-                                                </label>
-                                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                                                    <div className="lg:col-span-8">
-                                                        <QuestionTextEditor
-                                                            value={watch(`questions.${index}.question_text`) || ''}
-                                                            onChange={(val: string) => setValue(`questions.${index}.question_text`, val, { shouldDirty: true })}
-                                                            placeholder={t('examEditor.questions.questionTextPlaceholder')}
-                                                            showPreview={showMathPreview}
-                                                        />
-                                                    </div>
-                                                    <div className="lg:col-span-4">
-                                                        <div className="bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-2 h-full min-h-[120px] flex items-center justify-center hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
-                                                            <ImageUploader
-                                                                userId={user?.id || 'anon'}
-                                                                value={questionsWatch?.[index]?.media_url || ''}
-                                                                onChange={(url) => {
-                                                                    setValue(`questions.${index}.media_url`, url);
-                                                                    setValue(`questions.${index}.media_type`, 'image');
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Options / Answer Input */}
-                                            {['multiple_choice', 'multiple_select', 'dropdown'].includes(questionsWatch?.[index]?.type || '') && (
-                                                <div className="space-y-4 mt-8">
-                                                    <div className="flex items-center justify-between ml-1">
-                                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('examEditor.questions.options')}</label>
-                                                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-full uppercase tracking-widest border border-indigo-100 dark:border-indigo-800">
-                                                            {t('examEditor.questions.selectCorrect')}
-                                                        </span>
-                                                    </div>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                        {questionsWatch?.[index]?.options?.map((_, optionIndex) => (
-                                                            <div key={`${index}-${optionIndex}`} className="relative group/option flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all">
-                                                                <input
-                                                                    type={questionsWatch?.[index]?.type === 'multiple_select' ? 'checkbox' : 'radio'}
-                                                                    name={`correct_${index}`}
-                                                                    checked={questionsWatch?.[index]?.type === 'multiple_select'
-                                                                        ? (questionsWatch?.[index]?.correct_answer as string[])?.includes(questionsWatch?.[index]?.options?.[optionIndex] || '')
-                                                                        : questionsWatch?.[index]?.correct_answer === questionsWatch?.[index]?.options?.[optionIndex]
-                                                                    }
-                                                                    onChange={() => {
-                                                                        const currentVal = questionsWatch?.[index]?.options?.[optionIndex];
-                                                                        if (questionsWatch?.[index]?.type === 'multiple_select') {
-                                                                            const currentAnswers = (questionsWatch?.[index]?.correct_answer as string[]) || [];
-                                                                            const isSelected = currentAnswers.includes(currentVal || '');
-                                                                            const newAnswers = isSelected
-                                                                                ? currentAnswers.filter(a => a !== currentVal)
-                                                                                : [...currentAnswers, currentVal || ''];
-                                                                            setValue(`questions.${index}.correct_answer`, newAnswers);
-                                                                        } else {
-                                                                            setValue(`questions.${index}.correct_answer`, currentVal || '');
-                                                                        }
-                                                                    }}
-                                                                    className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded cursor-pointer"
-                                                                />
-                                                                <input
-                                                                    {...register(`questions.${index}.options.${optionIndex}`)}
-                                                                    className="flex-1 bg-transparent border-0 text-sm font-semibold text-gray-900 dark:text-white placeholder-gray-400 focus:ring-0 min-w-0 p-0"
-                                                                    placeholder={`${t('examEditor.questions.option')} ${optionIndex + 1}`}
-                                                                />
-                                                                {showMathPreview && watch(`questions.${index}.options.${optionIndex}`) && (
-                                                                    <div className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">
-                                                                        <Latex>{watch(`questions.${index}.options.${optionIndex}`)}</Latex>
-                                                                    </div>
-                                                                )}
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => {
-                                                                        const currentOpts = [...(questionsWatch?.[index]?.options || [])];
-                                                                        currentOpts.splice(optionIndex, 1);
-                                                                        setValue(`questions.${index}.options`, currentOpts);
-                                                                    }}
-                                                                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all opacity-0 group-hover/option:opacity-100"
-                                                                >
-                                                                    <Trash2 className="h-4 w-4" />
-                                                                </button>
+                            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                                <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                                    <div className="space-y-6 w-full">
+                                        {fields.map((field, index) => (
+                                            <SortableQuestionItem key={field.id} id={field.id}>
+                                                <div className="group/card">
+                                                    <div className="flex items-center justify-between mb-6">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-bold text-lg border border-indigo-100 dark:border-indigo-800">
+                                                                {index + 1}
                                                             </div>
-                                                        ))}
-
+                                                            <div className="min-w-0">
+                                                                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{t('examEditor.questions.question')} {index + 1}</p>
+                                                                <div className="flex items-center gap-2 mt-0.5">
+                                                                    <span className="text-sm font-bold text-gray-900 dark:text-gray-200">
+                                                                        {questionsWatch?.[index]?.type?.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Multiple Choice'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                         <button
                                                             type="button"
-                                                            onClick={() => {
-                                                                const currentOpts = [...(questionsWatch?.[index]?.options || [])];
-                                                                currentOpts.push('');
-                                                                setValue(`questions.${index}.options`, currentOpts);
-                                                            }}
-                                                            className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl text-xs font-bold text-gray-500 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all group"
+                                                            onClick={() => remove(index)}
+                                                            className="p-2.5 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all opacity-100 lg:opacity-0 lg:group-hover/card:opacity-100"
+                                                            title="Delete Question"
                                                         >
-                                                            <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />
-                                                            {t('examEditor.questions.addOption')}
+                                                            <Trash2 className="h-5 w-5" />
                                                         </button>
                                                     </div>
-                                                </div>
-                                            )}
 
-                                            {questionsWatch?.[index]?.type === 'true_false' && (
-                                                <div className="space-y-4">
-                                                    <label className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('examEditor.questions.correctAnswer')}</label>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                        {['True', 'False'].map((val) => (
-                                                            <label key={val} className={`p-6 rounded-[2rem] border-2 cursor-pointer transition-all flex flex-col items-center gap-4 ${watch(`questions.${index}.correct_answer`) === val
-                                                                ? 'bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-400'
-                                                                : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 hover:border-indigo-200'
-                                                                }`}>
-                                                                <input
-                                                                    type="radio"
-                                                                    value={val}
-                                                                    className="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-2 border-gray-200"
-                                                                    {...register(`questions.${index}.correct_answer`)}
-                                                                />
-                                                                <span className={`text-lg font-black ${watch(`questions.${index}.correct_answer`) === val ? 'text-indigo-600' : 'text-gray-400'}`}>
-                                                                    {val === 'True' ? t('examEditor.questions.true') : t('examEditor.questions.false')}
-                                                                </span>
+                                                    <div className="space-y-6">
+                                                        {/* Type and Points Row */}
+                                                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-6">
+                                                            <div className="sm:col-span-8">
+                                                                <label className="block text-xs font-bold uppercase text-gray-400 mb-1.5 ml-1">{t('examEditor.questions.type')}</label>
+                                                                <select
+                                                                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer font-medium"
+                                                                    {...register(`questions.${index}.type`)}
+                                                                >
+                                                                    <option value="multiple_choice">{t('examEditor.questions.types.multipleChoice')}</option>
+                                                                    <option value="multiple_select">{t('examEditor.questions.types.multipleSelect')}</option>
+                                                                    <option value="dropdown">{t('examEditor.questions.types.dropdown')}</option>
+                                                                    <option value="true_false">{t('examEditor.questions.types.trueFalse')}</option>
+                                                                    {watch('settings.child_mode_enabled') && (
+                                                                        <>
+                                                                            <option value="kids_color_picker">Kids: Color Picker</option>
+                                                                            <option value="kids_odd_one_out">Kids: Odd One Out</option>
+                                                                            <option value="kids_picture_pairing">Kids: Picture Pairing</option>
+                                                                            <option value="kids_story_sequence">Kids: Story Sequence</option>
+                                                                        </>
+                                                                    )}
+                                                                </select>
+                                                            </div>
+                                                            <div className="sm:col-span-4">
+                                                                <label className="block text-xs font-bold uppercase text-gray-400 mb-1.5 ml-1">{t('examEditor.questions.points')}</label>
+                                                                <div className="relative">
+                                                                    <input
+                                                                        type="number"
+                                                                        min="1"
+                                                                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all pr-12 font-bold"
+                                                                        {...register(`questions.${index}.points`, { valueAsNumber: true })}
+                                                                    />
+                                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">PTS</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Question Content */}
+                                                        <div className="space-y-4">
+                                                            <label className="text-xs font-bold uppercase text-gray-400 ml-1">
+                                                                {t('examEditor.questions.questionText')}
                                                             </label>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Kids Modes */}
-                                            {questionsWatch?.[index]?.type === 'kids_color_picker' && (
-                                                <div className="p-6 bg-purple-50/30 dark:bg-purple-900/10 rounded-[2rem] border-2 border-purple-100/50 dark:border-purple-900/30 space-y-4">
-                                                    <div className="flex items-center gap-3 mb-2">
-                                                        <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-                                                            <Sparkles className="w-5 h-5 text-purple-600" />
-                                                        </div>
-                                                        <label className="text-sm font-black text-purple-700 dark:text-purple-300 uppercase tracking-widest">Color Magic Swatches</label>
-                                                    </div>
-                                                    <div className="grid grid-cols-1 gap-3">
-                                                        {(questionsWatch?.[index]?.options as string[] || []).map((_val, optionIndex) => (
-                                                            <div key={optionIndex} className="flex items-center gap-4 p-3 bg-white/50 dark:bg-gray-900/50 rounded-2xl border border-purple-50 dark:border-purple-900/20 group">
-                                                                <input
-                                                                    type="radio"
-                                                                    name={`correct_kids_${index}`}
-                                                                    checked={questionsWatch?.[index]?.correct_answer === questionsWatch?.[index]?.options?.[optionIndex]}
-                                                                    onChange={() => setValue(`questions.${index}.correct_answer`, questionsWatch?.[index]?.options?.[optionIndex] || '')}
-                                                                    className="h-6 w-6 text-purple-600 focus:ring-purple-500 border-2 border-gray-200 dark:border-gray-700 cursor-pointer transition-all"
-                                                                />
-                                                                <div className="relative group/color">
-                                                                    <input
-                                                                        type="color"
-                                                                        className="h-12 w-12 p-0 border-0 bg-transparent rounded-xl cursor-pointer overflow-hidden shadow-sm"
-                                                                        value={/^#([0-9A-Fa-f]{3}){1,2}$/.test(questionsWatch?.[index]?.options?.[optionIndex] || '') ? questionsWatch?.[index]?.options?.[optionIndex] as string : '#ffffff'}
-                                                                        onChange={(e) => setValue(`questions.${index}.options.${optionIndex}`, e.target.value)}
+                                                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                                                                <div className="lg:col-span-8">
+                                                                    <textarea
+                                                                        {...register(`questions.${index}.question_text`)}
+                                                                        className="w-full px-5 py-4 border border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder-gray-400 text-base font-medium resize-none"
+                                                                        placeholder={t('examEditor.questions.questionTextPlaceholder')}
+                                                                        rows={index === 0 ? 3 : 2}
                                                                     />
-                                                                    <div className="absolute inset-0 rounded-xl border-2 border-white pointer-events-none group-hover/color:scale-110 transition-transform shadow-inner"></div>
+                                                                    {showMathPreview && watch(`questions.${index}.question_text`) && (
+                                                                        <div className="mt-3 p-4 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800 text-sm">
+                                                                            <Latex>{watch(`questions.${index}.question_text`)}</Latex>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder={`#HEX_COLOR`}
-                                                                    className="flex-1 bg-transparent border-0 text-gray-900 dark:text-white font-black tracking-widest uppercase focus:ring-0 placeholder-gray-300"
-                                                                    value={questionsWatch?.[index]?.options?.[optionIndex] as string || ''}
-                                                                    onChange={(e) => setValue(`questions.${index}.options.${optionIndex}`, e.target.value)}
-                                                                />
-                                                                <button
-                                                                    type="button"
-                                                                    className="p-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                                                                    onClick={() => {
-                                                                        const arr = [...(questionsWatch?.[index]?.options as string[] || [])];
-                                                                        arr.splice(optionIndex, 1);
-                                                                        setValue(`questions.${index}.options`, arr);
-                                                                    }}
-                                                                >
-                                                                    <Trash2 className="h-4 w-4" />
-                                                                </button>
-                                                            </div>
-                                                        ))}
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                const arr = [...(questionsWatch?.[index]?.options as string[] || [])];
-                                                                arr.push('#ffffff');
-                                                                setValue(`questions.${index}.options`, arr);
-                                                            }}
-                                                            className="mt-2 w-full py-3 bg-purple-100/50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-purple-200/50 transition-all flex items-center justify-center gap-2"
-                                                        >
-                                                            <Plus className="h-4 w-4" />
-                                                            Add Color
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {questionsWatch?.[index]?.type === 'kids_odd_one_out' && (
-                                                <div className="p-6 bg-pink-50/30 dark:bg-pink-900/10 rounded-[2rem] border-2 border-pink-100/50 dark:border-pink-900/30 space-y-4">
-                                                    <div className="flex items-center gap-3 mb-2">
-                                                        <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-pink-600">
-                                                            <MonitorOff className="w-5 h-5" />
-                                                        </div>
-                                                        <label className="text-sm font-black text-pink-700 dark:text-pink-300 uppercase tracking-widest">Odd One Out Finder</label>
-                                                    </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                        {[0, 1, 2, 3].map((i) => (
-                                                            <div key={i} className={`p-4 rounded-[1.5rem] border-2 transition-all ${questionsWatch?.[index]?.correct_answer === String(i)
-                                                                ? 'bg-pink-100/50 dark:bg-pink-900/30 border-pink-300 dark:border-pink-700'
-                                                                : 'bg-white/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800'
-                                                                }`}>
-                                                                <div className="flex items-center gap-3 mb-3">
-                                                                    <input
-                                                                        type="radio"
-                                                                        checked={questionsWatch?.[index]?.correct_answer === String(i)}
-                                                                        onChange={() => setValue(`questions.${index}.correct_answer`, String(i))}
-                                                                        className="h-5 w-5 text-pink-600 focus:ring-pink-500 border-2 border-gray-200 dark:border-gray-700 cursor-pointer"
-                                                                    />
-                                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Item {i + 1}</span>
-                                                                </div>
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder="Text/URL"
-                                                                    className="w-full bg-transparent border-0 text-sm font-bold text-gray-900 dark:text-white mb-2 focus:ring-0 placeholder-gray-300"
-                                                                    {...register(`questions.${index}.options.${i}`)}
-                                                                />
-                                                                <ImageUploader
-                                                                    userId={user?.id || 'anon'}
-                                                                    compact
-                                                                    value={questionsWatch?.[index]?.options?.[i] || ''}
-                                                                    onChange={(url) => setValue(`questions.${index}.options.${i}`, url)}
-                                                                />
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                    <p className="text-[10px] font-bold text-pink-400 text-center uppercase tracking-widest">Choose the item that doesn't belong!</p>
-                                                </div>
-                                            )}
-
-                                            {questionsWatch?.[index]?.type === 'kids_picture_pairing' && (
-                                                <div className="p-6 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-3xl border border-indigo-100 dark:border-indigo-900/30 space-y-6">
-                                                    <div className="flex items-center gap-3 mb-2">
-                                                        <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-indigo-600">
-                                                            <Sparkles className="w-5 h-5" />
-                                                        </div>
-                                                        <label className="text-sm font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-widest">Perfect Pairing Game</label>
-                                                    </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 relative">
-                                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden sm:block">
-                                                            <div className="h-20 w-1 bg-indigo-100 dark:bg-indigo-900/30 rounded-full animate-pulse"></div>
-                                                        </div>
-                                                        <div className="space-y-3">
-                                                            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest ml-4 mb-2">Left Side Items</p>
-                                                            {[0, 1, 2, 3].map((i) => (
-                                                                <div key={`left_${i}`} className="p-3 bg-white/50 dark:bg-gray-900/50 rounded-2xl border border-indigo-50 dark:border-indigo-900/20 flex flex-col gap-2">
-                                                                    <input
-                                                                        type="text"
-                                                                        placeholder={`Side A - ${i + 1}`}
-                                                                        className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-gray-400"
-                                                                        {...register(`questions.${index}.options.${i}`)}
-                                                                    />
-                                                                    <ImageUploader
-                                                                        userId={user?.id || 'anon'}
-                                                                        compact
-                                                                        value={questionsWatch?.[index]?.options?.[i] || ''}
-                                                                        onChange={(url) => setValue(`questions.${index}.options.${i}`, url)}
-                                                                    />
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                        <div className="space-y-3">
-                                                            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest ml-4 mb-2">Right Side Matches</p>
-                                                            {[4, 5, 6, 7].map((i) => (
-                                                                <div key={`right_${i}`} className="p-3 bg-white/50 dark:bg-gray-900/50 rounded-2xl border border-indigo-50 dark:border-indigo-900/20 flex flex-col gap-2">
-                                                                    <input
-                                                                        type="text"
-                                                                        placeholder={`Side B - ${i - 3}`}
-                                                                        className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-gray-400"
-                                                                        {...register(`questions.${index}.options.${i}`)}
-                                                                    />
-                                                                    <ImageUploader
-                                                                        userId={user?.id || 'anon'}
-                                                                        compact
-                                                                        value={questionsWatch?.[index]?.options?.[i] || ''}
-                                                                        onChange={(url) => setValue(`questions.${index}.options.${i}`, url)}
-                                                                    />
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {questionsWatch?.[index]?.type === 'kids_story_sequence' && (
-                                                <div className="p-6 bg-amber-50/30 dark:bg-amber-900/10 rounded-3xl border border-amber-100 dark:border-amber-900/30 space-y-4">
-                                                    <div className="flex items-center gap-3 mb-2">
-                                                        <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-amber-600">
-                                                            <BookOpen className="w-5 h-5" />
-                                                        </div>
-                                                        <label className="text-sm font-black text-amber-700 dark:text-amber-300 uppercase tracking-widest">Story Timeline</label>
-                                                    </div>
-                                                    <div className="space-y-3">
-                                                        {[0, 1, 2].map((i) => (
-                                                            <div key={i} className="flex items-center gap-4 p-4 bg-white/50 dark:bg-gray-900/50 rounded-[1.5rem] border border-amber-50 dark:border-amber-900/20">
-                                                                <div className="h-10 w-10 flex-shrink-0 flex items-center justify-center bg-amber-100 dark:bg-amber-900/30 rounded-full text-amber-600 font-black">
-                                                                    {i + 1}
-                                                                </div>
-                                                                <div className="flex-1 space-y-2 min-w-0">
-                                                                    <input
-                                                                        type="text"
-                                                                        placeholder={`Part ${i + 1} of the story...`}
-                                                                        className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-gray-300"
-                                                                        {...register(`questions.${index}.options.${i}`)}
-                                                                    />
-                                                                    <ImageUploader
-                                                                        userId={user?.id || 'anon'}
-                                                                        compact
-                                                                        value={questionsWatch?.[index]?.options?.[i] || ''}
-                                                                        onChange={(url) => setValue(`questions.${index}.options.${i}`, url)}
-                                                                    />
+                                                                <div className="lg:col-span-4">
+                                                                    <div className="bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-2 h-full min-h-[120px] flex items-center justify-center hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
+                                                                        <ImageUploader
+                                                                            userId={user?.id || 'anon'}
+                                                                            value={questionsWatch?.[index]?.media_url || ''}
+                                                                            onChange={(url) => {
+                                                                                setValue(`questions.${index}.media_url`, url);
+                                                                                setValue(`questions.${index}.media_type`, 'image');
+                                                                            }}
+                                                                        />
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        ))}
+                                                        </div>
+
+                                                        {/* Options / Answer Input */}
+                                                        {['multiple_choice', 'multiple_select', 'dropdown'].includes(questionsWatch?.[index]?.type || '') && (
+                                                            <div className="space-y-4 mt-8">
+                                                                <div className="flex items-center justify-between ml-1">
+                                                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('examEditor.questions.options')}</label>
+                                                                    <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-full uppercase tracking-widest border border-indigo-100 dark:border-indigo-800">
+                                                                        {t('examEditor.questions.selectCorrect')}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                    {questionsWatch?.[index]?.options?.map((_, optionIndex) => (
+                                                                        <div key={`${index}-${optionIndex}`} className="relative group/option flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all">
+                                                                            <input
+                                                                                type={questionsWatch?.[index]?.type === 'multiple_select' ? 'checkbox' : 'radio'}
+                                                                                name={`correct_${index}`}
+                                                                                checked={questionsWatch?.[index]?.type === 'multiple_select'
+                                                                                    ? (questionsWatch?.[index]?.correct_answer as string[])?.includes(questionsWatch?.[index]?.options?.[optionIndex] || '')
+                                                                                    : questionsWatch?.[index]?.correct_answer === questionsWatch?.[index]?.options?.[optionIndex]
+                                                                                }
+                                                                                onChange={() => {
+                                                                                    const currentVal = questionsWatch?.[index]?.options?.[optionIndex];
+                                                                                    if (questionsWatch?.[index]?.type === 'multiple_select') {
+                                                                                        const currentAnswers = (questionsWatch?.[index]?.correct_answer as string[]) || [];
+                                                                                        const isSelected = currentAnswers.includes(currentVal || '');
+                                                                                        const newAnswers = isSelected
+                                                                                            ? currentAnswers.filter(a => a !== currentVal)
+                                                                                            : [...currentAnswers, currentVal || ''];
+                                                                                        setValue(`questions.${index}.correct_answer`, newAnswers);
+                                                                                    } else {
+                                                                                        setValue(`questions.${index}.correct_answer`, currentVal || '');
+                                                                                    }
+                                                                                }}
+                                                                                className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded cursor-pointer"
+                                                                            />
+                                                                            <input
+                                                                                {...register(`questions.${index}.options.${optionIndex}`)}
+                                                                                className="flex-1 bg-transparent border-0 text-sm font-semibold text-gray-900 dark:text-white placeholder-gray-400 focus:ring-0 min-w-0 p-0"
+                                                                                placeholder={`${t('examEditor.questions.option')} ${optionIndex + 1}`}
+                                                                            />
+                                                                            {showMathPreview && watch(`questions.${index}.options.${optionIndex}`) && (
+                                                                                <div className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">
+                                                                                    <Latex>{watch(`questions.${index}.options.${optionIndex}`)}</Latex>
+                                                                                </div>
+                                                                            )}
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    const currentOpts = [...(questionsWatch?.[index]?.options || [])];
+                                                                                    currentOpts.splice(optionIndex, 1);
+                                                                                    setValue(`questions.${index}.options`, currentOpts);
+                                                                                }}
+                                                                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all opacity-0 group-hover/option:opacity-100"
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </button>
+                                                                        </div>
+                                                                    ))}
+
+
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            const currentOpts = [...(questionsWatch?.[index]?.options || [])];
+                                                                            currentOpts.push('');
+                                                                            setValue(`questions.${index}.options`, currentOpts);
+                                                                        }}
+                                                                        className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl text-xs font-bold text-gray-500 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all group"
+                                                                    >
+                                                                        <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />
+                                                                        {t('examEditor.questions.addOption')}
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {questionsWatch?.[index]?.type === 'true_false' && (
+                                                            <div className="space-y-4">
+                                                                <label className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('examEditor.questions.correctAnswer')}</label>
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                                    {['True', 'False'].map((val) => (
+                                                                        <label key={val} className={`p-6 rounded-[2rem] border-2 cursor-pointer transition-all flex flex-col items-center gap-4 ${watch(`questions.${index}.correct_answer`) === val
+                                                                            ? 'bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-400'
+                                                                            : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 hover:border-indigo-200'
+                                                                            }`}>
+                                                                            <input
+                                                                                type="radio"
+                                                                                value={val}
+                                                                                className="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-2 border-gray-200"
+                                                                                {...register(`questions.${index}.correct_answer`)}
+                                                                            />
+                                                                            <span className={`text-lg font-black ${watch(`questions.${index}.correct_answer`) === val ? 'text-indigo-600' : 'text-gray-400'}`}>
+                                                                                {val === 'True' ? t('examEditor.questions.true') : t('examEditor.questions.false')}
+                                                                            </span>
+                                                                        </label>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Kids Modes */}
+                                                        {questionsWatch?.[index]?.type === 'kids_color_picker' && (
+                                                            <div className="p-6 bg-purple-50/30 dark:bg-purple-900/10 rounded-[2rem] border-2 border-purple-100/50 dark:border-purple-900/30 space-y-4">
+                                                                <div className="flex items-center gap-3 mb-2">
+                                                                    <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                                                                        <Sparkles className="w-5 h-5 text-purple-600" />
+                                                                    </div>
+                                                                    <label className="text-sm font-black text-purple-700 dark:text-purple-300 uppercase tracking-widest">Color Magic Swatches</label>
+                                                                </div>
+                                                                <div className="grid grid-cols-1 gap-3">
+                                                                    {(questionsWatch?.[index]?.options as string[] || []).map((_val, optionIndex) => (
+                                                                        <div key={optionIndex} className="flex items-center gap-4 p-3 bg-white/50 dark:bg-gray-900/50 rounded-2xl border border-purple-50 dark:border-purple-900/20 group">
+                                                                            <input
+                                                                                type="radio"
+                                                                                name={`correct_kids_${index}`}
+                                                                                checked={questionsWatch?.[index]?.correct_answer === questionsWatch?.[index]?.options?.[optionIndex]}
+                                                                                onChange={() => setValue(`questions.${index}.correct_answer`, questionsWatch?.[index]?.options?.[optionIndex] || '')}
+                                                                                className="h-6 w-6 text-purple-600 focus:ring-purple-500 border-2 border-gray-200 dark:border-gray-700 cursor-pointer transition-all"
+                                                                            />
+                                                                            <div className="relative group/color">
+                                                                                <input
+                                                                                    type="color"
+                                                                                    className="h-12 w-12 p-0 border-0 bg-transparent rounded-xl cursor-pointer overflow-hidden shadow-sm"
+                                                                                    value={/^#([0-9A-Fa-f]{3}){1,2}$/.test(questionsWatch?.[index]?.options?.[optionIndex] || '') ? questionsWatch?.[index]?.options?.[optionIndex] as string : '#ffffff'}
+                                                                                    onChange={(e) => setValue(`questions.${index}.options.${optionIndex}`, e.target.value)}
+                                                                                />
+                                                                                <div className="absolute inset-0 rounded-xl border-2 border-white pointer-events-none group-hover/color:scale-110 transition-transform shadow-inner"></div>
+                                                                            </div>
+                                                                            <input
+                                                                                type="text"
+                                                                                placeholder={`#HEX_COLOR`}
+                                                                                className="flex-1 bg-transparent border-0 text-gray-900 dark:text-white font-black tracking-widest uppercase focus:ring-0 placeholder-gray-300"
+                                                                                value={questionsWatch?.[index]?.options?.[optionIndex] as string || ''}
+                                                                                onChange={(e) => setValue(`questions.${index}.options.${optionIndex}`, e.target.value)}
+                                                                            />
+                                                                            <button
+                                                                                type="button"
+                                                                                className="p-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                                                                                onClick={() => {
+                                                                                    const arr = [...(questionsWatch?.[index]?.options as string[] || [])];
+                                                                                    arr.splice(optionIndex, 1);
+                                                                                    setValue(`questions.${index}.options`, arr);
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </button>
+                                                                        </div>
+                                                                    ))}
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            const arr = [...(questionsWatch?.[index]?.options as string[] || [])];
+                                                                            arr.push('#ffffff');
+                                                                            setValue(`questions.${index}.options`, arr);
+                                                                        }}
+                                                                        className="mt-2 w-full py-3 bg-purple-100/50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-purple-200/50 transition-all flex items-center justify-center gap-2"
+                                                                    >
+                                                                        <Plus className="h-4 w-4" /> Add Color
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {questionsWatch?.[index]?.type === 'kids_odd_one_out' && (
+                                                            <div className="p-6 bg-pink-50/30 dark:bg-pink-900/10 rounded-[2rem] border-2 border-pink-100/50 dark:border-pink-900/30 space-y-4">
+                                                                <div className="flex items-center gap-3 mb-2">
+                                                                    <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-pink-600">
+                                                                        <MonitorOff className="w-5 h-5" />
+                                                                    </div>
+                                                                    <label className="text-sm font-black text-pink-700 dark:text-pink-300 uppercase tracking-widest">Odd One Out Finder</label>
+                                                                </div>
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                                    {[0, 1, 2, 3].map((i) => (
+                                                                        <div key={i} className={`p-4 rounded-[1.5rem] border-2 transition-all ${questionsWatch?.[index]?.correct_answer === String(i)
+                                                                            ? 'bg-pink-100/50 dark:bg-pink-900/30 border-pink-300 dark:border-pink-700'
+                                                                            : 'bg-white/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800'
+                                                                            }`}>
+                                                                            <div className="flex items-center gap-3 mb-3">
+                                                                                <input
+                                                                                    type="radio"
+                                                                                    checked={questionsWatch?.[index]?.correct_answer === String(i)}
+                                                                                    onChange={() => setValue(`questions.${index}.correct_answer`, String(i))}
+                                                                                    className="h-5 w-5 text-pink-600 focus:ring-pink-500 border-2 border-gray-200 dark:border-gray-700 cursor-pointer"
+                                                                                />
+                                                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Item {i + 1}</span>
+                                                                            </div>
+                                                                            <input
+                                                                                type="text"
+                                                                                placeholder="Text/URL"
+                                                                                className="w-full bg-transparent border-0 text-sm font-bold text-gray-900 dark:text-white mb-2 focus:ring-0 placeholder-gray-300"
+                                                                                {...register(`questions.${index}.options.${i}`)}
+                                                                            />
+                                                                            <ImageUploader
+                                                                                userId={user?.id || 'anon'}
+                                                                                compact
+                                                                                value={questionsWatch?.[index]?.options?.[i] || ''}
+                                                                                onChange={(url) => setValue(`questions.${index}.options.${i}`, url)}
+                                                                            />
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                                <p className="text-[10px] font-bold text-pink-400 text-center uppercase tracking-widest">Choose the item that doesn't belong!</p>
+                                                            </div>
+                                                        )}
+
+                                                        {questionsWatch?.[index]?.type === 'kids_picture_pairing' && (
+                                                            <div className="p-6 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-3xl border border-indigo-100 dark:border-indigo-900/30 space-y-6">
+                                                                <div className="flex items-center gap-3 mb-2">
+                                                                    <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-indigo-600">
+                                                                        <Sparkles className="w-5 h-5" />
+                                                                    </div>
+                                                                    <label className="text-sm font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-widest">Perfect Pairing Game</label>
+                                                                </div>
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 relative">
+                                                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden sm:block">
+                                                                        <div className="h-20 w-1 bg-indigo-100 dark:bg-indigo-900/30 rounded-full animate-pulse"></div>
+                                                                    </div>
+                                                                    <div className="space-y-3">
+                                                                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest ml-4 mb-2">Left Side Items</p>
+                                                                        {[0, 1, 2, 3].map((i) => (
+                                                                            <div key={`left_${i}`} className="p-3 bg-white/50 dark:bg-gray-900/50 rounded-2xl border border-indigo-50 dark:border-indigo-900/20 flex flex-col gap-2">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    placeholder={`Side A - ${i + 1}`}
+                                                                                    className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-gray-400"
+                                                                                    {...register(`questions.${index}.options.${i}`)}
+                                                                                />
+                                                                                <ImageUploader
+                                                                                    userId={user?.id || 'anon'}
+                                                                                    compact
+                                                                                    value={questionsWatch?.[index]?.options?.[i] || ''}
+                                                                                    onChange={(url) => setValue(`questions.${index}.options.${i}`, url)}
+                                                                                />
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                    <div className="space-y-3">
+                                                                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest ml-4 mb-2">Right Side Matches</p>
+                                                                        {[4, 5, 6, 7].map((i) => (
+                                                                            <div key={`right_${i}`} className="p-3 bg-white/50 dark:bg-gray-900/50 rounded-2xl border border-indigo-50 dark:border-indigo-900/20 flex flex-col gap-2">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    placeholder={`Side B - ${i - 3}`}
+                                                                                    className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-gray-400"
+                                                                                    {...register(`questions.${index}.options.${i}`)}
+                                                                                />
+                                                                                <ImageUploader
+                                                                                    userId={user?.id || 'anon'}
+                                                                                    compact
+                                                                                    value={questionsWatch?.[index]?.options?.[i] || ''}
+                                                                                    onChange={(url) => setValue(`questions.${index}.options.${i}`, url)}
+                                                                                />
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {questionsWatch?.[index]?.type === 'kids_story_sequence' && (
+                                                            <div className="p-6 bg-amber-50/30 dark:bg-amber-900/10 rounded-3xl border border-amber-100 dark:border-amber-900/30 space-y-4">
+                                                                <div className="flex items-center gap-3 mb-2">
+                                                                    <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-amber-600">
+                                                                        <BookOpen className="w-5 h-5" />
+                                                                    </div>
+                                                                    <label className="text-sm font-black text-amber-700 dark:text-amber-300 uppercase tracking-widest">Story Timeline</label>
+                                                                </div>
+                                                                <div className="space-y-3">
+                                                                    {[0, 1, 2].map((i) => (
+                                                                        <div key={i} className="flex items-center gap-4 p-4 bg-white/50 dark:bg-gray-900/50 rounded-[1.5rem] border border-amber-50 dark:border-amber-900/20">
+                                                                            <div className="h-10 w-10 flex-shrink-0 flex items-center justify-center bg-amber-100 dark:bg-amber-900/30 rounded-full text-amber-600 font-black">
+                                                                                {i + 1}
+                                                                            </div>
+                                                                            <div className="flex-1 space-y-2 min-w-0">
+                                                                                <input
+                                                                                    type="text"
+                                                                                    placeholder={`Part ${i + 1} of the story...`}
+                                                                                    className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-gray-300"
+                                                                                    {...register(`questions.${index}.options.${i}`)}
+                                                                                />
+                                                                                <ImageUploader
+                                                                                    userId={user?.id || 'anon'}
+                                                                                    compact
+                                                                                    value={questionsWatch?.[index]?.options?.[i] || ''}
+                                                                                    onChange={(url) => setValue(`questions.${index}.options.${i}`, url)}
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                                <p className="text-[10px] font-bold text-amber-400 text-center uppercase tracking-widest">Organize the story parts in the correct order!</p>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <p className="text-[10px] font-bold text-amber-400 text-center uppercase tracking-widest">Organize the story parts in the correct order!</p>
                                                 </div>
-                                            )}
+                                            </SortableQuestionItem>
+                                        ))}
+                                    </div>
+                                </SortableContext>
+                            </DndContext>
+                        </div>
+                    </div>
+
+                    {/* Import from Question Bank Modal */}
+                    {showImportModal && (
+                        <div className="fixed inset-0 bg-gray-950/40 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
+                            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white dark:border-gray-800 max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col scale-in-center">
+                                <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white/50 dark:bg-gray-900/50">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl text-indigo-600">
+                                            <BookOpen className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-3">
+                                                <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                                                    Import Questions
+                                                </h2>
+                                                {profile?.subscription_status !== 'active' && (
+                                                    <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 text-[10px] font-black rounded-lg border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+                                                        <Crown className="w-3 h-3" />
+                                                        PRO
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs font-bold text-gray-400">
+                                                {profile?.subscription_status !== 'active'
+                                                    ? 'Subscribe to unlock question bank imports'
+                                                    : 'Select from your existing question banks'}
+                                            </p>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
+                                    <button
+                                        onClick={() => setShowImportModal(false)}
+                                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+                                    >
+                                        <X className="w-6 h-6 text-gray-400" />
+                                    </button>
+                                </div>
 
-                        {/* Import from Question Bank Modal */}
-                        {showImportModal && (
-                            <div className="fixed inset-0 bg-gray-950/40 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
-                                <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white dark:border-gray-800 max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col scale-in-center">
-                                    <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white/50 dark:bg-gray-900/50">
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl text-indigo-600">
-                                                <BookOpen className="w-6 h-6" />
-                                            </div>
-                                            <div>
-                                                <div className="flex items-center gap-3">
-                                                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                                                        Import Questions
-                                                    </h2>
-                                                    {profile?.subscription_status !== 'active' && (
-                                                        <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 text-[10px] font-black rounded-lg border border-amber-200 dark:border-amber-800 flex items-center gap-1">
-                                                            <Crown className="w-3 h-3" />
-                                                            PRO
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <p className="text-xs font-bold text-gray-400">
-                                                    {profile?.subscription_status !== 'active'
-                                                        ? 'Subscribe to unlock question bank imports'
-                                                        : 'Select from your existing question banks'}
+                                <div className="p-8 space-y-8 overflow-y-auto custom-scrollbar">
+                                    {/* Number of questions input */}
+                                    <div className="space-y-3">
+                                        <label className="flex items-center gap-2 text-sm font-black text-gray-700 dark:text-gray-300 ml-1">
+                                            <span className="text-xl">🎲</span>
+                                            How many questions?
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                value={questionCount}
+                                                onChange={(e) => setQuestionCount(parseInt(e.target.value) || 1)}
+                                                className="w-full px-6 py-4 border border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all pr-20 font-bold"
+                                            />
+                                            <span className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black text-gray-400">RANDOM</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Question banks selection */}
+                                    <div className="space-y-4">
+                                        <label className="flex items-center gap-2 text-sm font-black text-gray-700 dark:text-gray-300 ml-1">
+                                            <span className="text-xl">📚</span>
+                                            Target Banks
+                                        </label>
+                                        {questionBanks.length === 0 ? (
+                                            <div className="text-center py-12 bg-gray-50/50 dark:bg-gray-900/50 rounded-[2rem] border-2 border-dashed border-gray-100 dark:border-gray-800">
+                                                <p className="text-sm font-bold text-gray-400">
+                                                    No question banks found.
                                                 </p>
                                             </div>
-                                        </div>
-                                        <button
-                                            onClick={() => setShowImportModal(false)}
-                                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
-                                        >
-                                            <X className="w-6 h-6 text-gray-400" />
-                                        </button>
-                                    </div>
-
-                                    <div className="p-8 space-y-8 overflow-y-auto custom-scrollbar">
-                                        {/* Number of questions input */}
-                                        <div className="space-y-3">
-                                            <label className="flex items-center gap-2 text-sm font-black text-gray-700 dark:text-gray-300 ml-1">
-                                                <span className="text-xl">🎲</span>
-                                                How many questions?
-                                            </label>
-                                            <div className="relative">
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    value={questionCount}
-                                                    onChange={(e) => setQuestionCount(parseInt(e.target.value) || 1)}
-                                                    className="w-full px-6 py-4 border border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all pr-20 font-bold"
-                                                />
-                                                <span className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black text-gray-400">RANDOM</span>
-                                            </div>
-                                        </div>
-
-                                        {/* Question banks selection */}
-                                        <div className="space-y-4">
-                                            <label className="flex items-center gap-2 text-sm font-black text-gray-700 dark:text-gray-300 ml-1">
-                                                <span className="text-xl">📚</span>
-                                                Target Banks
-                                            </label>
-                                            {questionBanks.length === 0 ? (
-                                                <div className="text-center py-12 bg-gray-50/50 dark:bg-gray-900/50 rounded-[2rem] border-2 border-dashed border-gray-100 dark:border-gray-800">
-                                                    <p className="text-sm font-bold text-gray-400">
-                                                        No question banks found.
-                                                    </p>
-                                                </div>
-                                            ) : (
-                                                <div className="grid grid-cols-1 gap-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
-                                                    {questionBanks.map(bank => (
-                                                        <label
-                                                            key={bank.id}
-                                                            className={`flex items-center gap-4 p-5 rounded-[1.5rem] border-2 transition-all cursor-pointer group ${selectedBankIds.includes(bank.id)
-                                                                ? 'bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800'
-                                                                : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
-                                                                }`}
-                                                        >
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={selectedBankIds.includes(bank.id)}
-                                                                onChange={() => toggleBankSelection(bank.id)}
-                                                                className="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-2 border-gray-200 dark:border-gray-700 rounded-xl transition-all"
-                                                            />
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className="text-base font-black text-gray-900 dark:text-white truncate">
-                                                                    {bank.name}
+                                        ) : (
+                                            <div className="grid grid-cols-1 gap-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
+                                                {questionBanks.map(bank => (
+                                                    <label
+                                                        key={bank.id}
+                                                        className={`flex items-center gap-4 p-5 rounded-[1.5rem] border-2 transition-all cursor-pointer group ${selectedBankIds.includes(bank.id)
+                                                            ? 'bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800'
+                                                            : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
+                                                            }`}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedBankIds.includes(bank.id)}
+                                                            onChange={() => toggleBankSelection(bank.id)}
+                                                            className="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-2 border-gray-200 dark:border-gray-700 rounded-xl transition-all"
+                                                        />
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-base font-black text-gray-900 dark:text-white truncate">
+                                                                {bank.name}
+                                                            </p>
+                                                            {bank.description && (
+                                                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+                                                                    {bank.description}
                                                                 </p>
-                                                                {bank.description && (
-                                                                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
-                                                                        {bank.description}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                            <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/40 transition-colors">
-                                                                <ArrowLeft className="w-4 h-4 text-gray-400 group-hover:text-indigo-600 rotate-180" />
-                                                            </div>
-                                                        </label>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Modal actions */}
-                                    <div className="p-8 bg-gray-50/50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setShowImportModal(false);
-                                                setSelectedBankIds([]);
-                                                setQuestionCount(5);
-                                            }}
-                                            className="px-8 py-3 text-sm font-black text-gray-500 hover:text-gray-700 transition-colors"
-                                            disabled={isImporting}
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={handleImportFromBanks}
-                                            disabled={isImporting || selectedBankIds.length === 0}
-                                            className="px-10 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-indigo-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                                        >
-                                            {isImporting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                                            {isImporting ? 'Importing...' : 'Start Import'}
-                                        </button>
+                                                            )}
+                                                        </div>
+                                                        <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/40 transition-colors">
+                                                            <ArrowLeft className="w-4 h-4 text-gray-400 group-hover:text-indigo-600 rotate-180" />
+                                                        </div>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                            </div>
-                        )}
 
-                        {/* Live Preview */}
-                        <div className="w-full mt-10">
-                            <ExamPreviewPanel data={watch()} />
+                                {/* Modal actions */}
+                                <div className="p-8 bg-gray-50/50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowImportModal(false);
+                                            setSelectedBankIds([]);
+                                            setQuestionCount(5);
+                                        }}
+                                        className="px-8 py-3 text-sm font-black text-gray-500 hover:text-gray-700 transition-colors"
+                                        disabled={isImporting}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleImportFromBanks}
+                                        disabled={isImporting || selectedBankIds.length === 0}
+                                        className="px-10 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-indigo-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                    >
+                                        {isImporting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                                        {isImporting ? 'Importing...' : 'Start Import'}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+                    )}
+
+                    {/* Right Column: Live Preview (Desktop Only) */}
+                    <div className="xl:w-[400px] sticky top-48">
+                        <ExamPreviewPanel data={watch()} />
                     </div>
                 </div>
             </div>
         </div>
     );
 }
-
