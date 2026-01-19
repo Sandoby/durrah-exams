@@ -199,6 +199,21 @@
   }
 }
 
+/* Question text editor sizing */
+.question-quill {
+  min-height: 280px;
+}
+
+.question-quill .ql-container {
+  min-height: 280px;
+  border: 0;
+}
+
+.question-quill .ql-editor {
+  min-height: 240px;
+  padding: 16px 18px;
+}
+
 .animate-scale-pop {
   animation: scale-pop 0.25s ease-out forwards;
 }

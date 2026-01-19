@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react';
-import ReactQuill from 'react-quill';
+// react-quill uses findDOMNode which is removed in React 19; react-quill-new ships a patched build
+import ReactQuill from 'react-quill-new';
 import katex from 'katex';
 import 'react-quill/dist/quill.snow.css';
 import 'katex/dist/katex.min.css';

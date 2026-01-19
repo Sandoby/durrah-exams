@@ -5,6 +5,10 @@
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
+    "baseUrl": ".",
+    "paths": {
+      "react-quill-new": ["src/vendor/react-quill-new.ts"]
+    },
     "types": ["vite/client"],
     "skipLibCheck": true,
 
