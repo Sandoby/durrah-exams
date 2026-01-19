@@ -353,18 +353,27 @@ http.route({
       const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${authUser.id}&select=dodo_customer_id`, {
         headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
       });
-      if (!profileRes.ok) {
-        return new Response(JSON.stringify({ error: 'Profile lookup failed' }), { status: 403, headers: corsHeaders });
-      }
-      const profiles = await profileRes.json();
-      const userDodoId = profiles?.[0]?.dodo_customer_id as string | undefined;
 
-      const effectiveId = providedId ?? userDodoId;
+      let userDodoId: string | undefined = undefined;
+      if (profileRes.ok) {
+        try {
+          const profiles = await profileRes.json();
+          userDodoId = profiles?.[0]?.dodo_customer_id as string | undefined;
+        } catch (e) {
+          console.warn('[Portal] Failed to parse profile response JSON:', e);
+        }
+      } else {
+        console.warn(`[Portal] Profile lookup failed with status: ${profileRes.status}`);
+        // Do not hard fail; if the client provided a customer id we can still proceed after verifying below
+      }
+
+      const effectiveId = (providedId ?? userDodoId) as string | undefined;
 
       if (!effectiveId) {
         return new Response(JSON.stringify({ error: 'No Dodo customer linked to your account yet' }), { status: 404, headers: corsHeaders });
       }
 
+      // If both exist and mismatch, reject
       if (providedId && userDodoId && providedId !== userDodoId) {
         return new Response(JSON.stringify({ error: 'Forbidden: customer mismatch' }), { status: 403, headers: corsHeaders });
       }

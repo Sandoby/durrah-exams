@@ -62,22 +62,70 @@ export default function Settings() {
             // Open a blank tab immediately to avoid popup blocking
             portalWin = window.open('about:blank', '_blank', 'noopener,noreferrer');
 
-            const res = await fetch(`${siteUrl}/dodoPortalSession`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
-                },
-                // Let the server fetch and verify the user's dodo_customer_id itself
-                body: JSON.stringify({})
-            });
+            // Small robust retry for transient network blips like ERR_NETWORK_CHANGED
+            let res: Response | null = null;
+            let data: any = null;
+            let lastErr: any = null;
 
-            const data = await res.json();
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 8000); // 8s safety timeout
+
+                    res = await fetch(`${siteUrl}/dodoPortalSession`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${accessToken}`
+                        },
+                        body: JSON.stringify({ dodoCustomerId: profile.dodo_customer_id || undefined }),
+                        signal: controller.signal,
+                        // keepalive helps when browser is navigating, but safe to include here
+                                                keepalive: true,
+                    });
+
+                    clearTimeout(timeout);
+                    data = await res.json().catch(() => ({}));
+                    lastErr = null;
+                    break; // success
+                } catch (err: any) {
+                    lastErr = err;
+                    // Only retry for transient fetch errors
+                    const msg = String(err?.message || err);
+                    const isAbort = err?.name === 'AbortError';
+                    const isTransient = msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('ERR_NETWORK_CHANGED');
+                    if (attempt < 3 && (isAbort || isTransient)) {
+                        // Exponential backoff: 300ms, 600ms
+                        await new Promise(r => setTimeout(r, 300 * attempt));
+                        continue;
+                    }
+                    break;
+                }
+            }
+
+            if (!res) {
+                if (portalWin) portalWin.close();
+                // If offline, surface a clearer hint
+                if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                    toast.error('You appear to be offline. Please reconnect and try again.');
+                } else {
+                    toast.error('Network error while opening portal. Please try again.');
+                }
+                return;
+            }
 
             if (!res.ok || !data?.portal_url) {
-                console.error('Portal session error:', data);
+                console.error('Portal session error:', data || lastErr);
                 if (portalWin) portalWin.close();
-                const msg = data?.error || (res.status === 403 ? 'Subscription not linked to this account' : 'Unable to open subscription portal');
+
+                // Friendlier messaging depending on status
+                let msg = 'Unable to open subscription portal';
+                if (res.status === 404) msg = 'No Dodo subscription linked to your account yet';
+                if (res.status === 403) msg = data?.error || 'Subscription not linked to this account';
+                if (res.status === 500) msg = 'Server configuration error. Please retry in a moment';
+                if (lastErr && String(lastErr).includes('ERR_NETWORK_CHANGED')) {
+                    msg = 'Network changed while contacting the server. Please try again.';
+                }
                 toast.error(msg);
                 return;
             }
