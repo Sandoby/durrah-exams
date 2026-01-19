@@ -243,8 +243,8 @@ export default function LandingPage() {
                         "logo": {
                             "@type": "ImageObject",
                             "@id": "https://durrahtutors.com/#logo",
-                            "url": "https://durrahtutors.com/logo.png",
-                            "contentUrl": "https://durrahtutors.com/logo.png",
+                            "url": "https://durrahtutors.com/logo-google.png",
+                            "contentUrl": "https://durrahtutors.com/logo-google.png",
                             "width": 512,
                             "height": 512,
                             "caption": "Durrah for Tutors Logo"
@@ -252,7 +252,7 @@ export default function LandingPage() {
                         "brand": {
                             "@type": "Brand",
                             "name": "Durrah",
-                            "logo": "https://durrahtutors.com/logo.png"
+                            "logo": "https://durrahtutors.com/logo-google.png"
                         },
                         "image": {
                             "@type": "ImageObject",

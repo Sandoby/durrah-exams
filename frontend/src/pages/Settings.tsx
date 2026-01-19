@@ -41,6 +41,8 @@ export default function Settings() {
 
     // Open Dodo Customer Portal via authenticated Convex endpoint
     const handleOpenDodoPortal = async () => {
+        // Pre-open a tab to preserve the user gesture and avoid popup blockers
+        let portalWin: Window | null = null;
         try {
             if (!profile.dodo_customer_id) {
                 toast.error('No subscription found for portal access');
@@ -60,6 +62,9 @@ export default function Settings() {
                 return;
             }
 
+            // Open a blank tab immediately to avoid popup blocking
+            portalWin = window.open('about:blank', '_blank', 'noopener,noreferrer');
+
             const res = await fetch(`${siteUrl}/dodoPortalSession`, {
                 method: 'POST',
                 headers: {
@@ -70,14 +75,29 @@ export default function Settings() {
             });
 
             const data = await res.json();
+
             if (!res.ok || !data?.portal_url) {
                 console.error('Portal session error:', data);
-                toast.error(data?.error || 'Unable to open subscription portal');
+                if (portalWin) portalWin.close();
+                const msg = data?.error || (res.status === 403 ? 'Subscription not linked to this account' : 'Unable to open subscription portal');
+                toast.error(msg);
                 return;
             }
 
-            window.open(data.portal_url, '_blank', 'noopener,noreferrer');
+            // Navigate the pre-opened tab if available; otherwise redirect current tab
+            if (portalWin) {
+                try {
+                    portalWin.location.href = data.portal_url;
+                    portalWin.focus?.();
+                } catch {
+                    // Fallback if the browser prevented navigation
+                    window.location.href = data.portal_url;
+                }
+            } else {
+                window.location.href = data.portal_url;
+            }
         } catch (err) {
+            if (portalWin) portalWin.close();
             console.error('Open portal error:', err);
             toast.error('Unable to open subscription portal');
         }
