@@ -191,13 +191,41 @@ http.route({
       // Deduplication: ONLY subscription.active triggers the subscription update/extension logic
       // to prevents double-adding time when multiple events arrive for the same transaction.
       if (eventType === 'subscription.active') {
+        // Ensure we have a Dodo customer id; if missing, look it up from Dodo API using subscription_id
+        let ensuredCustomerId = dodoCustomerId;
+        if (!ensuredCustomerId && data?.subscription_id) {
+          try {
+            const apiKey = process.env.DODO_PAYMENTS_API_KEY;
+            if (apiKey) {
+              const isTest = apiKey.startsWith('test_');
+              const baseUrl = isTest ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
+              const subRes = await fetch(`${baseUrl}/subscriptions/${data.subscription_id}`, {
+                headers: { 'Authorization': `Bearer ${apiKey}` }
+              });
+              if (subRes.ok) {
+                const sub = await subRes.json();
+                ensuredCustomerId = sub?.customer?.id || sub?.customer?.customer_id || sub?.customer_id;
+                if (!ensuredCustomerId) {
+                  console.warn('[Webhook] Subscription lookup returned no customer id');
+                }
+              } else {
+                console.warn('[Webhook] Dodo subscription lookup failed:', subRes.status);
+              }
+            } else {
+              console.warn('[Webhook] DODO_PAYMENTS_API_KEY not configured; cannot fetch subscription for customer id');
+            }
+          } catch (e) {
+            console.warn('[Webhook] Error fetching subscription for customer id:', e);
+          }
+        }
+
         // Activate or renew subscription
         const res = await ctx.runAction(internal.dodoPayments.updateSubscription, {
           userId,
           userEmail,
           status: 'active',
           plan: metadata.planId === 'pro' ? 'Professional' : 'Starter',
-          dodoCustomerId,
+          dodoCustomerId: ensuredCustomerId,
           subscriptionId: data?.subscription_id,
           nextBillingDate: data?.next_billing_date,
           billingCycle: metadata.billingCycle,
@@ -367,7 +395,22 @@ http.route({
         // Do not hard fail; if the client provided a customer id we can still proceed after verifying below
       }
 
-      const effectiveId = (providedId ?? userDodoId) as string | undefined;
+      let effectiveId = (providedId ?? userDodoId) as string | undefined;
+
+      // If we still don't have a Dodo customer id, try to resolve it automatically
+      if (!effectiveId) {
+        try {
+          const resolved = await ctx.runAction(internal.dodoPayments.resolveAndLinkCustomer, {
+            userId: authUser.id,
+            userEmail: authUser.email
+          });
+          if (resolved?.success && resolved?.dodoCustomerId) {
+            effectiveId = resolved.dodoCustomerId as string;
+          }
+        } catch (e) {
+          console.warn('[Portal] Auto-resolve of Dodo customer failed:', e);
+        }
+      }
 
       if (!effectiveId) {
         return new Response(JSON.stringify({ error: 'No Dodo customer linked to your account yet' }), { status: 404, headers: corsHeaders });

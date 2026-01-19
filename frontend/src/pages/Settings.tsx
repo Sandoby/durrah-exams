@@ -39,116 +39,6 @@ export default function Settings() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [userRole, setUserRole] = useState<string>('tutor');
 
-    // Open Dodo Customer Portal via authenticated Convex endpoint
-    const handleOpenDodoPortal = async () => {
-        // Pre-open a tab to preserve the user gesture and avoid popup blockers
-        let portalWin: Window | null = null;
-        try {
-            // Allow server to resolve linked Dodo customer; don't block by local field
-            const convexUrl = import.meta.env.VITE_CONVEX_URL;
-            if (!convexUrl) {
-                toast.error('Configuration missing');
-                return;
-            }
-            const siteUrl = convexUrl.replace('.cloud', '.site');
-
-            const { data: authData } = await supabase.auth.getSession();
-            const accessToken = authData?.session?.access_token;
-            if (!accessToken) {
-                toast.error('Please login again');
-                return;
-            }
-
-            // Open a blank tab immediately to avoid popup blocking
-            portalWin = window.open('about:blank', '_blank', 'noopener,noreferrer');
-
-            // Small robust retry for transient network blips like ERR_NETWORK_CHANGED
-            let res: Response | null = null;
-            let data: any = null;
-            let lastErr: any = null;
-
-            for (let attempt = 1; attempt <= 3; attempt++) {
-                try {
-                    const controller = new AbortController();
-                    const timeout = setTimeout(() => controller.abort(), 8000); // 8s safety timeout
-
-                    res = await fetch(`${siteUrl}/dodoPortalSession`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${accessToken}`
-                        },
-                        body: JSON.stringify({ dodoCustomerId: profile.dodo_customer_id || undefined }),
-                        signal: controller.signal,
-                        // keepalive helps when browser is navigating, but safe to include here
-                                                keepalive: true,
-                    });
-
-                    clearTimeout(timeout);
-                    data = await res.json().catch(() => ({}));
-                    lastErr = null;
-                    break; // success
-                } catch (err: any) {
-                    lastErr = err;
-                    // Only retry for transient fetch errors
-                    const msg = String(err?.message || err);
-                    const isAbort = err?.name === 'AbortError';
-                    const isTransient = msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('ERR_NETWORK_CHANGED');
-                    if (attempt < 3 && (isAbort || isTransient)) {
-                        // Exponential backoff: 300ms, 600ms
-                        await new Promise(r => setTimeout(r, 300 * attempt));
-                        continue;
-                    }
-                    break;
-                }
-            }
-
-            if (!res) {
-                if (portalWin) portalWin.close();
-                // If offline, surface a clearer hint
-                if (typeof navigator !== 'undefined' && !navigator.onLine) {
-                    toast.error('You appear to be offline. Please reconnect and try again.');
-                } else {
-                    toast.error('Network error while opening portal. Please try again.');
-                }
-                return;
-            }
-
-            if (!res.ok || !data?.portal_url) {
-                console.error('Portal session error:', data || lastErr);
-                if (portalWin) portalWin.close();
-
-                // Friendlier messaging depending on status
-                let msg = 'Unable to open subscription portal';
-                if (res.status === 404) msg = 'No Dodo subscription linked to your account yet';
-                if (res.status === 403) msg = data?.error || 'Subscription not linked to this account';
-                if (res.status === 500) msg = 'Server configuration error. Please retry in a moment';
-                if (lastErr && String(lastErr).includes('ERR_NETWORK_CHANGED')) {
-                    msg = 'Network changed while contacting the server. Please try again.';
-                }
-                toast.error(msg);
-                return;
-            }
-
-            // Navigate the pre-opened tab if available; otherwise redirect current tab
-            if (portalWin) {
-                try {
-                    portalWin.location.href = data.portal_url;
-                    portalWin.focus?.();
-                } catch {
-                    // Fallback if the browser prevented navigation
-                    window.location.href = data.portal_url;
-                }
-            } else {
-                window.location.href = data.portal_url;
-            }
-        } catch (err) {
-            if (portalWin) portalWin.close();
-            console.error('Open portal error:', err);
-            toast.error('Unable to open subscription portal');
-        }
-    };
-
     const handleLogout = async () => {
         try {
             await supabase.auth.signOut();
@@ -556,13 +446,15 @@ export default function Settings() {
                                         </div>
 
                                         {profile.subscription_status === 'active' && (
-                                            <button
-                                                onClick={handleOpenDodoPortal}
+                                            <a
+                                                href="https://customer.dodopayments.com/login/bus_0NVDOv8mOGPj5tQXpDBCg"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
                                                 className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 rounded-xl font-bold text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all group"
                                             >
                                                 <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                                                 Manage Subscription
-                                            </button>
+                                            </a>
                                         )}
                                     </div>
                                 ) : (

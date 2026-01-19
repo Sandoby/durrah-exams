@@ -419,3 +419,100 @@ export const verifyPayment = internalAction({
         }
     }
 });
+
+
+// ============================================
+// INTERNAL: Resolve and link Dodo customer id by inspecting recent Dodo payment/subscription
+// ============================================
+export const resolveAndLinkCustomer = internalAction({
+    args: {
+        userId: v.string(),
+        userEmail: v.optional(v.string()),
+    },
+    handler: async (_ctx, args) => {
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        const apiKey = process.env.DODO_PAYMENTS_API_KEY;
+
+        if (!supabaseUrl || !supabaseKey || !apiKey) {
+            console.error('[ResolveCustomer] Missing configuration');
+            return { success: false, error: 'Configuration missing' };
+        }
+
+        try {
+            const headers = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` };
+
+            // Get the most recent Dodo payment entry for this user to extract subscriptionId
+            // Fetch a few recent Dodo payments for this user and try to extract a subscription id
+            const paymentsRes = await fetch(
+                `${supabaseUrl}/rest/v1/payments?user_id=eq.${args.userId}&provider=eq.dodo&select=merchant_reference,metadata&order=created_at.desc&limit=5`,
+                { headers }
+            );
+
+            let subscriptionId: string | undefined;
+            if (paymentsRes.ok) {
+                const payments = await paymentsRes.json();
+                if (Array.isArray(payments) && payments.length > 0) {
+                    for (const p of payments) {
+                        // metadata may be JSON or stringified JSON – handle both
+                        let meta: any = {};
+                        try {
+                            meta = typeof p?.metadata === 'string' ? JSON.parse(p.metadata) : (p?.metadata || {});
+                        } catch (e) {
+                            console.warn('[ResolveCustomer] Failed to parse payments.metadata JSON:', e);
+                        }
+                        if (meta?.subscriptionId && typeof meta.subscriptionId === 'string') {
+                            subscriptionId = meta.subscriptionId;
+                        }
+                        // Fallback: merchant_reference might itself be a subscription id
+                        if (!subscriptionId && typeof p?.merchant_reference === 'string' && p.merchant_reference.startsWith('sub_')) {
+                            subscriptionId = p.merchant_reference;
+                        }
+                        if (subscriptionId) break;
+                    }
+                }
+            } else {
+                console.warn('[ResolveCustomer] Payments fetch failed:', paymentsRes.status);
+            }
+
+            if (!subscriptionId) {
+                console.warn('[ResolveCustomer] No recent Dodo subscription/payment found for user', args.userId);
+                return { success: false, error: 'No recent dodo payment' };
+            }
+
+            const baseUrl = apiKey.startsWith('test_') ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
+            const subRes = await fetch(`${baseUrl}/subscriptions/${subscriptionId}`, {
+                headers: { Authorization: `Bearer ${apiKey}` }
+            });
+            if (!subRes.ok) {
+                const errTxt = await subRes.text();
+                console.error('[ResolveCustomer] Dodo subscription lookup failed:', subRes.status, errTxt);
+                return { success: false, error: 'Dodo lookup failed' };
+            }
+
+            const sub = await subRes.json();
+            const dodoCustomerId = sub?.customer?.id || sub?.customer?.customer_id || sub?.customer_id;
+            if (!dodoCustomerId) {
+                console.warn('[ResolveCustomer] Subscription has no customer id');
+                return { success: false, error: 'No customer id' };
+            }
+
+            // Patch profile to persist the customer id for future operations
+            const patchRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${args.userId}`, {
+                method: 'PATCH',
+                headers: { ...headers, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                body: JSON.stringify({ dodo_customer_id: dodoCustomerId }),
+            });
+            if (!patchRes.ok) {
+                const txt = await patchRes.text();
+                console.error('[ResolveCustomer] Failed to patch dodo_customer_id:', patchRes.status, txt);
+                // Not fatal – we can still return the id
+            }
+
+            return { success: true, dodoCustomerId };
+        } catch (e: any) {
+            console.error('[ResolveCustomer] Error:', e);
+            return { success: false, error: e?.message || 'error' };
+        }
+    }
+});
