@@ -32,6 +32,11 @@ export const CONVEX_FEATURES = {
   leaderboard: import.meta.env.VITE_USE_CONVEX_LEADERBOARD === 'true',
 };
 
+// Debug: Log environment variables (remove after debugging)
+console.log('[DEBUG] CONVEX_FEATURES:', CONVEX_FEATURES);
+console.log('[DEBUG] VITE_CONVEX_URL:', import.meta.env.VITE_CONVEX_URL);
+console.log('[DEBUG] VITE_USE_CONVEX_PROCTORING:', import.meta.env.VITE_USE_CONVEX_PROCTORING);
+
 // App with optional Convex wrapper
 const AppWithProviders = () => (
   <StrictMode>
