@@ -9,7 +9,7 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-
+import { ParallaxFloatingIcons } from '../components/ParallaxFloatingIcons';
 import { GridSpotlight } from '../components/GridSpotlight';
 import { InteractiveHowTo } from '../components/InteractiveHowTo';
 
@@ -566,7 +566,7 @@ export default function LandingPage() {
             <section className="relative pt-40 pb-32 overflow-hidden bg-slate-50 dark:bg-slate-950 min-h-screen">
                 {/* Background Effects */}
                 <GridSpotlight />
-
+                <ParallaxFloatingIcons />
 
                 {/* Noise */}
                 <div className="absolute inset-0 bg-noise opacity-[0.4] pointer-events-none" />
@@ -621,15 +621,10 @@ export default function LandingPage() {
                                     <ArrowRight weight="bold" className={`w-5 h-5 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180' : ''}`} />
                                 </span>
                             </a>
-                            <div className="relative group cursor-not-allowed">
-                                <button disabled className="px-8 py-4 rounded-xl font-bold text-lg text-slate-400 dark:text-slate-600 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 flex items-center gap-2 opacity-70">
-                                    {t('hero.watchDemo', 'Interactive Demo')}
-                                    <Lightning weight="duotone" className="w-5 h-5" />
-                                </button>
-                                <span className="absolute -top-3 -right-3 px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-[10px] font-black rounded-lg shadow-sm border border-white/20 uppercase tracking-wider">
-                                    Coming Soon
-                                </span>
-                            </div>
+                            <Link to="/demo" className="group px-8 py-4 rounded-xl font-bold text-lg text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center gap-2">
+                                {t('hero.watchDemo', 'Interactive Demo')}
+                                <Lightning weight="duotone" className="w-5 h-5" />
+                            </Link>
                         </motion.div>
                     </div>
 

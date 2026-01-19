@@ -1,35 +1,97 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, User, ArrowRight, Search, Sparkles, Filter, Clock } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Calendar, User, ArrowRight, Search, Sparkles } from 'lucide-react';
 
-import {
-  getFeaturedPost,
-  getCategories,
-  getFilteredPosts
-} from './blogData';
-import './Blog.css';
+interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  author: string;
+  date: string;
+  readTime: number;
+  category: string;
+  image: string;
+  featured?: boolean;
+}
+
+const blogPosts: BlogPost[] = [
+  {
+    id: '1',
+    slug: 'how-to-prevent-cheating-online-exams',
+    title: 'How to Prevent Cheating in Online Exams: The Complete 2024 Guide',
+    excerpt: 'Academic dishonesty costs education systems billions annually. Learn evidence-based strategies tutors use to detect and prevent cheating in online assessments.',
+    author: 'Ahmed Elsaid',
+    date: '2024-12-06',
+    readTime: 8,
+    category: 'Anti-Cheating',
+    image: 'https://images.unsplash.com/photo-1633356122544-f134ef2944f0?w=800&h=400&fit=crop&q=80',
+    featured: true
+  },
+  {
+    id: '2',
+    slug: 'grading-essays-faster-ai-tutors',
+    title: 'Grade 100 Essay Exams in 1 Hour: How Tutors Save 10+ Hours Weekly',
+    excerpt: 'Manual essay grading takes 15-20 minutes per essay. Discover how modern tutors use AI-assisted grading to save time without sacrificing quality feedback.',
+    author: 'Ahmed Elsaid',
+    date: '2024-12-05',
+    readTime: 7,
+    category: 'Productivity',
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=400&fit=crop&q=80'
+  },
+  {
+    id: '3',
+    slug: 'online-tutoring-effectiveness-vs-traditional',
+    title: 'Online Tutoring vs Traditional: What Research Actually Shows About Effectiveness',
+    excerpt: 'Studies reveal online tutoring can be just as effective—sometimes MORE effective. See the data and learn why 60% of tutors now prefer online delivery.',
+    author: 'Ahmed Elsaid',
+    date: '2024-12-04',
+    readTime: 9,
+    category: 'Research',
+    image: 'https://images.unsplash.com/photo-1588702547919-26089e690ecc?w=800&h=400&fit=crop&q=80'
+  },
+  {
+    id: '4',
+    slug: 'student-dropout-rates-online-exams-solutions',
+    title: 'Why 85% of Online Students Dropout (And How to Fix It)',
+    excerpt: 'Online learning dropout rates are 4x higher than traditional. Learn the 5 proven tactics tutors use to keep students engaged and completing exams.',
+    author: 'Ahmed Elsaid',
+    date: '2024-12-03',
+    readTime: 10,
+    category: 'Student Engagement',
+    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=400&fit=crop&q=80'
+  }
+];
 
 export function BlogList() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [filteredPosts, setFilteredPosts] = useState(blogPosts);
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const categories = getCategories();
-  const featuredPost = getFeaturedPost();
-  const filteredPosts = useMemo(() => {
-    return getFilteredPosts(searchTerm, selectedCategory).filter(p => !p.featured);
+  useEffect(() => {
+    let filtered = blogPosts;
+
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(post => post.category === selectedCategory);
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter(post =>
+        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredPosts(filtered);
   }, [searchTerm, selectedCategory]);
+
+  const categories = ['All', ...new Set(blogPosts.map(post => post.category))];
+  const featuredPost = blogPosts.find(p => p.featured);
 
   const handleNewsletterSignup = () => {
     alert('Thanks for your interest! Newsletter signup coming soon.');
-  };
-
-  // Helper to get Bento card class based on index
-  const getBentoClass = (index: number) => {
-    const patterns = ['blog-card-large', 'blog-card-standard', 'blog-card-standard', 'blog-card-tall', 'blog-card-wide', 'blog-card-standard'];
-    return patterns[index % patterns.length];
   };
 
   return (
@@ -41,226 +103,244 @@ export function BlogList() {
         <link rel="canonical" href="https://durrahtutors.com/blog" />
       </Helmet>
 
-      <div className="min-h-screen bg-[#fafafa] dark:bg-slate-950 overflow-hidden">
-        {/* Background Decorative Shapes */}
-        <div className="blog-bg-shape shape-1" />
-        <div className="blog-bg-shape shape-2" />
+      <div className="min-h-screen bg-white dark:bg-gray-900">
+        {/* Hero Section - Matches Landing Page */}
+        <section className="pt-40 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950">
+          {/* Animated Blobs */}
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+          <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-violet-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
 
-        {/* Hero Section */}
-        <section className="pt-40 pb-16 px-4 sm:px-6 lg:px-8 relative">
-          <div className="max-w-6xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12"
+          <div className="max-w-4xl mx-auto text-center relative z-10">
+            <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-8">
+              <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Expert Insights & Real Data</span>
+            </div>
+
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 dark:text-white mb-6 leading-[1.1]">
+              Blog for Modern<br />
+              <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Tutors</span>
+            </h1>
+
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+              Real strategies, real data, real results. Learn how top tutors save time, prevent cheating, and engage students better.
+            </p>
+
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center justify-center gap-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition mx-auto"
             >
-              <div className="max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-bold mb-6 tracking-wider uppercase">
-                  <Sparkles className="w-3 h-3" />
-                  Editorial & Insights
-                </div>
-                <h1 className="text-6xl md:text-8xl font-black text-slate-900 dark:text-white mb-6 tracking-tight leading-none">
-                  The <span className="text-indigo-600">Durrah</span> Journal
-                </h1>
-                <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                  Curated strategies for the modern educator. Deep dives into pedagogy, automation, and the future of tutoring.
-                </p>
-              </div>
+              <ArrowLeft className="w-4 h-4" />
+              Back to Home
+            </button>
+          </div>
+        </section>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/')}
-                className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold shadow-sm hover:shadow-md transition-all self-start md:self-auto"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Return Home
-              </motion.button>
-            </motion.div>
-
-            {/* Featured Post Header */}
-            {featuredPost && !searchTerm && selectedCategory === 'All' && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2 }}
-                className="mb-20"
-              >
-                <Link to={`/blog/${featuredPost.slug}`} className="group relative block w-full aspect-[21/9] rounded-[2.5rem] overflow-hidden shadow-2xl">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Featured Post - Large Hero Style */}
+          {featuredPost && (
+            <Link
+              to={`/blog/${featuredPost.slug}`}
+              className="group block mb-20"
+            >
+              <div className="relative rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-3xl transition-all duration-300 hover:-translate-y-2">
+                {/* Featured Image */}
+                <div className="relative h-96 overflow-hidden bg-gray-300 dark:bg-gray-600">
                   <img
                     src={featuredPost.image}
                     alt={featuredPost.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="eager"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-
-                  <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full md:w-2/3">
-                    <div className="flex items-center gap-3 mb-6">
-                      <span className="px-4 py-1.5 bg-indigo-600 text-white rounded-full text-xs font-black uppercase tracking-widest leading-none">
-                        Featured
-                      </span>
-                      <span className="text-white/80 text-sm font-bold flex items-center gap-1.5 leading-none">
-                        <Clock className="w-4 h-4" /> {featuredPost.readTime} min read
-                      </span>
-                    </div>
-                    <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-[1.1] tracking-tight group-hover:text-indigo-300 transition-colors">
-                      {featuredPost.title}
-                    </h2>
-                    <p className="text-lg text-white/70 line-clamp-2 max-w-xl font-medium mb-8">
-                      {featuredPost.excerpt}
-                    </p>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white backdrop-blur">
-                          <User className="w-5 h-5" />
-                        </div>
-                        <span className="text-white font-bold">{featuredPost.author}</span>
-                      </div>
-                    </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                  <div className="absolute top-6 right-6 bg-yellow-400 text-gray-900 px-6 py-3 rounded-full font-black text-sm shadow-lg">
+                    🏆 FEATURED
                   </div>
-                </Link>
-              </motion.div>
-            )}
-
-            {/* Search & Filter Toolbar */}
-            <div className="flex flex-col md:flex-row items-center gap-4 mb-16 p-2 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-3xl sticky top-24 z-30 shadow-xl shadow-slate-900/5">
-              <div className="relative flex-1 w-full">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search the journal..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-transparent text-slate-900 dark:text-white focus:outline-none font-bold placeholder:text-slate-400"
-                />
-              </div>
-              <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 hidden md:block" />
-              <div className="flex items-center gap-2 w-full md:w-auto px-2 overflow-x-auto no-scrollbar">
-                <Filter className="w-4 h-4 text-slate-400 ml-2 hidden lg:block" />
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`px-5 py-2 rounded-2xl whitespace-nowrap text-sm font-bold transition-all ${selectedCategory === category
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
-                      : 'text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-800'
-                      }`}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Bento Grid */}
-            <div className="blog-grid mb-32">
-              <AnimatePresence mode="popLayout">
-                {filteredPosts.map((post, index) => (
-                  <motion.div
-                    key={post.id}
-                    layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
-                    className={`${getBentoClass(index)} group`}
-                  >
-                    <Link
-                      to={`/blog/${post.slug}`}
-                      className="glass-card rounded-[2rem] w-full h-full p-4 flex flex-col overflow-hidden transition-all duration-500 hover:border-indigo-500/50"
-                    >
-                      <div className="relative w-full h-1/2 rounded-2xl overflow-hidden mb-6 flex-shrink-0">
-                        <img
-                          src={post.image}
-                          alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-                        <div className="absolute top-3 left-3 px-3 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">
-                          {post.category}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col flex-1">
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 line-clamp-2 leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                          {post.title}
-                        </h3>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 font-medium mb-auto">
-                          {post.excerpt}
-                        </p>
-
-                        <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
-                          <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                            <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                            <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
-                            <span>{post.readTime} min</span>
-                          </div>
-                          <motion.div
-                            whileHover={{ x: 5 }}
-                            className="bg-indigo-50 dark:bg-indigo-900/30 p-2 rounded-xl text-indigo-600 dark:text-indigo-400"
-                          >
-                            <ArrowRight className="w-4 h-4" />
-                          </motion.div>
-                        </div>
-                      </div>
-                    </Link>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-
-            {/* Pagination Empty State */}
-            {filteredPosts.length === 0 && (
-              <div className="text-center py-32">
-                <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-3xl flex items-center justify-center mx-auto mb-6 text-slate-400">
-                  <Search className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No matches found</h3>
-                <p className="text-slate-500 dark:text-slate-400">Try adjusting your filters or search terms.</p>
-              </div>
-            )}
 
-            {/* Premium Newsletter Section */}
-            <motion.section
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="relative p-12 md:p-20 bg-slate-900 dark:bg-indigo-600 rounded-[3rem] overflow-hidden shadow-2xl mb-16"
-            >
-              <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
-              <div className="relative z-10 flex flex-col md:flex-row items-center gap-12">
-                <div className="flex-1 text-center md:text-left">
-                  <div className="inline-flex px-4 py-1.5 bg-white/10 border border-white/20 rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] mb-6">
-                    Weekly Digest
+                {/* Content Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-sm font-bold">
+                      {featuredPost.category}
+                    </span>
+                    <span className="text-sm text-gray-100">{featuredPost.readTime} min read</span>
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
-                    Stay ahead of the <br /><span className="text-indigo-400">Education Curve.</span>
+                  <h2 className="text-3xl md:text-4xl font-black mb-3 leading-tight group-hover:text-yellow-300 transition">
+                    {featuredPost.title}
                   </h2>
-                  <p className="text-indigo-100/70 text-lg font-medium max-w-lg mb-0">
-                    Get the latest student data trends and tutoring automation hacks delivered straight to your inbox.
+                  <p className="text-lg text-gray-100 mb-4">
+                    {featuredPost.excerpt}
                   </p>
-                </div>
-                <div className="w-full md:w-auto flex-shrink-0">
-                  <div className="bg-white/5 backdrop-blur-md border border-white/10 p-2 rounded-[2rem] flex flex-col sm:flex-row gap-2 max-w-md mx-auto md:mx-0">
-                    <input
-                      type="email"
-                      placeholder="your@email.com"
-                      className="flex-1 bg-transparent px-6 py-4 text-white placeholder:text-white/40 font-bold focus:outline-none sm:min-w-[250px]"
-                    />
-                    <button
-                      onClick={handleNewsletterSignup}
-                      className="px-8 py-4 bg-white text-slate-900 rounded-2xl font-black hover:bg-indigo-50 transition-all flex items-center justify-center gap-2"
-                    >
-                      Subscribe <ArrowRight className="w-5 h-5" />
-                    </button>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 text-sm text-gray-200">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {new Date(featuredPost.date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <User className="w-4 h-4" />
+                        {featuredPost.author}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 font-bold group-hover:gap-3 transition-all">
+                      Read <ArrowRight className="w-5 h-5" />
+                    </div>
                   </div>
-                  <p className="text-white/40 text-[10px] text-center mt-4 font-bold uppercase tracking-widest">
-                    No spam. Just knowledge.
-                  </p>
                 </div>
               </div>
-            </motion.section>
+            </Link>
+          )}
+
+          {/* Search & Filter */}
+          <div className="mb-12 space-y-4">
+            <div className="relative">
+              <Search className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search articles..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition font-medium"
+              />
+            </div>
+
+            {/* Categories */}
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-full font-semibold transition-all duration-200 ${selectedCategory === category
+                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                    }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
           </div>
-        </section>
+
+          {/* Blog Posts Grid - Matches Landing Page Card Style */}
+          {filteredPosts.length > 0 ? (
+            <>
+              <div className="grid md:grid-cols-3 gap-8 mb-20">
+                {filteredPosts.filter(p => !p.featured).map((post) => (
+                  <Link
+                    key={post.id}
+                    to={`/blog/${post.slug}`}
+                    className="group bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 hover:-translate-y-2"
+                  >
+                    {/* Image */}
+                    <div className="relative h-48 overflow-hidden bg-gray-200 dark:bg-gray-700">
+                      <img
+                        src={post.image}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-6">
+                      <div className="inline-block px-3 py-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-bold mb-3">
+                        {post.category}
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition line-clamp-2">
+                        {post.title}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 text-sm">
+                        {post.excerpt}
+                      </p>
+                      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(post.date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </div>
+                        <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-semibold group-hover:gap-2 transition-all">
+                          {post.readTime}m <ArrowRight className="w-3 h-3" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-600 dark:text-gray-400 text-lg">No articles found matching your search.</p>
+            </div>
+          )}
+
+          {/* CTA Section - Matches Landing Page Style */}
+          <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 rounded-3xl text-white mb-16 shadow-2xl">
+            <div className="max-w-4xl mx-auto text-center">
+              <h2 className="text-4xl md:text-5xl font-black mb-6">Ready to Transform Your Tutoring?</h2>
+              <p className="text-xl text-indigo-100 mb-12">
+                Join 10,000+ tutors saving 10+ hours every week with Durrah. Create exams in 2 minutes, grade automatically, prevent cheating with AI.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href="https://tutors.durrahsystem.tech/register"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group relative inline-flex items-center justify-center gap-2 bg-white text-indigo-600 px-10 py-5 rounded-2xl text-lg font-bold hover:shadow-2xl hover:scale-105 transition-all"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    Start Free Trial
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </a>
+                <a
+                  href="https://tutors.durrahsystem.tech/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center gap-2 border-2 border-white text-white px-10 py-5 rounded-2xl text-lg font-bold hover:bg-white/10 transition-all"
+                >
+                  Watch Demo
+                </a>
+              </div>
+              <p className="text-indigo-100 text-sm mt-8">✨ No credit card required • 14 days free access</p>
+            </div>
+          </section>
+
+          {/* Newsletter Section */}
+          <div className="bg-gradient-to-b from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-900 rounded-3xl p-12 border border-indigo-200 dark:border-indigo-900/30 text-center shadow-lg">
+            <div className="inline-block px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full mb-4">
+              <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">📧 Weekly Newsletter</span>
+            </div>
+            <h3 className="text-4xl font-black text-gray-900 dark:text-white mb-4">Get Expert Tips Weekly</h3>
+            <p className="text-gray-700 dark:text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
+              Join 5,000+ tutors getting actionable strategies, real research, and exclusive tips delivered to your inbox. Transform your tutoring game.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="your@email.com"
+                className="flex-1 px-6 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-600 focus:border-transparent font-medium"
+              />
+              <button
+                onClick={handleNewsletterSignup}
+                className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl font-bold hover:shadow-lg transition-all whitespace-nowrap"
+              >
+                Subscribe
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
+          .animate-blob { animation: blob 7s infinite; }
+          .animation-delay-2000 { animation-delay: 2s; }
+        `}</style>
       </div>
     </>
   );
