@@ -44,10 +44,7 @@ export default function Settings() {
         // Pre-open a tab to preserve the user gesture and avoid popup blockers
         let portalWin: Window | null = null;
         try {
-            if (!profile.dodo_customer_id) {
-                toast.error('No subscription found for portal access');
-                return;
-            }
+            // Allow server to resolve linked Dodo customer; don't block by local field
             const convexUrl = import.meta.env.VITE_CONVEX_URL;
             if (!convexUrl) {
                 toast.error('Configuration missing');
@@ -71,7 +68,8 @@ export default function Settings() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${accessToken}`
                 },
-                body: JSON.stringify({ dodoCustomerId: profile.dodo_customer_id })
+                // Let the server fetch and verify the user's dodo_customer_id itself
+                body: JSON.stringify({})
             });
 
             const data = await res.json();
@@ -513,8 +511,6 @@ export default function Settings() {
                                             <button
                                                 onClick={handleOpenDodoPortal}
                                                 className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 rounded-xl font-bold text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all group"
-                                                disabled={!profile.dodo_customer_id}
-                                                title={!profile.dodo_customer_id ? 'Dodo subscription not linked yet' : 'Open Subscription Portal'}
                                             >
                                                 <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                                                 Manage Subscription

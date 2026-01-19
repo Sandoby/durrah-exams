@@ -332,15 +332,13 @@ http.route({
         });
       }
 
-      const body = await request.json();
-      const { dodoCustomerId } = body;
+      // Accept empty body; server will resolve customer's Dodo ID from profile
+      let body: any = {};
+      try {
+        body = await request.json();
+      } catch {}
 
-      if (!dodoCustomerId) {
-        return new Response(JSON.stringify({ error: 'No Dodo customer ID provided' }), {
-          status: 400,
-          headers: corsHeaders
-        });
-      }
+      const providedId = body?.dodoCustomerId as string | undefined;
 
       const supabaseUrl = process.env.SUPABASE_URL;
       const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -361,12 +359,18 @@ http.route({
       const profiles = await profileRes.json();
       const userDodoId = profiles?.[0]?.dodo_customer_id as string | undefined;
 
-      if (!userDodoId || userDodoId !== dodoCustomerId) {
+      const effectiveId = providedId ?? userDodoId;
+
+      if (!effectiveId) {
+        return new Response(JSON.stringify({ error: 'No Dodo customer linked to your account yet' }), { status: 404, headers: corsHeaders });
+      }
+
+      if (providedId && userDodoId && providedId !== userDodoId) {
         return new Response(JSON.stringify({ error: 'Forbidden: customer mismatch' }), { status: 403, headers: corsHeaders });
       }
 
       const result = await ctx.runAction(internal.dodoPayments.createPortal, {
-        dodoCustomerId
+        dodoCustomerId: effectiveId
       });
 
       return new Response(JSON.stringify(result), {
