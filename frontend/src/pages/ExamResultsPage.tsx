@@ -269,8 +269,7 @@ export default function ExamResultsPage() {
                 await supabase.from('exam_progress').delete().eq('exam_id', examId).eq('student_email', submission.student_email);
                 if (CONVEX_FEATURES.proctoring && convex) {
                     try {
-                        const deleteConvexSession = convex.mutation(api.sessions.deleteSessionForRetake);
-                        await deleteConvexSession({ exam_id: examId!, student_email: submission.student_email });
+                        await convex.mutation(api.sessions.deleteSessionForRetake, { exam_id: examId!, student_email: submission.student_email });
                     } catch (e) { console.warn('Convex session delete failed', e); }
                 }
             }

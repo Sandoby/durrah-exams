@@ -309,8 +309,7 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ examId, examTitle }) =
             // 4. Delete Convex proctoring session (if enabled)
             if (CONVEX_FEATURES.proctoring && submission.student_email && convex) {
                 try {
-                    const deleteConvexSession = convex.mutation(api.sessions.deleteSessionForRetake);
-                    await deleteConvexSession({
+                    await convex.mutation(api.sessions.deleteSessionForRetake, {
                         exam_id: examId,
                         student_email: submission.student_email,
                     });
