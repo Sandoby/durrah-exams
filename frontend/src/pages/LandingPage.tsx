@@ -5,6 +5,7 @@ import { ArrowRight, CaretDown, Check, GraduationCap, Layout, Lightning, Lock, L
 import { useState, useEffect, useRef } from 'react';
 import { Logo } from '../components/Logo';
 import { OwlMascot } from '../components/OwlMascot';
+import { HeroMascot } from '../components/HeroMascot';
 import MobileWelcome from './MobileWelcome';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
@@ -46,7 +47,7 @@ export default function LandingPage() {
 
         let particles: any[] = [];
         let comets: any[] = [];
-        const particleCount = 80; // Reduced for performance on landing page
+        const particleCount = 40; // Halved for speed
         let mouse = { x: -1000, y: -1000 };
 
         const resize = () => {
@@ -186,7 +187,7 @@ export default function LandingPage() {
 
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="min-h-screen bg-white dark:bg-slate-950" dir={isRTL ? 'rtl' : 'ltr'}>
             <Helmet>
                 {/* Primary Meta Tags */}
                 <title>{t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')}</title>
@@ -563,7 +564,7 @@ export default function LandingPage() {
             )}
 
             {/* Hero Section */}
-            <section className="relative pt-40 pb-32 overflow-hidden bg-slate-50 dark:bg-slate-950 min-h-screen">
+            <section className="relative pt-32 pb-20 overflow-hidden bg-white dark:bg-slate-950 min-h-[90vh]">
                 {/* Background Effects */}
                 <GridSpotlight />
 
@@ -587,17 +588,26 @@ export default function LandingPage() {
                             </span>
                         </motion.div>
 
-                        <motion.h1
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white mb-8 tracking-tight leading-[1.1]"
-                        >
-                            {t('hero.title')} <br />
-                            <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent pb-2">
-                                {t('hero.titleHighlight')}
-                            </span>
-                        </motion.h1>
+                        {/* ... */}
+
+                        {/* Title Row with Mascot */}
+                        <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12 mb-12">
+                            <div className="flex-shrink-0 order-first lg:order-none">
+                                <HeroMascot className="transform scale-90 md:scale-110" />
+                            </div>
+
+                            <motion.h1
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 }}
+                                className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.1]"
+                            >
+                                {t('hero.title')} <br />
+                                <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent pb-2">
+                                    {t('hero.titleHighlight')}
+                                </span>
+                            </motion.h1>
+                        </div>
 
                         <motion.p
                             initial={{ opacity: 0, y: 20 }}
@@ -672,9 +682,9 @@ export default function LandingPage() {
                                         initial={{ opacity: 0, scale: 1.1 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ duration: 1 }}
-                                        src="/mockups/dashboard-analytics.png"
+                                        src="/mockups/dashboard-hero.png"
                                         alt="Durrah Dashboard Analytics"
-                                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
+                                        className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-700"
                                     />
 
                                     {/* Glass Overlay for Depth */}
@@ -1190,7 +1200,7 @@ export default function LandingPage() {
                                             <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700" />
                                         </div>
                                     </div>
-                                    <img src="/mockups/student-portal.png" alt="Student Dashboard" className="w-full h-full object-top object-cover" />
+                                    <img src="/mockups/student-portal.png" alt="Student Dashboard" className="w-full h-full object-contain bg-slate-50 dark:bg-slate-900" />
                                 </motion.div>
 
                                 {/* Floating Stats Badge */}
