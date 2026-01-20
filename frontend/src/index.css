@@ -485,8 +485,31 @@
 
 body {
   font-family: 'Outfit', sans-serif;
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hero title: black + violet with a simple halo */
+.hero-title-neon {
+  font-family: 'Outfit', sans-serif;
+  font-optical-sizing: auto;
+  letter-spacing: 0.01em;
+  color: #0f172a;
+}
+
+.hero-title-glow {
+  color: #7c3aed;
+  text-shadow: 0 0 10px rgba(124, 58, 237, 0.35);
+}
+
+.dark .hero-title-neon {
+  color: #f8fafc;
+}
+
+.dark .hero-title-glow {
+  color: #a78bfa;
+  text-shadow: 0 0 12px rgba(167, 139, 250, 0.45);
 }
 
 /* 3D Perspective Utilities */
@@ -504,6 +527,10 @@ body {
 
 .rotate-x-12 {
   transform: rotateX(12deg);
+}
+
+.rotate-x-6 {
+  transform: rotateX(6deg);
 }
 
 .rotate-y-12 {

@@ -9,7 +9,7 @@ import { HeroMascot } from '../components/HeroMascot';
 import MobileWelcome from './MobileWelcome';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useSpring, useTransform } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { GridSpotlight } from '../components/GridSpotlight';
 import { InteractiveHowTo } from '../components/InteractiveHowTo';
@@ -31,9 +31,21 @@ export default function LandingPage() {
     const { price: yearlyPrice } = useCurrency(50);
 
     const { scrollY } = useScroll();
-    const heroRotateX = useTransform(scrollY, [0, 500], [15, 30]);
-    const heroTranslateY = useTransform(scrollY, [0, 500], [0, 100]);
-    const heroScale = useTransform(scrollY, [0, 500], [1, 0.95]);
+    const heroRotateXRaw = useTransform(scrollY, [0, 750], [8, 14]);
+    const heroTranslateYRaw = useTransform(scrollY, [0, 750], [0, 48]);
+    const heroScaleRaw = useTransform(scrollY, [0, 750], [1, 0.985]);
+
+    const heroRotateX = useSpring(heroRotateXRaw, { stiffness: 120, damping: 28 });
+    const heroTranslateY = useSpring(heroTranslateYRaw, { stiffness: 120, damping: 28 });
+    const heroScale = useSpring(heroScaleRaw, { stiffness: 120, damping: 28 });
+
+    const heroIllustrationYRaw = useTransform(scrollY, [0, 650], [0, 40]);
+    const heroIllustrationRotateRaw = useTransform(scrollY, [0, 650], [-1.5, 1.5]);
+    const heroIllustrationScaleRaw = useTransform(scrollY, [0, 650], [1, 0.985]);
+
+    const heroIllustrationY = useSpring(heroIllustrationYRaw, { stiffness: 120, damping: 28 });
+    const heroIllustrationRotate = useSpring(heroIllustrationRotateRaw, { stiffness: 120, damping: 28 });
+    const heroIllustrationScale = useSpring(heroIllustrationScaleRaw, { stiffness: 120, damping: 28 });
 
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -576,7 +588,8 @@ export default function LandingPage() {
                 <div className="absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[80px] opacity-50 pointer-events-none" />
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="text-center max-w-4xl mx-auto mb-20">
+                    <div className="mb-20 grid lg:grid-cols-2 lg:gap-10 items-center">
+                        <div className="text-center max-w-4xl mx-auto lg:text-left lg:max-w-none lg:mx-0">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -600,10 +613,10 @@ export default function LandingPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.1]"
+                                className="hero-title-neon text-5xl md:text-7xl font-black leading-[1.1]"
                             >
                                 {t('hero.title')} <br />
-                                <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent pb-2">
+                                <span className="hero-title-glow bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent pb-2">
                                     {t('hero.titleHighlight')}
                                 </span>
                             </motion.h1>
@@ -655,6 +668,38 @@ export default function LandingPage() {
                                 </span>
                             </a>
                         </motion.div>
+
+                        </div>
+
+                        {/* Hero illustration card (right side, no overlap) */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.15 }}
+                            className="hidden lg:flex justify-end lg:mt-[-60px]"
+                            style={{ y: heroIllustrationY, rotate: heroIllustrationRotate, scale: heroIllustrationScale }}
+                        >
+                            <div className="w-full max-w-lg xl:max-w-xl rounded-[28px] bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/60 shadow-[0_40px_80px_-30px_rgba(15,23,42,0.35)] p-3">
+                                <img
+                                    src="/illustrations/84406320_9963615.jpg"
+                                    alt=""
+                                    className="w-full h-auto rounded-2xl"
+                                    loading="eager"
+                                />
+                            </div>
+                        </motion.div>
+
+                        {/* Hero illustration card (mobile/tablet) */}
+                        <div className="mt-10 flex justify-center lg:hidden">
+                            <div className="w-full max-w-md rounded-[28px] bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/60 shadow-[0_35px_70px_-35px_rgba(15,23,42,0.35)] p-3">
+                                <img
+                                    src="/illustrations/84406320_9963615.jpg"
+                                    alt=""
+                                    className="w-full h-auto rounded-2xl"
+                                    loading="lazy"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     {/* 3D Dashboard Mockup */}
@@ -665,7 +710,11 @@ export default function LandingPage() {
                         transition={{ duration: 0.8, type: "spring", delay: 0.2 }}
                         className="relative perspective-2000"
                     >
-                        <div className="relative transform-style-3d rotate-x-12 mx-auto max-w-5xl">
+                        <motion.div
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+                            className="relative transform-style-3d rotate-x-6 mx-auto max-w-5xl"
+                        >
                             <div className="relative bg-slate-900 rounded-2xl p-2 shadow-2xl border border-slate-700/50">
                                 {/* Browser Chrome */}
                                 <div className="h-8 bg-slate-800/50 rounded-t-xl flex items-center px-4 gap-2 border-b border-slate-700/50">
@@ -695,7 +744,7 @@ export default function LandingPage() {
 
                             {/* Reflection on floor */}
                             <div className="absolute top-full left-0 right-0 h-40 bg-gradient-to-b from-indigo-500/10 to-transparent blur-3xl transform -scale-y-100 opacity-50 pointer-events-none" />
-                        </div>
+                        </motion.div>
                     </motion.div>
                 </div>
             </section>
@@ -1168,6 +1217,11 @@ export default function LandingPage() {
             {/* Student Portal section */}
             <section className="py-32 relative overflow-hidden bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800/50">
                 <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
+                <img
+                    src="/illustrations/freepik__talk__87937.png"
+                    alt=""
+                    className="absolute right-[-6%] top-1/2 -translate-y-1/2 w-[560px] max-w-[75vw] opacity-15 blur-[1px] mix-blend-multiply pointer-events-none select-none dark:opacity-10 dark:mix-blend-screen"
+                />
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="grid lg:grid-cols-2 gap-20 items-center">
