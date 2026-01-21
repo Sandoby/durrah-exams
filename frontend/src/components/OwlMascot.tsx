@@ -10,6 +10,11 @@ const owlSources: Record<OwlVariant, string> = {
     tablet: '/brand/owls/sticker223.webp'
 };
 
+const owlSrcSets: Partial<Record<OwlVariant, string>> = {
+    logo: '/brand/owls/logo-128w.webp 128w, /brand/owls/logo.webp 512w',
+    guide: '/brand/owls/sticker-256w.webp 256w, /brand/owls/sticker.webp 512w'
+};
+
 const owlAlt: Record<OwlVariant, string> = {
     logo: 'Durrah Owl logo',
     guide: 'Durrah Owl guide',
@@ -28,6 +33,8 @@ interface OwlMascotProps {
     decoding?: 'auto' | 'async' | 'sync';
     width?: number | string;
     height?: number | string;
+    srcSet?: string;
+    sizes?: string;
 }
 
 export function OwlMascot({
@@ -37,11 +44,15 @@ export function OwlMascot({
     loading = 'lazy',
     decoding = 'async',
     width,
-    height
+    height,
+    srcSet,
+    sizes
 }: OwlMascotProps) {
     return (
         <img
             src={owlSources[variant]}
+            srcSet={srcSet ?? owlSrcSets[variant]}
+            sizes={sizes}
             alt={alt ?? owlAlt[variant]}
             className={`object-contain ${className}`}
             loading={loading}

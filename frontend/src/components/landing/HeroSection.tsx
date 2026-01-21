@@ -133,6 +133,8 @@ export function HeroSection({ registrationUrl, showNonCriticalEffects }: { regis
                         <div className="w-full max-w-lg xl:max-w-xl rounded-[28px] bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/60 shadow-[0_40px_80px_-30px_rgba(15,23,42,0.35)] p-3">
                             <img
                                 src="/illustrations/84406320_9963615.jpg"
+                                srcSet="/illustrations/84406320_9963615-800w.jpeg 800w, /illustrations/84406320_9963615-1600w.jpeg 1600w"
+                                sizes="(max-width: 1024px) 100vw, 600px"
                                 alt="Durrah Learning Platform"
                                 className="w-full h-auto rounded-2xl"
                                 loading="eager"
@@ -147,6 +149,8 @@ export function HeroSection({ registrationUrl, showNonCriticalEffects }: { regis
                         <div className="w-full max-w-md rounded-[28px] bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/60 shadow-[0_35px_70px_-35px_rgba(15,23,42,0.35)] p-3">
                             <img
                                 src="/illustrations/84406320_9963615.jpg"
+                                srcSet="/illustrations/84406320_9963615-800w.jpeg 800w, /illustrations/84406320_9963615-1600w.jpeg 1600w"
+                                sizes="(max-width: 640px) 100vw, 400px"
                                 alt="Durrah Learning Platform"
                                 className="w-full h-auto rounded-2xl"
                                 loading="eager"
@@ -184,7 +188,9 @@ export function HeroSection({ registrationUrl, showNonCriticalEffects }: { regis
                                     initial={{ opacity: 0, scale: 1.1 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 1 }}
-                                    src="/mockups/dashboard-hero.png"
+                                    src="/mockups/dashboard-hero.webp"
+                                    srcSet="/mockups/dashboard-hero-600w.webp 600w, /mockups/dashboard-hero-1200w.webp 1200w, /mockups/dashboard-hero.webp 1600w"
+                                    sizes="(max-width: 1024px) 100vw, 1000px"
                                     alt="Durrah Dashboard Analytics"
                                     className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-700"
                                     width={1000}
