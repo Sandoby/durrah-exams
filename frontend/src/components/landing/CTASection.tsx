@@ -1,0 +1,81 @@
+import { motion } from 'framer-motion';
+import { ArrowRight, Lightning, Sparkle } from '@phosphor-icons/react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+
+export function CTASection({ registrationUrl }: { registrationUrl: string }) {
+    const { t, i18n } = useTranslation();
+    const isRTL = i18n.language === 'ar';
+
+    return (
+        <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 relative">
+            <div className="max-w-6xl mx-auto relative group">
+                {/* Outer Glow */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
+
+                <div className="relative bg-slate-950 rounded-[2rem] p-8 md:p-20 overflow-hidden border border-slate-800 ring-1 ring-white/10">
+                    {/* Dynamic Background */}
+                    <div className="absolute inset-0 bg-grid-pattern opacity-[0.07]" />
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none" />
+                    <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
+
+                    {/* Content */}
+                    <div className="relative z-10 flex flex-col items-center text-center">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8"
+                        >
+                            <Sparkle weight="fill" className="w-4 h-4" />
+                            <span>{t('ctaSection.tagline', 'Join the Future of Assessment')}</span>
+                        </motion.div>
+
+                        <motion.h2
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight"
+                        >
+                            {t('ctaSection.title', 'Ready to Transform?')}
+                        </motion.h2>
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl leading-relaxed"
+                        >
+                            {t('ctaSection.subtitle', 'Join thousands of educators delivering secure, professional exams with Durrah.')}
+                        </motion.p>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 }}
+                            className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
+                        >
+                            <a
+                                href={registrationUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-lg shadow-indigo-600/25 transition-all hover:-translate-y-1"
+                            >
+                                {t('ctaSection.cta', 'Start Free Trial')}
+                                <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+                            </a>
+                            <Link
+                                to="/demo"
+                                className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 px-8 py-4 rounded-xl text-lg font-bold backdrop-blur-sm transition-all hover:-translate-y-1"
+                            >
+                                <Lightning weight="duotone" className="w-5 h-5" />
+                                {t('ctaSection.demo', 'Live Demo')}
+                            </Link>
+                        </motion.div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}

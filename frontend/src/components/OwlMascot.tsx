@@ -26,6 +26,8 @@ interface OwlMascotProps {
     alt?: string;
     loading?: 'lazy' | 'eager';
     decoding?: 'auto' | 'async' | 'sync';
+    width?: number | string;
+    height?: number | string;
 }
 
 export function OwlMascot({
@@ -33,7 +35,9 @@ export function OwlMascot({
     className = '',
     alt,
     loading = 'lazy',
-    decoding = 'async'
+    decoding = 'async',
+    width,
+    height
 }: OwlMascotProps) {
     return (
         <img
@@ -42,6 +46,8 @@ export function OwlMascot({
             className={`object-contain ${className}`}
             loading={loading}
             decoding={decoding}
+            width={width}
+            height={height}
         />
     );
 }

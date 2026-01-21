@@ -55,6 +55,9 @@ export function HeroMascot({ className = "" }: HeroMascotProps) {
                     variant="guide"
                     className="h-32 w-32 md:h-40 md:w-40 object-contain"
                     alt="Durrah Guide"
+                    width={160}
+                    height={160}
+                    loading="eager"
                 />
             </motion.div>
         </div>
