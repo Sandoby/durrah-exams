@@ -2,17 +2,22 @@
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, CaretDown, Check, GraduationCap, Layout, Lightning, Lock, List, X, ShieldCheck, Sparkle, GlobeHemisphereWest, UsersThree, Medal, Rocket, DeviceMobile, Bell, FacebookLogo, ChartLineUp, DownloadSimple } from '@phosphor-icons/react';
-import { useState, useEffect, useRef } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Logo } from '../components/Logo';
 import { OwlMascot } from '../components/OwlMascot';
 import { HeroMascot } from '../components/HeroMascot';
-import MobileWelcome from './MobileWelcome';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useCurrency } from '../hooks/useCurrency';
 import { motion, AnimatePresence, useScroll, useSpring, useTransform } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { GridSpotlight } from '../components/GridSpotlight';
-import { InteractiveHowTo } from '../components/InteractiveHowTo';
+
+const GridSpotlight = lazy(() =>
+    import('../components/GridSpotlight').then(mod => ({ default: mod.GridSpotlight }))
+);
+const InteractiveHowTo = lazy(() =>
+    import('../components/InteractiveHowTo').then(mod => ({ default: mod.InteractiveHowTo }))
+);
+const MobileWelcome = lazy(() => import('./MobileWelcome'));
 
 export default function LandingPage() {
     const { t, i18n } = useTranslation();
@@ -21,11 +26,76 @@ export default function LandingPage() {
     const [userDropdownOpen, setUserDropdownOpen] = useState(false);
     const userDropdownRef = useRef<HTMLDivElement>(null);
     const registrationUrl = 'https://tutors.durrahsystem.tech/register';
-    // Force language detection on mount (for main landing page)
-    import('../lib/countryLanguageDetector').then(mod => mod.default.lookup());
     const isRTL = i18n.language === 'ar';
+    const [showNonCriticalEffects, setShowNonCriticalEffects] = useState(false);
+    const kidsSectionRef = useRef<HTMLElement | null>(null);
+    const [kidsSectionActive, setKidsSectionActive] = useState(false);
 
     // No auto-redirect - show authenticated UI instead
+
+    // Force language detection on mount (for main landing page)
+    useEffect(() => {
+        void import('../lib/countryLanguageDetector')
+            .then(mod => mod.default.lookup())
+            .catch(() => undefined);
+    }, []);
+
+    // Defer non-critical visuals/components until after initial paint/idle time.
+    useEffect(() => {
+        let cancelled = false;
+        const enable = () => {
+            if (!cancelled) setShowNonCriticalEffects(true);
+        };
+
+        const w = window as unknown as {
+            requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number;
+            cancelIdleCallback?: (id: number) => void;
+        };
+
+        if (typeof w.requestIdleCallback === 'function') {
+            const id = w.requestIdleCallback(enable, { timeout: 1500 });
+            return () => {
+                cancelled = true;
+                w.cancelIdleCallback?.(id);
+            };
+        }
+
+        const id = window.setTimeout(enable, 0);
+        return () => {
+            cancelled = true;
+            window.clearTimeout(id);
+        };
+    }, []);
+
+    // Only start the Kids section canvas animation when it is near the viewport.
+    useEffect(() => {
+        const node = kidsSectionRef.current;
+        if (!node || kidsSectionActive) return;
+
+        const observer = new IntersectionObserver(
+            entries => {
+                if (entries[0]?.isIntersecting) {
+                    setKidsSectionActive(true);
+                    observer.disconnect();
+                }
+            },
+            { rootMargin: '200px 0px' }
+        );
+
+        observer.observe(node);
+        return () => observer.disconnect();
+    }, [kidsSectionActive]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+                setUserDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const { price: monthlyPrice, currency: currencyCode, isLoading: isCurrencyLoading } = useCurrency(5);
     const { price: yearlyPrice } = useCurrency(50);
@@ -52,6 +122,9 @@ export default function LandingPage() {
 
     // Interactive Particle & Constellation Background for Kids Section
     useEffect(() => {
+        if (!showNonCriticalEffects || !kidsSectionActive) return;
+        if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) return;
+
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
@@ -61,6 +134,7 @@ export default function LandingPage() {
         let comets: any[] = [];
         const particleCount = 40; // Halved for speed
         let mouse = { x: -1000, y: -1000 };
+        let rafId = 0;
 
         const resize = () => {
             const container = canvas.parentElement;
@@ -138,7 +212,7 @@ export default function LandingPage() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             particles.forEach(p => { p.update(canvas.width, canvas.height, mouse.x, mouse.y); p.draw(); });
             comets.forEach(c => { c.update(canvas.width, canvas.height); c.draw(); });
-            requestAnimationFrame(animate);
+            rafId = window.requestAnimationFrame(animate);
         };
 
         const handleMouseMove = (e: MouseEvent) => {
@@ -147,22 +221,15 @@ export default function LandingPage() {
             mouse.y = e.clientY - rect.top;
         };
 
-        const handleClickOutside = (event: MouseEvent) => {
-            if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
-                setUserDropdownOpen(false);
-            }
-        };
-
         window.addEventListener('resize', resize);
         window.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mousedown', handleClickOutside);
         resize(); init(); animate();
         return () => {
+            if (rafId) window.cancelAnimationFrame(rafId);
             window.removeEventListener('resize', resize);
             window.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, []);
+    }, [kidsSectionActive, showNonCriticalEffects]);
 
     const faqs = [
         {
@@ -578,7 +645,11 @@ export default function LandingPage() {
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 overflow-hidden bg-white dark:bg-slate-950 min-h-[90vh]">
                 {/* Background Effects */}
-                <GridSpotlight />
+                {showNonCriticalEffects && (
+                    <Suspense fallback={null}>
+                        <GridSpotlight />
+                    </Suspense>
+                )}
 
                 {/* Noise */}
                 <div className="absolute inset-0 bg-noise opacity-[0.4] pointer-events-none" />
@@ -1087,7 +1158,7 @@ export default function LandingPage() {
             </section>
 
             {/* Kids Mode Feature Section - Enhanced Space Theme */}
-            <section className="py-32 relative overflow-hidden bg-[#050616] text-white" >
+            <section ref={kidsSectionRef} className="py-32 relative overflow-hidden bg-[#050616] text-white">
                 {/* Space Atmosphere Background */}
                 <div className="absolute inset-0 pointer-events-none" >
                     <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-60" />
@@ -1324,7 +1395,11 @@ export default function LandingPage() {
 
             {/* How to Section - Timeline Layout */}
             {/* How to Section - Interactive Tabs */}
-            <InteractiveHowTo />
+            {showNonCriticalEffects && (
+                <Suspense fallback={null}>
+                    <InteractiveHowTo />
+                </Suspense>
+            )}
 
             {/* Mobile App Section */}
             <section className="py-32 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-950 relative overflow-hidden">
@@ -1349,7 +1424,17 @@ export default function LandingPage() {
                                             style={{ width: '360px', height: '770px', transform: 'scale(0.733)' }}
                                             className="flex-shrink-0 bg-gray-50 dark:bg-gray-950 pointer-events-none origin-center"
                                         >
-                                            <MobileWelcome className="h-full" />
+                                            {showNonCriticalEffects ? (
+                                                <Suspense
+                                                    fallback={
+                                                        <div className="h-full w-full bg-gray-50 dark:bg-gray-950" />
+                                                    }
+                                                >
+                                                    <MobileWelcome className="h-full" />
+                                                </Suspense>
+                                            ) : (
+                                                <div className="h-full w-full bg-gray-50 dark:bg-gray-950" />
+                                            )}
                                         </div>
                                     </div>
                                     {/* Gradient Overlay for depth */}
@@ -1365,7 +1450,9 @@ export default function LandingPage() {
                             >
                                 <div className="w-24 h-24 bg-slate-100 dark:bg-slate-900 rounded-xl mb-3 flex items-center justify-center border border-slate-200 dark:border-slate-700">
                                     {/* QR Code Placeholder */}
-                                    <div className="w-16 h-16 bg-[url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://khogxhpnuhhebkevaqlg.supabase.co/storage/v1/object/public/app-releases/DurrahTutors-latest.apk')] bg-cover opacity-80" />
+                                    {showNonCriticalEffects && (
+                                        <div className="w-16 h-16 bg-[url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://khogxhpnuhhebkevaqlg.supabase.co/storage/v1/object/public/app-releases/DurrahTutors-latest.apk')] bg-cover opacity-80" />
+                                    )}
                                 </div>
                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('landing.mobileApp.scan', 'Scan to Install')}</span>
                             </motion.div>
