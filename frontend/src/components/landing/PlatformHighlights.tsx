@@ -3,9 +3,9 @@ import { DeviceMobile, GlobeHemisphereWest, Lightning, ShieldCheck } from '@phos
 
 export function PlatformHighlights() {
     return (
-        <div className="w-full py-12 bg-white dark:bg-slate-950 border-y border-slate-100 dark:border-slate-900 overflow-hidden">
+        <div className="w-full py-16 bg-slate-50 dark:bg-slate-950">
             <div className="max-w-7xl mx-auto px-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
                         { label: "High Availability", value: "99.9% Uptime", icon: GlobeHemisphereWest, color: "text-indigo-500" },
                         { label: "Security", value: "SSL Encrypted", icon: ShieldCheck, color: "text-emerald-500" },
@@ -18,14 +18,18 @@ export function PlatformHighlights() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: idx * 0.1 }}
-                            className="flex flex-col items-center md:items-start text-center md:text-left"
+                            className="flex items-center gap-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/70 shadow-[0_16px_40px_-30px_rgba(15,23,42,0.4)] p-5"
                         >
-                            <div className={`flex items-center gap-2 mb-2 ${stat.color}`}>
-                                <stat.icon weight="duotone" className="w-4 h-4" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">{stat.label}</span>
+                            <div className={`h-10 w-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center ${stat.color}`}>
+                                <stat.icon weight="duotone" className="w-5 h-5" />
                             </div>
-                            <div className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-200">
-                                {stat.value}
+                            <div>
+                                <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                                    {stat.label}
+                                </div>
+                                <div className="text-lg font-bold text-slate-800 dark:text-slate-200">
+                                    {stat.value}
+                                </div>
                             </div>
                         </motion.div>
                     ))}

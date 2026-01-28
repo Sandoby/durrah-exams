@@ -6,8 +6,7 @@ export function FeaturesBento() {
     const { t } = useTranslation();
 
     return (
-        <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 relative bg-white dark:bg-slate-950">
-            <div className="absolute inset-0 bg-grid-pattern opacity-[0.3] pointer-events-none" />
+        <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 relative bg-slate-50 dark:bg-slate-950">
             <div className="max-w-7xl mx-auto relative z-10">
                 <div className="text-center mb-16 max-w-3xl mx-auto">
                     <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-4">
@@ -23,7 +22,7 @@ export function FeaturesBento() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="md:col-span-2 glass-card rounded-3xl p-8 relative overflow-hidden group hover:border-indigo-500/30 transition-colors"
+                        className="md:col-span-2 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.45)] p-8 relative overflow-hidden group"
                     >
                         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/20 transition-colors" />
 
@@ -48,7 +47,7 @@ export function FeaturesBento() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="md:row-span-2 glass-card rounded-3xl p-8 relative overflow-hidden group hover:border-pink-500/30 transition-colors"
+                        className="md:row-span-2 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.45)] p-8 relative overflow-hidden group"
                     >
                         <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-pink-500/5 to-transparent opacity-50" />
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-pink-500/20 rounded-full blur-3xl group-hover:bg-pink-500/30 transition-colors" />
@@ -75,7 +74,7 @@ export function FeaturesBento() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.2 }}
-                        className="glass-card rounded-3xl p-8 relative overflow-hidden group hover:border-yellow-500/30 transition-colors"
+                        className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.45)] p-8 relative overflow-hidden group"
                     >
                         <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/50 rounded-2xl flex items-center justify-center mb-4 text-yellow-600 dark:text-yellow-400">
                             <Lightning weight="duotone" className="w-6 h-6" />
@@ -89,7 +88,7 @@ export function FeaturesBento() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.3 }}
-                        className="glass-card rounded-3xl p-8 relative overflow-hidden group hover:border-green-500/30 transition-colors"
+                        className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.45)] p-8 relative overflow-hidden group"
                     >
                         <div className="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-2xl flex items-center justify-center mb-4 text-green-600 dark:text-green-400">
                             <UsersThree weight="duotone" className="w-6 h-6" />
