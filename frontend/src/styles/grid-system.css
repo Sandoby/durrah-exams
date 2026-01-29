@@ -1,0 +1,464 @@
+/**
+ * Asymmetrical Grid System with Flexible Breakpoints
+ * Breaking away from centered, predictable layouts
+ * Creating visual interest through varied content arrangements
+ */
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES FROM DESIGN SYSTEM
+   ============================================================================ */
+
+:root {
+  /* Primary Colors - Warm Teal */
+  --color-primary-50: #f0fdfa;
+  --color-primary-100: #ccfbf1;
+  --color-primary-200: #99f6e4;
+  --color-primary-300: #5eead4;
+  --color-primary-400: #2dd4bf;
+  --color-primary-500: #14b8a6;
+  --color-primary-600: #0d9488;
+  --color-primary-700: #0f766e;
+  --color-primary-800: #115e59;
+  --color-primary-900: #134e4a;
+
+  /* Secondary Colors - Warm Gray */
+  --color-secondary-50: #fafaf9;
+  --color-secondary-100: #f5f5f4;
+  --color-secondary-200: #e7e5e4;
+  --color-secondary-300: #d6d3d1;
+  --color-secondary-400: #a8a29e;
+  --color-secondary-500: #78716c;
+  --color-secondary-600: #57534e;
+  --color-secondary-700: #44403c;
+  --color-secondary-800: #292524;
+  --color-secondary-900: #1c1917;
+
+  /* Accent Colors - Warm Orange */
+  --color-accent-50: #fff7ed;
+  --color-accent-100: #ffedd5;
+  --color-accent-200: #fed7aa;
+  --color-accent-300: #fdba74;
+  --color-accent-400: #fb923c;
+  --color-accent-500: #f97316;
+  --color-accent-600: #ea580c;
+  --color-accent-700: #c2410c;
+  --color-accent-800: #9a3412;
+  --color-accent-900: #7c2d12;
+
+  /* Neutral Colors - True Gray */
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4b5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1f2937;
+  --color-neutral-900: #111827;
+
+  /* Typography Scale */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+  --font-size-6xl: 3.75rem;
+
+  /* Spacing Scale */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+  --spacing-4xl: 6rem;
+  --spacing-5xl: 8rem;
+  --spacing-6xl: 12rem;
+
+  /* Animation Settings */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --easing-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Custom Breakpoints */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* ============================================================================
+   ASYMMETRICAL GRID FOUNDATION
+   ============================================================================ */
+
+.asymmetrical-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+@media (min-width: 640px) {
+  .asymmetrical-container {
+    padding: 0 var(--spacing-xl);
+  }
+}
+
+@media (min-width: 1024px) {
+  .asymmetrical-container {
+    padding: 0 var(--spacing-2xl);
+  }
+}
+
+/* ============================================================================
+   FLEXIBLE GRID LAYOUTS - Breaking Away from Centered Columns
+   ============================================================================ */
+
+/* 7/5 Split - Content Heavy Left */
+.grid-7-5 {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: var(--spacing-3xl);
+  align-items: center;
+}
+
+/* 5/7 Split - Content Heavy Right */
+.grid-5-7 {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: var(--spacing-3xl);
+  align-items: center;
+}
+
+/* 8/4 Split - Dominant Content Left */
+.grid-8-4 {
+  display: grid;
+  grid-template-columns: 8fr 4fr;
+  gap: var(--spacing-2xl);
+  align-items: start;
+}
+
+/* 4/8 Split - Dominant Content Right */
+.grid-4-8 {
+  display: grid;
+  grid-template-columns: 4fr 8fr;
+  gap: var(--spacing-2xl);
+  align-items: start;
+}
+
+/* 6/6 Split - Balanced but Offset */
+.grid-6-6-offset {
+  display: grid;
+  grid-template-columns: 6fr 6fr;
+  gap: var(--spacing-4xl);
+  align-items: center;
+}
+
+/* Responsive Behavior - Stack on Mobile */
+@media (max-width: 1023px) {
+  .grid-7-5,
+  .grid-5-7,
+  .grid-8-4,
+  .grid-4-8,
+  .grid-6-6-offset {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2xl);
+  }
+}
+
+/* ============================================================================
+   MASONRY LAYOUTS - Varied Heights for Visual Interest
+   ============================================================================ */
+
+.masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-xl);
+  align-items: start;
+}
+
+.masonry-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xl);
+  align-items: start;
+}
+
+@media (max-width: 1023px) {
+  .masonry-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .masonry-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Masonry Items with Varied Heights */
+.masonry-item-tall {
+  grid-row: span 2;
+}
+
+.masonry-item-wide {
+  grid-column: span 2;
+}
+
+@media (max-width: 1023px) {
+  .masonry-item-wide {
+    grid-column: span 1;
+  }
+}
+
+/* ============================================================================
+   STAGGERED LAYOUTS - Breaking Grid Monotony
+   ============================================================================ */
+
+.staggered-layout {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--spacing-lg);
+  align-items: start;
+}
+
+.staggered-item-1 {
+  grid-column: 1 / 8;
+  grid-row: 1;
+}
+
+.staggered-item-2 {
+  grid-column: 9 / 13;
+  grid-row: 1;
+  margin-top: var(--spacing-3xl);
+}
+
+.staggered-item-3 {
+  grid-column: 1 / 6;
+  grid-row: 2;
+  margin-top: var(--spacing-xl);
+}
+
+.staggered-item-4 {
+  grid-column: 7 / 13;
+  grid-row: 2;
+}
+
+@media (max-width: 1023px) {
+  .staggered-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .staggered-item-1,
+  .staggered-item-2,
+  .staggered-item-3,
+  .staggered-item-4 {
+    grid-column: 1;
+    margin-top: 0;
+  }
+
+  .staggered-item-1 { grid-row: 1; }
+  .staggered-item-2 { grid-row: 2; }
+  .staggered-item-3 { grid-row: 3; }
+  .staggered-item-4 { grid-row: 4; }
+}
+
+/* ============================================================================
+   SECTION LAYOUTS - Mixed Heights and Widths
+   ============================================================================ */
+
+.section-varied-height {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+}
+
+.section-compact {
+  min-height: 40vh;
+  display: flex;
+  align-items: center;
+}
+
+.section-tall {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+}
+
+.section-full {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+/* ============================================================================
+   CONTENT ZONES - Purposeful Whitespace
+   ============================================================================ */
+
+.content-zone-narrow {
+  max-width: 600px;
+}
+
+.content-zone-medium {
+  max-width: 800px;
+}
+
+.content-zone-wide {
+  max-width: 1000px;
+}
+
+.content-zone-full {
+  max-width: 1200px;
+}
+
+/* ============================================================================
+   ASYMMETRICAL SPACING UTILITIES
+   ============================================================================ */
+
+.space-asymmetric-y {
+  padding-top: var(--spacing-5xl);
+  padding-bottom: var(--spacing-3xl);
+}
+
+.space-asymmetric-y-reverse {
+  padding-top: var(--spacing-3xl);
+  padding-bottom: var(--spacing-5xl);
+}
+
+.space-asymmetric-x {
+  padding-left: var(--spacing-4xl);
+  padding-right: var(--spacing-2xl);
+}
+
+.space-asymmetric-x-reverse {
+  padding-left: var(--spacing-2xl);
+  padding-right: var(--spacing-4xl);
+}
+
+/* ============================================================================
+   VISUAL HIERARCHY UTILITIES
+   ============================================================================ */
+
+.visual-weight-primary {
+  background-color: var(--color-primary-50);
+  border-left: 4px solid var(--color-primary-500);
+  padding: var(--spacing-xl);
+}
+
+.visual-weight-secondary {
+  background-color: var(--color-neutral-50);
+  border-radius: 12px;
+  padding: var(--spacing-lg);
+}
+
+.visual-weight-accent {
+  background-color: var(--color-accent-50);
+  border-radius: 8px;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-accent-200);
+}
+
+/* ============================================================================
+   RESPONSIVE UTILITIES
+   ============================================================================ */
+
+.hide-mobile {
+  display: block;
+}
+
+.show-mobile {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .hide-mobile {
+    display: none;
+  }
+
+  .show-mobile {
+    display: block;
+  }
+}
+
+.hide-tablet {
+  display: block;
+}
+
+.show-tablet {
+  display: none;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hide-tablet {
+    display: none;
+  }
+
+  .show-tablet {
+    display: block;
+  }
+}
+
+/* ============================================================================
+   ANIMATION UTILITIES - Subtle and Purposeful
+   ============================================================================ */
+
+.animate-fade-in {
+  animation: fadeIn var(--duration-normal) var(--easing-ease-out);
+}
+
+.animate-slide-up {
+  animation: slideUp var(--duration-normal) var(--easing-ease-out);
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--duration-fast) var(--easing-ease-out);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-scale-in {
+    animation: none;
+  }
+}

@@ -1,0 +1,466 @@
+/**
+ * Custom Typography Scale with Custom Font Stack
+ * Professional, readable typography that avoids generic system fonts
+ * Focus on authentic, human-designed typography hierarchy
+ */
+
+/* ============================================================================
+   CUSTOM FONT IMPORTS
+   ============================================================================ */
+
+/* Inter - Modern, professional sans-serif for body text */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Fraunces - Distinctive serif for headings */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&display=swap');
+
+/* JetBrains Mono - Clean monospace for code */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+/* ============================================================================
+   CUSTOM FONT STACK DEFINITIONS
+   ============================================================================ */
+
+:root {
+  /* Primary Font Stack - Inter for body text */
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  
+  /* Heading Font Stack - Fraunces for distinctive headings */
+  --font-family-serif: 'Fraunces', Georgia, 'Times New Roman', Times, serif;
+  
+  /* Monospace Font Stack - JetBrains Mono for code */
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  
+  /* Arabic Font Support */
+  --font-family-arabic: 'Cairo', 'Noto Sans Arabic', 'Amiri', sans-serif;
+}
+
+/* ============================================================================
+   BASE TYPOGRAPHY STYLES
+   ============================================================================ */
+
+body {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--color-neutral-800);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Arabic Language Support */
+body[dir="rtl"] {
+  font-family: var(--font-family-arabic);
+}
+
+/* ============================================================================
+   HEADING STYLES - Using Fraunces for Distinction
+   ============================================================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-serif);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-neutral-900);
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+h1 {
+  font-size: var(--font-size-5xl);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+h2 {
+  font-size: var(--font-size-4xl);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+h3 {
+  font-size: var(--font-size-3xl);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+h4 {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+h5 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+h6 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Responsive Heading Sizes */
+@media (max-width: 767px) {
+  h1 {
+    font-size: var(--font-size-4xl);
+  }
+  
+  h2 {
+    font-size: var(--font-size-3xl);
+  }
+  
+  h3 {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+/* ============================================================================
+   BODY TEXT STYLES
+   ============================================================================ */
+
+p {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  line-height: 1.7;
+  color: var(--color-neutral-700);
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.text-large {
+  font-size: var(--font-size-lg);
+  line-height: 1.6;
+  color: var(--color-neutral-600);
+}
+
+.text-small {
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  color: var(--color-neutral-600);
+}
+
+.text-xs {
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  color: var(--color-neutral-500);
+}
+
+/* ============================================================================
+   DISPLAY TEXT STYLES - For Hero Sections
+   ============================================================================ */
+
+.display-1 {
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-6xl);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--color-neutral-900);
+}
+
+.display-2 {
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-5xl);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  color: var(--color-neutral-900);
+}
+
+.display-3 {
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-4xl);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--color-neutral-900);
+}
+
+/* Responsive Display Text */
+@media (max-width: 767px) {
+  .display-1 {
+    font-size: var(--font-size-4xl);
+  }
+  
+  .display-2 {
+    font-size: var(--font-size-3xl);
+  }
+  
+  .display-3 {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+/* ============================================================================
+   SPECIALIZED TEXT STYLES
+   ============================================================================ */
+
+.text-gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-400) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-accent {
+  background: linear-gradient(135deg, var(--color-accent-600) 0%, var(--color-accent-400) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-highlight {
+  background-color: var(--color-accent-100);
+  color: var(--color-accent-800);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   LINK STYLES
+   ============================================================================ */
+
+a {
+  color: var(--color-primary-600);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--duration-fast) var(--easing-ease-out);
+}
+
+a:hover {
+  color: var(--color-primary-700);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+a:focus {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ============================================================================
+   LIST STYLES
+   ============================================================================ */
+
+ul, ol {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--color-neutral-700);
+  margin: 0 0 var(--spacing-lg) 0;
+  padding-left: var(--spacing-xl);
+}
+
+li {
+  margin-bottom: var(--spacing-sm);
+}
+
+ul li::marker {
+  color: var(--color-primary-500);
+}
+
+ol li::marker {
+  color: var(--color-primary-500);
+  font-weight: 600;
+}
+
+/* ============================================================================
+   CODE AND PREFORMATTED TEXT
+   ============================================================================ */
+
+code {
+  font-family: var(--font-family-mono);
+  font-size: 0.875em;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-800);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+pre {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  background-color: var(--color-neutral-900);
+  color: var(--color-neutral-100);
+  padding: var(--spacing-lg);
+  border-radius: 8px;
+  overflow-x: auto;
+  line-height: 1.5;
+  margin: var(--spacing-lg) 0;
+}
+
+pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* ============================================================================
+   BLOCKQUOTE STYLES
+   ============================================================================ */
+
+blockquote {
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-lg);
+  font-style: italic;
+  color: var(--color-neutral-600);
+  border-left: 4px solid var(--color-primary-300);
+  padding-left: var(--spacing-lg);
+  margin: var(--spacing-xl) 0;
+  line-height: 1.6;
+}
+
+blockquote cite {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  font-style: normal;
+  font-weight: 600;
+  color: var(--color-neutral-500);
+  display: block;
+  margin-top: var(--spacing-sm);
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+.font-sans {
+  font-family: var(--font-family-sans);
+}
+
+.font-serif {
+  font-family: var(--font-family-serif);
+}
+
+.font-mono {
+  font-family: var(--font-family-mono);
+}
+
+.font-light {
+  font-weight: 300;
+}
+
+.font-normal {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-extrabold {
+  font-weight: 800;
+}
+
+.font-black {
+  font-weight: 900;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+.uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lowercase {
+  text-transform: lowercase;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.tracking-tight {
+  letter-spacing: -0.025em;
+}
+
+.tracking-normal {
+  letter-spacing: 0;
+}
+
+.tracking-wide {
+  letter-spacing: 0.025em;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
+.tracking-widest {
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================================
+   ACCESSIBILITY IMPROVEMENTS
+   ============================================================================ */
+
+/* Focus indicators for keyboard navigation */
+*:focus {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  body {
+    color: #000000;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: #000000;
+  }
+  
+  a {
+    color: #0000EE;
+    text-decoration: underline;
+  }
+  
+  a:visited {
+    color: #551A8B;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

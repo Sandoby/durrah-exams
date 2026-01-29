@@ -13,11 +13,11 @@ export function CTASection({ registrationUrl }: { registrationUrl: string }) {
                 {/* Outer Glow */}
                 <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
 
-                <div className="relative bg-slate-950 rounded-[2rem] p-8 md:p-20 overflow-hidden border border-slate-800 ring-1 ring-white/10">
+                <div className="relative bg-white dark:bg-slate-950 rounded-[2rem] p-8 md:p-20 overflow-hidden border border-slate-200 dark:border-slate-800 ring-1 ring-slate-200/50 dark:ring-white/10">
                     {/* Dynamic Background */}
-                    <div className="absolute inset-0 bg-grid-pattern opacity-[0.07]" />
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none" />
-                    <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
+                    <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] dark:opacity-[0.07]" />
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-500/5 dark:bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none" />
+                    <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
 
                     {/* Content */}
                     <div className="relative z-10 flex flex-col items-center text-center">
@@ -25,7 +25,7 @@ export function CTASection({ registrationUrl }: { registrationUrl: string }) {
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8"
+                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-sm font-medium mb-8"
                         >
                             <Sparkle weight="fill" className="w-4 h-4" />
                             <span>{t('ctaSection.tagline', 'Join the Future of Assessment')}</span>
@@ -35,7 +35,7 @@ export function CTASection({ registrationUrl }: { registrationUrl: string }) {
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight"
+                            className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tight"
                         >
                             {t('ctaSection.title', 'Ready to Transform?')}
                         </motion.h2>
@@ -44,7 +44,7 @@ export function CTASection({ registrationUrl }: { registrationUrl: string }) {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
-                            className="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl leading-relaxed"
+                            className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl leading-relaxed"
                         >
                             {t('ctaSection.subtitle', 'Join thousands of educators delivering secure, professional exams with Durrah.')}
                         </motion.p>
@@ -60,18 +60,11 @@ export function CTASection({ registrationUrl }: { registrationUrl: string }) {
                                 href={registrationUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-lg shadow-indigo-600/25 transition-all hover:-translate-y-1"
+                                className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-xl text-lg font-bold shadow-lg shadow-indigo-600/25 transition-all hover:-translate-y-1"
                             >
                                 {t('ctaSection.cta', 'Start Free Trial')}
                                 <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
                             </a>
-                            <Link
-                                to="/demo"
-                                className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 px-8 py-4 rounded-xl text-lg font-bold backdrop-blur-sm transition-all hover:-translate-y-1"
-                            >
-                                <Lightning weight="duotone" className="w-5 h-5" />
-                                {t('ctaSection.demo', 'Live Demo')}
-                            </Link>
                         </motion.div>
                     </div>
                 </div>

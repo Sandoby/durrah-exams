@@ -97,16 +97,16 @@ export function InteractiveHowTo() {
 
                     {/* Right: Mock Interface Display */}
                     <div className="lg:col-span-7">
-                        <div className="relative aspect-[4/3] bg-slate-900 rounded-3xl border border-slate-700 shadow-2xl overflow-hidden ring-1 ring-white/10">
+                        <div className="relative aspect-[4/3] bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden ring-1 ring-slate-200/50 dark:ring-white/10">
                             {/* Window Chrome */}
-                            <div className="absolute top-0 left-0 right-0 h-10 bg-slate-800/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 gap-2 z-20">
+                            <div className="absolute top-0 left-0 right-0 h-10 bg-slate-50/80 dark:bg-slate-800/50 backdrop-blur-md border-b border-slate-200 dark:border-white/5 flex items-center px-4 gap-2 z-20">
                                 <div className="w-3 h-3 rounded-full bg-red-400/80" />
                                 <div className="w-3 h-3 rounded-full bg-amber-400/80" />
                                 <div className="w-3 h-3 rounded-full bg-emerald-400/80" />
                             </div>
 
                             {/* Content Area */}
-                            <div className="absolute inset-0 pt-10 bg-slate-900/50 backdrop-blur-3xl p-8">
+                            <div className="absolute inset-0 pt-10 bg-white/50 dark:bg-slate-900/50 backdrop-blur-3xl p-8">
                                 <AnimatePresence mode="wait">
                                     <motion.div
                                         key={activeStep}
@@ -124,7 +124,7 @@ export function InteractiveHowTo() {
                             </div>
 
                             {/* Decorative Blurs */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px] pointer-events-none" />
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
                         </div>
                     </div>
                 </div>
@@ -138,16 +138,16 @@ function EditorMockup() {
     return (
         <div className="flex flex-col gap-4 h-full">
             <div className="flex gap-4 mb-4">
-                <div className="glass-panel px-4 py-2 rounded-lg text-xs font-mono text-indigo-300 border border-indigo-500/30">Question 1 of 50</div>
-                <div className="glass-panel px-4 py-2 rounded-lg text-xs font-mono text-emerald-300 border border-emerald-500/30">Multiple Choice</div>
+                <div className="bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-lg text-xs font-mono text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 font-bold">Question 1 of 50</div>
+                <div className="bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-lg text-xs font-mono text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-bold">Multiple Choice</div>
             </div>
-            <div className="h-4 w-3/4 bg-slate-700 rounded animate-pulse" />
-            <div className="h-4 w-1/2 bg-slate-700 rounded animate-pulse opacity-60 mb-8" />
+            <div className="h-4 w-3/4 bg-slate-100 dark:bg-slate-700 rounded animate-pulse" />
+            <div className="h-4 w-1/2 bg-slate-100 dark:bg-slate-700 rounded animate-pulse opacity-60 mb-8" />
 
             {[1, 2, 3, 4].map(i => (
-                <div key={i} className="flex items-center gap-4 p-3 rounded-xl border border-slate-700 bg-slate-800/50">
-                    <div className="w-6 h-6 rounded-full border border-slate-600 flex items-center justify-center text-xs text-slate-400">{String.fromCharCode(64 + i)}</div>
-                    <div className="h-2 w-32 bg-slate-600 rounded opacity-50" />
+                <div key={i} className="flex items-center gap-4 p-3 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+                    <div className="w-6 h-6 rounded-full border border-slate-200 dark:border-slate-600 flex items-center justify-center text-xs text-slate-400">{String.fromCharCode(64 + i)}</div>
+                    <div className="h-2 w-32 bg-slate-200 dark:bg-slate-600 rounded opacity-50" />
                 </div>
             ))}
         </div>
@@ -162,18 +162,18 @@ function SecurityMockup() {
                 { label: 'Tab Detection', desc: 'Logs any tab switching', icon: Browsers, active: true },
                 { label: 'Anti-Cheat Mode', desc: 'No copy-paste allowed', icon: ClipboardText, active: true },
             ].map((item, i) => (
-                <div key={i} className="p-4 rounded-xl border border-slate-700 bg-slate-800/50 flex items-center justify-between gap-4">
+                <div key={i} className="p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-lg bg-slate-700/50 flex items-center justify-center">
-                            <item.icon className="w-5 h-5 text-slate-300" weight="duotone" />
+                        <div className="w-10 h-10 rounded-lg bg-white dark:bg-slate-700/50 flex items-center justify-center border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <item.icon className="w-5 h-5 text-slate-600 dark:text-slate-300" weight="duotone" />
                         </div>
                         <div>
-                            <span className="block text-sm font-bold text-slate-200">{item.label}</span>
+                            <span className="block text-sm font-bold text-slate-800 dark:text-slate-200">{item.label}</span>
                             <span className="text-xs text-slate-500">{item.desc}</span>
                         </div>
                     </div>
 
-                    <div className={`w-10 h-5 rounded-full relative transition-colors ${item.active ? 'bg-indigo-500' : 'bg-slate-700'}`}>
+                    <div className={`w-10 h-5 rounded-full relative transition-colors ${item.active ? 'bg-indigo-500' : 'bg-slate-200 dark:bg-slate-700'}`}>
                         <div className={`absolute top-1 bottom-1 w-3 h-3 bg-white rounded-full transition-all ${item.active ? 'right-1' : 'left-1'}`} />
                     </div>
                 </div>
@@ -186,17 +186,17 @@ function AnalyticsMockup() {
     return (
         <div className="flex flex-col gap-6 h-full">
             <div className="flex gap-4">
-                <div className="flex-1 p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-                    <div className="text-xs text-indigo-300 uppercase tracking-wider mb-1">Pass Rate</div>
-                    <div className="text-3xl font-bold text-white">84%</div>
+                <div className="flex-1 p-4 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20">
+                    <div className="text-xs text-indigo-600 dark:text-indigo-300 uppercase tracking-wider mb-1 font-bold">Pass Rate</div>
+                    <div className="text-3xl font-bold text-slate-900 dark:text-white">84%</div>
                 </div>
-                <div className="flex-1 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                    <div className="text-xs text-emerald-300 uppercase tracking-wider mb-1">Avg Score</div>
-                    <div className="text-3xl font-bold text-white">72.5</div>
+                <div className="flex-1 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
+                    <div className="text-xs text-emerald-600 dark:text-emerald-300 uppercase tracking-wider mb-1 font-bold">Avg Score</div>
+                    <div className="text-3xl font-bold text-slate-900 dark:text-white">72.5</div>
                 </div>
             </div>
 
-            <div className="flex-1 rounded-xl border border-slate-700 bg-slate-800/50 relative overflow-hidden flex items-end px-6 pb-6 gap-2">
+            <div className="flex-1 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 relative overflow-hidden flex items-end px-6 pb-6 gap-2">
                 {[40, 65, 45, 80, 55, 70, 40].map((h, i) => (
                     <div key={i} className="flex-1 bg-indigo-500/50 rounded-t" style={{ height: `${h}%` }} />
                 ))}
@@ -204,5 +204,6 @@ function AnalyticsMockup() {
         </div>
     );
 }
+
 
 

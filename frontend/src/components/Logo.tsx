@@ -1,4 +1,4 @@
-import { OwlMascot } from './OwlMascot';
+
 
 interface LogoProps {
     className?: string;
@@ -7,11 +7,12 @@ interface LogoProps {
 }
 
 export function Logo({ className = '', showText = true, size = 'md' }: LogoProps) {
-    const sizeClasses = {
-        sm: 'h-6 w-6',
-        md: 'h-8 w-8',
-        lg: 'h-12 w-12',
-        xl: 'h-16 w-16'
+    // Container sizes (visible area)
+    const containerClasses = {
+        sm: 'h-10 w-10',
+        md: 'h-12 w-12',
+        lg: 'h-16 w-16',
+        xl: 'h-24 w-24'
     };
 
     const textClasses = {
@@ -22,20 +23,19 @@ export function Logo({ className = '', showText = true, size = 'md' }: LogoProps
     };
 
     return (
-        <div className={`flex items-center logo ${className}`}>
-            <div className="relative flex items-center justify-center">
-                <div className="absolute inset-0 bg-indigo-600/10 rounded-full blur-sm transform scale-110" />
-                <OwlMascot
-                    variant="logo"
-                    className={`${sizeClasses[size]} relative z-10`}
+        <div className={`inline-flex items-center gap-2.5 ${className}`}>
+            <div className={`${containerClasses[size]} overflow-hidden flex items-center justify-center shrink-0`}>
+                <img
+                    src="/brand/logo.png?v=2"
+                    className="w-[300%] h-[300%] max-w-none object-contain"
                     loading="eager"
-                    alt="Durrah Owl logo"
+                    alt="Durrah logo"
                 />
             </div>
             {showText && (
-                <div className={`ml-3 font-bold text-gray-900 dark:text-white ${textClasses[size]} tracking-tight flex items-baseline`}>
+                <div className={`font-bold text-slate-900 dark:text-white ${textClasses[size]} tracking-tight flex items-baseline leading-none`}>
                     <span className="text-indigo-600">Durrah</span>
-                    <span className="text-gray-500 dark:text-gray-400 font-light ml-1.5">for Tutors</span>
+                    <span className="text-slate-400 dark:text-slate-500 font-light ml-1.5 whitespace-nowrap">for Tutors</span>
                 </div>
             )}
         </div>

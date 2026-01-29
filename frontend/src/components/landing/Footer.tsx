@@ -12,7 +12,7 @@ export function Footer() {
                 <div className="grid md:grid-cols-4 gap-8 mb-8">
                     <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <Logo className="h-8 w-8" showText={false} />
+                            <Logo size="md" showText={false} />
                             <span className="text-xl font-bold text-white">Durrah</span>
                         </div>
                         <p className="text-gray-400 mb-6">Modern exam platform for educators</p>
