@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Lightning, Sparkle } from '@phosphor-icons/react';
-import { Link } from 'react-router-dom';
+import { ArrowRight, Sparkle } from '@phosphor-icons/react';
+
 import { useTranslation } from 'react-i18next';
 
 export function CTASection({ registrationUrl }: { registrationUrl: string }) {
