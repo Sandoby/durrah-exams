@@ -33,6 +33,7 @@ import AgentDashboard from './pages/support/AgentDashboard';
 import { BlogList } from './pages/blog/BlogList';
 import { BlogPost } from './pages/blog/BlogPost';
 import { SubmissionSync } from './components/SubmissionSync';
+import StudyZone from './pages/StudyZone';
 import { ExamAnalyticsDashboard } from "./components/analytics/ExamAnalyticsDashboard";
 import { ProctorDashboard } from "./components/ProctorDashboard";
 
@@ -188,6 +189,7 @@ function AppContent() {
         {/* Student Routes (Some have internal auth logic) */}
         <Route path="/exam/:id" element={<ExamView />} />
         <Route path="/student-portal" element={<StudentPortal />} />
+        <Route path="/study-zone" element={<StudyZone />} />
         <Route path="/payment-callback" element={<PaymentCallback />} />
 
         {/* Support & Admin (Strictly Protected) */}
