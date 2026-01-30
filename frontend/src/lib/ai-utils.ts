@@ -1,14 +1,11 @@
-import { getAIKey } from './config';
+import { config } from './config';
 
 /**
  * Extract questions from document content using Groq AI
  */
 export const extractQuestionsWithAI = async (content: string): Promise<any[]> => {
-    const apiKey = getAIKey();
-    
-    if (!apiKey) {
-        throw new Error('AI API key not configured');
-    }
+    const provider = config.activeProvider === 'openrouter' ? config.openrouter : config.groq;
+    const apiKey = provider.apiKey;
 
     const prompt = `Extract all exam questions from the following text and return them as a JSON array. Each question should be an object with these fields:
 - type: "multiple_choice", "multiple_select", "true_false", "dropdown", "numeric", or "short_answer"
@@ -26,14 +23,16 @@ ${content}
 Return ONLY the JSON array, no other text.`;
 
     try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const response = await fetch(`${provider.baseUrl}/chat/completions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
+                'HTTP-Referer': 'https://durrahtutors.com',
+                'X-Title': 'Durrah Tutors',
             },
             body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
+                model: provider.model,
                 messages: [
                     {
                         role: 'system',
@@ -85,14 +84,11 @@ export const generateQuestionsWithAI = async (
     difficulty: 'easy' | 'medium' | 'hard' = 'medium',
     type?: string
 ): Promise<any[]> => {
-    const apiKey = getAIKey();
-    
-    if (!apiKey) {
-        throw new Error('AI API key not configured');
-    }
+    const provider = config.activeProvider === 'openrouter' ? config.openrouter : config.groq;
+    const apiKey = provider.apiKey;
 
     const typeFilter = type ? `All questions should be of type: ${type}` : 'Use a variety of question types (multiple_choice, true_false, etc.)';
-    
+
     const prompt = `Generate ${count} exam questions about "${topic}" with ${difficulty} difficulty level. ${typeFilter}
 
 Return a JSON array where each question has:
@@ -108,14 +104,16 @@ Return a JSON array where each question has:
 Return ONLY the JSON array, no other text.`;
 
     try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const response = await fetch(`${provider.baseUrl}/chat/completions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
+                'HTTP-Referer': 'https://durrahtutors.com',
+                'X-Title': 'Durrah Tutors',
             },
             body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
+                model: provider.model,
                 messages: [
                     {
                         role: 'system',
@@ -155,6 +153,75 @@ Return ONLY the JSON array, no other text.`;
     } catch (error: any) {
         console.error('AI generation error:', error);
         throw new Error(error.message || 'Failed to generate questions with AI');
+    }
+};
+
+/**
+ * Generate plausible options for a multiple choice question using AI
+ */
+export const generateOptionsWithAI = async (
+    questionText: string,
+    type: string = 'multiple_choice'
+): Promise<string[]> => {
+    const provider = config.activeProvider === 'openrouter' ? config.openrouter : config.groq;
+    const apiKey = provider.apiKey;
+
+    const prompt = `Based on the following question text (which may contain HTML tags), generate 4 distinct, plausible options for a ${type} question.
+One of them should be the intended correct answer, and the others should be realistic distractors.
+
+Question: "${questionText}"
+
+Return ONLY a JSON array of 4 strings reflecting the options. NO other text.`;
+
+    try {
+        const response = await fetch(`${provider.baseUrl}/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+                'HTTP-Referer': 'https://durrahtutors.com',
+                'X-Title': 'Durrah Tutors',
+            },
+            body: JSON.stringify({
+                model: provider.model,
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are an educational assistant specialized in creating multiple choice options.'
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: 0.6,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'Failed to generate options');
+        }
+
+        const data = await response.json();
+        const content = data.choices[0]?.message?.content;
+
+        if (!content) {
+            throw new Error('No content returned from AI');
+        }
+
+        let jsonStr = content.trim();
+        if (jsonStr.startsWith('```json')) {
+            jsonStr = jsonStr.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+        } else if (jsonStr.startsWith('```')) {
+            jsonStr = jsonStr.replace(/```\n?/g, '');
+        }
+
+        const options = JSON.parse(jsonStr);
+        return Array.isArray(options) ? options : [];
+    } catch (error: any) {
+        console.error('AI options generation error:', error);
+        throw new Error(error.message || 'Failed to generate options');
     }
 };
 

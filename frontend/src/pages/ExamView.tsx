@@ -44,6 +44,7 @@ interface Exam {
     id: string;
     title: string;
     description: string;
+    tutor_instructions?: string; // Added field
     questions: Question[];
     required_fields?: string[];
     is_active?: boolean;
@@ -2202,6 +2203,19 @@ export default function ExamView() {
 
                 <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{exam.title}</h1>
                 <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">{exam.description}</p>
+
+                {/* Tutor Instructions - Only visible if provided */}
+                {exam.tutor_instructions && (
+                    <div className="mb-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-500 rounded-r-md">
+                        <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-200 mb-2 flex items-center gap-2">
+                            <StickyNote className="w-4 h-4" />
+                            Instructions from Tutor
+                        </h3>
+                        <div className="text-sm text-indigo-800 dark:text-indigo-300 prose prose-sm max-w-none">
+                            <p className="whitespace-pre-wrap">{exam.tutor_instructions}</p>
+                        </div>
+                    </div>
+                )}
 
                 {hasPreviousSession && (
                     <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-md text-sm flex items-center">

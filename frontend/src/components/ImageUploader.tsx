@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
 import { Upload, Image as ImageIcon, Loader2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import * as imageCompressionModule from 'browser-image-compression';
+const imageCompression = (imageCompressionModule as any).default || imageCompressionModule;
 
 interface ImageUploaderProps {
   value?: string;
@@ -12,43 +14,7 @@ interface ImageUploaderProps {
   bucket?: string; // Supabase storage bucket name
 }
 
-async function readFileAsImage(file: File): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = String(reader.result);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-function downscaleToJpeg(img: HTMLImageElement, maxDimension: number, quality: number): Promise<Blob> {
-  return new Promise((resolve) => {
-    const canvas = document.createElement('canvas');
-    let { width, height } = img;
-
-    const scale = Math.min(1, maxDimension / Math.max(width, height));
-    width = Math.round(width * scale);
-    height = Math.round(height * scale);
-
-    canvas.width = width;
-    canvas.height = height;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      canvas.toBlob((blob) => resolve(blob || new Blob()), 'image/jpeg', quality);
-      return;
-    }
-    ctx.drawImage(img, 0, 0, width, height);
-    canvas.toBlob((blob) => resolve(blob || new Blob()), 'image/jpeg', quality);
-  });
-}
-
-async function blobToDataUrl(blob: Blob): Promise<string> {
+async function blobToDataUrl(blob: Blob | File): Promise<string> {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onloadend = () => resolve(String(reader.result));
@@ -65,14 +31,20 @@ export function ImageUploader({ value, onChange, userId = 'anon', compact = fals
     setError(null);
     setUploading(true);
     try {
-      const img = await readFileAsImage(file);
-      const blob = await downscaleToJpeg(img, maxDimension, quality);
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: maxDimension,
+        useWebWorker: true,
+        initialQuality: quality,
+      };
+
+      const compressedFile = await imageCompression(file, options);
 
       // Try Supabase Storage first
       const targetBucket = bucket || (import.meta as any).env?.VITE_SUPABASE_STORAGE_BUCKET || 'question-media';
       const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
       try {
-        const { data, error: upErr } = await supabase.storage.from(targetBucket).upload(path, blob, {
+        const { data, error: upErr } = await supabase.storage.from(targetBucket).upload(path, compressedFile, {
           contentType: 'image/jpeg',
           upsert: true,
         });
@@ -83,11 +55,11 @@ export function ImageUploader({ value, onChange, userId = 'anon', compact = fals
           return;
         }
         // Fallback to data URL if public URL missing
-        const dataUrl = await blobToDataUrl(blob);
+        const dataUrl = await blobToDataUrl(compressedFile);
         onChange(dataUrl);
       } catch (e) {
         // If storage fails (bucket missing / RLS), fallback to data URL
-        const dataUrl = await blobToDataUrl(blob);
+        const dataUrl = await blobToDataUrl(compressedFile);
         onChange(dataUrl);
         setError('Uploaded locally. Configure storage for public URLs.');
       }
@@ -110,7 +82,7 @@ export function ImageUploader({ value, onChange, userId = 'anon', compact = fals
             </div>
           )}
           <div className="text-xs text-gray-500">
-            JPG, auto-downscaled to fit {maxDimension}px, quality {Math.round(quality * 100)}%
+            JPG, auto-compressed to 25% for performance (max {maxDimension}px)
           </div>
         </div>
       )}
