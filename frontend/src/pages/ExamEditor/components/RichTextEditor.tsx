@@ -23,75 +23,75 @@ const MenuBar = ({ editor }: { editor: any }) => {
     if (!editor) return null;
 
     return (
-        <div className="flex flex-wrap gap-1 p-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+        <div className="flex flex-wrap gap-1 p-2 border-b border-gray-100 dark:border-gray-800 bg-teal-50/30 dark:bg-teal-900/10">
             <button
                 onClick={() => editor.chain().focus().toggleBold().run()}
-                className={`p-1.5 rounded-md transition-colors ${editor.isActive('bold') ? 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                className={`p-1.5 rounded-md transition-colors ${editor.isActive('bold') ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-400' : 'hover:bg-teal-100/50 dark:hover:bg-teal-900/20'}`}
             >
                 <Bold className="w-4 h-4" />
             </button>
             <button
                 onClick={() => editor.chain().focus().toggleItalic().run()}
-                className={`p-1.5 rounded-md transition-colors ${editor.isActive('italic') ? 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                className={`p-1.5 rounded-md transition-colors ${editor.isActive('italic') ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-400' : 'hover:bg-teal-100/50 dark:hover:bg-teal-900/20'}`}
             >
                 <Italic className="w-4 h-4" />
             </button>
             <button
                 onClick={() => editor.chain().focus().toggleUnderline().run()}
-                className={`p-1.5 rounded-md transition-colors ${editor.isActive('underline') ? 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                className={`p-1.5 rounded-md transition-colors ${editor.isActive('underline') ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-400' : 'hover:bg-teal-100/50 dark:hover:bg-teal-900/20'}`}
             >
                 <UnderlineIcon className="w-4 h-4" />
             </button>
-            <div className="w-px h-4 bg-gray-300 dark:bg-gray-700 mx-1 self-center" />
+            <div className="w-px h-4 bg-teal-200 dark:bg-teal-800 mx-1 self-center" />
             <button
                 onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                className={`p-1.5 rounded-md transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                className={`p-1.5 rounded-md transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-400' : 'hover:bg-teal-100/50 dark:hover:bg-teal-900/20'}`}
             >
                 <Heading1 className="w-4 h-4" />
             </button>
             <button
                 onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                className={`p-1.5 rounded-md transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                className={`p-1.5 rounded-md transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-400' : 'hover:bg-teal-100/50 dark:hover:bg-teal-900/20'}`}
             >
                 <Heading2 className="w-4 h-4" />
             </button>
-            <div className="w-px h-4 bg-gray-300 dark:bg-gray-700 mx-1 self-center" />
+            <div className="w-px h-4 bg-teal-200 dark:bg-teal-800 mx-1 self-center" />
             <button
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
-                className={`p-1.5 rounded-md transition-colors ${editor.isActive('bulletList') ? 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                className={`p-1.5 rounded-md transition-colors ${editor.isActive('bulletList') ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-400' : 'hover:bg-teal-100/50 dark:hover:bg-teal-900/20'}`}
             >
                 <List className="w-4 h-4" />
             </button>
             <button
                 onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                className={`p-1.5 rounded-md transition-colors ${editor.isActive('orderedList') ? 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                className={`p-1.5 rounded-md transition-colors ${editor.isActive('orderedList') ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-400' : 'hover:bg-teal-100/50 dark:hover:bg-teal-900/20'}`}
             >
                 <ListOrdered className="w-4 h-4" />
             </button>
-            <div className="w-px h-4 bg-gray-300 dark:bg-gray-700 mx-1 self-center" />
+            <div className="w-px h-4 bg-teal-200 dark:bg-teal-800 mx-1 self-center" />
             <button
                 onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-                className={`p-1.5 rounded-md transition-colors ${editor.isActive('codeBlock') ? 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                className={`p-1.5 rounded-md transition-colors ${editor.isActive('codeBlock') ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-400' : 'hover:bg-teal-100/50 dark:hover:bg-teal-900/20'}`}
             >
                 <Code className="w-4 h-4" />
             </button>
             <button
                 onClick={() => editor.chain().focus().toggleBlockquote().run()}
-                className={`p-1.5 rounded-md transition-colors ${editor.isActive('blockquote') ? 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                className={`p-1.5 rounded-md transition-colors ${editor.isActive('blockquote') ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-400' : 'hover:bg-teal-100/50 dark:hover:bg-teal-900/20'}`}
             >
                 <Quote className="w-4 h-4" />
             </button>
             <div className="flex-1" />
             <button
                 onClick={() => editor.chain().focus().undo().run()}
-                className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className="p-1.5 rounded-md hover:teal-100/50 dark:hover:bg-teal-900/20 transition-colors"
                 disabled={!editor.can().undo()}
             >
                 <Undo className="w-4 h-4" />
             </button>
             <button
                 onClick={() => editor.chain().focus().redo().run()}
-                className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className="p-1.5 rounded-md hover:teal-100/50 dark:hover:bg-teal-900/20 transition-colors"
                 disabled={!editor.can().redo()}
             >
                 <Redo className="w-4 h-4" />
@@ -133,14 +133,26 @@ export function RichTextEditor({ value, onChange, placeholder = 'Start typing yo
     }, [value, editor]);
 
     return (
-        <div className="border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:ring-gray-900/20 focus-within:border-gray-900 transition-all">
+        <div className="border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:ring-teal-500/20 focus-within:border-teal-500 transition-all">
             <MenuBar editor={editor} />
             <EditorContent
                 editor={editor}
-                className="prose prose-sm dark:prose-invert max-w-none p-4 min-h-[150px] outline-none editor-content"
+                className="prose prose-sm dark:prose-invert max-w-none min-h-[150px] outline-none editor-content"
             />
             <style dangerouslySetInnerHTML={{
                 __html: `
+                .tiptap {
+                    min-height: 150px;
+                    padding: 1rem;
+                    outline: none !important;
+                }
+                .tiptap p.is-editor-empty:first-child::before {
+                    color: #adb5bd;
+                    content: attr(data-placeholder);
+                    float: left;
+                    height: 0;
+                    pointer-events: none;
+                }
                 .editor-content .hljs-comment,
                 .editor-content .hljs-quote { color: #616161; }
                 .editor-content .hljs-variable,

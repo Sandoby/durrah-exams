@@ -25,8 +25,8 @@ function SortableQuestionItem({ index, id, isSelected }: SortableItemProps) {
             ref={setNodeRef}
             style={style}
             className={`group flex items-center gap-2 p-2 mx-2 rounded-lg cursor-pointer transition-all ${isSelected
-                ? 'bg-gray-100 border-gray-300 dark:bg-gray-800 dark:border-gray-700'
-                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                ? 'bg-teal-50 border-teal-200 dark:bg-teal-900/30 dark:border-teal-800'
+                : 'hover:bg-teal-50/50 dark:hover:bg-teal-900/10'
                 } border border-transparent`}
             onClick={() => setSelectedQuestion(index)}
         >
@@ -35,10 +35,10 @@ function SortableQuestionItem({ index, id, isSelected }: SortableItemProps) {
             </div>
 
             <div className={`flex-1 min-w-0 flex items-center gap-2`}>
-                <span className={`text-[10px] font-bold ${isSelected ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400'}`}>
+                <span className={`text-[10px] font-bold ${isSelected ? 'text-teal-600 dark:text-teal-400' : 'text-gray-400'}`}>
                     Q{index + 1}
                 </span>
-                <p className={`text-xs truncate font-medium ${isSelected ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'}`}>
+                <p className={`text-xs truncate font-medium ${isSelected ? 'text-teal-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
                     {question.question_text.replace(/<[^>]*>/g, '') || 'Empty Question'}
                 </p>
             </div>
@@ -108,7 +108,7 @@ export function Sidebar() {
                 <div className="px-4 mt-4">
                     <button
                         onClick={() => addQuestion()}
-                        className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 text-gray-400 hover:border-gray-400 hover:text-gray-900 dark:hover:border-gray-600 transition-all text-sm font-bold"
+                        className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 border-dashed border-teal-100 dark:border-teal-900/50 text-teal-600 hover:border-teal-400 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 transition-all text-sm font-bold"
                     >
                         <Plus className="w-4 h-4" />
                         Add Question

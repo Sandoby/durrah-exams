@@ -17,7 +17,7 @@ export function EditorLayout({ sidebar, canvas, properties }: EditorLayoutProps)
         return (
             <div className="h-screen w-full flex items-center justify-center bg-gray-50 dark:bg-gray-950">
                 <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="h-10 w-10 animate-spin text-gray-900 dark:text-gray-100" />
+                    <Loader2 className="h-10 w-10 animate-spin text-teal-600 dark:text-teal-400" />
                     <p className="text-gray-500 font-medium">Loading your exam...</p>
                 </div>
             </div>
@@ -83,7 +83,7 @@ export function EditorLayout({ sidebar, canvas, properties }: EditorLayoutProps)
                                 //@ts-ignore
                                 onClick={() => setMobileTab(tab.id)}
                                 className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors ${mobileTab === tab.id
-                                    ? 'text-gray-900 bg-gray-100 dark:bg-gray-800 dark:text-white'
+                                    ? 'text-teal-600 bg-teal-50 dark:bg-teal-900/30'
                                     : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                                     }`}
                             >

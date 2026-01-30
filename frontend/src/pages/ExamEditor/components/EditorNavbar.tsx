@@ -29,7 +29,7 @@ export function EditorNavbar() {
                     <Logo showText={false} size="sm" />
                     <div className="h-4 w-px bg-gray-200 dark:bg-gray-800" />
                     <div className="flex flex-col">
-                        <span className="text-sm font-black text-gray-900 dark:text-white tracking-tight">Durrah Editor</span>
+                        <span className="text-sm font-black bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent tracking-tight">Durrah Editor</span>
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5">
@@ -44,7 +44,7 @@ export function EditorNavbar() {
                 <button
                     onClick={() => setPreviewMode(!isPreviewMode)}
                     className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-all ${isPreviewMode
-                        ? 'bg-gray-100 text-gray-900 dark:bg-gray-800'
+                        ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-400'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                         }`}
                 >
@@ -55,7 +55,7 @@ export function EditorNavbar() {
                 <button
                     onClick={saveExam}
                     disabled={isSaving}
-                    className="flex items-center gap-2 px-5 py-2 bg-gray-900 text-white text-sm font-black rounded-xl shadow-lg shadow-gray-200 dark:shadow-none hover:bg-gray-800 active:scale-[0.98] transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-5 py-2 bg-teal-600 text-white text-sm font-black rounded-xl shadow-lg shadow-teal-200 dark:shadow-none hover:bg-teal-700 active:scale-[0.98] transition-all disabled:opacity-50"
                 >
                     {isSaving ? (
                         <Loader2 className="w-4 h-4 animate-spin" />

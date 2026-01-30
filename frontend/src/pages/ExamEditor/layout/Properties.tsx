@@ -14,7 +14,7 @@ export function Properties() {
                 <button
                     onClick={() => setActiveTab('question')}
                     className={`flex-1 p-4 text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'question'
-                        ? 'text-gray-900 border-b-2 border-gray-900 bg-gray-50'
+                        ? 'text-teal-600 border-b-2 border-teal-600 bg-teal-50/30'
                         : 'text-gray-400 hover:text-gray-600'
                         }`}
                 >
@@ -23,7 +23,7 @@ export function Properties() {
                 <button
                     onClick={() => setActiveTab('exam')}
                     className={`flex-1 p-4 text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'exam'
-                        ? 'text-gray-900 border-b-2 border-gray-900 bg-gray-50'
+                        ? 'text-teal-600 border-b-2 border-teal-600 bg-teal-50/30'
                         : 'text-gray-400 hover:text-gray-600'
                         }`}
                 >
@@ -43,7 +43,7 @@ export function Properties() {
                             <select
                                 value={question.type}
                                 onChange={(e) => updateQuestion(selectedQuestionIndex!, { type: e.target.value })}
-                                className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-gray-900/20"
+                                className="w-full bg-teal-50/30 dark:bg-teal-900/10 border border-teal-100/50 dark:border-teal-800/30 rounded-2xl px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-teal-500/20"
                             >
                                 <option value="multiple_choice">Multiple Choice</option>
                                 <option value="multiple_select">Multiple Select</option>
@@ -65,7 +65,7 @@ export function Properties() {
                                     min="1"
                                     value={question.points}
                                     onChange={(e) => updateQuestion(selectedQuestionIndex!, { points: parseInt(e.target.value) || 1 })}
-                                    className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-gray-900/20 pr-12"
+                                    className="w-full bg-teal-50/30 dark:bg-teal-900/10 border border-teal-100/50 dark:border-teal-800/30 rounded-2xl px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-teal-500/20 pr-12"
                                 />
                                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400">PTS</span>
                             </div>
@@ -104,7 +104,7 @@ export function Properties() {
                                 placeholder="Instructions for students before they start..."
                                 value={exam.tutor_instructions || ''}
                                 onChange={(e) => updateExam({ tutor_instructions: e.target.value })}
-                                className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-gray-900/20 min-h-[100px] resize-y"
+                                className="w-full bg-teal-50/30 dark:bg-teal-900/10 border border-teal-100/50 dark:border-teal-800/30 rounded-2xl px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-teal-500/20 min-h-[100px] resize-y"
                             />
                             <p className="text-[10px] text-gray-400 font-medium">
                                 Shown on the start screen before students begin the exam.
@@ -124,7 +124,7 @@ export function Properties() {
                                         placeholder="No limit"
                                         value={exam.settings.time_limit_minutes || ''}
                                         onChange={(e) => updateSettings({ time_limit_minutes: parseInt(e.target.value) || null })}
-                                        className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-gray-900/20 pr-12"
+                                        className="w-full bg-teal-50/30 dark:bg-teal-900/10 border border-teal-100/50 dark:border-teal-800/30 rounded-2xl px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-teal-500/20 pr-12"
                                     />
                                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400">MIN</span>
                                 </div>
@@ -137,7 +137,7 @@ export function Properties() {
                                 <select
                                     value={exam.settings.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone}
                                     onChange={(e) => updateSettings({ timezone: e.target.value })}
-                                    className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-gray-900/20"
+                                    className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-teal-500/20"
                                 >
                                     <option value={Intl.DateTimeFormat().resolvedOptions().timeZone}>Local ({Intl.DateTimeFormat().resolvedOptions().timeZone})</option>
                                     <option value="UTC">UTC</option>
@@ -162,7 +162,7 @@ export function Properties() {
                                             type="datetime-local"
                                             value={exam.settings.start_time || ''}
                                             onChange={(e) => updateSettings({ start_time: e.target.value || null })}
-                                            className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-xs font-bold text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-gray-900/20"
+                                            className="w-full bg-teal-50/30 dark:bg-teal-900/10 border border-teal-100/50 dark:border-teal-800/30 rounded-2xl px-4 py-3 text-xs font-bold text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-teal-500/20"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -171,7 +171,7 @@ export function Properties() {
                                             type="datetime-local"
                                             value={exam.settings.end_time || ''}
                                             onChange={(e) => updateSettings({ end_time: e.target.value || null })}
-                                            className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-2xl px-4 py-3 text-xs font-bold text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-gray-900/20"
+                                            className="w-full bg-teal-50/30 dark:bg-teal-900/10 border border-teal-100/50 dark:border-teal-800/30 rounded-2xl px-4 py-3 text-xs font-bold text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-teal-500/20"
                                         />
                                     </div>
                                 </div>
@@ -200,7 +200,7 @@ export function Properties() {
                                             type="checkbox"
                                             checked={!!exam.settings[item.key as keyof typeof exam.settings]}
                                             onChange={(e) => updateSettings({ [item.key]: e.target.checked })}
-                                            className="h-4 w-4 text-gray-900 rounded"
+                                            className="h-4 w-4 text-teal-600 rounded"
                                         />
                                     </label>
                                 ))}

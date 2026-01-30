@@ -24,7 +24,7 @@ export function PreviewMode() {
                                             className="text-lg font-bold text-gray-800 dark:text-gray-200 prose prose-slate dark:prose-invert max-w-none"
                                             dangerouslySetInnerHTML={{ __html: q.question_text }}
                                         />
-                                        <span className="flex-shrink-0 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                        <span className="flex-shrink-0 px-3 py-1 bg-teal-50 dark:bg-teal-900/30 rounded-full text-[10px] font-black uppercase tracking-widest text-teal-600 dark:text-teal-400 border border-teal-100 dark:border-teal-800">
                                             {q.points} PTS
                                         </span>
                                     </div>
@@ -37,8 +37,8 @@ export function PreviewMode() {
 
                                     <div className="space-y-3">
                                         {['multiple_choice', 'multiple_select', 'dropdown'].includes(q.type) && q.options.map((opt, oIdx) => (
-                                            <div key={oIdx} className="flex items-center gap-3 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-colors cursor-pointer group">
-                                                <div className="w-5 h-5 rounded-full border-2 border-gray-200 group-hover:border-gray-400 dark:group-hover:border-gray-600 transition-colors" />
+                                            <div key={oIdx} className="flex items-center gap-3 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-teal-300 dark:hover:border-teal-700 transition-colors cursor-pointer group hover:bg-teal-50/50 dark:hover:bg-teal-900/10">
+                                                <div className="w-5 h-5 rounded-full border-2 border-gray-200 group-hover:border-teal-400 dark:group-hover:border-teal-600 transition-colors" />
                                                 <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{opt}</span>
                                             </div>
                                         ))}
@@ -51,7 +51,7 @@ export function PreviewMode() {
                                         {q.type === 'true_false' && (
                                             <div className="flex gap-4">
                                                 {['True', 'False'].map((val) => (
-                                                    <div key={val} className="flex-1 flex items-center justify-center p-4 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-colors cursor-pointer font-bold text-gray-700 dark:text-gray-300">
+                                                    <div key={val} className="flex-1 flex items-center justify-center p-4 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-teal-300 dark:hover:border-teal-700 hover:bg-teal-50/50 dark:hover:bg-teal-900/10 transition-colors cursor-pointer font-bold text-gray-700 dark:text-gray-300">
                                                         {val}
                                                     </div>
                                                 ))}
@@ -64,7 +64,7 @@ export function PreviewMode() {
                     </div>
 
                     <footer className="mt-12 text-center pb-24">
-                        <button className="px-12 py-4 bg-gray-900 text-white rounded-2xl font-black shadow-xl shadow-gray-200 dark:shadow-none hover:bg-black hover:scale-105 transition-all">
+                        <button className="px-12 py-4 bg-teal-600 text-white rounded-2xl font-black shadow-xl shadow-teal-200 dark:shadow-none hover:bg-teal-700 hover:scale-105 transition-all">
                             Submit Exam
                         </button>
                     </footer>

@@ -163,6 +163,7 @@ export default function ExamView() {
     const [showUnansweredModal, setShowUnansweredModal] = useState(false);
     const [unansweredQuestions, setUnansweredQuestions] = useState<number[]>([]);
     const [showAutoSubmitWarning, setShowAutoSubmitWarning] = useState(false);
+    const [isBlackout, setIsBlackout] = useState(false);
 
     // Initialize student data from authenticated user
     useEffect(() => {
@@ -1106,6 +1107,18 @@ export default function ExamView() {
         });
     }, [proctoringEnabled, logConvexViolation, exam?.settings.max_violations, t]);
 
+    const handleViolationModalClose = useCallback(async () => {
+        setShowViolationModal(false);
+        // If fullscreen is required and we're not in fullscreen, request it
+        if (exam?.settings.require_fullscreen && !document.fullscreenElement && started && !submitted) {
+            try {
+                await document.documentElement.requestFullscreen();
+            } catch (e) {
+                console.warn('Failed to re-enter fullscreen:', e);
+            }
+        }
+    }, [exam?.settings.require_fullscreen, started, submitted]);
+
     useEffect(() => {
         if (!started || !exam) return;
 
@@ -1176,6 +1189,16 @@ export default function ExamView() {
             }
         };
 
+        const handleBlur = () => {
+            if (started && !submitted) {
+                setIsBlackout(true);
+            }
+        };
+
+        const handleFocus = () => {
+            setIsBlackout(false);
+        };
+
         document.addEventListener('visibilitychange', handleVisibilityChange);
         document.addEventListener('contextmenu', handleContextMenu);
         document.addEventListener('copy', handleCopy);
@@ -1183,6 +1206,8 @@ export default function ExamView() {
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         window.addEventListener('beforeprint', handleBeforePrint);
+        window.addEventListener('blur', handleBlur);
+        window.addEventListener('focus', handleFocus);
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -1192,6 +1217,8 @@ export default function ExamView() {
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
             window.removeEventListener('beforeprint', handleBeforePrint);
+            window.removeEventListener('blur', handleBlur);
+            window.removeEventListener('focus', handleFocus);
         };
     }, [started, exam, violations.length, submitted]);
 
@@ -2291,6 +2318,24 @@ export default function ExamView() {
             {/* Screen Reader Announcer */}
             <announce.Announcer />
 
+            {/* Blackout Overlay to prevent screenshots */}
+            {isBlackout && (
+                <div className="fixed inset-0 bg-black z-[100] flex items-center justify-center p-6 text-center">
+                    <div className="space-y-4">
+                        <div className="bg-red-500/20 p-4 rounded-full w-20 h-20 mx-auto flex items-center justify-center border border-red-500/50">
+                            <AlertTriangle className="w-10 h-10 text-red-500" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-white">Security Blackout</h2>
+                        <p className="text-gray-400 max-w-sm">Content hidden to prevent unauthorized capture. Click back into the window and wait to resume.</p>
+                        <div className="flex justify-center gap-2">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="w-2 h-2 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: `${i * 200}ms` }} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Watermark Overlay */}
             {started && (
                 <div className={`fixed inset-0 pointer-events-none z-50 overflow-hidden select-none flex flex-wrap content-center justify-center gap-24 rotate-[-15deg] transition-opacity duration-300 ${highContrast ? 'opacity-[0.08]' : 'opacity-[0.03]'}`}>
@@ -2958,7 +3003,7 @@ export default function ExamView() {
 
                 <ViolationModal
                     isOpen={showViolationModal}
-                    onClose={() => setShowViolationModal(false)}
+                    onClose={handleViolationModalClose}
                     title={violationMessage.title}
                     message={violationMessage.message}
                     severity={violationMessage.title.includes('Final') || violationMessage.title.includes('Maximum') ? 'critical' : 'warning'}

@@ -51,7 +51,7 @@ export function Canvas() {
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
-                        <span className="text-gray-900 bg-gray-100 dark:bg-gray-800 px-4 py-1 rounded-2xl border border-gray-200 dark:border-gray-700">
+                        <span className="text-teal-900 bg-teal-50 dark:bg-teal-900/30 px-4 py-1 rounded-2xl border border-teal-100 dark:border-teal-800">
                             Question {selectedQuestionIndex + 1}
                         </span>
                     </h2>
@@ -91,8 +91,8 @@ export function Canvas() {
                                 <button
                                     onClick={() => toggleCorrectAnswer(option)}
                                     className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${(question.type === 'multiple_select' ? (question.correct_answer as string[])?.includes(option) : question.correct_answer === option)
-                                        ? 'bg-gray-900 border-gray-900 text-white shadow-lg shadow-gray-200'
-                                        : 'bg-white border-gray-200 text-transparent hover:border-gray-400'
+                                        ? 'bg-teal-600 border-teal-600 text-white shadow-lg shadow-teal-200/50'
+                                        : 'bg-white border-gray-200 text-transparent hover:border-teal-400'
                                         }`}
                                 >
                                     <CheckCircle2 className="w-4 h-4" />
@@ -121,7 +121,7 @@ export function Canvas() {
 
                     <button
                         onClick={addOption}
-                        className="flex items-center gap-2 text-gray-600 font-bold text-xs hover:text-black transition-colors ml-12"
+                        className="flex items-center gap-2 text-teal-600 font-bold text-xs hover:text-teal-700 transition-colors ml-12"
                     >
                         <Plus className="w-4 h-4" />
                         Add another option
