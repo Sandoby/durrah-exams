@@ -529,6 +529,26 @@ export default function StudentPortal() {
             </div>
           </div>
 
+
+          {/* Study Zone Request */}
+          <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg p-6 text-white group cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]" onClick={() => navigate('/study-zone')}>
+            <div className="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-700">
+              <Clock className="h-32 w-32" />
+            </div>
+            <div className="relative z-10 h-full flex flex-col justify-between">
+              <div>
+                <h3 className="text-xl font-bold mb-1 flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  Study Zone
+                </h3>
+                <p className="text-emerald-100 text-sm opacity-90">Focus with Pomodoro & Lo-Fi.</p>
+              </div>
+              <button className="mt-4 w-full py-2 bg-white/20 backdrop-blur-md rounded-lg text-sm font-semibold hover:bg-white/30 transition-colors flex items-center justify-center gap-2">
+                Enter Zone <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+
           {/* Stats Card */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700 flex flex-col justify-center">
             <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center">
