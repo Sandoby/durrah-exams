@@ -21,7 +21,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import PricingPage from './pages/PricingPage';
 
 import Dashboard from './pages/Dashboard';
-import ExamEditor from './pages/ExamEditor';
+import ExamEditor from './pages/ExamEditor.tsx';
 import ExamView from './pages/ExamView';
 import Settings from './pages/Settings';
 import AdminPanel from './pages/AdminPanel';
