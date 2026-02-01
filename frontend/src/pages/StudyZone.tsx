@@ -47,9 +47,68 @@ export default function StudyZone() {
             }
         `}>
             <Helmet>
-                <title>Study Zone | Scientific Focus & Recall Suite</title>
-                <meta name="description" content="A comprehensive suite of scientific study tools including Pomodoro, Active Recall (Blurting), Spaced Repetition (Leitner System), SQ3R, and Feynman Technique." />
-                <meta name="keywords" content="study tools, pomodoro, active recall, flashcards, leitner system, feynman technique, sq3r, study dashboard" />
+                {/* Primary Meta Tags */}
+                <title>Free Study Tools | Pomodoro Timer, Flashcards, Active Recall | Durrah Study Zone</title>
+                <meta name="title" content="Free Study Tools | Pomodoro Timer, Flashcards, Active Recall | Durrah Study Zone" />
+                <meta name="description" content="Boost your learning with free scientific study tools. Pomodoro timer, Leitner flashcards, active recall (blurting method), SQ3R reading technique, and Feynman technique. No sign-up required." />
+                <meta name="keywords" content="free study tools, pomodoro timer online, flashcards app, active recall, blurting method, leitner system, spaced repetition, sq3r reading method, feynman technique, study dashboard, focus timer, study techniques, exam preparation, memory techniques, learning tools" />
+                <meta name="author" content="Durrah Tutors" />
+                <meta name="robots" content="index, follow" />
+                <link rel="canonical" href="https://durrahtutors.com/study-zone" />
+
+                {/* Open Graph / Facebook */}
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://durrahtutors.com/study-zone" />
+                <meta property="og:title" content="Free Study Tools | Pomodoro, Flashcards & Active Recall" />
+                <meta property="og:description" content="Boost your learning with free scientific study tools. Pomodoro timer, Leitner flashcards, active recall, SQ3R, and Feynman technique. No sign-up required." />
+                <meta property="og:image" content="https://durrahtutors.com/og-study-zone.png" />
+                <meta property="og:site_name" content="Durrah Tutors" />
+                <meta property="og:locale" content="en_US" />
+
+                {/* Twitter */}
+                <meta property="twitter:card" content="summary_large_image" />
+                <meta property="twitter:url" content="https://durrahtutors.com/study-zone" />
+                <meta property="twitter:title" content="Free Study Tools | Pomodoro, Flashcards & Active Recall" />
+                <meta property="twitter:description" content="Boost your learning with free scientific study tools. Pomodoro timer, Leitner flashcards, active recall, SQ3R, and Feynman technique." />
+                <meta property="twitter:image" content="https://durrahtutors.com/og-study-zone.png" />
+
+                {/* Additional SEO */}
+                <meta name="theme-color" content="#4f46e5" />
+                <meta name="application-name" content="Durrah Study Zone" />
+                <meta name="apple-mobile-web-app-title" content="Study Zone" />
+                <meta name="apple-mobile-web-app-capable" content="yes" />
+                <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+                {/* JSON-LD Structured Data */}
+                <script type="application/ld+json">
+                    {JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "WebApplication",
+                        "name": "Durrah Study Zone",
+                        "description": "Free scientific study tools including Pomodoro timer, Leitner flashcards, active recall, SQ3R reading method, and Feynman technique.",
+                        "url": "https://durrahtutors.com/study-zone",
+                        "applicationCategory": "EducationalApplication",
+                        "operatingSystem": "Any",
+                        "offers": {
+                            "@type": "Offer",
+                            "price": "0",
+                            "priceCurrency": "USD"
+                        },
+                        "featureList": [
+                            "Pomodoro Timer with ambient sounds",
+                            "Leitner System Flashcards",
+                            "Active Recall (Blurting Method)",
+                            "SQ3R Reading Technique",
+                            "Feynman Technique Notepad",
+                            "Study Statistics Dashboard"
+                        ],
+                        "provider": {
+                            "@type": "Organization",
+                            "name": "Durrah Tutors",
+                            "url": "https://durrahtutors.com"
+                        }
+                    })}
+                </script>
             </Helmet>
 
             {/* Navigation Bar */}
