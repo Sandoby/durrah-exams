@@ -46,7 +46,7 @@ export function StudentPortalFeature() {
                                         <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700" />
                                     </div>
                                 </div>
-                                <img src="/mockups/student-portal.png" alt="Student Dashboard" className="w-full h-full object-contain bg-slate-50 dark:bg-slate-900" width={1200} height={675} loading="lazy" />
+                                <img src="/mockups/student-portal-v2.png" alt="Student Dashboard" className="w-full h-full object-contain bg-slate-50 dark:bg-slate-900" width={1200} height={675} loading="lazy" />
                             </motion.div>
 
                             <motion.div
