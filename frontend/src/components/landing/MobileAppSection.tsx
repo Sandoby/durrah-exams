@@ -5,7 +5,7 @@ import { Suspense, lazy } from 'react';
 
 const MobileWelcome = lazy(() => import('../../pages/MobileWelcome'));
 
-export function MobileAppSection({ showNonCriticalEffects }: { showNonCriticalEffects: boolean }) {
+export function MobileAppSection() {
     const { t } = useTranslation();
 
     return (
@@ -29,17 +29,13 @@ export function MobileAppSection({ showNonCriticalEffects }: { showNonCriticalEf
                                         style={{ width: '360px', height: '770px', transform: 'scale(0.733)' }}
                                         className="flex-shrink-0 bg-gray-50 dark:bg-gray-950 pointer-events-none origin-center"
                                     >
-                                        {showNonCriticalEffects ? (
-                                            <Suspense
-                                                fallback={
-                                                    <div className="h-full w-full bg-gray-50 dark:bg-gray-950" />
-                                                }
-                                            >
-                                                <MobileWelcome className="h-full" />
-                                            </Suspense>
-                                        ) : (
-                                            <div className="h-full w-full bg-gray-50 dark:bg-gray-950" />
-                                        )}
+                                        <Suspense
+                                            fallback={
+                                                <div className="h-full w-full bg-gray-50 dark:bg-gray-950" />
+                                            }
+                                        >
+                                            <MobileWelcome className="h-full" />
+                                        </Suspense>
                                     </div>
                                 </div>
                                 <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/40 via-transparent to-transparent pointer-events-none" />
@@ -52,16 +48,14 @@ export function MobileAppSection({ showNonCriticalEffects }: { showNonCriticalEf
                             className="absolute -bottom-8 -right-4 md:right-0 bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 z-20 flex flex-col items-center"
                         >
                             <div className="w-24 h-24 bg-slate-100 dark:bg-slate-900 rounded-xl mb-3 flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                                {showNonCriticalEffects && (
-                                    <img
-                                        src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://khogxhpnuhhebkevaqlg.supabase.co/storage/v1/object/public/app-releases/DurrahTutors-latest.apk"
-                                        alt="QR Code"
-                                        className="w-16 h-16 opacity-80"
-                                        width={64}
-                                        height={64}
-                                        loading="lazy"
-                                    />
-                                )}
+                                <img
+                                    src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://khogxhpnuhhebkevaqlg.supabase.co/storage/v1/object/public/app-releases/DurrahTutors-latest.apk"
+                                    alt="QR Code"
+                                    className="w-16 h-16 opacity-80"
+                                    width={64}
+                                    height={64}
+                                    loading="lazy"
+                                />
                             </div>
                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('landing.mobileApp.scan', 'Scan to Install')}</span>
                         </motion.div>

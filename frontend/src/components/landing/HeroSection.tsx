@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Sparkle } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 
-export function HeroSection({ registrationUrl, showNonCriticalEffects }: { registrationUrl: string, showNonCriticalEffects: boolean }) {
+export function HeroSection({ registrationUrl }: { registrationUrl: string }) {
     const { t, i18n } = useTranslation();
     const isRTL = i18n.language === 'ar';
 
@@ -10,9 +10,7 @@ export function HeroSection({ registrationUrl, showNonCriticalEffects }: { regis
         <section className="relative pt-28 pb-24 overflow-hidden bg-slate-50 dark:bg-slate-950">
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute -top-24 left-1/2 h-72 w-[520px] -translate-x-1/2 rounded-full bg-indigo-200/50 blur-[120px]" />
-                {showNonCriticalEffects && (
-                    <div className="absolute -bottom-20 right-10 h-72 w-72 rounded-full bg-blue-200/40 blur-[110px]" />
-                )}
+                <div className="absolute -bottom-20 right-10 h-72 w-72 rounded-full bg-blue-200/40 blur-[110px]" />
             </div>
 
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

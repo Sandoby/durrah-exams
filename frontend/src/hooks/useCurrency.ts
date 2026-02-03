@@ -4,6 +4,8 @@ import { useLocation } from './useLocation';
 const EXCHANGE_CACHE_KEY = 'exchange_rates';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
+let ratesPromise: Promise<Record<string, number>> | null = null;
+
 export function useCurrency(basePriceUSD: number) {
     const { location, isLoading: isLocationLoading } = useLocation();
     const [convertedPrice, setConvertedPrice] = useState<string | null>(null);
@@ -22,8 +24,8 @@ export function useCurrency(basePriceUSD: number) {
             }
 
             try {
-                let rates;
-                // Check cache
+                let rates: Record<string, number> | undefined;
+                // Check local storage cache
                 const cached = localStorage.getItem(EXCHANGE_CACHE_KEY);
                 if (cached) {
                     const { data, timestamp } = JSON.parse(cached);
@@ -33,24 +35,35 @@ export function useCurrency(basePriceUSD: number) {
                 }
 
                 if (!rates) {
-                    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-                    if (!response.ok) throw new Error('Failed to fetch rates');
-                    const data = await response.json();
-                    rates = data.rates;
-
-                    localStorage.setItem(EXCHANGE_CACHE_KEY, JSON.stringify({
-                        data: rates,
-                        timestamp: Date.now()
-                    }));
+                    // Use shared promise to avoid duplicate inflight requests
+                    if (!ratesPromise) {
+                        ratesPromise = fetch('https://api.exchangerate-api.com/v4/latest/USD')
+                            .then(res => {
+                                if (!res.ok) throw new Error('Failed to fetch rates');
+                                return res.json();
+                            })
+                            .then(data => {
+                                const newRates = data.rates;
+                                localStorage.setItem(EXCHANGE_CACHE_KEY, JSON.stringify({
+                                    data: newRates,
+                                    timestamp: Date.now()
+                                }));
+                                return newRates;
+                            })
+                            .catch(err => {
+                                ratesPromise = null;
+                                throw err;
+                            });
+                    }
+                    rates = await ratesPromise;
                 }
 
-                const rate = rates[location.currency];
+                const rate = rates![location.currency];
                 if (rate) {
                     const converted = (basePriceUSD * rate).toFixed(2);
                     setConvertedPrice(converted);
                     setCurrencyCode(location.currency);
                 } else {
-                    // Fallback to USD if currency not found
                     setConvertedPrice(basePriceUSD.toFixed(2));
                     setCurrencyCode('USD');
                 }
