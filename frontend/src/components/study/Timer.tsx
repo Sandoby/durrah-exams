@@ -51,6 +51,20 @@ export function StudyTimer({ isFocusMode, setIsFocusMode }: { isFocusMode: boole
         } else if (timeLeft === 0) {
             setIsActive(false);
             setIsFocusMode(false);
+
+            // Save stats to localStorage
+            const savedMinutes = parseInt(localStorage.getItem('sz_total_focus_minutes') || '0');
+            const savedSessions = parseInt(localStorage.getItem('sz_total_sessions') || '0');
+            localStorage.setItem('sz_total_focus_minutes', (savedMinutes + customDuration).toString());
+            localStorage.setItem('sz_total_sessions', (savedSessions + 1).toString());
+            localStorage.setItem('sz_last_active', new Date().toISOString());
+
+            // Update daily activity heatmap data
+            const today = new Date().toISOString().split('T')[0];
+            const activity = JSON.parse(localStorage.getItem('sz_daily_activity') || '{}');
+            activity[today] = (activity[today] || 0) + customDuration;
+            localStorage.setItem('sz_daily_activity', JSON.stringify(activity));
+
             if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
                 new Notification("Time's up!", { body: `${MODE_LABELS[mode]} completed.` });
             }

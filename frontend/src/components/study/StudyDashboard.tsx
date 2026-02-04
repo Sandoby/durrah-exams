@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-    Trophy, Flame, Clock, BookOpen,
-    Calendar, Star, Zap
+    Trophy, Flame, Clock,
+    Calendar, Star, Zap, Notebook
 } from 'lucide-react';
 
 interface Stats {
@@ -11,6 +11,10 @@ interface Stats {
     cardsReviewed: number;
     streak: number;
     lastActive: string | null;
+    blurterBest: number;
+    feynmanBest: number;
+    notesCount: number;
+    sq3rProgress: number;
 }
 
 export function StudyDashboard() {
@@ -19,7 +23,11 @@ export function StudyDashboard() {
         sessionsCompleted: 0,
         cardsReviewed: 0,
         streak: 0,
-        lastActive: null
+        lastActive: null,
+        blurterBest: 0,
+        feynmanBest: 0,
+        notesCount: 0,
+        sq3rProgress: 0
     });
 
     useEffect(() => {
@@ -29,21 +37,49 @@ export function StudyDashboard() {
         const cards = JSON.parse(localStorage.getItem('sz_leitner_cards') || '[]').length;
         const streak = parseInt(localStorage.getItem('sz_streak') || '0');
         const lastActive = localStorage.getItem('sz_last_active');
+        const blurter = parseInt(localStorage.getItem('sz_blurter_best_score') || '0');
+        const feynman = parseInt(localStorage.getItem('sz_feynman_best_score') || '0');
+        const notes = (localStorage.getItem('sz_notes') || '').length;
+
+        const sq3rData = JSON.parse(localStorage.getItem('sz_sq3r_session') || '{}');
+        const sq3rPhases = ['survey', 'question', 'read', 'recite', 'review'];
+        const currentPhaseIndex = sq3rPhases.indexOf(sq3rData.phase || 'survey');
+        const sq3rProgress = Math.round((currentPhaseIndex / (sq3rPhases.length - 1)) * 100) || 0;
 
         setStats({
             totalFocusMinutes: focusMinutes,
             sessionsCompleted: sessions,
             cardsReviewed: cards,
             streak: streak,
-            lastActive: lastActive
+            lastActive: lastActive,
+            blurterBest: blurter,
+            feynmanBest: feynman,
+            notesCount: notes,
+            sq3rProgress: sq3rProgress
         });
     }, []);
 
-    // Simple heatmap data generation (mock for now, but linked to real dates later)
-    const heatmapDays = Array.from({ length: 28 }, (_, i) => ({
-        day: i,
-        intensity: Math.floor(Math.random() * 5) // 0-4
-    }));
+    // Heatmap data generation based on real activity
+    const activity = JSON.parse(localStorage.getItem('sz_daily_activity') || '{}');
+    const heatmapDays = Array.from({ length: 28 }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (27 - i));
+        const dateKey = date.toISOString().split('T')[0];
+        const minutes = activity[dateKey] || 0;
+
+        // Map minutes to intensity (0-4)
+        let intensity = 0;
+        if (minutes > 0 && minutes <= 15) intensity = 1;
+        else if (minutes > 15 && minutes <= 45) intensity = 2;
+        else if (minutes > 45 && minutes <= 90) intensity = 3;
+        else if (minutes > 90) intensity = 4;
+
+        return {
+            day: i,
+            date: dateKey,
+            intensity
+        };
+    });
 
     return (
         <motion.div
@@ -55,11 +91,11 @@ export function StudyDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     icon={Flame}
-                    label="Current Streak"
-                    value={`${stats.streak} Days`}
+                    label="Active Recall"
+                    value={`${stats.blurterBest}%`}
                     color="text-orange-500"
                     bg="bg-orange-50 dark:bg-orange-950/20"
-                    trend="+1 from yesterday"
+                    trend="Best Blurter Score"
                 />
                 <StatCard
                     icon={Clock}
@@ -67,23 +103,23 @@ export function StudyDashboard() {
                     value={`${Math.round(stats.totalFocusMinutes / 60)}h ${stats.totalFocusMinutes % 60}m`}
                     color="text-indigo-500"
                     bg="bg-indigo-50 dark:bg-indigo-950/20"
-                    trend="Top 5% this week"
+                    trend={`${stats.sessionsCompleted} Sessions total`}
                 />
                 <StatCard
-                    icon={BookOpen}
-                    label="Concepts Mastered"
-                    value={stats.cardsReviewed.toString()}
-                    color="text-emerald-500"
-                    bg="bg-emerald-50 dark:bg-emerald-950/20"
-                    trend="Leitner System"
-                />
-                <StatCard
-                    icon={Trophy}
-                    label="Sessions"
-                    value={stats.sessionsCompleted.toString()}
+                    icon={Star}
+                    label="Feynman Score"
+                    value={`${stats.feynmanBest}%`}
                     color="text-amber-500"
                     bg="bg-amber-50 dark:bg-amber-950/20"
-                    trend="Keep it up!"
+                    trend="Teaching Simplicity"
+                />
+                <StatCard
+                    icon={Zap}
+                    label="SQ3R Depth"
+                    value={`${stats.sq3rProgress}%`}
+                    color="text-emerald-500"
+                    bg="bg-emerald-50 dark:bg-emerald-950/20"
+                    trend="Session progress"
                 />
             </div>
 
@@ -96,17 +132,7 @@ export function StudyDashboard() {
                                 <Calendar className="w-5 h-5 text-indigo-500" />
                                 Consistency Map
                             </h4>
-                            <p className="text-sm text-gray-500 mt-1">Your study activity over the last 4 weeks.</p>
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                            <span>Less</span>
-                            <div className="flex gap-1">
-                                <div className="w-3 h-3 rounded-sm bg-gray-100 dark:bg-gray-800" />
-                                <div className="w-3 h-3 rounded-sm bg-indigo-200" />
-                                <div className="w-3 h-3 rounded-sm bg-indigo-400" />
-                                <div className="w-3 h-3 rounded-sm bg-indigo-600" />
-                            </div>
-                            <span>More</span>
+                            <p className="text-sm text-gray-500 mt-1">Real-time study activity tracking.</p>
                         </div>
                     </div>
 
@@ -118,7 +144,7 @@ export function StudyDashboard() {
                             <motion.div
                                 key={day.day}
                                 whileHover={{ scale: 1.1 }}
-                                className={`aspect-square rounded-lg transition-colors border border-black/5 dark:border-white/5 ${day.intensity === 0 ? 'bg-gray-50 dark:bg-gray-800' :
+                                className={`aspect-square rounded-lg transition-colors border border-black/5 dark:border-white/5 ${day.intensity === 0 || stats.sessionsCompleted < day.day ? 'bg-gray-50 dark:bg-gray-800' :
                                     day.intensity === 1 ? 'bg-indigo-100 dark:bg-indigo-900/20' :
                                         day.intensity === 2 ? 'bg-indigo-300 dark:bg-indigo-700/40' :
                                             day.intensity === 3 ? 'bg-indigo-500' : 'bg-indigo-700 dark:bg-indigo-400'
@@ -131,14 +157,13 @@ export function StudyDashboard() {
                     <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-3xl flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-white dark:bg-gray-950 rounded-2xl shadow-sm">
-                                <Zap className="w-5 h-5 text-amber-500" />
+                                <Notebook className="w-5 h-5 text-indigo-500" />
                             </div>
                             <div>
-                                <p className="text-sm font-bold">Scientific Insight</p>
-                                <p className="text-xs text-gray-500">You are most productive on Tuesdays at 10:00 AM.</p>
+                                <p className="text-sm font-bold">Scratchpad Activity</p>
+                                <p className="text-xs text-gray-500">{stats.notesCount} characters written in your persistent notes.</p>
                             </div>
                         </div>
-                        <button className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">View Detailed Flow</button>
                     </div>
                 </div>
 
@@ -146,8 +171,8 @@ export function StudyDashboard() {
                 <div className="lg:col-span-1 space-y-6">
                     <div className="bg-indigo-600 rounded-[40px] p-8 text-white shadow-xl shadow-indigo-500/20 h-full flex flex-col">
                         <h4 className="text-lg font-bold mb-6 flex items-center gap-2">
-                            <Star className="w-5 h-5 text-amber-300" />
-                            Next Achievement
+                            <Trophy className="w-5 h-5 text-amber-300" />
+                            Next Goal
                         </h4>
 
                         <div className="flex-1 flex flex-col items-center justify-center text-center">
@@ -159,24 +184,28 @@ export function StudyDashboard() {
                                         className="fill-none stroke-white"
                                         strokeWidth="8"
                                         strokeLinecap="round"
-                                        style={{ strokeDasharray: '364', strokeDashoffset: '100' }}
+                                        style={{ strokeDasharray: '364', strokeDashoffset: `${364 - (Math.min(stats.totalFocusMinutes / 600, 1) * 364)}` }}
                                     />
                                 </svg>
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <Trophy className="w-10 h-10 text-amber-300" />
+                                    <Flame className="w-10 h-10 text-amber-300" />
                                 </div>
                             </div>
-                            <h5 className="font-bold text-xl mb-2">Focus Master I</h5>
-                            <p className="text-sm opacity-80 leading-relaxed px-4">Focus for 10 hours total. You're almost there!</p>
+                            <h5 className="font-bold text-xl mb-2">Focus Master</h5>
+                            <p className="text-sm opacity-80 leading-relaxed px-4">Reach 10 hours of focused study time.</p>
                         </div>
 
                         <div className="mt-8 space-y-3">
                             <div className="flex justify-between text-xs font-bold uppercase tracking-widest opacity-60">
                                 <span>Progress</span>
-                                <span>7.5 / 10h</span>
+                                <span>{Math.round(stats.totalFocusMinutes / 60)}h / 10h</span>
                             </div>
                             <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden">
-                                <div className="h-full bg-white rounded-full w-[75%]" />
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${Math.min((stats.totalFocusMinutes / 600) * 100, 100)}%` }}
+                                    className="h-full bg-white rounded-full"
+                                />
                             </div>
                         </div>
                     </div>

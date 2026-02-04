@@ -700,3 +700,122 @@ body {
     transform: rotate(360deg);
   }
 }
+
+/* ============================================
+   IOS / AURORA AESTHETICS
+   ============================================ */
+
+@keyframes aurora-1 {
+  0% {
+    top: 0;
+    left: 0;
+    transform: scale(1);
+  }
+
+  33% {
+    top: -10%;
+    left: 10%;
+    transform: scale(1.1);
+  }
+
+  66% {
+    top: 10%;
+    left: -5%;
+    transform: scale(0.95);
+  }
+
+  100% {
+    top: 0;
+    left: 0;
+    transform: scale(1);
+  }
+}
+
+@keyframes aurora-2 {
+  0% {
+    top: 0;
+    right: 0;
+    transform: scale(1);
+  }
+
+  33% {
+    top: 10%;
+    right: 10%;
+    transform: scale(1.1);
+  }
+
+  66% {
+    top: -5%;
+    right: -5%;
+    transform: scale(0.9);
+  }
+
+  100% {
+    top: 0;
+    right: 0;
+    transform: scale(1);
+  }
+}
+
+@keyframes aurora-3 {
+  0% {
+    bottom: 0;
+    left: 0;
+    transform: scale(1);
+  }
+
+  33% {
+    bottom: 10%;
+    left: -10%;
+    transform: scale(1.1);
+  }
+
+  66% {
+    bottom: -5%;
+    left: 10%;
+    transform: scale(0.95);
+  }
+
+  100% {
+    bottom: 0;
+    left: 0;
+    transform: scale(1);
+  }
+}
+
+.animate-aurora-1 {
+  animation: aurora-1 10s infinite ease-in-out alternate;
+}
+
+.animate-aurora-2 {
+  animation: aurora-2 12s infinite ease-in-out alternate;
+}
+
+.animate-aurora-3 {
+  animation: aurora-3 7s infinite ease-in-out alternate;
+}
+
+.glass-dock {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 10px 40px -10px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+}
+
+.dark .glass-dock {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 10px 40px -10px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+/* iOS Spring Animation approximation for non-framer elements */
+.ios-spring {
+  transition: all 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+}

@@ -34,6 +34,12 @@ export function Blurter() {
     };
 
     const finishRecall = () => {
+        const score = calculateScore();
+        const best = parseInt(localStorage.getItem('sz_blurter_best_score') || '0');
+        if (score > best) {
+            localStorage.setItem('sz_blurter_best_score', score.toString());
+        }
+        localStorage.setItem('sz_last_active', new Date().toISOString());
         setPhase('result');
     };
 

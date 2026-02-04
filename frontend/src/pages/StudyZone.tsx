@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../context/AuthContext';
 
-// Import New Modular Components
+// Import Modular Components
 import { StudyTimer } from '../components/study/Timer';
 import { Blurter } from '../components/study/Blurter';
 import { LeitnerFlashcards } from '../components/study/LeitnerFlashcards';
@@ -28,10 +28,34 @@ export default function StudyZone() {
     const [isFocusMode, setIsFocusMode] = useState(false);
     const [notes, setNotes] = useState('');
 
-    // --- Persistence ---
     useEffect(() => {
         const savedNotes = localStorage.getItem('sz_notes');
         if (savedNotes) setNotes(savedNotes);
+
+        const lastActive = localStorage.getItem('sz_last_active');
+        const streak = parseInt(localStorage.getItem('sz_streak') || '0');
+        const now = new Date();
+        const today = now.toISOString().split('T')[0];
+
+        if (lastActive) {
+            const lastDate = lastActive.split('T')[0];
+            const diffTime = Math.abs(now.getTime() - new Date(lastActive).getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) {
+                // Studied yesterday, increment streak if it's a new day
+                if (lastDate !== today) {
+                    localStorage.setItem('sz_streak', (streak + 1).toString());
+                }
+            } else if (diffDays > 1) {
+                // Missed a day or more, reset streak
+                localStorage.setItem('sz_streak', '1');
+            }
+        } else {
+            // First time studying
+            localStorage.setItem('sz_streak', '1');
+        }
+        localStorage.setItem('sz_last_active', now.toISOString());
     }, []);
 
     useEffect(() => {
@@ -39,153 +63,115 @@ export default function StudyZone() {
     }, [notes]);
 
     return (
-        <div className={`
-            min-h-screen font-sans transition-all duration-700
-            ${isFocusMode
-                ? 'bg-gray-950 text-gray-100 selection:bg-indigo-900'
-                : 'bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 selection:bg-indigo-100 dark:selection:bg-indigo-900'
-            }
-        `}>
+        <motion.div
+            animate={{
+                backgroundColor: isFocusMode ? "#000000" : "rgba(249, 250, 251, 0.5)",
+            }}
+            transition={{ duration: 1.2, ease: [0.32, 0.72, 0, 1] }}
+            className="min-h-screen relative font-[Outfit] overflow-hidden"
+        >
             <Helmet>
-                {/* Primary Meta Tags */}
-                <title>Free Study Tools | Pomodoro Timer, Flashcards, Active Recall | Durrah Study Zone</title>
-                <meta name="title" content="Free Study Tools | Pomodoro Timer, Flashcards, Active Recall | Durrah Study Zone" />
-                <meta name="description" content="Boost your learning with free scientific study tools. Pomodoro timer, Leitner flashcards, active recall (blurting method), SQ3R reading technique, and Feynman technique. No sign-up required." />
-                <meta name="keywords" content="free study tools, pomodoro timer online, flashcards app, active recall, blurting method, leitner system, spaced repetition, sq3r reading method, feynman technique, study dashboard, focus timer, study techniques, exam preparation, memory techniques, learning tools" />
-                <meta name="author" content="Durrah Tutors" />
-                <meta name="robots" content="index, follow" />
-                <link rel="canonical" href="https://durrahtutors.com/study-zone" />
-
-                {/* Open Graph / Facebook */}
-                <meta property="og:type" content="website" />
-                <meta property="og:url" content="https://durrahtutors.com/study-zone" />
-                <meta property="og:title" content="Free Study Tools | Pomodoro, Flashcards & Active Recall" />
-                <meta property="og:description" content="Boost your learning with free scientific study tools. Pomodoro timer, Leitner flashcards, active recall, SQ3R, and Feynman technique. No sign-up required." />
-                <meta property="og:image" content="https://durrahtutors.com/og-study-zone.png" />
-                <meta property="og:site_name" content="Durrah Tutors" />
-                <meta property="og:locale" content="en_US" />
-
-                {/* Twitter */}
-                <meta property="twitter:card" content="summary_large_image" />
-                <meta property="twitter:url" content="https://durrahtutors.com/study-zone" />
-                <meta property="twitter:title" content="Free Study Tools | Pomodoro, Flashcards & Active Recall" />
-                <meta property="twitter:description" content="Boost your learning with free scientific study tools. Pomodoro timer, Leitner flashcards, active recall, SQ3R, and Feynman technique." />
-                <meta property="twitter:image" content="https://durrahtutors.com/og-study-zone.png" />
-
-                {/* Additional SEO */}
-                <meta name="theme-color" content="#4f46e5" />
-                <meta name="application-name" content="Durrah Study Zone" />
-                <meta name="apple-mobile-web-app-title" content="Study Zone" />
-                <meta name="apple-mobile-web-app-capable" content="yes" />
-                <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
-                {/* JSON-LD Structured Data */}
-                <script type="application/ld+json">
-                    {JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@type": "WebApplication",
-                        "name": "Durrah Study Zone",
-                        "description": "Free scientific study tools including Pomodoro timer, Leitner flashcards, active recall, SQ3R reading method, and Feynman technique.",
-                        "url": "https://durrahtutors.com/study-zone",
-                        "applicationCategory": "EducationalApplication",
-                        "operatingSystem": "Any",
-                        "offers": {
-                            "@type": "Offer",
-                            "price": "0",
-                            "priceCurrency": "USD"
-                        },
-                        "featureList": [
-                            "Pomodoro Timer with ambient sounds",
-                            "Leitner System Flashcards",
-                            "Active Recall (Blurting Method)",
-                            "SQ3R Reading Technique",
-                            "Feynman Technique Notepad",
-                            "Study Statistics Dashboard"
-                        ],
-                        "provider": {
-                            "@type": "Organization",
-                            "name": "Durrah Tutors",
-                            "url": "https://durrahtutors.com"
-                        }
-                    })}
-                </script>
+                <title>Study Zone | Durrah Tutors</title>
+                <meta name="theme-color" content={isFocusMode ? "#000000" : "#4f46e5"} />
             </Helmet>
 
-            {/* Navigation Bar */}
-            <motion.nav
-                initial={{ opacity: 1, y: 0 }}
-                animate={{
-                    opacity: isFocusMode ? 0 : 1,
-                    y: isFocusMode ? -50 : 0
-                }}
-                className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-50 pointer-events-none"
+            {/* Dynamic Aurora Background */}
+            <motion.div
+                animate={{ opacity: isFocusMode ? 0 : 1 }}
+                transition={{ duration: 1 }}
+                className="fixed inset-0 pointer-events-none z-0"
             >
-                <div className="pointer-events-auto">
-                    {user && (
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-                        >
-                            <ArrowLeft className="w-6 h-6 opacity-70" />
-                        </button>
-                    )}
-                </div>
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/20 rounded-full blur-[120px] animate-aurora-1 mix-blend-multiply dark:mix-blend-screen" />
+                <div className="absolute top-[10%] right-[-10%] w-[40%] h-[50%] bg-purple-500/20 rounded-full blur-[120px] animate-aurora-2 mix-blend-multiply dark:mix-blend-screen" />
+                <div className="absolute bottom-[-10%] left-[20%] w-[60%] h-[40%] bg-blue-500/20 rounded-full blur-[120px] animate-aurora-3 mix-blend-multiply dark:mix-blend-screen" />
+            </motion.div>
 
-                <div className={`pointer-events-auto flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-md border transition-all ${isFocusMode ? 'bg-black/50 border-white/20' : 'bg-white/50 dark:bg-black/30 border-gray-200/50 dark:border-gray-800/50'}`}>
-                    <Brain className="w-4 h-4 text-indigo-500" />
-                    <span className="text-sm font-medium opacity-80">Study Zone 2.0</span>
-                </div>
-
-                <div className="w-10" />
-            </motion.nav>
-
-            {/* Focus Mode Close Button */}
+            {/* Focus Mode Immersive Blur Overlay */}
             <AnimatePresence>
                 {isFocusMode && (
-                    <motion.button
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 0.5, y: 0 }}
-                        whileHover={{ opacity: 1, scale: 1.05 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        onClick={() => setIsFocusMode(false)}
-                        className="fixed top-6 right-6 z-50 p-2 bg-white/10 backdrop-blur-md rounded-full text-white border border-white/20 shadow-lg"
-                        title="Exit Focus Mode"
-                    >
-                        <Minimize2 className="w-5 h-5" />
-                    </motion.button>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 1 }}
+                        className="fixed inset-0 z-10 pointer-events-none backdrop-blur-[2px] bg-black/20"
+                    />
                 )}
             </AnimatePresence>
 
-            {/* Bottom Tool Dock */}
-            <motion.div
-                initial={{ y: 100 }}
-                animate={{ y: isFocusMode ? 100 : 0 }}
-                className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-fit px-4"
+            {/* iOS-Style Glass Header */}
+            <motion.header
+                initial={{ y: -100 }}
+                animate={{ y: isFocusMode ? -100 : 0 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed top-0 inset-x-0 h-16 z-40 flex items-center justify-between px-4 sm:px-6
+                          backdrop-blur-xl bg-white/70 dark:bg-gray-900/60 border-b border-white/20 dark:border-white/5"
             >
-                <div className="flex items-center gap-1 p-1 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl overflow-x-auto no-scrollbar">
-                    <NavButton active={activeTool === 'timer'} onClick={() => setActiveTool('timer')} icon={RotateCcw} label="Timer" />
-                    <NavButton active={activeTool === 'blurter'} onClick={() => setActiveTool('blurter')} icon={Zap} label="Blurter" />
-                    <NavButton active={activeTool === 'flashcards'} onClick={() => setActiveTool('flashcards')} icon={BookOpen} label="Cards" />
-                    <NavButton active={activeTool === 'sq3r'} onClick={() => setActiveTool('sq3r')} icon={Lightbulb} label="SQ3R" />
-                    <NavButton active={activeTool === 'feynman'} onClick={() => setActiveTool('feynman')} icon={Brain} label="Feynman" />
-                    <NavButton active={activeTool === 'dashboard'} onClick={() => setActiveTool('dashboard')} icon={BarChart2} label="Stats" />
-                    <NavButton active={activeTool === 'notes'} onClick={() => setActiveTool('notes')} icon={Notebook} label="Notes" />
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all"
+                    >
+                        <ArrowLeft className="w-5 h-5 opacity-70" />
+                    </button>
+                    <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+                        Study Zone
+                    </h1>
                 </div>
-            </motion.div>
+
+                <div className="flex items-center gap-3">
+                    {/* Placeholder for future header actions */}
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs ring-2 ring-white dark:ring-gray-800 shadow-sm">
+                        {user ? user.email?.charAt(0).toUpperCase() : 'G'}
+                    </div>
+                </div>
+            </motion.header>
+
+            {/* Focus Mode Overlay Controls */}
+            <AnimatePresence>
+                {isFocusMode && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed top-6 right-6 z-50 pointer-events-auto"
+                    >
+                        <button
+                            onClick={() => setIsFocusMode(false)}
+                            className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white border border-white/10 shadow-xl hover:bg-white/20 transition-all group"
+                        >
+                            <Minimize2 className="w-4 h-4 group-hover:scale-90 transition-transform" />
+                            <span className="text-sm font-medium">Exit Focus</span>
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Main Content Area */}
-            <main className={`
-                container mx-auto px-4 min-h-screen flex flex-col items-center justify-center transition-all duration-700
-                ${isFocusMode ? 'gap-0' : 'pt-28 pb-32'}
-            `}>
+            <motion.main
+                animate={{
+                    paddingTop: isFocusMode ? 0 : "6rem",
+                    paddingBottom: isFocusMode ? 0 : "8rem"
+                }}
+                transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
+                className={`
+                    relative z-20 w-full min-h-screen flex flex-col items-center px-4
+                    ${isFocusMode ? 'justify-center' : ''}
+                `}
+            >
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={activeTool}
-                        initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.98, y: -10 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                        className="w-full flex justify-center"
+                        initial={{ opacity: 0, scale: 0.95, y: 20, filter: 'blur(10px)' }}
+                        animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                        exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 350,
+                            damping: 30,
+                            mass: 0.8
+                        }}
+                        className={`w-full max-w-7xl mx-auto flex justify-center ${isFocusMode ? 'h-full items-center' : ''}`}
                     >
                         {activeTool === 'timer' && (
                             <StudyTimer isFocusMode={isFocusMode} setIsFocusMode={setIsFocusMode} />
@@ -195,38 +181,137 @@ export default function StudyZone() {
                         {activeTool === 'sq3r' && <SQ3RReader />}
                         {activeTool === 'feynman' && <FeynmanNotepad />}
                         {activeTool === 'dashboard' && <StudyDashboard />}
+
                         {activeTool === 'notes' && (
-                            <div className="w-full max-w-4xl h-[600px] bg-white dark:bg-gray-900 rounded-[40px] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col">
-                                <div className="p-8 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between">
-                                    <h3 className="text-xl font-bold flex items-center gap-2">
-                                        <Notebook className="w-6 h-6 text-indigo-500" />
-                                        Persistent Scratchpad
-                                    </h3>
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Auto-saving to browser</span>
+                            <div className="w-full max-w-3xl aspect-[3/4] md:aspect-[4/3] bg-white dark:bg-gray-800 rounded-[32px] shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col relative group">
+                                <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none" />
+                                <div className="p-6 md:p-8 flex items-center justify-between border-b border-gray-100 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm sticky top-0 z-10">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 rounded-xl">
+                                            <Notebook className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">Scratchpad</h3>
+                                            <p className="text-xs text-gray-500 font-medium">Auto-saves locally</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs font-mono text-gray-400 bg-gray-50 dark:bg-gray-900 px-2 py-1 rounded-md border border-gray-100 dark:border-gray-800">
+                                        {notes.length} chars
+                                    </span>
                                 </div>
                                 <textarea
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
-                                    placeholder="Start writing your study notes here..."
-                                    className="flex-1 w-full p-10 bg-transparent border-none focus:ring-0 resize-none font-serif text-xl leading-relaxed dark:text-gray-200 placeholder:opacity-30"
+                                    placeholder="Type your notes here..."
+                                    className="flex-1 w-full p-8 md:p-10 bg-transparent border-none focus:ring-0 resize-none font-serif text-lg md:text-xl leading-8 text-gray-700 dark:text-gray-300 placeholder:text-gray-300 dark:placeholder:text-gray-600 selection:bg-yellow-100 dark:selection:bg-yellow-900/30"
+                                    spellCheck={false}
                                 />
                             </div>
                         )}
                     </motion.div>
                 </AnimatePresence>
-            </main>
-        </div>
+            </motion.main>
+
+            {/* Floating Dock (iOS Style) */}
+            <motion.div
+                initial={{ y: 150 }}
+                animate={{ y: isFocusMode ? 200 : 0 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+                className="fixed bottom-6 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-auto md:max-w-4xl z-50 flex justify-center"
+            >
+                <div className="glass-dock p-2 rounded-[24px] md:rounded-full flex items-center gap-1 md:gap-2 overflow-x-auto no-scrollbar max-w-full shadow-2xl ring-1 ring-white/20">
+                    <DockItem
+                        active={activeTool === 'timer'}
+                        onClick={() => setActiveTool('timer')}
+                        icon={RotateCcw}
+                        label="Timer"
+                        activeColor="text-rose-500"
+                    />
+                    <div className="w-px h-8 bg-gray-300/30 dark:bg-gray-700/30 mx-1 hidden md:block" />
+
+                    <DockItem
+                        active={activeTool === 'blurter'}
+                        onClick={() => setActiveTool('blurter')}
+                        icon={Zap}
+                        label="Blurter"
+                        activeColor="text-orange-500"
+                    />
+                    <DockItem
+                        active={activeTool === 'flashcards'}
+                        onClick={() => setActiveTool('flashcards')}
+                        icon={BookOpen}
+                        label="Cards"
+                        activeColor="text-emerald-500"
+                    />
+                    <DockItem
+                        active={activeTool === 'sq3r'}
+                        onClick={() => setActiveTool('sq3r')}
+                        icon={Lightbulb}
+                        label="SQ3R"
+                        activeColor="text-sky-500"
+                    />
+                    <DockItem
+                        active={activeTool === 'feynman'}
+                        onClick={() => setActiveTool('feynman')}
+                        icon={Brain}
+                        label="Feynman"
+                        activeColor="text-teal-500"
+                    />
+
+                    <div className="w-px h-8 bg-gray-300/30 dark:bg-gray-700/30 mx-1 hidden md:block" />
+
+                    <DockItem
+                        active={activeTool === 'notes'}
+                        onClick={() => setActiveTool('notes')}
+                        icon={Notebook}
+                        label="Notes"
+                        activeColor="text-amber-600"
+                    />
+                    <DockItem
+                        active={activeTool === 'dashboard'}
+                        onClick={() => setActiveTool('dashboard')}
+                        icon={BarChart2}
+                        label="Stats"
+                        activeColor="text-blue-600"
+                    />
+                </div>
+            </motion.div>
+        </motion.div>
     );
 }
 
-function NavButton({ active, onClick, icon: Icon, label }: any) {
+function DockItem({ active, onClick, icon: Icon, label, activeColor }: any) {
     return (
         <button
             onClick={onClick}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${active ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+            className="group relative flex flex-col items-center justify-center min-w-[64px] h-[64px] rounded-2xl md:rounded-full transition-all duration-300 focus:outline-none"
         >
-            <Icon className="w-4 h-4" />
-            <span className="hidden lg:inline">{label}</span>
+            {active && (
+                <motion.div
+                    layoutId="dockHighlight"
+                    className="absolute inset-0 bg-gray-900/5 dark:bg-white/10 shadow-sm rounded-2xl md:rounded-full z-0 border border-black/5 dark:border-white/10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+            )}
+
+            <div className={`relative z-10 flex flex-col items-center gap-1 transition-all duration-300 ${active ? '-translate-y-1' : ''}`}>
+                <div className={`
+                    p-2 rounded-xl transition-all duration-300
+                    ${active
+                        ? activeColor
+                        : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-gray-100 group-hover:bg-black/5 dark:group-hover:bg-white/5'
+                    }
+                `}>
+                    <Icon className="w-6 h-6" strokeWidth={active ? 2.5 : 1.5} />
+                </div>
+                <span className={`text-[9px] font-bold uppercase tracking-[0.05em] transition-all duration-300 ${active ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 absolute bottom-0'} ${active ? activeColor : 'text-gray-400'}`}>
+                    {label}
+                </span>
+            </div>
+
+            {!active && (
+                <div className="absolute -bottom-1 w-1 h-1 rounded-full bg-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            )}
         </button>
     );
 }

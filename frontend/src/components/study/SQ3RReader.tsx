@@ -61,6 +61,7 @@ export function SQ3RReader() {
         const currentIndex = PHASES.findIndex(p => p.id === phase);
         if (currentIndex < PHASES.length - 1) {
             setPhase(PHASES[currentIndex + 1].id);
+            localStorage.setItem('sz_last_active', new Date().toISOString());
         }
     };
 

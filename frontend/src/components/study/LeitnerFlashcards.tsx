@@ -57,6 +57,7 @@ export function LeitnerFlashcards() {
         const newNextReview = Date.now() + BOX_INTERVALS[newBox];
 
         setCards(prev => prev.map(c => c.id === card.id ? { ...c, box: newBox, nextReview: newNextReview } : c));
+        localStorage.setItem('sz_last_active', new Date().toISOString());
 
         if (currentIndex < reviewQueue.length - 1) {
             setCurrentIndex(currentIndex + 1);

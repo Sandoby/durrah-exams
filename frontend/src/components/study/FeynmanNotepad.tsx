@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Brain, Sparkles, AlertTriangle, CheckCircle2, Info } from 'lucide-react';
 
@@ -34,6 +34,16 @@ export function FeynmanNotepad() {
             longSentences
         };
     }, [explanation]);
+
+    useEffect(() => {
+        if (complexityAnalysis.score > 0) {
+            const best = parseInt(localStorage.getItem('sz_feynman_best_score') || '0');
+            if (complexityAnalysis.score > best) {
+                localStorage.setItem('sz_feynman_best_score', complexityAnalysis.score.toString());
+            }
+            localStorage.setItem('sz_last_active', new Date().toISOString());
+        }
+    }, [complexityAnalysis.score]);
 
     return (
         <motion.div
