@@ -1015,7 +1015,7 @@ export default function ExamEditor() {
                                     </p>
                                 </div>
 
-                                <div className="p-8 grid grid-cols-1 gap-10 sm:grid-cols-2">
+                                <div className="p-4 sm:p-8 grid grid-cols-1 gap-10 lg:grid-cols-2">
                                 {watch('settings.child_mode_enabled') ? (
                                     <div className="col-span-2">
                                         <div className="p-8 rounded-[2rem] border border-purple-100 dark:border-purple-800 bg-gradient-to-br from-purple-50/50 to-pink-50/50 dark:from-purple-900/20 dark:to-pink-900/20 relative overflow-hidden">
@@ -1144,23 +1144,25 @@ export default function ExamEditor() {
                                                             </div>
                                                         </div>
                                                     )}
-                                                    <input
-                                                        type="checkbox"
-                                                        className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded"
-                                                        {...register('settings.show_detailed_results')}
-                                                        onChange={(e) => {
-                                                            if (profile?.subscription_status !== 'active' && e.target.checked) {
-                                                                e.preventDefault();
-                                                                toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
-                                                                navigate('/checkout');
-                                                                return;
-                                                            }
-                                                            setValue('settings.show_detailed_results', e.target.checked);
-                                                        }}
-                                                    />
-                                                    <div className="ml-3">
-                                                        <span className="block text-sm font-bold text-slate-700 dark:text-slate-300">Show answers after submission</span>
-                                                        <span className="text-xs text-slate-500 font-medium">Students can see which questions they got wrong.</span>
+                                                    <div className="flex items-start gap-3 w-full">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded mt-0.5 flex-shrink-0"
+                                                            {...register('settings.show_detailed_results')}
+                                                            onChange={(e) => {
+                                                                if (profile?.subscription_status !== 'active' && e.target.checked) {
+                                                                    e.preventDefault();
+                                                                    toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
+                                                                    navigate('/checkout');
+                                                                    return;
+                                                                }
+                                                                setValue('settings.show_detailed_results', e.target.checked);
+                                                            }}
+                                                        />
+                                                        <div className="flex-1 min-w-0">
+                                                            <span className="block text-sm font-bold text-slate-700 dark:text-slate-300 break-words">Show answers after submission</span>
+                                                            <span className="text-xs text-slate-500 font-medium block mt-0.5 leading-snug break-words">Students can see which questions they got wrong.</span>
+                                                        </div>
                                                     </div>
                                                 </label>
                                             </div>
