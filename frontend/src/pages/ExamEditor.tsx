@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { RichTextEditor } from './ExamEditor/components/RichTextEditor';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, LayoutList, Crown, LogOut, Menu, Sigma, Mail } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Loader2, BookOpen, Sparkles, X, Settings, Maximize, MonitorOff, ClipboardX, Crown, LogOut, Menu, Sigma, Mail, ChevronDown, Hash, Users, ListChecks, GripVertical, CheckCircle2, ToggleLeft, ArrowDownCircle, CheckSquare } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -13,7 +14,6 @@ import { useAuth } from '../context/AuthContext';
 import { EmailWhitelist } from '../components/EmailWhitelist';
 import { useDemoTour } from '../hooks/useDemoTour';
 import { SortableQuestionItem } from '../components/SortableQuestionItem';
-import { ExamPreviewPanel } from '../components/ExamPreviewPanel';
 import { ImageUploader } from '../components/ImageUploader';
 import Latex from 'react-latex-next';
 
@@ -84,6 +84,9 @@ export default function ExamEditor() {
     const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
     const [profile, setProfile] = useState<any>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    
+    // Tab State
+    const [activeTab, setActiveTab] = useState('basic');
 
     const handleLogout = async () => {
         try {
@@ -145,7 +148,7 @@ export default function ExamEditor() {
         })
     );
 
-    const { register, control, handleSubmit, reset, watch, setValue } = useForm<ExamForm>({
+    const { register, control, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<ExamForm>({
         defaultValues: {
             title: '',
             description: '',
@@ -602,13 +605,7 @@ export default function ExamEditor() {
         }
     };
 
-    const toggleBankSelection = (bankId: string) => {
-        setSelectedBankIds(prev =>
-            prev.includes(bankId)
-                ? prev.filter(id => id !== bankId)
-                : [...prev, bankId]
-        );
-    };
+
 
     if (isFetching) {
         return (
@@ -619,15 +616,17 @@ export default function ExamEditor() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1120] font-sans pb-40 relative overflow-x-hidden pt-20 selection:bg-indigo-500/20 selection:text-indigo-600 dark:selection:bg-indigo-500/30 dark:selection:text-indigo-400">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-40 relative overflow-x-hidden pt-20 selection:bg-indigo-500/30 selection:text-indigo-700 dark:selection:bg-indigo-500/30 dark:selection:text-indigo-400 text-slate-900 dark:text-slate-100">
             {/* Ambient Background Lights */}
-            <div className="fixed top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-indigo-50/50 via-white/0 to-transparent dark:from-indigo-950/20 dark:via-gray-950/0 pointer-events-none" />
-            <div className="fixed -top-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
-            <div className="fixed top-40 -left-20 w-72 h-72 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
+            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-indigo-500/5 blur-[120px]" />
+                <div className="absolute top-[10%] -right-[10%] w-[50%] h-[60%] rounded-full bg-blue-500/5 blur-[120px]" />
+                <div className="absolute bottom-[10%] left-[20%] w-[40%] h-[40%] rounded-full bg-purple-500/5 blur-[100px]" />
+            </div>
 
             {/* Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 pt-4 pb-2">
-                <div className="max-w-7xl mx-auto bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl rounded-2xl shadow-sm border border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
+            <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 pt-4 pb-2 transition-transform duration-300">
+                <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200/50 dark:border-slate-800/50 transition-all duration-300 hover:shadow-md hover:bg-white/80 dark:hover:bg-slate-900/80">
                     <div className="flex justify-between h-14 sm:h-16 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
                             <Logo className="h-8 w-8" showText={false} />
@@ -713,42 +712,44 @@ export default function ExamEditor() {
             )}
 
             {/* Fixed Header Container */}
-            <div className="fixed top-16 sm:top-20 left-0 right-0 z-40 px-3 sm:px-6 lg:px-8 transition-all duration-300 pointer-events-none">
+            <div className="fixed top-20 left-0 right-0 z-40 px-3 sm:px-6 lg:px-8 transition-all duration-300 pointer-events-none">
                 <div className="max-w-[1600px] mx-auto pointer-events-auto">
-                    <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50 shadow-md rounded-2xl sm:rounded-3xl p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between">
+                    <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 shadow-lg shadow-slate-200/20 dark:shadow-none rounded-2xl sm:rounded-3xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between ring-1 ring-black/5 dark:ring-white/5">
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => navigate(isDemo ? '/demo' : '/dashboard')}
-                                className="group p-2.5 rounded-xl bg-white dark:bg-gray-800 text-gray-500 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all shadow-sm"
+                                className="group p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all shadow-sm active:scale-95"
                             >
                                 <ArrowLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
                             </button>
-                            <div>
-                                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                            <div className="flex flex-col">
+                                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                                     {id ? t('examEditor.editTitle') : t('examEditor.createTitle')}
+                                    {id && <span className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-wider border border-indigo-100 dark:border-indigo-800">Edit Mode</span>}
                                 </h1>
-                                <p className="text-xs text-gray-500 font-medium mt-0.5">
-                                    {savedQuizCode ? `Code: ${savedQuizCode}` : 'Draft Mode'}
+                                <p className="text-xs text-slate-500 font-medium flex items-center gap-1.5 mt-0.5">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${isLoading ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+                                    {savedQuizCode ? <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 rounded text-slate-600 dark:text-slate-400">#{savedQuizCode}</span> : 'Draft Mode'}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                        <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
                             {/* Imports Button */}
                             <button
                                 onClick={() => setShowImportModal(true)}
                                 type="button"
-                                className="inline-flex items-center px-4 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-750 hover:border-gray-300 dark:hover:border-gray-600 transition-all shadow-sm whitespace-nowrap"
+                                className="inline-flex items-center px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 dark:hover:border-slate-600 transition-all shadow-sm whitespace-nowrap active:scale-95"
                             >
                                 <BookOpen className="h-4 w-4 mr-2 text-indigo-500" />
-                                Import
+                                Import Questions
                             </button>
 
                             {/* Save Button */}
                             {isDemo ? (
                                 <Link
                                     to="/register"
-                                    className="inline-flex items-center px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-bold shadow-lg shadow-gray-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap"
+                                    className="inline-flex items-center px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold shadow-lg shadow-slate-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap border border-transparent hover:shadow-xl"
                                 >
                                     <Sparkles className="h-4 w-4 mr-2" />
                                     Sign Up to Save
@@ -757,7 +758,7 @@ export default function ExamEditor() {
                                 <button
                                     onClick={handleSubmit(onSubmit)}
                                     disabled={isLoading}
-                                    className="inline-flex items-center px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-bold shadow-lg shadow-gray-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ml-auto sm:ml-0"
+                                    className="inline-flex items-center px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold shadow-lg shadow-slate-200 dark:shadow-none hover:translate-y-[-1px] active:scale-[0.98] active:translate-y-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ml-auto sm:ml-0"
                                 >
                                     {isLoading ? (
                                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -772,58 +773,115 @@ export default function ExamEditor() {
                 </div>
             </div>
 
-            <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pt-44 sm:pt-48 lg:pt-52">
-                <div className="flex flex-col xl:flex-row gap-4 sm:gap-8 items-start">
-                    {/* Left Column: Form Editor */}
-                    <div className="flex-1 w-full space-y-4 sm:space-y-8 min-w-0">
-                        {/* Basic Info */}
-                        <div className="bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden group">
-                            {/* Decorative highlight */}
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-48 sm:pt-52 lg:pt-56">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    {/* Left Navigation (Desktop) */}
+                    <aside className="hidden lg:block lg:col-span-3 sticky top-48">
+                        <nav className="space-y-1" aria-label="Exam Sections">
+                            {[
+                                { id: 'basic', label: t('examEditor.basicInfo.title', 'Basic Info'), icon: Hash },
+                                { id: 'student', label: t('examEditor.studentInfo.title', 'Student Info'), icon: Users, hidden: watch('settings.child_mode_enabled') },
+                                { id: 'settings', label: t('examEditor.settings.title', 'Settings'), icon: Settings },
+                                { id: 'questions', label: t('examEditor.questions.title', 'Questions'), icon: ListChecks },
+                            ].filter(item => !item.hidden).map((item) => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setActiveTab(item.id)}
+                                    className={`w-full flex items-center gap-3 px-4 py-4 rounded-2xl text-sm font-bold transition-all text-left group border-2 ${
+                                        activeTab === item.id 
+                                        ? 'bg-white dark:bg-slate-900 border-indigo-600 text-indigo-700 dark:text-indigo-400 shadow-lg shadow-indigo-100 dark:shadow-none translate-x-3' 
+                                        : 'bg-transparent border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                    }`}
+                                >
+                                    <div className={`p-2 rounded-xl transition-all ${activeTab === item.id ? 'bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400'}`}>
+                                        <item.icon className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex-1">
+                                        {item.label}
+                                        {item.id === 'questions' && (
+                                            <p className="text-[10px] font-medium text-slate-400 mt-0.5">{fields.length} items</p>
+                                        )}
+                                    </div>
+                                    {activeTab === item.id && (
+                                        <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
+                                    )}
+                                </button>
+                            ))}
+                        </nav>
+                    </aside>
 
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2.5">
-                                <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
-                                    <Sparkles className="w-4 h-4" />
+                    {/* Center Column: Form Editor */}
+                    <main className="lg:col-span-9 xl:col-span-9 w-full space-y-6 min-w-0">
+                        {/* Basic Info */}
+                        <div className={activeTab === 'basic' ? 'block animate-in fade-in slide-in-from-bottom-4 duration-500' : 'hidden'}>
+                            <section className="bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl relative overflow-hidden group">
+                                <div className="p-8 border-b border-slate-100 dark:border-slate-800">
+                                    <h3 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                                        <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl text-indigo-600 dark:text-indigo-400">
+                                            <Hash className="w-6 h-6" />
+                                        </div>
+                                        {t('examEditor.basicInfo.title')}
+                                    </h3>
+                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-2 ml-[3.25rem]">
+                                        Set up the core details of your exam.
+                                    </p>
                                 </div>
-                                {t('examEditor.basicInfo.title')}
-                            </h3>
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">
-                                        {t('examEditor.basicInfo.examTitle')}
-                                        <span className="text-red-500 ml-1">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        required
-                                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none placeholder:text-gray-400 font-medium"
-                                        placeholder="e.g., Final Physics Assessment"
-                                        {...register('title')}
-                                    />
+
+                                <div className="p-8 space-y-8">
+                                    {/* Title */}
+                                    <div className="space-y-4">
+                                        <label className="text-sm font-bold text-slate-900 dark:text-white flex items-center justify-between">
+                                            {t('examEditor.basicInfo.examTitle', 'Exam Title')}
+                                            <span className="text-xs font-medium text-slate-400">Required</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder={t('examEditor.basicInfo.titlePlaceholder', 'Enter exam title...')}
+                                            className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-bold text-lg"
+                                            {...register('title', { required: true })}
+                                        />
+                                        {errors.title && <p className="text-red-500 text-sm font-medium pl-2">Title is required</p>}
+                                    </div>
+
+                                    {/* Description */}
+                                    <div className="space-y-4">
+                                        <label className="text-sm font-bold text-slate-900 dark:text-white">
+                                            {t('examEditor.basicInfo.description', 'Description')}
+                                        </label>
+                                        <textarea
+                                            rows={4}
+                                            placeholder={t('examEditor.basicInfo.descPlaceholder', 'Enter exam description...')}
+                                            className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all resize-none"
+                                            {...register('description')}
+                                        />
+                                    </div>
                                 </div>
-                                <div id="exam-description">
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">
-                                        {t('examEditor.basicInfo.description')}
-                                        <span className="text-red-500 ml-1">*</span>
-                                    </label>
-                                    <textarea
-                                        rows={3}
-                                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none resize-none placeholder:text-gray-400 font-medium"
-                                        placeholder="Briefly describe the purpose of this exam..."
-                                        {...register('description')}
-                                    />
-                                </div>
-                            </div>
+                            </section>
                         </div>
 
                         {/* Student Fields - Hidden in Kids Mode */}
-                        {!watch('settings.child_mode_enabled') && (
-                            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-sm border border-gray-100 dark:border-gray-800 rounded-[2rem] p-8" id="required-fields">
-                                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">{t('examEditor.studentInfo.title')}</h3>
-                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-8">{t('examEditor.studentInfo.desc')}</p>
-                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className={activeTab === 'student' ? 'block animate-in fade-in slide-in-from-bottom-4 duration-500' : 'hidden'}>
+                            {!watch('settings.child_mode_enabled') && (
+                                <section className="bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl relative overflow-hidden">
+                                    <div className="p-8 border-b border-slate-100 dark:border-slate-800">
+                                        <h3 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                                            <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-slate-600 dark:text-slate-400">
+                                                <Users className="w-6 h-6" />
+                                            </div>
+                                            {t('examEditor.studentInfo.title')}
+                                        </h3>
+                                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-2 ml-[3.25rem]">
+                                            {t('examEditor.studentInfo.desc')}
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="p-8">
+                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-8">
                                     {['name', 'email', 'student_id', 'phone'].map((field) => (
-                                        <label key={field} className="flex items-center p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 border-2 border-transparent hover:border-indigo-500/20 cursor-pointer transition-all">
+                                        <label key={field} className="relative flex items-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-2 border-transparent hover:border-indigo-500/20 cursor-pointer transition-all shadow-sm group">
+                                            <div className={`p-2 rounded-lg mr-4 transition-colors ${watch('required_fields')?.includes(field) ? 'bg-indigo-50 text-indigo-600' : 'bg-white text-slate-400'}`}>
+                                                 {field === 'email' ? <Mail className="w-5 h-5"/> : <ClipboardX className="w-5 h-5"/>}
+                                            </div>
                                             <input
                                                 type="checkbox"
                                                 checked={watch('required_fields')?.includes(field)}
@@ -835,89 +893,94 @@ export default function ExamEditor() {
                                                         setValue('required_fields', current.filter(f => f !== field));
                                                     }
                                                 }}
-                                                className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded-lg"
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                             />
-                                            <span className="ml-3 text-sm font-bold text-gray-700 dark:text-gray-300 capitalize">
+                                            <span className="text-sm font-bold text-slate-700 dark:text-slate-200 capitalize group-hover:text-slate-900 dark:group-hover:text-white">
                                                 {field.replace('_', ' ')}
                                             </span>
+                                            {watch('required_fields')?.includes(field) && (
+                                                <div className="absolute right-4 text-indigo-500">
+                                                    <div className="w-2 h-2 rounded-full bg-indigo-500 ring-4 ring-indigo-100 dark:ring-indigo-900/30" />
+                                                </div>
+                                            )}
                                         </label>
                                     ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Email Access Control */}
-                        {!watch('settings.child_mode_enabled') && (
-                            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden group">
-                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
-                                                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
-                                                    <Mail className="w-4 h-4" />
-                                                </div>
-                                                {t('examEditor.emailAccess.title')}
-                                            </h3>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 ml-11">
-                                                {t('examEditor.emailAccess.desc')}
-                                            </p>
-                                        </div>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                className="sr-only peer"
-                                                checked={watch('settings.restrict_by_email')}
-                                                onChange={(e) => {
-                                                    if (profile?.subscription_status !== 'active' && e.target.checked) {
-                                                        toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
-                                                        navigate('/checkout');
-                                                        return;
-                                                    }
-                                                    setValue('settings.restrict_by_email', e.target.checked);
-                                                    if (e.target.checked && !watch('required_fields')?.includes('email')) {
-                                                        const current = watch('required_fields') || [];
-                                                        setValue('required_fields', [...current, 'email']);
-                                                    }
-                                                }}
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
-                                        </label>
-                                        {profile?.subscription_status !== 'active' && (
-                                            <div className="absolute -top-1 -right-1">
-                                                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
-                                                    <Crown className="w-2.5 h-2.5" />
-                                                    PRO
-                                                </div>
-                                            </div>
-                                        )}
                                     </div>
 
-                                    {watch('settings.restrict_by_email') && (
-                                        <div className="ml-1">
-                                            <EmailWhitelist
-                                                emails={watch('settings.allowed_emails') || []}
-                                                onChange={(emails) => setValue('settings.allowed_emails', emails)}
-                                            />
+                                    {/* Email Access Control inside the same section for cleaner UX */}
+                                    <div className="bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 relative overflow-hidden group/email">
+                                        <div className="space-y-6">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+                                                        <Mail className="w-4 h-4 text-blue-500" />
+                                                        {t('examEditor.emailAccess.title')}
+                                                    </h3>
+                                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                                        {t('examEditor.emailAccess.desc')}
+                                                    </p>
+                                                </div>
+                                                <label className="relative inline-flex items-center cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="sr-only peer"
+                                                        checked={watch('settings.restrict_by_email')}
+                                                        onChange={(e) => {
+                                                            if (profile?.subscription_status !== 'active' && e.target.checked) {
+                                                                toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
+                                                                navigate('/checkout');
+                                                                return;
+                                                            }
+                                                            setValue('settings.restrict_by_email', e.target.checked);
+                                                            if (e.target.checked && !watch('required_fields')?.includes('email')) {
+                                                                const current = watch('required_fields') || [];
+                                                                setValue('required_fields', [...current, 'email']);
+                                                            }
+                                                        }}
+                                                    />
+                                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                                                </label>
+                                                {profile?.subscription_status !== 'active' && (
+                                                    <div className="absolute -top-1 -right-1">
+                                                        <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                                                            <Crown className="w-2.5 h-2.5" />
+                                                            PRO
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {watch('settings.restrict_by_email') && (
+                                                <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                                                    <EmailWhitelist
+                                                        emails={watch('settings.allowed_emails') || []}
+                                                        onChange={(emails) => setValue('settings.allowed_emails', emails)}
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
-                            </div>
+                            </section>
                         )}
-
+                        </div>
+                        
                         {/* Settings */}
-                        <div className="bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden group" id="exam-settings">
-                            {/* Decorative highlight */}
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-500 to-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-2.5">
-                                <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-600 dark:text-gray-400">
-                                    <Settings className="w-4 h-4" />
+                        <div className={activeTab === 'settings' ? 'block animate-in fade-in slide-in-from-bottom-4 duration-500' : 'hidden'}>
+                            <section className="bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl relative overflow-hidden">
+                                <div className="p-8 border-b border-slate-100 dark:border-slate-800">
+                                    <h3 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                                        <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-slate-600 dark:text-slate-400">
+                                            <Settings className="w-6 h-6" />
+                                        </div>
+                                        {t('examEditor.settings.title')}
+                                    </h3>
+                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-2 ml-[3.25rem]">
+                                        Configure time limits, anti-cheat measures, and more.
+                                    </p>
                                 </div>
-                                {t('examEditor.settings.title')}
-                            </h3>
 
-                            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+                                <div className="p-8 grid grid-cols-1 gap-10 sm:grid-cols-2">
                                 {watch('settings.child_mode_enabled') ? (
                                     <div className="col-span-2">
                                         <div className="p-8 rounded-[2rem] border border-purple-100 dark:border-purple-800 bg-gradient-to-br from-purple-50/50 to-pink-50/50 dark:from-purple-900/20 dark:to-pink-900/20 relative overflow-hidden">
@@ -925,29 +988,29 @@ export default function ExamEditor() {
                                                 <Sparkles className="w-32 h-32 text-purple-600" />
                                             </div>
                                             <div className="flex items-center gap-3 mb-8 relative z-10">
-                                                <div className="text-3xl bg-white dark:bg-gray-800 p-2 rounded-2xl shadow-sm">🎈</div>
+                                                <div className="text-3xl bg-white dark:bg-slate-800 p-2 rounded-2xl shadow-sm">🎈</div>
                                                 <h4 className="text-xl font-bold text-purple-900 dark:text-purple-200">{t('examEditor.settings.kidsMode.title')}</h4>
                                             </div>
                                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 relative z-10">
-                                                <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-6 rounded-2xl border border-purple-100 dark:border-purple-800/50 shadow-sm hover:shadow-md transition-all">
-                                                    <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
-                                                        <span className="text-lg">🎯</span>
+                                                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-6 rounded-2xl border border-purple-100 dark:border-purple-800/50 shadow-sm hover:shadow-md transition-all group/kidset">
+                                                    <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
+                                                        <span className="text-lg grayscale group-hover/kidset:grayscale-0 transition-all">🎯</span>
                                                         {t('examEditor.settings.kidsMode.attemptLimit')}
                                                     </label>
                                                     <input
                                                         type="number"
                                                         min="1"
-                                                        className="w-full px-4 py-3 border border-purple-200 dark:border-purple-800/50 rounded-xl bg-purple-50/30 dark:bg-gray-800/50 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all"
+                                                        className="w-full px-4 py-3 border border-purple-200 dark:border-purple-800/50 rounded-xl bg-purple-50/30 dark:bg-slate-800/50 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all font-bold text-center"
                                                         {...register('settings.attempt_limit', { valueAsNumber: true })}
                                                     />
                                                 </div>
-                                                <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-6 rounded-2xl border border-purple-100 dark:border-purple-800/50 shadow-sm hover:shadow-md transition-all">
-                                                    <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
-                                                        <span className="text-lg">🏆</span>
+                                                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-6 rounded-2xl border border-purple-100 dark:border-purple-800/50 shadow-sm hover:shadow-md transition-all group/kidset">
+                                                    <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
+                                                        <span className="text-lg grayscale group-hover/kidset:grayscale-0 transition-all">🏆</span>
                                                         {t('examEditor.settings.kidsMode.leaderboardVisibility')}
                                                     </label>
                                                     <select
-                                                        className="w-full px-4 py-3 border border-purple-200 dark:border-purple-800/50 rounded-xl bg-purple-50/30 dark:bg-gray-800/50 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all cursor-pointer"
+                                                        className="w-full px-4 py-3 border border-purple-200 dark:border-purple-800/50 rounded-xl bg-purple-50/30 dark:bg-slate-800/50 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all cursor-pointer font-bold"
                                                         {...register('settings.leaderboard_visibility')}
                                                     >
                                                         <option value="hidden">{t('examEditor.settings.kidsMode.visibilityHidden')}</option>
@@ -962,46 +1025,52 @@ export default function ExamEditor() {
                                     <>
                                         {/* Anti-Cheating Group */}
                                         <div className="col-span-2">
-                                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 ml-1">Anti-Cheating Measures</h4>
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                                            <div className="flex items-center gap-2 mb-4 ml-1">
+                                                <div className="h-4 w-1 bg-red-400 rounded-full"/>
+                                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Anti-Cheating Measures</h4>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                 {[
-                                                    { id: 'fullscreen_required', icon: Maximize, label: 'Fullscreen Force', desc: 'Requires students to stay in fullscreen', field: 'settings.require_fullscreen', isPremium: false },
-                                                    { id: 'tab_switch_prohibited', icon: MonitorOff, label: 'Tab Detection', desc: 'Logs tab switches as violations', field: 'settings.detect_tab_switch', isPremium: true },
-                                                    { id: 'copy_paste_prohibited', icon: ClipboardX, label: 'Anti-Cheat Mode', desc: 'Disables Copy, Paste & Right Click', field: 'settings.disable_copy_paste', isPremium: true }
+                                                    { id: 'fullscreen_required', icon: Maximize, label: 'Fullscreen Force', desc: 'Requires full screen', field: 'settings.require_fullscreen', isPremium: false },
+                                                    { id: 'tab_switch_prohibited', icon: MonitorOff, label: 'Tab Detection', desc: 'Logs switching tabs', field: 'settings.detect_tab_switch', isPremium: true },
+                                                    { id: 'copy_paste_prohibited', icon: ClipboardX, label: 'Anti-Cheat Mode', desc: 'No Copy/Paste/Right Click', field: 'settings.disable_copy_paste', isPremium: true }
                                                 ].map((item) => (
-                                                    <label key={item.id} className="relative flex items-start gap-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-slate-50 dark:hover:bg-gray-800 transition-all cursor-pointer group/item">
+                                                    <label key={item.id} className="relative flex flex-col p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/50 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-pointer group/item shadow-sm hover:shadow-md">
                                                         {item.isPremium && profile?.subscription_status !== 'active' && (
-                                                            <div className="absolute -top-2 -right-2 z-10">
+                                                            <div className="absolute top-3 right-3 z-10">
                                                                 <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
                                                                     <Crown className="w-2.5 h-2.5" />
                                                                     PRO
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        <div className="mt-1">
-                                                            <input
-                                                                type="checkbox"
-                                                                id={item.id}
-                                                                className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition-all"
-                                                                {...register(item.field as any)}
-                                                                onChange={(e) => {
-                                                                    if (item.isPremium && profile?.subscription_status !== 'active' && e.target.checked) {
-                                                                        e.preventDefault();
-                                                                        toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
-                                                                        navigate('/checkout');
-                                                                        return;
-                                                                    }
-                                                                    const field = item.field as any;
-                                                                    setValue(field, e.target.checked);
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <div className="flex flex-col">
-                                                            <div className="flex items-center gap-2 mb-0.5">
-                                                                <item.icon className="h-4 w-4 text-gray-400 group-hover/item:text-indigo-500 transition-colors" />
-                                                                <span className="text-sm font-bold text-gray-700 dark:text-gray-200 group-hover/item:text-gray-900 dark:group-hover/item:text-white transition-colors">{item.label}</span>
+                                                        <div className="flex justify-between items-start mb-3">
+                                                            <div className={`p-2.5 rounded-xl transition-colors ${watch(item.field as any) ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400' : 'bg-white dark:bg-slate-700 text-slate-400'}`}>
+                                                                <item.icon className="h-5 w-5" />
                                                             </div>
-                                                            <span className="text-xs font-medium text-gray-400 leading-snug">{item.desc}</span>
+                                                            <div className="relative inline-flex items-center cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    id={item.id}
+                                                                    className="sr-only peer"
+                                                                    {...register(item.field as any)}
+                                                                    onChange={(e) => {
+                                                                        if (item.isPremium && profile?.subscription_status !== 'active' && e.target.checked) {
+                                                                            e.preventDefault();
+                                                                            toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
+                                                                            navigate('/checkout');
+                                                                            return;
+                                                                        }
+                                                                        const field = item.field as any;
+                                                                        setValue(field, e.target.checked);
+                                                                    }}
+                                                                />
+                                                                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <span className={`block text-sm font-bold transition-colors ${watch(item.field as any) ? 'text-indigo-900 dark:text-indigo-100' : 'text-slate-700 dark:text-slate-200'}`}>{item.label}</span>
+                                                            <span className="text-xs font-medium text-slate-400 leading-snug mt-1 block">{item.desc}</span>
                                                         </div>
                                                     </label>
                                                 ))}
@@ -1009,26 +1078,29 @@ export default function ExamEditor() {
                                         </div>
 
                                         <div className="space-y-6">
-                                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 ml-1">Submission Rules</h4>
+                                            <div className="flex items-center gap-2 mb-4 ml-1">
+                                                <div className="h-4 w-1 bg-blue-400 rounded-full"/>
+                                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Submission Logic</h4>
+                                            </div>
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('examEditor.settings.maxViolations')}</label>
+                                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">{t('examEditor.settings.maxViolations')}</label>
                                                 <input
                                                     type="number"
                                                     min="0"
-                                                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium"
+                                                    className="w-full px-5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-bold"
                                                     {...register('settings.max_violations', { valueAsNumber: true })}
                                                 />
                                             </div>
                                             <div className="space-y-3">
-                                                <label className="flex items-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 cursor-pointer transition-all">
+                                                <label className="flex items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700 cursor-pointer transition-all">
                                                     <input
                                                         type="checkbox"
-                                                        className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                        className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded"
                                                         {...register('settings.show_results_immediately')}
                                                     />
-                                                    <span className="ml-3 text-sm font-bold text-gray-700 dark:text-gray-300">{t('examEditor.settings.showResults')}</span>
+                                                    <span className="ml-3 text-sm font-bold text-slate-700 dark:text-slate-300">{t('examEditor.settings.showResults')}</span>
                                                 </label>
-                                                <label className="relative flex items-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 cursor-pointer transition-all">
+                                                <label className="relative flex items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700 cursor-pointer transition-all">
                                                     {profile?.subscription_status !== 'active' && (
                                                         <div className="absolute -top-2 -right-2 z-10">
                                                             <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
@@ -1039,7 +1111,7 @@ export default function ExamEditor() {
                                                     )}
                                                     <input
                                                         type="checkbox"
-                                                        className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                        className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded"
                                                         {...register('settings.show_detailed_results')}
                                                         onChange={(e) => {
                                                             if (profile?.subscription_status !== 'active' && e.target.checked) {
@@ -1052,52 +1124,55 @@ export default function ExamEditor() {
                                                         }}
                                                     />
                                                     <div className="ml-3">
-                                                        <span className="block text-sm font-bold text-gray-700 dark:text-gray-300">Show answers after submission</span>
-                                                        <span className="text-xs text-gray-500 font-medium">Students can see which questions they got wrong.</span>
+                                                        <span className="block text-sm font-bold text-slate-700 dark:text-slate-300">Show answers after submission</span>
+                                                        <span className="text-xs text-slate-500 font-medium">Students can see which questions they got wrong.</span>
                                                     </div>
                                                 </label>
                                             </div>
                                         </div>
 
                                         <div className="space-y-6">
-                                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 ml-1">Timing & Zone</h4>
+                                            <div className="flex items-center gap-2 mb-4 ml-1">
+                                                <div className="h-4 w-1 bg-orange-400 rounded-full"/>
+                                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Schedule & Time</h4>
+                                            </div>
                                             <div id="time-settings">
-                                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">{t('examEditor.settings.timeLimit')}</label>
+                                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">{t('examEditor.settings.timeLimit')}</label>
                                                 <div className="relative">
                                                     <input
                                                         type="number"
                                                         min="0"
                                                         placeholder="No limit"
-                                                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all pr-12 font-medium"
+                                                        className="w-full px-5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all pr-12 font-bold"
                                                         {...register('settings.time_limit_minutes', { valueAsNumber: true })}
                                                     />
-                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">MIN</span>
+                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">MIN</span>
                                                 </div>
                                             </div>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-xs font-bold uppercase text-gray-400 mb-2 ml-1">{t('examEditor.settings.startTime')}</label>
+                                                    <label className="block text-xs font-bold uppercase text-slate-400 mb-2 ml-1">{t('examEditor.settings.startTime')}</label>
                                                     <input
                                                         type="datetime-local"
-                                                        className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-sm font-medium"
+                                                        className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-sm font-medium"
                                                         {...register('settings.start_time')}
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-bold uppercase text-gray-400 mb-2 ml-1">{t('examEditor.settings.endTime')}</label>
+                                                    <label className="block text-xs font-bold uppercase text-slate-400 mb-2 ml-1">{t('examEditor.settings.endTime')}</label>
                                                     <input
                                                         type="datetime-local"
-                                                        className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-sm font-medium"
+                                                        className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-sm font-medium"
                                                         {...register('settings.end_time')}
                                                     />
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">
+                                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">
                                                     {t('examEditor.settings.timezone', 'Timezone')}
                                                 </label>
                                                 <select
-                                                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer text-sm font-medium"
+                                                    className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer text-sm font-medium"
                                                     {...register('settings.timezone')}
                                                 >
                                                     {typeof Intl !== 'undefined' && 'supportedValuesOf' in Intl ? (
@@ -1108,7 +1183,7 @@ export default function ExamEditor() {
                                                         <option value="UTC">UTC</option>
                                                     )}
                                                 </select>
-                                                <p className="mt-2 text-xs font-medium text-gray-400 ml-1">
+                                                <p className="mt-2 text-xs font-medium text-slate-400 ml-1">
                                                     Current: {watch('settings.timezone')}
                                                 </p>
                                             </div>
@@ -1116,33 +1191,43 @@ export default function ExamEditor() {
                                     </>
                                 )}
                             </div>
+                            </section>
                         </div>
 
-                        {/* Questions */}
-                        <div className="w-full space-y-8" id="questions-section">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                                    <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
-                                        <LayoutList className="w-4 h-4" />
-                                    </div>
-                                    {t('examEditor.questions.title')}
-                                </h3>
+                        {/* Questions Section */}
+                        <div className={activeTab === 'questions' ? 'block animate-in fade-in slide-in-from-bottom-4 duration-500' : 'hidden'}>
+                            <div className="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                                        <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl text-indigo-600 dark:text-indigo-400">
+                                            <ListChecks className="w-6 h-6" />
+                                        </div>
+                                        {t('examEditor.questions.title')}
+                                        <span className="px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 text-sm font-bold border border-slate-200 dark:border-slate-700">
+                                            {fields.length}
+                                        </span>
+                                    </h3>
+                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-2 ml-[3.25rem]">
+                                        Build your exam by adding and arranging questions.
+                                    </p>
+                                </div>
+                                
                                 <div className="flex items-center gap-3">
-                                    <button
+                                     <button
                                         type="button"
                                         onClick={() => setShowMathPreview(!showMathPreview)}
-                                        className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${showMathPreview
-                                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-                                            : 'bg-white text-gray-600 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750'
+                                        className={`hidden md:flex px-4 py-2.5 rounded-xl text-sm font-bold items-center gap-2 transition-all border-2 ${showMathPreview
+                                            ? 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800'
+                                            : 'bg-white text-slate-500 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
                                             }`}
                                     >
                                         <Sigma className="w-4 h-4" />
-                                        {t('math.togglePreview', 'Math')}
+                                        {t('math.togglePreview', 'Math Preview')}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => append(defaultQuestion)}
-                                        className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 active:scale-95 transition-all shadow-lg shadow-indigo-200 dark:shadow-none"
+                                        className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 transition-all"
                                     >
                                         <Plus className="h-4 w-4 mr-2" />
                                         {t('examEditor.questions.add')}
@@ -1150,94 +1235,109 @@ export default function ExamEditor() {
                                 </div>
                             </div>
 
-                            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                            <div className="p-8">
+                                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                                 <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
                                     <div className="space-y-6 w-full">
                                         {fields.map((field, index) => (
                                             <SortableQuestionItem key={field.id} id={field.id}>
-                                                <div className="group/card">
-                                                    <div className="flex items-center justify-between mb-6">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-bold text-lg border border-indigo-100 dark:border-indigo-800">
+                                                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative group/card hover:shadow-md transition-all duration-300 overflow-hidden">
+                                                    {/* Compact Card Header */}
+                                                    <div className="flex items-center gap-2 sm:gap-4 p-4 bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800">
+                                                        {/* Drag Handle & Index */}
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1" title="Drag to reorder">
+                                                                <GripVertical className="w-5 h-5" />
+                                                            </div>
+                                                            <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-black text-sm border border-slate-200 dark:border-slate-600 shadow-sm">
                                                                 {index + 1}
                                                             </div>
-                                                            <div className="min-w-0">
-                                                                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{t('examEditor.questions.question')} {index + 1}</p>
-                                                                <div className="flex items-center gap-2 mt-0.5">
-                                                                    <span className="text-sm font-bold text-gray-900 dark:text-gray-200">
-                                                                        {questionsWatch?.[index]?.type?.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Multiple Choice'}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
                                                         </div>
+
+                                                        {/* Type Selector (Compact) */}
+                                                        <div className="relative flex-1 max-w-[200px] sm:max-w-[240px]">
+                                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                                                {questionsWatch?.[index]?.type === 'multiple_choice' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                                                                {questionsWatch?.[index]?.type === 'true_false' && <ToggleLeft className="w-3.5 h-3.5" />}
+                                                                {questionsWatch?.[index]?.type === 'dropdown' && <ArrowDownCircle className="w-3.5 h-3.5" />}
+                                                                {questionsWatch?.[index]?.type === 'multiple_select' && <CheckSquare className="w-3.5 h-3.5" />}
+                                                                {questionsWatch?.[index]?.type?.startsWith('kids_') && <Sparkles className="w-3.5 h-3.5" />}
+                                                            </div>
+                                                            <select
+                                                                className="w-full pl-9 pr-8 py-2 text-xs font-bold uppercase tracking-wide border border-transparent hover:border-slate-200 dark:hover:border-slate-700 rounded-lg bg-transparent hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer appearance-none truncate"
+                                                                {...register(`questions.${index}.type`)}
+                                                            >
+                                                                <option value="multiple_choice">{t('examEditor.questions.types.multipleChoice')}</option>
+                                                                <option value="multiple_select">{t('examEditor.questions.types.multipleSelect')}</option>
+                                                                <option value="dropdown">{t('examEditor.questions.types.dropdown')}</option>
+                                                                <option value="true_false">{t('examEditor.questions.types.trueFalse')}</option>
+                                                                {watch('settings.child_mode_enabled') && (
+                                                                    <>
+                                                                        <option value="kids_color_picker">Kids: Color Picker</option>
+                                                                        <option value="kids_odd_one_out">Kids: Odd One Out</option>
+                                                                        <option value="kids_picture_pairing">Kids: Picture Pairing</option>
+                                                                        <option value="kids_story_sequence">Kids: Story Sequence</option>
+                                                                    </>
+                                                                )}
+                                                            </select>
+                                                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+                                                        </div>
+
+                                                        <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block"></div>
+
+                                                        {/* Points (Compact) */}
+                                                        <div className="relative w-20 hidden sm:block">
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                className="w-full pl-3 pr-8 py-1.5 text-xs font-black bg-transparent border border-transparent hover:border-slate-200 dark:hover:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-center placeholder-transparent"
+                                                                {...register(`questions.${index}.points`, { valueAsNumber: true })}
+                                                            />
+                                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">PTS</span>
+                                                        </div>
+
+                                                        {/* Delete Button (Right aligned) */}
                                                         <button
                                                             type="button"
                                                             onClick={() => remove(index)}
-                                                            className="p-2.5 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all opacity-100 lg:opacity-0 lg:group-hover/card:opacity-100"
+                                                            className="ml-auto p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all opacity-100"
                                                             title="Delete Question"
                                                         >
-                                                            <Trash2 className="h-5 w-5" />
+                                                            <Trash2 className="h-4 w-4" />
                                                         </button>
                                                     </div>
 
-                                                    <div className="space-y-6">
-                                                        {/* Type and Points Row */}
-                                                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-6">
-                                                            <div className="sm:col-span-8">
-                                                                <label className="block text-xs font-bold uppercase text-gray-400 mb-1.5 ml-1">{t('examEditor.questions.type')}</label>
-                                                                <select
-                                                                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer font-medium"
-                                                                    {...register(`questions.${index}.type`)}
-                                                                >
-                                                                    <option value="multiple_choice">{t('examEditor.questions.types.multipleChoice')}</option>
-                                                                    <option value="multiple_select">{t('examEditor.questions.types.multipleSelect')}</option>
-                                                                    <option value="dropdown">{t('examEditor.questions.types.dropdown')}</option>
-                                                                    <option value="true_false">{t('examEditor.questions.types.trueFalse')}</option>
-                                                                    {watch('settings.child_mode_enabled') && (
-                                                                        <>
-                                                                            <option value="kids_color_picker">Kids: Color Picker</option>
-                                                                            <option value="kids_odd_one_out">Kids: Odd One Out</option>
-                                                                            <option value="kids_picture_pairing">Kids: Picture Pairing</option>
-                                                                            <option value="kids_story_sequence">Kids: Story Sequence</option>
-                                                                        </>
-                                                                    )}
-                                                                </select>
-                                                            </div>
-                                                            <div className="sm:col-span-4">
-                                                                <label className="block text-xs font-bold uppercase text-gray-400 mb-1.5 ml-1">{t('examEditor.questions.points')}</label>
-                                                                <div className="relative">
-                                                                    <input
-                                                                        type="number"
-                                                                        min="1"
-                                                                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all pr-12 font-bold"
-                                                                        {...register(`questions.${index}.points`, { valueAsNumber: true })}
-                                                                    />
-                                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">PTS</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                                    <div className="p-5 sm:p-8 space-y-6">
 
                                                         {/* Question Content */}
-                                                        <div className="space-y-4">
-                                                            <label className="text-xs font-bold uppercase text-gray-400 ml-1">
+                                                        <div className="space-y-3">
+                                                            <label className="text-xs font-bold uppercase text-slate-400 ml-1">
                                                                 {t('examEditor.questions.questionText')}
                                                             </label>
                                                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                                                                 <div className="lg:col-span-8">
-                                                                    <textarea
-                                                                        {...register(`questions.${index}.question_text`)}
-                                                                        className="w-full px-5 py-4 border border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder-gray-400 text-base font-medium resize-none"
-                                                                        placeholder={t('examEditor.questions.questionTextPlaceholder')}
-                                                                        rows={index === 0 ? 3 : 2}
-                                                                    />
+                                                                    <div className="relative">
+                                                                        <Controller
+                                                                            name={`questions.${index}.question_text`}
+                                                                            control={control}
+                                                                            render={({ field: { value, onChange } }) => (
+                                                                                <RichTextEditor
+                                                                                    value={value || ''}
+                                                                                    onChange={onChange}
+                                                                                    placeholder={t('examEditor.questions.questionTextPlaceholder')}
+                                                                                />
+                                                                            )}
+                                                                        />
+                                                                    </div>
+                                                                    
                                                                     {showMathPreview && watch(`questions.${index}.question_text`) && (
-                                                                        <div className="mt-3 p-4 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800 text-sm">
+                                                                        <div className="mt-3 p-4 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800 text-sm animate-in fade-in slide-in-from-top-2">
                                                                             <Latex>{watch(`questions.${index}.question_text`)}</Latex>
                                                                         </div>
                                                                     )}
                                                                 </div>
                                                                 <div className="lg:col-span-4">
-                                                                    <div className="bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-2 h-full min-h-[120px] flex items-center justify-center hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
+                                                                    <div className="bg-slate-50 dark:bg-slate-800/30 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-2 h-full min-h-[140px] flex items-center justify-center hover:border-indigo-300 dark:hover:border-indigo-700 transition-all hover:bg-slate-100 dark:hover:bg-slate-800/50 group/upload">
                                                                         <ImageUploader
                                                                             userId={user?.id || 'anon'}
                                                                             value={questionsWatch?.[index]?.media_url || ''}
@@ -1253,16 +1353,17 @@ export default function ExamEditor() {
 
                                                         {/* Options / Answer Input */}
                                                         {['multiple_choice', 'multiple_select', 'dropdown'].includes(questionsWatch?.[index]?.type || '') && (
-                                                            <div className="space-y-4 mt-8">
-                                                                <div className="flex items-center justify-between ml-1">
-                                                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('examEditor.questions.options')}</label>
-                                                                    <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-full uppercase tracking-widest border border-indigo-100 dark:border-indigo-800">
+                                                            <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800/50">
+                                                                <div className="flex items-center justify-between ml-1 mb-2">
+                                                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('examEditor.questions.options')}</label>
+                                                                    <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-full uppercase tracking-widest border border-indigo-100 dark:border-indigo-800 flex items-center gap-1.5">
+                                                                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"/>
                                                                         {t('examEditor.questions.selectCorrect')}
                                                                     </span>
                                                                 </div>
-                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                                     {questionsWatch?.[index]?.options?.map((_, optionIndex) => (
-                                                                        <div key={`${index}-${optionIndex}`} className="relative group/option flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all">
+                                                                        <div key={`${index}-${optionIndex}`} className="relative group/option flex items-center gap-3 p-1.5 pl-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all hover:shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
                                                                             <input
                                                                                 type={questionsWatch?.[index]?.type === 'multiple_select' ? 'checkbox' : 'radio'}
                                                                                 name={`correct_${index}`}
@@ -1283,18 +1384,23 @@ export default function ExamEditor() {
                                                                                         setValue(`questions.${index}.correct_answer`, currentVal || '');
                                                                                     }
                                                                                 }}
-                                                                                className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded cursor-pointer"
+                                                                                className={`h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer transition-transform active:scale-95 ${questionsWatch?.[index]?.type !== 'multiple_select' ? 'rounded-full' : ''}`}
                                                                             />
-                                                                            <input
-                                                                                {...register(`questions.${index}.options.${optionIndex}`)}
-                                                                                className="flex-1 bg-transparent border-0 text-sm font-semibold text-gray-900 dark:text-white placeholder-gray-400 focus:ring-0 min-w-0 p-0"
-                                                                                placeholder={`${t('examEditor.questions.option')} ${optionIndex + 1}`}
-                                                                            />
+                                                                            
+                                                                            <div className="flex-1 py-1.5">
+                                                                                <input
+                                                                                    {...register(`questions.${index}.options.${optionIndex}`)}
+                                                                                    className="w-full bg-transparent border-0 text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 focus:ring-0 min-w-0 p-0"
+                                                                                    placeholder={`${t('examEditor.questions.option')} ${optionIndex + 1}`}
+                                                                                />
+                                                                            </div>
+
                                                                             {showMathPreview && watch(`questions.${index}.options.${optionIndex}`) && (
-                                                                                <div className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">
+                                                                                <div className="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-[10px]">
                                                                                     <Latex>{watch(`questions.${index}.options.${optionIndex}`)}</Latex>
                                                                                 </div>
                                                                             )}
+
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={() => {
@@ -1302,7 +1408,7 @@ export default function ExamEditor() {
                                                                                     currentOpts.splice(optionIndex, 1);
                                                                                     setValue(`questions.${index}.options`, currentOpts);
                                                                                 }}
-                                                                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all opacity-0 group-hover/option:opacity-100"
+                                                                                className="p-2.5 m-0.5 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 rounded-xl transition-all shadow-sm opacity-0 group-hover/option:opacity-100"
                                                                             >
                                                                                 <Trash2 className="h-4 w-4" />
                                                                             </button>
@@ -1317,9 +1423,11 @@ export default function ExamEditor() {
                                                                             currentOpts.push('');
                                                                             setValue(`questions.${index}.options`, currentOpts);
                                                                         }}
-                                                                        className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl text-xs font-bold text-gray-500 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all group"
+                                                                        className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-bold text-slate-500 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-all group"
                                                                     >
-                                                                        <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />
+                                                                        <div className="p-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/40 group-hover:text-indigo-600 transition-colors">
+                                                                            <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />
+                                                                        </div>
                                                                         {t('examEditor.questions.addOption')}
                                                                     </button>
                                                                 </div>
@@ -1327,21 +1435,21 @@ export default function ExamEditor() {
                                                         )}
 
                                                         {questionsWatch?.[index]?.type === 'true_false' && (
-                                                            <div className="space-y-4">
-                                                                <label className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('examEditor.questions.correctAnswer')}</label>
+                                                            <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800/50">
+                                                                <label className="text-sm font-black text-slate-400 uppercase tracking-widest ml-1">{t('examEditor.questions.correctAnswer')}</label>
                                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                                     {['True', 'False'].map((val) => (
-                                                                        <label key={val} className={`p-6 rounded-[2rem] border-2 cursor-pointer transition-all flex flex-col items-center gap-4 ${watch(`questions.${index}.correct_answer`) === val
+                                                                        <label key={val} className={`p-6 rounded-[2rem] border-2 cursor-pointer transition-all flex flex-col items-center gap-4 group ${watch(`questions.${index}.correct_answer`) === val
                                                                             ? 'bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-400'
-                                                                            : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 hover:border-indigo-200'
+                                                                            : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-800'
                                                                             }`}>
                                                                             <input
                                                                                 type="radio"
                                                                                 value={val}
-                                                                                className="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-2 border-gray-200"
+                                                                                className="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-2 border-slate-200"
                                                                                 {...register(`questions.${index}.correct_answer`)}
                                                                             />
-                                                                            <span className={`text-lg font-black ${watch(`questions.${index}.correct_answer`) === val ? 'text-indigo-600' : 'text-gray-400'}`}>
+                                                                            <span className={`text-lg font-black transition-colors ${watch(`questions.${index}.correct_answer`) === val ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`}>
                                                                                 {val === 'True' ? t('examEditor.questions.true') : t('examEditor.questions.false')}
                                                                             </span>
                                                                         </label>
@@ -1354,20 +1462,20 @@ export default function ExamEditor() {
                                                         {questionsWatch?.[index]?.type === 'kids_color_picker' && (
                                                             <div className="p-6 bg-purple-50/30 dark:bg-purple-900/10 rounded-[2rem] border-2 border-purple-100/50 dark:border-purple-900/30 space-y-4">
                                                                 <div className="flex items-center gap-3 mb-2">
-                                                                    <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                                                                    <div className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm">
                                                                         <Sparkles className="w-5 h-5 text-purple-600" />
                                                                     </div>
                                                                     <label className="text-sm font-black text-purple-700 dark:text-purple-300 uppercase tracking-widest">Color Magic Swatches</label>
                                                                 </div>
                                                                 <div className="grid grid-cols-1 gap-3">
                                                                     {(questionsWatch?.[index]?.options as string[] || []).map((_val, optionIndex) => (
-                                                                        <div key={optionIndex} className="flex items-center gap-4 p-3 bg-white/50 dark:bg-gray-900/50 rounded-2xl border border-purple-50 dark:border-purple-900/20 group">
+                                                                        <div key={optionIndex} className="flex items-center gap-4 p-3 bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-purple-50 dark:border-purple-900/20 group">
                                                                             <input
                                                                                 type="radio"
                                                                                 name={`correct_kids_${index}`}
                                                                                 checked={questionsWatch?.[index]?.correct_answer === questionsWatch?.[index]?.options?.[optionIndex]}
                                                                                 onChange={() => setValue(`questions.${index}.correct_answer`, questionsWatch?.[index]?.options?.[optionIndex] || '')}
-                                                                                className="h-6 w-6 text-purple-600 focus:ring-purple-500 border-2 border-gray-200 dark:border-gray-700 cursor-pointer transition-all"
+                                                                                className="h-6 w-6 text-purple-600 focus:ring-purple-500 border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all"
                                                                             />
                                                                             <div className="relative group/color">
                                                                                 <input
@@ -1381,13 +1489,13 @@ export default function ExamEditor() {
                                                                             <input
                                                                                 type="text"
                                                                                 placeholder={`#HEX_COLOR`}
-                                                                                className="flex-1 bg-transparent border-0 text-gray-900 dark:text-white font-black tracking-widest uppercase focus:ring-0 placeholder-gray-300"
+                                                                                className="flex-1 bg-transparent border-0 text-slate-900 dark:text-white font-black tracking-widest uppercase focus:ring-0 placeholder-slate-300"
                                                                                 value={questionsWatch?.[index]?.options?.[optionIndex] as string || ''}
                                                                                 onChange={(e) => setValue(`questions.${index}.options.${optionIndex}`, e.target.value)}
                                                                             />
                                                                             <button
                                                                                 type="button"
-                                                                                className="p-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                                                                                className="p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                                                                                 onClick={() => {
                                                                                     const arr = [...(questionsWatch?.[index]?.options as string[] || [])];
                                                                                     arr.splice(optionIndex, 1);
@@ -1416,7 +1524,7 @@ export default function ExamEditor() {
                                                         {questionsWatch?.[index]?.type === 'kids_odd_one_out' && (
                                                             <div className="p-6 bg-pink-50/30 dark:bg-pink-900/10 rounded-[2rem] border-2 border-pink-100/50 dark:border-pink-900/30 space-y-4">
                                                                 <div className="flex items-center gap-3 mb-2">
-                                                                    <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-pink-600">
+                                                                    <div className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm text-pink-600">
                                                                         <MonitorOff className="w-5 h-5" />
                                                                     </div>
                                                                     <label className="text-sm font-black text-pink-700 dark:text-pink-300 uppercase tracking-widest">Odd One Out Finder</label>
@@ -1425,21 +1533,21 @@ export default function ExamEditor() {
                                                                     {[0, 1, 2, 3].map((i) => (
                                                                         <div key={i} className={`p-4 rounded-[1.5rem] border-2 transition-all ${questionsWatch?.[index]?.correct_answer === String(i)
                                                                             ? 'bg-pink-100/50 dark:bg-pink-900/30 border-pink-300 dark:border-pink-700'
-                                                                            : 'bg-white/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800'
+                                                                            : 'bg-white/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800'
                                                                             }`}>
                                                                             <div className="flex items-center gap-3 mb-3">
                                                                                 <input
                                                                                     type="radio"
                                                                                     checked={questionsWatch?.[index]?.correct_answer === String(i)}
                                                                                     onChange={() => setValue(`questions.${index}.correct_answer`, String(i))}
-                                                                                    className="h-5 w-5 text-pink-600 focus:ring-pink-500 border-2 border-gray-200 dark:border-gray-700 cursor-pointer"
+                                                                                    className="h-5 w-5 text-pink-600 focus:ring-pink-500 border-2 border-slate-200 dark:border-slate-700 cursor-pointer"
                                                                                 />
-                                                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Item {i + 1}</span>
+                                                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Item {i + 1}</span>
                                                                             </div>
                                                                             <input
                                                                                 type="text"
                                                                                 placeholder="Text/URL"
-                                                                                className="w-full bg-transparent border-0 text-sm font-bold text-gray-900 dark:text-white mb-2 focus:ring-0 placeholder-gray-300"
+                                                                                className="w-full bg-transparent border-0 text-sm font-bold text-slate-900 dark:text-white mb-2 focus:ring-0 placeholder-slate-300"
                                                                                 {...register(`questions.${index}.options.${i}`)}
                                                                             />
                                                                             <ImageUploader
@@ -1458,7 +1566,7 @@ export default function ExamEditor() {
                                                         {questionsWatch?.[index]?.type === 'kids_picture_pairing' && (
                                                             <div className="p-6 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-3xl border border-indigo-100 dark:border-indigo-900/30 space-y-6">
                                                                 <div className="flex items-center gap-3 mb-2">
-                                                                    <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-indigo-600">
+                                                                    <div className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm text-indigo-600">
                                                                         <Sparkles className="w-5 h-5" />
                                                                     </div>
                                                                     <label className="text-sm font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-widest">Perfect Pairing Game</label>
@@ -1470,11 +1578,11 @@ export default function ExamEditor() {
                                                                     <div className="space-y-3">
                                                                         <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest ml-4 mb-2">Left Side Items</p>
                                                                         {[0, 1, 2, 3].map((i) => (
-                                                                            <div key={`left_${i}`} className="p-3 bg-white/50 dark:bg-gray-900/50 rounded-2xl border border-indigo-50 dark:border-indigo-900/20 flex flex-col gap-2">
+                                                                            <div key={`left_${i}`} className="p-3 bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-indigo-50 dark:border-indigo-900/20 flex flex-col gap-2">
                                                                                 <input
                                                                                     type="text"
                                                                                     placeholder={`Side A - ${i + 1}`}
-                                                                                    className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-gray-400"
+                                                                                    className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-slate-400"
                                                                                     {...register(`questions.${index}.options.${i}`)}
                                                                                 />
                                                                                 <ImageUploader
@@ -1489,11 +1597,11 @@ export default function ExamEditor() {
                                                                     <div className="space-y-3">
                                                                         <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest ml-4 mb-2">Right Side Matches</p>
                                                                         {[4, 5, 6, 7].map((i) => (
-                                                                            <div key={`right_${i}`} className="p-3 bg-white/50 dark:bg-gray-900/50 rounded-2xl border border-indigo-50 dark:border-indigo-900/20 flex flex-col gap-2">
+                                                                            <div key={`right_${i}`} className="p-3 bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-indigo-50 dark:border-indigo-900/20 flex flex-col gap-2">
                                                                                 <input
                                                                                     type="text"
                                                                                     placeholder={`Side B - ${i - 3}`}
-                                                                                    className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-gray-400"
+                                                                                    className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-slate-400"
                                                                                     {...register(`questions.${index}.options.${i}`)}
                                                                                 />
                                                                                 <ImageUploader
@@ -1512,14 +1620,14 @@ export default function ExamEditor() {
                                                         {questionsWatch?.[index]?.type === 'kids_story_sequence' && (
                                                             <div className="p-6 bg-amber-50/30 dark:bg-amber-900/10 rounded-3xl border border-amber-100 dark:border-amber-900/30 space-y-4">
                                                                 <div className="flex items-center gap-3 mb-2">
-                                                                    <div className="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm text-amber-600">
+                                                                    <div className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm text-amber-600">
                                                                         <BookOpen className="w-5 h-5" />
                                                                     </div>
                                                                     <label className="text-sm font-black text-amber-700 dark:text-amber-300 uppercase tracking-widest">Story Timeline</label>
                                                                 </div>
                                                                 <div className="space-y-3">
                                                                     {[0, 1, 2].map((i) => (
-                                                                        <div key={i} className="flex items-center gap-4 p-4 bg-white/50 dark:bg-gray-900/50 rounded-[1.5rem] border border-amber-50 dark:border-amber-900/20">
+                                                                        <div key={i} className="flex items-center gap-4 p-4 bg-white/50 dark:bg-slate-900/50 rounded-[1.5rem] border border-amber-50 dark:border-amber-900/20">
                                                                             <div className="h-10 w-10 flex-shrink-0 flex items-center justify-center bg-amber-100 dark:bg-amber-900/30 rounded-full text-amber-600 font-black">
                                                                                 {i + 1}
                                                                             </div>
@@ -1527,7 +1635,7 @@ export default function ExamEditor() {
                                                                                 <input
                                                                                     type="text"
                                                                                     placeholder={`Part ${i + 1} of the story...`}
-                                                                                    className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-gray-300"
+                                                                                    className="w-full bg-transparent border-0 text-sm font-bold focus:ring-0 placeholder-slate-300"
                                                                                     {...register(`questions.${index}.options.${i}`)}
                                                                                 />
                                                                                 <ImageUploader
@@ -1550,21 +1658,22 @@ export default function ExamEditor() {
                                     </div>
                                 </SortableContext>
                             </DndContext>
-                        </div>
+                            </div>
                     </div>
+                    </main>
 
                     {/* Import from Question Bank Modal */}
                     {showImportModal && (
-                        <div className="fixed inset-0 bg-gray-950/40 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
-                            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white dark:border-gray-800 max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col scale-in-center">
-                                <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white/50 dark:bg-gray-900/50">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl text-indigo-600">
+                        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
+                            <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col scale-in-center shadow-indigo-500/10">
+                                <div className="p-6 sm:p-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+                                    <div className="flex items-center gap-5">
+                                        <div className="p-3.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl text-indigo-600 shadow-sm border border-indigo-100 dark:border-indigo-800">
                                             <BookOpen className="w-6 h-6" />
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-3">
-                                                <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                                                <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                                                     Import Questions
                                                 </h2>
                                                 {profile?.subscription_status !== 'active' && (
@@ -1574,7 +1683,7 @@ export default function ExamEditor() {
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-xs font-bold text-gray-400">
+                                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
                                                 {profile?.subscription_status !== 'active'
                                                     ? 'Subscribe to unlock question bank imports'
                                                     : 'Select from your existing question banks'}
@@ -1583,40 +1692,40 @@ export default function ExamEditor() {
                                     </div>
                                     <button
                                         onClick={() => setShowImportModal(false)}
-                                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+                                        className="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                     >
-                                        <X className="w-6 h-6 text-gray-400" />
+                                        <X className="w-5 h-5" />
                                     </button>
                                 </div>
 
                                 <div className="p-8 space-y-8 overflow-y-auto custom-scrollbar">
                                     {/* Number of questions input */}
-                                    <div className="space-y-3">
-                                        <label className="flex items-center gap-2 text-sm font-black text-gray-700 dark:text-gray-300 ml-1">
-                                            <span className="text-xl">🎲</span>
-                                            How many questions?
+                                    <div className="space-y-4">
+                                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+                                            <span className="text-lg">🎲</span>
+                                            How many questions to import?
                                         </label>
-                                        <div className="relative">
+                                        <div className="relative group">
                                             <input
                                                 type="number"
                                                 min="1"
                                                 value={questionCount}
                                                 onChange={(e) => setQuestionCount(parseInt(e.target.value) || 1)}
-                                                className="w-full px-6 py-4 border border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all pr-20 font-bold"
+                                                className="w-full px-6 py-4 border border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all pr-24 font-bold text-lg"
                                             />
-                                            <span className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black text-gray-400">RANDOM</span>
+                                            <span className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400 uppercase tracking-widest pointer-events-none group-focus-within:text-indigo-500 transition-colors">RANDOM</span>
                                         </div>
                                     </div>
 
                                     {/* Question banks selection */}
                                     <div className="space-y-4">
-                                        <label className="flex items-center gap-2 text-sm font-black text-gray-700 dark:text-gray-300 ml-1">
-                                            <span className="text-xl">📚</span>
-                                            Target Banks
+                                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">
+                                            <span className="text-lg">📚</span>
+                                            Source Question Banks
                                         </label>
                                         {questionBanks.length === 0 ? (
-                                            <div className="text-center py-12 bg-gray-50/50 dark:bg-gray-900/50 rounded-[2rem] border-2 border-dashed border-gray-100 dark:border-gray-800">
-                                                <p className="text-sm font-bold text-gray-400">
+                                            <div className="text-center py-12 bg-slate-50/50 dark:bg-slate-900/50 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-700">
+                                                <p className="text-sm font-bold text-slate-400">
                                                     No question banks found.
                                                 </p>
                                             </div>
@@ -1625,29 +1734,26 @@ export default function ExamEditor() {
                                                 {questionBanks.map(bank => (
                                                     <label
                                                         key={bank.id}
-                                                        className={`flex items-center gap-4 p-5 rounded-[1.5rem] border-2 transition-all cursor-pointer group ${selectedBankIds.includes(bank.id)
-                                                            ? 'bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800'
-                                                            : 'bg-white dark:bg-gray-900 border-gray-50 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
+                                                        className={`flex items-center gap-4 p-5 rounded-[1.5rem] border transition-all cursor-pointer group hover:shadow-md ${selectedBankIds.includes(bank.id)
+                                                            ? 'bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 ring-1 ring-indigo-500/20'
+                                                            : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700'
                                                             }`}
                                                     >
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedBankIds.includes(bank.id)}
-                                                            onChange={() => toggleBankSelection(bank.id)}
-                                                            className="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-2 border-gray-200 dark:border-gray-700 rounded-xl transition-all"
-                                                        />
+                                                        <div className={`flex items-center justify-center w-6 h-6 rounded-full border-2 transition-all ${selectedBankIds.includes(bank.id) ? 'border-indigo-500 bg-indigo-500 text-white scale-110' : 'border-slate-300 dark:border-slate-600 bg-transparent'}`}>
+                                                            {selectedBankIds.includes(bank.id) && <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                                                        </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <p className="text-base font-black text-gray-900 dark:text-white truncate">
+                                                            <p className={`text-base font-bold truncate ${selectedBankIds.includes(bank.id) ? 'text-indigo-900 dark:text-indigo-100' : 'text-slate-900 dark:text-white'}`}>
                                                                 {bank.name}
                                                             </p>
                                                             {bank.description && (
-                                                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+                                                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
                                                                     {bank.description}
                                                                 </p>
                                                             )}
                                                         </div>
-                                                        <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/40 transition-colors">
-                                                            <ArrowLeft className="w-4 h-4 text-gray-400 group-hover:text-indigo-600 rotate-180" />
+                                                        <div className={`p-2 rounded-xl transition-all ${selectedBankIds.includes(bank.id) ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40' : 'bg-slate-50 dark:bg-slate-800 text-slate-300'}`}>
+                                                            <BookOpen className="w-4 h-4" />
                                                         </div>
                                                     </label>
                                                 ))}
@@ -1657,7 +1763,7 @@ export default function ExamEditor() {
                                 </div>
 
                                 {/* Modal actions */}
-                                <div className="p-8 bg-gray-50/50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
+                                <div className="p-6 sm:p-8 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -1665,7 +1771,7 @@ export default function ExamEditor() {
                                             setSelectedBankIds([]);
                                             setQuestionCount(5);
                                         }}
-                                        className="px-8 py-3 text-sm font-black text-gray-500 hover:text-gray-700 transition-colors"
+                                        className="px-6 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
                                         disabled={isImporting}
                                     >
                                         Cancel
@@ -1674,9 +1780,9 @@ export default function ExamEditor() {
                                         type="button"
                                         onClick={handleImportFromBanks}
                                         disabled={isImporting || selectedBankIds.length === 0}
-                                        className="px-10 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-indigo-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                        className="px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold shadow-lg shadow-slate-200 dark:shadow-none hover:translate-y-[-1px] active:translate-y-0 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                     >
-                                        {isImporting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                                        {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />}
                                         {isImporting ? 'Importing...' : 'Start Import'}
                                     </button>
                                 </div>
@@ -1684,10 +1790,8 @@ export default function ExamEditor() {
                         </div>
                     )}
 
-                    {/* Right Column: Live Preview (Desktop Only) */}
-                    <div className="xl:w-[400px] sticky top-48">
-                        <ExamPreviewPanel data={watch()} />
-                    </div>
+
+                    {/* Right Column: Live Preview removed */}
                 </div>
             </div>
         </div>
