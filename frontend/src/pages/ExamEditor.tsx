@@ -773,7 +773,42 @@ export default function ExamEditor() {
                 </div>
             </div>
 
-            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-48 sm:pt-52 lg:pt-56">
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28 sm:pt-32 lg:pt-56">
+                {/* Mobile Navigation */}
+                <div className="lg:hidden mb-8 sticky top-20 z-30 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-xl py-4 -mx-4 px-4 overflow-x-auto hide-scrollbar border-b border-slate-200 dark:border-slate-800">
+                    <nav className="flex items-center gap-3 min-w-max p-1">
+                        {[
+                            { id: 'basic', label: t('examEditor.basicInfo.title', 'Basic Info'), icon: Hash },
+                            { id: 'student', label: t('examEditor.studentInfo.title', 'Student Info'), icon: Users, hidden: watch('settings.child_mode_enabled') },
+                            { id: 'settings', label: t('examEditor.settings.title', 'Settings'), icon: Settings },
+                            { id: 'questions', label: t('examEditor.questions.title', 'Questions'), icon: ListChecks },
+                        ].filter(item => !item.hidden).map((item) => (
+                             <button
+                                key={item.id}
+                                onClick={() => {
+                                    setActiveTab(item.id);
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all border ${
+                                    activeTab === item.id 
+                                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-500/20' 
+                                    : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                                }`}
+                            >
+                                <item.icon className="w-4 h-4" />
+                                {item.label}
+                                {item.id === 'questions' && (
+                                    <span className={`ml-1.5 px-2 py-0.5 rounded-md text-[10px] ${
+                                        activeTab === item.id ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300'
+                                    }`}>
+                                        {fields.length}
+                                    </span>
+                                )}
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                     {/* Left Navigation (Desktop) */}
                     <aside className="hidden lg:block lg:col-span-3 sticky top-48">
