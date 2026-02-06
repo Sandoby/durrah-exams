@@ -59,8 +59,8 @@ export function StudentPortalFeature() {
                                         <Medal weight="duotone" className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <div className="text-[10px] font-black uppercase tracking-wider text-slate-500">Academic Standing</div>
-                                        <div className="text-sm font-bold text-slate-900 dark:text-white">Top 5% of Class</div>
+                                        <div className="text-[10px] font-black uppercase tracking-wider text-slate-500">{t('landing.marketing.student.academicStanding')}</div>
+                                        <div className="text-sm font-bold text-slate-900 dark:text-white">{t('landing.marketing.student.topClass')}</div>
                                     </div>
                                 </div>
                             </motion.div>
@@ -88,10 +88,10 @@ export function StudentPortalFeature() {
 
                             <div className="grid sm:grid-cols-2 gap-6 mb-12">
                                 {[
-                                    { icon: Layout, title: "Centralized Access" },
-                                    { icon: ChartLineUp, title: "Performance Insights" },
-                                    { icon: Medal, title: "Achievement Badges" },
-                                    { icon: ShieldCheck, title: "Secure History" }
+                                    { icon: Layout, title: t('landing.marketing.student.features.centralized') },
+                                    { icon: ChartLineUp, title: t('landing.marketing.student.features.performance') },
+                                    { icon: Medal, title: t('landing.marketing.student.features.badges') },
+                                    { icon: ShieldCheck, title: t('landing.marketing.student.features.history') }
                                 ].map((item, i) => (
                                     <div key={i} className="flex items-center gap-4 group">
                                         <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-500 group-hover:text-white transition-all">
@@ -103,7 +103,7 @@ export function StudentPortalFeature() {
                             </div>
 
                             <Link to="/student-portal" className="group inline-flex items-center gap-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl font-bold shadow-2xl hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white transition-all transform hover:-translate-y-1">
-                                {t('landing.marketing.student.cta', 'Explore Student Hub')}
+                                {t('landing.marketing.student.cta')}
                                 <ArrowRight className={`w-5 h-5 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180' : ''}`} />
                             </Link>
                         </motion.div>

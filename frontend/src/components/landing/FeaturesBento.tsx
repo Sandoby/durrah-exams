@@ -35,9 +35,9 @@ export function FeaturesBento() {
                                 <p className="text-slate-600 dark:text-slate-400 text-lg max-w-md">{t('features.antiCheating.desc')}</p>
                             </div>
                             <div className="mt-8 flex gap-3 text-sm font-medium text-slate-500">
-                                <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg">Tab Detection</span>
-                                <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg">Fullscreen Lock</span>
-                                <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg">AI Proctor</span>
+                                <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg">{t('features.tags.tabDetection')}</span>
+                                <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg">{t('features.tags.fullscreenLock')}</span>
+                                <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg">{t('features.tags.aiProctor')}</span>
                             </div>
                         </div>
                     </motion.div>

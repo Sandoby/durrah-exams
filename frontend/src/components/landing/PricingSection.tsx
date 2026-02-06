@@ -60,12 +60,12 @@ export function PricingSection({ registrationUrl, isCurrencyLoading, currencyCod
                         variants={fadeIn}
                         className="flex flex-col relative bg-slate-900 dark:bg-indigo-600 rounded-3xl shadow-2xl p-8 transform md:-translate-y-4 border border-slate-700 dark:border-indigo-500 ring-4 ring-indigo-500/10"
                     >
-                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-1 rounded-full font-bold text-xs uppercase tracking-wider shadow-lg">Most Popular</div>
+                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-1 rounded-full font-bold text-xs uppercase tracking-wider shadow-lg">{t('pricing.professional.badge')}</div>
                         <h3 className="text-2xl font-bold text-white mb-2">{t('pricing.professional.title')}</h3>
                         <div className="mb-6">
                             <span className="text-5xl font-black text-white tracking-tight">{isCurrencyLoading ? '...' : `${currencyCode} ${monthlyPrice}`}</span>
                             <span className="text-slate-400 dark:text-indigo-200 text-sm font-medium ml-2">{t('pricing.professional.period')}</span>
-                            <div className="mt-1 text-indigo-300 text-xs font-semibold">{t('pricing.professional.freeTrial', '14-day free trial')}</div>
+                            <div className="mt-1 text-indigo-300 text-xs font-semibold">{t('pricing.yearly.freeTrial')}</div>
                         </div>
                         <ul className="space-y-4 mb-8 flex-1">
                             {[0, 1, 2, 3].map(i => (
@@ -78,7 +78,7 @@ export function PricingSection({ registrationUrl, isCurrencyLoading, currencyCod
                     <motion.div variants={fadeIn} className="flex flex-col bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 hover:shadow-xl transition-all duration-300">
                         <div className="flex justify-between items-center mb-2">
                             <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{t('pricing.yearly.title')}</h3>
-                            <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs px-2 py-1 rounded-md font-bold">SAVE 20%</span>
+                            <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs px-2 py-1 rounded-md font-bold">{t('pricing.yearly.badge').toUpperCase()}</span>
                         </div>
                         <div className="mb-6">
                             <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">{isCurrencyLoading ? '...' : `${currencyCode} ${yearlyPrice}`}</span>

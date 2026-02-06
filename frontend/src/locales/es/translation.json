@@ -46,6 +46,11 @@
         "satisfaction": "Tasa de Satisfacción"
     },
     "features": {
+        "tags": {
+            "tabDetection": "Detección de pestañas",
+            "fullscreenLock": "Bloqueo de pantalla completa",
+            "aiProctor": "Supervisor IA"
+        },
         "title": "Todo lo que necesitas para sobresalir",
         "subtitle": "Funciones potentes diseñadas específicamente para educadores modernos",
         "badge": "Características",
@@ -518,6 +523,16 @@
         }
     },
     "landing": {
+        "highlights": {
+            "availability": "Alta Disponibilidad",
+            "uptime": "99.9% Tiempo de actividad",
+            "security": "Seguridad",
+            "ssl": "Cifrado SSL",
+            "global": "Alcance Global",
+            "anyDevice": "Cualquier dispositivo",
+            "reporting": "Informes",
+            "instantResult": "Resultados instantáneos"
+        },
         "seo": {
             "title": "Durrah for Tutors | Crea Exámenes Online Seguros",
             "description": "Crea exámenes profesionales en minutos. Durrah for Tutors ofrece potentes funciones anti-trampas, calificación automática y análisis detallados para educadores de todo el mundo.",
@@ -528,7 +543,7 @@
                 "badge": "Divertido y Seguro",
                 "title": "Modo Niños: La Aventura de Quiz Definitiva",
                 "titleSpan": "Definitiva",
-                "desc": "Transforma las evaluaciones en un viaje divertido. Nuestro Modo Niños cuenta con visuales vibrantes, navegación simplificada y un sistema anti-trampas de clase mundial que se siente como un juego, no como una prueba.",
+                "desc": "Transforma las evaluaciones en un viaje divertido. Nuestro Modo Niños cuenta con imágenes vibrantes, navegación simplificada y un sistema anti-trampas de clase mundial que se siente como un juego, no como una prueba.",
                 "features": [
                     "Psicología de Juego",
                     "Comunidad Segura",
@@ -542,16 +557,26 @@
                 "title": "Empodera a los Estudiantes con un Portal Unificado",
                 "titleSpan": "Portal Unificado",
                 "desc": "Ofrece a tus estudiantes un centro centralizado para gestionar su trayectoria académica. Desde unirse a exámenes con un simple código hasta realizar un seguimiento de desempeños pasados y revisar análisis profundos.",
-                "features": [
-                    "Seguimiento de Desempeño",
-                    "Paneles Personalizados",
-                    "Información de Crecimiento",
-                    "Acceso Seguro"
-                ],
-                "cta": "Visitar Portal del Estudiante"
+                "academicStanding": "Nivel Académico",
+                "topClass": "Top 5% de la clase",
+                "features": {
+                    "centralized": "Acceso centralizado",
+                    "performance": "Información de rendimiento",
+                    "badges": "Insignias de logro",
+                    "history": "Historial seguro"
+                },
+                "cta": "Explora el Portal del Estudiante"
             }
         },
         "mobileApp": {
+            "mobileFirst": "Móvil primero",
+            "scan": "Escanear para instalar",
+            "featuresList": {
+                "push": "Notificaciones push",
+                "biometric": "Control biométrico",
+                "kids": "Aventura para niños",
+                "offline": "Modo sin conexión"
+            },
             "title": "Obtén la Aplicación Móvil",
             "subtitle": "Accede a exámenes en cualquier lugar con nuestra aplicación nativa para Android",
             "appName": "Durrah Tutors",

@@ -15,7 +15,7 @@ export function Footer() {
                             <Logo size="md" showText={false} />
                             <span className="text-xl font-bold text-white">Durrah</span>
                         </div>
-                        <p className="text-gray-400 mb-6">Modern exam platform for educators</p>
+                        <p className="text-gray-400 mb-6">{t('footer.desc')}</p>
                         <div className="flex items-center gap-4">
                             <a
                                 href="https://web.facebook.com/profile.php?id=61584207453651"
@@ -29,7 +29,7 @@ export function Footer() {
                         </div>
                     </div>
                     <div>
-                        <h3 className="font-bold text-white mb-4">Product</h3>
+                        <h3 className="font-bold text-white mb-4">{t('footer.product')}</h3>
                         <ul className="space-y-4">
                             <li><Link to="/pricing" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.pricing')}</Link></li>
                             <li><a href="#testimonials" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.testimonials')}</a></li>
@@ -37,9 +37,9 @@ export function Footer() {
                         </ul>
                     </div>
                     <div>
-                        <h3 className="font-bold text-white mb-4">Company</h3>
+                        <h3 className="font-bold text-white mb-4">{t('footer.company')}</h3>
                         <ul className="space-y-4">
-                            <li><Link to="/about" className="text-gray-400 hover:text-white transition-colors">About</Link></li>
+                            <li><Link to="/about" className="text-gray-400 hover:text-white transition-colors">{t('footer.about')}</Link></li>
                             <li><a href="mailto:info@durrahtutors.com" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.contact')}</a></li>
                         </ul>
                     </div>
@@ -54,7 +54,7 @@ export function Footer() {
                     </div>
                 </div>
                 <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-                    <p>&copy; 2026 Durrah for Tutors. All rights reserved.</p>
+                    <p>{t('footer.copyright')}</p>
                 </div>
             </div>
         </footer>

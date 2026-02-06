@@ -46,6 +46,11 @@
         "satisfaction": "Taux de Satisfaction"
     },
     "features": {
+        "tags": {
+            "tabDetection": "Détection d'onglets",
+            "fullscreenLock": "Verrouillage plein écran",
+            "aiProctor": "Surveillant IA"
+        },
         "title": "Tout ce dont vous avez besoin pour exceller",
         "subtitle": "Des fonctionnalités puissantes conçues spécifiquement pour les éducateurs modernes",
         "badge": "Fonctionnalités",
@@ -798,6 +803,16 @@
         }
     },
     "landing": {
+        "highlights": {
+            "availability": "Haute Disponibilité",
+            "uptime": "99.9% de disponibilité",
+            "security": "Sécurité",
+            "ssl": "Cryptage SSL",
+            "global": "Portée Mondiale",
+            "anyDevice": "Tout appareil",
+            "reporting": "Rapports",
+            "instantResult": "Résultats instantanés"
+        },
         "seo": {
             "title": "Durrah for Tutors | Créez des Examens en Ligne Sécurisés",
             "description": "Créez des examens professionnels en quelques minutes. Durrah for Tutors offre de puissantes fonctionnalités anti-triche, une notation automatique et des analyses détaillées pour les éducateurs du monde entier.",
@@ -813,7 +828,7 @@
                     "Psychologie du Jeu",
                     "Communauté Sûre",
                     "Mondes Interactifs",
-                    "système de Récompenses"
+                    "Système de Récompenses"
                 ],
                 "cta": "Décollage !"
             },
@@ -822,16 +837,26 @@
                 "title": "Donnez du Pouvoir aux Étudiants avec un Portail Unifié",
                 "titleSpan": "Portail Unifié",
                 "desc": "Offrez à vos étudiants un centre névralgique pour gérer leur parcours académique. De l'inscription aux examens avec un simple code au suivi des performances passées et à l'examen d'analyses approfondies.",
-                "features": [
-                    "Suivi des Performances",
-                    "Tableaux de Bord Personnalisés",
-                    "Aperçus de Croissance",
-                    "Accès Sécurisé"
-                ],
+                "academicStanding": "Niveau Académique",
+                "topClass": "Top 5% de la classe",
+                "features": {
+                    "centralized": "Accès centralisé",
+                    "performance": "Aperçus de performance",
+                    "badges": "Badges de réussite",
+                    "history": "Historique sécurisé"
+                },
                 "cta": "Visiter le Portail Étudiant"
             }
         },
         "mobileApp": {
+            "mobileFirst": "Mobile d'abord",
+            "scan": "Scanner pour installer",
+            "featuresList": {
+                "push": "Notifications push",
+                "biometric": "Contrôle biométrique",
+                "kids": "Aventure pour enfants",
+                "offline": "Mode hors ligne"
+            },
             "title": "Obtenez l'Application Mobile",
             "subtitle": "Accédez aux examens n'importe où avec notre application Android native",
             "appName": "Durrah Tutors",

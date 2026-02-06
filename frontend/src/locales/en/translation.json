@@ -46,6 +46,11 @@
         "satisfaction": "Satisfaction Rate"
     },
     "features": {
+        "tags": {
+            "tabDetection": "Tab Detection",
+            "fullscreenLock": "Fullscreen Lock",
+            "aiProctor": "AI Proctor"
+        },
         "title": "Everything You Need to Excel",
         "subtitle": "Powerful features designed specifically for modern educators",
         "badge": "Features",
@@ -90,6 +95,8 @@
         },
         "professional": {
             "title": "Professional",
+            "save20": "SAVE 20%",
+            "mostPopular": "Most Popular",
             "price": "5 USD",
             "period": "/month",
             "badge": "Most Popular",
@@ -228,6 +235,8 @@
     },
     "footer": {
         "desc": "The modern exam platform for tutors worldwide.",
+        "company": "Company",
+        "about": "About",
         "product": "Product",
         "features": "Features",
         "signup": "Sign Up",
@@ -834,6 +843,16 @@
         }
     },
     "landing": {
+        "highlights": {
+            "availability": "High Availability",
+            "uptime": "99.9% Uptime",
+            "security": "Security",
+            "ssl": "SSL Encrypted",
+            "global": "Global Reach",
+            "anyDevice": "Any Device",
+            "reporting": "Reporting",
+            "instantResult": "Instant Result"
+        },
         "seo": {
             "title": "Durrah for Tutors | Create Secure Online Exams",
             "description": "Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.",
@@ -858,16 +877,26 @@
                 "title": "Empower Students with a Unified Portal",
                 "titleSpan": "Unified Portal",
                 "desc": "Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.",
-                "features": [
-                    "Performance Tracking",
-                    "Personalized Dashboards",
-                    "Growth Insights",
-                    "Secure Access"
-                ],
-                "cta": "Visit Student Portal"
+                "academicStanding": "Academic Standing",
+                "topClass": "Top 5% of Class",
+                "features": {
+                    "centralized": "Centralized Access",
+                    "performance": "Performance Insights",
+                    "badges": "Achievement Badges",
+                    "history": "Secure History"
+                },
+                "cta": "Explore Student Hub"
             }
         },
         "mobileApp": {
+            "mobileFirst": "Mobile First",
+            "scan": "Scan to Install",
+            "featuresList": {
+                "push": "Push Notifications",
+                "biometric": "Biometric Control",
+                "kids": "Kids Adventure",
+                "offline": "Offline Mode"
+            },
             "title": "Get the Mobile App",
             "subtitle": "Access exams anywhere with our native Android application",
             "appName": "Durrah Tutors",

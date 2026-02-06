@@ -1,16 +1,19 @@
 import { motion } from 'framer-motion';
 import { DeviceMobile, GlobeHemisphereWest, Lightning, ShieldCheck } from '@phosphor-icons/react';
+import { useTranslation } from 'react-i18next';
 
 export function PlatformHighlights() {
+    const { t } = useTranslation();
+
     return (
         <div className="w-full py-16 bg-slate-50 dark:bg-slate-950">
             <div className="max-w-7xl mx-auto px-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
-                        { label: "High Availability", value: "99.9% Uptime", icon: GlobeHemisphereWest, color: "text-indigo-500" },
-                        { label: "Security", value: "SSL Encrypted", icon: ShieldCheck, color: "text-emerald-500" },
-                        { label: "Global Reach", value: "Any Device", icon: DeviceMobile, color: "text-purple-500" },
-                        { label: "Reporting", value: "Instant Result", icon: Lightning, color: "text-yellow-500" },
+                        { label: t('landing.highlights.availability'), value: t('landing.highlights.uptime'), icon: GlobeHemisphereWest, color: "text-indigo-500" },
+                        { label: t('landing.highlights.security'), value: t('landing.highlights.ssl'), icon: ShieldCheck, color: "text-emerald-500" },
+                        { label: t('landing.highlights.global'), value: t('landing.highlights.anyDevice'), icon: DeviceMobile, color: "text-purple-500" },
+                        { label: t('landing.highlights.reporting'), value: t('landing.highlights.instantResult'), icon: Lightning, color: "text-yellow-500" },
                     ].map((stat, idx) => (
                         <motion.div
                             key={idx}

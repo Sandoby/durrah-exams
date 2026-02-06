@@ -57,7 +57,7 @@ export function MobileAppSection() {
                                     loading="lazy"
                                 />
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('landing.mobileApp.scan', 'Scan to Install')}</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('landing.mobileApp.scan')}</span>
                         </motion.div>
                     </motion.div>
 
@@ -69,7 +69,7 @@ export function MobileAppSection() {
                         >
                             <div className="inline-flex items-center gap-2 bg-pink-50 dark:bg-pink-900/30 border border-pink-200 dark:border-pink-800 rounded-full px-4 py-1.5 mb-6">
                                 <DeviceMobile weight="duotone" className="w-4 h-4 text-pink-600 dark:text-pink-400" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-pink-600 dark:text-pink-400">Mobile First</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-pink-600 dark:text-pink-400">{t('landing.mobileApp.mobileFirst')}</span>
                             </div>
 
                             <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-8 tracking-tight leading-[1.1]">
@@ -82,10 +82,10 @@ export function MobileAppSection() {
 
                             <div className="grid sm:grid-cols-2 gap-4 mb-12">
                                 {[
-                                    { icon: Bell, text: "Push Notifications", color: "bg-indigo-500" },
-                                    { icon: ShieldCheck, text: "Biometric Control", color: "bg-emerald-500" },
-                                    { icon: Rocket, text: "Kids Adventure", color: "bg-purple-500" },
-                                    { icon: Lock, text: "Offline Mode", color: "bg-amber-500" }
+                                    { icon: Bell, text: t('landing.mobileApp.featuresList.push'), color: "bg-indigo-500" },
+                                    { icon: ShieldCheck, text: t('landing.mobileApp.featuresList.biometric'), color: "bg-emerald-500" },
+                                    { icon: Rocket, text: t('landing.mobileApp.featuresList.kids'), color: "bg-purple-500" },
+                                    { icon: Lock, text: t('landing.mobileApp.featuresList.offline'), color: "bg-amber-500" }
                                 ].map((feat, i) => (
                                     <div key={i} className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 backdrop-blur-sm transition-colors hover:border-indigo-500/30 group">
                                         <feat.icon className="w-5 h-5 text-indigo-500 group-hover:scale-110 transition-transform" />
