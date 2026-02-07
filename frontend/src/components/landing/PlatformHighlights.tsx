@@ -6,14 +6,14 @@ export function PlatformHighlights() {
     const { t } = useTranslation();
 
     return (
-        <div className="w-full py-16 bg-slate-50 dark:bg-slate-950">
+        <div className="w-full py-16">
             <div className="max-w-7xl mx-auto px-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
-                        { label: t('landing.highlights.availability'), value: t('landing.highlights.uptime'), icon: GlobeHemisphereWest, color: "text-indigo-500" },
-                        { label: t('landing.highlights.security'), value: t('landing.highlights.ssl'), icon: ShieldCheck, color: "text-emerald-500" },
-                        { label: t('landing.highlights.global'), value: t('landing.highlights.anyDevice'), icon: DeviceMobile, color: "text-purple-500" },
-                        { label: t('landing.highlights.reporting'), value: t('landing.highlights.instantResult'), icon: Lightning, color: "text-yellow-500" },
+                        { label: t('landing.highlights.availability'), value: t('landing.highlights.uptime'), icon: GlobeHemisphereWest, color: "text-indigo-600" },
+                        { label: t('landing.highlights.security'), value: t('landing.highlights.ssl'), icon: ShieldCheck, color: "text-emerald-600" },
+                        { label: t('landing.highlights.global'), value: t('landing.highlights.anyDevice'), icon: DeviceMobile, color: "text-purple-600" },
+                        { label: t('landing.highlights.reporting'), value: t('landing.highlights.instantResult'), icon: Lightning, color: "text-amber-600" },
                     ].map((stat, idx) => (
                         <motion.div
                             key={idx}
@@ -21,9 +21,9 @@ export function PlatformHighlights() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: idx * 0.1 }}
-                            className="flex items-center gap-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/70 shadow-[0_16px_40px_-30px_rgba(15,23,42,0.4)] p-5"
+                            className="flex items-center gap-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-sm"
                         >
-                            <div className={`h-10 w-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center ${stat.color}`}>
+                            <div className={`h-10 w-10 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center ${stat.color}`}>
                                 <stat.icon weight="duotone" className="w-5 h-5" />
                             </div>
                             <div>

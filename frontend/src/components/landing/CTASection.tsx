@@ -8,16 +8,15 @@ export function CTASection({ registrationUrl }: { registrationUrl: string }) {
     const isRTL = i18n.language === 'ar';
 
     return (
-        <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 relative">
+        <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
             <div className="max-w-6xl mx-auto relative group">
-                {/* Outer Glow */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
+                {/* Outer Glow - Simplified */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2.5rem] blur opacity-10 group-hover:opacity-20 transition duration-1000 group-hover:duration-200" />
 
-                <div className="relative bg-white dark:bg-slate-950 rounded-[2rem] p-8 md:p-20 overflow-hidden border border-slate-200 dark:border-slate-800 ring-1 ring-slate-200/50 dark:ring-white/10">
-                    {/* Dynamic Background */}
-                    <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] dark:opacity-[0.07]" />
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-500/5 dark:bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none" />
-                    <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
+                <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] p-8 md:p-20 overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
+                    {/* Dynamic Background - Simplified */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-50/50 dark:bg-indigo-900/20 rounded-full blur-[120px] pointer-events-none" />
+
 
                     {/* Content */}
                     <div className="relative z-10 flex flex-col items-center text-center">

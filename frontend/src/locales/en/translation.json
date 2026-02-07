@@ -16,6 +16,8 @@
     "hero": {
         "title": "Create Exams That",
         "titleHighlight": "Inspire Excellence",
+        "slogan1": "create exams inspire",
+        "slogan2": "excellence",
         "subtitle": "The modern exam platform trusted by tutors worldwide. Create, distribute, and grade exams with powerful anti-cheating features.",
         "cta": "Start Free Trial",
         "watchDemo": "Watch Demo",
@@ -28,6 +30,24 @@
             "noCreditCard": "No credit card required",
             "freeExams": "Free for up to 3 exams (lifetime)",
             "cancelAnytime": "Cancel anytime"
+        }
+    },
+    "landing": {
+        "howto": {
+            "title": "How It Works",
+            "subtitle": "Create secure online exams in three simple steps",
+            "step1": {
+                "title": "Craft Your Vision",
+                "desc": "The most intuitive exam builder. Questions assemble in 3D as you type."
+            },
+            "step2": {
+                "title": "Secure The Environment",
+                "desc": "Enable powerful anti-cheating measures with a single click. Tab monitoring, fullscreen lock, and more."
+            },
+            "step3": {
+                "title": "Review & Insights",
+                "desc": "Get detailed analytics and student performance metrics instantly."
+            }
         }
     },
     "nav": {
@@ -932,12 +952,12 @@
             "title": "How to Create an Online Exam in 3 Simple Steps",
             "subtitle": "Get your assessment up and running in minutes with our streamlined process.",
             "step1": {
-                "title": "1. Build Your Content",
-                "desc": "Use our lightning-fast editor to create multiple-choice, numeric, or open-ended questions. Add images and math formulas with ease."
+                "title": "Craft Your Vision",
+                "desc": "The most intuitive exam builder. Questions assemble in 3D as you type."
             },
             "step2": {
-                "title": "2. Set Security Rules",
-                "desc": "Enable one-click anti-cheating features like tab detection, fullscreen enforcement, and violation tracking to ensure academic integrity."
+                "title": "Fortify Integrity",
+                "desc": "AI-powered proctoring locks down the environment instantly. Secured by Durrah."
             },
             "step3": {
                 "title": "3. Share & Analyze",

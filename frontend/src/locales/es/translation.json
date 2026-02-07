@@ -16,6 +16,8 @@
     "hero": {
         "title": "Crea Exámenes Que",
         "titleHighlight": "Inspiren Excelencia",
+        "slogan1": "crea exámenes que inspiran",
+        "slogan2": "excelencia",
         "subtitle": "La plataforma de exámenes moderna en la que confían tutores de todo el mundo. Crea, distribuye y califica exámenes con potentes funciones anti-trampas.",
         "cta": "Prueba Gratis",
         "watchDemo": "Ver Demostración",
@@ -28,6 +30,24 @@
             "noCreditCard": "No se requiere tarjeta de crédito",
             "freeExams": "Gratis hasta 3 exámenes",
             "cancelAnytime": "Cancela en cualquier momento"
+        }
+    },
+    "landing": {
+        "howto": {
+            "title": "Cómo Funciona",
+            "subtitle": "Cree exámenes seguros en línea en tres sencillos pasos",
+            "step1": {
+                "title": "Diseñe su Visión",
+                "desc": "El creador de exámenes más intuitivo. Las preguntas se ensamblan en 3D mientras escribe."
+            },
+            "step2": {
+                "title": "Asegure el Entorno",
+                "desc": "Active potentes medidas anti-trampas con un solo clic. Monitoreo de pestañas, bloqueo de pantalla completa y más."
+            },
+            "step3": {
+                "title": "Revisión y Análisis",
+                "desc": "Obtenga análisis detallados y métricas de rendimiento de los estudiantes al instante."
+            }
         }
     },
     "nav": {

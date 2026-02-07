@@ -8,101 +8,113 @@ export function StudentPortalFeature() {
     const isRTL = i18n.language === 'ar';
 
     return (
-        <section className="py-32 relative overflow-hidden bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800/50">
-            <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
-            <img
-                src="/illustrations/freepik__talk__87937.png"
-                alt=""
-                className="absolute right-[-6%] top-1/2 -translate-y-1/2 w-[560px] max-w-[75vw] opacity-15 blur-[1px] mix-blend-multiply pointer-events-none select-none dark:opacity-10 dark:mix-blend-screen"
-                width={560}
-                height={500}
-                loading="lazy"
-            />
+        <section className="py-24 md:py-32 relative overflow-hidden">
+            {/* Premium Background Elements */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="grid lg:grid-cols-2 gap-20 items-center">
+                <div className="grid lg:grid-cols-2 gap-16 md:gap-24 items-center">
+                    {/* Left: Enhanced Mockup Area */}
                     <motion.div
-                        initial={{ opacity: 0, x: -30 }}
-                        whileInView={{ opacity: 1, x: 0 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="relative perspective-2000"
+                        className="relative"
                     >
-                        <div className="relative transform-style-3d rotate-y-12">
-                            <motion.div
-                                animate={{ y: [0, -15, 0], x: [0, 10, 0] }}
-                                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute -top-12 -right-8 w-full aspect-video bg-slate-800 rounded-2xl shadow-2xl border border-white/10 overflow-hidden opacity-40 blur-[1px]"
-                            >
-                                <img src="/mockups/exam-view.png" alt="Exam Interface" className="w-full h-full object-cover" width={800} height={450} loading="lazy" />
-                            </motion.div>
-
-                            <motion.div
-                                className="relative z-10 w-full aspect-video bg-white dark:bg-slate-800 rounded-2xl shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-slate-700 overflow-hidden"
-                            >
-                                <div className="h-10 bg-slate-50 dark:bg-slate-800/50 flex items-center px-4 gap-2 border-b border-slate-200 dark:border-slate-700">
-                                    <div className="flex gap-1.5">
-                                        <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700" />
-                                        <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700" />
-                                        <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700" />
-                                    </div>
+                        {/* Main Dashboard Mockup */}
+                        <div className="relative z-10 bg-white dark:bg-slate-900 rounded-[2rem] shadow-[0_32px_80px_-20px_rgba(15,23,42,0.15)] dark:shadow-[0_32px_80px_-20px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-slate-800 overflow-hidden transform perspective-2000 rotate-y-[-4deg] rotate-x-[2deg]">
+                            <div className="h-10 bg-slate-50 dark:bg-slate-800/50 flex items-center px-6 gap-2 border-b border-slate-200 dark:border-slate-800">
+                                <div className="flex gap-2">
+                                    <div className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700" />
+                                    <div className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700" />
+                                    <div className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700" />
                                 </div>
-                                <img src="/mockups/student-portal-v2.png" alt="Student Dashboard" className="w-full h-full object-contain bg-slate-50 dark:bg-slate-900" width={1200} height={675} loading="lazy" />
-                            </motion.div>
+                            </div>
+                            <img
+                                src="/mockups/student-portal-v2.png"
+                                alt="Student Dashboard"
+                                className="w-full h-auto object-contain bg-white dark:bg-slate-900"
+                                width={1200}
+                                height={800}
+                                loading="lazy"
+                            />
+                        </div>
 
-                            <motion.div
-                                animate={{ y: [0, 20, 0] }}
-                                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                                className="absolute -bottom-6 -left-6 z-20 glass-card p-4 rounded-2xl shadow-xl border border-indigo-500/20"
-                            >
+                        {/* Floating elements for "Wow" factor */}
+                        <motion.div
+                            animate={{ y: [0, -20, 0] }}
+                            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute -top-12 -right-8 z-20 hidden md:block"
+                        >
+                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/50 flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold">A+</div>
+                                <div className="pr-4">
+                                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{t('landing.highlights.reporting')}</div>
+                                    <div className="text-sm font-bold text-slate-900 dark:text-white">New Exam Result</div>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            animate={{ y: [0, 20, 0] }}
+                            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                            className="absolute -bottom-10 -left-6 z-20 hidden md:block"
+                        >
+                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-4 rounded-2xl shadow-xl border border-white/20 dark:border-slate-700/50">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
                                         <Medal weight="duotone" className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <div className="text-[10px] font-black uppercase tracking-wider text-slate-500">{t('landing.marketing.student.academicStanding')}</div>
+                                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{t('landing.marketing.student.academicStanding')}</div>
                                         <div className="text-sm font-bold text-slate-900 dark:text-white">{t('landing.marketing.student.topClass')}</div>
                                     </div>
                                 </div>
-                            </motion.div>
-                        </div>
+                            </div>
+                        </motion.div>
                     </motion.div>
 
-                    <div className="relative">
+                    {/* Right: Text & Content */}
+                    <div>
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                         >
-                            <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-1.5 mb-6">
+                            <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-1.5 mb-8">
                                 <GraduationCap className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{t('landing.marketing.student.badge', 'Unified Hub')}</span>
+                                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{t('landing.marketing.student.badge')}</span>
                             </div>
 
-                            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-8 tracking-tight leading-[1.1]">
-                                {t('landing.marketing.student.title', 'One Place for Every Student Goal')}
+                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white mb-8 tracking-tighter leading-[1.05]">
+                                {t('landing.marketing.student.title')}
                             </h2>
 
-                            <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed">
-                                {t('landing.marketing.student.desc', 'Give your students a central hub to manage their academic journey. From joining exams with a simple code to tracking past performances and reviewing deep analytics.')}
+                            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed font-medium">
+                                {t('landing.marketing.student.desc')}
                             </p>
 
-                            <div className="grid sm:grid-cols-2 gap-6 mb-12">
+                            <div className="grid sm:grid-cols-2 gap-y-6 gap-x-8 mb-12">
                                 {[
-                                    { icon: Layout, title: t('landing.marketing.student.features.centralized') },
-                                    { icon: ChartLineUp, title: t('landing.marketing.student.features.performance') },
-                                    { icon: Medal, title: t('landing.marketing.student.features.badges') },
-                                    { icon: ShieldCheck, title: t('landing.marketing.student.features.history') }
+                                    { icon: Layout, title: t('landing.marketing.student.features.centralized'), color: "text-blue-500" },
+                                    { icon: ChartLineUp, title: t('landing.marketing.student.features.performance'), color: "text-emerald-500" },
+                                    { icon: Medal, title: t('landing.marketing.student.features.badges'), color: "text-amber-500" },
+                                    { icon: ShieldCheck, title: t('landing.marketing.student.features.history'), color: "text-indigo-500" }
                                 ].map((item, i) => (
                                     <div key={i} className="flex items-center gap-4 group">
-                                        <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-500 group-hover:text-white transition-all">
-                                            <item.icon className="w-5 h-5" />
+                                        <div className={`w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}>
+                                            <item.icon className="w-6 h-6" />
                                         </div>
-                                        <span className="font-semibold text-slate-700 dark:text-slate-200">{item.title}</span>
+                                        <span className="font-bold text-slate-700 dark:text-slate-200">{item.title}</span>
                                     </div>
                                 ))}
                             </div>
 
-                            <Link to="/student-portal" className="group inline-flex items-center gap-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl font-bold shadow-2xl hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white transition-all transform hover:-translate-y-1">
+                            <Link
+                                to="/student-portal"
+                                className="group flex items-center justify-center sm:inline-flex gap-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-10 py-4 rounded-2xl font-bold shadow-xl hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white transition-all transform hover:-translate-y-1"
+                            >
                                 {t('landing.marketing.student.cta')}
                                 <ArrowRight className={`w-5 h-5 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180' : ''}`} />
                             </Link>
@@ -113,3 +125,4 @@ export function StudentPortalFeature() {
         </section>
     );
 }
+

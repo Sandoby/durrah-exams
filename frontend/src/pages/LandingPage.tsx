@@ -17,13 +17,11 @@ const StudentPortalFeature = lazy(() => import('../components/landing/StudentPor
 const MobileAppSection = lazy(() => import('../components/landing/MobileAppSection').then(mod => ({ default: mod.MobileAppSection })));
 const Footer = lazy(() => import('../components/landing/Footer').then(mod => ({ default: mod.Footer })));
 
-const InteractiveHowTo = lazy(() =>
-    import('../components/InteractiveHowTo').then(mod => ({ default: mod.InteractiveHowTo }))
-);
+import { HowItWorks } from '../components/landing/HowItWorks';
 
 export default function LandingPage() {
     const { i18n } = useTranslation();
-    const registrationUrl = 'https://tutors.durrahsystem.tech/register';
+    const registrationUrl = '/register';
     const isRTL = i18n.language === 'ar';
     // Force language detection on mount (for main landing page)
     useEffect(() => {
@@ -37,55 +35,58 @@ export default function LandingPage() {
 
 
     return (
-        <div className="min-h-screen bg-white dark:bg-slate-950" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="min-h-screen bg-white dark:bg-slate-950 relative selection:bg-indigo-100 selection:text-indigo-700" dir={isRTL ? 'rtl' : 'ltr'}>
+            {/* Global Grid Background */}
+            <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+
             <LandingPageSEO />
 
             <Navbar />
 
-            <HeroSection registrationUrl={registrationUrl} />
+            <div className="relative z-10">
+                <HeroSection registrationUrl={registrationUrl} />
 
-            <PlatformHighlights />
+                <PlatformHighlights />
 
-            <Suspense fallback={<div className="py-24" />}>
-                <FeaturesBento />
-            </Suspense>
+                <Suspense fallback={<div className="py-24" />}>
+                    <FeaturesBento />
+                </Suspense>
 
-            <Suspense fallback={<div className="py-24" />}>
-                <PricingSection
-                    registrationUrl={registrationUrl}
-                    isCurrencyLoading={isCurrencyLoading}
-                    currencyCode={currencyCode || ''}
-                    monthlyPrice={monthlyPrice || ''}
-                    yearlyPrice={yearlyPrice || ''}
-                />
-            </Suspense>
+                <Suspense fallback={<div className="py-24" />}>
+                    <PricingSection
+                        registrationUrl={registrationUrl}
+                        isCurrencyLoading={isCurrencyLoading}
+                        currencyCode={currencyCode || ''}
+                        monthlyPrice={monthlyPrice || ''}
+                        yearlyPrice={yearlyPrice || ''}
+                    />
+                </Suspense>
 
-            <Suspense fallback={<div className="py-24" />}>
-                <FAQSection />
-            </Suspense>
+                <Suspense fallback={<div className="py-24" />}>
+                    <FAQSection />
+                </Suspense>
 
+                <Suspense fallback={<div className="py-24" />}>
+                    <CTASection registrationUrl={registrationUrl} />
+                </Suspense>
 
-            <Suspense fallback={<div className="py-24" />}>
-                <CTASection registrationUrl={registrationUrl} />
-            </Suspense>
+                <Suspense fallback={<div className="py-24" />}>
+                    <StudentPortalFeature />
+                </Suspense>
 
+                <HowItWorks />
 
+                {/* Mobile App Section - Kept distinct as requested */}
+                <Suspense fallback={<div className="py-24" />}>
+                    <div className="relative">
+                        <MobileAppSection />
+                    </div>
+                </Suspense>
 
-            <Suspense fallback={<div className="py-24" />}>
-                <StudentPortalFeature />
-            </Suspense>
-
-            <Suspense fallback={null}>
-                <InteractiveHowTo />
-            </Suspense>
-
-            <Suspense fallback={<div className="py-24" />}>
-                <MobileAppSection />
-            </Suspense>
-
-            <Suspense fallback={<div className="py-24" />}>
-                <Footer />
-            </Suspense>
+                <Suspense fallback={<div className="py-24" />}>
+                    <Footer />
+                </Suspense>
+            </div>
         </div>
     );
 }

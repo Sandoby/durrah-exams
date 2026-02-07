@@ -27,8 +27,7 @@ export function FAQSection() {
     ];
 
     return (
-        <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-950/50 relative overflow-hidden">
-            <div className="absolute inset-0 bg-noise opacity-50 pointer-events-none" />
+        <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
             <div className="max-w-3xl mx-auto relative z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -52,7 +51,7 @@ export function FAQSection() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 }}
-                            className={`bg-white dark:bg-slate-800 rounded-2xl border ${activeFaq === index ? 'border-indigo-500 dark:border-indigo-500 ring-4 ring-indigo-500/10' : 'border-slate-200 dark:border-slate-700'} overflow-hidden shadow-sm hover:shadow-md transition-all duration-300`}
+                            className={`bg-white dark:bg-slate-900 rounded-xl border ${activeFaq === index ? 'border-indigo-500 ring-2 ring-indigo-500/10' : 'border-slate-200 dark:border-slate-800'} overflow-hidden shadow-sm hover:border-indigo-300 transition-all duration-300`}
                         >
                             <button
                                 onClick={() => setActiveFaq(activeFaq === index ? null : index)}
@@ -76,7 +75,7 @@ export function FAQSection() {
                                         exit={{ height: 0, opacity: 0 }}
                                         transition={{ duration: 0.3 }}
                                     >
-                                        <div className="px-6 pb-6 text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-700/50 pt-4">
+                                        <div className="px-6 pb-6 text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800 pt-4">
                                             {t(`landing.faq.q${index + 1}.answer`, faq.answer)}
                                         </div>
                                     </motion.div>

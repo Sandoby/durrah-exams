@@ -1,93 +1,112 @@
-import { motion } from 'framer-motion';
-import { ArrowRight, Sparkle } from '@phosphor-icons/react';
+import { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 export function HeroSection({ registrationUrl }: { registrationUrl: string }) {
-    const { t, i18n } = useTranslation();
-    const isRTL = i18n.language === 'ar';
+    const { t } = useTranslation();
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start start", "end start"]
+    });
+
+    const logoScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.7]);
+    const logoOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+    const logoY = useTransform(scrollYProgress, [0, 0.5], [0, -100]);
 
     return (
-        <section className="relative pt-28 pb-24 overflow-hidden bg-slate-50 dark:bg-slate-950">
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute -top-24 left-1/2 h-72 w-[520px] -translate-x-1/2 rounded-full bg-indigo-200/50 blur-[120px]" />
-                <div className="absolute -bottom-20 right-10 h-72 w-72 rounded-full bg-blue-200/40 blur-[110px]" />
-            </div>
+        <section ref={containerRef} className="relative pt-16 pb-20 md:pt-24 md:pb-32 overflow-hidden bg-white dark:bg-slate-950">
+            {/* Ambient Stage Light (Background) */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/5 blur-[100px] rounded-full pointer-events-none mix-blend-screen" />
 
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="bg-white dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-800/80 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.45)] rounded-[32px] p-8 sm:p-12 lg:p-14">
-                    <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
-                        <div className="text-center lg:text-left">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div className="flex flex-col items-center justify-center text-center">
+                    {/* Logo Area */}
+                    <motion.div
+                        style={{ scale: logoScale, opacity: logoOpacity, y: logoY }}
+                        initial={{ opacity: 1, scale: 1 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.8 }}
+                        className="mb-12 relative flex items-center justify-center group"
+                    >
+                        {/* Logo Container */}
+                        <div className="w-64 h-64 md:w-80 md:h-80 relative z-10 p-4">
+                            {/* NEON HALO EFFECT */}
                             <motion.div
-                                initial={{ opacity: 0, y: 14 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="inline-flex items-center gap-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full px-4 py-2 mb-6 shadow-sm"
+                                animate={{
+                                    filter: [
+                                        "drop-shadow(0 0 20px rgba(37,99,235,0.3))",
+                                        "drop-shadow(0 0 50px rgba(37,99,235,0.6))",
+                                        "drop-shadow(0 0 20px rgba(37,99,235,0.3))"
+                                    ]
+                                }}
+                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                className="w-full h-full"
                             >
-                                <Sparkle weight="fill" className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                    {t('hero.trustedBadge')}
-                                </span>
-                            </motion.div>
-
-                            <motion.h1
-                                initial={{ opacity: 0, y: 16 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 }}
-                                className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white leading-tight"
-                            >
-                                {t('hero.title')}
-                                <span className="block text-indigo-600 dark:text-indigo-400">
-                                    {t('hero.titleHighlight')}
-                                </span>
-                            </motion.h1>
-
-                            <motion.p
-                                initial={{ opacity: 0, y: 16 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="mt-6 text-lg md:text-xl text-slate-600 dark:text-slate-300 leading-relaxed"
-                            >
-                                {t('hero.subtitle')}
-                            </motion.p>
-
-                            <motion.div
-                                initial={{ opacity: 0, y: 16 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3 }}
-                                className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
-                            >
-                                <a
-                                    href={registrationUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="group inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 text-white px-6 py-3 text-base font-semibold shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 transition-colors"
-                                >
-                                    {t('hero.cta')}
-                                    <ArrowRight weight="bold" className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180' : ''}`} />
-                                </a>
-                            </motion.div>
-                        </div>
-
-                        <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="flex justify-center lg:justify-end"
-                        >
-                            <div className="w-full max-w-md rounded-[28px] bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700/70 shadow-[0_25px_60px_-35px_rgba(15,23,42,0.45)] p-4">
                                 <img
-                                    src="/illustrations/84406320_9963615.jpg"
-                                    srcSet="/illustrations/84406320_9963615-800w.jpeg 800w, /illustrations/84406320_9963615-1600w.jpeg 1600w"
-                                    sizes="(max-width: 1024px) 100vw, 480px"
-                                    alt="Durrah Learning Platform"
-                                    className="w-full h-auto rounded-2xl"
-                                    loading="eager"
-                                    width={480}
-                                    height={480}
-                                    style={{ fetchPriority: 'high' } as any}
+                                    src="/brand/logo.png"
+                                    className="w-full h-full object-contain relative z-20"
+                                    alt="Durrah Logo"
+                                />
+                            </motion.div>
+
+                            {/* Interactive Light Sheen (Reflection) */}
+                            <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                                <motion.div
+                                    animate={{ left: ['-100%', '200%'] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 0.5, ease: "easeInOut" }}
+                                    className="absolute top-0 w-1/2 h-full -skew-x-12 bg-gradient-to-r from-transparent via-white/50 to-transparent mix-blend-overlay"
                                 />
                             </div>
-                        </motion.div>
-                    </div>
+                        </div>
+
+                        {/* Back Halo Glow (Static Anchor) */}
+                        <div className="absolute inset-0 bg-blue-400/10 blur-[60px] rounded-full scale-75 pointer-events-none" />
+                    </motion.div>
+
+                    {/* Slogan */}
+                    <motion.h1
+                        initial={{ opacity: 1, y: 0 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter text-slate-900 dark:text-white leading-[1.1] mb-8 relative"
+                    >
+                        <span className="block mb-2 drop-shadow-lg">
+                            {t('hero.slogan1')}
+                        </span>
+
+                        {/* Neon Text Glow */}
+                        <span className="relative inline-block text-[#2563EB]">
+                            <span className="relative z-10">
+                                {t('hero.slogan2')}
+                            </span>
+                            {/* Text Halo */}
+                            <motion.span
+                                animate={{ opacity: [0.3, 0.7, 0.3], scale: [1, 1.02, 1] }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute inset-0 text-[#2563EB] blur-lg -z-10 select-none"
+                                aria-hidden="true"
+                            >
+                                {t('hero.slogan2')}
+                            </motion.span>
+                        </span>
+                    </motion.h1>
+
+                    {/* CTA */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                        className="mt-4 flex flex-col sm:flex-row gap-4 items-center"
+                    >
+                        <a
+                            href={registrationUrl}
+                            className="bg-[#2563EB] hover:bg-blue-700 text-white px-10 py-4 rounded-full font-bold text-lg transition-all shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-1 ring-2 ring-blue-500/20 ring-offset-2 ring-offset-white dark:ring-offset-slate-900"
+                        >
+                            {t('hero.cta')}
+                        </a>
+                    </motion.div>
                 </div>
             </div>
         </section>

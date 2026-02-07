@@ -16,6 +16,8 @@
     "hero": {
         "title": "Créez des Examens Qui",
         "titleHighlight": "Inspirent l'Excellence",
+        "slogan1": "créez des examens inspirant",
+        "slogan2": "l'excellence",
         "subtitle": "La plateforme d'examen moderne approuvée par les tuteurs du monde entier. Créez, distribuez et notez des examens avec de puissantes fonctionnalités anti-triche.",
         "cta": "Essai Gratuit",
         "watchDemo": "Voir la Démo",
@@ -28,6 +30,24 @@
             "noCreditCard": "Pas de carte de crédit requise",
             "freeExams": "Gratuit jusqu'à 3 examens",
             "cancelAnytime": "Annulez à tout moment"
+        }
+    },
+    "landing": {
+        "howto": {
+            "title": "Comment ça marche",
+            "subtitle": "Créez des examens sécurisés en ligne en trois étapes simples",
+            "step1": {
+                "title": "Élaborez votre vision",
+                "desc": "Le créateur d'examen le plus intuitif. Les questions s'assemblent en 3D pendant que vous tapez."
+            },
+            "step2": {
+                "title": "Sécurisez l'environnement",
+                "desc": "Activez des mesures anti-triche puissantes en un clic. Surveillance des onglets, verrouillage plein écran, et plus encore."
+            },
+            "step3": {
+                "title": "Bilan et analyses",
+                "desc": "Obtenez instantanément des analyses détaillées et des indicateurs de performance des étudiants."
+            }
         }
     },
     "nav": {
