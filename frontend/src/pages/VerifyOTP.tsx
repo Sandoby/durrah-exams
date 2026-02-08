@@ -238,7 +238,7 @@ export default function VerifyOTP() {
               {timeRemaining > 0 ? (
                 <div className="flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400">
                   <Shield className="h-4 w-4" />
-                  <span>{t('auth.forgotPassword.expiresIn', { time: formatTime(timeRemaining) })}</span>
+                  <span>{t('auth.forgotPassword.expiresIn', { time: '15:00' })}</span>
                 </div>
               ) : (
                 <div className="text-sm font-medium text-red-600 dark:text-red-400">
