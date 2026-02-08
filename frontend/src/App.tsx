@@ -8,6 +8,7 @@ import DemoPage from './pages/DemoPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
+import VerifyOTP from './pages/VerifyOTP';
 import UpdatePassword from './pages/UpdatePassword';
 import EmailConfirmed from './pages/EmailConfirmed';
 import EmailVerification from './pages/EmailVerification';
@@ -170,6 +171,7 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/update-password" element={<UpdatePassword />} />
         <Route path="/email-confirmed" element={<EmailConfirmed />} />
         <Route path="/verify-email" element={<EmailVerification />} />

@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Loader2, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { supabase } from '../lib/supabase';
 import { Logo } from '../components/Logo';
 import { useTranslation } from 'react-i18next';
 
@@ -19,6 +18,7 @@ export default function ForgotPassword() {
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const { t } = useTranslation();
+    const navigate = useNavigate();
 
     const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordForm>({
         resolver: zodResolver(forgotPasswordSchema),
@@ -27,16 +27,31 @@ export default function ForgotPassword() {
     const onSubmit = async (data: ForgotPasswordForm) => {
         setIsLoading(true);
         try {
-            const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-                redirectTo: `${window.location.origin}/update-password`,
-            });
+            const response = await fetch(
+                `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-password-reset-otp`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+                    },
+                    body: JSON.stringify({
+                        email: data.email,
+                    }),
+                }
+            );
 
-            if (error) throw error;
+            const result = await response.json();
 
-            setIsSubmitted(true);
-            toast.success(t('auth.messages.resetLinkSent'));
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to send OTP');
+            }
+
+            // Navigate to OTP verification page
+            navigate(`/verify-otp?email=${encodeURIComponent(data.email)}`);
+            toast.success(t('auth.messages.codeSent'));
         } catch (error: any) {
-            toast.error(t('auth.messages.resetLinkError'));
+            toast.error(error.message || t('auth.messages.resetCodeError'));
         } finally {
             setIsLoading(false);
         }
