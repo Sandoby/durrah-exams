@@ -249,17 +249,17 @@ export function ConvexChatWidget({
   // Show rating modal
   if (showRating) {
     return (
-      <div className="fixed bottom-4 right-4 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+      <div className="fixed bottom-4 right-4 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
         <div className="p-6 text-center">
-          <h3 className="text-lg font-semibold mb-2">Rate your experience</h3>
-          <p className="text-sm text-gray-500 mb-4">How was your chat support?</p>
+          <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Rate your experience</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">How was your chat support?</p>
 
           <div className="flex justify-center gap-2 mb-6">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 onClick={() => handleRate(star)}
-                className="p-1 hover:scale-110 transition-transform"
+                className="p-1 hover:scale-105 transition-transform"
               >
                 <Star
                   className={`h-8 w-8 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
@@ -270,7 +270,7 @@ export function ConvexChatWidget({
 
           <button
             onClick={() => { setShowRating(false); endSession(); }}
-            className="text-sm text-gray-500 hover:text-gray-700"
+            className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
           >
             Skip
           </button>
@@ -285,11 +285,11 @@ export function ConvexChatWidget({
     return (
       <button
         onClick={() => setIsMinimized(false)}
-        className="fixed bottom-4 right-4 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 rounded-full shadow-lg flex items-center justify-center text-white transition-all z-40"
+        className="fixed bottom-4 right-4 w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-full shadow-lg flex items-center justify-center text-white transition-colors z-40"
       >
         <MessageSquare className="h-6 w-6" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center font-semibold">
             {unreadCount}
           </span>
         )}
@@ -300,18 +300,18 @@ export function ConvexChatWidget({
   // No active session - show start button
   if (!sessionId) {
     return (
-      <div className="fixed bottom-4 right-4 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-40">
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white flex items-center justify-between">
+      <div className="fixed bottom-4 right-4 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-40">
+        <div className="bg-blue-600 p-4 text-white flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
             <span className="font-semibold">Live Support</span>
           </div>
           <div className="flex gap-1">
-            <button onClick={() => setIsMinimized(true)} className="p-1 hover:bg-white/20 rounded">
+            <button onClick={() => setIsMinimized(true)} className="p-1 hover:bg-white/20 rounded transition-colors">
               <Minimize2 className="h-4 w-4" />
             </button>
             {onClose && (
-              <button onClick={onClose} className="p-1 hover:bg-white/20 rounded">
+              <button onClick={onClose} className="p-1 hover:bg-white/20 rounded transition-colors">
                 <X className="h-4 w-4" />
               </button>
             )}
@@ -319,10 +319,10 @@ export function ConvexChatWidget({
         </div>
 
         <div className="p-6 text-center">
-          <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <MessageSquare className="h-8 w-8 text-indigo-600" />
+          <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <MessageSquare className="h-8 w-8 text-blue-600 dark:text-blue-400" />
           </div>
-          <h3 className="font-semibold text-lg mb-2">Need help?</h3>
+          <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">Need help?</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
             {questionText
               ? `Question: "${questionText.substring(0, 50)}..."`
@@ -333,7 +333,7 @@ export function ConvexChatWidget({
           <button
             onClick={startSession}
             disabled={isStarting}
-            className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
           >
             {isStarting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -350,9 +350,9 @@ export function ConvexChatWidget({
   }
 
   return (
-    <div className="fixed bottom-4 right-4 w-80 sm:w-96 h-[500px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden z-40">
+    <div className="fixed bottom-4 right-4 w-80 sm:w-96 h-[500px] bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden z-40">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white flex items-center justify-between shrink-0">
+      <div className="bg-blue-600 p-4 text-white flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -373,10 +373,10 @@ export function ConvexChatWidget({
         </div>
 
         <div className="flex gap-1">
-          <button onClick={() => setIsMinimized(true)} className="p-1.5 hover:bg-white/20 rounded">
+          <button onClick={() => setIsMinimized(true)} className="p-1.5 hover:bg-white/20 rounded transition-colors">
             <Minimize2 className="h-4 w-4" />
           </button>
-          <button onClick={handleEndChat} className="p-1.5 hover:bg-white/20 rounded">
+          <button onClick={handleEndChat} className="p-1.5 hover:bg-white/20 rounded transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -394,7 +394,7 @@ export function ConvexChatWidget({
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {isLoading && (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
           </div>
         )}
 
@@ -431,12 +431,12 @@ export function ConvexChatWidget({
               onKeyPress={handleKeyPress}
               placeholder="Type a message..."
               rows={1}
-              className="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg resize-none bg-transparent text-sm max-h-24 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl resize-none bg-transparent text-sm max-h-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               onClick={handleSend}
               disabled={!newMessage.trim()}
-              className="p-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Send className="h-4 w-4" />
             </button>
@@ -447,10 +447,10 @@ export function ConvexChatWidget({
       {/* Closed state */}
       {session?.status === 'ended' && (
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 text-center shrink-0">
-          <p className="text-sm text-gray-500 mb-2">This chat has ended</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">This chat has ended</p>
           <button
             onClick={() => setSessionId(null)}
-            className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+            className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold transition-colors"
           >
             Start new chat
           </button>
@@ -467,7 +467,7 @@ function MessageBubble({ message, isOwn }: { message: ChatMessage; isOwn: boolea
       <div className={`max-w-[80%] ${isOwn ? 'order-1' : 'order-2'}`}>
         <div
           className={`rounded-2xl px-4 py-2 ${isOwn
-            ? 'bg-indigo-600 text-white rounded-br-md'
+            ? 'bg-blue-600 text-white rounded-br-md'
             : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md'
             }`}
         >
@@ -481,7 +481,7 @@ function MessageBubble({ message, isOwn }: { message: ChatMessage; isOwn: boolea
             })}
           </span>
           {isOwn && message.read_at && (
-            <CheckCheck className="h-3 w-3 text-indigo-500" />
+            <CheckCheck className="h-3 w-3 text-blue-500" />
           )}
         </div>
       </div>
@@ -766,7 +766,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
   if (!enabled || allSessions === undefined) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -788,17 +788,17 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
         transition-transform duration-300 ease-in-out
         flex flex-col shrink-0
       `}>
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex items-center justify-between">
-          <h3 className="font-bold flex items-center gap-2">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-white flex items-center justify-between">
+          <h3 className="font-semibold flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
             Chat Sessions
             {waitingCount !== undefined && waitingCount > 0 && (
-              <span className="bg-white text-indigo-600 text-[10px] px-1.5 py-0.5 rounded-full animate-pulse">
+              <span className="bg-white text-blue-600 text-[10px] px-1.5 py-0.5 rounded-full font-semibold">
                 {waitingCount}
               </span>
             )}
           </h3>
-          <button onClick={() => setShowSessionsList(false)} className="md:hidden p-1 hover:bg-white/20 rounded">
+          <button onClick={() => setShowSessionsList(false)} className="md:hidden p-1 hover:bg-white/20 rounded transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -821,7 +821,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
                   }
                   setShowSessionsList(false);
                 }}
-                className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors ${activeSessionId === session._id ? 'bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-600' : ''
+                className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors ${activeSessionId === session._id ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-600' : ''
                   }`}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -865,8 +865,8 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
                   <ChevronLeft className="h-5 w-5" />
                 </button>
                 <div className="relative shrink-0">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center">
-                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 dark:text-indigo-400" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   {activeSession.status === 'active' && (
                     <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
@@ -885,7 +885,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <button
                   onClick={() => setShowUserPanelMobile(true)}
-                  className="p-2 sm:px-3 sm:py-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
+                  className="p-2 sm:px-3 sm:py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5"
                   title="View User Data"
                 >
                   <User className="h-4 w-4" />
@@ -894,7 +894,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
                 {activeSession.status !== 'ended' && (
                   <button
                     onClick={handleEndChat}
-                    className="p-2 sm:px-4 sm:py-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center"
+                    className="p-2 sm:px-4 sm:py-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 rounded-xl text-sm font-semibold transition-colors flex items-center"
                     title="End Chat"
                   >
                     <X className="h-4 w-4 sm:mr-1.5" />
@@ -927,11 +927,11 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
                       onKeyPress={handleKeyPress}
                       placeholder="Type your message..."
                       rows={1}
-                      className="w-full px-4 py-2.5 sm:py-3 border border-gray-200 dark:border-gray-700 rounded-xl resize-none bg-gray-50 dark:bg-gray-900 text-sm max-h-32 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-4 py-2.5 sm:py-3 border border-gray-200 dark:border-gray-700 rounded-xl resize-none bg-gray-50 dark:bg-gray-900 text-sm max-h-32 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <button
                       onClick={() => setShowCannedMenu(!showCannedMenu)}
-                      className="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 transition-colors"
+                      className="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-blue-600 transition-colors"
                       title="Quick Replies"
                     >
                       <Zap className="h-4 w-4" />
@@ -955,10 +955,10 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
                                 setNewMessage(response.content);
                                 setShowCannedMenu(false);
                               }}
-                              className="w-full text-left p-3 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 border-b border-gray-50 dark:border-gray-700/50 last:border-0 transition-colors"
+                              className="w-full text-left p-3 hover:bg-blue-50 dark:hover:bg-blue-900/20 border-b border-gray-50 dark:border-gray-700/50 last:border-0 transition-colors"
                             >
                               <div className="flex items-center justify-between mb-1">
-                                <span className="font-bold text-xs text-indigo-600 dark:text-indigo-400">{response.title}</span>
+                                <span className="font-bold text-xs text-blue-600 dark:text-blue-400">{response.title}</span>
                                 {response.shortcut && <span className="text-[10px] bg-gray-100 dark:bg-gray-700 px-1.5 rounded text-gray-500">{response.shortcut}</span>}
                               </div>
                               <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">{response.content}</p>
@@ -971,7 +971,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
                   <button
                     onClick={handleSend}
                     disabled={!newMessage.trim()}
-                    className="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+                    className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
                   >
                     <Send className="h-5 w-5" />
                   </button>
@@ -1032,7 +1032,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
 
           {loadingUser ? (
             <div className="flex items-center justify-center p-12">
-              <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
             </div>
           ) : userProfile ? (
             <div className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -1040,7 +1040,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
               <div className="p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <User className="h-5 w-5 text-indigo-500" />
+                    <User className="h-5 w-5 text-blue-500" />
                     Student Data
                   </h4>
                   <button onClick={() => setShowUserPanelMobile(false)} className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
@@ -1074,7 +1074,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800/50">
                     <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Plan</p>
-                    <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">{userProfile.subscription_plan || 'Free'}</p>
+                    <p className="text-sm font-bold text-blue-600 dark:text-blue-400">{userProfile.subscription_plan || 'Free'}</p>
                   </div>
                   <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800/50">
                     <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Status</p>
@@ -1103,7 +1103,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
                         <select
                           value={extendDays}
                           onChange={(e) => setExtendDays(Number(e.target.value))}
-                          className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 outline-none focus:ring-2 focus:ring-indigo-500"
+                          className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 outline-none focus:ring-2 focus:ring-blue-500"
                         >
                           <option value={7}>7 Days</option>
                           <option value={14}>14 Days</option>
@@ -1119,13 +1119,13 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
                           value={extendReason}
                           onChange={(e) => setExtendReason(e.target.value)}
                           placeholder="Ex: Loyalty"
-                          className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 outline-none focus:ring-2 focus:ring-indigo-500"
+                          className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                     </div>
                     <button
                       onClick={extendSubscription}
-                      className="w-full px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
+                      className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98]"
                     >
                       Extend Subscription
                     </button>
@@ -1195,7 +1195,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
               {/* Agent Notes */}
               <div className="p-5">
                 <h4 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-purple-500" />
+                  <Activity className="h-5 w-5 text-blue-500" />
                   Agent Logs & Notes
                 </h4>
                 <div className="space-y-3 mb-4">
@@ -1204,7 +1204,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
                     onChange={(e) => setNewNote(e.target.value)}
                     placeholder="Add student behavior notes..."
                     rows={2}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 resize-none outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 resize-none outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <div className="flex items-center gap-2">
                     <label className="flex items-center gap-2 cursor-pointer group">

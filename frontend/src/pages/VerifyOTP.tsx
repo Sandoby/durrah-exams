@@ -6,11 +6,19 @@ import toast from 'react-hot-toast';
 import { Logo } from '../components/Logo';
 import { useTranslation } from 'react-i18next';
 
+const OTP_EXPIRY_SECONDS = 15 * 60;
+const RESEND_COOLDOWN_SECONDS = 60;
+const MAX_VERIFY_ATTEMPTS = 3;
+
+const getErrorMessage = (error: unknown, fallback: string): string =>
+  error instanceof Error ? error.message : fallback;
+
 export default function VerifyOTP() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(60); // 60 seconds
-  const [attemptsRemaining, setAttemptsRemaining] = useState(3);
+  const [otpTimeRemaining, setOtpTimeRemaining] = useState(OTP_EXPIRY_SECONDS);
+  const [resendTimeRemaining, setResendTimeRemaining] = useState(RESEND_COOLDOWN_SECONDS);
+  const [attemptsRemaining, setAttemptsRemaining] = useState(MAX_VERIFY_ATTEMPTS);
   const [canResend, setCanResend] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
@@ -28,11 +36,11 @@ export default function VerifyOTP() {
       return;
     }
 
-    // Countdown timer
+    // Countdown timers
     const interval = setInterval(() => {
-      setTimeRemaining((prev) => {
+      setOtpTimeRemaining((prev) => (prev > 0 ? prev - 1 : 0));
+      setResendTimeRemaining((prev) => {
         if (prev <= 1) {
-          clearInterval(interval);
           setCanResend(true);
           return 0;
         }
@@ -66,8 +74,14 @@ export default function VerifyOTP() {
     }
 
     // Auto-submit when all 6 digits entered
-    if (newCode.every((digit) => digit !== '') && newCode.join('').length === 6) {
-      verifyOTP(newCode.join(''));
+    if (
+      !isVerifying &&
+      attemptsRemaining > 0 &&
+      otpTimeRemaining > 0 &&
+      newCode.every((digit) => digit !== '') &&
+      newCode.join('').length === 6
+    ) {
+      void verifyOTP(newCode.join(''));
     }
   };
 
@@ -101,11 +115,22 @@ export default function VerifyOTP() {
       setCode(newCode);
       inputRefs.current[5]?.focus();
       // Auto-submit pasted code
-      verifyOTP(pastedData);
+      void verifyOTP(pastedData);
     }
   };
 
   const verifyOTP = async (otpCode: string) => {
+    if (attemptsRemaining <= 0) {
+      toast.error('Maximum attempts reached. Please request a new code.');
+      setCanResend(true);
+      return;
+    }
+
+    if (otpTimeRemaining <= 0) {
+      toast.error(t('auth.forgotPassword.codeExpired'));
+      return;
+    }
+
     setIsVerifying(true);
     try {
       const response = await fetch(
@@ -125,7 +150,16 @@ export default function VerifyOTP() {
       if (!response.ok) {
         if (result.attemptsRemaining !== undefined) {
           setAttemptsRemaining(result.attemptsRemaining);
+          if (result.attemptsRemaining <= 0) {
+            setCanResend(true);
+          }
         }
+
+        if (response.status === 429) {
+          setAttemptsRemaining(0);
+          setCanResend(true);
+        }
+
         throw new Error(result.error || 'Invalid code');
       }
 
@@ -136,8 +170,8 @@ export default function VerifyOTP() {
 
       // Navigate to password reset page
       navigate('/update-password');
-    } catch (error: any) {
-      toast.error(error.message || t('auth.forgotPassword.invalidCode'));
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, t('auth.forgotPassword.invalidCode')));
       // Clear code and reset focus
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
@@ -155,10 +189,14 @@ export default function VerifyOTP() {
       return;
     }
 
-    verifyOTP(otpCode);
+    void verifyOTP(otpCode);
   };
 
   const resendCode = async () => {
+    if (!canResend || !email) {
+      return;
+    }
+
     setIsResending(true);
     try {
       const response = await fetch(
@@ -173,16 +211,21 @@ export default function VerifyOTP() {
         }
       );
 
-      if (!response.ok) throw new Error('Failed to resend code');
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to resend code');
+      }
 
       toast.success(t('auth.messages.codeSent'));
-      setTimeRemaining(60); // Reset timer to 60 seconds
+      setOtpTimeRemaining(typeof result.expiresIn === 'number' ? result.expiresIn : OTP_EXPIRY_SECONDS);
+      setResendTimeRemaining(RESEND_COOLDOWN_SECONDS);
       setCanResend(false);
-      setAttemptsRemaining(3);
+      setAttemptsRemaining(MAX_VERIFY_ATTEMPTS);
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
-    } catch (error) {
-      toast.error(t('auth.messages.resendError'));
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, t('auth.messages.resendError')));
     } finally {
       setIsResending(false);
     }
@@ -235,10 +278,10 @@ export default function VerifyOTP() {
 
             {/* Timer and attempts info */}
             <div className="flex flex-col items-center gap-2">
-              {timeRemaining > 0 ? (
+              {otpTimeRemaining > 0 ? (
                 <div className="flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400">
                   <Shield className="h-4 w-4" />
-                  <span>{t('auth.forgotPassword.expiresIn', { time: '15:00' })}</span>
+                  <span>{t('auth.forgotPassword.expiresIn', { time: formatTime(otpTimeRemaining) })}</span>
                 </div>
               ) : (
                 <div className="text-sm font-medium text-red-600 dark:text-red-400">
@@ -246,18 +289,22 @@ export default function VerifyOTP() {
                 </div>
               )}
 
-              {attemptsRemaining < 3 && (
+              {attemptsRemaining < MAX_VERIFY_ATTEMPTS && (
                 <div className="text-xs text-orange-600 dark:text-orange-400">
                   {t('auth.forgotPassword.attemptsRemaining', { count: attemptsRemaining })}
                 </div>
               )}
+
+              <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                Max 3 OTP requests per hour per email.
+              </div>
             </div>
 
             {/* Submit button */}
             <div>
               <button
                 type="submit"
-                disabled={isVerifying || code.some((d) => d === '')}
+                disabled={isVerifying || otpTimeRemaining <= 0 || attemptsRemaining <= 0 || code.some((d) => d === '')}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isVerifying ? (
@@ -303,7 +350,7 @@ export default function VerifyOTP() {
                     {t('auth.forgotPassword.resendCode')}
                   </>
                 ) : (
-                  t('auth.forgotPassword.resendIn', { time: formatTime(timeRemaining) })
+                  t('auth.forgotPassword.resendIn', { time: formatTime(resendTimeRemaining) })
                 )}
               </button>
             </div>

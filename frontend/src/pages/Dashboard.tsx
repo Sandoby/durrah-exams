@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, Globe, AlertTriangle, Power, Eye, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, AlertTriangle, Power, Eye, Loader2, AlertCircle } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -49,35 +49,35 @@ const TutorialTooltip = ({
     skipProps,
 }: any) => {
     return (
-        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-2xl p-6 max-w-sm mx-4 transform transition-all duration-300">
-            <div className="space-y-4">
+        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-lg p-5 max-w-sm mx-4">
+            <div className="space-y-3">
                 <div className="flex justify-between items-start">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                        <span className="text-white font-bold text-lg">{index + 1}</span>
+                    <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
+                        <span className="text-white font-semibold text-sm">{index + 1}</span>
                     </div>
                     <button {...skipProps} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xs font-medium transition-colors">
                         {skipProps.title}
                     </button>
                 </div>
 
-                <div className="space-y-1.5">
-                    <div className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                <div>
+                    <div className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
                         {step.content}
                     </div>
                 </div>
 
-                <div className="pt-2 flex items-center justify-end gap-2">
+                <div className="pt-1 flex items-center justify-end gap-2">
                     {index > 0 && (
                         <button
                             {...backProps}
-                            className="px-4 py-2 rounded-lg text-xs font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                         >
                             {backProps.title}
                         </button>
                     )}
                     <button
                         {...primaryProps}
-                        className="px-5 py-2 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md transition-all"
+                        className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
                     >
                         {primaryProps.title}
                     </button>
@@ -505,18 +505,7 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 relative overflow-hidden pt-24">
-            {/* Animated background blobs */}
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
-            <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-purple-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
-
-            <style>{`
-                @keyframes blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
-                .animate-blob { animation: blob 7s infinite; }
-                .animation-delay-2000 { animation-delay: 2s; }
-                .animation-delay-4000 { animation-delay: 4s; }
-            `}</style>
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 relative overflow-hidden pt-24">
             {/* Interactive Tutorial Tour */}
             <Joyride
                 steps={tourSteps}
@@ -538,27 +527,27 @@ export default function Dashboard() {
                 }}
                 styles={{
                     options: {
-                        primaryColor: '#6366f1',
+                        primaryColor: '#2563eb',
                         zIndex: 10000,
                         backgroundColor: '#ffffff',
                         arrowColor: '#ffffff',
                         textColor: '#1f2937',
-                        overlayColor: 'rgba(0, 0, 0, 0.4)',
+                        overlayColor: 'rgba(0, 0, 0, 0.3)',
                     },
                     tooltip: {
-                        borderRadius: '20px',
-                        padding: '24px',
-                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                        borderRadius: '12px',
+                        padding: '20px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
                     },
                     buttonNext: {
-                        borderRadius: '10px',
-                        backgroundColor: '#6366f1',
-                        padding: '10px 20px',
+                        borderRadius: '8px',
+                        backgroundColor: '#2563eb',
+                        padding: '8px 16px',
                         fontWeight: '600',
                     },
                     buttonBack: {
-                        marginRight: '10px',
-                        color: '#6366f1',
+                        marginRight: '8px',
+                        color: '#2563eb',
                         fontWeight: '600',
                     },
                     buttonSkip: {
@@ -568,12 +557,12 @@ export default function Dashboard() {
             />
 
             <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
-                <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
+                <div className="max-w-7xl mx-auto bg-white dark:bg-slate-900 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 dark:border-slate-800">
                     <div className="flex justify-between h-16 px-6">
                         <div className="flex items-center gap-3">
                             <Logo className="h-9 w-9" showText={false} />
                             <div className="flex flex-col">
-                                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
+                                <span className="text-xl font-bold text-gray-900 dark:text-white">Durrah</span>
                                 <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
                             </div>
                         </div>
@@ -587,7 +576,7 @@ export default function Dashboard() {
                             {profile?.subscription_status !== 'active' && (
                                 <Link
                                     to="/checkout"
-                                    className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-500/30 hover:shadow-xl transition-all"
+                                    className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white hover:bg-amber-600 shadow-md hover:shadow-lg transition-all"
                                 >
                                     <Crown className="h-4 w-4 lg:mr-2" />
                                     <span className="hidden lg:inline">{t('settings.subscription.upgrade')}</span>
@@ -698,8 +687,8 @@ export default function Dashboard() {
                 <div className="space-y-8">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                         <div>
-                            <h1 className="text-3xl sm:text-4xl font-bold">
-                                <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">{t('dashboard.title')}</span>
+                            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
+                                {t('dashboard.title')}
                             </h1>
                             <p className="mt-2 text-gray-600 dark:text-gray-400">{t('dashboard.subTitle')}</p>
                         </div>
@@ -707,7 +696,7 @@ export default function Dashboard() {
                             <Link
                                 to="/question-bank"
                                 data-tour="question-bank"
-                                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg transition-all w-full sm:w-auto"
+                                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 hover:shadow-md transition-all w-full sm:w-auto"
                             >
                                 <BookOpen className="h-5 w-5 mr-2" />
                                 {t('dashboard.questionBank')}
@@ -715,20 +704,17 @@ export default function Dashboard() {
                             <button
                                 onClick={handleCreateExam}
                                 data-tour="create-exam"
-                                className="group relative inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300 w-full sm:w-auto"
+                                className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all w-full sm:w-auto"
                             >
-                                <span className="relative z-10 flex items-center">
-                                    <Plus className="h-5 w-5 mr-2" />
-                                    {t('dashboard.createExam')}
-                                </span>
-                                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <Plus className="h-5 w-5 mr-2" />
+                                {t('dashboard.createExam')}
                             </button>
                         </div>
                     </div>
 
                     {profile?.subscription_status === 'payment_failed' && (
-                        <div className="bg-white/40 dark:bg-red-950/20 backdrop-blur-xl border border-red-200/50 dark:border-red-800/50 p-6 rounded-[2rem] flex flex-col sm:flex-row items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-500 shadow-xl shadow-red-500/5 mb-8">
-                            <div className="h-16 w-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-3xl flex items-center justify-center shadow-lg shadow-red-500/20 shrink-0">
+                        <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 p-6 rounded-2xl flex flex-col sm:flex-row items-center gap-6 shadow-md mb-8">
+                            <div className="h-16 w-16 bg-red-500 rounded-2xl flex items-center justify-center shadow-md shrink-0">
                                 <AlertCircle className="h-8 w-8 text-white" />
                             </div>
                             <div className="flex-1 text-center sm:text-left">
@@ -742,13 +728,13 @@ export default function Dashboard() {
                             <div className="flex gap-3 shrink-0">
                                 <Link
                                     to="/settings"
-                                    className="px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-bold text-sm hover:scale-105 transition-all shadow-lg"
+                                    className="px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-semibold text-sm hover:shadow-lg transition-all"
                                 >
                                     {t('dashboard.paymentFailed.manage', 'Manage Billing')}
                                 </Link>
                                 <Link
                                     to="/checkout"
-                                    className="px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-2xl font-bold text-sm hover:scale-105 transition-all shadow-lg shadow-red-500/20"
+                                    className="px-6 py-3 bg-red-600 text-white rounded-xl font-semibold text-sm hover:bg-red-700 hover:shadow-lg transition-all"
                                 >
                                     {t('dashboard.paymentFailed.retry', 'Retry Payment')}
                                 </Link>
@@ -757,7 +743,7 @@ export default function Dashboard() {
                     )}
 
                     {profile?.subscription_status !== 'active' && exams.length >= 3 && (
-                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-start gap-3 animate-fade-in shadow-sm mb-4">
+                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-start gap-3 shadow-sm mb-4">
                             <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                             <div className="flex-1">
                                 <h4 className="text-sm font-bold text-amber-900 dark:text-amber-200">
@@ -775,31 +761,28 @@ export default function Dashboard() {
 
                     {isLoading ? (
                         <div className="flex justify-center py-20">
-                            <Loader2 className="h-10 w-10 text-indigo-600 animate-spin" />
+                            <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
                         </div>
                     ) : exams.length === 0 && !showMockExam ? (
-                        <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700">
-                            <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 flex items-center justify-center mb-6">
-                                <FileText className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
+                        <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl shadow-md border border-gray-200 dark:border-slate-800">
+                            <div className="mx-auto w-20 h-20 rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center mb-6">
+                                <FileText className="h-10 w-10 text-gray-400 dark:text-gray-500" />
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('dashboard.noExams.title')}</h3>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">{t('dashboard.noExams.desc')}</p>
                             <button
                                 onClick={handleCreateExam}
-                                className="group relative inline-flex items-center px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300"
+                                className="inline-flex items-center px-6 py-3 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all"
                             >
-                                <span className="relative z-10 flex items-center">
-                                    <Plus className="h-5 w-5 mr-2" />
-                                    {t('dashboard.noExams.button')}
-                                </span>
-                                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <Plus className="h-5 w-5 mr-2" />
+                                {t('dashboard.noExams.button')}
                             </button>
                         </div>
                     ) : (
                         <div className="grid gap-6 mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                             {showMockExam && (
-                                <div data-tour="exam-card" className="group bg-white dark:bg-slate-800 rounded-2xl border-2 border-dashed border-indigo-300 dark:border-indigo-600 shadow-lg relative overflow-hidden animate-pulse">
-                                    <div className="absolute top-0 right-0 bg-indigo-500 text-white px-3 py-1 text-[10px] font-bold uppercase rounded-bl-lg">Tutorial Card</div>
+                                <div data-tour="exam-card" className="group bg-white dark:bg-slate-900 rounded-2xl border-2 border-dashed border-blue-300 dark:border-blue-600 shadow-md relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 text-[10px] font-bold uppercase rounded-bl-lg">Tutorial Card</div>
                                     <div className="p-6">
                                         <div className="flex justify-between items-start mb-4">
                                             <div className="flex-1">
@@ -835,7 +818,7 @@ export default function Dashboard() {
                                 </div>
                             )}
                             {exams.map((exam, index) => (
-                                <div key={exam.id} data-tour={index === 0 ? "exam-card" : undefined} className="group bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-lg hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-2 transition-all duration-300">
+                                <div key={exam.id} data-tour={index === 0 ? "exam-card" : undefined} className="group bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
                                     <div className="p-6">
                                         <div className="flex justify-between items-start mb-4">
                                             <div className="flex-1">
@@ -848,7 +831,7 @@ export default function Dashboard() {
                                             </div>
                                             <button
                                                 onClick={(e) => handleToggleStatus(exam.id, exam.is_active, e)}
-                                                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${exam.is_active ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md shadow-green-500/20' : 'bg-gradient-to-r from-gray-500 to-slate-500 text-white'} hover:shadow-lg hover:scale-105 transition-all cursor-pointer`}
+                                                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${exam.is_active ? 'bg-green-500 text-white shadow-sm' : 'bg-gray-400 dark:bg-gray-600 text-white'} hover:shadow-md hover:scale-105 transition-all cursor-pointer`}
                                                 title={exam.is_active ? t('dashboard.status.clickToDeactivate', "Click to Deactivate") : t('dashboard.status.clickToActivate', "Click to Activate")}
                                             >
                                                 {exam.is_active ? t('dashboard.status.active') : t('dashboard.status.inactive')}
@@ -862,7 +845,7 @@ export default function Dashboard() {
                                                         {new Date(exam.created_at).toLocaleDateString()}
                                                     </span>
                                                     {exam.quiz_code && (
-                                                        <span className="px-2 py-0.5 text-xs font-mono bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded border border-indigo-200 dark:border-indigo-800">
+                                                        <span className="px-2 py-0.5 text-xs font-mono bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded border border-blue-200 dark:border-blue-800">
                                                             {exam.quiz_code}
                                                         </span>
                                                     )}
@@ -875,18 +858,18 @@ export default function Dashboard() {
                                                 <button
                                                     onClick={() => copyExamLink(exam.id)}
                                                     data-tour={index === 0 ? "copy-link" : undefined}
-                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30 hover:shadow-md transition-all duration-200"
                                                 >
-                                                    <Share2 className="h-5 w-5 text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform" />
+                                                    <Share2 className="h-5 w-5 text-green-600 dark:text-green-400" />
                                                     <span className="text-xs font-semibold text-green-700 dark:text-green-300">{t('dashboard.actions.copyLink', 'Share')}</span>
                                                 </button>
 
                                                 {/* Print Button */}
                                                 <button
                                                     onClick={() => downloadExamPDF(exam.id)}
-                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:shadow-md transition-all duration-200"
                                                 >
-                                                    <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
+                                                    <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                                                     <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">{t('dashboard.actions.print', 'Print')}</span>
                                                 </button>
 
@@ -894,9 +877,9 @@ export default function Dashboard() {
                                                 <button
                                                     onClick={() => navigate(`/exam/${exam.id}/results`)}
                                                     data-tour={index === 0 ? "results" : undefined}
-                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:shadow-md transition-all duration-200"
                                                 >
-                                                    <BarChart3 className="h-5 w-5 text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform" />
+                                                    <BarChart3 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                                                     <span className="text-xs font-semibold text-orange-700 dark:text-orange-300">{t('dashboard.actions.results', 'Results')}</span>
                                                 </button>
 
@@ -909,27 +892,27 @@ export default function Dashboard() {
                                                             setPremiumModal({ isOpen: true, feature: 'analytics' });
                                                         }
                                                     }}
-                                                    className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 group ${profile?.subscription_status === 'active'
-                                                        ? 'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 hover:shadow-lg hover:scale-105'
+                                                    className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 ${profile?.subscription_status === 'active'
+                                                        ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:shadow-md'
                                                         : 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700'
                                                         }`}
                                                 >
                                                     {profile?.subscription_status !== 'active' && (
                                                         <div className="absolute -top-2.5 -right-1.5 z-20">
-                                                            <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg border border-white/20 flex items-center gap-1">
+                                                            <div className="bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-white/20 flex items-center gap-1">
                                                                 <Crown className="w-2.5 h-2.5" />
                                                                 PRO
                                                             </div>
                                                         </div>
                                                     )}
                                                     {profile?.subscription_status === 'active' ? (
-                                                        <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" />
+                                                        <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                                                     ) : (
-                                                        <Lock className="h-5 w-5 text-gray-400 group-hover:text-purple-500 transition-colors" />
+                                                        <Lock className="h-5 w-5 text-gray-400" />
                                                     )}
                                                     <span className={`text-xs font-semibold ${profile?.subscription_status === 'active'
                                                         ? 'text-purple-700 dark:text-purple-300'
-                                                        : 'text-gray-500 group-hover:text-purple-600 transition-colors'
+                                                        : 'text-gray-500'
                                                         }`}>
                                                         {t('dashboard.actions.analytics', 'Stats')}
                                                     </span>
@@ -945,36 +928,31 @@ export default function Dashboard() {
                                                                 setPremiumModal({ isOpen: true, feature: 'proctoring' });
                                                             }
                                                         }}
-                                                        className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 group ${profile?.subscription_status === 'active'
-                                                            ? 'bg-gradient-to-br from-teal-500 to-cyan-600 border border-teal-400/50 hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105 overflow-hidden'
+                                                        className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 ${profile?.subscription_status === 'active'
+                                                            ? 'bg-teal-500 border border-teal-400 hover:bg-teal-600 hover:shadow-md'
                                                             : 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-teal-300 dark:hover:border-teal-700'
                                                             }`}
                                                     >
                                                         {profile?.subscription_status !== 'active' && (
                                                             <div className="absolute -top-2.5 -right-1.5 z-20">
-                                                                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg border border-white/20 flex items-center gap-1">
+                                                                <div className="bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-white/20 flex items-center gap-1">
                                                                     <Crown className="w-2.5 h-2.5" />
                                                                     PRO
                                                                 </div>
                                                             </div>
                                                         )}
                                                         {profile?.subscription_status === 'active' && (
-                                                            <>
-                                                                {/* Shimmer effect */}
-                                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                                                                {/* Live indicator */}
-                                                                <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-                                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                                                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
-                                                                </span>
-                                                            </>
+                                                            <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                                                            </span>
                                                         )}
                                                         {profile?.subscription_status === 'active' ? (
-                                                            <Eye className="h-5 w-5 text-white group-hover:scale-110 transition-transform drop-shadow-sm" />
+                                                            <Eye className="h-5 w-5 text-white" />
                                                         ) : (
-                                                            <Lock className="h-5 w-5 text-gray-400 group-hover:text-teal-500 transition-colors" />
+                                                            <Lock className="h-5 w-5 text-gray-400" />
                                                         )}
-                                                        <span className={`text-xs font-bold drop-shadow-sm ${profile?.subscription_status === 'active' ? 'text-white' : 'text-gray-500 group-hover:text-teal-600 transition-colors'}`}>
+                                                        <span className={`text-xs font-bold ${profile?.subscription_status === 'active' ? 'text-white' : 'text-gray-500'}`}>
                                                             {t('dashboard.actions.proctor', 'Live')}
                                                         </span>
                                                     </button>
@@ -983,18 +961,18 @@ export default function Dashboard() {
                                                 {/* Edit Button */}
                                                 <Link
                                                     to={`/exam/${exam.id}/edit`}
-                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 border border-indigo-200 dark:border-indigo-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 hover:shadow-md transition-all duration-200"
                                                 >
-                                                    <Edit className="h-5 w-5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                                                    <Edit className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                                                     <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">{t('dashboard.actions.edit', 'Edit')}</span>
                                                 </Link>
 
                                                 {/* Delete Button */}
                                                 <button
                                                     onClick={() => handleDelete(exam.id)}
-                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border border-red-200 dark:border-red-800 hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30 hover:shadow-md transition-all duration-200"
                                                 >
-                                                    <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400 group-hover:scale-110 transition-transform" />
+                                                    <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
                                                     <span className="text-xs font-semibold text-red-700 dark:text-red-300">{t('dashboard.actions.delete', 'Delete')}</span>
                                                 </button>
                                             </div>
@@ -1009,83 +987,79 @@ export default function Dashboard() {
 
             {/* Kids Share Modal */}
             {kidsShareModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 p-6 text-white text-center relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-4">
-                                <button
-                                    onClick={() => setKidsShareModal(null)}
-                                    className="text-white/70 hover:text-white transition-colors"
-                                >
-                                    <X className="h-6 w-6" />
-                                </button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-2xl overflow-hidden border border-gray-100 dark:border-slate-800">
+                        <div className="relative px-6 py-5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{kidsShareModal.title || t('dashboard.modals.share.kidsTitle', 'Kids Exam')}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t('dashboard.modals.share.kidsSubtitle', 'Kids Mode • Single Question View')}</p>
                             </div>
-                            <h3 className="text-2xl font-bold mb-1">{kidsShareModal.title || t('dashboard.modals.share.kidsTitle', 'Kids Exam')}</h3>
-                            <p className="text-indigo-100 text-sm">{t('dashboard.modals.share.kidsSubtitle', 'Kids Mode • Single Question View')}</p>
+                            <button
+                                onClick={() => setKidsShareModal(null)}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+                            >
+                                <X className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                            </button>
                         </div>
 
-                        <div className="p-6 space-y-6">
-                            {/* QR Code */}
-                            <div className="flex justify-center">
-                                <div className="p-3 bg-white rounded-xl shadow-lg border border-gray-100">
-                                    <img
-                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(kidsShareModal.url)}&color=4f46e5`}
-                                        alt="Exam QR Code"
-                                        className="w-32 h-32"
-                                    />
-                                    <p className="text-center text-xs text-gray-500 mt-2 font-medium">{t('dashboard.modals.share.qrNote', 'Scan to join')}</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="group">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('dashboard.modals.share.portalLink', 'Student Portal Link')}</label>
-                                    <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 group-focus-within:border-indigo-500 dark:group-focus-within:border-indigo-500 transition-colors">
-                                        <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                                            <Globe className="h-4 w-4 text-indigo-600" />
-                                        </div>
-                                        <input
-                                            readOnly
-                                            value={kidsShareModal.url}
-                                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium text-gray-700 dark:text-gray-200"
+                        <div className="p-6">
+                            <div className="flex gap-6 items-start">
+                                {/* QR Code */}
+                                <div className="flex-shrink-0">
+                                    <div className="p-3 bg-gray-50 dark:bg-slate-800 rounded-2xl">
+                                        <img
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(kidsShareModal.url)}&color=1f2937`}
+                                            alt="Exam QR Code"
+                                            className="w-35 h-35 rounded-lg"
                                         />
-                                        <button
-                                            onClick={() => copyValue(kidsShareModal.url, t('dashboard.modals.share.linkCopied', 'Student portal link copied'))}
-                                            className="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                                            title="Copy Link"
-                                        >
-                                            <Copy className="h-4 w-4" />
-                                        </button>
                                     </div>
                                 </div>
 
-                                <div className="group">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('dashboard.modals.share.accessCode', 'Access Code')}</label>
-                                    <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 group-focus-within:border-indigo-500 dark:group-focus-within:border-indigo-500 transition-colors">
-                                        <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                                            <Lock className="h-4 w-4 text-indigo-600" />
+                                {/* Inputs */}
+                                <div className="flex-1 space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{t('dashboard.modals.share.portalLink', 'Student Portal Link')}</label>
+                                        <div className="relative">
+                                            <input
+                                                readOnly
+                                                value={kidsShareModal.url}
+                                                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-10"
+                                            />
+                                            <button
+                                                onClick={() => copyValue(kidsShareModal.url, t('dashboard.modals.share.linkCopied', 'Student portal link copied'))}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                                                title="Copy Link"
+                                            >
+                                                <Copy className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                            </button>
                                         </div>
-                                        <input
-                                            readOnly
-                                            value={kidsShareModal.code}
-                                            className="flex-1 bg-transparent border-none focus:ring-0 text-lg font-mono font-bold tracking-widest text-indigo-600"
-                                        />
-                                        <button
-                                            onClick={() => copyValue(kidsShareModal.code, t('dashboard.modals.share.codeCopied', 'Access code copied'))}
-                                            className="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                                            title="Copy Code"
-                                        >
-                                            <Copy className="h-4 w-4" />
-                                        </button>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{t('dashboard.modals.share.accessCode', 'Access Code')}</label>
+                                        <div className="relative">
+                                            <input
+                                                readOnly
+                                                value={kidsShareModal.code}
+                                                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xl font-mono font-bold tracking-wider text-center text-blue-600 dark:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-10"
+                                            />
+                                            <button
+                                                onClick={() => copyValue(kidsShareModal.code, t('dashboard.modals.share.codeCopied', 'Access code copied'))}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                                                title="Copy Code"
+                                            >
+                                                <Copy className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Note */}
+                                    <div className="p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl">
+                                        <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+                                            {t('dashboard.modals.share.tutorNote', '⚠️ Remind your students to have their accounts ready and be signed in before starting the exam!')}
+                                        </p>
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* Tutor Note */}
-                            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-2xl">
-                                <p className="text-xs font-bold text-amber-700 dark:text-amber-400 leading-relaxed">
-                                    {t('dashboard.modals.share.tutorNote', '⚠️ Remind your students to have their accounts ready and be signed in before starting the exam!')}
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -1094,123 +1068,122 @@ export default function Dashboard() {
 
             {/* Redesigned Share Modal */}
             {shareModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100 dark:border-gray-700">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-3xl overflow-hidden border border-gray-100 dark:border-slate-800">
                         {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-700">
+                        <div className="relative px-6 py-5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
                             <div>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t('dashboard.modals.share.title', 'Share Exam')}</h3>
-                                <p className="text-sm text-gray-500">{shareModal.title}</p>
+                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{t('dashboard.modals.share.title', 'Share Exam')}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{shareModal.title}</p>
                             </div>
                             <button
                                 onClick={() => setShareModal(null)}
-                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors"
                             >
-                                <X className="h-5 w-5 text-gray-500" />
+                                <X className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                             </button>
                         </div>
 
-                        <div className="p-6 space-y-6">
-                            {/* QR Code Centerpiece */}
-                            <div className="flex flex-col items-center">
-                                <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-200">
-                                    <img
-                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(shareModal.directUrl || shareModal.url)}&color=4f46e5`}
-                                        alt="QR Code"
-                                        className="w-32 h-32"
-                                    />
-                                </div>
-                                <p className="mt-2 text-xs text-gray-500 font-medium tracking-wide">
-                                    {shareModal.directUrl ? t('dashboard.modals.share.qrDirectNote', 'SCAN FOR DIRECT ACCESS') : t('dashboard.modals.share.qrStartNote', 'SCAN TO START')}
-                                </p>
-                            </div>
-
-                            <div className="space-y-4">
-                                {/* Link Input */}
-                                <div className="group">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('dashboard.modals.share.portalLink', 'Student Portal Link')}</label>
-                                    <div className="flex items-center gap-2 p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 group-focus-within:border-indigo-500 dark:group-focus-within:border-indigo-500 transition-colors">
-                                        <div className="p-1.5 bg-white dark:bg-gray-800 rounded-md shadow-sm">
-                                            <Globe className="h-4 w-4 text-indigo-600" />
-                                        </div>
-                                        <input
-                                            readOnly
-                                            value={shareModal.url}
-                                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-gray-700 dark:text-gray-200 font-medium"
+                        <div className="p-6">
+                            <div className="flex gap-6 items-start">
+                                {/* QR Code */}
+                                <div className="flex-shrink-0">
+                                    <div className="p-3 bg-gray-50 dark:bg-slate-800 rounded-2xl">
+                                        <img
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(shareModal.directUrl || shareModal.url)}&color=1f2937`}
+                                            alt="QR Code"
+                                            className="w-35 h-35 rounded-lg"
                                         />
+                                    </div>
+                                </div>
+
+                                {/* Inputs */}
+                                <div className="flex-1 space-y-4">
+                                    {/* Link Input */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{t('dashboard.modals.share.portalLink', 'Student Portal Link')}</label>
+                                        <div className="relative">
+                                            <input
+                                                readOnly
+                                                value={shareModal.url}
+                                                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-10"
+                                            />
+                                            <button
+                                                onClick={() => copyValue(shareModal.url, t('dashboard.modals.share.linkCopied', 'Link copied'))}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                                            >
+                                                <Copy className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Code Input */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{t('dashboard.modals.share.accessCode', 'Access Code')}</label>
+                                        <div className="relative">
+                                            <input
+                                                readOnly
+                                                value={shareModal.code || t('dashboard.modals.share.noCode', 'NO CODE')}
+                                                className={`w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xl font-mono font-bold tracking-wider text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-10 ${shareModal.code ? 'text-blue-600 dark:text-blue-400' : 'text-red-500 dark:text-red-400'}`}
+                                            />
+                                            {shareModal.code && (
+                                                <button
+                                                    onClick={() => copyValue(shareModal.code, t('dashboard.modals.share.codeCopied', 'Code copied'))}
+                                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                                                >
+                                                    <Copy className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="grid grid-cols-2 gap-3">
                                         <button
-                                            onClick={() => copyValue(shareModal.url, t('dashboard.modals.share.linkCopied', 'Link copied'))}
-                                            className="p-1.5 hover:bg-white dark:hover:bg-gray-800 rounded-md text-gray-400 hover:text-indigo-600 transition-all"
+                                            onClick={() => {
+                                                const message = `Join my exam: ${shareModal.title}\n\nLink: ${shareModal.url}\nAccess Code: ${shareModal.code}\n\n⚠️ IMPORTANT: Make sure you are signed up and logged in before the exam starts to avoid losing time!`;
+                                                window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+                                            }}
+                                            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl transition-all font-medium shadow-sm hover:shadow-md"
+                                            title="Share on WhatsApp"
+                                        >
+                                            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg>
+                                            <span className="text-sm">{t('dashboard.modals.share.whatsapp', 'WhatsApp')}</span>
+                                        </button>
+                                        <button
+                                            onClick={() => copyValue(`Exam Link: ${shareModal.url}\nAccess Code: ${shareModal.code}`, 'All details copied')}
+                                            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-medium shadow-sm hover:shadow-md"
+                                            title="Copy All Details"
                                         >
                                             <Copy className="h-4 w-4" />
+                                            <span className="text-sm">{t('dashboard.modals.share.copyAll', 'Copy All')}</span>
                                         </button>
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* Code Input */}
-                                <div className="group">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">{t('dashboard.modals.share.accessCode', 'Access Code')}</label>
-                                    <div className="flex items-center gap-2 p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
-                                        <div className="p-1.5 bg-white dark:bg-gray-800 rounded-md shadow-sm">
-                                            <Lock className="h-4 w-4 text-indigo-600" />
-                                        </div>
-                                        <input
-                                            readOnly
-                                            value={shareModal.code || t('dashboard.modals.share.noCode', 'NO CODE')}
-                                            className={`flex-1 bg-transparent border-none focus:ring-0 text-lg font-mono font-bold tracking-wider ${shareModal.code ? 'text-gray-900 dark:text-white' : 'text-red-400'}`}
-                                        />
-                                        {shareModal.code && (
-                                            <button
-                                                onClick={() => copyValue(shareModal.code, t('dashboard.modals.share.codeCopied', 'Code copied'))}
-                                                className="p-1.5 hover:bg-white dark:hover:bg-gray-800 rounded-md text-gray-400 hover:text-indigo-600 transition-all"
-                                            >
-                                                <Copy className="h-4 w-4" />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Tutor Note */}
-                                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-2xl">
-                                    <p className="text-xs font-bold text-amber-700 dark:text-amber-400 leading-relaxed text-center">
+                            {/* Note and Direct Link */}
+                            <div className="mt-4 space-y-3">
+                                <div className="p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl">
+                                    <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
                                         {t('dashboard.modals.share.tutorNote', '⚠️ Remind your students to create their accounts and sign in BEFORE the exam starts to avoid losing time!')}
                                     </p>
                                 </div>
 
-                                {/* Action Buttons - Moved to new row */}
-                                <div className="grid grid-cols-2 gap-3 pt-2">
-                                    <button
-                                        onClick={() => {
-                                            const message = `Join my exam: ${shareModal.title}\n\nLink: ${shareModal.url}\nAccess Code: ${shareModal.code}\n\n⚠️ IMPORTANT: Make sure you are signed up and logged in before the exam starts to avoid losing time!`;
-                                            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-                                        }}
-                                        className="h-[46px] flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl transition-colors shadow-sm font-medium"
-                                        title="Share on WhatsApp"
-                                    >
-                                        <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg>
-                                        {t('dashboard.modals.share.whatsapp', 'WhatsApp')}
-                                    </button>
-                                    <button
-                                        onClick={() => copyValue(`Exam Link: ${shareModal.url}\nAccess Code: ${shareModal.code}`, 'All details copied')}
-                                        className="h-[46px] flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors shadow-sm font-medium"
-                                        title="Copy All Details"
-                                    >
-                                        <Copy className="h-5 w-5" />
-                                        {t('dashboard.modals.share.copyAll', 'Copy All')}
-                                    </button>
-                                </div>
-
                                 {shareModal.directUrl && (
-                                    <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
-                                        <p className="text-xs text-gray-400 mb-2">{t('dashboard.modals.share.directLink', 'Direct Link (No Code Required)')}</p>
-                                        <div className="flex items-center gap-2">
+                                    <div>
+                                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{t('dashboard.modals.share.directLink', 'Direct Link (No Code Required)')}</p>
+                                        <div className="relative">
                                             <input
                                                 readOnly
                                                 value={shareModal.directUrl}
-                                                className="flex-1 text-xs text-gray-500 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded px-2 py-1"
+                                                className="w-full px-3 py-2 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg pr-10"
                                             />
-                                            <button onClick={() => copyValue(shareModal.directUrl!, t('dashboard.modals.share.linkCopied', 'Direct link copied'))} className="text-gray-400 hover:text-indigo-600">
-                                                <Copy className="h-3 w-3" />
+                                            <button
+                                                onClick={() => copyValue(shareModal.directUrl!, t('dashboard.modals.share.linkCopied', 'Direct link copied'))}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 dark:hover:bg-slate-700 rounded transition-colors"
+                                            >
+                                                <Copy className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
                                             </button>
                                         </div>
                                     </div>
@@ -1223,25 +1196,25 @@ export default function Dashboard() {
 
             {/* Delete Confirmation Modal */}
             {deleteConfirmModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 text-center border border-gray-100 dark:border-gray-700">
-                        <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl w-full max-w-sm p-8 text-center border border-gray-100 dark:border-slate-800">
+                        <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-5">
                             <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-500" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('dashboard.modals.delete.title', 'Delete Exam?')}</h3>
-                        <p className="text-gray-500 dark:text-gray-400 mb-6">
+                        <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">{t('dashboard.modals.delete.title', 'Delete Exam?')}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
                             {t('dashboard.modals.delete.desc', { title: deleteConfirmModal.title })}
                         </p>
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setDeleteConfirmModal(null)}
-                                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                className="flex-1 px-4 py-3 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
                             >
                                 {t('dashboard.modals.delete.cancel', 'Cancel')}
                             </button>
                             <button
                                 onClick={executeDelete}
-                                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all hover:scale-[1.02]"
+                                className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 shadow-sm hover:shadow-md transition-all"
                             >
                                 {t('dashboard.modals.delete.confirm', 'Yes, Delete')}
                             </button>

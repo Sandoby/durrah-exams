@@ -439,12 +439,12 @@ export default function QuestionBank() {
         <div className="min-h-screen bg-[#f8fafc] dark:bg-gray-950 font-sans pt-24">
             {/* Navbar */}
             <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
-                <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
+                <div className="max-w-7xl mx-auto bg-white dark:bg-slate-900 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 dark:border-slate-800">
                     <div className="flex justify-between h-16 px-6">
                         <div className="flex items-center gap-3">
                             <Logo className="h-9 w-9" showText={false} />
                             <div className="flex flex-col">
-                                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
+                                <span className="text-xl font-bold text-gray-900 dark:text-white">Durrah</span>
                                 <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
                             </div>
                         </div>
@@ -458,7 +458,7 @@ export default function QuestionBank() {
                             {profile?.subscription_status !== 'active' && (
                                 <Link
                                     to="/checkout"
-                                    className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-500/30 hover:shadow-xl transition-all"
+                                    className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white hover:bg-amber-600 shadow-md hover:shadow-lg transition-all"
                                 >
                                     <Crown className="h-4 w-4 lg:mr-2" />
                                     <span className="hidden lg:inline">{t('settings.subscription.upgrade')}</span>
@@ -534,13 +534,13 @@ export default function QuestionBank() {
             </nav>
 
             {isDemo && (
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-6 lg:px-8 py-3 shadow-lg shadow-blue-100 dark:shadow-none relative z-10">
+                <div className="bg-blue-600 text-white px-4 sm:px-6 lg:px-8 py-3 shadow-lg relative z-10">
                     <div className="max-w-7xl mx-auto flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Sparkles className="w-5 h-5" />
-                            <span className="text-sm font-black uppercase tracking-tight">{t('questionBank.demo.banner')}</span>
+                            <span className="text-sm font-semibold">{t('questionBank.demo.banner')}</span>
                         </div>
-                        <Link to="/demo" className="text-xs font-black bg-white/20 hover:bg-white/30 px-4 py-1.5 rounded-full transition-all border border-white/20">{t('questionBank.demo.back')}</Link>
+                        <Link to="/demo" className="text-xs font-semibold bg-white/20 hover:bg-white/30 px-4 py-1.5 rounded-full transition-all border border-white/20">{t('questionBank.demo.back')}</Link>
                     </div>
                 </div>
             )}
@@ -549,11 +549,11 @@ export default function QuestionBank() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-16">
                     <div>
                         <div className="flex items-center gap-4 mb-3">
-                            <Link to="/dashboard" className="p-3 rounded-2xl bg-white dark:bg-gray-800 text-gray-400 hover:text-indigo-600 shadow-sm border border-gray-100 dark:border-gray-700 transition-all group">
+                            <Link to="/dashboard" className="p-3 rounded-2xl bg-white dark:bg-gray-800 text-gray-400 hover:text-blue-600 shadow-sm border border-gray-100 dark:border-gray-700 transition-all group">
                                 <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                             </Link>
-                            <h1 className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter">
-                                {t('questionBank.titlePart1')} <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">{t('questionBank.titlePart2')}</span>
+                            <h1 className="text-5xl font-bold text-gray-900 dark:text-white tracking-tight">
+                                {t('questionBank.titlePart1')} <span className="text-blue-600 dark:text-blue-500">{t('questionBank.titlePart2')}</span>
                             </h1>
                         </div>
                         <p className="text-lg text-gray-500 dark:text-gray-400 font-bold ml-[72px]">{t('questionBank.subtitle')}</p>
@@ -568,7 +568,7 @@ export default function QuestionBank() {
                             }
                             setShowCreateModal(true);
                         }}
-                        className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-[2rem] font-black shadow-2xl shadow-indigo-200 dark:shadow-none hover:scale-105 active:scale-95 transition-all ml-[72px] md:ml-0 group"
+                        className="flex items-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-2xl font-semibold shadow-md hover:bg-blue-700 hover:shadow-lg transition-all ml-[72px] md:ml-0 group"
                     >
                         <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform" />
                         {t('questionBank.createBank')}
@@ -578,9 +578,9 @@ export default function QuestionBank() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     {/* Banks List Sidebar */}
                     <div className="lg:col-span-4" id="bank-list">
-                        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-sm border border-gray-100 dark:border-gray-700 rounded-[2rem] p-8">
+                        <div className="bg-white dark:bg-slate-800 backdrop-blur-xl shadow-sm border border-gray-200 dark:border-slate-700 rounded-2xl p-8">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 px-1 flex items-center gap-2">
-                                <BookOpen className="w-5 h-5 text-indigo-600" />
+                                <BookOpen className="w-5 h-5 text-blue-600" />
                                 {t('questionBank.libraries')}
                             </h2>
 
@@ -594,15 +594,15 @@ export default function QuestionBank() {
                                         <div
                                             key={bank.id}
                                             className={`p-5 rounded-2xl border-2 cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] ${selectedBank?.id === bank.id
-                                                ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20 ring-4 ring-indigo-100 dark:ring-indigo-900/10'
-                                                : 'border-white dark:border-gray-800 bg-white dark:bg-gray-900/50 hover:border-gray-100 dark:hover:border-gray-700 shadow-sm'
+                                                ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-md'
+                                                : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-gray-300 dark:hover:border-slate-600 shadow-sm'
                                                 }`}
                                             onClick={() => setSelectedBank(bank)}
                                         >
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2">
-                                                        <BookOpen className="h-4 w-4 text-indigo-600" />
+                                                        <BookOpen className="h-4 w-4 text-blue-600" />
                                                         <h3 className="font-medium text-gray-900 dark:text-white">{bank.name}</h3>
                                                     </div>
                                                     {bank.description && (
@@ -632,7 +632,7 @@ export default function QuestionBank() {
                                                                         exportBank(bank.id, 'pdf');
                                                                         setExportMenuOpen(null);
                                                                     }}
-                                                                    className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                                                                    className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                                                                 >
                                                                     <FileText className="w-4 h-4 mr-2 text-red-500" />
                                                                     {t('questionBank.export.pdf')}
@@ -643,7 +643,7 @@ export default function QuestionBank() {
                                                                         exportBank(bank.id, 'docx');
                                                                         setExportMenuOpen(null);
                                                                     }}
-                                                                    className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                                                                    className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                                                                 >
                                                                     <FileText className="w-4 h-4 mr-2 text-blue-500" />
                                                                     {t('questionBank.export.word')}
@@ -654,7 +654,7 @@ export default function QuestionBank() {
                                                                         exportBank(bank.id, 'json');
                                                                         setExportMenuOpen(null);
                                                                     }}
-                                                                    className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                                                                    className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                                                                 >
                                                                     <FileText className="w-4 h-4 mr-2 text-yellow-500" />
                                                                     {t('questionBank.export.json')}
@@ -684,19 +684,19 @@ export default function QuestionBank() {
                     {/* Questions List Main Area */}
                     <div className="lg:col-span-8" id="questions-list">
                         {selectedBank ? (
-                            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-sm border border-gray-100 dark:border-gray-700 rounded-[2rem] p-8 min-h-[600px]">
+                            <div className="bg-white dark:bg-slate-800 backdrop-blur-xl shadow-sm border border-gray-200 dark:border-slate-700 rounded-2xl p-8 min-h-[600px]">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                                     <div>
                                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{selectedBank.name}</h2>
                                         <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-                                            <span className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full">{questions.length} {t('questionBank.questions')}</span>
+                                            <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full">{questions.length} {t('questionBank.questions')}</span>
                                             <span>•</span>
                                             <span>{t('questionBank.collectionLibrary')}</span>
                                         </div>
                                     </div>
                                     <button
                                         onClick={() => setShowAddQuestionModal(true)}
-                                        className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-md"
+                                        className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl font-semibold hover:bg-blue-700 transition-all shadow-md"
                                     >
                                         <Plus className="h-5 w-5" />
                                         {t('questionBank.addQuestion')}
@@ -706,13 +706,13 @@ export default function QuestionBank() {
                                 {/* Search Bar */}
                                 <div className="mb-8 group">
                                     <div className="relative group">
-                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
                                         <input
                                             type="text"
                                             placeholder={t('questionBank.searchPlaceholder')}
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full pl-12 pr-6 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none"
+                                            className="w-full pl-12 pr-6 py-4 border-2 border-gray-100 dark:border-slate-700 rounded-2xl bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all outline-none"
                                         />
                                     </div>
                                 </div>
@@ -728,15 +728,15 @@ export default function QuestionBank() {
                                         </div>
                                     ) : (
                                         filteredQuestions.map((question) => (
-                                            <div key={question.id} className="group border-2 border-gray-50 dark:border-gray-800 hover:border-indigo-100 dark:hover:border-indigo-900/30 rounded-2xl p-6 transition-all hover:bg-white dark:hover:bg-gray-800 hover:shadow-xl hover:shadow-indigo-500/5">
+                                            <div key={question.id} className="group border-2 border-gray-100 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-900/30 rounded-2xl p-6 transition-all hover:bg-white dark:hover:bg-slate-800 hover:shadow-lg">
                                                 <div className="flex justify-between items-start gap-4">
                                                     <div className="flex-1">
                                                         <div className="flex flex-wrap items-center gap-3 mb-3">
-                                                            <span className="px-3 py-1 text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-full border border-indigo-100 dark:border-indigo-900/50">
+                                                            <span className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-full border border-blue-100 dark:border-blue-900/50">
                                                                 {t(`questionBank.types.${question.type}`)}
                                                             </span>
                                                             {question.difficulty && (
-                                                                <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full border ${question.difficulty === 'easy' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-900/50' :
+                                                                <span className={`px-3 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full border ${question.difficulty === 'easy' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-900/50' :
                                                                     question.difficulty === 'hard' ? 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-900/50' :
                                                                         'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-900/50'
                                                                     }`}>
@@ -777,12 +777,12 @@ export default function QuestionBank() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl shadow-sm border border-gray-100 dark:border-gray-700 rounded-[2rem] p-24 text-center flex flex-col items-center justify-center">
-                                <div className="w-32 h-32 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mb-8 animate-pulse">
-                                    <BookOpen className="h-16 w-16 text-indigo-600/50" />
+                            <div className="bg-white dark:bg-slate-800 backdrop-blur-xl shadow-sm border border-gray-200 dark:border-slate-700 rounded-2xl p-24 text-center flex flex-col items-center justify-center">
+                                <div className="w-32 h-32 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-8">
+                                    <BookOpen className="h-16 w-16 text-blue-600 dark:text-blue-500" />
                                 </div>
-                                <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">{t('questionBank.selectLibrary.title')}</h3>
-                                <p className="text-lg text-gray-500 dark:text-gray-400 font-medium max-w-sm">{t('questionBank.selectLibrary.desc')}</p>
+                                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('questionBank.selectLibrary.title')}</h3>
+                                <p className="text-lg text-gray-500 dark:text-gray-400 max-w-sm">{t('questionBank.selectLibrary.desc')}</p>
                             </div>
                         )}
                     </div>
@@ -794,15 +794,15 @@ export default function QuestionBank() {
                 showCreateModal && (
                     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
                         <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowCreateModal(false)} />
-                        <div className="relative bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl max-w-md w-full p-10 overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full p-10 overflow-hidden border border-gray-200 dark:border-slate-700">
                             <div className="absolute top-0 right-0 p-6">
                                 <button onClick={() => setShowCreateModal(false)} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
                                     <X className="w-6 h-6" />
                                 </button>
                             </div>
                             <div className="mb-8">
-                                <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-2">{t('questionBank.createModal.title')}</h3>
-                                <p className="text-gray-500 dark:text-gray-400 font-medium">{t('questionBank.createModal.subtitle')}</p>
+                                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('questionBank.createModal.title')}</h3>
+                                <p className="text-gray-500 dark:text-gray-400">{t('questionBank.createModal.subtitle')}</p>
                             </div>
                             <div className="space-y-6">
                                 <div>
@@ -811,7 +811,7 @@ export default function QuestionBank() {
                                         type="text"
                                         value={newBankName}
                                         onChange={(e) => setNewBankName(e.target.value)}
-                                        className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none"
+                                        className="w-full px-5 py-4 border-2 border-gray-100 dark:border-slate-700 rounded-2xl bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all outline-none"
                                         placeholder={t('questionBank.createModal.namePlaceholder')}
                                     />
                                 </div>
@@ -830,7 +830,7 @@ export default function QuestionBank() {
                                 <button
                                     onClick={createBank}
                                     disabled={isCreating}
-                                    className="flex-1 px-8 py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                                    className="flex-1 px-8 py-4 bg-blue-600 text-white rounded-2xl font-semibold shadow-md hover:bg-blue-700 hover:shadow-lg transition-all disabled:opacity-50"
                                 >
                                     {isCreating ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : t('questionBank.createModal.submit')}
                                 </button>
@@ -845,15 +845,15 @@ export default function QuestionBank() {
                 showAddQuestionModal && (
                     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 overflow-y-auto">
                         <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowAddQuestionModal(false)} />
-                        <div className="relative bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl max-w-2xl w-full my-8 p-10 overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-2xl w-full my-8 p-10 overflow-hidden border border-gray-200 dark:border-slate-700">
                             <div className="flex justify-between items-center mb-10">
                                 <div>
-                                    <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-1">{t('questionBank.addQuestionModal.title')}</h3>
-                                    <p className="text-gray-500 dark:text-gray-400 font-medium">{t('questionBank.addQuestionModal.subtitle')} {selectedBank?.name}</p>
+                                    <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{t('questionBank.addQuestionModal.title')}</h3>
+                                    <p className="text-gray-500 dark:text-gray-400">{t('questionBank.addQuestionModal.subtitle')} {selectedBank?.name}</p>
                                 </div>
                                 <button
                                     onClick={() => setShowAddQuestionModal(false)}
-                                    className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-2xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                                    className="p-3 bg-gray-50 dark:bg-slate-700 rounded-2xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
                                 >
                                     <X className="h-6 w-6" />
                                 </button>
@@ -938,7 +938,7 @@ export default function QuestionBank() {
                                                                     setNewQuestion({ ...newQuestion, correct_answer: option });
                                                                 }
                                                             }}
-                                                            className={`h-6 w-6 cursor-pointer text-indigo-600 focus:ring-offset-0 focus:ring-0 border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 checked:bg-indigo-600 transition-colors ${newQuestion.type !== 'multiple_select' ? 'rounded-full' : 'rounded-lg'}`}
+                                                            className={`h-6 w-6 cursor-pointer text-blue-600 focus:ring-offset-0 focus:ring-0 border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 checked:bg-blue-600 transition-colors ${newQuestion.type !== 'multiple_select' ? 'rounded-full' : 'rounded-lg'}`}
                                                         />
                                                     </div>
 
@@ -994,7 +994,7 @@ export default function QuestionBank() {
                                             {newQuestion.type !== 'true_false' && newQuestion.options.length < 6 && (
                                                 <button
                                                     onClick={() => setNewQuestion({ ...newQuestion, options: [...newQuestion.options, ''] })}
-                                                    className="flex items-center gap-2 px-4 py-3 text-sm font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-2xl hover:bg-indigo-100 transition-all mt-4"
+                                                    className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-2xl hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all mt-4"
                                                 >
                                                     <Plus className="h-4 w-4" />
                                                     {t('questionBank.addQuestionModal.addChoice')}
@@ -1014,7 +1014,7 @@ export default function QuestionBank() {
                                             type={newQuestion.type === 'numeric' ? 'number' : 'text'}
                                             value={newQuestion.correct_answer as string}
                                             onChange={(e) => setNewQuestion({ ...newQuestion, correct_answer: e.target.value })}
-                                            className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none"
+                                            className="w-full px-5 py-4 border-2 border-gray-100 dark:border-slate-700 rounded-2xl bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all outline-none"
                                             placeholder={t('questionBank.addQuestionModal.correctAnswerPlaceholder')}
                                         />
                                     </div>
@@ -1030,7 +1030,7 @@ export default function QuestionBank() {
                                             type="number"
                                             value={newQuestion.points}
                                             onChange={(e) => setNewQuestion({ ...newQuestion, points: parseInt(e.target.value) || 1 })}
-                                            className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none"
+                                            className="w-full px-5 py-4 border-2 border-gray-100 dark:border-slate-700 rounded-2xl bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all outline-none"
                                             min="1"
                                         />
                                     </div>
@@ -1064,7 +1064,7 @@ export default function QuestionBank() {
                                         type="text"
                                         value={newQuestion.category}
                                         onChange={(e) => setNewQuestion({ ...newQuestion, category: e.target.value })}
-                                        className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none"
+                                        className="w-full px-5 py-4 border-2 border-gray-100 dark:border-slate-700 rounded-2xl bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all outline-none"
                                         placeholder={t('questionBank.addQuestionModal.categoryPlaceholder')}
                                     />
                                 </div>
@@ -1078,7 +1078,7 @@ export default function QuestionBank() {
                                         type="text"
                                         value={newQuestion.tags}
                                         onChange={(e) => setNewQuestion({ ...newQuestion, tags: e.target.value })}
-                                        className="w-full px-5 py-4 border-2 border-gray-50 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-indigo-500/50 focus:bg-white dark:focus:bg-gray-900 transition-all outline-none"
+                                        className="w-full px-5 py-4 border-2 border-gray-100 dark:border-slate-700 rounded-2xl bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:border-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all outline-none"
                                         placeholder={t('questionBank.addQuestionModal.tagsPlaceholder')}
                                     />
                                 </div>
@@ -1087,14 +1087,14 @@ export default function QuestionBank() {
                             <div className="flex gap-4 mt-10">
                                 <button
                                     onClick={() => setShowAddQuestionModal(false)}
-                                    className="flex-1 px-8 py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-2xl font-black hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
+                                    className="flex-1 px-8 py-4 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-2xl font-semibold hover:bg-gray-200 dark:hover:bg-slate-600 transition-all"
                                 >
                                     {t('questionBank.addQuestionModal.cancel')}
                                 </button>
                                 <button
                                     onClick={handleAddQuestion}
                                     disabled={isAdding}
-                                    className="flex-[2] px-8 py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="flex-[2] px-8 py-4 bg-blue-600 text-white rounded-2xl font-semibold shadow-md hover:bg-blue-700 hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {isAdding ? (
                                         <Loader2 className="h-6 w-6 animate-spin" />

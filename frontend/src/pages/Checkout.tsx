@@ -342,10 +342,10 @@ export default function Checkout() {
 
     if (isNative) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 flex items-center justify-center p-6 text-center">
-                <div className="max-w-md w-full bg-white/8 backdrop-blur-xl border border-white/20 dark:border-white/10 p-8 rounded-3xl shadow-2xl animate-fade-in">
-                    <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <Globe className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 flex items-center justify-center p-6 text-center">
+                <div className="max-w-md w-full bg-white/8 backdrop-blur-xl border border-white/20 dark:border-white/10 p-8 rounded-3xl shadow-xl animate-fade-in">
+                    <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <Globe className="h-10 w-10 text-blue-600 dark:text-blue-400" />
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                         Subscription Required
@@ -356,14 +356,14 @@ export default function Checkout() {
                     <div className="space-y-4">
                         <button
                             onClick={() => Browser.open({ url: 'https://tutors.durrahsystem.tech/login' })}
-                            className="w-full py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-indigo-500/30 transition-all flex items-center justify-center gap-2"
+                            className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 hover:shadow-lg transition-all flex items-center justify-center gap-2"
                         >
                             <ExternalLink className="h-5 w-5" />
                             Open Durrah Website
                         </button>
                         <button
                             onClick={() => navigate('/dashboard')}
-                            className="w-full py-3 text-gray-500 dark:text-gray-400 font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                            className="w-full py-3 text-gray-500 dark:text-gray-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                         >
                             Back to Dashboard
                         </button>
@@ -377,28 +377,17 @@ export default function Checkout() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 relative overflow-hidden font-sans pt-24">
-            {/* Animated background blobs */}
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
-            <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-purple-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
-
-            <style>{`
-                @keyframes blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
-                .animate-blob { animation: blob 7s infinite; }
-                .animation-delay-2000 { animation-delay: 2s; }
-                .animation-delay-4000 { animation-delay: 4s; }
-            `}</style>
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 relative overflow-hidden font-sans pt-24">
 
             {/* Header */}
             <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
-                <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
+                <div className="max-w-7xl mx-auto bg-white dark:bg-slate-900 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 dark:border-slate-800">
                     <div className="h-16 px-6 flex items-center justify-between">
                         <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/dashboard')}>
                             <Logo className="h-9 w-9" showText={false} />
                             <div className="flex flex-col">
-                                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">Durrah</span>
-                                <span className="text-[10px] text-gray-500 dark:text-gray-400 font-bold tracking-[0.2em] uppercase leading-none">for Tutors</span>
+                                <span className="text-xl font-bold text-gray-900 dark:text-white">Durrah</span>
+                                <span className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold tracking-[0.2em] uppercase leading-none">for Tutors</span>
                             </div>
                         </div>
                         <button
@@ -413,13 +402,13 @@ export default function Checkout() {
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
                 <div className="text-center max-w-3xl mx-auto mb-16">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider mb-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-xs font-semibold uppercase tracking-wider mb-6">
                         <Crown className="h-3.5 w-3.5" />
                         Premium Access
                     </div>
-                    <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
+                    <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
                         {t('checkout.title')} <br className="hidden md:block" />
-                        <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">
+                        <span className="text-blue-600 dark:text-blue-500">
                             {t('checkout.subtitle_highlight', 'Unlock Your Potential')}
                         </span>
                     </h1>
@@ -433,20 +422,20 @@ export default function Checkout() {
                     <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm p-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 inline-flex relative shadow-sm">
                         <button
                             onClick={() => handleBillingCycleChange('monthly')}
-                            className={`relative z-10 px-8 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${billingCycle === 'monthly'
-                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30'
+                            className={`relative z-10 px-8 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${billingCycle === 'monthly'
+                                ? 'bg-blue-600 text-white shadow-md'
                                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50'}`}
                         >
                             {t('checkout.monthly')}
                         </button>
                         <button
                             onClick={() => handleBillingCycleChange('yearly')}
-                            className={`relative z-10 px-8 py-3 rounded-xl text-sm font-bold transition-all duration-300 flex items-center ${billingCycle === 'yearly'
-                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30'
+                            className={`relative z-10 px-8 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center ${billingCycle === 'yearly'
+                                ? 'bg-blue-600 text-white shadow-md'
                                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50'}`}
                         >
                             {t('checkout.yearly')}
-                            <span className={`ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide transition-colors ${billingCycle === 'yearly' ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'}`}>
+                            <span className={`ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide transition-colors ${billingCycle === 'yearly' ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'}`}>
                                 -20%
                             </span>
                         </button>
@@ -460,12 +449,12 @@ export default function Checkout() {
                             key={plan.id}
                             onClick={() => setSelectedPlan(plan.id)}
                             className={`relative group rounded-3xl transition-all duration-300 cursor-pointer flex flex-col ${selectedPlan === plan.id
-                                ? 'bg-white dark:bg-gray-800 ring-2 ring-indigo-600 shadow-2xl shadow-indigo-500/20 scale-[1.02]'
-                                : 'bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border border-white/60 dark:border-gray-800 shadow-xl hover:shadow-2xl hover:scale-[1.01] hover:bg-white/80 dark:hover:bg-gray-900/80'}`}
+                                ? 'bg-white dark:bg-gray-800 ring-2 ring-blue-600 shadow-xl shadow-blue-500/10 scale-[1.02]'
+                                : 'bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border border-gray-200 dark:border-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.01] hover:bg-white/80 dark:hover:bg-gray-900/80'}`}
                         >
                             {plan.recommended && (
                                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
-                                    <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wide shadow-lg flex items-center gap-1.5">
+                                    <span className="bg-blue-600 text-white text-xs font-semibold px-4 py-1.5 rounded-full uppercase tracking-wide shadow-md flex items-center gap-1.5">
                                         <Star className="h-3 w-3 fill-current" />
                                         {t('checkout.mostPopular')}
                                     </span>
@@ -477,7 +466,7 @@ export default function Checkout() {
                                 <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">{plan.description}</p>
 
                                 <div className="flex items-baseline mb-8">
-                                    <span className="text-5xl font-black text-gray-900 dark:text-white tracking-tight">
+                                    <span className="text-5xl font-bold text-gray-900 dark:text-white tracking-tight">
                                         {isCurrencyLoading ? (
                                             <span className="animate-pulse opacity-50">---</span>
                                         ) : (
@@ -488,9 +477,9 @@ export default function Checkout() {
                                 </div>
 
                                 {(plan as any).hasTrial && (
-                                    <div className="mb-6 p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl border border-indigo-100 dark:border-indigo-800 flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
-                                        <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300">
+                                    <div className="mb-6 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl border border-blue-100 dark:border-blue-800 flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                                        <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">
                                             {t('checkout.freeTrialNote')}
                                         </span>
                                     </div>
@@ -510,10 +499,10 @@ export default function Checkout() {
 
                             <div className="p-8 pt-0 mt-auto">
                                 <button
-                                    className={`w-full py-4 px-6 rounded-2xl font-bold text-sm transition-all duration-300 ${selectedPlan === plan.id
-                                        ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30'
+                                    className={`w-full py-4 px-6 rounded-2xl font-semibold text-sm transition-all duration-300 ${selectedPlan === plan.id
+                                        ? 'bg-blue-600 text-white shadow-md hover:bg-blue-700 hover:shadow-lg'
                                         : plan.recommended
-                                            ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50'
+                                            ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50'
                                             : 'bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700'}`}
                                 >
                                     {selectedPlan === plan.id ? t('checkout.selected') : t('checkout.choose') + ' ' + plan.name}
@@ -525,11 +514,11 @@ export default function Checkout() {
 
                 {/* Checkout section */}
                 {selectedPlan && selectedPlan !== 'basic' && (
-                    <div className="max-w-3xl mx-auto bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/60 dark:border-gray-800 overflow-hidden animate-fade-in-up">
+                    <div className="max-w-3xl mx-auto bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 dark:border-gray-800 overflow-hidden animate-fade-in-up">
                         <div className="p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 flex justify-between items-center">
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                                    <CreditCard className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                    <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                                 </div>
                                 {t('checkout.secureCheckout')}
                             </h3>
@@ -546,7 +535,7 @@ export default function Checkout() {
                             <div className="text-center mb-10">
                                 <h4 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('checkout.confirmOrder')}</h4>
                                 <p className="text-gray-500 dark:text-gray-400">
-                                    You are subscribing to <span className="font-bold text-indigo-600 dark:text-indigo-400">{plans.find(p => p.id === selectedPlan)?.name}</span> ({billingCycle})
+                                    You are subscribing to <span className="font-bold text-blue-600 dark:text-blue-400">{plans.find(p => p.id === selectedPlan)?.name}</span> ({billingCycle})
                                 </p>
                             </div>
 
@@ -572,7 +561,7 @@ export default function Checkout() {
                                                     setSelectedPaymentProvider('dodo');
                                                 }
                                             }}
-                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${isInsideEgypt ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${isInsideEgypt ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}`}
                                         >
                                             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isInsideEgypt ? 'translate-x-6' : 'translate-x-1'}`} />
                                         </button>
@@ -584,15 +573,15 @@ export default function Checkout() {
 
                                         {/* Show instruction for Dodo Payments */}
                                         {selectedPaymentProvider === 'dodo' ? (
-                                            <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl flex gap-3">
+                                            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl flex gap-3">
                                                 <div className="mt-0.5">
-                                                    <Ticket className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                                    <Ticket className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold text-indigo-900 dark:text-indigo-200">
+                                                    <p className="text-sm font-semibold text-blue-900 dark:text-blue-200">
                                                         {t('checkout.haveCoupon', 'Note on Coupons')}
                                                     </p>
-                                                    <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-1 leading-relaxed">
+                                                    <p className="text-xs text-blue-700 dark:text-blue-300 mt-1 leading-relaxed">
                                                         {t('checkout.dodoCouponNote', 'Please enter your coupon code directly on the secure payment page after clicking "Proceed".')}
                                                     </p>
                                                 </div>
@@ -627,12 +616,12 @@ export default function Checkout() {
                                                         value={couponCode}
                                                         onChange={e => setCouponCode(e.target.value)}
                                                         placeholder={t('checkout.coupon.placeholder')}
-                                                        className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white uppercase font-medium placeholder:normal-case transition-all"
+                                                        className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white uppercase font-medium placeholder:normal-case transition-all"
                                                     />
                                                     <button
                                                         onClick={validateCoupon}
                                                         disabled={isValidatingCoupon}
-                                                        className="px-6 py-3 bg-gray-900 dark:bg-gray-700 text-white rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 min-w-[100px]"
+                                                        className="px-6 py-3 bg-gray-900 dark:bg-gray-700 text-white rounded-xl font-semibold text-sm hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 min-w-[100px]"
                                                     >
                                                         {isValidatingCoupon ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : t('checkout.coupon.apply')}
                                                     </button>
@@ -660,7 +649,7 @@ export default function Checkout() {
                                         )}
                                         <div className="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between items-center">
                                             <span className="font-bold text-gray-900 dark:text-white">Total</span>
-                                            <span className="text-xl font-black text-indigo-600 dark:text-indigo-400">
+                                            <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
                                                 {calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0) === 0 ? 'FREE' : `${currencyCode} ${calculateFinalPrice(plans.find(p => p.id === selectedPlan)?.price || 0)}`}
                                             </span>
                                         </div>
@@ -676,7 +665,7 @@ export default function Checkout() {
                                             {!isInsideEgypt && (
                                                 <div>
                                                     <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                                                        <Globe className="w-4 h-4 text-indigo-500" />
+                                                        <Globe className="w-4 h-4 text-blue-500" />
                                                         {t('checkout.internationalPayments')}
                                                     </label>
                                                     <div className="space-y-3">
@@ -684,12 +673,12 @@ export default function Checkout() {
                                                         <button
                                                             onClick={() => setSelectedPaymentProvider('dodo')}
                                                             className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'dodo'
-                                                                ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
-                                                                : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                                                                ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                                                : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700'
                                                                 }`}
                                                         >
-                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'dodo' ? 'border-indigo-600' : 'border-gray-300'}`}>
-                                                                {selectedPaymentProvider === 'dodo' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'dodo' ? 'border-blue-600' : 'border-gray-300'}`}>
+                                                                {selectedPaymentProvider === 'dodo' && <div className="w-2.5 h-2.5 rounded-full bg-blue-600" />}
                                                             </div>
                                                             <div className="flex-1 flex items-center justify-between">
                                                                 <div className="flex items-center gap-3">
@@ -725,12 +714,12 @@ export default function Checkout() {
                                                         <button
                                                             onClick={() => setSelectedPaymentProvider('paysky')}
                                                             className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'paysky'
-                                                                ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
-                                                                : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                                                                ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                                                : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700'
                                                                 }`}
                                                         >
-                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'paysky' ? 'border-indigo-600' : 'border-gray-300'}`}>
-                                                                {selectedPaymentProvider === 'paysky' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'paysky' ? 'border-blue-600' : 'border-gray-300'}`}>
+                                                                {selectedPaymentProvider === 'paysky' && <div className="w-2.5 h-2.5 rounded-full bg-blue-600" />}
                                                             </div>
                                                             <div className="flex-1 flex items-center justify-between">
                                                                 <div className="flex items-center gap-3">
@@ -752,12 +741,12 @@ export default function Checkout() {
                                                         <button
                                                             onClick={() => setSelectedPaymentProvider('kashier')}
                                                             className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${selectedPaymentProvider === 'kashier'
-                                                                ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20'
-                                                                : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                                                                ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                                                : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700'
                                                                 }`}
                                                         >
-                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'kashier' ? 'border-indigo-600' : 'border-gray-300'}`}>
-                                                                {selectedPaymentProvider === 'kashier' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPaymentProvider === 'kashier' ? 'border-blue-600' : 'border-gray-300'}`}>
+                                                                {selectedPaymentProvider === 'kashier' && <div className="w-2.5 h-2.5 rounded-full bg-blue-600" />}
                                                             </div>
                                                             <div className="flex-1 flex items-center justify-between">
                                                                 <div className="flex items-center gap-3">
@@ -782,7 +771,7 @@ export default function Checkout() {
                                     <button
                                         onClick={handlePayment}
                                         disabled={isProcessing}
-                                        className="w-full py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all disabled:opacity-70 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                                        className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 hover:shadow-lg transition-all disabled:opacity-70 disabled:hover:scale-100 flex items-center justify-center gap-2"
                                     >
                                         {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Shield className="h-5 w-5" />}
                                         {isProcessing ? t('checkout.processing') : t('checkout.proceed')}
@@ -801,7 +790,7 @@ export default function Checkout() {
                 {/* Features grid */}
                 <div className="mt-24 mb-16">
                     <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-                        Why top educators choose <span className="text-indigo-600">Durrah</span>
+                        Why top educators choose <span className="text-blue-600">Durrah</span>
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg p-8 rounded-3xl shadow-lg border border-white/60 dark:border-gray-700 hover:-translate-y-1 transition-transform duration-300">
@@ -812,8 +801,8 @@ export default function Checkout() {
                             <p className="text-gray-500 dark:text-gray-400 leading-relaxed">{t('checkout.features.fast.desc')}</p>
                         </div>
                         <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg p-8 rounded-3xl shadow-lg border border-white/60 dark:border-gray-700 hover:-translate-y-1 transition-transform duration-300">
-                            <div className="w-14 h-14 bg-purple-50 dark:bg-purple-900/20 rounded-2xl flex items-center justify-center mb-6 border border-purple-100 dark:border-purple-800">
-                                <Shield className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+                            <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mb-6 border border-blue-100 dark:border-blue-800">
+                                <Shield className="h-7 w-7 text-blue-600 dark:text-blue-400" />
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{t('checkout.features.antiCheat.title')}</h3>
                             <p className="text-gray-500 dark:text-gray-400 leading-relaxed">{t('checkout.features.antiCheat.desc')}</p>
@@ -838,7 +827,7 @@ export default function Checkout() {
                             Questions about our refund policy?{' '}
                             <button
                                 onClick={() => navigate('/refund-policy')}
-                                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 underline font-semibold transition-colors"
+                                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline font-semibold transition-colors"
                             >
                                 View Refund Policy
                             </button>
