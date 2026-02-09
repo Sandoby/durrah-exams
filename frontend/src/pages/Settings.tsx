@@ -55,6 +55,14 @@ export default function Settings() {
         fetchProfile();
     }, [user]);
 
+    useEffect(() => {
+        if (!subscriptionStatus) return;
+        setProfile(prev => ({
+            ...prev,
+            subscription_status: subscriptionStatus
+        }));
+    }, [subscriptionStatus]);
+
     const fetchProfile = async () => {
         if (!user) return;
         try {
@@ -75,7 +83,7 @@ export default function Settings() {
                 email: profileData?.email || user.email || '',
                 phone: profileData?.phone || user.user_metadata?.phone || '',
                 institution: profileData?.institution || user.user_metadata?.institution || '',
-                subscription_status: profileData?.subscription_status,
+                subscription_status: profileData?.subscription_status || subscriptionStatus || undefined,
                 subscription_plan: profileData?.subscription_plan,
                 subscription_end_date: profileData?.subscription_end_date,
                 dodo_customer_id: profileData?.dodo_customer_id,

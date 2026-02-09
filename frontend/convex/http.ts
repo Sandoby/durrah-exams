@@ -154,6 +154,7 @@ http.route({
       });
 
       let userId = metadata.userId;
+      let resolvedUserId = userId as string | undefined;
       const userEmail = data?.customer?.email || data?.email;
       const dodoCustomerId = data?.customer_id || data?.customer?.customer_id || data?.customer?.id || data?.id;
 
@@ -231,6 +232,10 @@ http.route({
           billingCycle: metadata.billingCycle,
         });
         console.log(`[Webhook] updateSubscription result (subscription.active):`, res);
+        if (res?.success && 'userId' in res && res.userId) {
+          resolvedUserId = res.userId as string;
+          userId = res.userId as string;
+        }
 
         if (!res?.success) {
           console.error(`[Webhook] Subscription activation FAILED for user ${userId || 'unknown'}`);
@@ -240,38 +245,73 @@ http.route({
       }
 
       // Record the payment
+      if (!resolvedUserId && userEmail) {
+        try {
+          const lookup = await ctx.runAction(internal.dodoPayments.resolveUserIdByEmail, {
+            userEmail
+          });
+          if (lookup?.success && lookup?.userId) {
+            resolvedUserId = lookup.userId as string;
+          }
+        } catch (e) {
+          console.warn('[Webhook] Failed to resolve user by email for payment record:', e);
+        }
+      }
+
       if (
         (eventType === 'payment.succeeded' || eventType === 'subscription.active') &&
         (data?.total_amount || data?.amount)
       ) {
-        await ctx.runAction(internal.dodoPayments.recordPayment, {
-          userId: userId || 'unknown',
-          amount: data.total_amount || data.amount,
-          currency: data.currency || 'USD',
-          status: 'completed',
-          merchantReference: data.payment_id || data.subscription_id || data.id,
-          subscriptionId: data.subscription_id,
-        });
+        if (resolvedUserId) {
+          await ctx.runAction(internal.dodoPayments.recordPayment, {
+            userId: resolvedUserId,
+            userEmail,
+            amount: data.total_amount || data.amount,
+            currency: data.currency || 'USD',
+            status: 'completed',
+            merchantReference: data.payment_id || data.subscription_id || data.id,
+            subscriptionId: data.subscription_id,
+          });
+        } else {
+          console.warn('[Webhook] Skipping Dodo payment record because user could not be resolved', {
+            eventType,
+            paymentId: data.payment_id,
+            subscriptionId: data.subscription_id,
+            email: userEmail
+          });
+        }
       }
       if (eventType === 'subscription.renewed') {
         // Subscription renewed - just push the date and record payment
-        await ctx.runAction(internal.dodoPayments.updateSubscription, {
+        const renewRes = await ctx.runAction(internal.dodoPayments.updateSubscription, {
           userId,
           userEmail,
           status: 'active',
           nextBillingDate: data?.next_billing_date,
           billingCycle: metadata.billingCycle,
         });
+        if (renewRes?.success && 'userId' in renewRes && renewRes.userId) {
+          resolvedUserId = renewRes.userId as string;
+        }
 
         if (data?.amount) {
-          await ctx.runAction(internal.dodoPayments.recordPayment, {
-            userId: userId || 'unknown',
-            amount: data.amount,
-            currency: data.currency || 'USD',
-            status: 'completed',
-            merchantReference: data.payment_id,
-            subscriptionId: data.subscription_id,
-          });
+          if (resolvedUserId) {
+            await ctx.runAction(internal.dodoPayments.recordPayment, {
+              userId: resolvedUserId,
+              userEmail,
+              amount: data.amount,
+              currency: data.currency || 'USD',
+              status: 'completed',
+              merchantReference: data.payment_id,
+              subscriptionId: data.subscription_id,
+            });
+          } else {
+            console.warn('[Webhook] Skipping renewal payment record because user could not be resolved', {
+              paymentId: data.payment_id,
+              subscriptionId: data.subscription_id,
+              email: userEmail
+            });
+          }
         }
       } else if (eventType === 'subscription.on_hold' || eventType === 'subscription.failed') {
         await ctx.runAction(internal.dodoPayments.updateSubscription, {
@@ -360,17 +400,14 @@ http.route({
         });
       }
 
-      // Accept empty body; server will resolve customer's Dodo ID from profile
       let body: any = {};
       try {
         body = await request.json();
       } catch {}
 
       const providedId = body?.dodoCustomerId as string | undefined;
-
       const supabaseUrl = process.env.SUPABASE_URL;
       const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
       if (!supabaseUrl || !supabaseKey) {
         return new Response(JSON.stringify({ error: 'Server configuration missing' }), {
           status: 500,
@@ -378,56 +415,78 @@ http.route({
         });
       }
 
-      const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${authUser.id}&select=dodo_customer_id`, {
-        headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
-      });
+      const profileRes = await fetch(
+        `${supabaseUrl}/rest/v1/profiles?id=eq.${authUser.id}&select=dodo_customer_id,subscription_status,email`,
+        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+      );
 
-      let userDodoId: string | undefined = undefined;
+      let userDodoId: string | undefined;
+      let subscriptionStatus: string | undefined;
+      let profileEmail: string | undefined;
       if (profileRes.ok) {
         try {
           const profiles = await profileRes.json();
           userDodoId = profiles?.[0]?.dodo_customer_id as string | undefined;
+          subscriptionStatus = profiles?.[0]?.subscription_status as string | undefined;
+          profileEmail = profiles?.[0]?.email as string | undefined;
         } catch (e) {
-          console.warn('[Portal] Failed to parse profile response JSON:', e);
+          console.warn('[Portal] Failed to parse profile JSON:', e);
         }
       } else {
         console.warn(`[Portal] Profile lookup failed with status: ${profileRes.status}`);
-        // Do not hard fail; if the client provided a customer id we can still proceed after verifying below
       }
 
-      let effectiveId = (providedId ?? userDodoId) as string | undefined;
-
-      // If we still don't have a Dodo customer id, try to resolve it automatically
-      if (!effectiveId) {
-        try {
-          const resolved = await ctx.runAction(internal.dodoPayments.resolveAndLinkCustomer, {
-            userId: authUser.id,
-            userEmail: authUser.email
-          });
-          if (resolved?.success && resolved?.dodoCustomerId) {
-            effectiveId = resolved.dodoCustomerId as string;
-          }
-        } catch (e) {
-          console.warn('[Portal] Auto-resolve of Dodo customer failed:', e);
-        }
-      }
-
-      if (!effectiveId) {
-        return new Response(JSON.stringify({ error: 'No Dodo customer linked to your account yet' }), { status: 404, headers: corsHeaders });
-      }
-
-      // If both exist and mismatch, reject
       if (providedId && userDodoId && providedId !== userDodoId) {
         return new Response(JSON.stringify({ error: 'Forbidden: customer mismatch' }), { status: 403, headers: corsHeaders });
       }
 
-      const result = await ctx.runAction(internal.dodoPayments.createPortal, {
-        dodoCustomerId: effectiveId
-      });
+      const tryPortal = async (customerId: string | undefined) => {
+        if (!customerId) return null;
+        try {
+          const portal = await ctx.runAction(internal.dodoPayments.createPortal, { dodoCustomerId: customerId });
+          return portal;
+        } catch (e) {
+          console.warn('[Portal] Failed to create portal with candidate customer id:', customerId, e);
+          return null;
+        }
+      };
 
-      return new Response(JSON.stringify(result), {
-        status: 200,
-        headers: corsHeaders,
+      const directPortal = await tryPortal(providedId ?? userDodoId);
+      if (directPortal?.portal_url) {
+        return new Response(JSON.stringify(directPortal), {
+          status: 200,
+          headers: corsHeaders,
+        });
+      }
+
+      let resolvedId: string | undefined;
+      try {
+        const resolved = await ctx.runAction(internal.dodoPayments.resolveAndLinkCustomer, {
+          userId: authUser.id,
+          userEmail: authUser.email || profileEmail
+        });
+        if (resolved?.success && resolved?.dodoCustomerId) {
+          resolvedId = resolved.dodoCustomerId as string;
+        }
+      } catch (e) {
+        console.warn('[Portal] Auto-resolve failed:', e);
+      }
+
+      const recoveredPortal = await tryPortal(resolvedId);
+      if (recoveredPortal?.portal_url) {
+        return new Response(JSON.stringify(recoveredPortal), {
+          status: 200,
+          headers: corsHeaders,
+        });
+      }
+
+      return new Response(JSON.stringify({
+        error: 'No Dodo customer linked to your account yet',
+        code: 'DODO_CUSTOMER_NOT_LINKED',
+        subscriptionStatus: subscriptionStatus || null
+      }), {
+        status: 404,
+        headers: corsHeaders
       });
     } catch (error: any) {
       console.error('Portal session error:', error);

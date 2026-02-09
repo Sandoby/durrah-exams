@@ -212,6 +212,7 @@ export const updateSubscription = internalAction({
 export const recordPayment = internalAction({
     args: {
         userId: v.string(),
+        userEmail: v.optional(v.string()),
         amount: v.number(), // in cents
         currency: v.string(),
         status: v.string(),
@@ -233,6 +234,7 @@ export const recordPayment = internalAction({
             },
             body: JSON.stringify({
                 user_id: args.userId,
+                user_email: args.userEmail,
                 // Store in smallest currency unit to match Dodo responses
                 amount: args.amount,
                 currency: args.currency,
@@ -475,11 +477,12 @@ export const resolveAndLinkCustomer = internalAction({
             // Get the most recent Dodo payment entry for this user to extract subscriptionId
             // Fetch a few recent Dodo payments for this user and try to extract a subscription id
             const paymentsRes = await fetch(
-                `${supabaseUrl}/rest/v1/payments?user_id=eq.${args.userId}&provider=eq.dodo&select=merchant_reference,metadata&order=created_at.desc&limit=5`,
+                `${supabaseUrl}/rest/v1/payments?user_id=eq.${args.userId}&provider=eq.dodo&select=merchant_reference,metadata,user_email&order=created_at.desc&limit=10`,
                 { headers }
             );
 
             let subscriptionId: string | undefined;
+            const paymentCandidates: string[] = [];
             if (paymentsRes.ok) {
                 const payments = await paymentsRes.json();
                 if (Array.isArray(payments) && payments.length > 0) {
@@ -498,6 +501,9 @@ export const resolveAndLinkCustomer = internalAction({
                         if (!subscriptionId && typeof p?.merchant_reference === 'string' && p.merchant_reference.startsWith('sub_')) {
                             subscriptionId = p.merchant_reference;
                         }
+                        if (typeof p?.merchant_reference === 'string' && (p.merchant_reference.startsWith('pay_') || p.merchant_reference.startsWith('pmt_'))) {
+                            paymentCandidates.push(p.merchant_reference);
+                        }
                         if (subscriptionId) break;
                     }
                 }
@@ -505,25 +511,69 @@ export const resolveAndLinkCustomer = internalAction({
                 console.warn('[ResolveCustomer] Payments fetch failed:', paymentsRes.status);
             }
 
-            if (!subscriptionId) {
-                console.warn('[ResolveCustomer] No recent Dodo subscription/payment found for user', args.userId);
+            if (!subscriptionId && args.userEmail) {
+                const paymentsByEmailRes = await fetch(
+                    `${supabaseUrl}/rest/v1/payments?user_email=eq.${encodeURIComponent(args.userEmail)}&provider=eq.dodo&select=merchant_reference,metadata,user_email&order=created_at.desc&limit=10`,
+                    { headers }
+                );
+
+                if (paymentsByEmailRes.ok) {
+                    const emailPayments = await paymentsByEmailRes.json();
+                    if (Array.isArray(emailPayments) && emailPayments.length > 0) {
+                        for (const p of emailPayments) {
+                            let meta: any = {};
+                            try {
+                                meta = typeof p?.metadata === 'string' ? JSON.parse(p.metadata) : (p?.metadata || {});
+                            } catch {}
+
+                            if (!subscriptionId && typeof meta?.subscriptionId === 'string') {
+                                subscriptionId = meta.subscriptionId;
+                            }
+                            if (!subscriptionId && typeof p?.merchant_reference === 'string' && p.merchant_reference.startsWith('sub_')) {
+                                subscriptionId = p.merchant_reference;
+                            }
+                            if (typeof p?.merchant_reference === 'string' && (p.merchant_reference.startsWith('pay_') || p.merchant_reference.startsWith('pmt_'))) {
+                                paymentCandidates.push(p.merchant_reference);
+                            }
+                            if (subscriptionId) break;
+                        }
+                    }
+                }
+            }
+
+            if (!subscriptionId && paymentCandidates.length === 0) {
+                console.warn('[ResolveCustomer] No recent Dodo subscription/payment found for user', args.userId, args.userEmail);
                 return { success: false, error: 'No recent dodo payment' };
             }
 
             const baseUrl = apiKey.startsWith('test_') ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
-            const subRes = await fetch(`${baseUrl}/subscriptions/${subscriptionId}`, {
-                headers: { Authorization: `Bearer ${apiKey}` }
-            });
-            if (!subRes.ok) {
-                const errTxt = await subRes.text();
-                console.error('[ResolveCustomer] Dodo subscription lookup failed:', subRes.status, errTxt);
-                return { success: false, error: 'Dodo lookup failed' };
+            let dodoCustomerId: string | undefined;
+            if (subscriptionId) {
+                const subRes = await fetch(`${baseUrl}/subscriptions/${subscriptionId}`, {
+                    headers: { Authorization: `Bearer ${apiKey}` }
+                });
+                if (subRes.ok) {
+                    const sub = await subRes.json();
+                    dodoCustomerId = sub?.customer?.id || sub?.customer?.customer_id || sub?.customer_id;
+                } else {
+                    const errTxt = await subRes.text();
+                    console.warn('[ResolveCustomer] Dodo subscription lookup failed:', subRes.status, errTxt);
+                }
+            }
+            if (!dodoCustomerId && paymentCandidates.length > 0) {
+                for (const paymentId of [...new Set(paymentCandidates)]) {
+                    const payRes = await fetch(`${baseUrl}/payments/${paymentId}`, {
+                        headers: { Authorization: `Bearer ${apiKey}` }
+                    });
+                    if (!payRes.ok) continue;
+                    const pay = await payRes.json();
+                    dodoCustomerId = pay?.customer?.id || pay?.customer?.customer_id || pay?.customer_id;
+                    if (dodoCustomerId) break;
+                }
             }
 
-            const sub = await subRes.json();
-            const dodoCustomerId = sub?.customer?.id || sub?.customer?.customer_id || sub?.customer_id;
             if (!dodoCustomerId) {
-                console.warn('[ResolveCustomer] Subscription has no customer id');
+                console.warn('[ResolveCustomer] Could not resolve customer id from subscription/payment lookups');
                 return { success: false, error: 'No customer id' };
             }
 
@@ -543,6 +593,35 @@ export const resolveAndLinkCustomer = internalAction({
         } catch (e: any) {
             console.error('[ResolveCustomer] Error:', e);
             return { success: false, error: e?.message || 'error' };
+        }
+    }
+});
+
+export const resolveUserIdByEmail = internalAction({
+    args: {
+        userEmail: v.string(),
+    },
+    handler: async (_ctx, args) => {
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+        if (!supabaseUrl || !supabaseKey) {
+            return { success: false, error: 'Configuration missing' };
+        }
+
+        try {
+            const lookupRes = await fetch(
+                `${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(args.userEmail)}&select=id`,
+                { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+            );
+            if (!lookupRes.ok) {
+                return { success: false, error: `Lookup failed: ${lookupRes.status}` };
+            }
+            const profiles = await lookupRes.json();
+            const userId = profiles?.[0]?.id as string | undefined;
+            return { success: !!userId, userId };
+        } catch (error: any) {
+            return { success: false, error: error?.message || 'Lookup error' };
         }
     }
 });
