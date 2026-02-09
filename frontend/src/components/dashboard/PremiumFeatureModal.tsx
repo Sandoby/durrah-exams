@@ -1,6 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { X, Crown, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { openDodoPortalSession } from '../../lib/dodoPortal';
+import toast from 'react-hot-toast';
 
 interface PremiumFeatureModalProps {
     isOpen: boolean;
@@ -11,6 +14,7 @@ interface PremiumFeatureModalProps {
 export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeatureModalProps) {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const { subscriptionStatus } = useAuth();
 
     if (!isOpen) return null;
 
@@ -105,8 +109,16 @@ export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeature
 
                     <div className="space-y-4">
                         <button
-                            onClick={() => {
-                                navigate('/checkout');
+                            onClick={async () => {
+                                if (subscriptionStatus === 'payment_failed') {
+                                    const result = await openDodoPortalSession();
+                                    if (!result.success) {
+                                        toast.error(result.error || 'Failed to open payment portal');
+                                        navigate('/settings');
+                                    }
+                                } else {
+                                    navigate('/checkout');
+                                }
                                 onClose();
                             }}
                             className={`w-full py-4 px-6 bg-gradient-to-r ${activeContent.color} text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-500/20 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group`}

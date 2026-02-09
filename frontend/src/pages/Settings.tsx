@@ -7,6 +7,7 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { openDodoPortalSession } from '../lib/dodoPortal';
 
 interface TutorProfile {
     full_name: string;
@@ -38,6 +39,7 @@ export default function Settings() {
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [userRole, setUserRole] = useState<string>('tutor');
+    const [isOpeningPortal, setIsOpeningPortal] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -158,6 +160,21 @@ export default function Settings() {
             toast.error(error.message || t('settings.password.error'));
         } finally {
             setIsChangingPassword(false);
+        }
+    };
+
+    const openDodoPortal = async () => {
+        try {
+            setIsOpeningPortal(true);
+            const result = await openDodoPortalSession();
+            if (!result.success) {
+                throw new Error(result.error || 'Could not open subscription portal');
+            }
+        } catch (error: any) {
+            console.error('Dodo portal error:', error);
+            toast.error(error?.message || 'Failed to open subscription portal');
+        } finally {
+            setIsOpeningPortal(false);
         }
     };
 
@@ -446,19 +463,36 @@ export default function Settings() {
                                         </div>
 
                                         {profile.subscription_status === 'active' && (
-                                            <a
-                                                href="https://customer.dodopayments.com/login/bus_0NVDOv8mOGPj5tQXpDBCg"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 rounded-xl font-bold text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all group"
+                                            <button
+                                                onClick={openDodoPortal}
+                                                disabled={isOpeningPortal}
+                                                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 rounded-xl font-bold text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all group disabled:opacity-60"
                                             >
-                                                <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                                                {isOpeningPortal ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : (
+                                                    <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                                                )}
                                                 Manage Subscription
-                                            </a>
+                                            </button>
                                         )}
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
+                                        {(profile.subscription_status === 'payment_failed' || profile.subscription_status === 'cancelled' || !!profile.dodo_customer_id) && (
+                                            <button
+                                                onClick={openDodoPortal}
+                                                disabled={isOpeningPortal}
+                                                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 rounded-xl font-bold text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all group disabled:opacity-60"
+                                            >
+                                                {isOpeningPortal ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : (
+                                                    <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                                                )}
+                                                Recover Subscription
+                                            </button>
+                                        )}
                                         <p className="text-sm text-gray-500">{t('settings.subscription.upgradeDesc', 'Unlock all features with a Pro plan.')}</p>
                                         <Link
                                             to="/checkout"

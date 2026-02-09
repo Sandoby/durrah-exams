@@ -96,6 +96,30 @@ export default function PaymentCallback() {
                 setTimeout(() => navigate('/dashboard', { replace: true }), 1500);
                 return;
               }
+
+              if (profile?.subscription_status === 'payment_failed') {
+                setStatus('error');
+                setMessage('Your payment could not be completed or renewed. Please update your payment method.');
+                toast.error('Payment failed. Please update payment method.');
+                setTimeout(() => {
+                  navigate('/checkout', {
+                    state: {
+                      error: 'Payment failed. Please update your payment method and try again.',
+                      paymentFailed: true,
+                      provider: 'dodo'
+                    },
+                    replace: true
+                  });
+                }, 1800);
+                return;
+              }
+
+              if (profile?.subscription_status === 'cancelled') {
+                setStatus('cancelled');
+                setMessage('Your subscription is cancelled. You can reactivate from checkout.');
+                setTimeout(() => navigate('/checkout', { replace: true }), 1800);
+                return;
+              }
               // Wait 2 seconds between polls
               await new Promise(r => setTimeout(r, 2000));
             }

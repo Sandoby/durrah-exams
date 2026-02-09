@@ -2,12 +2,30 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { X, AlertCircle, CreditCard, ChevronRight, Bell } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { openDodoPortalSession } from '../lib/dodoPortal';
 
 export const PaymentNotification = () => {
     const { user, subscriptionStatus } = useAuth();
     const navigate = useNavigate();
     const [isVisible, setIsVisible] = useState(false);
     const [dismissed, setDismissed] = useState(false);
+    const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+
+    const handleRecoverSubscription = async () => {
+        try {
+            setIsOpeningPortal(true);
+            const result = await openDodoPortalSession();
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to open payment portal');
+            }
+        } catch (error: any) {
+            toast.error(error?.message || 'Failed to open payment portal');
+            navigate('/settings');
+        } finally {
+            setIsOpeningPortal(false);
+        }
+    };
 
     useEffect(() => {
         if (user && subscriptionStatus === 'payment_failed' && !dismissed) {
@@ -56,16 +74,17 @@ export const PaymentNotification = () => {
                                 </div>
 
                                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-                                    Your subscription is currently on hold. Restore access to continue using professional features.
+                                    Your recurring payment failed and your subscription is on hold. Update your payment method to restore Pro access.
                                 </p>
 
                                 <div className="mt-4 flex flex-col gap-2">
                                     <button
-                                        onClick={() => navigate('/checkout')}
-                                        className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-[0.98]"
+                                        onClick={handleRecoverSubscription}
+                                        disabled={isOpeningPortal}
+                                        className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-60"
                                     >
                                         <CreditCard className="w-4 h-4" />
-                                        Update Payment
+                                        {isOpeningPortal ? 'Opening Portal...' : 'Update Payment'}
                                         <ChevronRight className="w-4 h-4 ml-auto" />
                                     </button>
                                 </div>

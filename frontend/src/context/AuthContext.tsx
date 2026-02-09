@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 
@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [role, setRole] = useState<UserRole>(null);
     const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>(null);
     const [loading, setLoading] = useState(true);
+    const profileChannelRef = useRef<any>(null);
 
     const fetchUserProfile = async (userId: string) => {
         try {
@@ -44,6 +45,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setRole('tutor'); // Default to tutor if error
             setSubscriptionStatus(null);
         }
+    };
+
+    const setupProfileRealtime = (userId: string) => {
+        if (profileChannelRef.current) {
+            supabase.removeChannel(profileChannelRef.current);
+            profileChannelRef.current = null;
+        }
+
+        const channel = supabase
+            .channel(`profile-sync-${userId}`)
+            .on(
+                'postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${userId}` },
+                (payload: any) => {
+                    const nextStatus = payload?.new?.subscription_status as SubscriptionStatus | undefined;
+                    const nextRole = payload?.new?.role as UserRole | undefined;
+                    if (typeof nextStatus !== 'undefined') {
+                        setSubscriptionStatus(nextStatus ?? null);
+                    }
+                    if (typeof nextRole !== 'undefined') {
+                        setRole(nextRole ?? 'tutor');
+                    }
+                }
+            )
+            .subscribe();
+
+        profileChannelRef.current = channel;
     };
 
     const cacheSession = (sessionData: Session | null, userData: User | null) => {
@@ -137,6 +165,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     fetchUserProfile(cachedData.user.id).catch(err => {
                         console.error('Profile fetch failed:', err);
                     });
+                    setupProfileRealtime(cachedData.user.id);
                     setLoading(false);
                     clearTimeout(loadingTimeout);
                     return;
@@ -157,6 +186,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         fetchUserProfile(session.user.id).catch(err => {
                             console.error('Profile fetch failed:', err);
                         });
+                        setupProfileRealtime(session.user.id);
                     }
 
                     setLoading(false);
@@ -188,9 +218,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 fetchUserProfile(session.user.id).catch(err => {
                     console.error('Profile fetch failed:', err);
                 });
+                setupProfileRealtime(session.user.id);
             } else {
                 // Clear cache on sign out
                 cacheSession(null, null);
+                if (profileChannelRef.current) {
+                    supabase.removeChannel(profileChannelRef.current);
+                    profileChannelRef.current = null;
+                }
                 // If signed out from Supabase, check if custom auth is active
                 if (!checkCustomAuth()) {
                     setRole(null);
@@ -240,6 +275,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             clearTimeout(loadingTimeout);
             clearInterval(refreshInterval);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
+            if (profileChannelRef.current) {
+                supabase.removeChannel(profileChannelRef.current);
+                profileChannelRef.current = null;
+            }
             subscription.unsubscribe();
         };
     }, []);
@@ -247,6 +286,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const signOut = async () => {
         await supabase.auth.signOut();
         cacheSession(null, null);
+        if (profileChannelRef.current) {
+            supabase.removeChannel(profileChannelRef.current);
+            profileChannelRef.current = null;
+        }
         sessionStorage.removeItem('agent_authenticated');
         sessionStorage.removeItem('agent_role');
         sessionStorage.removeItem('agent_id');

@@ -259,6 +259,8 @@ export const createCheckout = internalAction({
     handler: async (_ctx, args) => {
         const apiKey = process.env.DODO_PAYMENTS_API_KEY;
         if (!apiKey) throw new Error('DODO_PAYMENTS_API_KEY not configured');
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
         const isTest = apiKey.startsWith('test_');
         const baseUrl = isTest ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
@@ -300,6 +302,34 @@ export const createCheckout = internalAction({
         if (!res.ok) {
             console.error('Dodo API Error:', data);
             throw new Error(data.message || 'Failed to create checkout session');
+        }
+
+        // Persist Dodo customer id early when available from checkout response
+        const checkoutCustomerId =
+            data?.customer_id ||
+            data?.customer?.id ||
+            data?.customer?.customer_id;
+
+        if (checkoutCustomerId && supabaseUrl && supabaseKey) {
+            try {
+                const patchRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${args.userId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ dodo_customer_id: checkoutCustomerId })
+                });
+
+                if (!patchRes.ok) {
+                    const patchErr = await patchRes.text();
+                    console.warn('[Checkout] Failed to persist dodo_customer_id:', patchRes.status, patchErr);
+                }
+            } catch (error) {
+                console.warn('[Checkout] Error persisting dodo_customer_id:', error);
+            }
         }
 
         return { checkout_url: data.payment_link || data.checkout_url };

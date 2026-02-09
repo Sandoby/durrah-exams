@@ -9,6 +9,7 @@ import { kashierIntegration } from '../lib/kashier';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { useCurrency } from '../hooks/useCurrency';
+import { openDodoPortalSession } from '../lib/dodoPortal';
 
 
 
@@ -30,6 +31,7 @@ export default function Checkout() {
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
     const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
     const [isFirstTimeSubscriber, setIsFirstTimeSubscriber] = useState(true);
+    const [isRecoveringViaPortal, setIsRecoveringViaPortal] = useState(false);
 
     // Handle errors from payment callback
     useEffect(() => {
@@ -56,13 +58,23 @@ export default function Checkout() {
                     if (data.subscription_plan || data.dodo_customer_id) {
                         setIsFirstTimeSubscriber(false);
                     }
+
+                    if (data.subscription_status === 'payment_failed') {
+                        setIsRecoveringViaPortal(true);
+                        toast('Redirecting to billing portal to recover your subscription...');
+                        const result = await openDodoPortalSession();
+                        if (!result.success) {
+                            toast.error(result.error || 'Unable to open billing portal');
+                            navigate('/settings', { replace: true });
+                        }
+                    }
                 }
             } catch (err) {
                 console.error('Error checking subscription history:', err);
             }
         };
         checkSubscriptionHistory();
-    }, [user]);
+    }, [user, navigate]);
 
     // Currency hooks for display
     const { price: dynamicMonthlyPrice, currency: dynamicCurrencyCode, isLoading: isCurrencyLoading } = useCurrency(5);
@@ -371,6 +383,18 @@ export default function Checkout() {
                     <p className="mt-8 text-xs text-gray-400 dark:text-gray-500">
                         Once you subscribe on the website, lock your account in the app to access all premium features instantly.
                     </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (isRecoveringViaPortal) {
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex items-center justify-center p-6">
+                <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl p-8 text-center shadow-lg">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Redirecting to billing portal</h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Your recurring payment needs recovery. Please manage your payment method in Dodo portal.</p>
                 </div>
             </div>
         );
