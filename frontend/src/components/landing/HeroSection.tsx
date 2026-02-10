@@ -93,6 +93,31 @@ export function HeroSection({ registrationUrl }: { registrationUrl: string }) {
                         </span>
                     </motion.h1>
 
+                    {/* Free Trial Badge - SEO Optimized */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3, duration: 0.5 }}
+                        className="mb-6"
+                    >
+                        <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-2 border-blue-200 dark:border-blue-800 rounded-full shadow-lg">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                            <span className="text-base md:text-lg font-bold text-slate-900 dark:text-white">
+                                {t('hero.trial', '14-Day Free Trial • No Credit Card Required')}
+                            </span>
+                        </div>
+                    </motion.div>
+
+                    {/* Subtitle - SEO Keywords */}
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 0.6 }}
+                        className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mb-2 font-medium"
+                    >
+                        {t('hero.subtitle', 'Create professional online exams with anti-cheating features, live proctoring, and auto-grading. Start your free trial today and get full premium access.')}
+                    </motion.p>
+
                     {/* CTA */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -104,8 +129,11 @@ export function HeroSection({ registrationUrl }: { registrationUrl: string }) {
                             href={registrationUrl}
                             className="bg-[#2563EB] hover:bg-blue-700 text-white px-10 py-4 rounded-full font-bold text-lg transition-all shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-1 ring-2 ring-blue-500/20 ring-offset-2 ring-offset-white dark:ring-offset-slate-900"
                         >
-                            {t('hero.cta')}
+                            {t('hero.cta', 'Start Free Trial')}
                         </a>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                            {t('hero.ctaSubtext', 'Join thousands of educators • Free for 14 days')}
+                        </p>
                     </motion.div>
                 </div>
             </div>

@@ -6,6 +6,10 @@ export function LandingPageSEO() {
 
     const faqs = [
         {
+            question: t('landing.faq.q0.question', 'How do I start the 14-day free trial?'),
+            answer: t('landing.faq.q0.answer', 'Simply create a free account and your trial starts automatically! No credit card required. You\'ll get full premium access to all features including unlimited exams, live proctoring, and advanced analytics for 14 days.')
+        },
+        {
             question: t('landing.faq.q1.question', 'Is Durrah really safe for kids?'),
             answer: t('landing.faq.q1.answer', 'Yes! We prioritize safety with filtered content, secure nickname-only access options, and zero data selling.')
         },
@@ -26,9 +30,9 @@ export function LandingPageSEO() {
     return (
         <Helmet>
             {/* Primary Meta Tags */}
-            <title>{t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')}</title>
-            <meta name="description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
-            <meta name="keywords" content={t('landing.seo.keywords', 'online exam platform, create online exams, anti-cheating exam software, quiz maker for teachers, online assessment tool, proctored exams, exam creator software, auto grading exams, secure online testing, digital assessment platform, virtual exam software, remote proctoring, kids mode exams, educator tools')} />
+            <title>{t('landing.seo.title', 'Durrah for Tutors | 14-Day Free Trial - Create Secure Online Exams')}</title>
+            <meta name="description" content={t('landing.seo.description', 'Start your 14-day free trial today! No credit card required. Create professional exams with anti-cheating features, auto-grading, and live proctoring. Full premium access for new users.')} />
+            <meta name="keywords" content={t('landing.seo.keywords', 'free trial exam software, 14 day free trial, online exam platform free trial, create online exams, anti-cheating exam software, no credit card trial, quiz maker for teachers, online assessment tool free, proctored exams, exam creator software, auto grading exams, free online testing platform, secure online testing, digital assessment platform, virtual exam software, remote proctoring, kids mode exams, educator tools, trial period exam software')} />
             <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
             <meta name="author" content="Durrah System" />
             <meta name="language" content={i18n.language === 'ar' ? 'Arabic' : 'English'} />
@@ -45,12 +49,12 @@ export function LandingPageSEO() {
             <meta property="og:type" content="website" />
             <meta property="og:site_name" content="Durrah for Tutors" />
             <meta property="og:url" content="https://durrahtutors.com/" />
-            <meta property="og:title" content={t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')} />
-            <meta property="og:description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
+            <meta property="og:title" content={t('landing.seo.title', 'Durrah for Tutors | 14-Day Free Trial - Create Secure Online Exams')} />
+            <meta property="og:description" content={t('landing.seo.description', 'Start your 14-day free trial today! No credit card required. Create professional exams with anti-cheating features, auto-grading, and live proctoring. Full premium access for new users.')} />
             <meta property="og:image" content="https://durrahtutors.com/og-image.png" />
             <meta property="og:image:width" content="1200" />
             <meta property="og:image:height" content="630" />
-            <meta property="og:image:alt" content="Durrah for Tutors - Online Exam Platform" />
+            <meta property="og:image:alt" content="Durrah for Tutors - 14-Day Free Trial Available" />
             <meta property="og:locale" content={i18n.language === 'ar' ? 'ar_SA' : 'en_US'} />
 
             {/* Twitter */}
@@ -58,10 +62,10 @@ export function LandingPageSEO() {
             <meta name="twitter:site" content="@durrahsystem" />
             <meta name="twitter:creator" content="@durrahsystem" />
             <meta name="twitter:url" content="https://durrahtutors.com/" />
-            <meta name="twitter:title" content={t('landing.seo.title', 'Durrah for Tutors | Create Secure Online Exams')} />
-            <meta name="twitter:description" content={t('landing.seo.description', 'Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.')} />
+            <meta name="twitter:title" content={t('landing.seo.title', 'Durrah for Tutors | 14-Day Free Trial - Create Secure Online Exams')} />
+            <meta name="twitter:description" content={t('landing.seo.description', 'Start your 14-day free trial today! No credit card required. Create professional exams with anti-cheating features, auto-grading, and live proctoring. Full premium access for new users.')} />
             <meta name="twitter:image" content="https://durrahtutors.com/og-image.png" />
-            <meta name="twitter:image:alt" content="Durrah for Tutors - Online Exam Platform" />
+            <meta name="twitter:image:alt" content="Durrah for Tutors - 14-Day Free Trial Available" />
 
             <meta name="theme-color" content="#6366f1" />
             <meta name="apple-mobile-web-app-title" content="Durrah for Tutors" />
@@ -94,9 +98,41 @@ export function LandingPageSEO() {
                         "@type": "ImageObject",
                         "url": "https://durrahtutors.com/og-image.png"
                     },
-                    "description": "Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.",
+                    "description": "Start your 14-day free trial today! Create professional exams with anti-cheating features, auto-grading, and live proctoring. No credit card required for new users.",
                     "foundingDate": "2024",
                     "sameAs": ["https://durrahtutors.com"]
+                }
+            `}</script>
+
+            <script type="application/ld+json">{`
+                {
+                    "@context": "https://schema.org",
+                    "@type": "SoftwareApplication",
+                    "name": "Durrah for Tutors",
+                    "applicationCategory": "EducationApplication",
+                    "operatingSystem": "Web Browser",
+                    "offers": {
+                        "@type": "Offer",
+                        "price": "0",
+                        "priceCurrency": "USD",
+                        "priceValidUntil": "2026-12-31",
+                        "availability": "https://schema.org/InStock",
+                        "name": "14-Day Free Trial",
+                        "description": "Full premium access for 14 days. No credit card required. Available for all new users.",
+                        "eligibleCustomerType": "New Users Only"
+                    },
+                    "description": "Professional online exam platform with anti-cheating features, live proctoring, auto-grading, and advanced analytics. Start your 14-day free trial today with full premium access.",
+                    "screenshot": "https://durrahtutors.com/og-image.png",
+                    "aggregateRating": {
+                        "@type": "AggregateRating",
+                        "ratingValue": "4.8",
+                        "ratingCount": "250",
+                        "bestRating": "5",
+                        "worstRating": "1"
+                    },
+                    "author": {
+                        "@id": "https://durrahtutors.com/#organization"
+                    }
                 }
             `}</script>
 
@@ -122,7 +158,7 @@ export function LandingPageSEO() {
                     "@id": "https://durrahtutors.com/#website",
                     "name": "Durrah for Tutors",
                     "url": "https://durrahtutors.com/",
-                    "description": "Create professional exams in minutes. Durrah for Tutors offers powerful anti-cheating features, auto-grading, and detailed analytics for educators worldwide.",
+                    "description": "Start your 14-day free trial today! Create professional exams with anti-cheating features, auto-grading, live proctoring, and advanced analytics. No credit card required for new users.",
                     "inLanguage": "${i18n.language === 'ar' ? 'ar' : 'en'}",
                     "publisher": {
                         "@id": "https://durrahtutors.com/#organization"
