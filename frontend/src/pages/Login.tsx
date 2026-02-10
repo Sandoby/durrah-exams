@@ -50,7 +50,9 @@ export default function Login() {
                         id: session.user.id,
                         role: 'tutor',
                         full_name: session.user.user_metadata?.full_name || '',
-                        email: session.user.email
+                        email: session.user.email,
+                        phone: session.user.user_metadata?.phone || null,
+                        institution: session.user.user_metadata?.institution || null
                     });
 
                     // Activate trial for new OAuth users

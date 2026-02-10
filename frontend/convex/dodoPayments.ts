@@ -47,6 +47,37 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
         return { success: false, error: 'User not identified' };
     }
 
+    // TRIAL PROTECTION: Check if user is currently on trial
+    // If they are, only allow 'active' paid subscriptions to override (trial-to-paid conversion)
+    // Prevent old cancelled/failed Dodo subscriptions from destroying active trials
+    try {
+        const profileRes = await fetch(
+            `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=subscription_status,trial_activated,trial_ends_at,trial_grace_ends_at`,
+            { headers: emailHeaders }
+        );
+        if (profileRes.ok) {
+            const profiles = await profileRes.json();
+            const profile = profiles?.[0];
+
+            // If user is on active trial OR in grace period and Dodo status is cancelled/payment_failed
+            // Skip the update to protect the trial/grace period
+            const isTrialing = profile?.subscription_status === 'trialing' && profile?.trial_activated === true;
+            const isInGracePeriod = profile?.subscription_status === 'expired' &&
+                                    profile?.trial_activated === true &&
+                                    profile?.trial_grace_ends_at &&
+                                    new Date(profile.trial_grace_ends_at) > new Date();
+
+            if ((isTrialing || isInGracePeriod) && args.status !== 'active') {
+                console.log(`[TRIAL-PROTECTION] Skipping ${args.status} Dodo update for user ${userId} - protecting active trial/grace period`);
+                return { success: true, userId, skipped: true, reason: 'trial_protection' };
+            } else if (isTrialing && args.status === 'active') {
+                console.log(`[TRIAL-TO-PAID] User ${userId} converting from trial to paid subscription`);
+            }
+        }
+    } catch (e) {
+        console.warn('[TRIAL-PROTECTION] Check failed (proceeding):', e);
+    }
+
     // Use the same RPC functions as the admin panel for consistent behavior
     if (args.status === 'active') {
         // For provider-driven updates, prefer exact period end from provider.

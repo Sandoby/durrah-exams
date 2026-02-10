@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, Loader2, ArrowLeft, ArrowRight, Phone, Building2, ChevronDown } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
@@ -13,9 +13,62 @@ import { Browser } from '@capacitor/browser';
 import { StudentAccountModal } from '../components/StudentAccountModal';
 import { Helmet } from 'react-helmet-async';
 
+// Common country codes with flags
+const COUNTRY_CODES = [
+    { code: '+1', country: 'US', flag: '🇺🇸', name: 'United States' },
+    { code: '+1', country: 'CA', flag: '🇨🇦', name: 'Canada' },
+    { code: '+20', country: 'EG', flag: '🇪🇬', name: 'Egypt' },
+    { code: '+44', country: 'GB', flag: '🇬🇧', name: 'United Kingdom' },
+    { code: '+49', country: 'DE', flag: '🇩🇪', name: 'Germany' },
+    { code: '+33', country: 'FR', flag: '🇫🇷', name: 'France' },
+    { code: '+39', country: 'IT', flag: '🇮🇹', name: 'Italy' },
+    { code: '+34', country: 'ES', flag: '🇪🇸', name: 'Spain' },
+    { code: '+31', country: 'NL', flag: '🇳🇱', name: 'Netherlands' },
+    { code: '+46', country: 'SE', flag: '🇸🇪', name: 'Sweden' },
+    { code: '+47', country: 'NO', flag: '🇳🇴', name: 'Norway' },
+    { code: '+45', country: 'DK', flag: '🇩🇰', name: 'Denmark' },
+    { code: '+41', country: 'CH', flag: '🇨🇭', name: 'Switzerland' },
+    { code: '+43', country: 'AT', flag: '🇦🇹', name: 'Austria' },
+    { code: '+32', country: 'BE', flag: '🇧🇪', name: 'Belgium' },
+    { code: '+351', country: 'PT', flag: '🇵🇹', name: 'Portugal' },
+    { code: '+30', country: 'GR', flag: '🇬🇷', name: 'Greece' },
+    { code: '+48', country: 'PL', flag: '🇵🇱', name: 'Poland' },
+    { code: '+7', country: 'RU', flag: '🇷🇺', name: 'Russia' },
+    { code: '+81', country: 'JP', flag: '🇯🇵', name: 'Japan' },
+    { code: '+82', country: 'KR', flag: '🇰🇷', name: 'South Korea' },
+    { code: '+86', country: 'CN', flag: '🇨🇳', name: 'China' },
+    { code: '+91', country: 'IN', flag: '🇮🇳', name: 'India' },
+    { code: '+92', country: 'PK', flag: '🇵🇰', name: 'Pakistan' },
+    { code: '+880', country: 'BD', flag: '🇧🇩', name: 'Bangladesh' },
+    { code: '+966', country: 'SA', flag: '🇸🇦', name: 'Saudi Arabia' },
+    { code: '+971', country: 'AE', flag: '🇦🇪', name: 'UAE' },
+    { code: '+965', country: 'KW', flag: '🇰🇼', name: 'Kuwait' },
+    { code: '+973', country: 'BH', flag: '🇧🇭', name: 'Bahrain' },
+    { code: '+974', country: 'QA', flag: '🇶🇦', name: 'Qatar' },
+    { code: '+968', country: 'OM', flag: '🇴🇲', name: 'Oman' },
+    { code: '+962', country: 'JO', flag: '🇯🇴', name: 'Jordan' },
+    { code: '+961', country: 'LB', flag: '🇱🇧', name: 'Lebanon' },
+    { code: '+963', country: 'SY', flag: '🇸🇾', name: 'Syria' },
+    { code: '+964', country: 'IQ', flag: '🇮🇶', name: 'Iraq' },
+    { code: '+98', country: 'IR', flag: '🇮🇷', name: 'Iran' },
+    { code: '+90', country: 'TR', flag: '🇹🇷', name: 'Turkey' },
+    { code: '+27', country: 'ZA', flag: '🇿🇦', name: 'South Africa' },
+    { code: '+234', country: 'NG', flag: '🇳🇬', name: 'Nigeria' },
+    { code: '+254', country: 'KE', flag: '🇰🇪', name: 'Kenya' },
+    { code: '+61', country: 'AU', flag: '🇦🇺', name: 'Australia' },
+    { code: '+64', country: 'NZ', flag: '🇳🇿', name: 'New Zealand' },
+    { code: '+55', country: 'BR', flag: '🇧🇷', name: 'Brazil' },
+    { code: '+52', country: 'MX', flag: '🇲🇽', name: 'Mexico' },
+    { code: '+54', country: 'AR', flag: '🇦🇷', name: 'Argentina' },
+    { code: '+56', country: 'CL', flag: '🇨🇱', name: 'Chile' },
+    { code: '+57', country: 'CO', flag: '🇨🇴', name: 'Colombia' },
+];
+
 const registerSchema = z.object({
     name: z.string().min(2, 'auth.validation.name'),
     email: z.string().email('auth.validation.email'),
+    phone: z.string().optional(),
+    institution: z.string().optional(),
     password: z.string().min(6, 'auth.validation.passwordMin'),
     confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -38,6 +91,43 @@ export default function Register() {
     const [showStudentModal, setShowStudentModal] = useState(false);
     const [studentUserInfo, setStudentUserInfo] = useState<{ email: string; id: string } | null>(null);
 
+    // Country code selector state
+    const [selectedCountryCode, setSelectedCountryCode] = useState('+1');
+    const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+    const [countrySearchQuery, setCountrySearchQuery] = useState('');
+
+    // Auto-detect user's country on mount
+    useEffect(() => {
+        const detectUserCountry = async () => {
+            try {
+                // Try to get country from IP geolocation
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                const countryCode = data.country_code;
+
+                // Find matching country in our list
+                const matchedCountry = COUNTRY_CODES.find(c => c.country === countryCode);
+                if (matchedCountry) {
+                    setSelectedCountryCode(matchedCountry.code);
+                }
+            } catch (error) {
+                console.log('Could not detect country, using default');
+                // Fallback: try browser locale
+                try {
+                    const browserLocale = navigator.language || 'en-US';
+                    const localeCountry = browserLocale.split('-')[1]?.toUpperCase();
+                    const matchedCountry = COUNTRY_CODES.find(c => c.country === localeCountry);
+                    if (matchedCountry) {
+                        setSelectedCountryCode(matchedCountry.code);
+                    }
+                } catch {
+                    // Keep default +1
+                }
+            }
+        };
+        detectUserCountry();
+    }, []);
+
     useEffect(() => {
         const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
@@ -58,7 +148,9 @@ export default function Register() {
                         id: session.user.id,
                         role: 'tutor',
                         full_name: session.user.user_metadata?.full_name || '',
-                        email: session.user.email
+                        email: session.user.email,
+                        phone: session.user.user_metadata?.phone || null,
+                        institution: session.user.user_metadata?.institution || null
                     });
 
                     // Add welcome notification
@@ -142,12 +234,15 @@ export default function Register() {
     const onSubmit = async (data: RegisterForm) => {
         setIsLoading(true);
         try {
+            const fullPhone = data.phone ? `${selectedCountryCode}${data.phone}` : null;
             const { data: authData, error } = await supabase.auth.signUp({
                 email: data.email,
                 password: data.password,
                 options: {
                     data: {
                         full_name: data.name,
+                        phone: fullPhone,
+                        institution: data.institution || null,
                     },
                     emailRedirectTo: `${window.location.origin}/login`,
                 },
@@ -166,11 +261,14 @@ export default function Register() {
             // Send welcome email (don't block on this)
             if (authData.user) {
                 // Create tutor profile
+                const fullPhone = data.phone ? `${selectedCountryCode}${data.phone}` : null;
                 await supabase.from('profiles').upsert({
                     id: authData.user.id,
                     role: 'tutor',
                     full_name: data.name,
-                    email: data.email
+                    email: data.email,
+                    phone: fullPhone,
+                    institution: data.institution || null
                 });
 
                 // Activate 14-day free trial for new users
@@ -413,6 +511,99 @@ export default function Register() {
                                 {errors.confirmPassword && (
                                     <p className="mt-1.5 text-sm text-red-500 font-medium">{t(errors.confirmPassword.message as string)}</p>
                                 )}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                Phone Number <span className="text-gray-400 text-xs">(Optional)</span>
+                            </label>
+                            <div className="relative flex gap-2">
+                                {/* Country Code Selector */}
+                                <div className="relative">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                                        className="h-[52px] px-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center gap-2 min-w-[100px]"
+                                    >
+                                        <span className="text-lg">{COUNTRY_CODES.find(c => c.code === selectedCountryCode)?.flag || '🌐'}</span>
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{selectedCountryCode}</span>
+                                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                                    </button>
+
+                                    {/* Dropdown */}
+                                    {isCountryDropdownOpen && (
+                                        <>
+                                            <div
+                                                className="fixed inset-0 z-10"
+                                                onClick={() => setIsCountryDropdownOpen(false)}
+                                            />
+                                            <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl z-20 max-h-64 overflow-hidden">
+                                                {/* Search */}
+                                                <div className="p-2 border-b border-gray-200 dark:border-gray-800">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Search country..."
+                                                        value={countrySearchQuery}
+                                                        onChange={(e) => setCountrySearchQuery(e.target.value)}
+                                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                                    />
+                                                </div>
+                                                {/* Country List */}
+                                                <div className="overflow-y-auto max-h-56">
+                                                    {COUNTRY_CODES
+                                                        .filter(c =>
+                                                            c.name.toLowerCase().includes(countrySearchQuery.toLowerCase()) ||
+                                                            c.code.includes(countrySearchQuery) ||
+                                                            c.country.toLowerCase().includes(countrySearchQuery.toLowerCase())
+                                                        )
+                                                        .map((country, idx) => (
+                                                            <button
+                                                                key={`${country.code}-${country.country}-${idx}`}
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setSelectedCountryCode(country.code);
+                                                                    setIsCountryDropdownOpen(false);
+                                                                    setCountrySearchQuery('');
+                                                                }}
+                                                                className="w-full px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-3 text-left"
+                                                            >
+                                                                <span className="text-lg">{country.flag}</span>
+                                                                <span className="flex-1 text-sm text-gray-700 dark:text-gray-200">{country.name}</span>
+                                                                <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">{country.code}</span>
+                                                            </button>
+                                                        ))}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Phone Input */}
+                                <div className="relative flex-1">
+                                    <Phone className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
+                                    <input
+                                        {...register('phone')}
+                                        type="tel"
+                                        className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
+                                        placeholder="555 000 0000"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                Institution <span className="text-gray-400 text-xs">(Optional)</span>
+                            </label>
+                            <div className="relative">
+                                <Building2 className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
+                                <input
+                                    {...register('institution')}
+                                    type="text"
+                                    className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
+                                    placeholder="School or Organization"
+                                />
                             </div>
                         </div>
 
