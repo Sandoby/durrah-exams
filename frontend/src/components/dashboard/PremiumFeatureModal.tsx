@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { X, Crown, ArrowRight, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
+import { X, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { openDodoPortalSession } from '../../lib/dodoPortal';
 import { supabase } from '../../lib/supabase';
@@ -74,10 +74,6 @@ export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeature
         analytics: {
             title: t('premiumModal.analytics.title', 'Advanced Exam Analytics'),
             desc: t('premiumModal.analytics.desc', 'Get deep insights into student performance, question difficulty, and time distribution.'),
-            image: '/illustrations/analytics-premium.png',
-            color: 'from-purple-600 to-pink-600',
-            accent: 'text-purple-600',
-            bgAccent: 'bg-purple-50 dark:bg-purple-900/20',
             benefits: [
                 t('premiumModal.analytics.benefit1', 'Detailed performance reports'),
                 t('premiumModal.analytics.benefit2', 'Question-by-question analysis'),
@@ -87,10 +83,6 @@ export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeature
         proctoring: {
             title: t('premiumModal.proctoring.title', 'Live AI Proctoring'),
             desc: t('premiumModal.proctoring.desc', 'Monitor your exams in real-time with AI-powered tab detection and anti-cheat measures.'),
-            image: '/illustrations/proctoring-premium.png',
-            color: 'from-teal-600 to-cyan-600',
-            accent: 'text-teal-600',
-            bgAccent: 'bg-teal-50 dark:bg-teal-900/20',
             benefits: [
                 t('premiumModal.proctoring.benefit1', 'Real-time student monitoring'),
                 t('premiumModal.proctoring.benefit2', 'Instant violation alerts'),
@@ -102,116 +94,131 @@ export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeature
     const activeContent = content[feature];
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300">
-            <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-2xl overflow-hidden border border-white/20 dark:border-slate-800 animate-in zoom-in-95 duration-300 flex flex-col md:flex-row">
-                {/* Illustration Section */}
-                <div className={`md:w-1/2 bg-gradient-to-br ${activeContent.color} p-8 flex flex-col items-center justify-center relative overflow-hidden`}>
-                    <div className="relative z-10 w-full aspect-square rounded-3xl overflow-hidden shadow-2xl border border-white/20 group">
-                        <img
-                            src={activeContent.image}
-                            alt={activeContent.title}
-                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                    </div>
+        <>
+            {/* Backdrop */}
+            <div
+                className="fixed inset-0 bg-black/40 z-50 transition-opacity duration-300"
+                onClick={onClose}
+            />
 
-                    {/* Floating Badge */}
-                    <div className="absolute top-6 left-6 z-20">
-                        <div className="bg-white/20 backdrop-blur-xl border border-white/30 rounded-2xl px-4 py-2 flex items-center gap-2 shadow-lg">
-                            <Crown className="w-4 h-4 text-white" />
-                            <span className="text-white text-[10px] font-black uppercase tracking-widest">Premium</span>
-                        </div>
-                    </div>
-
-                    {/* Decorative Blobs */}
-                    <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-                    <div className="absolute -top-20 -left-20 w-64 h-64 bg-black/10 rounded-full blur-3xl animate-pulse delay-700"></div>
-                </div>
-
-                {/* Content Section */}
-                <div className="md:w-1/2 p-10 flex flex-col justify-between bg-white dark:bg-slate-900">
-                    <div>
-                        <div className="flex justify-between items-start mb-6">
-                            <h3 className="text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
-                                {activeContent.title}
-                            </h3>
-                            <button
-                                onClick={onClose}
-                                className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all"
-                            >
-                                <X className="h-6 w-6" />
-                            </button>
-                        </div>
-
-                        <p className="text-slate-600 dark:text-slate-400 text-base font-medium mb-8 leading-relaxed">
-                            {activeContent.desc}
-                        </p>
-
-                        <div className="space-y-4 mb-10">
-                            {activeContent.benefits.map((benefit, idx) => (
-                                <div key={idx} className="flex items-center gap-3 group">
-                                    <div className={`flex-shrink-0 w-6 h-6 rounded-full ${activeContent.bgAccent} flex items-center justify-center transition-transform group-hover:scale-110`}>
-                                        <CheckCircle2 className={`w-4 h-4 ${activeContent.accent}`} />
-                                    </div>
-                                    <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{benefit}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        {isTrialEligible ? (
-                            <>
-                                <button
-                                    onClick={handleActivateTrial}
-                                    disabled={isActivating}
-                                    className={`w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-500/20 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group`}
-                                >
-                                    {isActivating ? (
-                                        <>
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                            Activating Trial...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Sparkles className="w-5 h-5" />
-                                            Start 14-Day Free Trial
-                                        </>
-                                    )}
-                                </button>
-                                <p className="text-center text-xs text-slate-500 dark:text-slate-400">
-                                    No credit card required • Full premium access
-                                </p>
-                            </>
-                        ) : (
-                            <button
-                                onClick={async () => {
-                                    if (subscriptionStatus === 'payment_failed') {
-                                        const result = await openDodoPortalSession();
-                                        if (!result.success) {
-                                            toast.error(result.error || 'Failed to open payment portal');
-                                            navigate('/settings');
-                                        }
-                                    } else {
-                                        navigate('/checkout');
-                                    }
-                                    onClose();
-                                }}
-                                className={`w-full py-4 px-6 bg-gradient-to-r ${activeContent.color} text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-500/20 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group`}
-                            >
-                                {t('premiumModal.upgradeBtn', 'Upgrade Now')}
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                            </button>
-                        )}
+            {/* Modal */}
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-none">
+                <div
+                    className="relative w-full max-w-md pointer-events-auto"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div
+                        className="relative bg-white dark:bg-gray-950 rounded-[28px] overflow-hidden"
+                        style={{
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)',
+                        }}
+                    >
+                        {/* Close button */}
                         <button
                             onClick={onClose}
-                            className="w-full py-3 px-6 text-slate-500 dark:text-slate-400 font-bold hover:text-slate-900 dark:hover:text-slate-100 transition-colors text-sm"
+                            className="absolute top-5 right-5 z-10 w-8 h-8 rounded-full bg-gray-100/90 dark:bg-gray-800/90 hover:bg-gray-200/90 dark:hover:bg-gray-700/90 flex items-center justify-center transition-all duration-200 backdrop-blur-sm"
+                            aria-label="Close"
                         >
-                            {t('premiumModal.cancelBtn', 'Maybe Later')}
+                            <X className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                         </button>
+
+                        {/* Content */}
+                        <div className="px-9 py-12 text-center">
+                            {/* Premium badge */}
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-full mb-6">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <span className="text-sm font-semibold text-blue-700 dark:text-blue-400">
+                                    Premium Feature
+                                </span>
+                            </div>
+
+                            {/* Title */}
+                            <h2
+                                className="text-[28px] font-semibold text-gray-900 dark:text-white mb-3 tracking-tight"
+                                style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
+                            >
+                                {activeContent.title}
+                            </h2>
+
+                            {/* Description */}
+                            <p className="text-[15px] text-gray-600 dark:text-gray-400 mb-8 leading-relaxed font-normal">
+                                {activeContent.desc}
+                            </p>
+
+                            {/* Benefits list */}
+                            <div className="space-y-3 mb-8 text-left">
+                                {activeContent.benefits.map((benefit, idx) => (
+                                    <div key={idx} className="flex items-center gap-3">
+                                        <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                                            <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                                        </div>
+                                        <span className="text-[15px] text-gray-700 dark:text-gray-300 font-normal">
+                                            {benefit}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* CTA Buttons */}
+                            <div className="space-y-3">
+                                {isTrialEligible ? (
+                                    <>
+                                        <button
+                                            onClick={handleActivateTrial}
+                                            disabled={isActivating}
+                                            className="w-full h-12 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-xl font-medium text-[15px] transition-all duration-200 flex items-center justify-center gap-2"
+                                            style={{
+                                                boxShadow: isActivating ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.1)',
+                                            }}
+                                        >
+                                            {isActivating ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                    <span>Starting trial...</span>
+                                                </>
+                                            ) : (
+                                                <span>Start 14-Day Free Trial</span>
+                                            )}
+                                        </button>
+                                        <p className="text-[13px] text-gray-500 dark:text-gray-400 font-normal">
+                                            No credit card required • Full premium access
+                                        </p>
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={async () => {
+                                            if (subscriptionStatus === 'payment_failed') {
+                                                const result = await openDodoPortalSession();
+                                                if (!result.success) {
+                                                    toast.error(result.error || 'Failed to open payment portal');
+                                                    navigate('/settings');
+                                                }
+                                            } else {
+                                                navigate('/checkout');
+                                            }
+                                            onClose();
+                                        }}
+                                        className="w-full h-12 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-medium text-[15px] transition-all duration-200 flex items-center justify-center gap-2"
+                                        style={{
+                                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                                        }}
+                                    >
+                                        <span>Upgrade Now</span>
+                                        <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                )}
+
+                                <button
+                                    onClick={onClose}
+                                    className="w-full h-10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 font-medium text-[14px] transition-colors"
+                                >
+                                    {t('premiumModal.cancelBtn', 'Maybe Later')}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

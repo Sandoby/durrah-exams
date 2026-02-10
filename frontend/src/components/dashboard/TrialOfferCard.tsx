@@ -13,9 +13,51 @@ export function TrialOfferCard({ isVisible }: TrialOfferCardProps) {
     const [isActivating, setIsActivating] = useState(false);
     const [isDismissed, setIsDismissed] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [isEligible, setIsEligible] = useState(true);
 
     useEffect(() => {
         if (!user) return;
+
+        // Double-check trial eligibility from database
+        const checkEligibility = async () => {
+            try {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('trial_activated, subscription_status')
+                    .eq('id', user.id)
+                    .single();
+
+                // Not eligible if trial was already activated
+                if (profile?.trial_activated === true) {
+                    setIsEligible(false);
+                    return;
+                }
+
+                // Not eligible if user already has or had a subscription
+                // (active, trialing, cancelled, payment_failed, expired all indicate user already engaged with paid features)
+                if (profile?.subscription_status && profile.subscription_status !== null) {
+                    setIsEligible(false);
+                    return;
+                }
+
+                // Check if user has any payment history (meaning they subscribed before)
+                const { data: payments, error: paymentsError } = await supabase
+                    .from('payments')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .limit(1);
+
+                if (!paymentsError && payments && payments.length > 0) {
+                    setIsEligible(false);
+                    return;
+                }
+            } catch (error) {
+                console.error('Failed to check trial eligibility:', error);
+                setIsEligible(false); // Fail closed - don't show offer if check fails
+            }
+        };
+
+        checkEligibility();
 
         // Check if user has dismissed this overlay
         const dismissKey = `trial_offer_dismissed_${user.id}`;
@@ -64,8 +106,8 @@ export function TrialOfferCard({ isVisible }: TrialOfferCardProps) {
         }
     };
 
-    // Don't render if dismissed or not visible
-    if (isDismissed || !isVisible) return null;
+    // Don't render if dismissed, not visible, or not eligible
+    if (isDismissed || !isVisible || !isEligible) return null;
 
     return (
         <>
