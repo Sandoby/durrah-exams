@@ -3,6 +3,7 @@ import { useProctorDashboard } from '../hooks/useConvexProctoring';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { hasActiveAccess } from '../lib/subscriptionUtils';
 import { supabase } from '../lib/supabase';
 import { Logo } from './Logo';
 import {
@@ -93,7 +94,7 @@ export function ProctorDashboard({ examId: propExamId, examTitle: propExamTitle 
   const { subscriptionStatus } = useAuth();
 
   useEffect(() => {
-    if (subscriptionStatus !== 'active') {
+    if (!hasActiveAccess(subscriptionStatus)) {
       navigate('/checkout');
     }
   }, [subscriptionStatus, navigate]);

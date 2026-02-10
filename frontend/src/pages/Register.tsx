@@ -173,6 +173,21 @@ export default function Register() {
                     email: data.email
                 });
 
+                // Activate 14-day free trial for new users
+                try {
+                    const { data: trialResult, error: trialError } = await supabase.rpc('activate_trial', {
+                        p_user_id: authData.user.id
+                    });
+                    if (trialResult?.success) {
+                        console.log('✅ Trial activated for new user');
+                    } else {
+                        console.log('ℹ️ Trial not activated:', trialResult?.error || trialError?.message);
+                    }
+                } catch (trialError) {
+                    console.warn('Trial activation failed, continuing:', trialError);
+                    // Don't block registration if trial activation fails
+                }
+
                 // Add welcome notification
                 await supabase.from('notifications').insert({
                     user_id: authData.user.id,

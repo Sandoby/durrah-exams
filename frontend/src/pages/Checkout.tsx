@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, CreditCard, Shield, Zap, Layout, X, Loader2, Star, Crown, Globe, ExternalLink, Ticket } from 'lucide-react';
+import { Check, CreditCard, Shield, Zap, Layout, X, Loader2, Star, Crown, Globe, ExternalLink, Ticket, Sparkles } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Logo } from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { useCurrency } from '../hooks/useCurrency';
 import { openDodoPortalSession } from '../lib/dodoPortal';
+import { daysRemaining } from '../lib/subscriptionUtils';
 
 
 
@@ -21,7 +22,7 @@ export default function Checkout() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
-    const { user } = useAuth();
+    const { user, subscriptionStatus, trialEndsAt } = useAuth();
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [isInsideEgypt, setIsInsideEgypt] = useState(false);
@@ -425,6 +426,30 @@ export default function Checkout() {
             </header>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+                {/* Trial Info Banner */}
+                {subscriptionStatus === 'trialing' && trialEndsAt && (
+                    <div className="max-w-3xl mx-auto mb-8">
+                        <div className="bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/30 dark:to-violet-950/30 border-2 border-indigo-200 dark:border-indigo-800 rounded-2xl p-6 shadow-lg">
+                            <div className="flex items-center gap-4">
+                                <div className="flex-shrink-0 w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center">
+                                    <Sparkles className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                        You're on a free trial
+                                        <span className="px-2 py-0.5 bg-indigo-600 text-white text-xs font-bold rounded-full">
+                                            {daysRemaining(trialEndsAt)} days left
+                                        </span>
+                                    </h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                        Subscribe now to keep your premium access after the trial ends
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="text-center max-w-3xl mx-auto mb-16">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-xs font-semibold uppercase tracking-wider mb-6">
                         <Crown className="h-3.5 w-3.5" />

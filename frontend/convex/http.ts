@@ -17,25 +17,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-client-info, apikey',
   'Content-Type': 'application/json',
 };
-// In-memory idempotency for webhook events (best-effort; add durable storage later)
-const processedWebhookIds = new Map<string, number>();
-const WEBHOOK_TTL_MS = 60 * 60 * 1000; // 1 hour
-
-function isDuplicateWebhook(id?: string | null) {
-  if (!id) return false;
-  const now = Date.now();
-  // Cleanup expired
-  for (const [k, v] of processedWebhookIds) {
-    if (now - v > WEBHOOK_TTL_MS) processedWebhookIds.delete(k);
-  }
-  const ts = processedWebhookIds.get(id);
-  return !!(ts && now - ts < WEBHOOK_TTL_MS);
-}
-
-function rememberWebhookId(id?: string | null) {
-  if (!id) return;
-  processedWebhookIds.set(id, Date.now());
-}
 
 // Constant-time comparison for signatures
 function timingSafeEqual(a: string, b: string) {
@@ -57,35 +38,71 @@ async function verifyDodoSignature(
 ) {
   if (!secretRaw || !webhookId || !webhookTimestamp || !headerSignature) return false;
 
-  // Secrets may be provided as "whsec_<base64>" or raw base64
-  const secretB64 = secretRaw.replace(/^\s*whsec_/, '').trim();
-
-  let keyBytes: Uint8Array;
-  try {
-    keyBytes = new Uint8Array(Buffer.from(secretB64, 'base64'));
-  } catch {
-    return false;
-  }
-
   const signedContent = `${webhookId}.${webhookTimestamp}.${rawBody}`;
   const message = new TextEncoder().encode(signedContent);
 
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw',
-    keyBytes as unknown as BufferSource,
-    { name: 'HMAC', hash: 'SHA-256' } as HmacImportParams,
-    false,
-    ['sign']
-  );
-  const signatureBytes = await crypto.subtle.sign('HMAC', cryptoKey, message);
-  const computedSig = Buffer.from(new Uint8Array(signatureBytes)).toString('base64');
+  // Parse signature header variants:
+  // - "v1,<sig>"
+  // - "t=<ts>,v1=<sig>"
+  // - "<sig>"
+  const tokens = headerSignature
+    .split(/[,\s]+/)
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const expectedSignatures = new Set<string>();
+  for (const token of tokens) {
+    if (token.startsWith('v1=')) {
+      expectedSignatures.add(token.slice(3));
+    } else if (token.startsWith('v1,')) {
+      expectedSignatures.add(token.slice(3));
+    } else if (!token.startsWith('t=')) {
+      expectedSignatures.add(token);
+    }
+  }
+  if (expectedSignatures.size === 0) return false;
 
-  // Header can be "v1,<sig1> v2,<sig2>" or a simple "<sig>"
-  const parts = headerSignature.split(' ');
-  const v1Part = parts.find((p) => p.startsWith('v1,')) || '';
-  const expectedSig = v1Part ? v1Part.slice(3) : headerSignature.split(',')[1] || headerSignature;
+  const secretNoPrefix = secretRaw.replace(/^\s*whsec_/, '').trim();
+  const candidateKeys: Uint8Array[] = [];
 
-  return timingSafeEqual(computedSig, expectedSig);
+  // Candidate key 1: base64-decoded secret (common Dodo format).
+  try {
+    const decoded = Buffer.from(secretNoPrefix, 'base64');
+    if (decoded.length > 0) {
+      candidateKeys.push(new Uint8Array(decoded));
+    }
+  } catch {
+    // ignore
+  }
+
+  // Candidate key 2: raw secret bytes without prefix.
+  candidateKeys.push(new TextEncoder().encode(secretNoPrefix));
+  // Candidate key 3: raw secret bytes with prefix preserved.
+  candidateKeys.push(new TextEncoder().encode(secretRaw.trim()));
+
+  for (const keyBytes of candidateKeys) {
+    try {
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        keyBytes as unknown as BufferSource,
+        { name: 'HMAC', hash: 'SHA-256' } as HmacImportParams,
+        false,
+        ['sign']
+      );
+      const signatureBytes = await crypto.subtle.sign('HMAC', cryptoKey, message);
+      const computedSigBase64 = Buffer.from(new Uint8Array(signatureBytes)).toString('base64');
+      const computedSigHex = Buffer.from(new Uint8Array(signatureBytes)).toString('hex');
+
+      for (const expectedSig of expectedSignatures) {
+        if (timingSafeEqual(computedSigBase64, expectedSig) || timingSafeEqual(computedSigHex, expectedSig)) {
+          return true;
+        }
+      }
+    } catch {
+      // try next key strategy
+    }
+  }
+
+  return false;
 }
 
 // Resolve Supabase user from Authorization header (Bearer <access_token>)
@@ -127,19 +144,28 @@ http.route({
       const webhookTimestamp = request.headers.get('webhook-timestamp');
       const rawBody = await request.text();
 
-      // Verify signature and deduplicate
+      // Verify signature
       if (secret) {
         const ok = await verifyDodoSignature(secret, webhookId, webhookTimestamp, rawBody, signature);
         if (!ok) {
           console.error('Invalid Dodo webhook signature', { webhookId });
           return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 401 });
         }
-        if (isDuplicateWebhook(webhookId)) {
-          console.log('[Webhook] Duplicate delivery detected, ignoring', { webhookId });
-          return new Response(JSON.stringify({ received: true, duplicate: true }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
+
+        // Check for duplicate using persistent storage
+        if (webhookId) {
+          const duplicateCheck = await ctx.runQuery(internal.webhookHelpers.isWebhookProcessed, {
+            webhookId,
+            provider: 'dodo',
           });
+
+          if (duplicateCheck.processed) {
+            console.log('[Webhook] Duplicate delivery detected, ignoring', { webhookId });
+            return new Response(JSON.stringify({ received: true, duplicate: true }), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
         }
       }
 
@@ -148,26 +174,84 @@ http.route({
       const data = body.data;
       const metadata = data?.metadata || body.metadata || {};
 
+      const evtTsRaw = body?.timestamp || data?.timestamp || null;
+      const evtTs = evtTsRaw ? Date.parse(evtTsRaw) : null;
+      const recvTs = Date.now();
+      const deliveryLatencyMs = (evtTs && !isNaN(evtTs)) ? (recvTs - evtTs) : null;
       console.log(`Processing Dodo event: ${eventType}`, {
-        id: data?.subscription_id || data?.payment_id,
-        metadata: JSON.stringify(metadata)
+        webhookId,
+        subscriptionId: data?.subscription_id || data?.payment_id,
+        metadata: JSON.stringify(metadata),
+        event_timestamp: evtTsRaw || null,
+        received_at: new Date(recvTs).toISOString(),
+        delivery_latency_ms: deliveryLatencyMs
       });
 
       let userId = metadata.userId;
       let resolvedUserId = userId as string | undefined;
-      const userEmail = data?.customer?.email || data?.email;
-      const dodoCustomerId = data?.customer_id || data?.customer?.customer_id || data?.customer?.id || data?.id;
+      let userEmail = data?.customer?.email || data?.email;
+      const subscriptionId = data?.subscription_id || data?.id;
+      let resolvedDodoCustomerId = data?.customer_id || data?.customer?.customer_id || data?.customer?.id || data?.id;
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+      const resolveUserFromRecentDodoPayments = async (subId: string | undefined) => {
+        if (!subId || !supabaseUrl || !supabaseKey) return undefined;
+        const encodedSubId = encodeURIComponent(subId);
+
+        // First: direct merchant reference match.
+        const directRes = await fetch(
+          `${supabaseUrl}/rest/v1/payments?provider=eq.dodo&merchant_reference=eq.${encodedSubId}&select=user_id&order=created_at.desc&limit=1`,
+          { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+        );
+        if (directRes.ok) {
+          const rows = await directRes.json();
+          if (rows?.[0]?.user_id) return rows[0].user_id as string;
+        }
+
+        // Second: metadata.subscriptionId match.
+        const metaRes = await fetch(
+          `${supabaseUrl}/rest/v1/payments?provider=eq.dodo&metadata->>subscriptionId=eq.${encodedSubId}&select=user_id&order=created_at.desc&limit=1`,
+          { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+        );
+        if (metaRes.ok) {
+          const rows = await metaRes.json();
+          if (rows?.[0]?.user_id) return rows[0].user_id as string;
+        }
+
+        return undefined;
+      };
+
+      // Ensure we can resolve the customer even when webhook payload omits customer fields.
+      // This is important for cancellation events from portal actions.
+      if (!resolvedDodoCustomerId && data?.subscription_id) {
+        try {
+          const apiKey = process.env.DODO_PAYMENTS_API_KEY;
+          if (apiKey) {
+            const isTest = apiKey.startsWith('test_');
+            const baseUrl = isTest ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
+            const subRes = await fetch(`${baseUrl}/subscriptions/${data.subscription_id}`, {
+              headers: { 'Authorization': `Bearer ${apiKey}` }
+            });
+            if (subRes.ok) {
+              const sub = await subRes.json();
+              resolvedDodoCustomerId = sub?.customer?.id || sub?.customer?.customer_id || sub?.customer_id;
+            } else {
+              console.warn('[Webhook] Subscription lookup failed while resolving customer id:', subRes.status);
+            }
+          }
+        } catch (error) {
+          console.warn('[Webhook] Error resolving customer id from subscription:', error);
+        }
+      }
 
       // Fallback: If userId is missing from metadata, look up via dodo_customer_id in Supabase
-      if (!userId && dodoCustomerId) {
-        console.log(`[Webhook] No userId in metadata, attempting fallback lookup for customer: ${dodoCustomerId}`);
-        const supabaseUrl = process.env.SUPABASE_URL;
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
+      if (!userId && resolvedDodoCustomerId) {
+        console.log(`[Webhook] No userId in metadata, attempting fallback lookup for customer: ${resolvedDodoCustomerId}`);
         if (supabaseUrl && supabaseKey) {
           try {
             const lookupRes = await fetch(
-              `${supabaseUrl}/rest/v1/profiles?dodo_customer_id=eq.${encodeURIComponent(dodoCustomerId)}&select=id`,
+              `${supabaseUrl}/rest/v1/profiles?dodo_customer_id=eq.${encodeURIComponent(resolvedDodoCustomerId)}&select=id`,
               { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
             );
             if (lookupRes.ok) {
@@ -176,7 +260,7 @@ http.route({
                 userId = profiles[0].id;
                 console.log(`[Webhook] Found userId via dodo_customer_id: ${userId}`);
               } else {
-                console.warn(`[Webhook] No user found with dodo_customer_id: ${dodoCustomerId}`);
+                console.warn(`[Webhook] No user found with dodo_customer_id: ${resolvedDodoCustomerId}`);
               }
             } else {
               console.error(`[Webhook] Fallback lookup failed with status: ${lookupRes.status}`);
@@ -187,49 +271,102 @@ http.route({
         }
       }
 
+      // Fallback: If still unresolved, use email.
+      if (!userId && userEmail) {
+        try {
+          const lookup = await ctx.runAction(internal.dodoPayments.resolveUserIdByEmail, { userEmail });
+          if (lookup?.success && lookup?.userId) {
+            userId = lookup.userId as string;
+            resolvedUserId = userId;
+            console.log(`[Webhook] Found userId via email: ${userId}`);
+          }
+        } catch (error) {
+          console.warn('[Webhook] Email resolution failed:', error);
+        }
+      }
+
+      // Fallback: If still unresolved, use recent Dodo payment/subscription records.
+      if (!userId && subscriptionId) {
+        try {
+          const paymentMatchedUserId = await resolveUserFromRecentDodoPayments(subscriptionId);
+          if (paymentMatchedUserId) {
+            userId = paymentMatchedUserId;
+            resolvedUserId = paymentMatchedUserId;
+            console.log(`[Webhook] Found userId via Dodo payment history: ${paymentMatchedUserId}`);
+          }
+        } catch (error) {
+          console.warn('[Webhook] Payment-history user resolution failed:', error);
+        }
+      }
+
+      // Fetch the live subscription snapshot for subscription events to avoid stale/out-of-order webhook states.
+      let liveSubscriptionStatus = '';
+      let liveSubscriptionData: any = null;
+      if (subscriptionId && (eventType || '').toLowerCase().startsWith('subscription.')) {
+        try {
+          const apiKey = process.env.DODO_PAYMENTS_API_KEY;
+          if (apiKey) {
+            const isTest = apiKey.startsWith('test_');
+            const baseUrl = isTest ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
+            const subRes = await fetch(`${baseUrl}/subscriptions/${subscriptionId}`, {
+              headers: { Authorization: `Bearer ${apiKey}` }
+            });
+            if (subRes.ok) {
+              const sub = await subRes.json();
+              liveSubscriptionData = sub;
+              liveSubscriptionStatus = String(sub?.status || '').toLowerCase();
+              const subCustomerId = sub?.customer?.id || sub?.customer?.customer_id || sub?.customer_id;
+              const subEmail = sub?.customer?.email;
+              if (!resolvedDodoCustomerId && subCustomerId) {
+                resolvedDodoCustomerId = subCustomerId;
+              }
+              if (!userEmail && subEmail) {
+                userEmail = subEmail;
+              }
+            }
+          }
+        } catch (error) {
+          console.warn('[Webhook] Live subscription snapshot fetch failed:', error);
+        }
+      }
+
+      const preNormalizedStatus = String(
+        liveSubscriptionStatus ||
+        data?.status ||
+        data?.subscription_status ||
+        data?.subscription?.status ||
+        ''
+      ).toLowerCase();
+      const preIsFailedStatus =
+        preNormalizedStatus === 'on_hold' ||
+        preNormalizedStatus === 'failed' ||
+        preNormalizedStatus === 'payment_failed' ||
+        preNormalizedStatus === 'past_due';
+      const preIsCancelledStatus =
+        preNormalizedStatus === 'cancelled' ||
+        preNormalizedStatus === 'canceled' ||
+        preNormalizedStatus === 'expired' ||
+        preNormalizedStatus === 'inactive' ||
+        liveSubscriptionData?.cancel_at_period_end === true ||
+        !!liveSubscriptionData?.cancelled_at ||
+        !!liveSubscriptionData?.ended_at ||
+        !!liveSubscriptionData?.end_at;
+
       // Routing based on event type
       // Routing based on event type
       // Deduplication: ONLY subscription.active triggers the subscription update/extension logic
       // to prevents double-adding time when multiple events arrive for the same transaction.
-      if (eventType === 'subscription.active') {
-        // Ensure we have a Dodo customer id; if missing, look it up from Dodo API using subscription_id
-        let ensuredCustomerId = dodoCustomerId;
-        if (!ensuredCustomerId && data?.subscription_id) {
-          try {
-            const apiKey = process.env.DODO_PAYMENTS_API_KEY;
-            if (apiKey) {
-              const isTest = apiKey.startsWith('test_');
-              const baseUrl = isTest ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
-              const subRes = await fetch(`${baseUrl}/subscriptions/${data.subscription_id}`, {
-                headers: { 'Authorization': `Bearer ${apiKey}` }
-              });
-              if (subRes.ok) {
-                const sub = await subRes.json();
-                ensuredCustomerId = sub?.customer?.id || sub?.customer?.customer_id || sub?.customer_id;
-                if (!ensuredCustomerId) {
-                  console.warn('[Webhook] Subscription lookup returned no customer id');
-                }
-              } else {
-                console.warn('[Webhook] Dodo subscription lookup failed:', subRes.status);
-              }
-            } else {
-              console.warn('[Webhook] DODO_PAYMENTS_API_KEY not configured; cannot fetch subscription for customer id');
-            }
-          } catch (e) {
-            console.warn('[Webhook] Error fetching subscription for customer id:', e);
-          }
-        }
-
+      if (eventType === 'subscription.active' && !preIsFailedStatus && !preIsCancelledStatus) {
         // Activate or renew subscription
         const res = await ctx.runAction(internal.dodoPayments.updateSubscription, {
           userId,
           userEmail,
           status: 'active',
-          plan: metadata.planId === 'pro' ? 'Professional' : 'Starter',
-          dodoCustomerId: ensuredCustomerId,
+          plan: metadata?.planId || 'pro',
+          dodoCustomerId: resolvedDodoCustomerId,
           subscriptionId: data?.subscription_id,
           nextBillingDate: data?.next_billing_date,
-          billingCycle: metadata.billingCycle,
+          billingCycle: metadata?.billingCycle,
         });
         console.log(`[Webhook] updateSubscription result (subscription.active):`, res);
         if (res?.success && 'userId' in res && res.userId) {
@@ -281,7 +418,37 @@ http.route({
           });
         }
       }
-      if (eventType === 'subscription.renewed') {
+      const normalizedEvent = (eventType || '').toLowerCase();
+      const normalizedPayloadStatus = String(
+        liveSubscriptionStatus || data?.status || data?.subscription_status || data?.subscription?.status || ''
+      ).toLowerCase();
+      const normalizedLifecycleState = normalizedPayloadStatus || normalizedEvent;
+
+      const isRenewedEvent = normalizedEvent === 'subscription.renewed';
+      const isFailedEvent =
+        normalizedEvent === 'subscription.on_hold' ||
+        normalizedEvent === 'subscription.failed' ||
+        normalizedEvent === 'subscription.payment_failed' ||
+        normalizedPayloadStatus === 'on_hold' ||
+        normalizedPayloadStatus === 'failed' ||
+        normalizedPayloadStatus === 'payment_failed' ||
+        normalizedPayloadStatus === 'past_due' ||
+        normalizedLifecycleState.includes('past_due');
+      const isCancelledEvent =
+        normalizedEvent === 'subscription.cancelled' ||
+        normalizedEvent === 'subscription.canceled' ||
+        normalizedEvent.includes('cancel') ||
+        normalizedPayloadStatus === 'cancelled' ||
+        normalizedPayloadStatus === 'canceled' ||
+        normalizedPayloadStatus === 'expired' ||
+        normalizedPayloadStatus === 'inactive' ||
+        normalizedLifecycleState.includes('cancel') ||
+        normalizedLifecycleState.includes('expire') ||
+        normalizedLifecycleState.includes('inactive');
+
+      const isUpdatedEvent = normalizedEvent === 'subscription.updated';
+
+      if (isRenewedEvent) {
         // Subscription renewed - just push the date and record payment
         const renewRes = await ctx.runAction(internal.dodoPayments.updateSubscription, {
           userId,
@@ -313,21 +480,94 @@ http.route({
             });
           }
         }
-      } else if (eventType === 'subscription.on_hold' || eventType === 'subscription.failed') {
+      } else if (isUpdatedEvent) {
+        // Real-time sync without extending time: set nextBillingDate/plan if provided
+        const updRes = await ctx.runAction(internal.dodoPayments.updateSubscription, {
+          userId,
+          userEmail,
+          status: 'active',
+          plan: metadata?.planId || 'pro',
+          dodoCustomerId: resolvedDodoCustomerId,
+          subscriptionId: data?.subscription_id,
+          nextBillingDate: data?.next_billing_date,
+          billingCycle: metadata?.billingCycle,
+          silent: true
+        });
+        if (updRes?.success && 'userId' in updRes && updRes.userId) {
+          resolvedUserId = updRes.userId as string;
+        }
+      } else if (isFailedEvent) {
         await ctx.runAction(internal.dodoPayments.updateSubscription, {
           userId,
           userEmail,
           status: 'payment_failed',
         });
-      } else if (eventType === 'subscription.cancelled') {
+      } else if (isCancelledEvent) {
+        console.log(`[Webhook] Processing cancellation event: ${eventType}`, {
+          userId,
+          userEmail,
+          subscriptionId: data?.subscription_id,
+        });
+
         await ctx.runAction(internal.dodoPayments.updateSubscription, {
           userId,
           userEmail,
           status: 'cancelled',
         });
+
+        // Add cancellation notification for user visibility
+        if (resolvedUserId) {
+          const supabaseUrl = process.env.SUPABASE_URL;
+          const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          if (supabaseUrl && supabaseKey) {
+            try {
+              await fetch(`${supabaseUrl}/rest/v1/notifications`, {
+                method: 'POST',
+                headers: {
+                  'apikey': supabaseKey,
+                  'Authorization': `Bearer ${supabaseKey}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  user_id: resolvedUserId,
+                  title: 'Subscription Cancelled',
+                  message: 'Your subscription has been cancelled. You can reactivate anytime from the checkout page.',
+                  type: 'warning',
+                  is_read: false
+                })
+              });
+              console.log('[Webhook] Sent cancellation notification to user:', resolvedUserId);
+            } catch (e) {
+              console.error('[Webhook] Failed to send cancellation notification:', e);
+            }
+          }
+        }
       }
 
-      rememberWebhookId(webhookId);
+      // Record webhook as processed in persistent storage
+      if (webhookId) {
+        await ctx.runMutation(internal.webhookHelpers.recordWebhookProcessed, {
+          webhookId,
+          eventType,
+          provider: 'dodo',
+          userId: resolvedUserId,
+          subscriptionId: data?.subscription_id,
+        });
+      }
+
+      // Update subscription sync state for monitoring
+      if (resolvedUserId) {
+        await ctx.runMutation(internal.webhookHelpers.updateSubscriptionSyncState, {
+          userId: resolvedUserId,
+          status: eventType === 'subscription.active' ? 'active'
+            : isCancelledEvent ? 'cancelled'
+              : isFailedEvent ? 'payment_failed'
+                : 'unknown',
+          dodoCustomerId: resolvedDodoCustomerId,
+          syncSource: 'webhook',
+        });
+      }
+
       return new Response(JSON.stringify({ received: true }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
@@ -416,7 +656,7 @@ http.route({
       }
 
       const profileRes = await fetch(
-        `${supabaseUrl}/rest/v1/profiles?id=eq.${authUser.id}&select=dodo_customer_id,subscription_status,email`,
+        `${supabaseUrl}/rest/v1/profiles?id=eq.${authUser.id}&select=subscription_status,email`,
         { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
       );
 
@@ -426,7 +666,6 @@ http.route({
       if (profileRes.ok) {
         try {
           const profiles = await profileRes.json();
-          userDodoId = profiles?.[0]?.dodo_customer_id as string | undefined;
           subscriptionStatus = profiles?.[0]?.subscription_status as string | undefined;
           profileEmail = profiles?.[0]?.email as string | undefined;
         } catch (e) {
@@ -537,10 +776,48 @@ http.route({
   }),
 });
 
+// ============================================
+// SYNC DODO SUBSCRIPTION (Authenticated fallback)
+// POST /syncDodoSubscription
+// ============================================
+http.route({
+  path: "/syncDodoSubscription",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    try {
+      const authHeader = request.headers.get('Authorization') || '';
+      const authUser = await getSupabaseUser(authHeader);
+      if (!authUser?.id) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: corsHeaders
+        });
+      }
+
+      const result = await ctx.runAction(internal.dodoPayments.syncSubscriptionFromProvider, {
+        userId: authUser.id,
+        userEmail: authUser.email
+      });
+
+      return new Response(JSON.stringify(result), {
+        status: 200,
+        headers: corsHeaders,
+      });
+    } catch (error: any) {
+      console.error('Sync Dodo subscription error:', error);
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 400,
+        headers: corsHeaders
+      });
+    }
+  }),
+});
+
 // OPTIONS routes for CORS preflight
 http.route({ path: "/verifyDodoPayment", method: "OPTIONS", handler: httpAction(async () => new Response(null, { headers: corsHeaders })) });
 http.route({ path: "/createDodoPayment", method: "OPTIONS", handler: httpAction(async () => new Response(null, { headers: corsHeaders })) });
 http.route({ path: "/dodoPortalSession", method: "OPTIONS", handler: httpAction(async () => new Response(null, { headers: corsHeaders })) });
+http.route({ path: "/syncDodoSubscription", method: "OPTIONS", handler: httpAction(async () => new Response(null, { headers: corsHeaders })) });
 
 
 // ============================================

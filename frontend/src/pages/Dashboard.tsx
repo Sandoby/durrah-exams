@@ -17,6 +17,11 @@ import { NotificationCenter } from '../components/NotificationCenter';
 
 import { CONVEX_FEATURES } from '../main';
 import { PremiumFeatureModal } from '../components/dashboard/PremiumFeatureModal';
+import { hasActiveAccess } from '../lib/subscriptionUtils';
+import { TrialBanner } from '../components/dashboard/TrialBanner';
+import { TrialWelcomeModal } from '../components/dashboard/TrialWelcomeModal';
+import { TrialOfferCard } from '../components/dashboard/TrialOfferCard';
+import { GracePeriodBanner } from '../components/dashboard/GracePeriodBanner';
 
 
 interface Exam {
@@ -250,7 +255,7 @@ export default function Dashboard() {
 
     const handleCreateExam = (e: React.MouseEvent) => {
         // Check if user is on free plan and has reached limit
-        if (profile?.subscription_status !== 'active' && exams.length >= 3) {
+        if (!hasActiveAccess(profile?.subscription_status) && exams.length >= 3) {
             e.preventDefault();
             toast.error(t('dashboard.upgradeLimit'));
             return;
@@ -573,7 +578,7 @@ export default function Dashboard() {
                                 {user?.user_metadata?.full_name || user?.email}
                             </span>
 
-                            {profile?.subscription_status !== 'active' && (
+                            {!hasActiveAccess(profile?.subscription_status) && (
                                 <Link
                                     to="/checkout"
                                     className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white hover:bg-amber-600 shadow-md hover:shadow-lg transition-all"
@@ -641,7 +646,7 @@ export default function Dashboard() {
                                 </svg>
                                 {t('dashboard.tour.startTour', 'Tutorial')}
                             </button>
-                            {profile?.subscription_status !== 'active' && (
+                            {!hasActiveAccess(profile?.subscription_status) && (
                                 <Link
                                     to="/checkout"
                                     onClick={() => setIsMobileMenuOpen(false)}
@@ -742,7 +747,23 @@ export default function Dashboard() {
                         </div>
                     )}
 
-                    {profile?.subscription_status !== 'active' && exams.length >= 3 && (
+                    {/* Trial Banners */}
+                    {profile?.subscription_status === 'trialing' && (
+                        <div className="mb-6">
+                            <TrialBanner trialEndsAt={profile?.trial_ends_at} />
+                        </div>
+                    )}
+
+                    {profile?.subscription_status === 'expired' && (
+                        <div className="mb-6">
+                            <GracePeriodBanner
+                                subscriptionStatus={profile?.subscription_status}
+                                trialGraceEndsAt={profile?.trial_grace_ends_at}
+                            />
+                        </div>
+                    )}
+
+                    {!hasActiveAccess(profile?.subscription_status) && exams.length >= 3 && (
                         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-start gap-3 shadow-sm mb-4">
                             <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                             <div className="flex-1">
@@ -886,18 +907,18 @@ export default function Dashboard() {
                                                 {/* Analytics Button */}
                                                 <button
                                                     onClick={() => {
-                                                        if (profile?.subscription_status === 'active') {
+                                                        if (hasActiveAccess(profile?.subscription_status)) {
                                                             navigate(`/exam/${exam.id}/analytics`);
                                                         } else {
                                                             setPremiumModal({ isOpen: true, feature: 'analytics' });
                                                         }
                                                     }}
-                                                    className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 ${profile?.subscription_status === 'active'
+                                                    className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 ${hasActiveAccess(profile?.subscription_status)
                                                         ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:shadow-md'
                                                         : 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700'
                                                         }`}
                                                 >
-                                                    {profile?.subscription_status !== 'active' && (
+                                                    {!hasActiveAccess(profile?.subscription_status) && (
                                                         <div className="absolute -top-2.5 -right-1.5 z-20">
                                                             <div className="bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-white/20 flex items-center gap-1">
                                                                 <Crown className="w-2.5 h-2.5" />
@@ -905,12 +926,12 @@ export default function Dashboard() {
                                                             </div>
                                                         </div>
                                                     )}
-                                                    {profile?.subscription_status === 'active' ? (
+                                                    {hasActiveAccess(profile?.subscription_status) ? (
                                                         <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                                                     ) : (
                                                         <Lock className="h-5 w-5 text-gray-400" />
                                                     )}
-                                                    <span className={`text-xs font-semibold ${profile?.subscription_status === 'active'
+                                                    <span className={`text-xs font-semibold ${hasActiveAccess(profile?.subscription_status)
                                                         ? 'text-purple-700 dark:text-purple-300'
                                                         : 'text-gray-500'
                                                         }`}>
@@ -922,18 +943,18 @@ export default function Dashboard() {
                                                 {CONVEX_FEATURES.proctoring && (
                                                     <button
                                                         onClick={() => {
-                                                            if (profile?.subscription_status === 'active') {
+                                                            if (hasActiveAccess(profile?.subscription_status)) {
                                                                 navigate(`/exam/${exam.id}/proctor`);
                                                             } else {
                                                                 setPremiumModal({ isOpen: true, feature: 'proctoring' });
                                                             }
                                                         }}
-                                                        className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 ${profile?.subscription_status === 'active'
+                                                        className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 ${hasActiveAccess(profile?.subscription_status)
                                                             ? 'bg-teal-500 border border-teal-400 hover:bg-teal-600 hover:shadow-md'
                                                             : 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-teal-300 dark:hover:border-teal-700'
                                                             }`}
                                                     >
-                                                        {profile?.subscription_status !== 'active' && (
+                                                        {!hasActiveAccess(profile?.subscription_status) && (
                                                             <div className="absolute -top-2.5 -right-1.5 z-20">
                                                                 <div className="bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-white/20 flex items-center gap-1">
                                                                     <Crown className="w-2.5 h-2.5" />
@@ -941,18 +962,18 @@ export default function Dashboard() {
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        {profile?.subscription_status === 'active' && (
+                                                        {hasActiveAccess(profile?.subscription_status) && (
                                                             <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
                                                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                                                                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
                                                             </span>
                                                         )}
-                                                        {profile?.subscription_status === 'active' ? (
+                                                        {hasActiveAccess(profile?.subscription_status) ? (
                                                             <Eye className="h-5 w-5 text-white" />
                                                         ) : (
                                                             <Lock className="h-5 w-5 text-gray-400" />
                                                         )}
-                                                        <span className={`text-xs font-bold ${profile?.subscription_status === 'active' ? 'text-white' : 'text-gray-500'}`}>
+                                                        <span className={`text-xs font-bold ${hasActiveAccess(profile?.subscription_status) ? 'text-white' : 'text-gray-500'}`}>
                                                             {t('dashboard.actions.proctor', 'Live')}
                                                         </span>
                                                     </button>
@@ -1240,6 +1261,17 @@ export default function Dashboard() {
                 isOpen={premiumModal.isOpen}
                 onClose={() => setPremiumModal({ ...premiumModal, isOpen: false })}
                 feature={premiumModal.feature}
+            />
+            {/* Trial Welcome Modal */}
+            <TrialWelcomeModal />
+
+            {/* Trial Offer Overlay - Show for eligible users when tutorial is not running */}
+            <TrialOfferCard
+                isVisible={
+                    !hasActiveAccess(profile?.subscription_status) &&
+                    profile?.trial_activated !== true &&
+                    !runTour
+                }
             />
         </div>
     );

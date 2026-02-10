@@ -3,13 +3,15 @@ import { supabase } from '../lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 
 type UserRole = 'admin' | 'agent' | 'tutor' | null;
-type SubscriptionStatus = 'active' | 'payment_failed' | 'cancelled' | null;
+type SubscriptionStatus = 'active' | 'trialing' | 'payment_failed' | 'cancelled' | 'expired' | null;
 
 interface AuthContextType {
     user: User | null;
     session: Session | null;
     role: UserRole;
     subscriptionStatus: SubscriptionStatus;
+    trialEndsAt: string | null;
+    isTrialing: boolean;
     loading: boolean;
     signOut: () => Promise<void>;
 }
@@ -21,6 +23,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [session, setSession] = useState<Session | null>(null);
     const [role, setRole] = useState<UserRole>(null);
     const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>(null);
+    const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const profileChannelRef = useRef<any>(null);
 
@@ -28,7 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('role, subscription_status')
+                .select('role, subscription_status, trial_ends_at')
                 .eq('id', userId)
                 .single();
 
@@ -36,14 +39,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 console.error('Error fetching user profile:', error);
                 setRole('tutor'); // Default to tutor if error
                 setSubscriptionStatus(null);
+                setTrialEndsAt(null);
                 return;
             }
             setRole(data?.role || 'tutor');
             setSubscriptionStatus(data?.subscription_status || null);
+            setTrialEndsAt(data?.trial_ends_at || null);
         } catch (error) {
             console.error('Error fetching user profile:', error);
             setRole('tutor'); // Default to tutor if error
             setSubscriptionStatus(null);
+            setTrialEndsAt(null);
+        }
+    };
+
+    const syncDodoSubscription = async () => {
+        try {
+            const convexUrl = import.meta.env.VITE_CONVEX_URL as string | undefined;
+            if (!convexUrl) return;
+            const siteUrl = convexUrl.replace('.cloud', '.site');
+
+            const { data } = await supabase.auth.getSession();
+            const accessToken = data?.session?.access_token;
+            if (!accessToken) return;
+
+            await fetch(`${siteUrl}/syncDodoSubscription`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({})
+            });
+        } catch (error) {
+            console.warn('Dodo subscription sync skipped:', error);
         }
     };
 
@@ -61,11 +90,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 (payload: any) => {
                     const nextStatus = payload?.new?.subscription_status as SubscriptionStatus | undefined;
                     const nextRole = payload?.new?.role as UserRole | undefined;
+                    const nextTrialEndsAt = payload?.new?.trial_ends_at as string | undefined;
                     if (typeof nextStatus !== 'undefined') {
                         setSubscriptionStatus(nextStatus ?? null);
                     }
                     if (typeof nextRole !== 'undefined') {
                         setRole(nextRole ?? 'tutor');
+                    }
+                    if (typeof nextTrialEndsAt !== 'undefined') {
+                        setTrialEndsAt(nextTrialEndsAt ?? null);
                     }
                 }
             )
@@ -165,6 +198,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     fetchUserProfile(cachedData.user.id).catch(err => {
                         console.error('Profile fetch failed:', err);
                     });
+                    syncDodoSubscription().catch(err => {
+                        console.warn('Dodo sync failed:', err);
+                    });
                     setupProfileRealtime(cachedData.user.id);
                     setLoading(false);
                     clearTimeout(loadingTimeout);
@@ -185,6 +221,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         // Fetch profile but don't block on it
                         fetchUserProfile(session.user.id).catch(err => {
                             console.error('Profile fetch failed:', err);
+                        });
+                        syncDodoSubscription().catch(err => {
+                            console.warn('Dodo sync failed:', err);
                         });
                         setupProfileRealtime(session.user.id);
                     }
@@ -218,6 +257,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 fetchUserProfile(session.user.id).catch(err => {
                     console.error('Profile fetch failed:', err);
                 });
+                syncDodoSubscription().catch(err => {
+                    console.warn('Dodo sync failed:', err);
+                });
                 setupProfileRealtime(session.user.id);
             } else {
                 // Clear cache on sign out
@@ -230,6 +272,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 if (!checkCustomAuth()) {
                     setRole(null);
                     setSubscriptionStatus(null);
+                    setTrialEndsAt(null);
                 }
             }
 
@@ -297,8 +340,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         sessionStorage.removeItem('agent_name');
         setRole(null);
         setSubscriptionStatus(null);
+        setTrialEndsAt(null);
         setUser(null);
     };
+
+    const isTrialing = subscriptionStatus === 'trialing';
 
     // Show loading spinner instead of blank screen
     if (loading) {
@@ -313,7 +359,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user, session, role, subscriptionStatus, loading, signOut }}>
+        <AuthContext.Provider value={{ user, session, role, subscriptionStatus, trialEndsAt, isTrialing, loading, signOut }}>
             {children}
         </AuthContext.Provider>
     );

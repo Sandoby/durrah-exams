@@ -49,6 +49,31 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
 
     // Use the same RPC functions as the admin panel for consistent behavior
     if (args.status === 'active') {
+        // For provider-driven updates, prefer exact period end from provider.
+        // This prevents duplicated extensions from repeated webhook/sync events.
+        if (args.nextBillingDate) {
+            const patchPayload: Record<string, any> = {
+                subscription_status: 'active',
+                subscription_end_date: args.nextBillingDate
+            };
+            if (args.plan) patchPayload.subscription_plan = args.plan;
+            if (args.dodoCustomerId) patchPayload.dodo_customer_id = args.dodoCustomerId;
+
+            const patchRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
+                method: 'PATCH',
+                headers,
+                body: JSON.stringify(patchPayload)
+            });
+
+            if (!patchRes.ok) {
+                const patchErr = await patchRes.text();
+                console.error(`[DB] Failed to sync active subscription state for user ${userId}: ${patchRes.status} ${patchErr}`);
+                return { success: false, error: 'Profile sync failed' };
+            }
+
+            return { success: true, userId, syncedByDate: true };
+        }
+
         const days = args.billingCycle === 'yearly' ? 365 : 30;
         let shouldExtend = true;
 
@@ -88,7 +113,7 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
                     p_user_id: userId,
                     p_agent_id: null,
                     p_days: days,
-                    p_plan: args.plan || 'Professional',
+                    p_plan: args.plan || 'pro',
                     p_reason: 'Activated via Dodo Payments'
                 })
             });
@@ -99,6 +124,28 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
                 return { success: false, error: 'Database RPC failed' };
             }
             console.log(`[DB] Successfully activated subscription for user ${userId} via RPC`);
+
+            // TRIAL-TO-PAID CONVERSION: Clear trial fields if user was on trial
+            try {
+                const { data: currentProfile } = await fetch(`${supabaseUrl}/rest/v1/profiles?select=subscription_status,trial_ends_at&id=eq.${userId}`, {
+                    headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
+                }).then(r => r.json());
+
+                if (currentProfile && currentProfile.length > 0 && currentProfile[0].subscription_status === 'trialing') {
+                    console.log(`[DB] 🎉 Trial-to-paid conversion for user ${userId}`);
+                    await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
+                        method: 'PATCH',
+                        headers,
+                        body: JSON.stringify({
+                            trial_ends_at: null,
+                            trial_grace_ends_at: null
+                            // Keep trial_activated and trial_started_at for analytics
+                        })
+                    });
+                }
+            } catch (trialError) {
+                console.warn('[DB] Trial conversion cleanup failed (non-critical):', trialError);
+            }
         }
 
         // ALWAYS update dodo_customer_id if it's there (Critical for Settings button)
@@ -115,65 +162,93 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
         }
 
         // Add success notification
-        try {
-            await fetch(`${supabaseUrl}/rest/v1/notifications`, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify({
-                    user_id: userId,
-                    title: 'Subscription Activated! 💎',
-                    message: `Welcome to the ${args.plan || 'Professional'} plan. Your premium features are now active.`,
-                    type: 'success',
-                    is_read: false
-                })
-            });
-        } catch (e) {
-            console.error('[NOTIF] Failed to send success notification:', e);
-        }
-
-        return { success: true, userId };
-    } else if (args.status === 'cancelled' || args.status === 'payment_failed') {
-        // Deactivate subscription using the admin RPC
-        const res = await fetch(`${supabaseUrl}/rest/v1/rpc/cancel_subscription`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({
-                p_user_id: userId,
-                p_agent_id: null,
-                p_reason: args.status === 'cancelled' ? 'Cancelled via Dodo' : 'Payment failed via Dodo'
-            })
-        });
-
-        if (!res.ok) {
-            const errTxt = await res.text();
-            console.error(`[DB] Supabase RPC cancel_subscription failed for user ${userId}: ${res.status} ${errTxt}`);
-            return { success: false, error: 'Database RPC failed' };
-        }
-
-        const result = await res.json();
-        console.log(`[DB] Deactivated subscription for user ${userId} via RPC`);
-        console.log(`[DB] Deactivated subscription for user ${userId} via RPC`);
-
-        // Add failure notification if it was a payment failure
-        if (args.status === 'payment_failed') {
+        if (!args.silent) {
             try {
                 await fetch(`${supabaseUrl}/rest/v1/notifications`, {
                     method: 'POST',
                     headers,
                     body: JSON.stringify({
                         user_id: userId,
-                        title: 'Payment Failed ⚠️',
-                        message: 'We were unable to process your subscription payment. Please update your payment method to avoid service interruption.',
-                        type: 'error',
+                        title: 'Subscription Activated! 💎',
+                        message: `Welcome to the ${args.plan || 'Professional'} plan. Your premium features are now active.`,
+                        type: 'success',
                         is_read: false
                     })
                 });
             } catch (e) {
-                console.error('[NOTIF] Failed to send failure notification:', e);
+                console.error('[NOTIF] Failed to send success notification:', e);
             }
         }
 
-        return { success: result?.success ?? true, userId };
+        return { success: true, userId };
+    } else if (args.status === 'cancelled') {
+        // Immediate deactivation (aligned with AdminPanel "Deactivate")
+        const rpcRes = await fetch(`${supabaseUrl}/rest/v1/rpc/cancel_subscription`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+                p_user_id: userId,
+                p_agent_id: null,
+                p_reason: 'Cancelled via Dodo'
+            })
+        });
+
+        if (!rpcRes.ok) {
+            const rpcErr = await rpcRes.text();
+            console.error(`[DB] Supabase RPC cancel_subscription failed for user ${userId}: ${rpcRes.status} ${rpcErr}`);
+        }
+
+        // Enforce final state for frontend/access control sync.
+        const enforcePatch = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({
+                subscription_status: 'cancelled'
+            })
+        });
+
+        if (!enforcePatch.ok) {
+            const enforceErr = await enforcePatch.text();
+            console.error(`[DB] Failed to enforce profile status for user ${userId}: ${enforcePatch.status} ${enforceErr}`);
+            if (!rpcRes.ok) {
+                return { success: false, error: 'RPC and profile enforcement failed' };
+            }
+        }
+
+        return { success: true, userId, status: 'cancelled' };
+    } else if (args.status === 'payment_failed') {
+        // Do NOT cancel on payment failure; mark status and notify
+        const enforcePatch = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({
+                subscription_status: 'payment_failed'
+            })
+        });
+
+        if (!enforcePatch.ok) {
+            const enforceErr = await enforcePatch.text();
+            console.error(`[DB] Failed to set payment_failed status for user ${userId}: ${enforcePatch.status} ${enforceErr}`);
+            return { success: false, error: 'Failed to mark payment_failed' };
+        }
+
+        try {
+            await fetch(`${supabaseUrl}/rest/v1/notifications`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    user_id: userId,
+                    title: 'Payment Failed',
+                    message: 'We were unable to process your subscription payment. Please update your payment method to avoid service interruption.',
+                    type: 'error',
+                    is_read: false
+                })
+            });
+        } catch (e) {
+            console.error('[NOTIF] Failed to send payment failure notification:', e);
+        }
+
+        return { success: true, userId, status: 'payment_failed' };
     }
 
     return { success: false, error: 'Unknown status' };
@@ -192,6 +267,7 @@ export const updateSubscription = internalAction({
         subscriptionId: v.optional(v.string()),
         nextBillingDate: v.optional(v.string()), // Used for sync
         billingCycle: v.optional(v.string()),
+        silent: v.optional(v.boolean()),
     },
     handler: async (_ctx, args) => {
         const supabaseUrl = process.env.SUPABASE_URL;
@@ -473,11 +549,41 @@ export const resolveAndLinkCustomer = internalAction({
 
         try {
             const headers = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` };
+            const baseUrl = apiKey.startsWith('test_') ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
+
+            if (args.userEmail) {
+                try {
+                    const customerRes = await fetch(
+                        `${baseUrl}/customers?email=${encodeURIComponent(args.userEmail)}`,
+                        { headers: { Authorization: `Bearer ${apiKey}` } }
+                    );
+                    if (customerRes.ok) {
+                        const customerData = await customerRes.json();
+                        const directCustomerId =
+                            customerData?.items?.[0]?.customer_id ||
+                            customerData?.items?.[0]?.id;
+                        if (directCustomerId) {
+                            const patchRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${args.userId}`, {
+                                method: 'PATCH',
+                                headers: { ...headers, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                                body: JSON.stringify({ dodo_customer_id: directCustomerId }),
+                            });
+                            if (!patchRes.ok) {
+                                const txt = await patchRes.text();
+                                console.warn('[ResolveCustomer] Could not persist dodo_customer_id (continuing):', patchRes.status, txt);
+                            }
+                            return { success: true, dodoCustomerId: directCustomerId };
+                        }
+                    }
+                } catch (e) {
+                    console.warn('[ResolveCustomer] Direct email customer lookup failed:', e);
+                }
+            }
 
             // Get the most recent Dodo payment entry for this user to extract subscriptionId
             // Fetch a few recent Dodo payments for this user and try to extract a subscription id
             const paymentsRes = await fetch(
-                `${supabaseUrl}/rest/v1/payments?user_id=eq.${args.userId}&provider=eq.dodo&select=merchant_reference,metadata,user_email&order=created_at.desc&limit=10`,
+                `${supabaseUrl}/rest/v1/payments?user_id=eq.${args.userId}&provider=eq.dodo&select=merchant_reference&order=created_at.desc&limit=20`,
                 { headers }
             );
 
@@ -513,7 +619,7 @@ export const resolveAndLinkCustomer = internalAction({
 
             if (!subscriptionId && args.userEmail) {
                 const paymentsByEmailRes = await fetch(
-                    `${supabaseUrl}/rest/v1/payments?user_email=eq.${encodeURIComponent(args.userEmail)}&provider=eq.dodo&select=merchant_reference,metadata,user_email&order=created_at.desc&limit=10`,
+                    `${supabaseUrl}/rest/v1/payments?provider=eq.dodo&select=merchant_reference&order=created_at.desc&limit=100`,
                     { headers }
                 );
 
@@ -546,7 +652,6 @@ export const resolveAndLinkCustomer = internalAction({
                 return { success: false, error: 'No recent dodo payment' };
             }
 
-            const baseUrl = apiKey.startsWith('test_') ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
             let dodoCustomerId: string | undefined;
             if (subscriptionId) {
                 const subRes = await fetch(`${baseUrl}/subscriptions/${subscriptionId}`, {
@@ -625,3 +730,234 @@ export const resolveUserIdByEmail = internalAction({
         }
     }
 });
+
+export const syncSubscriptionFromProvider = internalAction({
+    args: {
+        userId: v.string(),
+        userEmail: v.optional(v.string()),
+    },
+    handler: async (_ctx, args) => {
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        const apiKey = process.env.DODO_PAYMENTS_API_KEY;
+
+        if (!supabaseUrl || !supabaseKey || !apiKey) {
+            return { success: false, error: 'Configuration missing' };
+        }
+
+        const headers = {
+            apikey: supabaseKey,
+            Authorization: `Bearer ${supabaseKey}`
+        };
+        const baseUrl = apiKey.startsWith('test_') ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
+
+        try {
+            const paymentsRes = await fetch(
+                `${supabaseUrl}/rest/v1/payments?user_id=eq.${args.userId}&provider=eq.dodo&select=merchant_reference,metadata&order=created_at.desc&limit=25`,
+                { headers }
+            );
+
+            if (!paymentsRes.ok) {
+                const err = await paymentsRes.text();
+                return { success: false, error: `Payments lookup failed: ${paymentsRes.status} ${err}` };
+            }
+
+            const payments = await paymentsRes.json();
+            let subscriptionId: string | undefined;
+            for (const payment of (Array.isArray(payments) ? payments : [])) {
+                let metadata: any = {};
+                try {
+                    metadata = typeof payment?.metadata === 'string'
+                        ? JSON.parse(payment.metadata)
+                        : (payment?.metadata || {});
+                } catch {
+                    metadata = {};
+                }
+
+                if (typeof metadata?.subscriptionId === 'string' && metadata.subscriptionId.startsWith('sub_')) {
+                    subscriptionId = metadata.subscriptionId;
+                    break;
+                }
+                if (typeof payment?.merchant_reference === 'string' && payment.merchant_reference.startsWith('sub_')) {
+                    subscriptionId = payment.merchant_reference;
+                    break;
+                }
+            }
+
+            if (!subscriptionId) {
+                return { success: true, noSubscriptionId: true };
+            }
+
+            const subRes = await fetch(`${baseUrl}/subscriptions/${subscriptionId}`, {
+                headers: { Authorization: `Bearer ${apiKey}` }
+            });
+            if (!subRes.ok) {
+                const err = await subRes.text();
+                return { success: false, error: `Dodo subscription lookup failed: ${subRes.status} ${err}` };
+            }
+
+            const subscription = await subRes.json();
+            const statusRaw = String(subscription?.status || '').toLowerCase();
+            const canceledByFlags =
+                subscription?.cancel_at_period_end === true ||
+                !!subscription?.cancelled_at ||
+                !!subscription?.ended_at ||
+                !!subscription?.end_at;
+            const dodoCustomerId = subscription?.customer?.id || subscription?.customer?.customer_id || subscription?.customer_id;
+            const nextBillingDate = subscription?.next_billing_date as string | undefined;
+
+            let mappedStatus: 'active' | 'cancelled' | 'payment_failed';
+            if (canceledByFlags) {
+                mappedStatus = 'cancelled';
+            } else if (statusRaw === 'active' || statusRaw === 'trialing') {
+                mappedStatus = 'active';
+            } else if (
+                statusRaw === 'on_hold' ||
+                statusRaw === 'failed' ||
+                statusRaw === 'payment_failed' ||
+                statusRaw === 'past_due'
+            ) {
+                mappedStatus = 'payment_failed';
+            } else {
+                mappedStatus = 'cancelled';
+            }
+
+            const syncResult = await updateSubscriptionLogic(supabaseUrl, supabaseKey, {
+                userId: args.userId,
+                userEmail: args.userEmail,
+                status: mappedStatus,
+                dodoCustomerId,
+                subscriptionId,
+                nextBillingDate,
+                billingCycle: subscription?.metadata?.billingCycle,
+                plan: 'Professional',
+                silent: true
+            });
+
+            return { ...syncResult, providerStatus: statusRaw, subscriptionId };
+        } catch (error: any) {
+            return { success: false, error: error?.message || 'sync failed' };
+        }
+    }
+});
+
+export const reconcileSubscriptionsFromDodo = internalAction({
+    args: {
+        limit: v.optional(v.number()),
+    },
+    handler: async (_ctx, args) => {
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        const apiKey = process.env.DODO_PAYMENTS_API_KEY;
+
+        if (!supabaseUrl || !supabaseKey || !apiKey) {
+            return { success: false, error: 'Configuration missing' };
+        }
+
+        const limit = Math.max(1, Math.min(args.limit ?? 100, 300));
+        const baseUrl = apiKey.startsWith('test_') ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
+        const sbHeaders = {
+            apikey: supabaseKey,
+            Authorization: `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json',
+            Prefer: 'return=minimal'
+        };
+
+        try {
+            const listRes = await fetch(`${baseUrl}/subscriptions?limit=${limit}`, {
+                headers: { Authorization: `Bearer ${apiKey}` }
+            });
+            if (!listRes.ok) {
+                const err = await listRes.text();
+                return { success: false, error: `Dodo list subscriptions failed: ${listRes.status} ${err}` };
+            }
+
+            const payload = await listRes.json();
+            const items = Array.isArray(payload?.items) ? payload.items : [];
+
+            let processed = 0;
+            let synced = 0;
+            let unresolved = 0;
+
+            for (const subscription of items) {
+                processed++;
+                const statusRaw = String(subscription?.status || '').toLowerCase();
+                const canceledByFlags =
+                    subscription?.cancel_at_next_billing_date === true ||
+                    subscription?.cancel_at_period_end === true ||
+                    !!subscription?.cancelled_at ||
+                    !!subscription?.ended_at ||
+                    !!subscription?.end_at;
+
+                let mappedStatus: 'active' | 'cancelled' | 'payment_failed';
+                if (canceledByFlags || statusRaw === 'cancelled' || statusRaw === 'canceled') {
+                    mappedStatus = 'cancelled';
+                } else if (
+                    statusRaw === 'on_hold' ||
+                    statusRaw === 'failed' ||
+                    statusRaw === 'payment_failed' ||
+                    statusRaw === 'past_due'
+                ) {
+                    mappedStatus = 'payment_failed';
+                } else {
+                    mappedStatus = 'active';
+                }
+
+                const subId = subscription?.subscription_id as string | undefined;
+                const customerId = subscription?.customer?.customer_id || subscription?.customer?.id || subscription?.customer_id;
+                const customerEmail = subscription?.customer?.email as string | undefined;
+                const metadataUserId = subscription?.metadata?.userId as string | undefined;
+                const nextBillingDate = subscription?.next_billing_date as string | undefined;
+
+                let resolvedUserId: string | undefined = metadataUserId;
+                if (!resolvedUserId && customerId) {
+                    const byCustomerRes = await fetch(
+                        `${supabaseUrl}/rest/v1/profiles?dodo_customer_id=eq.${encodeURIComponent(customerId)}&select=id&limit=1`,
+                        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+                    );
+                    if (byCustomerRes.ok) {
+                        const rows = await byCustomerRes.json();
+                        resolvedUserId = rows?.[0]?.id as string | undefined;
+                    }
+                }
+
+                if (!resolvedUserId && customerEmail) {
+                    const byEmailRes = await fetch(
+                        `${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(customerEmail)}&select=id&limit=1`,
+                        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+                    );
+                    if (byEmailRes.ok) {
+                        const rows = await byEmailRes.json();
+                        resolvedUserId = rows?.[0]?.id as string | undefined;
+                    }
+                }
+
+                if (!resolvedUserId) {
+                    unresolved++;
+                    continue;
+                }
+
+                const result = await updateSubscriptionLogic(supabaseUrl, supabaseKey, {
+                    userId: resolvedUserId,
+                    userEmail: customerEmail,
+                    status: mappedStatus,
+                    dodoCustomerId: customerId,
+                    subscriptionId: subId,
+                    nextBillingDate,
+                    billingCycle: subscription?.metadata?.billingCycle,
+                    plan: 'Professional',
+                    silent: true,
+                });
+
+                if (result?.success) {
+                    synced++;
+                }
+            }
+
+            return { success: true, processed, synced, unresolved };
+        } catch (error: any) {
+            return { success: false, error: error?.message || 'reconcile failed' };
+        }
+    }
+});
+

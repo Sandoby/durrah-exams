@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { X, Crown, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { X, Crown, ArrowRight, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { openDodoPortalSession } from '../../lib/dodoPortal';
+import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
+import { useState, useEffect } from 'react';
 
 interface PremiumFeatureModalProps {
     isOpen: boolean;
@@ -14,7 +16,61 @@ interface PremiumFeatureModalProps {
 export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeatureModalProps) {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { subscriptionStatus } = useAuth();
+    const { subscriptionStatus, user } = useAuth();
+    const [isTrialEligible, setIsTrialEligible] = useState(false);
+    const [isActivating, setIsActivating] = useState(false);
+    const [isCheckingEligibility, setIsCheckingEligibility] = useState(true);
+
+    useEffect(() => {
+        const checkEligibility = async () => {
+            if (!user || subscriptionStatus === 'active' || subscriptionStatus === 'trialing') {
+                setIsTrialEligible(false);
+                setIsCheckingEligibility(false);
+                return;
+            }
+
+            try {
+                const { data: eligible } = await supabase.rpc('check_trial_eligibility', {
+                    p_user_id: user.id
+                });
+                setIsTrialEligible(!!eligible);
+            } catch (error) {
+                console.error('Trial eligibility check failed:', error);
+                setIsTrialEligible(false);
+            } finally {
+                setIsCheckingEligibility(false);
+            }
+        };
+
+        if (isOpen) {
+            checkEligibility();
+        }
+    }, [isOpen, user, subscriptionStatus]);
+
+    const handleActivateTrial = async () => {
+        if (!user) return;
+
+        setIsActivating(true);
+        try {
+            const { data: result, error } = await supabase.rpc('activate_trial', {
+                p_user_id: user.id
+            });
+
+            if (error) throw error;
+
+            if (result?.success) {
+                toast.success('Your 14-day free trial has started!');
+                window.location.reload();
+            } else {
+                toast.error(result?.error || 'Failed to activate trial');
+            }
+        } catch (error: any) {
+            console.error('Trial activation error:', error);
+            toast.error('Failed to activate trial. Please try again.');
+        } finally {
+            setIsActivating(false);
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -108,24 +164,49 @@ export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeature
                     </div>
 
                     <div className="space-y-4">
-                        <button
-                            onClick={async () => {
-                                if (subscriptionStatus === 'payment_failed') {
-                                    const result = await openDodoPortalSession();
-                                    if (!result.success) {
-                                        toast.error(result.error || 'Failed to open payment portal');
-                                        navigate('/settings');
+                        {isTrialEligible ? (
+                            <>
+                                <button
+                                    onClick={handleActivateTrial}
+                                    disabled={isActivating}
+                                    className={`w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-500/20 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group`}
+                                >
+                                    {isActivating ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            Activating Trial...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="w-5 h-5" />
+                                            Start 14-Day Free Trial
+                                        </>
+                                    )}
+                                </button>
+                                <p className="text-center text-xs text-slate-500 dark:text-slate-400">
+                                    No credit card required • Full premium access
+                                </p>
+                            </>
+                        ) : (
+                            <button
+                                onClick={async () => {
+                                    if (subscriptionStatus === 'payment_failed') {
+                                        const result = await openDodoPortalSession();
+                                        if (!result.success) {
+                                            toast.error(result.error || 'Failed to open payment portal');
+                                            navigate('/settings');
+                                        }
+                                    } else {
+                                        navigate('/checkout');
                                     }
-                                } else {
-                                    navigate('/checkout');
-                                }
-                                onClose();
-                            }}
-                            className={`w-full py-4 px-6 bg-gradient-to-r ${activeContent.color} text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-500/20 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group`}
-                        >
-                            {t('premiumModal.upgradeBtn', 'Upgrade Now')}
-                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                        </button>
+                                    onClose();
+                                }}
+                                className={`w-full py-4 px-6 bg-gradient-to-r ${activeContent.color} text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-500/20 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group`}
+                            >
+                                {t('premiumModal.upgradeBtn', 'Upgrade Now')}
+                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        )}
                         <button
                             onClick={onClose}
                             className="w-full py-3 px-6 text-slate-500 dark:text-slate-400 font-bold hover:text-slate-900 dark:hover:text-slate-100 transition-colors text-sm"

@@ -161,25 +161,227 @@ export const cleanupOldLeaderboards = internalMutation({
   handler: async (ctx) => {
     const RETENTION_DAYS = 30;
     const cutoff = Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000;
-    
+
     // Find old entries
     const entries = await ctx.db
       .query("leaderboardEntries")
       .collect();
-    
+
     const oldEntries = entries.filter((e) => e.submitted_at < cutoff);
-    
+
     // Delete old entries
     for (const entry of oldEntries) {
       await ctx.db.delete(entry._id);
     }
-    
+
     // Update job meta
     await updateJobMeta(ctx, "cleanup_old_leaderboards", oldEntries.length);
-    
+
     return oldEntries.length;
   },
 });
+
+// ============================================
+// CHECK SUBSCRIPTION EXPIRATIONS (REDUNDANT)
+// Provides redundancy to GitHub Actions cron job
+// ============================================
+export const checkSubscriptionExpirations = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('[Expiration Check] Missing Supabase configuration');
+      return { error: 'Configuration missing' };
+    }
+
+    const headers = {
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`,
+      'Content-Type': 'application/json',
+    };
+
+    try {
+      const now = new Date();
+      const nowIso = now.toISOString();
+
+      // Fetch profiles with subscription_end_date
+      const profilesRes = await fetch(
+        `${supabaseUrl}/rest/v1/profiles?select=id,email,subscription_status,subscription_end_date,last_reminder_sent_at,email_notifications_enabled&subscription_end_date=not.is.null`,
+        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+      );
+
+      if (!profilesRes.ok) {
+        console.error('[Expiration Check] Failed to fetch profiles:', profilesRes.status);
+        return { error: 'Failed to fetch profiles' };
+      }
+
+      const profiles = await profilesRes.json();
+      let processedCount = 0;
+      let expiredCount = 0;
+      let remindersCount = 0;
+
+      for (const profile of profiles) {
+        const endDate = new Date(profile.subscription_end_date);
+        const daysUntilExpiry = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        const lastReminder = profile.last_reminder_sent_at ? new Date(profile.last_reminder_sent_at) : null;
+        const hoursSinceLastReminder = lastReminder ? (now.getTime() - lastReminder.getTime()) / (1000 * 60 * 60) : 999;
+
+        // Skip if email notifications are disabled
+        if (!profile.email_notifications_enabled) continue;
+
+        // EXPIRED - Set status to expired
+        if (daysUntilExpiry <= 0 && profile.subscription_status !== 'expired') {
+          await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({ subscription_status: 'expired' }),
+          });
+
+          console.log(`[Expiration Check] Marked user ${profile.id} as expired`);
+          expiredCount++;
+          processedCount++;
+        }
+        // 3-DAY REMINDER
+        else if (daysUntilExpiry <= 3 && daysUntilExpiry > 0 && hoursSinceLastReminder >= 23) {
+          remindersCount++;
+          processedCount++;
+          console.log(`[Expiration Check] Would send 3-day reminder to ${profile.email}`);
+        }
+        // 7-DAY REMINDER
+        else if (daysUntilExpiry <= 7 && daysUntilExpiry > 3 && hoursSinceLastReminder >= 23) {
+          remindersCount++;
+          processedCount++;
+          console.log(`[Expiration Check] Would send 7-day reminder to ${profile.email}`);
+        }
+      }
+
+      // Update job meta
+      await updateJobMeta(ctx, "check_subscription_expirations", processedCount);
+
+      console.log(`[Expiration Check] Processed ${processedCount} profiles, expired ${expiredCount}, reminders ${remindersCount}`);
+
+      return {
+        success: true,
+        processed: processedCount,
+        expired: expiredCount,
+        reminders: remindersCount,
+      };
+    } catch (error: any) {
+      console.error('[Expiration Check] Error:', error);
+      return { error: error.message };
+    }
+  },
+});
+
+// ============================================
+// CHECK TRIAL EXPIRATIONS
+// Handles trial → expired → cancelled flow with grace period
+// ============================================
+export const checkTrialExpirations = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('[Trial Check] Missing Supabase configuration');
+      return { error: 'Configuration missing' };
+    }
+
+    const headers = {
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`,
+      'Content-Type': 'application/json',
+    };
+
+    try {
+      const now = new Date();
+      const nowIso = now.toISOString();
+
+      // Fetch profiles with trial data
+      const profilesRes = await fetch(
+        `${supabaseUrl}/rest/v1/profiles?select=id,email,subscription_status,trial_ends_at,trial_grace_ends_at,trial_activated,last_reminder_sent_at,email_notifications_enabled&trial_activated=eq.true`,
+        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+      );
+
+      if (!profilesRes.ok) {
+        console.error('[Trial Check] Failed to fetch profiles:', profilesRes.status);
+        return { error: 'Failed to fetch profiles' };
+      }
+
+      const profiles = await profilesRes.json();
+      let processedCount = 0;
+      let expiredCount = 0;
+      let cancelledCount = 0;
+      let warningsCount = 0;
+
+      for (const profile of profiles) {
+        const trialEndsAt = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
+        const graceEndsAt = profile.trial_grace_ends_at ? new Date(profile.trial_grace_ends_at) : null;
+        const lastReminder = profile.last_reminder_sent_at ? new Date(profile.last_reminder_sent_at) : null;
+        const hoursSinceLastReminder = lastReminder ? (now.getTime() - lastReminder.getTime()) / (1000 * 60 * 60) : 999;
+
+        // 1. TRIAL ENDED - Move to expired status with grace period
+        if (trialEndsAt && now >= trialEndsAt && profile.subscription_status === 'trialing') {
+          await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({ subscription_status: 'expired' }),
+          });
+
+          console.log(`[Trial Check] Trial ended for user ${profile.id}, now in grace period`);
+          expiredCount++;
+          processedCount++;
+        }
+        // 2. GRACE PERIOD ENDED - Cancel subscription
+        else if (graceEndsAt && now >= graceEndsAt && profile.subscription_status === 'expired' && profile.trial_activated) {
+          await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({
+              subscription_status: 'cancelled',
+              subscription_plan: null,
+              subscription_end_date: null,
+            }),
+          });
+
+          console.log(`[Trial Check] Grace period ended for user ${profile.id}, subscription cancelled`);
+          cancelledCount++;
+          processedCount++;
+        }
+        // 3. TRIAL ENDING SOON - Send 2-day warning (respect rate limit)
+        else if (trialEndsAt && profile.subscription_status === 'trialing' && profile.email_notifications_enabled) {
+          const daysUntilExpiry = Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          if (daysUntilExpiry <= 2 && daysUntilExpiry > 0 && hoursSinceLastReminder >= 23) {
+            // Would send warning email here (via Edge Function)
+            console.log(`[Trial Check] Would send trial ending warning to ${profile.email}, ${daysUntilExpiry} day(s) remaining`);
+            warningsCount++;
+            processedCount++;
+          }
+        }
+      }
+
+      // Update job meta
+      await updateJobMeta(ctx, "check_trial_expirations", processedCount);
+
+      console.log(`[Trial Check] Processed ${processedCount} profiles, expired ${expiredCount}, cancelled ${cancelledCount}, warnings ${warningsCount}`);
+
+      return {
+        success: true,
+        processed: processedCount,
+        expired: expiredCount,
+        cancelled: cancelledCount,
+        warnings: warningsCount,
+      };
+    } catch (error: any) {
+      console.error('[Trial Check] Error:', error);
+      return { error: error.message };
+    }
+  },
+});
+
 
 // ============================================
 // HELPER: Update job metadata
@@ -193,9 +395,9 @@ async function updateJobMeta(
     .query("jobsMeta")
     .withIndex("by_key", (q: any) => q.eq("job_key", jobKey))
     .first();
-  
+
   const now = Date.now();
-  
+
   if (existing) {
     await ctx.db.patch(existing._id, {
       last_run_at: now,

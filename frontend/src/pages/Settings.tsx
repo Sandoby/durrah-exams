@@ -7,6 +7,7 @@ import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { hasActiveAccess, daysRemaining } from '../lib/subscriptionUtils';
 import { openDodoPortalSession } from '../lib/dodoPortal';
 
 interface TutorProfile {
@@ -18,6 +19,7 @@ interface TutorProfile {
     subscription_plan?: string;
     subscription_end_date?: string;
     dodo_customer_id?: string;
+    trial_ends_at?: string;
 }
 
 export default function Settings() {
@@ -87,6 +89,7 @@ export default function Settings() {
                 subscription_plan: profileData?.subscription_plan,
                 subscription_end_date: profileData?.subscription_end_date,
                 dodo_customer_id: profileData?.dodo_customer_id,
+                trial_ends_at: profileData?.trial_ends_at,
             });
             if (profileData?.role) {
                 setUserRole(profileData.role);
@@ -361,7 +364,7 @@ export default function Settings() {
                             </div>
 
                             <div className="flex justify-end pt-6 border-t border-gray-50 dark:border-gray-800">
-                                {subscriptionStatus !== 'active' && (
+                                {!hasActiveAccess(subscriptionStatus) && (
                                     <Link
                                         to="/checkout"
                                         className="flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg font-bold text-sm shadow-sm mr-4"
@@ -457,7 +460,29 @@ export default function Settings() {
                                 <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('settings.subscription.title', 'Subscription')}</h2>
                             </div>
                             <div className="p-6 flex-1 flex flex-col justify-center items-center text-center">
-                                {profile.subscription_status === 'active' ? (
+                                {profile.subscription_status === 'trialing' ? (
+                                    <div className="w-full space-y-4">
+                                        <div className="p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                                            <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">Free Trial</p>
+                                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Professional Plan</h3>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500">Trial ends in</p>
+                                            <p className="text-3xl font-black text-indigo-600 dark:text-indigo-400">
+                                                {daysRemaining(profile.trial_ends_at)} <span className="text-sm font-semibold">days</span>
+                                            </p>
+                                        </div>
+                                        <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                                            <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">No credit card on file. Subscribe to keep premium access.</p>
+                                        </div>
+                                        <Link
+                                            to="/checkout"
+                                            className="w-full block py-2.5 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition-colors text-center"
+                                        >
+                                            Subscribe Now
+                                        </Link>
+                                    </div>
+                                ) : hasActiveAccess(profile.subscription_status) ? (
                                     <div className="w-full space-y-4">
                                         <div className="p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
                                             <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">{t('settings.subscription.plan', 'Current Plan')}</p>
@@ -470,7 +495,7 @@ export default function Settings() {
                                             </p>
                                         </div>
 
-                                        {profile.subscription_status === 'active' && (
+                                        {hasActiveAccess(profile.subscription_status) && profile.subscription_status !== 'trialing' && (
                                             <button
                                                 onClick={openDodoPortal}
                                                 disabled={isOpeningPortal}

@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { exportToJSON, exportToPDF, exportToWord } from '../lib/exportUtils';
 import { useDemoTour } from '../hooks/useDemoTour';
+import { hasActiveAccess } from '../lib/subscriptionUtils';
 
 interface Question {
     id: string;
@@ -210,7 +211,7 @@ export default function QuestionBank() {
             toast(t('questionBank.demo.save', 'Demo mode: Sign up to save your own question banks'));
             return;
         }
-        if (profile?.subscription_status !== 'active' && banks.length >= 1) {
+        if (!hasActiveAccess(profile?.subscription_status) && banks.length >= 1) {
             toast.error(t('dashboard.upgradeLimit', 'Upgrade to create more question banks!'));
             navigate('/checkout');
             return;
@@ -455,7 +456,7 @@ export default function QuestionBank() {
                                 {user?.user_metadata?.full_name || user?.email}
                             </span>
 
-                            {profile?.subscription_status !== 'active' && (
+                            {!hasActiveAccess(profile?.subscription_status) && (
                                 <Link
                                     to="/checkout"
                                     className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white hover:bg-amber-600 shadow-md hover:shadow-lg transition-all"
@@ -503,7 +504,7 @@ export default function QuestionBank() {
                             <div className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
                                 {user?.user_metadata?.full_name || user?.email}
                             </div>
-                            {profile?.subscription_status !== 'active' && (
+                            {!hasActiveAccess(profile?.subscription_status) && (
                                 <Link
                                     to="/checkout"
                                     onClick={() => setIsMobileMenuOpen(false)}
@@ -561,7 +562,7 @@ export default function QuestionBank() {
 
                     <button
                         onClick={() => {
-                            if (profile?.subscription_status !== 'active' && banks.length >= 1) {
+                            if (!hasActiveAccess(profile?.subscription_status) && banks.length >= 1) {
                                 toast.error(t('questionBank.limitReach'));
                                 navigate('/checkout');
                                 return;

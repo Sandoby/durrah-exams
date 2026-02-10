@@ -326,12 +326,12 @@ export default function AdminPanel() {
             } else if (filters.subscriptionStatus === 'active') {
                 const now = new Date();
                 result = result.filter(user =>
-                    user.subscription_status === 'active' &&
+                    (user.subscription_status === 'active' || user.subscription_status === 'trialing') &&
                     (!user.subscription_end_date || new Date(user.subscription_end_date) > now)
                 );
             } else {
                 result = result.filter(user =>
-                    !user.subscription_status || user.subscription_status !== 'active'
+                    !user.subscription_status || (user.subscription_status !== 'active' && user.subscription_status !== 'trialing')
                 );
             }
         }
@@ -1304,11 +1304,11 @@ export default function AdminPanel() {
                                                                 )}
                                                                 <div>
                                                                     <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                                                                    <span className={`ml-1 font-medium ${selectedUserInfo?.subscription_status === 'active'
+                                                                    <span className={`ml-1 font-medium ${selectedUserInfo?.subscription_status === 'active' || selectedUserInfo?.subscription_status === 'trialing'
                                                                         ? 'text-green-600 dark:text-green-400'
                                                                         : 'text-gray-600 dark:text-gray-400'
                                                                         }`}>
-                                                                        {selectedUserInfo?.subscription_status === 'active' ? 'Subscribed' : 'Free'}
+                                                                        {selectedUserInfo?.subscription_status === 'active' ? 'Subscribed' : selectedUserInfo?.subscription_status === 'trialing' ? 'Trial' : 'Free'}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -1559,9 +1559,9 @@ function WebNotificationManager({ users }: { users: User[] }) {
             if (targetUserId === 'all') {
                 recipients = users;
             } else if (targetUserId === 'free') {
-                recipients = users.filter(u => !u.subscription_status || u.subscription_status !== 'active');
+                recipients = users.filter(u => !u.subscription_status || (u.subscription_status !== 'active' && u.subscription_status !== 'trialing'));
             } else if (targetUserId === 'subscribed') {
-                recipients = users.filter(u => u.subscription_status === 'active');
+                recipients = users.filter(u => u.subscription_status === 'active' || u.subscription_status === 'trialing');
             } else if (targetUserId === 'custom') {
                 // If custom ID, we create a partial user object or just use the ID directly
                 // Logic below handles single ID differently

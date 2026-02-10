@@ -1078,7 +1078,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
                   </div>
                   <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800/50">
                     <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Status</p>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${userProfile.subscription_status === 'active'
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${userProfile.subscription_status === 'active' || userProfile.subscription_status === 'trialing'
                       ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                       : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                       }`}>

@@ -7,6 +7,7 @@ import {
 import { CONVEX_FEATURES } from '../../main';
 import { PremiumFeatureModal } from './PremiumFeatureModal';
 import { useState } from 'react';
+import { hasActiveAccess } from '../../lib/subscriptionUtils';
 
 
 interface Exam {
@@ -164,18 +165,18 @@ export function ImprovedExamCard({
 
                     <button
                         onClick={() => {
-                            if (profile?.subscription_status === 'active') {
+                            if (hasActiveAccess(profile?.subscription_status)) {
                                 navigate(`/exam/${exam.id}/analytics`);
                             } else {
                                 setPremiumModal({ isOpen: true, feature: 'analytics' });
                             }
                         }}
-                        className={`relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm border transition-all ${profile?.subscription_status === 'active'
+                        className={`relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm border transition-all ${hasActiveAccess(profile?.subscription_status)
                             ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-100 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/30'
                             : 'bg-gray-50 dark:bg-slate-800/50 text-gray-400 border-gray-100 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-700'
                             }`}
                     >
-                        {profile?.subscription_status !== 'active' && (
+                        {!hasActiveAccess(profile?.subscription_status) && (
                             <div className="absolute -top-2.5 -right-1.5 z-20">
                                 <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg border border-white/20 flex items-center gap-1">
                                     <Crown className="w-2.5 h-2.5" />
@@ -183,7 +184,7 @@ export function ImprovedExamCard({
                                 </div>
                             </div>
                         )}
-                        {profile?.subscription_status === 'active' ? (
+                        {hasActiveAccess(profile?.subscription_status) ? (
                             <TrendingUp className="w-4 h-4" />
                         ) : (
                             <Lock className="w-4 h-4" />
@@ -194,18 +195,18 @@ export function ImprovedExamCard({
                     {CONVEX_FEATURES.proctoring && (
                         <button
                             onClick={() => {
-                                if (profile?.subscription_status === 'active') {
+                                if (hasActiveAccess(profile?.subscription_status)) {
                                     navigate(`/exam/${exam.id}/proctor`);
                                 } else {
                                     setPremiumModal({ isOpen: true, feature: 'proctoring' });
                                 }
                             }}
-                            className={`relative col-span-2 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm border transition-all ${profile?.subscription_status === 'active'
+                            className={`relative col-span-2 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm border transition-all ${hasActiveAccess(profile?.subscription_status)
                                 ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400 border-teal-100 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/30'
                                 : 'bg-gray-50 dark:bg-slate-800/50 text-gray-400 border-gray-100 dark:border-slate-700 hover:border-teal-300 dark:hover:border-teal-700'
                                 }`}
                         >
-                            {profile?.subscription_status !== 'active' && (
+                            {!hasActiveAccess(profile?.subscription_status) && (
                                 <div className="absolute -top-2.5 -right-1.5 z-20">
                                     <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg border border-white/20 flex items-center gap-1">
                                         <Crown className="w-2.5 h-2.5" />
@@ -213,7 +214,7 @@ export function ImprovedExamCard({
                                     </div>
                                 </div>
                             )}
-                            {profile?.subscription_status === 'active' ? (
+                            {hasActiveAccess(profile?.subscription_status) ? (
                                 <Eye className="w-4 h-4" />
                             ) : (
                                 <Lock className="w-4 h-4" />

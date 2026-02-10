@@ -238,6 +238,10 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
     };
 
     const getStatusBadge = () => {
+        if (user.subscription_status === 'trialing') {
+            return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">Trial</span>;
+        }
+
         if (!user.subscription_status || user.subscription_status !== 'active') {
             return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">Free</span>;
         }

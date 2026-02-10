@@ -52,6 +52,21 @@ export default function Login() {
                         full_name: session.user.user_metadata?.full_name || '',
                         email: session.user.email
                     });
+
+                    // Activate trial for new OAuth users
+                    if (!profile) {
+                        try {
+                            const { data: trialResult } = await supabase.rpc('activate_trial', {
+                                p_user_id: session.user.id
+                            });
+                            if (trialResult?.success) {
+                                console.log('✅ Trial activated for new OAuth user');
+                            }
+                        } catch (trialError) {
+                            console.warn('Trial activation failed:', trialError);
+                        }
+                    }
+
                     navigate('/dashboard');
                 } else if (profile.role === 'student') {
                     setStudentUserInfo({

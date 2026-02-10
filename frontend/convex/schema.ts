@@ -274,4 +274,37 @@ export default defineSchema({
     })),
   })
     .index("by_key", ["job_key"]),
+
+  // ============================================
+  // WEBHOOK DEDUPLICATION (Dodo Payments)
+  // ============================================
+  webhookEvents: defineTable({
+    webhook_id: v.string(),          // From webhook-id header
+    event_type: v.string(),          // subscription.active, etc.
+    provider: v.string(),            // dodo, kashier, paysky
+    processed_at: v.number(),        // Unix timestamp
+    user_id: v.optional(v.string()), // Resolved user
+    subscription_id: v.optional(v.string()),
+    payload_hash: v.optional(v.string()), // SHA-256 of payload for extra safety
+  })
+    .index("by_webhook_id", ["webhook_id"])
+    .index("by_processed_at", ["processed_at"])
+    .index("by_provider", ["provider", "processed_at"]),
+
+  // ============================================
+  // SUBSCRIPTION SYNC STATE
+  // ============================================
+  subscriptionSync: defineTable({
+    user_id: v.string(),             // Supabase user ID
+    last_synced_at: v.number(),      // Last successful sync
+    last_status: v.string(),         // active, cancelled, expired, payment_failed
+    last_end_date: v.optional(v.number()), // subscription_end_date
+    dodo_customer_id: v.optional(v.string()),
+    sync_source: v.string(),         // webhook, cron, manual, direct_verify
+    error_count: v.number(),         // Failed sync attempts
+    last_error: v.optional(v.string()),
+  })
+    .index("by_user", ["user_id"])
+    .index("by_last_synced", ["last_synced_at"])
+    .index("by_status", ["last_status"]),
 });
