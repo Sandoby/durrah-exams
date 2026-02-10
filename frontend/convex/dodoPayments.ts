@@ -856,12 +856,6 @@ export const reconcileSubscriptionsFromDodo = internalAction({
 
         const limit = Math.max(1, Math.min(args.limit ?? 100, 300));
         const baseUrl = apiKey.startsWith('test_') ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
-        const sbHeaders = {
-            apikey: supabaseKey,
-            Authorization: `Bearer ${supabaseKey}`,
-            'Content-Type': 'application/json',
-            Prefer: 'return=minimal'
-        };
 
         try {
             const listRes = await fetch(`${baseUrl}/subscriptions?limit=${limit}`, {

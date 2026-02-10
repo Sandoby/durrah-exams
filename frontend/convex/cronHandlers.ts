@@ -204,7 +204,6 @@ export const checkSubscriptionExpirations = internalMutation({
 
     try {
       const now = new Date();
-      const nowIso = now.toISOString();
 
       // Fetch profiles with subscription_end_date
       const profilesRes = await fetch(
@@ -298,7 +297,6 @@ export const checkTrialExpirations = internalMutation({
 
     try {
       const now = new Date();
-      const nowIso = now.toISOString();
 
       // Fetch profiles with trial data
       const profilesRes = await fetch(

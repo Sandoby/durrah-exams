@@ -19,13 +19,11 @@ export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeature
     const { subscriptionStatus, user } = useAuth();
     const [isTrialEligible, setIsTrialEligible] = useState(false);
     const [isActivating, setIsActivating] = useState(false);
-    const [isCheckingEligibility, setIsCheckingEligibility] = useState(true);
 
     useEffect(() => {
         const checkEligibility = async () => {
             if (!user || subscriptionStatus === 'active' || subscriptionStatus === 'trialing') {
                 setIsTrialEligible(false);
-                setIsCheckingEligibility(false);
                 return;
             }
 
@@ -37,8 +35,6 @@ export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeature
             } catch (error) {
                 console.error('Trial eligibility check failed:', error);
                 setIsTrialEligible(false);
-            } finally {
-                setIsCheckingEligibility(false);
             }
         };
 
