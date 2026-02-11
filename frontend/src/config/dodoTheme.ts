@@ -16,7 +16,6 @@ export const DURRAH_DODO_THEME: ThemeConfig = {
     // Border colors - Subtle but defined
     borderPrimary: "#E5E7EB", // gray-200
     borderSecondary: "#9CA3AF", // gray-400
-    inputFocusBorder: "#3B82F6", // blue-500
 
     // Text colors - High contrast for readability
     textPrimary: "#111827", // gray-900
@@ -42,7 +41,6 @@ export const DURRAH_DODO_THEME: ThemeConfig = {
     // Border colors - Subtle in dark mode
     borderPrimary: "#374151", // gray-700
     borderSecondary: "#4B5563", // gray-600
-    inputFocusBorder: "#3B82F6", // blue-500
 
     // Text colors - Softer whites for comfort
     textPrimary: "#F9FAFB", // gray-50
@@ -73,7 +71,6 @@ export const DURRAH_DODO_THEME_INDIGO: ThemeConfig = {
     bgSecondary: "#F9FAFB",
     borderPrimary: "#E5E7EB",
     borderSecondary: "#9CA3AF",
-    inputFocusBorder: "#6366F1", // indigo-500
     textPrimary: "#111827",
     textSecondary: "#6B7280",
     textPlaceholder: "#9CA3AF",
@@ -91,7 +88,6 @@ export const DURRAH_DODO_THEME_INDIGO: ThemeConfig = {
     bgSecondary: "#1A1A1A",
     borderPrimary: "#374151",
     borderSecondary: "#4B5563",
-    inputFocusBorder: "#6366F1",
     textPrimary: "#F9FAFB",
     textSecondary: "#9CA3AF",
     textPlaceholder: "#6B7280",

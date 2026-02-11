@@ -8,8 +8,6 @@ export type {
   CheckoutEvent,
   ThemeConfig,
   ThemeModeConfig,
-  FontSize,
-  FontWeight,
 } from 'dodopayments-checkout';
 
 /**

@@ -28,67 +28,60 @@ export const useDodoCheckout = ({
   const [breakdown, setBreakdown] = useState<CheckoutBreakdownData | null>(null);
   const [error, setError] = useState<CheckoutError | null>(null);
 
-  // Handle checkout events
+  // Handle checkout events (use string event type for SDK version compatibility)
   const handleEvent = useCallback(
     (event: CheckoutEvent) => {
-      console.log('[Dodo Checkout Event]', event.event_type, event.data);
+      const eventType = event.event_type as string;
+      console.log('[Dodo Checkout Event]', eventType, event.data);
 
       try {
-        switch (event.event_type) {
+        switch (eventType) {
           case 'checkout.opened':
-            console.log('✅ Checkout iframe loaded');
+            console.log('Checkout iframe loaded');
             break;
 
-          case 'checkout.form_ready':
-            console.log('✅ Checkout form ready for user input');
-            setIsReady(true);
-            setError(null);
-            break;
-
-          case 'checkout.breakdown':
+          case 'checkout.breakdown': {
             const breakdownData = event.data?.message as CheckoutBreakdownData;
             if (breakdownData) {
-              console.log('💰 Breakdown updated:', breakdownData);
+              console.log('Breakdown updated:', breakdownData);
               setBreakdown(breakdownData);
               onBreakdownUpdate?.(breakdownData);
             }
             break;
+          }
 
           case 'checkout.customer_details_submitted':
-            console.log('👤 Customer details submitted');
+            console.log('Customer details submitted');
             break;
 
-          case 'checkout.pay_button_clicked':
-            console.log('💳 Pay button clicked');
-            break;
-
-          case 'checkout.status':
+          case 'checkout.status': {
             const status = (event.data?.message as any)?.status;
             if (status) {
-              console.log('📊 Payment status:', status);
+              console.log('Payment status:', status);
               onStatusUpdate?.(status);
             }
             break;
+          }
 
           case 'checkout.redirect':
-            console.log('🔄 Checkout redirect initiated');
+            console.log('Checkout redirect initiated');
             break;
 
-          case 'checkout.redirect_requested':
+          case 'checkout.redirect_requested': {
             const redirectUrl = (event.data?.message as any)?.redirect_to;
             if (redirectUrl) {
-              console.log('🔗 Redirect requested:', redirectUrl);
+              console.log('Redirect requested:', redirectUrl);
               // Save state before redirect (e.g., for 3DS authentication)
               sessionStorage.setItem('pendingCheckout', checkoutUrl);
               sessionStorage.setItem('checkoutElementId', elementId);
               onRedirectRequested?.(redirectUrl);
-              // Redirect user
               window.location.href = redirectUrl;
             }
             break;
+          }
 
-          case 'checkout.link_expired':
-            console.warn('⏰ Checkout session expired');
+          case 'checkout.link_expired': {
+            console.warn('Checkout session expired');
             const expiredError: CheckoutError = {
               message: 'Your checkout session has expired. Please start again.',
               code: 'SESSION_EXPIRED',
@@ -97,10 +90,11 @@ export const useDodoCheckout = ({
             setError(expiredError);
             onError?.(expiredError);
             break;
+          }
 
-          case 'checkout.error':
+          case 'checkout.error': {
             const errorMessage = (event.data?.message as string) || 'An error occurred during checkout';
-            console.error('❌ Checkout error:', errorMessage);
+            console.error('Checkout error:', errorMessage);
             const checkoutError: CheckoutError = {
               message: errorMessage,
               code: 'CHECKOUT_ERROR',
@@ -109,9 +103,20 @@ export const useDodoCheckout = ({
             setError(checkoutError);
             onError?.(checkoutError);
             break;
+          }
 
           default:
-            console.log('📨 Unhandled event:', event.event_type);
+            if (eventType === 'checkout.form_ready') {
+              console.log('Checkout form ready for user input');
+              setIsReady(true);
+              setError(null);
+              break;
+            }
+            if (eventType === 'checkout.pay_button_clicked') {
+              console.log('Pay button clicked');
+              break;
+            }
+            console.log('Unhandled event:', eventType);
         }
       } catch (err) {
         console.error('Error handling checkout event:', err);
@@ -150,9 +155,9 @@ export const useDodoCheckout = ({
         onEvent: handleEvent,
       });
 
-      console.log('✅ Dodo SDK initialized successfully');
+      console.log('Dodo SDK initialized successfully');
     } catch (err) {
-      console.error('❌ Failed to initialize Dodo SDK:', err);
+      console.error('Failed to initialize Dodo SDK:', err);
       const initError: CheckoutError = {
         message: 'Failed to initialize payment system. Please refresh the page.',
         code: 'SDK_INIT_ERROR',
@@ -197,7 +202,7 @@ export const useDodoCheckout = ({
       // If not available, wait a bit for React to render it
       const timeoutId = setTimeout(() => {
         if (!checkElement()) {
-          console.error(`❌ Element #${elementId} still not found after timeout`);
+          console.error(`Element #${elementId} still not found after timeout`);
           const openError: CheckoutError = {
             message: 'Failed to initialize checkout container.',
             code: 'ELEMENT_NOT_FOUND',
@@ -235,9 +240,9 @@ export const useDodoCheckout = ({
           checkOrigin: false,
         } as any);
 
-        console.log('✅ Checkout opened successfully');
+        console.log('Checkout opened successfully');
       } catch (err) {
-        console.error('❌ Failed to open checkout:', err);
+        console.error('Failed to open checkout:', err);
         const openError: CheckoutError = {
           message: 'Failed to load checkout. Please try again.',
           code: 'CHECKOUT_OPEN_ERROR',
@@ -253,7 +258,7 @@ export const useDodoCheckout = ({
   useEffect(() => {
     const pendingCheckout = sessionStorage.getItem('pendingCheckout');
     if (pendingCheckout) {
-      console.log('🔙 User returned from redirect, resuming checkout');
+      console.log('User returned from redirect, resuming checkout');
       sessionStorage.removeItem('pendingCheckout');
       sessionStorage.removeItem('checkoutElementId');
       // The verification hook will handle status polling
