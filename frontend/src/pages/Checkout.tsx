@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Shield, Loader2, Check, Sparkles, ArrowRight, Ticket, BadgeCheck } from 'lucide-react';
+import { Shield, Loader2, Check, Sparkles, ArrowRight, BadgeCheck, Lock, RefreshCw, LifeBuoy, BarChart3, Users, FileText } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Capacitor } from '@capacitor/core';
@@ -14,7 +14,6 @@ import { openDodoPortalSession } from '../lib/dodoPortal';
 import { daysRemaining } from '../lib/subscriptionUtils';
 
 type BillingCycle = 'monthly' | 'yearly';
-type PlanId = 'basic' | 'pro';
 
 export default function Checkout() {
   const isNative = Capacitor.isNativePlatform();
@@ -24,12 +23,7 @@ export default function Checkout() {
   const { user, subscriptionStatus, trialEndsAt } = useAuth();
 
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
-  const [selectedPlan, setSelectedPlan] = useState<PlanId>('pro');
   const [isProcessing, setIsProcessing] = useState(false);
-
-  const [couponCode, setCouponCode] = useState('');
-  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
-  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
   const [isFirstTimeSubscriber, setIsFirstTimeSubscriber] = useState(true);
   const [isRecoveringViaPortal, setIsRecoveringViaPortal] = useState(false);
@@ -84,20 +78,6 @@ export default function Checkout() {
   const plans = useMemo(() => {
     return [
       {
-        id: 'basic' as const,
-        name: t('checkout.plans.starter.name', 'Starter'),
-        description: t('checkout.plans.starter.desc', 'Try the core experience with essential limits.'),
-        price: 0,
-        displayPrice: '0',
-        badge: null as string | null,
-        features: [
-          t('pricing.starter.features.0', 'Create exams'),
-          t('pricing.starter.features.1', 'Up to 100 students'),
-          t('pricing.starter.features.2', 'Basic anti-cheating'),
-          t('pricing.starter.features.3', 'Email support'),
-        ],
-      },
-      {
         id: 'pro' as const,
         name: t('checkout.plans.pro.name', 'Pro'),
         description: t('checkout.plans.pro.desc', 'Advanced anti-cheating, analytics, and priority features.'),
@@ -115,71 +95,7 @@ export default function Checkout() {
       },
     ];
   }, [billingCycle, dynamicCurrencyCode, dynamicMonthlyPrice, dynamicYearlyPrice, isFirstTimeSubscriber, t]);
-
-  const validateCoupon = async () => {
-    if (!couponCode) return;
-    setIsValidatingCoupon(true);
-    try {
-      const { data, error } = await supabase
-        .from('coupons')
-        .select('*')
-        .eq('code', couponCode.toUpperCase())
-        .single();
-
-      if (error || !data) throw new Error(t('checkout.couponNotFound', 'Coupon not found'));
-      if (new Date(data.valid_until) < new Date()) throw new Error(t('checkout.couponExpired', 'Coupon expired'));
-      if (data.used_count >= data.max_uses) throw new Error(t('checkout.couponMax', 'Coupon max uses reached'));
-      if (!data.is_active) throw new Error(t('checkout.couponInactive', 'Coupon inactive'));
-
-      if (data.duration && data.duration !== billingCycle) {
-        throw new Error(t('checkout.couponDuration', `This coupon is only valid for ${data.duration} plans`));
-      }
-
-      const { data: usageData, error: usageError } = await supabase
-        .from('coupon_usage')
-        .select('*')
-        .eq('coupon_id', data.id)
-        .eq('user_id', user?.id)
-        .single();
-
-      if (usageData && !usageError) {
-        throw new Error(t('checkout.couponUsed', 'You have already used this coupon'));
-      }
-
-      setAppliedCoupon(data);
-      toast.success(t('checkout.couponApplied', 'Coupon applied'));
-    } catch (e) {
-      console.error(e);
-      toast.error((e as Error).message || t('checkout.couponInvalid', 'Invalid coupon'));
-      setAppliedCoupon(null);
-    } finally {
-      setIsValidatingCoupon(false);
-    }
-  };
-
-  const removeCoupon = () => {
-    setAppliedCoupon(null);
-    setCouponCode('');
-    toast.success(t('checkout.couponRemoved', 'Coupon removed'));
-  };
-
-  const calculateFinalPrice = (basePrice: number) => {
-    if (!appliedCoupon) return basePrice;
-    if (appliedCoupon.discount_type === 'free') return 0;
-
-    if (appliedCoupon.discount_type === 'percentage') {
-      return Math.max(0, basePrice - (basePrice * appliedCoupon.discount_value) / 100);
-    }
-
-    if (appliedCoupon.discount_type === 'fixed') {
-      return Math.max(0, basePrice - appliedCoupon.discount_value);
-    }
-
-    return basePrice;
-  };
-
-  const selectedPlanObj = plans.find((p) => p.id === selectedPlan);
-  const finalPrice = selectedPlanObj ? calculateFinalPrice(selectedPlanObj.price) : 0;
+  const selectedPlanObj = plans[0];
 
   const handlePayment = async () => {
     if (!user) {
@@ -188,51 +104,8 @@ export default function Checkout() {
       return;
     }
 
-    const plan = plans.find((p) => p.id === selectedPlan);
-    if (!plan) return;
-
-    // Free subscription – activate instantly
-    if (finalPrice === 0) {
-      setIsProcessing(true);
-      try {
-        const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + (billingCycle === 'monthly' ? 1 : 12));
-
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            subscription_status: 'active',
-            subscription_plan: plan.name,
-            subscription_end_date: endDate.toISOString(),
-          })
-          .eq('id', user.id);
-
-        if (error) throw error;
-
-        if (appliedCoupon) {
-          await supabase.from('coupon_usage').insert({ coupon_id: appliedCoupon.id, user_id: user.id });
-          await supabase
-            .from('coupons')
-            .update({ used_count: appliedCoupon.used_count + 1 })
-            .eq('id', appliedCoupon.id);
-        }
-
-        toast.success(t('checkout.activated', 'Subscription activated!'));
-        navigate('/dashboard');
-      } catch (e) {
-        console.error(e);
-        toast.error(t('checkout.activateFailed', 'Failed to activate subscription'));
-      } finally {
-        setIsProcessing(false);
-      }
-      return;
-    }
-
     // Paid flow (single provider): redirect to secure checkout session.
     setIsProcessing(true);
-    if (appliedCoupon) {
-      localStorage.setItem('pendingCoupon', JSON.stringify(appliedCoupon));
-    }
 
     try {
       const convexUrl = import.meta.env.VITE_CONVEX_URL;
@@ -328,13 +201,7 @@ export default function Checkout() {
       <header className="relative z-10">
         <div className="mx-auto max-w-6xl px-6 py-6 flex items-center justify-between">
           <button onClick={() => navigate('/')} className="flex items-center gap-3 group">
-            <Logo className="h-10 w-10" />
-            <div className="leading-tight text-left">
-              <div className="text-slate-900 dark:text-white font-semibold tracking-tight group-hover:opacity-90">Durrah</div>
-              <div className="text-[11px] font-semibold text-blue-700 dark:text-blue-300 tracking-[0.14em] uppercase">
-                {t('brand.subtitle', 'for Tutors')}
-              </div>
-            </div>
+            <Logo size="sm" />
           </button>
 
           <button
@@ -391,14 +258,12 @@ export default function Checkout() {
         <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left: plans */}
           <section className="lg:col-span-7">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 gap-5">
               {plans.map((plan) => {
-                const isSelected = selectedPlan === plan.id;
+                const isSelected = true;
                 return (
-                  <button
+                  <div
                     key={plan.id}
-                    type="button"
-                    onClick={() => setSelectedPlan(plan.id)}
                     className={`text-left group rounded-3xl border backdrop-blur transition-all duration-300 p-6 ${
                       isSelected
                         ? 'border-blue-500/50 bg-white/80 dark:bg-slate-900/60 shadow-[0_18px_55px_-35px_rgba(37,99,235,0.55)]'
@@ -424,11 +289,7 @@ export default function Checkout() {
 
                     <div className="mt-5 flex items-baseline justify-between">
                       <div className="text-3xl font-semibold text-slate-900 dark:text-white tracking-tight">
-                        {plan.id === 'basic' ? (
-                          <span>{t('checkout.free', 'Free')}</span>
-                        ) : (
-                          <span className="tabular-nums">{isCurrencyLoading ? '...' : plan.displayPrice}</span>
-                        )}
+                        <span className="tabular-nums">{isCurrencyLoading ? '...' : plan.displayPrice}</span>
                       </div>
                       {plan.id === 'pro' && (
                         <div className="inline-flex rounded-2xl bg-slate-900/5 dark:bg-white/10 p-1">
@@ -439,11 +300,6 @@ export default function Checkout() {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setBillingCycle(cycle);
-                                if (appliedCoupon && appliedCoupon.duration && appliedCoupon.duration !== cycle) {
-                                  setAppliedCoupon(null);
-                                  setCouponCode('');
-                                  toast.error(t('checkout.couponRemovedMismatch', 'Coupon removed: only valid for the previous billing cycle'));
-                                }
                               }}
                               className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition ${
                                 billingCycle === cycle
@@ -468,9 +324,80 @@ export default function Checkout() {
                         </li>
                       ))}
                     </ul>
-                  </button>
+                  </div>
                 );
               })}
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="rounded-3xl border border-slate-200/70 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40 backdrop-blur p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                      {t('checkoutPage.includedTitle', 'Included with Pro')}
+                    </div>
+                    <div className="mt-1 text-lg font-semibold text-slate-900 dark:text-white tracking-tight">
+                      {t('checkoutPage.includedSubtitle', 'Everything you need to run exams at scale')}
+                    </div>
+                  </div>
+                  <div className="w-10 h-10 rounded-2xl bg-blue-600/10 border border-blue-600/15 flex items-center justify-center">
+                    <BarChart3 className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+                  </div>
+                </div>
+
+                <div className="mt-5 grid grid-cols-1 gap-3">
+                  {[
+                    { icon: Users, label: t('checkoutPage.inc1', 'Unlimited students and classes') },
+                    { icon: FileText, label: t('checkoutPage.inc2', 'Professional PDFs and exports') },
+                    { icon: Shield, label: t('checkoutPage.inc3', 'Advanced anti-cheating and monitoring') },
+                    { icon: BarChart3, label: t('checkoutPage.inc4', 'Instant reporting and analytics') },
+                  ].map((row, idx) => (
+                    <div key={idx} className="flex items-start gap-3 text-sm text-slate-700 dark:text-slate-200">
+                      <span className="mt-0.5 w-9 h-9 rounded-2xl bg-slate-900/5 dark:bg-white/10 border border-slate-200/60 dark:border-slate-800 flex items-center justify-center">
+                        <row.icon className="w-4.5 h-4.5 text-slate-700 dark:text-slate-200" />
+                      </span>
+                      <div className="leading-snug pt-1">{row.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-slate-200/70 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40 backdrop-blur p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                      {t('checkoutPage.billingTitle', 'Billing and security')}
+                    </div>
+                    <div className="mt-1 text-lg font-semibold text-slate-900 dark:text-white tracking-tight">
+                      {t('checkoutPage.billingSubtitle', 'Clear terms, easy management')}
+                    </div>
+                  </div>
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-600/10 border border-emerald-600/15 flex items-center justify-center">
+                    <Lock className="w-5 h-5 text-emerald-700 dark:text-emerald-300" />
+                  </div>
+                </div>
+
+                <div className="mt-5 space-y-3 text-sm text-slate-700 dark:text-slate-200">
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 w-9 h-9 rounded-2xl bg-slate-900/5 dark:bg-white/10 border border-slate-200/60 dark:border-slate-800 flex items-center justify-center">
+                      <RefreshCw className="w-4.5 h-4.5" />
+                    </span>
+                    <div className="pt-1 leading-snug">{t('checkoutPage.bill1', 'Cancel anytime from Settings. Your data stays safe.')}</div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 w-9 h-9 rounded-2xl bg-slate-900/5 dark:bg-white/10 border border-slate-200/60 dark:border-slate-800 flex items-center justify-center">
+                      <Shield className="w-4.5 h-4.5" />
+                    </span>
+                    <div className="pt-1 leading-snug">{t('checkoutPage.bill2', 'Encrypted connection and secure processing.')}</div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 w-9 h-9 rounded-2xl bg-slate-900/5 dark:bg-white/10 border border-slate-200/60 dark:border-slate-800 flex items-center justify-center">
+                      <LifeBuoy className="w-4.5 h-4.5" />
+                    </span>
+                    <div className="pt-1 leading-snug">{t('checkoutPage.bill3', 'Need help? Support is one click away in the dashboard.')}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -480,7 +407,7 @@ export default function Checkout() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-                    {t('checkout.summary', 'Order summary')}
+                    {t('checkoutPage.summaryTitle', 'Order summary')}
                   </div>
                   <div className="mt-1 text-xl font-semibold text-slate-900 dark:text-white tracking-tight">
                     {selectedPlanObj?.name}
@@ -496,39 +423,23 @@ export default function Checkout() {
                 </div>
               </div>
 
-              <div className="mt-6 space-y-3 text-sm">
-                <div className="flex items-center justify-between text-slate-700 dark:text-slate-200">
-                  <span>{t('checkout.price', 'Price')}</span>
-                  <span className="font-semibold tabular-nums">
-                    {selectedPlanObj?.id === 'basic' ? t('checkout.free', 'Free') : (isCurrencyLoading ? '...' : selectedPlanObj?.displayPrice)}
-                  </span>
-                </div>
+                  <div className="mt-6 space-y-3 text-sm">
+                    <div className="flex items-center justify-between text-slate-700 dark:text-slate-200">
+                      <span>{t('checkout.price', 'Price')}</span>
+                      <span className="font-semibold tabular-nums">
+                        {isCurrencyLoading ? '...' : selectedPlanObj?.displayPrice}
+                      </span>
+                    </div>
 
-                {appliedCoupon && (
-                  <div className="flex items-center justify-between text-slate-700 dark:text-slate-200">
-                    <span className="inline-flex items-center gap-2">
-                      <Ticket className="w-4 h-4" />
-                      {t('checkout.discount', 'Discount')}
-                    </span>
-                    <span className="font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums">
-                      {selectedPlanObj?.id === 'basic'
-                        ? '-'
-                        : selectedPlanObj
-                          ? `- ${Math.max(0, selectedPlanObj.price - finalPrice)}`
-                          : '-'}
-                    </span>
+                    <div className="pt-3 mt-3 border-t border-slate-200/70 dark:border-slate-800 flex items-center justify-between">
+                      <span className="text-slate-600 dark:text-slate-300 font-semibold">
+                        {t('checkout.total', 'Total')}
+                      </span>
+                      <span className="text-slate-900 dark:text-white font-semibold text-lg tabular-nums">
+                        {isCurrencyLoading ? '...' : (selectedPlanObj?.displayPrice || '')}
+                      </span>
+                    </div>
                   </div>
-                )}
-
-                <div className="pt-3 mt-3 border-t border-slate-200/70 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-slate-600 dark:text-slate-300 font-semibold">
-                    {t('checkout.total', 'Total')}
-                  </span>
-                  <span className="text-slate-900 dark:text-white font-semibold text-lg tabular-nums">
-                    {finalPrice === 0 ? t('checkout.free', 'Free') : (isCurrencyLoading ? '...' : (selectedPlanObj?.displayPrice || ''))}
-                  </span>
-                </div>
-              </div>
 
               <div className="mt-6">
                 <button
@@ -537,11 +448,7 @@ export default function Checkout() {
                   className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 transition disabled:opacity-60"
                 >
                   {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
-                  {isProcessing
-                    ? t('checkout.processing', 'Processing...')
-                    : finalPrice === 0
-                      ? t('checkout.activateNow', 'Activate now')
-                      : t('checkout.continueSecure', 'Continue to secure checkout')}
+                  {isProcessing ? t('checkout.processing', 'Processing...') : t('checkout.continueSecure', 'Continue to secure checkout')}
                 </button>
 
                 <div className="mt-4 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-center gap-2">
@@ -554,41 +461,6 @@ export default function Checkout() {
                 </div>
               </div>
 
-              {/* Coupon */}
-              <div className="mt-7 rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white/50 dark:bg-slate-950/20 p-4">
-                <div className="text-sm font-semibold text-slate-900 dark:text-white">
-                  {t('checkout.promoTitle', 'Promo code')}
-                </div>
-                <div className="mt-2 flex gap-2">
-                  <input
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    placeholder={t('checkout.promoPlaceholder', 'Enter code')}
-                    className="flex-1 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                  />
-                  {appliedCoupon ? (
-                    <button
-                      onClick={removeCoupon}
-                      type="button"
-                      className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-900/5 dark:hover:bg-white/10"
-                    >
-                      {t('checkout.remove', 'Remove')}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={validateCoupon}
-                      type="button"
-                      disabled={isValidatingCoupon}
-                      className="rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-3 py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-60"
-                    >
-                      {isValidatingCoupon ? t('checkout.checking', 'Checking...') : t('checkout.apply', 'Apply')}
-                    </button>
-                  )}
-                </div>
-                <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
-                  {t('checkout.promoNote', 'Some offers may be applied after checkout and activation.')}
-                </div>
-              </div>
             </div>
           </aside>
         </div>
