@@ -1,37 +1,28 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { PenLine, ShieldCheck, BarChart3 } from 'lucide-react';
+import { BarChart3, PenLine, ShieldCheck } from 'lucide-react';
 
-const steps = [
+const stepMeta = [
     {
         id: 1,
         icon: PenLine,
-        color: 'blue',
-        bgLight: 'bg-blue-50',
-        bgDark: 'dark:bg-blue-950/30',
-        borderColor: 'border-blue-200 dark:border-blue-800',
-        iconColor: 'text-blue-600 dark:text-blue-400',
-        lineGradient: 'from-blue-300 to-emerald-300',
+        tone: 'from-sky-500/30 to-blue-500/10',
+        iconColor: 'text-sky-600 dark:text-sky-400',
+        ring: 'ring-sky-200/70 dark:ring-sky-700/60',
     },
     {
         id: 2,
         icon: ShieldCheck,
-        color: 'emerald',
-        bgLight: 'bg-emerald-50',
-        bgDark: 'dark:bg-emerald-950/30',
-        borderColor: 'border-emerald-200 dark:border-emerald-800',
+        tone: 'from-emerald-500/30 to-teal-500/10',
         iconColor: 'text-emerald-600 dark:text-emerald-400',
-        lineGradient: 'from-emerald-300 to-indigo-300',
+        ring: 'ring-emerald-200/70 dark:ring-emerald-700/60',
     },
     {
         id: 3,
         icon: BarChart3,
-        color: 'indigo',
-        bgLight: 'bg-indigo-50',
-        bgDark: 'dark:bg-indigo-950/30',
-        borderColor: 'border-indigo-200 dark:border-indigo-800',
+        tone: 'from-indigo-500/30 to-blue-500/10',
         iconColor: 'text-indigo-600 dark:text-indigo-400',
-        lineGradient: '',
+        ring: 'ring-indigo-200/70 dark:ring-indigo-700/60',
     },
 ];
 
@@ -39,74 +30,67 @@ export function HowItWorks() {
     const { t } = useTranslation();
 
     return (
-        <section className="py-24 md:py-32 bg-slate-50/50 dark:bg-slate-950/50 relative overflow-hidden">
-            {/* Subtle background decoration */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-blue-100/30 to-transparent dark:from-blue-900/10 rounded-full blur-3xl pointer-events-none" />
+        <section className="relative overflow-hidden py-24 md:py-28">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_45%,#000_62%,transparent_100%)]" />
+            <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[860px] -translate-x-1/2 rounded-full bg-gradient-to-b from-slate-200/45 to-transparent blur-3xl dark:from-slate-800/35" />
 
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-                {/* Header */}
+            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 16 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                    className="text-center mb-16 md:mb-20"
+                    transition={{ duration: 0.55, ease: 'easeOut' }}
+                    className="mx-auto mb-14 max-w-3xl text-center md:mb-16"
                 >
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
+                    <div className="inline-flex items-center rounded-full border border-slate-200 bg-white/75 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900/75 dark:text-slate-400">
+                        Product Workflow
+                    </div>
+                    <h2 className="mt-5 text-3xl font-semibold tracking-[-0.02em] text-slate-900 dark:text-white md:text-5xl">
                         {t('landing.howto.title', 'How It Works')}
                     </h2>
-                    <p className="text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
+                    <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600 dark:text-slate-400 md:text-lg">
                         {t('landing.howto.subtitle', 'Create secure online exams in three simple steps')}
                     </p>
                 </motion.div>
 
-                {/* Timeline */}
                 <div className="relative">
-                    {steps.map((step, index) => (
-                        <motion.div
-                            key={step.id}
-                            initial={{ opacity: 0, x: -30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true, margin: "-50px" }}
-                            transition={{ duration: 0.5, delay: index * 0.15 }}
-                            className="relative flex gap-6 md:gap-10 pb-12 last:pb-0"
-                        >
-                            {/* Timeline Line & Node */}
-                            <div className="flex flex-col items-center">
-                                {/* Node */}
-                                <motion.div
-                                    whileHover={{ scale: 1.1 }}
-                                    className={`relative z-10 w-12 h-12 md:w-14 md:h-14 rounded-full ${step.bgLight} ${step.bgDark} border-2 ${step.borderColor} flex items-center justify-center shadow-sm`}
-                                >
-                                    <step.icon className={`w-5 h-5 md:w-6 md:h-6 ${step.iconColor}`} strokeWidth={1.5} />
-                                </motion.div>
+                    <div className="pointer-events-none absolute left-0 right-0 top-16 hidden h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent dark:via-slate-700 lg:block" />
 
-                                {/* Connecting Line */}
-                                {index < steps.length - 1 && (
-                                    <div className={`w-0.5 flex-1 mt-3 bg-gradient-to-b ${step.lineGradient} dark:opacity-50`} />
-                                )}
-                            </div>
-
-                            {/* Content Card */}
-                            <motion.div
-                                whileHover={{ y: -4, boxShadow: '0 12px 40px -12px rgba(0,0,0,0.1)' }}
-                                transition={{ duration: 0.2 }}
-                                className={`flex-1 p-6 md:p-8 rounded-2xl bg-white dark:bg-slate-900 border ${step.borderColor} shadow-sm hover:shadow-md transition-shadow`}
+                    <div className="grid gap-6 lg:grid-cols-3 lg:gap-7">
+                        {stepMeta.map((step, index) => (
+                            <motion.article
+                                key={step.id}
+                                initial={{ opacity: 0, y: 24 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: '-40px' }}
+                                transition={{ duration: 0.5, delay: index * 0.12, ease: 'easeOut' }}
+                                whileHover={{ y: -6 }}
+                                className="group relative rounded-2xl border border-slate-200/85 bg-white/85 p-6 shadow-[0_12px_35px_-30px_rgba(15,23,42,0.55)] backdrop-blur-sm transition-colors dark:border-slate-700/75 dark:bg-slate-900/75 md:p-7"
                             >
-                                <div className="flex items-center gap-3 mb-3">
-                                    <span className={`text-sm font-medium ${step.iconColor} opacity-60`}>
+                                <div className={`pointer-events-none absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r ${step.tone}`} />
+
+                                <div className="mb-6 flex items-center justify-between">
+                                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 ring-1 ${step.ring} dark:bg-slate-950/70`}>
+                                        <step.icon className={`h-5 w-5 ${step.iconColor}`} strokeWidth={1.7} />
+                                    </div>
+                                    <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
                                         Step {step.id}
                                     </span>
                                 </div>
-                                <h3 className="text-xl md:text-2xl font-semibold text-slate-900 dark:text-white mb-2">
+
+                                <h3 className="text-xl font-semibold tracking-[-0.01em] text-slate-900 dark:text-white md:text-2xl">
                                     {t(`landing.howto.step${step.id}.title`, `Step ${step.id}`)}
                                 </h3>
-                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                                <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400 md:text-base">
                                     {t(`landing.howto.step${step.id}.desc`, 'Description')}
                                 </p>
-                            </motion.div>
-                        </motion.div>
-                    ))}
+
+                                {index < stepMeta.length - 1 && (
+                                    <div className="pointer-events-none absolute -bottom-3 left-1/2 h-6 w-px -translate-x-1/2 bg-gradient-to-b from-slate-300 to-transparent dark:from-slate-700 lg:hidden" />
+                                )}
+                            </motion.article>
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>

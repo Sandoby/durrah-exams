@@ -36,6 +36,22 @@ export function PricingSection({ registrationUrl, isCurrencyLoading, currencyCod
                     </div>
                     <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">{t('pricing.title')}</h2>
                     <p className="text-xl text-slate-600 dark:text-slate-400">{t('pricing.subtitle')}</p>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.55, delay: 0.1 }}
+                        className="mx-auto mt-8 max-w-4xl rounded-2xl border border-slate-200 bg-white/80 p-5 text-left shadow-[0_12px_30px_-28px_rgba(15,23,42,0.6)] backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/70 sm:p-6"
+                    >
+                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-400" />
+                            <span>{t('hero.trial', '14-Day Free Trial • No Credit Card Required')}</span>
+                        </div>
+                        <p className="mt-3 text-base leading-relaxed text-slate-700 dark:text-slate-300 sm:text-lg">
+                            {t('hero.subtitle', 'Create professional online exams with anti-cheating features, live proctoring, and auto-grading. Start your free trial today and get full premium access.')}
+                        </p>
+                    </motion.div>
                 </div>
 
                 <motion.div

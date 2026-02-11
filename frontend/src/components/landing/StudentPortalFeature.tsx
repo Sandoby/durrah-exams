@@ -6,25 +6,29 @@ import { useTranslation } from 'react-i18next';
 export function StudentPortalFeature() {
     const { t, i18n } = useTranslation();
     const isRTL = i18n.language === 'ar';
+    const features = [
+        { icon: Layout, title: t('landing.marketing.student.features.centralized') },
+        { icon: ChartLineUp, title: t('landing.marketing.student.features.performance') },
+        { icon: Medal, title: t('landing.marketing.student.features.badges') },
+        { icon: ShieldCheck, title: t('landing.marketing.student.features.history') }
+    ];
 
     return (
-        <section className="py-24 md:py-32 relative overflow-hidden">
-            {/* Premium Background Elements */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <section className="relative overflow-hidden py-22 md:py-26">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_72%_60%_at_50%_50%,#000_66%,transparent_100%)]" />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[560px] w-[980px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-indigo-500/6 via-slate-300/8 to-indigo-500/6 blur-3xl dark:from-indigo-500/10 dark:via-slate-700/10 dark:to-indigo-500/10" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="grid lg:grid-cols-2 gap-16 md:gap-24 items-center">
-                    {/* Left: Enhanced Mockup Area */}
+                <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0, y: 24 }}
+                        whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="relative"
+                        transition={{ duration: 0.55, ease: 'easeOut' }}
+                        className="relative order-2 lg:order-1"
                     >
-                        {/* Main Dashboard Mockup */}
-                        <div className="relative z-10 bg-white dark:bg-slate-900 rounded-[2rem] shadow-[0_32px_80px_-20px_rgba(15,23,42,0.15)] dark:shadow-[0_32px_80px_-20px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-slate-800 overflow-hidden transform perspective-2000 rotate-y-[-4deg] rotate-x-[2deg]">
-                            <div className="h-10 bg-slate-50 dark:bg-slate-800/50 flex items-center px-6 gap-2 border-b border-slate-200 dark:border-slate-800">
+                        <div className="relative overflow-hidden rounded-[1.75rem] border border-slate-200/90 bg-white/90 shadow-[0_28px_70px_-35px_rgba(15,23,42,0.45)] backdrop-blur-sm dark:border-slate-700/80 dark:bg-slate-900/85">
+                            <div className="flex h-10 items-center gap-2 border-b border-slate-200 px-5 dark:border-slate-800 dark:bg-slate-900/90">
                                 <div className="flex gap-2">
                                     <div className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700" />
                                     <div className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700" />
@@ -34,92 +38,97 @@ export function StudentPortalFeature() {
                             <img
                                 src="/mockups/student-portal-v2.png"
                                 alt="Student Dashboard"
-                                className="w-full h-auto object-contain bg-white dark:bg-slate-900"
+                                className="h-auto w-full object-contain bg-white dark:bg-slate-900"
                                 width={1200}
                                 height={800}
                                 loading="lazy"
                             />
                         </div>
 
-                        {/* Floating elements for "Wow" factor */}
                         <motion.div
-                            animate={{ y: [0, -20, 0] }}
-                            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                            className="absolute -top-12 -right-8 z-20 hidden md:block"
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+                            className="absolute -right-2 top-6 z-20 hidden rounded-xl border border-slate-200/90 bg-white/88 px-4 py-3 shadow-[0_14px_28px_-20px_rgba(15,23,42,0.5)] backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80 md:block"
                         >
-                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/50 flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold">A+</div>
-                                <div className="pr-4">
-                                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{t('landing.highlights.reporting')}</div>
-                                    <div className="text-sm font-bold text-slate-900 dark:text-white">New Exam Result</div>
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300">
+                                    <ChartLineUp className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">{t('landing.highlights.reporting')}</p>
+                                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Live Performance</p>
                                 </div>
                             </div>
                         </motion.div>
-
                         <motion.div
-                            animate={{ y: [0, 20, 0] }}
-                            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                            className="absolute -bottom-10 -left-6 z-20 hidden md:block"
+                            animate={{ y: [0, 10, 0] }}
+                            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 0.35 }}
+                            className="absolute -bottom-5 left-4 z-20 hidden rounded-xl border border-slate-200/90 bg-white/88 px-4 py-3 shadow-[0_14px_28px_-20px_rgba(15,23,42,0.5)] backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80 md:block"
                         >
-                            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-4 rounded-2xl shadow-xl border border-white/20 dark:border-slate-700/50">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                                        <Medal weight="duotone" className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{t('landing.marketing.student.academicStanding')}</div>
-                                        <div className="text-sm font-bold text-slate-900 dark:text-white">{t('landing.marketing.student.topClass')}</div>
-                                    </div>
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-900/35 dark:text-emerald-300">
+                                    <Medal weight="duotone" className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">{t('landing.marketing.student.academicStanding')}</p>
+                                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t('landing.marketing.student.topClass')}</p>
                                 </div>
                             </div>
                         </motion.div>
                     </motion.div>
 
-                    {/* Right: Text & Content */}
-                    <div>
+                    <motion.div
+                        initial={{ opacity: 0, y: 24 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.55, ease: 'easeOut', delay: 0.08 }}
+                        className="order-1 lg:order-2"
+                    >
+                        <div className="inline-flex items-center gap-2 rounded-full border border-slate-300/80 bg-white/85 px-4 py-1.5 dark:border-slate-700 dark:bg-slate-900/80">
+                            <GraduationCap className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 dark:text-slate-300">{t('landing.marketing.student.badge')}</span>
+                        </div>
+
+                        <h2 className="mt-6 text-4xl font-semibold leading-[1.06] tracking-[-0.02em] text-slate-900 dark:text-white md:text-5xl lg:text-[3.5rem]">
+                            {t('landing.marketing.student.title')}
+                        </h2>
+
+                        <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+                            {t('landing.marketing.student.desc')}
+                        </p>
+
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
                             viewport={{ once: true }}
+                            transition={{ duration: 0.45, delay: 0.16 }}
+                            className="mt-9 grid gap-3 sm:grid-cols-2"
                         >
-                            <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-1.5 mb-8">
-                                <GraduationCap className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{t('landing.marketing.student.badge')}</span>
-                            </div>
-
-                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white mb-8 tracking-tighter leading-[1.05]">
-                                {t('landing.marketing.student.title')}
-                            </h2>
-
-                            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed font-medium">
-                                {t('landing.marketing.student.desc')}
-                            </p>
-
-                            <div className="grid sm:grid-cols-2 gap-y-6 gap-x-8 mb-12">
-                                {[
-                                    { icon: Layout, title: t('landing.marketing.student.features.centralized'), color: "text-blue-500" },
-                                    { icon: ChartLineUp, title: t('landing.marketing.student.features.performance'), color: "text-emerald-500" },
-                                    { icon: Medal, title: t('landing.marketing.student.features.badges'), color: "text-amber-500" },
-                                    { icon: ShieldCheck, title: t('landing.marketing.student.features.history'), color: "text-indigo-500" }
-                                ].map((item, i) => (
-                                    <div key={i} className="flex items-center gap-4 group">
-                                        <div className={`w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}>
-                                            <item.icon className="w-6 h-6" />
-                                        </div>
-                                        <span className="font-bold text-slate-700 dark:text-slate-200">{item.title}</span>
+                            {features.map((item, index) => (
+                                <motion.div
+                                    key={item.title}
+                                    initial={{ opacity: 0, y: 8 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.35, delay: 0.2 + index * 0.06 }}
+                                    className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white/80 px-4 py-3 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300/90 hover:shadow-[0_12px_22px_-18px_rgba(15,23,42,0.45)] dark:border-slate-700/70 dark:bg-slate-900/75 dark:hover:border-slate-600"
+                                >
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                        <item.icon className="h-5 w-5" />
                                     </div>
-                                ))}
-                            </div>
-
-                            <Link
-                                to="/student-portal"
-                                className="group flex items-center justify-center sm:inline-flex gap-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-10 py-4 rounded-2xl font-bold shadow-xl hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white transition-all transform hover:-translate-y-1"
-                            >
-                                {t('landing.marketing.student.cta')}
-                                <ArrowRight className={`w-5 h-5 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180' : ''}`} />
-                            </Link>
+                                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{item.title}</span>
+                                </motion.div>
+                            ))}
                         </motion.div>
-                    </div>
+
+                        <Link
+                            to="/student-portal"
+                            className="group mt-10 inline-flex items-center gap-3 rounded-2xl bg-slate-900 px-9 py-4 text-sm font-semibold text-white shadow-[0_18px_40px_-22px_rgba(15,23,42,0.7)] ring-1 ring-slate-900/10 transition-all hover:-translate-y-0.5 hover:bg-indigo-600 dark:bg-white dark:text-slate-900 dark:ring-white/20 dark:hover:bg-indigo-500 dark:hover:text-white sm:text-base"
+                        >
+                            {t('landing.marketing.student.cta')}
+                            <ArrowRight className={`h-5 w-5 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180' : ''}`} />
+                        </Link>
+                    </motion.div>
                 </div>
             </div>
         </section>
