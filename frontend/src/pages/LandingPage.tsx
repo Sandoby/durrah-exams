@@ -6,6 +6,7 @@ import { LandingPageSEO } from '../components/landing/LandingPageSEO';
 import { HeroSection } from '../components/landing/HeroSection';
 import { PlatformHighlights } from '../components/landing/PlatformHighlights';
 import { Navbar } from '../components/landing/Navbar';
+import { CookieConsentBanner } from '../components/landing/CookieConsentBanner';
 import '../styles/landing-animations.css';
 
 const FeaturesBento = lazy(() => import('../components/landing/FeaturesBento').then(mod => ({ default: mod.FeaturesBento })));
@@ -87,6 +88,8 @@ export default function LandingPage() {
                     <Footer />
                 </Suspense>
             </div>
+
+            <CookieConsentBanner />
         </div>
     );
 }

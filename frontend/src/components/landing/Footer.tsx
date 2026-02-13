@@ -21,10 +21,11 @@ export function Footer() {
                                 href="https://web.facebook.com/profile.php?id=61584207453651"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-gray-400 hover:bg-indigo-600 hover:text-white transition-all transform hover:-translate-y-1"
+                                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 transition-colors duration-200 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                                 title="Follow us on Facebook"
+                                aria-label="Follow Durrah for Tutors on Facebook"
                             >
-                                <FacebookLogo weight="fill" className="w-5 h-5" />
+                                <FacebookLogo weight="fill" className="h-[18px] w-[18px]" />
                             </a>
                         </div>
                     </div>

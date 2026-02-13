@@ -20,7 +20,6 @@ import { PremiumFeatureModal } from '../components/dashboard/PremiumFeatureModal
 import { hasActiveAccess } from '../lib/subscriptionUtils';
 import { TrialBanner } from '../components/dashboard/TrialBanner';
 import { TrialWelcomeModal } from '../components/dashboard/TrialWelcomeModal';
-import { TrialOfferCard } from '../components/dashboard/TrialOfferCard';
 import { GracePeriodBanner } from '../components/dashboard/GracePeriodBanner';
 
 
@@ -1265,14 +1264,6 @@ export default function Dashboard() {
             {/* Trial Welcome Modal */}
             <TrialWelcomeModal />
 
-            {/* Trial Offer Overlay - Show for eligible users when tutorial is not running */}
-            <TrialOfferCard
-                isVisible={
-                    !hasActiveAccess(profile?.subscription_status) &&
-                    profile?.trial_activated !== true &&
-                    !runTour
-                }
-            />
         </div>
     );
 }

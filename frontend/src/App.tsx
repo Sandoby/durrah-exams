@@ -54,14 +54,16 @@ import { BackButtonHandler } from './components/BackButtonHandler';
 import { Browser } from '@capacitor/browser';
 import { App as CapApp } from '@capacitor/app';
 
-import { useNavigate, Routes, Route } from 'react-router-dom';
+import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
+import { createTrackedPath, setupUnloadTracking, trackPageView } from './lib/trafficTracker';
 
 import { useAuth } from './context/AuthContext';
 
 function AppContent() {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
-  useAuth(); // Just ensuring hook is called if needed, though likely not anymore here
+  const location = useLocation();
+  const { user, loading } = useAuth();
 
   // ... existing useEffects ...
 
@@ -156,12 +158,42 @@ function AppContent() {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    setupUnloadTracking();
+  }, []);
+
+  useEffect(() => {
+    const trackedPath = createTrackedPath(location.pathname, location.search);
+    trackPageView(trackedPath);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    const onConsentUpdated = () => {
+      const trackedPath = createTrackedPath(location.pathname, location.search);
+      trackPageView(trackedPath);
+    };
+
+    window.addEventListener('durrah:cookie-consent-updated', onConsentUpdated);
+    return () => {
+      window.removeEventListener('durrah:cookie-consent-updated', onConsentUpdated);
+    };
+  }, [location.pathname, location.search]);
+
   const isNative = Capacitor.isNativePlatform();
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       <Routes>
-        <Route path="/" element={isNative ? <MobileWelcome /> : <LandingPage />} />
+        <Route
+          path="/"
+          element={
+            loading
+              ? null
+              : user
+                ? <Navigate to="/dashboard" replace />
+                : (isNative ? <MobileWelcome /> : <LandingPage />)
+          }
+        />
         <Route path="/mobile-welcome" element={<MobileWelcome />} />
         <Route path="/kids" element={<KidsLanding />} />
         <Route path="/kids/quiz/:id" element={<KidsExamView />} />

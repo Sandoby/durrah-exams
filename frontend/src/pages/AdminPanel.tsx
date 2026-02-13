@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type ComponentType } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Users, MessageCircle, Tag, Lock, LogOut,
     Loader2, Plus, Send, UserPlus, BarChart3, Bell,
-    Menu, X, ArrowLeft
+    Menu, X, ArrowLeft, Activity, MousePointerClick, TrendingUp, Clock3, Globe2, RefreshCw
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
@@ -89,6 +89,65 @@ interface UserInfo {
     created_at?: string;
 }
 
+interface TrafficOverview {
+    total_views: number;
+    unique_sessions: number;
+    unique_visitors: number;
+    authenticated_users: number;
+    anonymous_visitors: number;
+    bounce_rate: number;
+    avg_duration: number;
+    mobile_pct: number;
+    desktop_pct: number;
+    tablet_pct: number;
+}
+
+interface TrafficTimePoint {
+    date: string;
+    views: number;
+    sessions: number;
+    users: number;
+}
+
+interface TopPage {
+    path: string;
+    views: number;
+    unique_views: number;
+    avg_duration: number;
+    bounce_rate: number;
+}
+
+interface TrafficSource {
+    source: string;
+    views: number;
+    sessions: number;
+}
+
+interface TrafficGeo {
+    country: string;
+    views: number;
+    sessions: number;
+}
+
+interface TopEvent {
+    event_name: string;
+    event_category: string;
+    total_events: number;
+    unique_sessions: number;
+    unique_users: number;
+}
+
+interface TrafficRealtime {
+    active_now: number;
+    pages: Array<{ path: string; count: number }>;
+}
+
+interface TrafficTechBreakdown {
+    browsers: Array<{ name: string; count: number }>;
+    os: Array<{ name: string; count: number }>;
+    devices: Array<{ name: string; count: number }>;
+}
+
 export default function AdminPanel() {
     const navigate = useNavigate();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -96,7 +155,7 @@ export default function AdminPanel() {
     const [accessCode, setAccessCode] = useState('');
     const [userRole, setUserRole] = useState<'super_admin' | 'support_agent' | null>(null);
     const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'coupons' | 'chat' | 'agents' | 'notifications' | 'web-notifications'>('analytics');
+    const [activeTab, setActiveTab] = useState<'analytics' | 'traffic' | 'users' | 'coupons' | 'chat' | 'agents' | 'notifications' | 'web-notifications'>('analytics');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Users
@@ -810,6 +869,7 @@ export default function AdminPanel() {
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                     {[
                         { id: 'analytics', icon: BarChart3, label: 'Analytics' },
+                        { id: 'traffic', icon: Activity, label: 'Traffic' },
                         { id: 'users', icon: Users, label: 'Users' },
                         { id: 'coupons', icon: Tag, label: 'Coupons' },
                         { id: 'chat', icon: MessageCircle, label: 'Support Chat' },
@@ -853,6 +913,12 @@ export default function AdminPanel() {
                     {activeTab === 'analytics' && (
                         <div className="-mx-4 sm:mx-0">
                             <AdminAnalyticsDashboard />
+                        </div>
+                    )}
+
+                    {activeTab === 'traffic' && (
+                        <div className="p-0 sm:p-2">
+                            <TrafficAnalyticsTab />
                         </div>
                     )}
 
@@ -1540,6 +1606,381 @@ export default function AdminPanel() {
             </main>
         </div>
     );
+}
+
+function TrafficAnalyticsTab() {
+    const [daysBack, setDaysBack] = useState(30);
+    const [loading, setLoading] = useState(true);
+    const [refreshingRealtime, setRefreshingRealtime] = useState(false);
+
+    const [overview, setOverview] = useState<TrafficOverview | null>(null);
+    const [timeSeries, setTimeSeries] = useState<TrafficTimePoint[]>([]);
+    const [topPages, setTopPages] = useState<TopPage[]>([]);
+    const [sources, setSources] = useState<TrafficSource[]>([]);
+    const [geo, setGeo] = useState<TrafficGeo[]>([]);
+    const [topEvents, setTopEvents] = useState<TopEvent[]>([]);
+    const [realtime, setRealtime] = useState<TrafficRealtime | null>(null);
+    const [tech, setTech] = useState<TrafficTechBreakdown | null>(null);
+
+    const fetchRealtime = async (silent = false) => {
+        if (!silent) setRefreshingRealtime(true);
+        try {
+            const { data, error } = await supabase.rpc('get_realtime_visitors');
+            if (error) throw error;
+            setRealtime(data as TrafficRealtime);
+        } catch (error) {
+            console.error('Failed to load realtime traffic:', error);
+        } finally {
+            if (!silent) setRefreshingRealtime(false);
+        }
+    };
+
+    const fetchTrafficData = async () => {
+        setLoading(true);
+        try {
+            const [
+                overviewResp,
+                seriesResp,
+                pagesResp,
+                sourcesResp,
+                geoResp,
+                techResp,
+                eventsResp,
+            ] = await Promise.all([
+                supabase.rpc('get_traffic_overview', { days_back: daysBack }),
+                supabase.rpc('get_traffic_timeseries', { days_back: daysBack }),
+                supabase.rpc('get_top_pages', { days_back: daysBack, page_limit: 15 }),
+                supabase.rpc('get_traffic_by_referrer', { days_back: daysBack }),
+                supabase.rpc('get_traffic_geo', { days_back: daysBack }),
+                supabase.rpc('get_traffic_tech', { days_back: daysBack }),
+                supabase.rpc('get_top_events', { days_back: daysBack, event_limit: 15 }),
+            ]);
+
+            if (overviewResp.error) throw overviewResp.error;
+            if (seriesResp.error) throw seriesResp.error;
+            if (pagesResp.error) throw pagesResp.error;
+            if (sourcesResp.error) throw sourcesResp.error;
+            if (geoResp.error) throw geoResp.error;
+            if (techResp.error) throw techResp.error;
+            if (eventsResp.error) throw eventsResp.error;
+
+            setOverview((overviewResp.data || null) as TrafficOverview | null);
+            setTimeSeries((seriesResp.data || []) as TrafficTimePoint[]);
+            setTopPages((pagesResp.data || []) as TopPage[]);
+            setSources((sourcesResp.data || []) as TrafficSource[]);
+            setGeo((geoResp.data || []) as TrafficGeo[]);
+            setTech((techResp.data || null) as TrafficTechBreakdown | null);
+            setTopEvents((eventsResp.data || []) as TopEvent[]);
+
+            await fetchRealtime(true);
+        } catch (error) {
+            console.error('Failed to load traffic analytics:', error);
+            toast.error('Failed to load traffic analytics');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchTrafficData();
+    }, [daysBack]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetchRealtime(true);
+        }, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const latestViews = timeSeries.length > 0 ? timeSeries[timeSeries.length - 1].views : 0;
+    const previousViews = timeSeries.length > 1 ? timeSeries[timeSeries.length - 2].views : 0;
+    const trend = previousViews > 0 ? ((latestViews - previousViews) / previousViews) * 100 : 0;
+
+    return (
+        <div className="space-y-6">
+            <div className="rounded-2xl border border-indigo-200/60 dark:border-indigo-900/50 bg-gradient-to-r from-indigo-50 via-white to-sky-50 dark:from-indigo-950/40 dark:via-gray-900 dark:to-sky-950/30 p-5 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Traffic Intelligence</h2>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                            Real-time visitor insights, acquisition channels, and behavior analytics.
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <select
+                            value={daysBack}
+                            onChange={(e) => setDaysBack(Number(e.target.value))}
+                            className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100"
+                        >
+                            <option value={1}>Last 24 hours</option>
+                            <option value={7}>Last 7 days</option>
+                            <option value={30}>Last 30 days</option>
+                            <option value={90}>Last 90 days</option>
+                        </select>
+                        <button
+                            onClick={() => fetchTrafficData()}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-sm font-semibold"
+                        >
+                            <RefreshIcon />
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {loading ? (
+                <div className="flex items-center justify-center p-20 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                    <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                </div>
+            ) : (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                        <MetricCard title="Page Views" value={formatNumber(overview?.total_views || 0)} icon={MousePointerClick} />
+                        <MetricCard title="Unique Sessions" value={formatNumber(overview?.unique_sessions || 0)} icon={Users} />
+                        <MetricCard title="Unique Visitors" value={formatNumber(overview?.unique_visitors || 0)} icon={Globe2} />
+                        <MetricCard
+                            title="Bounce Rate"
+                            value={`${overview?.bounce_rate || 0}%`}
+                            icon={TrendingUp}
+                            accent={overview && overview.bounce_rate > 60 ? 'red' : 'green'}
+                        />
+                        <MetricCard title="Avg Duration" value={`${overview?.avg_duration || 0}s`} icon={Clock3} />
+                        <MetricCard title="Authenticated" value={formatNumber(overview?.authenticated_users || 0)} icon={Lock} />
+                        <MetricCard title="Anonymous" value={formatNumber(overview?.anonymous_visitors || 0)} icon={Activity} />
+                        <MetricCard title="Daily Trend" value={`${trend >= 0 ? '+' : ''}${trend.toFixed(1)}%`} icon={BarChart3} accent={trend >= 0 ? 'green' : 'red'} />
+                    </div>
+
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                        <div className="xl:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Traffic Timeline</h3>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">{daysBack} days</span>
+                            </div>
+                            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                                {timeSeries.length === 0 ? (
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">No traffic data available.</p>
+                                ) : (
+                                    timeSeries.map((point) => (
+                                        <div key={point.date} className="p-2.5 rounded-md bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800">
+                                            <div className="flex items-center justify-between text-sm mb-2">
+                                                <span className="text-gray-600 dark:text-gray-300">{new Date(point.date).toLocaleDateString()}</span>
+                                                <span className="text-indigo-600 dark:text-indigo-400 font-semibold">{formatNumber(point.views)} views</span>
+                                            </div>
+                                            <div className="h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-gradient-to-r from-indigo-500 to-sky-500 rounded-full"
+                                                    style={{ width: `${Math.max(4, (point.views / Math.max(latestViews, 1)) * 100)}%` }}
+                                                />
+                                            </div>
+                                            <div className="flex items-center gap-4 text-xs mt-2">
+                                                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Sessions: {formatNumber(point.sessions)}</span>
+                                                <span className="text-sky-600 dark:text-sky-400 font-semibold">Users: {formatNumber(point.users)}</span>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Live Visitors</h3>
+                                <button
+                                    onClick={() => fetchRealtime()}
+                                    className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                                    disabled={refreshingRealtime}
+                                >
+                                    {refreshingRealtime ? 'Refreshing...' : 'Refresh'}
+                                </button>
+                            </div>
+                            <div className="text-4xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-4 tabular-nums">
+                                {realtime?.active_now || 0}
+                            </div>
+                            <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
+                                {(realtime?.pages || []).length === 0 ? (
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">No active paths right now.</p>
+                                ) : (
+                                    (realtime?.pages || []).map((page) => (
+                                        <div key={page.path} className="flex items-center justify-between text-xs p-2 rounded bg-gray-50 dark:bg-gray-900/40">
+                                            <span className="truncate pr-2 text-gray-700 dark:text-gray-300">{page.path}</span>
+                                            <span className="font-semibold text-gray-900 dark:text-white">{page.count}</span>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                        <TrafficTable
+                            title="Top Pages"
+                            columns={['Path', 'Views', 'Unique', 'Avg sec', 'Bounce%']}
+                            rows={topPages.map((page) => [
+                                page.path,
+                                formatNumber(page.views),
+                                formatNumber(page.unique_views),
+                                `${page.avg_duration || 0}`,
+                                `${page.bounce_rate || 0}`,
+                            ])}
+                        />
+
+                        <TrafficTable
+                            title="Traffic Sources"
+                            columns={['Source', 'Views', 'Sessions']}
+                            rows={sources.map((source) => [
+                                source.source,
+                                formatNumber(source.views),
+                                formatNumber(source.sessions),
+                            ])}
+                        />
+
+                        <TrafficTable
+                            title="Top Countries"
+                            columns={['Country', 'Views', 'Sessions']}
+                            rows={geo.map((row) => [
+                                row.country,
+                                formatNumber(row.views),
+                                formatNumber(row.sessions),
+                            ])}
+                        />
+
+                        <TrafficTable
+                            title="Top Events"
+                            columns={['Event', 'Category', 'Count', 'Sessions', 'Users']}
+                            rows={topEvents.map((event) => [
+                                event.event_name,
+                                event.event_category,
+                                formatNumber(event.total_events),
+                                formatNumber(event.unique_sessions),
+                                formatNumber(event.unique_users),
+                            ])}
+                        />
+
+                        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Device & Tech Split</h3>
+                            <div className="space-y-3 text-sm">
+                                <div>
+                                    <p className="text-gray-500 dark:text-gray-400 mb-1">Devices</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {(tech?.devices || []).map((item) => (
+                                            <span key={item.name} className="px-2 py-1 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs">
+                                                {item.name}: {item.count}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-gray-500 dark:text-gray-400 mb-1">Browsers</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {(tech?.browsers || []).slice(0, 8).map((item) => (
+                                            <span key={item.name} className="px-2 py-1 rounded bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs">
+                                                {item.name}: {item.count}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-gray-500 dark:text-gray-400 mb-1">Operating Systems</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {(tech?.os || []).slice(0, 8).map((item) => (
+                                            <span key={item.name} className="px-2 py-1 rounded bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 text-xs">
+                                                {item.name}: {item.count}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="pt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    Mobile {overview?.mobile_pct || 0}% | Desktop {overview?.desktop_pct || 0}% | Tablet {overview?.tablet_pct || 0}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+}
+
+function MetricCard({
+    title,
+    value,
+    icon: Icon,
+    accent = 'indigo',
+}: {
+    title: string;
+    value: string;
+    icon: ComponentType<{ className?: string }>;
+    accent?: 'indigo' | 'green' | 'red';
+}) {
+    const accentClasses = {
+        indigo: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30',
+        green: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30',
+        red: 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30',
+    };
+
+    return (
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{title}</p>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${accentClasses[accent]}`}>
+                    <Icon className="w-4 h-4" />
+                </div>
+            </div>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{value}</p>
+        </div>
+    );
+}
+
+function TrafficTable({
+    title,
+    columns,
+    rows,
+}: {
+    title: string;
+    columns: string[];
+    rows: string[][];
+}) {
+    return (
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">{title}</h3>
+            <div className="overflow-x-auto max-h-80 overflow-y-auto rounded-lg border border-gray-100 dark:border-gray-800">
+                <table className="w-full text-sm">
+                    <thead className="sticky top-0 bg-gray-50 dark:bg-gray-900 z-10">
+                        <tr className="border-b border-gray-200 dark:border-gray-700">
+                            {columns.map((column) => (
+                                <th key={column} className="text-left px-3 py-2 text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{column}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows.length === 0 ? (
+                            <tr>
+                                <td colSpan={columns.length} className="py-6 text-center text-gray-500 dark:text-gray-400">
+                                    No data available
+                                </td>
+                            </tr>
+                        ) : (
+                            rows.map((row, index) => (
+                                <tr key={index} className="border-b border-gray-100 dark:border-gray-800 last:border-none odd:bg-white even:bg-gray-50/40 dark:odd:bg-gray-800 dark:even:bg-gray-900/30">
+                                    {row.map((cell, cellIndex) => (
+                                        <td key={`${index}-${cellIndex}`} className="px-3 py-2 text-gray-700 dark:text-gray-300">{cell}</td>
+                                    ))}
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}
+
+function RefreshIcon() {
+    return <RefreshCw className="w-4 h-4" />;
+}
+
+function formatNumber(value: number) {
+    return new Intl.NumberFormat().format(value || 0);
 }
 
 function WebNotificationManager({ users }: { users: User[] }) {
