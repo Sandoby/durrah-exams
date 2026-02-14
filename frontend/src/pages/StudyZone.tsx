@@ -65,26 +65,15 @@ export default function StudyZone() {
     return (
         <motion.div
             animate={{
-                backgroundColor: isFocusMode ? "#000000" : "rgba(249, 250, 251, 0.5)",
+                backgroundColor: isFocusMode ? "#000000" : "#f3f4f6",
             }}
             transition={{ duration: 1.2, ease: [0.32, 0.72, 0, 1] }}
-            className="min-h-screen relative font-[Outfit] overflow-hidden"
+            className="min-h-screen relative font-[Outfit] overflow-hidden dark:bg-gray-900"
         >
             <Helmet>
                 <title>Study Zone | Durrah Tutors</title>
-                <meta name="theme-color" content={isFocusMode ? "#000000" : "#4f46e5"} />
+                <meta name="theme-color" content={isFocusMode ? "#000000" : "#f3f4f6"} />
             </Helmet>
-
-            {/* Dynamic Aurora Background */}
-            <motion.div
-                animate={{ opacity: isFocusMode ? 0 : 1 }}
-                transition={{ duration: 1 }}
-                className="fixed inset-0 pointer-events-none z-0"
-            >
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/20 rounded-full blur-[120px] animate-aurora-1 mix-blend-multiply dark:mix-blend-screen" />
-                <div className="absolute top-[10%] right-[-10%] w-[40%] h-[50%] bg-purple-500/20 rounded-full blur-[120px] animate-aurora-2 mix-blend-multiply dark:mix-blend-screen" />
-                <div className="absolute bottom-[-10%] left-[20%] w-[60%] h-[40%] bg-blue-500/20 rounded-full blur-[120px] animate-aurora-3 mix-blend-multiply dark:mix-blend-screen" />
-            </motion.div>
 
             {/* Focus Mode Immersive Blur Overlay */}
             <AnimatePresence>

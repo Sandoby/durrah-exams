@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, RotateCcw, Sliders, Maximize2, Volume2, CloudRain, Waves, Flame, Coffee, Music, Trees } from 'lucide-react';
+import { Play, Pause, RotateCcw, Sliders, Maximize2, Volume2, CloudRain, Waves, Flame, Trees } from 'lucide-react';
 
 type TimerMode = 'focus' | 'shortBreak' | 'longBreak';
 
