@@ -60,6 +60,50 @@ export function StudyTimer({ isFocusMode, setIsFocusMode }: { isFocusMode: boole
 
     // Refs for audio
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const prevIsActiveRef = useRef(isActive);
+
+    // Sound effect functions
+    const playStartSound = () => {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.15);
+    };
+
+    const playEndSound = () => {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+        // Play three notes: C, E, G (major chord)
+        const notes = [523.25, 659.25, 783.99];
+        notes.forEach((freq, index) => {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = freq;
+            oscillator.type = 'sine';
+
+            const startTime = audioContext.currentTime + (index * 0.1);
+            gainNode.gain.setValueAtTime(0.2, startTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+
+            oscillator.start(startTime);
+            oscillator.stop(startTime + 0.4);
+        });
+    };
 
     // Timer Logic
     useEffect(() => {
@@ -69,6 +113,9 @@ export function StudyTimer({ isFocusMode, setIsFocusMode }: { isFocusMode: boole
         } else if (timeLeft === 0) {
             setIsActive(false);
             setIsFocusMode(false);
+
+            // Play end sound
+            playEndSound();
 
             // Save stats to localStorage
             const savedMinutes = parseInt(localStorage.getItem('sz_total_focus_minutes') || '0');
@@ -89,6 +136,14 @@ export function StudyTimer({ isFocusMode, setIsFocusMode }: { isFocusMode: boole
         }
         return () => clearInterval(interval);
     }, [isActive, timeLeft, mode, setIsFocusMode]);
+
+    // Play start sound when timer starts
+    useEffect(() => {
+        if (isActive && !prevIsActiveRef.current) {
+            playStartSound();
+        }
+        prevIsActiveRef.current = isActive;
+    }, [isActive]);
 
     useEffect(() => {
         setCustomDuration(DEFAULT_TIMES[mode]);
