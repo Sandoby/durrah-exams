@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, RotateCcw, Sliders, Maximize2, Volume2, CloudRain, Zap, Waves } from 'lucide-react';
+import { Play, Pause, RotateCcw, Sliders, Maximize2, Volume2, CloudRain, Waves, Flame, Coffee, Music, Trees } from 'lucide-react';
 
 type TimerMode = 'focus' | 'shortBreak' | 'longBreak';
 
 interface Sound {
     id: string;
     name: string;
-    type: 'white' | 'pink' | 'brown';
     icon: any;
     description: string;
 }
@@ -25,9 +24,30 @@ const MODE_LABELS: Record<TimerMode, string> = {
 };
 
 const SOUNDS: Sound[] = [
-    { id: 'rain', name: 'Rain', type: 'pink', icon: CloudRain, description: 'Pink Noise' },
-    { id: 'white', name: 'Focus', type: 'white', icon: Zap, description: 'White Noise' },
-    { id: 'river', name: 'River', type: 'brown', icon: Waves, description: 'Brown Noise' },
+    {
+        id: 'rain',
+        name: 'Rain',
+        icon: CloudRain,
+        description: 'Gentle Rain'
+    },
+    {
+        id: 'waterfall',
+        name: 'Waterfall',
+        icon: Waves,
+        description: 'Flowing Water'
+    },
+    {
+        id: 'forest',
+        name: 'Forest',
+        icon: Trees,
+        description: 'Nature Sounds'
+    },
+    {
+        id: 'fire',
+        name: 'Campfire',
+        icon: Flame,
+        description: 'Crackling Fire'
+    },
 ];
 
 export function StudyTimer({ isFocusMode, setIsFocusMode }: { isFocusMode: boolean, setIsFocusMode: (v: boolean) => void }) {
@@ -39,9 +59,7 @@ export function StudyTimer({ isFocusMode, setIsFocusMode }: { isFocusMode: boole
     const [volume, setVolume] = useState(0.5);
 
     // Refs for audio
-    const audioContextRef = useRef<AudioContext | null>(null);
-    const sourceNodeRef = useRef<AudioBufferSourceNode | null>(null);
-    const gainNodeRef = useRef<GainNode | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
     // Timer Logic
     useEffect(() => {
@@ -87,77 +105,48 @@ export function StudyTimer({ isFocusMode, setIsFocusMode }: { isFocusMode: boole
 
     // Audio Logic
     useEffect(() => {
-        stopAudio();
         if (activeSound) {
-            const sound = SOUNDS.find(s => s.id === activeSound);
-            if (sound) playNoise(sound.type);
+            // Stop any existing audio
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+            }
+
+            // Create new audio instance with local file
+            const audio = new Audio(`/sounds/${activeSound}.mp3`);
+            audio.loop = true;
+            audio.volume = volume;
+            audio.preload = 'auto';
+
+            // Play audio
+            audio.play().catch(err => {
+                console.log('Audio play failed:', err);
+            });
+
+            audioRef.current = audio;
+        } else {
+            // Stop audio
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+                audioRef.current = null;
+            }
         }
-        return () => stopAudio();
+
+        // Cleanup
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+            }
+        };
     }, [activeSound]);
 
     useEffect(() => {
-        if (gainNodeRef.current) {
-            gainNodeRef.current.gain.setTargetAtTime(volume * 0.15, audioContextRef.current?.currentTime || 0, 0.1);
+        if (audioRef.current) {
+            audioRef.current.volume = volume;
         }
     }, [volume]);
-
-    const stopAudio = () => {
-        if (sourceNodeRef.current) {
-            try { sourceNodeRef.current.stop(); } catch (e) { }
-            sourceNodeRef.current = null;
-        }
-    };
-
-    const playNoise = (type: 'white' | 'pink' | 'brown') => {
-        if (!audioContextRef.current) {
-            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-            audioContextRef.current = new AudioContext();
-        }
-        const ctx = audioContextRef.current;
-        if (!ctx) return;
-        if (ctx.state === 'suspended') ctx.resume();
-
-        const bufferSize = ctx.sampleRate * 2;
-        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-
-        if (type === 'white') {
-            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-        } else if (type === 'pink') {
-            let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-            for (let i = 0; i < bufferSize; i++) {
-                const white = Math.random() * 2 - 1;
-                b0 = 0.99886 * b0 + white * 0.0555179;
-                b1 = 0.99332 * b1 + white * 0.0750759;
-                b2 = 0.96900 * b2 + white * 0.1538520;
-                b3 = 0.86650 * b3 + white * 0.3104856;
-                b4 = 0.55000 * b4 + white * 0.5329522;
-                b5 = -0.7616 * b5 - white * 0.0168980;
-                data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-                data[i] *= 0.11;
-                b6 = white * 0.115926;
-            }
-        } else if (type === 'brown') {
-            let lastOut = 0;
-            for (let i = 0; i < bufferSize; i++) {
-                const white = Math.random() * 2 - 1;
-                data[i] = (lastOut + (0.02 * white)) / 1.02;
-                lastOut = data[i];
-                data[i] *= 3.5;
-            }
-        }
-
-        const noise = ctx.createBufferSource();
-        noise.buffer = buffer;
-        noise.loop = true;
-        const gain = ctx.createGain();
-        gain.gain.value = volume * 0.15;
-        noise.connect(gain);
-        gain.connect(ctx.destination);
-        noise.start();
-        sourceNodeRef.current = noise;
-        gainNodeRef.current = gain;
-    };
 
     const formatTime = (seconds: number) => {
         const m = Math.floor(seconds / 60);
@@ -245,13 +234,16 @@ export function StudyTimer({ isFocusMode, setIsFocusMode }: { isFocusMode: boole
                                 <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="w-24 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-indigo-500" />
                             )}
                         </div>
-                        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                             {SOUNDS.map((sound) => (
-                                <button key={sound.id} onClick={() => setActiveSound(activeSound === sound.id ? null : sound.id)} className={`flex-1 flex flex-col items-center gap-2 p-3 rounded-2xl transition-all border ${activeSound === sound.id ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-500/30' : 'bg-transparent border-transparent hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-                                    <div className={`p-3 rounded-xl ${activeSound === sound.id ? 'bg-indigo-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
+                                <button key={sound.id} onClick={() => setActiveSound(activeSound === sound.id ? null : sound.id)} className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all border ${activeSound === sound.id ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-500/30' : 'bg-transparent border-transparent hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                                    <div className={`p-3 rounded-xl transition-all ${activeSound === sound.id ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
                                         <sound.icon className="w-5 h-5" />
                                     </div>
-                                    <span className="text-sm font-medium whitespace-nowrap">{sound.name}</span>
+                                    <div className="text-center">
+                                        <span className="text-sm font-medium block">{sound.name}</span>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">{sound.description}</span>
+                                    </div>
                                 </button>
                             ))}
                         </div>

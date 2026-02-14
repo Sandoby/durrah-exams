@@ -13,6 +13,7 @@ import { UserFiltersComponent } from '../components/admin/UserFilters';
 import type { UserFilters } from '../components/admin/UserFilters';
 import { EnhancedUserCard } from '../components/admin/EnhancedUserCard';
 import { AdminAnalyticsDashboard } from '../components/analytics/AdminAnalyticsDashboard';
+import { EmailManager } from '../components/admin/EmailManager';
 
 const SUPER_ADMIN_PASSWORD = '2352206';
 
@@ -155,7 +156,7 @@ export default function AdminPanel() {
     const [accessCode, setAccessCode] = useState('');
     const [userRole, setUserRole] = useState<'super_admin' | 'support_agent' | null>(null);
     const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'analytics' | 'traffic' | 'users' | 'coupons' | 'chat' | 'agents' | 'notifications' | 'web-notifications'>('analytics');
+    const [activeTab, setActiveTab] = useState<'analytics' | 'traffic' | 'users' | 'coupons' | 'chat' | 'agents' | 'notifications' | 'web-notifications' | 'emails'>('analytics');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Users
@@ -874,6 +875,7 @@ export default function AdminPanel() {
                         { id: 'coupons', icon: Tag, label: 'Coupons' },
                         { id: 'chat', icon: MessageCircle, label: 'Support Chat' },
                         ...(userRole === 'super_admin' ? [{ id: 'agents', icon: UserPlus, label: 'Agents' }] : []),
+                        { id: 'emails', icon: Send, label: 'Email Campaigns' },
                         { id: 'notifications', icon: Bell, label: 'Push Notifications' },
                         { id: 'web-notifications', icon: Bell, label: 'Web Notifications' }
                     ].map((item) => (
@@ -1600,6 +1602,12 @@ export default function AdminPanel() {
                     {activeTab === 'web-notifications' && (
                         <div className="p-0 sm:p-6">
                             <WebNotificationManager users={users} />
+                        </div>
+                    )}
+
+                    {activeTab === 'emails' && (
+                        <div className="p-0 sm:p-6">
+                            <EmailManager users={users} />
                         </div>
                     )}
                 </div>
