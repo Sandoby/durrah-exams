@@ -216,7 +216,7 @@ export default function Settings() {
 
             {/* Navbar */}
             <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
-                <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">
+                <div className="max-w-7xl mx-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-800/50 transition-all duration-300">
                     <div className="flex justify-between h-16 px-6">
                         <div className="flex items-center gap-3">
                             <Logo className="h-9 w-9" showText={false} />

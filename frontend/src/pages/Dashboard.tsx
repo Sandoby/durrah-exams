@@ -483,12 +483,16 @@ export default function Dashboard() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-between h-16">
-                            <div className="flex items-center">
-                                <Logo />
+            <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pt-24">
+                <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
+                    <div className="max-w-7xl mx-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-800/50">
+                        <div className="flex justify-between h-16 px-6">
+                            <div className="flex items-center gap-3">
+                                <Logo className="h-9 w-9" showText={false} />
+                                <div className="flex flex-col">
+                                    <span className="text-xl font-bold text-gray-900 dark:text-white">Durrah</span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -561,7 +565,7 @@ export default function Dashboard() {
             />
 
             <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
-                <div className="max-w-7xl mx-auto bg-white dark:bg-slate-900 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200 dark:border-slate-800">
+                <div className="max-w-7xl mx-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-800/50 transition-all duration-300">
                     <div className="flex justify-between h-16 px-6">
                         <div className="flex items-center gap-3">
                             <Logo className="h-9 w-9" showText={false} />
