@@ -11,27 +11,19 @@ export function useInviteCode() {
     try {
       setIsLookingUp(true);
 
-      const { data: classroom, error: classroomError } = await supabase
-        .from('classrooms')
-        .select(`
-          id,
-          name,
-          subject,
-          grade_level,
-          academic_year,
-          description,
-          color,
-          student_count,
-          is_archived,
-          settings,
-          tutor:profiles!tutor_id (
-            full_name
-          )
-        `)
-        .eq('invite_code', inviteCode.toUpperCase().trim())
-        .single();
+      const { data: results, error: rpcError } = await supabase
+        .rpc('lookup_classroom_by_code', { p_code: inviteCode.toUpperCase().trim() });
 
-      if (classroomError || !classroom) {
+      if (rpcError) {
+        console.error('RPC Error:', rpcError);
+        toast.error('Invalid invite code');
+        return null;
+      }
+
+      // RPC with returns table returns an array
+      const classroom = (results as any)?.[0];
+
+      if (!classroom) {
         toast.error('Invalid invite code');
         return null;
       }
@@ -49,8 +41,8 @@ export function useInviteCode() {
         academic_year: classroom.academic_year,
         description: classroom.description,
         color: classroom.color,
-        invite_code: inviteCode.toUpperCase().trim(),
-        tutor_name: (classroom.tutor as any)?.full_name || 'Unknown',
+        invite_code: classroom.invite_code,
+        tutor_name: classroom.tutor_name || 'Unknown',
         student_count: classroom.student_count || 0,
         settings: classroom.settings,
       };
