@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
 import { OwlMascot } from '../components/OwlMascot';
-import { LogOut, BookOpen, Clock, Trophy, Search, User, ArrowRight, History, ArrowLeft, Mail, Lock, Loader2 } from 'lucide-react';
+import { LogOut, BookOpen, Clock, Trophy, Search, User, ArrowRight, History, ArrowLeft, Mail, Lock, Loader2, GraduationCap, Plus, Users, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
@@ -25,6 +25,12 @@ export default function StudentPortal() {
   const [joining, setJoining] = useState(false);
   const [previousExams, setPreviousExams] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalExams: 0, avgScore: 0 });
+  const [classrooms, setClassrooms] = useState<any[]>([]);
+  const [loadingClassrooms, setLoadingClassrooms] = useState(false);
+  const [activeView, setActiveView] = useState<'dashboard' | 'classroom'>('dashboard');
+  const [selectedClassroom, setSelectedClassroom] = useState<any>(null);
+  const [classroomExams, setClassroomExams] = useState<any[]>([]);
+  const [loadingClassroomExams, setLoadingClassroomExams] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -48,6 +54,7 @@ export default function StudentPortal() {
 
       ensureStudentRole();
       fetchStudentData();
+      fetchClassrooms();
     }
   }, [user]);
 
@@ -81,6 +88,87 @@ export default function StudentPortal() {
     } catch (error) {
       console.error('Error fetching student data:', error);
     }
+  };
+
+  const fetchClassrooms = async () => {
+    if (!user) return;
+
+    setLoadingClassrooms(true);
+    try {
+      const { data, error } = await supabase
+        .from('classroom_students')
+        .select(`
+          status,
+          enrolled_at,
+          classroom:classrooms(
+            id,
+            name,
+            subject,
+            grade_level,
+            color,
+            student_count,
+            tutor:profiles!tutor_id(full_name)
+          )
+        `)
+        .eq('student_id', user.id)
+        .eq('status', 'active')
+        .order('enrolled_at', { ascending: false });
+
+      if (!error && data) {
+        const enrolled = data.map((item: any) => ({
+          ...item.classroom,
+          joined_at: item.enrolled_at,
+        }));
+        setClassrooms(enrolled);
+      }
+    } catch (error) {
+      console.error('Error fetching classrooms:', error);
+    } finally {
+      setLoadingClassrooms(false);
+    }
+  };
+
+  const fetchClassroomExams = async (classroomId: string) => {
+    setLoadingClassroomExams(true);
+    try {
+      const { data, error } = await supabase
+        .from('classroom_exams')
+        .select(`
+          id,
+          added_at,
+          exam:exams (
+            id,
+            title,
+            description,
+            created_at
+          )
+        `)
+        .eq('classroom_id', classroomId)
+        .order('added_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading classroom exams:', error);
+        return;
+      }
+
+      if (data) {
+        const exams = data.map((item: any) => ({
+          ...item,
+          exam: Array.isArray(item.exam) ? item.exam[0] : item.exam
+        }));
+        setClassroomExams(exams);
+      }
+    } catch (error) {
+      console.error('Error loading classroom exams:', error);
+    } finally {
+      setLoadingClassroomExams(false);
+    }
+  };
+
+  const handleClassroomClick = (classroom: any) => {
+    setSelectedClassroom(classroom);
+    setActiveView('classroom');
+    fetchClassroomExams(classroom.id);
   };
 
   const handleGoogleLogin = async () => {
@@ -486,8 +574,158 @@ export default function StudentPortal() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {activeView === 'classroom' && selectedClassroom && (
+          <div className="mb-6">
+            <button
+              onClick={() => {
+                setActiveView('dashboard');
+                setSelectedClassroom(null);
+              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back to Dashboard</span>
+            </button>
+          </div>
+        )}
 
-        {/* Stats & Search Grid */}
+        {activeView === 'classroom' && selectedClassroom ? (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            
+            {/* Classroom Hero */}
+            <div className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 sm:p-8 transition-all hover:shadow-md">
+               <div 
+                  className="absolute inset-0 opacity-10 pointer-events-none"
+                  style={{ background: `linear-gradient(135deg, ${selectedClassroom.color} 0%, transparent 100%)` }}
+               />
+               
+               <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center">
+                  <div
+                    className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold text-white shadow-lg ring-4 ring-white dark:ring-slate-800 transition-transform hover:scale-105"
+                    style={{ backgroundColor: selectedClassroom.color }}
+                  >
+                    {selectedClassroom.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
+                       {selectedClassroom.name}
+                     </h1>
+                     <div className="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-400 mb-3">
+                        <span className="px-3 py-1 bg-gray-50 dark:bg-slate-800 rounded-full border border-gray-100 dark:border-slate-700 font-medium flex items-center gap-1.5">
+                           <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                           {selectedClassroom.subject}
+                        </span>
+                        {selectedClassroom.grade_level && (
+                           <span className="px-3 py-1 bg-gray-50 dark:bg-slate-800 rounded-full border border-gray-100 dark:border-slate-700 font-medium">
+                              {selectedClassroom.grade_level}
+                           </span>
+                        )}
+                     </div>
+                     
+                     <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center gap-1.5">
+                           <Users className="w-4 h-4 text-gray-400" />
+                           <span>{selectedClassroom.student_count || 0} students</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                           <GraduationCap className="w-4 h-4 text-gray-400" />
+                           <span>Tutor: <span className="text-gray-700 dark:text-gray-300 font-medium">{selectedClassroom.tutor?.full_name || 'Unknown'}</span></span>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               {selectedClassroom.description && (
+                 <div className="mt-6 pt-6 border-t border-gray-100 dark:border-slate-800">
+                   <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                     {selectedClassroom.description}
+                   </p>
+                 </div>
+               )}
+            </div>
+
+            {/* Assigned Exams Section */}
+            <div>
+              <div className="flex items-center gap-3 mb-4 px-1">
+                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400">
+                   <BookOpen className="w-5 h-5" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Assigned Exams
+                </h2>
+              </div>
+
+              {loadingClassroomExams ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                </div>
+              ) : classroomExams.length === 0 ? (
+                <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-gray-200 dark:border-slate-800">
+                  <div className="mx-auto w-16 h-16 rounded-full bg-gray-50 dark:bg-slate-800 flex items-center justify-center mb-4">
+                     <BookOpen className="w-8 h-8 text-gray-300 dark:text-gray-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                     No exams assigned yet
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                     Check back later for new assignments
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {classroomExams.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => {
+                        sessionStorage.setItem('durrah_exam_portal_access', 'true');
+                        navigate(`/exam/${item.exam.id}?classroomId=${selectedClassroom.id}`);
+                      }}
+                      className="group relative bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-indigo-500/30 hover:shadow-lg hover:shadow-indigo-500/5 transition-all cursor-pointer overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 p-5 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+                         <ArrowRight className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                           <FileText className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <div className="flex-1 min-w-0 pr-8">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                              {item.exam?.title || 'Untitled Exam'}
+                            </h3>
+                            {!item.exam?.is_published && (
+                              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-md">
+                                Draft
+                              </span>
+                            )}
+                          </div>
+                          
+                          {item.exam?.description && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3 leading-relaxed">
+                              {item.exam.description}
+                            </p>
+                          )}
+                          
+                          <div className="flex items-center gap-4 text-xs font-medium text-gray-500 dark:text-gray-500">
+                             <div className="flex items-center gap-1.5">
+                                <Clock className="w-3.5 h-3.5" />
+                                <span>Assigned {new Date(item.added_at).toLocaleDateString()}</span>
+                             </div>
+                             {/* You could add status/grade here if available */}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <>
+          {/* Stats & Search Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* Join Exam Card */}
@@ -568,6 +806,79 @@ export default function StudentPortal() {
           </div>
         </div>
 
+        {/* My Classrooms Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+              <GraduationCap className="h-5 w-5 mr-2 text-indigo-600" />
+              {t('classrooms.myClassrooms', 'My Classrooms')}
+            </h3>
+            <button
+              onClick={() => navigate('/join')}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{t('classrooms.joinClassroom', 'Join Classroom')}</span>
+            </button>
+          </div>
+
+          {loadingClassrooms ? (
+            <div className="p-12 text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto text-indigo-600" />
+            </div>
+          ) : classrooms.length === 0 ? (
+            <div className="p-12 text-center text-gray-500 dark:text-gray-400">
+              <div className="mx-auto w-20 h-20 bg-gray-50 dark:bg-gray-900/60 rounded-full flex items-center justify-center mb-4 border border-gray-200 dark:border-gray-700">
+                <GraduationCap className="h-10 w-10 text-gray-400" />
+              </div>
+              <p className="mb-4">{t('classrooms.noClassrooms', 'You haven\'t joined any classrooms yet')}</p>
+              <button
+                onClick={() => navigate('/join')}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+              >
+                <Plus className="w-5 h-5" />
+                <span>{t('classrooms.joinFirst', 'Join Your First Classroom')}</span>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+              {classrooms.map((classroom: any) => (
+                <div
+                  key={classroom.id}
+                  onClick={() => handleClassroomClick(classroom)}
+                  className="p-5 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 cursor-pointer transition-all hover:shadow-lg group"
+                  style={{ borderColor: classroom.color + '40' }}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div
+                      className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-xl"
+                      style={{ backgroundColor: classroom.color }}
+                    >
+                      {classroom.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
+                      <Users className="w-4 h-4" />
+                      <span>{classroom.student_count || 0}</span>
+                    </div>
+                  </div>
+
+                  <h4 className="text-base font-bold text-gray-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    {classroom.name}
+                  </h4>
+
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    {classroom.subject} {classroom.grade_level && `• ${classroom.grade_level}`}
+                  </p>
+
+                  <div className="text-xs text-gray-500 dark:text-gray-500 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <span className="font-medium">Tutor:</span> {classroom.tutor?.full_name || 'Unknown'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* History Section */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
@@ -619,6 +930,8 @@ export default function StudentPortal() {
             </div>
           )}
         </div>
+        </>
+        )}
       </main>
     </div>
   );

@@ -362,11 +362,12 @@ http.route({
           userId,
           userEmail,
           status: 'active',
-          plan: metadata?.planId || 'pro',
+          plan: metadata?.planId || 'Professional',
           dodoCustomerId: resolvedDodoCustomerId,
           subscriptionId: data?.subscription_id,
           nextBillingDate: data?.next_billing_date,
           billingCycle: metadata?.billingCycle,
+          eventType: eventType,
         });
         console.log(`[Webhook] updateSubscription result (subscription.active):`, res);
         if (res?.success && 'userId' in res && res.userId) {
@@ -374,8 +375,19 @@ http.route({
           userId = res.userId as string;
         }
 
-        if (!res?.success) {
-          console.error(`[Webhook] Subscription activation FAILED for user ${userId || 'unknown'}`);
+        // Return 500 on activation failure so Dodo retries the webhook
+        if (!res?.success && !('skipped' in res && res.skipped)) {
+          console.error(`[Webhook] Subscription activation FAILED for user ${userId || 'unknown'}: ${'error' in res ? res.error : 'Unknown error'}`);
+          return new Response(
+            JSON.stringify({ 
+              error: ('error' in res ? res.error : null) || 'Subscription activation failed',
+              logged: true 
+            }), 
+            { 
+              status: 500,
+              headers: { 'Content-Type': 'application/json' }
+            }
+          );
         }
       } else {
         console.log(`[Webhook] Skipping subscription update for ${eventType} to prevent double activation.`);
@@ -456,6 +468,9 @@ http.route({
           status: 'active',
           nextBillingDate: data?.next_billing_date,
           billingCycle: metadata.billingCycle,
+          dodoCustomerId: resolvedDodoCustomerId,
+          subscriptionId: data?.subscription_id,
+          eventType: 'subscription.renewed',
         });
         if (renewRes?.success && 'userId' in renewRes && renewRes.userId) {
           resolvedUserId = renewRes.userId as string;
@@ -481,38 +496,89 @@ http.route({
           }
         }
       } else if (isUpdatedEvent) {
-        // Real-time sync without extending time: set nextBillingDate/plan if provided
+        // Real-time sync: check if this update is actually a cancellation
+        // Dodo sends subscription.updated when cancel_at_period_end is set via portal
+        const isUpdatedButCancelled = preIsCancelledStatus || 
+          liveSubscriptionData?.cancel_at_period_end === true || 
+          liveSubscriptionData?.cancel_at_next_billing_date === true ||
+          !!liveSubscriptionData?.cancelled_at ||
+          !!liveSubscriptionData?.ended_at;
+
+        const effectiveStatus = isUpdatedButCancelled ? 'cancelled' : 'active';
+        console.log(`[Webhook] subscription.updated - live cancel flags:`, {
+          cancel_at_period_end: liveSubscriptionData?.cancel_at_period_end,
+          cancel_at_next_billing_date: liveSubscriptionData?.cancel_at_next_billing_date,
+          cancelled_at: liveSubscriptionData?.cancelled_at,
+          ended_at: liveSubscriptionData?.ended_at,
+          effectiveStatus
+        });
+
         const updRes = await ctx.runAction(internal.dodoPayments.updateSubscription, {
           userId,
           userEmail,
-          status: 'active',
+          status: effectiveStatus,
           plan: metadata?.planId || 'pro',
           dodoCustomerId: resolvedDodoCustomerId,
           subscriptionId: data?.subscription_id,
           nextBillingDate: data?.next_billing_date,
           billingCycle: metadata?.billingCycle,
+          eventType: 'subscription.updated',
           silent: true
         });
         if (updRes?.success && 'userId' in updRes && updRes.userId) {
           resolvedUserId = updRes.userId as string;
+        }
+
+        // If cancelled via portal, also send notification
+        if (isUpdatedButCancelled && resolvedUserId) {
+          const supabaseUrl = process.env.SUPABASE_URL;
+          const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          if (supabaseUrl && supabaseKey) {
+            try {
+              await fetch(`${supabaseUrl}/rest/v1/notifications`, {
+                method: 'POST',
+                headers: {
+                  'apikey': supabaseKey,
+                  'Authorization': `Bearer ${supabaseKey}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  user_id: resolvedUserId,
+                  title: 'Subscription Cancelled',
+                  message: 'Your subscription has been cancelled. You can reactivate anytime from the pricing page.',
+                  type: 'warning',
+                  is_read: false
+                })
+              });
+            } catch (e) {
+              console.error('[Webhook] Failed to send portal cancellation notification:', e);
+            }
+          }
         }
       } else if (isFailedEvent) {
         await ctx.runAction(internal.dodoPayments.updateSubscription, {
           userId,
           userEmail,
           status: 'payment_failed',
+          dodoCustomerId: resolvedDodoCustomerId,
+          subscriptionId: data?.subscription_id,
+          eventType: eventType,
         });
       } else if (isCancelledEvent) {
         console.log(`[Webhook] Processing cancellation event: ${eventType}`, {
           userId,
           userEmail,
           subscriptionId: data?.subscription_id,
+          dodoCustomerId: resolvedDodoCustomerId,
         });
 
         await ctx.runAction(internal.dodoPayments.updateSubscription, {
           userId,
           userEmail,
           status: 'cancelled',
+          dodoCustomerId: resolvedDodoCustomerId,
+          subscriptionId: data?.subscription_id,
+          eventType: eventType,
         });
 
         // Add cancellation notification for user visibility
@@ -656,7 +722,7 @@ http.route({
       }
 
       const profileRes = await fetch(
-        `${supabaseUrl}/rest/v1/profiles?id=eq.${authUser.id}&select=subscription_status,email`,
+        `${supabaseUrl}/rest/v1/profiles?id=eq.${authUser.id}&select=subscription_status,email,dodo_customer_id`,
         { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
       );
 
@@ -668,6 +734,7 @@ http.route({
           const profiles = await profileRes.json();
           subscriptionStatus = profiles?.[0]?.subscription_status as string | undefined;
           profileEmail = profiles?.[0]?.email as string | undefined;
+          userDodoId = profiles?.[0]?.dodo_customer_id as string | undefined;
         } catch (e) {
           console.warn('[Portal] Failed to parse profile JSON:', e);
         }
@@ -740,14 +807,37 @@ http.route({
 // ============================================
 // VERIFY DODO PAYMENT (Direct Check)
 // POST /verifyDodoPayment
+// Requires authentication
 // ============================================
 http.route({
   path: "/verifyDodoPayment",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     try {
+      // Require authentication
+      const authHeader = request.headers.get('Authorization') || '';
+      const authUser = await getSupabaseUser(authHeader);
+      
+      if (!authUser?.id) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - authentication required' }), 
+          { status: 401, headers: corsHeaders }
+        );
+      }
+
       const body = await request.json();
       const { orderId, userId } = body;
+      
+      // Ensure requested userId matches authenticated user
+      if (userId && userId !== authUser.id) {
+        return new Response(
+          JSON.stringify({ error: 'Forbidden - cannot verify payment for another user' }), 
+          { status: 403, headers: corsHeaders }
+        );
+      }
+
+      // Use authenticated user's ID
+      const verifiedUserId = authUser.id;
 
       if (!orderId) {
         return new Response(JSON.stringify({ error: 'Missing orderId' }), {
@@ -756,10 +846,10 @@ http.route({
         });
       }
 
-      console.log(`[HTTP] Direct verification request for ${orderId}`);
+      console.log(`[HTTP] Direct verification request for ${orderId} by user ${verifiedUserId}`);
       const result = await ctx.runAction(internal.dodoPayments.verifyPayment, {
         orderId,
-        userId
+        userId: verifiedUserId
       });
 
       return new Response(JSON.stringify(result), {

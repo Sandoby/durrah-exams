@@ -32,24 +32,6 @@
             "cancelAnytime": "Cancel anytime"
         }
     },
-    "landing": {
-        "howto": {
-            "title": "How It Works",
-            "subtitle": "Create secure online exams in three simple steps",
-            "step1": {
-                "title": "Craft Your Vision",
-                "desc": "The most intuitive exam builder. Questions assemble in 3D as you type."
-            },
-            "step2": {
-                "title": "Secure The Environment",
-                "desc": "Enable powerful anti-cheating measures with a single click. Tab monitoring, fullscreen lock, and more."
-            },
-            "step3": {
-                "title": "Review & Insights",
-                "desc": "Get detailed analytics and student performance metrics instantly."
-            }
-        }
-    },
     "nav": {
         "features": "Features",
         "pricing": "Pricing",
@@ -57,7 +39,9 @@
         "blog": "Blog",
         "login": "Login",
         "getStarted": "Get Started Free",
-        "goToDashboard": "Go to Dashboard"
+        "goToDashboard": "Go to Dashboard",
+        "classrooms": "Classrooms",
+        "logout": "Logout"
     },
     "stats": {
         "tutors": "Active Tutors",
@@ -451,6 +435,152 @@
                 "title": "📐 Mathematics Quiz (Sample)",
                 "desc": "Algebra, geometry, and trigonometry assessment for Grade 10"
             }
+        }
+    },
+    "classrooms": {
+        "title": "Classrooms",
+        "myClassrooms": "My Classrooms",
+        "createNew": "Create Classroom",
+        "join": "Join Classroom",
+        "noClassrooms": "No classrooms yet",
+        "noClassroomsDesc": "Create your first classroom to start organizing your students",
+        "searchPlaceholder": "Search classrooms...",
+        "filter": {
+            "all": "All",
+            "active": "Active",
+            "archived": "Archived"
+        },
+        "stats": {
+            "students": "Students",
+            "exams": "Exams",
+            "pending": "Pending Approval"
+        },
+        "form": {
+            "name": "Classroom Name",
+            "namePlaceholder": "e.g. Mathematics — Grade 10",
+            "subject": "Subject",
+            "subjectPlaceholder": "e.g. Mathematics",
+            "gradeLevel": "Grade Level",
+            "gradeLevelPlaceholder": "e.g. Grade 10",
+            "academicYear": "Academic Year",
+            "description": "Description",
+            "descriptionPlaceholder": "Brief description of this classroom...",
+            "color": "Color",
+            "settings": "Settings",
+            "autoApprove": "Auto-approve students",
+            "autoApproveHint": "Students will be added immediately when they join",
+            "maxCapacity": "Maximum students",
+            "showStudentList": "Show student list to students",
+            "allowStudentChat": "Allow student chat",
+            "createButton": "Create Classroom",
+            "updateButton": "Update Classroom",
+            "cancel": "Cancel"
+        },
+        "detail": {
+            "tabs": {
+                "overview": "Overview",
+                "roster": "Roster",
+                "exams": "Exams",
+                "settings": "Settings"
+            },
+            "overview": {
+                "title": "Overview",
+                "inviteCode": "Invite Code",
+                "shareTitle": "Share Invite Code",
+                "recentActivity": "Recent Activity"
+            },
+            "roster": {
+                "title": "Student Roster",
+                "add": "Add Student",
+                "import": "Import CSV",
+                "search": "Search students...",
+                "allStudents": "All Students",
+                "active": "Active",
+                "pending": "Pending",
+                "suspended": "Suspended",
+                "noStudents": "No students enrolled yet",
+                "pendingApproval": "Pending Approval",
+                "approve": "Approve",
+                "reject": "Reject",
+                "suspend": "Suspend",
+                "activate": "Activate",
+                "remove": "Remove",
+                "transfer": "Transfer"
+            },
+            "exams": {
+                "title": "Exam Assignments",
+                "link": "Link Exam",
+                "unlink": "Unlink",
+                "noExams": "No exams assigned",
+                "assigned": "Assigned",
+                "dueDate": "Due"
+            },
+            "settings": {
+                "title": "Classroom Settings",
+                "regenerateCode": "Regenerate Invite Code",
+                "archive": "Archive Classroom",
+                "unarchive": "Unarchive Classroom",
+                "delete": "Delete Classroom",
+                "deleteConfirm": "Are you sure? This cannot be undone."
+            }
+        },
+        "student": {
+            "noClassrooms": "No classrooms yet",
+            "noClassroomsDesc": "Join a classroom using an invite code from your tutor",
+            "joinButton": "Join Classroom",
+            "enterCode": "Enter Invite Code",
+            "codePlaceholder": "ABC123",
+            "lookingUp": "Looking up...",
+            "joining": "Joining...",
+            "tryDifferent": "Try Different Code",
+            "pendingApproval": "Waiting for Approval",
+            "pendingDesc": "Your tutor will review your request shortly",
+            "suspended": "Access Suspended",
+            "suspendedDesc": "Please contact your tutor for more information",
+            "willBeAdded": "You'll be added immediately",
+            "needsApproval": "Your tutor will need to approve your request",
+            "joinSuccess": "Successfully Joined!",
+            "redirecting": "Redirecting to your classrooms...",
+            "invalidCode": "Invalid or expired invite code",
+            "tabs": {
+                "exams": "Exams",
+                "results": "My Results",
+                "students": "Students"
+            },
+            "noExams": "No exams assigned yet",
+            "noExamsDesc": "Your tutor hasn't assigned any exams to this classroom"
+        },
+        "invite": {
+            "title": "Invite Students",
+            "code": "Invite Code",
+            "copy": "Copy Code",
+            "copyLink": "Copy Link",
+            "share": "Share",
+            "whatsapp": "WhatsApp",
+            "codeCopied": "Code copied!",
+            "linkCopied": "Link copied!"
+        },
+        "actions": {
+            "view": "View",
+            "edit": "Edit",
+            "archive": "Archive",
+            "delete": "Delete",
+            "regenerate": "Regenerate Code"
+        },
+        "messages": {
+            "created": "Classroom created successfully!",
+            "updated": "Classroom updated successfully!",
+            "deleted": "Classroom deleted successfully!",
+            "archived": "Classroom archived",
+            "unarchived": "Classroom unarchived",
+            "codeRegenerated": "Invite code regenerated!",
+            "studentAdded": "Student added successfully!",
+            "studentRemoved": "Student removed",
+            "studentApproved": "Student approved",
+            "studentRejected": "Student request rejected",
+            "joined": "Successfully joined classroom!",
+            "importSuccess": "{{count}} students imported successfully",
+            "error": "Failed to perform action"
         }
     },
     "settings": {

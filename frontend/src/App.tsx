@@ -38,6 +38,14 @@ import StudyZone from './pages/StudyZone';
 import { ExamAnalyticsDashboard } from "./components/analytics/ExamAnalyticsDashboard";
 import { ProctorDashboard } from "./components/ProctorDashboard";
 
+// Classroom pages
+import ClassroomList from './pages/classrooms/ClassroomList';
+import ClassroomCreate from './pages/classrooms/ClassroomCreate';
+import ClassroomDetail from './pages/classrooms/ClassroomDetail';
+import StudentClassroomList from './pages/classrooms/StudentClassroomList';
+import StudentClassroomView from './pages/classrooms/StudentClassroomView';
+import JoinClassroom from './pages/classrooms/JoinClassroom';
+
 import KidsLanding from './pages/KidsLanding';
 import KidsExamView from './pages/KidsExamView';
 import ExamResultsPage from './pages/ExamResultsPage';
@@ -211,6 +219,18 @@ function AppContent() {
         {/* Protected Routes */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        
+        {/* Classroom Routes - Tutor */}
+        <Route path="/classrooms" element={<ProtectedRoute><ClassroomList /></ProtectedRoute>} />
+        <Route path="/classrooms/new" element={<ProtectedRoute><ClassroomCreate /></ProtectedRoute>} />
+        <Route path="/classrooms/:id" element={<ProtectedRoute><ClassroomDetail /></ProtectedRoute>} />
+        
+        {/* Classroom Routes - Student */}
+        <Route path="/my/classrooms" element={<ProtectedRoute><StudentClassroomList /></ProtectedRoute>} />
+        <Route path="/my/classrooms/:id" element={<ProtectedRoute><StudentClassroomView /></ProtectedRoute>} />
+        <Route path="/join" element={<ProtectedRoute><JoinClassroom /></ProtectedRoute>} />
+        <Route path="/join/:code" element={<ProtectedRoute><JoinClassroom /></ProtectedRoute>} />
+        
         <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
         <Route path="/question-bank" element={<ProtectedRoute><QuestionBank /></ProtectedRoute>} />
         <Route path="/exam/new" element={<ProtectedRoute><ExamEditor /></ProtectedRoute>} />

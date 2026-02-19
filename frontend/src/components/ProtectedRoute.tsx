@@ -28,6 +28,32 @@ export function AdminRoute({ children }: ProtectedRouteProps) {
     return <>{children}</>;
 }
 
+// Tutor-only route (blocks students)
+export function TutorRoute({ children }: ProtectedRouteProps) {
+    const { user, role, loading } = useAuth();
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+
+    if (role === 'student') {
+        return <Navigate to="/my/classrooms" replace />;
+    }
+
+    return <>{children}</>;
+}
+
 // Agent or Admin route
 export function AgentRoute({ children }: ProtectedRouteProps) {
     const { role, loading } = useAuth();

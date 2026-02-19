@@ -16,6 +16,7 @@ interface User {
     subscription_status?: string;
     subscription_plan?: string;
     subscription_end_date?: string;
+    billing_cycle?: 'monthly' | 'yearly' | null;
     role?: 'tutor' | 'student' | null;
     created_at: string;
 }
@@ -117,34 +118,47 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
     const activateSubscription = async () => {
         try {
             let days = 0;
+            let billingCycle: 'monthly' | 'yearly' = 'monthly';
             if (subscriptionDuration === 'monthly') {
                 days = 30;
+                billingCycle = 'monthly';
             } else if (subscriptionDuration === 'yearly') {
                 days = 365;
+                billingCycle = 'yearly';
             } else {
                 days = customDays;
+                billingCycle = customDays >= 365 ? 'yearly' : 'monthly';
             }
 
-            const endDate = new Date();
-            endDate.setDate(endDate.getDate() + days);
-
-            const { data, error } = await supabase.rpc('extend_subscription', {
+            // Call extend_subscription RPC with new signature
+            const { error: rpcError } = await supabase.rpc('extend_subscription', {
                 p_user_id: user.id,
-                p_agent_id: agentId,
                 p_days: days,
-                p_plan: subscriptionPlan,
-                p_reason: `Activated ${subscriptionPlan} plan from admin panel`
+                p_reason: `Activated ${subscriptionPlan} plan from admin panel`,
+                p_metadata: {
+                    action: 'activate',
+                    plan: subscriptionPlan,
+                    billing_cycle: billingCycle,
+                    admin_id: agentId || 'admin'
+                }
             });
 
-            if (error) throw error;
+            if (rpcError) throw rpcError;
 
-            if (data?.success) {
-                toast.success(`Subscription activated: ${subscriptionPlan} (${days} days)`);
-                setShowSubscriptionModal(false);
-                onUpdate();
-            } else {
-                throw new Error(data?.error || 'Failed to activate subscription');
-            }
+            // Update billing_cycle and subscription_plan in profiles
+            const { error: updateError } = await supabase
+                .from('profiles')
+                .update({
+                    subscription_plan: subscriptionPlan,
+                    billing_cycle: billingCycle
+                })
+                .eq('id', user.id);
+
+            if (updateError) throw updateError;
+
+            toast.success(`Subscription activated: ${subscriptionPlan} (${days} days)`);
+            setShowSubscriptionModal(false);
+            onUpdate();
         } catch (error) {
             console.error('Error activating subscription:', error);
             toast.error('Failed to activate subscription');
@@ -154,38 +168,46 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
     const extendSubscription = async () => {
         try {
             let days = 0;
+            let billingCycle: 'monthly' | 'yearly' = 'monthly';
             if (subscriptionDuration === 'monthly') {
                 days = 30;
+                billingCycle = 'monthly';
             } else if (subscriptionDuration === 'yearly') {
                 days = 365;
+                billingCycle = 'yearly';
             } else {
                 days = customDays;
+                billingCycle = customDays >= 365 ? 'yearly' : 'monthly';
             }
 
-            const currentEnd = user.subscription_end_date
-                ? new Date(user.subscription_end_date)
-                : new Date();
-
-            const newEnd = new Date(currentEnd);
-            newEnd.setDate(newEnd.getDate() + days);
-
-            const { data, error } = await supabase.rpc('extend_subscription', {
+            // Call extend_subscription RPC with new signature
+            const { error } = await supabase.rpc('extend_subscription', {
                 p_user_id: user.id,
-                p_agent_id: agentId,
                 p_days: days,
-                p_plan: user.subscription_plan || 'pro',
-                p_reason: 'Extended from admin panel'
+                p_reason: 'Extended from admin panel',
+                p_metadata: {
+                    action: 'extend',
+                    previous_billing_cycle: user.billing_cycle,
+                    new_billing_cycle: billingCycle,
+                    admin_id: agentId || 'admin'
+                }
             });
 
             if (error) throw error;
 
-            if (data?.success) {
-                toast.success(`Subscription extended by ${days} days`);
-                setShowSubscriptionModal(false);
-                onUpdate();
-            } else {
-                throw new Error(data?.error || 'Failed to extend subscription');
+            // Update billing_cycle if changed
+            if (user.billing_cycle !== billingCycle) {
+                const { error: updateError } = await supabase
+                    .from('profiles')
+                    .update({ billing_cycle: billingCycle })
+                    .eq('id', user.id);
+
+                if (updateError) throw updateError;
             }
+
+            toast.success(`Subscription extended by ${days} days`);
+            setShowSubscriptionModal(false);
+            onUpdate();
         } catch (error) {
             console.error('Error extending subscription:', error);
             toast.error('Failed to extend subscription');
@@ -194,21 +216,23 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
 
     const deactivateSubscription = async () => {
         try {
-            const { data, error } = await supabase.rpc('cancel_subscription', {
+            // Call cancel_subscription RPC with new signature
+            const { error } = await supabase.rpc('cancel_subscription', {
                 p_user_id: user.id,
-                p_agent_id: agentId,
-                p_reason: 'Deactivated from admin panel'
+                p_reason: 'Deactivated from admin panel',
+                p_metadata: {
+                    action: 'deactivate',
+                    previous_status: user.subscription_status,
+                    previous_plan: user.subscription_plan,
+                    admin_id: agentId || 'admin'
+                }
             });
 
             if (error) throw error;
 
-            if (data?.success) {
-                toast.success('Subscription deactivated');
-                setShowSubscriptionModal(false);
-                onUpdate();
-            } else {
-                throw new Error(data?.error || 'Failed to deactivate subscription');
-            }
+            toast.success('Subscription deactivated');
+            setShowSubscriptionModal(false);
+            onUpdate();
         } catch (error) {
             console.error('Error deactivating subscription:', error);
             toast.error('Failed to deactivate subscription');
@@ -361,6 +385,12 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
                                             <div>
                                                 <span className="text-gray-500 dark:text-gray-400">Plan:</span>
                                                 <p className="text-gray-900 dark:text-white capitalize">{user.subscription_plan}</p>
+                                            </div>
+                                        )}
+                                        {user.billing_cycle && (
+                                            <div>
+                                                <span className="text-gray-500 dark:text-gray-400">Billing Cycle:</span>
+                                                <p className="text-gray-900 dark:text-white capitalize">{user.billing_cycle}</p>
                                             </div>
                                         )}
                                         {user.subscription_end_date && (

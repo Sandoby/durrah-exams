@@ -52,7 +52,10 @@ export default function PaymentCallback() {
               try {
                 const verifyRes = await fetch(`${siteUrl}/verifyDodoPayment`, {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
+                  headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                  },
                   body: JSON.stringify({ orderId, userId: session.user.id })
                 });
 
@@ -70,6 +73,10 @@ export default function PaymentCallback() {
                     setTimeout(() => navigate('/dashboard', { replace: true }), 1500);
                     return;
                   }
+                } else if (verifyRes.status === 401) {
+                  console.warn('Direct verification failed: Unauthorized');
+                } else {
+                  console.warn('Direct verification failed:', verifyRes.status);
                 }
               } catch (directErr) {
                 console.warn('Direct verification failed, falling back to polling:', directErr);
@@ -124,11 +131,11 @@ export default function PaymentCallback() {
               await new Promise(r => setTimeout(r, 2000));
             }
 
-            // Fallback: Webhook might be slow; do NOT mark success without confirmation
+            // Fallback: Webhook might be slow; show pending message
             console.log('⏳ Dodo webhook taking longer than expected');
             setStatus('loading');
-            setMessage('Payment received. Activation is pending verification. You will see Pro features shortly.');
-            setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
+            setMessage('Your payment was received but activation is taking longer than expected. Please check your dashboard or contact support if the issue persists.');
+            // Don't auto-redirect - let user manually go to dashboard or retry
             return;
           } catch (err: any) {
             console.error('Dodo callback error:', err);

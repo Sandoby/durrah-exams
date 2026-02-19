@@ -18,6 +18,7 @@ interface TutorProfile {
     subscription_status?: string;
     subscription_plan?: string;
     subscription_end_date?: string;
+    billing_cycle?: string;
     dodo_customer_id?: string;
     trial_ends_at?: string;
 }
@@ -88,6 +89,7 @@ export default function Settings() {
                 subscription_status: profileData?.subscription_status || subscriptionStatus || undefined,
                 subscription_plan: profileData?.subscription_plan,
                 subscription_end_date: profileData?.subscription_end_date,
+                billing_cycle: profileData?.billing_cycle,
                 dodo_customer_id: profileData?.dodo_customer_id,
                 trial_ends_at: profileData?.trial_ends_at,
             });
@@ -486,7 +488,12 @@ export default function Settings() {
                                     <div className="w-full space-y-4">
                                         <div className="p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
                                             <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">{t('settings.subscription.plan', 'Current Plan')}</p>
-                                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">{profile.subscription_plan || 'PRO'}</h3>
+                                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">{profile.subscription_plan || 'Professional'}</h3>
+                                            {profile.billing_cycle && (
+                                                <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">
+                                                    {profile.billing_cycle === 'yearly' ? 'Billed Annually' : 'Billed Monthly'}
+                                                </p>
+                                            )}
                                         </div>
                                         <div>
                                             <p className="text-xs text-gray-500">{t('settings.subscription.expires', 'Expires on')}</p>

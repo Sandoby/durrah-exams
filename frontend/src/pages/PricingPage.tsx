@@ -200,7 +200,7 @@ export default function PricingPage() {
                         <motion.div variants={fadeIn} className="flex flex-col bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 hover:shadow-xl transition-all duration-300">
                             <div className="flex justify-between items-center mb-2">
                                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{t('pricing.yearly.title')}</h3>
-                                <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs px-2 py-1 rounded-md font-bold">SAVE 20%</span>
+                                <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs px-2 py-1 rounded-md font-bold">SAVE 17%</span>
                             </div>
                             <div className="mb-6">
                                 <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">{isCurrencyLoading ? '...' : `${currencyCode} ${yearlyPrice}`}</span>

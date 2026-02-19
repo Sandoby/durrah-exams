@@ -26,6 +26,7 @@ interface User {
     subscription_status?: string;
     subscription_plan?: string;
     subscription_end_date?: string;
+    billing_cycle?: 'monthly' | 'yearly' | null;
 }
 
 interface Coupon {
@@ -87,6 +88,7 @@ interface UserInfo {
     subscription_status?: string;
     subscription_plan?: string;
     subscription_end_date?: string;
+    billing_cycle?: 'monthly' | 'yearly' | null;
     created_at?: string;
 }
 

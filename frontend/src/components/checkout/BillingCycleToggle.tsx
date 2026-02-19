@@ -14,7 +14,7 @@ const BillingCycleToggle: React.FC<BillingCycleToggleProps> = ({
   onCycleChange,
   disabled = false,
   showDiscount = true,
-  discountPercentage = 20,
+  discountPercentage = 17,
 }) => {
   const options = [
     {

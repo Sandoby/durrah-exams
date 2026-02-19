@@ -42,14 +42,55 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
         console.log(`[AUTH] Proceeding with provided userId: ${userId}`);
     }
 
+    // If user still not found, try looking up by dodo_customer_id
+    if (!userId && args.dodoCustomerId) {
+        const custLookup = await fetch(
+            `${supabaseUrl}/rest/v1/profiles?dodo_customer_id=eq.${encodeURIComponent(args.dodoCustomerId)}&select=id`,
+            { headers: emailHeaders }
+        );
+        if (custLookup.ok) {
+            const custUsers = await custLookup.json();
+            if (custUsers?.[0]?.id) {
+                userId = custUsers[0].id;
+                console.log(`[AUTH] Successfully identified user via dodo_customer_id: ${userId}`);
+            }
+        }
+    }
+
     if (!userId) {
-        console.error('COULD NOT IDENTIFY USER for Dodo event:', { email: args.userEmail, subId: args.subscriptionId });
-        return { success: false, error: 'User not identified' };
+        console.error('FAILED ACTIVATION: Could not identify user for Dodo event:', { 
+            email: args.userEmail, 
+            subId: args.subscriptionId,
+            customerId: args.dodoCustomerId 
+        });
+        
+        // Log failed activation for admin recovery
+        try {
+            await fetch(`${supabaseUrl}/rest/v1/failed_activations`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    dodo_subscription_id: args.subscriptionId,
+                    dodo_customer_id: args.dodoCustomerId,
+                    customer_email: args.userEmail,
+                    event_type: args.eventType || 'unknown',
+                    webhook_payload: args,
+                    error_message: 'User identification failed - no userId, email match, or customer_id match',
+                    status: 'pending_resolution'
+                })
+            });
+            console.log('[FAILED_ACTIVATION] Logged to failed_activations table for admin recovery');
+        } catch (e) {
+            console.error('[FAILED_ACTIVATION] Could not log to failed_activations:', e);
+        }
+        
+        return { success: false, error: 'User not identified - logged for recovery' };
     }
 
     // TRIAL PROTECTION: Check if user is currently on trial
     // If they are, only allow 'active' paid subscriptions to override (trial-to-paid conversion)
     // Prevent old cancelled/failed Dodo subscriptions from destroying active trials
+    // BUT: Always allow explicit cancellation from the portal (subscription.cancelled event)
     try {
         const profileRes = await fetch(
             `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=subscription_status,trial_activated,trial_ends_at,trial_grace_ends_at`,
@@ -61,48 +102,132 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
 
             // If user is on active trial OR in grace period and Dodo status is cancelled/payment_failed
             // Skip the update to protect the trial/grace period
+            // EXCEPTION: If eventType explicitly indicates a portal cancellation, allow it through
             const isTrialing = profile?.subscription_status === 'trialing' && profile?.trial_activated === true;
             const isInGracePeriod = profile?.subscription_status === 'expired' &&
                                     profile?.trial_activated === true &&
                                     profile?.trial_grace_ends_at &&
                                     new Date(profile.trial_grace_ends_at) > new Date();
 
-            if ((isTrialing || isInGracePeriod) && args.status !== 'active') {
+            const isExplicitCancellation = args.status === 'cancelled' && (
+                args.eventType === 'subscription.cancelled' || 
+                args.eventType === 'subscription.canceled' ||
+                args.eventType === 'subscription.updated' // portal cancel triggers updated event
+            );
+
+            if ((isTrialing || isInGracePeriod) && args.status !== 'active' && !isExplicitCancellation) {
                 console.log(`[TRIAL-PROTECTION] Skipping ${args.status} Dodo update for user ${userId} - protecting active trial/grace period`);
                 return { success: true, userId, skipped: true, reason: 'trial_protection' };
             } else if (isTrialing && args.status === 'active') {
                 console.log(`[TRIAL-TO-PAID] User ${userId} converting from trial to paid subscription`);
+            } else if (isExplicitCancellation && (isTrialing || isInGracePeriod)) {
+                console.log(`[TRIAL-CANCEL] User ${userId} explicitly cancelled via portal during trial - allowing cancellation`);
             }
         }
     } catch (e) {
         console.warn('[TRIAL-PROTECTION] Check failed (proceeding):', e);
     }
 
+    // Determine billing cycle with robust fallback chain
+    let billingCycle = args.billingCycle;
+    if (!billingCycle || billingCycle === 'monthly') {
+        // Fallback 1: Check profile's stored billing_cycle
+        try {
+            const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=billing_cycle`, 
+                { headers: emailHeaders });
+            if (profileRes.ok) {
+                const profiles = await profileRes.json();
+                const storedCycle = profiles?.[0]?.billing_cycle;
+                if (storedCycle) {
+                    billingCycle = storedCycle;
+                    console.log(`[BILLING_CYCLE] Using stored billing_cycle from profile: ${billingCycle}`);
+                }
+            }
+        } catch (e) {
+            console.warn('[BILLING_CYCLE] Could not fetch profile billing_cycle:', e);
+        }
+        
+        // Fallback 2: Check if subscription product ID indicates yearly
+        if ((!billingCycle || billingCycle === 'monthly') && args.subscriptionId) {
+            const apiKey = process.env.DODO_PAYMENTS_API_KEY;
+            if (apiKey) {
+                try {
+                    const isTest = apiKey.startsWith('test_');
+                    const baseUrl = isTest ? 'https://test.dodopayments.com' : 'https://live.dodopayments.com';
+                    const subRes = await fetch(`${baseUrl}/subscriptions/${args.subscriptionId}`, {
+                        headers: { 'Authorization': `Bearer ${apiKey}` }
+                    });
+                    if (subRes.ok) {
+                        const subData = await subRes.json();
+                        const productId = subData?.product_id || subData?.product?.id;
+                        // Yearly product ID
+                        if (productId === 'pdt_0NVdw6iZw42sQIdxctP55') {
+                            billingCycle = 'yearly';
+                            console.log('[BILLING_CYCLE] Detected yearly subscription from product ID');
+                        }
+                    }
+                } catch (e) {
+                    console.warn('[BILLING_CYCLE] Could not fetch Dodo subscription for product check:', e);
+                }
+            }
+        }
+    }
+    console.log(`[BILLING_CYCLE] Final resolved billing cycle: ${billingCycle}`);
+
     // Use the same RPC functions as the admin panel for consistent behavior
     if (args.status === 'active') {
         // For provider-driven updates, prefer exact period end from provider.
         // This prevents duplicated extensions from repeated webhook/sync events.
         if (args.nextBillingDate) {
-            const patchPayload: Record<string, any> = {
-                subscription_status: 'active',
-                subscription_end_date: args.nextBillingDate
-            };
-            if (args.plan) patchPayload.subscription_plan = args.plan;
-            if (args.dodoCustomerId) patchPayload.dodo_customer_id = args.dodoCustomerId;
+            const targetEnd = new Date(args.nextBillingDate);
+            
+            // Idempotency check: fetch current end date
+            let shouldUpdate = true;
+            try {
+                const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=subscription_status,subscription_end_date`, 
+                    { headers: emailHeaders });
+                if (profileRes.ok) {
+                    const profiles = await profileRes.json();
+                    const profile = profiles?.[0];
+                    if (profile?.subscription_status === 'active' && profile?.subscription_end_date) {
+                        const currentEnd = new Date(profile.subscription_end_date);
+                        const timeDiff = Math.abs(targetEnd.getTime() - currentEnd.getTime());
+                        const oneHourMs = 3600000;
+                        
+                        if (timeDiff < oneHourMs) {
+                            console.log(`[IDEMPOTENCY] Skipping update - end dates match within 1 hour. Current: ${profile.subscription_end_date}, Target: ${args.nextBillingDate}`);
+                            shouldUpdate = false;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('[IDEMPOTENCY] Check failed, proceeding with update:', e);
+            }
+            
+            if (shouldUpdate) {
+                const patchPayload: Record<string, any> = {
+                    subscription_status: 'active',
+                    subscription_end_date: args.nextBillingDate,
+                    subscription_plan: 'Professional',
+                    billing_cycle: billingCycle
+                };
+                if (args.dodoCustomerId) patchPayload.dodo_customer_id = args.dodoCustomerId;
 
-            const patchRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
-                method: 'PATCH',
-                headers,
-                body: JSON.stringify(patchPayload)
-            });
+                const patchRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
+                    method: 'PATCH',
+                    headers,
+                    body: JSON.stringify(patchPayload)
+                });
 
-            if (!patchRes.ok) {
-                const patchErr = await patchRes.text();
-                console.error(`[DB] Failed to sync active subscription state for user ${userId}: ${patchRes.status} ${patchErr}`);
-                return { success: false, error: 'Profile sync failed' };
+                if (!patchRes.ok) {
+                    const patchErr = await patchRes.text();
+                    console.error(`[DB] Failed to sync active subscription state for user ${userId}: ${patchRes.status} ${patchErr}`);
+                    return { success: false, error: 'Profile sync failed' };
+                }
+                console.log(`[DB] Successfully patched subscription for user ${userId} with nextBillingDate`);
             }
 
-            return { success: true, userId, syncedByDate: true };
+            return { success: true, userId, syncedByDate: true, skipped: !shouldUpdate };
         }
 
         const days = args.billingCycle === 'yearly' ? 365 : 30;
@@ -142,10 +267,15 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
                 headers,
                 body: JSON.stringify({
                     p_user_id: userId,
-                    p_agent_id: null,
                     p_days: days,
-                    p_plan: args.plan || 'pro',
-                    p_reason: 'Activated via Dodo Payments'
+                    p_reason: `Activated via Dodo Payments (${billingCycle})`,
+                    p_metadata: {
+                        source: 'dodo_webhook',
+                        plan: 'Professional',
+                        billing_cycle: billingCycle,
+                        subscription_id: args.subscriptionId || null,
+                        event_type: args.eventType || 'activation'
+                    }
                 })
             });
 
@@ -155,6 +285,17 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
                 return { success: false, error: 'Database RPC failed' };
             }
             console.log(`[DB] Successfully activated subscription for user ${userId} via RPC`);
+
+            // Update billing_cycle column
+            try {
+                await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
+                    method: 'PATCH',
+                    headers,
+                    body: JSON.stringify({ billing_cycle: billingCycle })
+                });
+            } catch (e) {
+                console.warn('[DB] Failed to update billing_cycle (non-critical):', e);
+            }
 
             // TRIAL-TO-PAID CONVERSION: Clear trial fields if user was on trial
             try {
@@ -219,8 +360,12 @@ async function updateSubscriptionLogic(supabaseUrl: string, supabaseKey: string,
             headers,
             body: JSON.stringify({
                 p_user_id: userId,
-                p_agent_id: null,
-                p_reason: 'Cancelled via Dodo'
+                p_reason: 'Cancelled via Dodo',
+                p_metadata: {
+                    source: 'dodo_webhook',
+                    subscription_id: args.subscriptionId || null,
+                    event_type: args.eventType || 'cancellation'
+                }
             })
         });
 
@@ -298,6 +443,7 @@ export const updateSubscription = internalAction({
         subscriptionId: v.optional(v.string()),
         nextBillingDate: v.optional(v.string()), // Used for sync
         billingCycle: v.optional(v.string()),
+        eventType: v.optional(v.string()),
         silent: v.optional(v.boolean()),
     },
     handler: async (_ctx, args) => {
@@ -853,6 +999,8 @@ export const syncSubscriptionFromProvider = internalAction({
                 mappedStatus = 'cancelled';
             }
 
+            console.log(`[SYNC] Dodo subscription ${subscriptionId}: raw=${statusRaw}, cancelFlags=${canceledByFlags}, mapped=${mappedStatus}`);
+
             const syncResult = await updateSubscriptionLogic(supabaseUrl, supabaseKey, {
                 userId: args.userId,
                 userEmail: args.userEmail,
@@ -862,7 +1010,9 @@ export const syncSubscriptionFromProvider = internalAction({
                 nextBillingDate,
                 billingCycle: subscription?.metadata?.billingCycle,
                 plan: 'Professional',
-                silent: true
+                silent: true,
+                // Pass eventType so trial protection allows explicit cancellations from sync
+                eventType: mappedStatus === 'cancelled' ? 'subscription.cancelled' : 'subscription.updated'
             });
 
             return { ...syncResult, providerStatus: statusRaw, subscriptionId };
@@ -972,6 +1122,8 @@ export const reconcileSubscriptionsFromDodo = internalAction({
                     billingCycle: subscription?.metadata?.billingCycle,
                     plan: 'Professional',
                     silent: true,
+                    // Pass eventType so trial protection allows cancellations from reconciliation
+                    eventType: mappedStatus === 'cancelled' ? 'subscription.cancelled' : 'subscription.updated'
                 });
 
                 if (result?.success) {

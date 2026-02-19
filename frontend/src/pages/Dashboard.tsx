@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, AlertTriangle, Power, Eye, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Share2, BarChart3, FileText, Settings, Crown, Menu, X, TrendingUp, Lock, BookOpen, Copy, AlertTriangle, Power, Eye, Loader2, AlertCircle, Users } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -645,6 +645,14 @@ export default function Dashboard() {
                                 </svg>
                                 {t('dashboard.tour.startTour', 'Tutorial')}
                             </button>
+                            <Link
+                                to="/classrooms"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                                <Users className="h-5 w-5 mr-3" />
+                                {t('nav.classrooms', 'Classrooms')}
+                            </Link>
                             {!hasActiveAccess(profile?.subscription_status) && (
                                 <Link
                                     to="/checkout"
@@ -697,6 +705,14 @@ export default function Dashboard() {
                             <p className="mt-2 text-gray-600 dark:text-gray-400">{t('dashboard.subTitle')}</p>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                            <Link
+                                to="/classrooms"
+                                data-tour="classrooms"
+                                className="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 hover:shadow-md transition-all w-full sm:w-auto"
+                            >
+                                <Users className="h-5 w-5 mr-2" />
+                                {t('nav.classrooms', 'Classrooms')}
+                            </Link>
                             <Link
                                 to="/question-bank"
                                 data-tour="question-bank"

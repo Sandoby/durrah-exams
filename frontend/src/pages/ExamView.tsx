@@ -76,6 +76,7 @@ export default function ExamView() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const submissionId = searchParams.get('submission');
+    const classroomId = searchParams.get('classroomId'); // Track classroom context
     const isReviewMode = !!submissionId;
 
     // Supabase-based exam progress (for authenticated users)
@@ -1669,6 +1670,7 @@ export default function ExamView() {
 
             const submissionData = {
                 exam_id: id,
+                classroom_id: classroomId || null, // Include classroom context if taking from classroom
                 student_data: {
                     name: studentName,
                     email: studentEmail,

@@ -32,24 +32,6 @@
             "cancelAnytime": "Annulez à tout moment"
         }
     },
-    "landing": {
-        "howto": {
-            "title": "Comment ça marche",
-            "subtitle": "Créez des examens sécurisés en ligne en trois étapes simples",
-            "step1": {
-                "title": "Élaborez votre vision",
-                "desc": "Le créateur d'examen le plus intuitif. Les questions s'assemblent en 3D pendant que vous tapez."
-            },
-            "step2": {
-                "title": "Sécurisez l'environnement",
-                "desc": "Activez des mesures anti-triche puissantes en un clic. Surveillance des onglets, verrouillage plein écran, et plus encore."
-            },
-            "step3": {
-                "title": "Bilan et analyses",
-                "desc": "Obtenez instantanément des analyses détaillées et des indicateurs de performance des étudiants."
-            }
-        }
-    },
     "nav": {
         "features": "Fonctionnalités",
         "pricing": "Tarifs",
