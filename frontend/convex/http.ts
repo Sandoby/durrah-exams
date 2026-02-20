@@ -498,6 +498,38 @@ http.route({
             });
           }
         }
+
+        // Send renewal success email
+        if (userEmail) {
+          const supabaseUrl = process.env.SUPABASE_URL;
+          const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          if (supabaseUrl && supabaseKey) {
+            try {
+              await fetch(`${supabaseUrl}/functions/v1/send-payment-email`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${supabaseKey}`,
+                  'apikey': supabaseKey,
+                },
+                body: JSON.stringify({
+                  type: 'subscription_renewed',
+                  email: userEmail,
+                  data: {
+                    userName: data?.customer?.name || userEmail.split('@')[0],
+                    nextBillingDate: data?.next_billing_date,
+                    planName: metadata.billingCycle === 'yearly' ? 'Professional (Yearly)' : 'Professional (Monthly)',
+                    amount: data?.amount,
+                    currency: data?.currency || 'USD',
+                  },
+                }),
+              });
+              console.log(`[Webhook] Sent subscription_renewed email to ${userEmail}`);
+            } catch (emailErr) {
+              console.error(`[Webhook] Failed to send subscription_renewed email:`, emailErr);
+            }
+          }
+        }
       } else if (isUpdatedEvent) {
         // Real-time sync: check if this update is actually a cancellation.
         // Dodo sends subscription.updated when cancel_at_period_end is set via portal.
@@ -572,6 +604,48 @@ http.route({
           subscriptionId: data?.subscription_id,
           eventType: eventType,
         });
+
+        // Send payment failed email
+        if (userEmail && userId) {
+          const supabaseUrl = process.env.SUPABASE_URL;
+          const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          if (supabaseUrl && supabaseKey) {
+            try {
+              // Fetch profile to get subscription_end_date and other details
+              const profileRes = await fetch(
+                `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=subscription_end_date,subscription_plan,dodo_checkout_url`,
+                { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+              );
+              if (profileRes.ok) {
+                const profiles = await profileRes.json();
+                const profile = profiles?.[0];
+                if (profile) {
+                  await fetch(`${supabaseUrl}/functions/v1/send-payment-email`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${supabaseKey}`,
+                      'apikey': supabaseKey,
+                    },
+                    body: JSON.stringify({
+                      type: 'payment_failed',
+                      email: userEmail,
+                      data: {
+                        subscriptionEndDate: profile.subscription_end_date,
+                        planName: profile.subscription_plan || 'Professional',
+                        checkoutUrl: profile.dodo_checkout_url,
+                        reason: data?.decline_reason || data?.failure_reason || 'Payment declined',
+                      },
+                    }),
+                  });
+                  console.log(`[Webhook] Sent payment_failed email to ${userEmail}`);
+                }
+              }
+            } catch (emailErr) {
+              console.error(`[Webhook] Failed to send payment_failed email:`, emailErr);
+            }
+          }
+        }
       } else if (isCancelledEvent) {
         console.log(`[Webhook] Processing cancellation event: ${eventType}`, {
           userId,

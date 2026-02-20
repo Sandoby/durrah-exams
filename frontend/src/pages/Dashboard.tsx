@@ -21,6 +21,7 @@ import { hasActiveAccess } from '../lib/subscriptionUtils';
 import { TrialBanner } from '../components/dashboard/TrialBanner';
 import { TrialWelcomeModal } from '../components/dashboard/TrialWelcomeModal';
 import { GracePeriodBanner } from '../components/dashboard/GracePeriodBanner';
+import { PaymentFailedBanner } from '../components/dashboard/PaymentFailedBanner';
 
 
 interface Exam {
@@ -782,6 +783,12 @@ export default function Dashboard() {
                                 subscriptionStatus={profile?.subscription_status}
                                 trialGraceEndsAt={profile?.trial_grace_ends_at}
                             />
+                        </div>
+                    )}
+
+                    {profile?.subscription_status === 'payment_failed' && (
+                        <div className="mb-6">
+                            <PaymentFailedBanner subscriptionEndDate={profile?.subscription_end_date} />
                         </div>
                     )}
 

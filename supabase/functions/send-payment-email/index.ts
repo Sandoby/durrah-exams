@@ -9,7 +9,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-type PaymentEmailType = 'payment_success' | 'payment_failed' | 'subscription_expiring'
+type PaymentEmailType = 'payment_success' | 'payment_failed' | 'subscription_expiring' | 'subscription_renewed'
 
 const createPaymentTemplate = (type: PaymentEmailType, data: Record<string, unknown>) => {
   switch (type) {
@@ -68,8 +68,7 @@ const createPaymentTemplate = (type: PaymentEmailType, data: Record<string, unkn
       }
     }
 
-    case 'subscription_expiring':
-    default: {
+    case 'subscription_expiring': {
       const subject = 'Your subscription expires soon'
       const bodyHtml = `
         <div style="margin-bottom:16px;">Your subscription will expire on <strong>${data.expiryDate ? new Date(String(data.expiryDate)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '-'}</strong>.</div>
@@ -95,6 +94,36 @@ const createPaymentTemplate = (type: PaymentEmailType, data: Record<string, unkn
         }),
       }
     }
+
+    case 'subscription_renewed':
+    default: {
+      const subject = 'Your subscription has been renewed'
+      const detailCard = renderDetailCard([
+        { label: 'Plan', value: String(data.planName || 'Professional') },
+        { label: 'Renewed on', value: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) },
+        { label: 'Valid Until', value: data.nextBillingDate ? new Date(String(data.nextBillingDate)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '-' },
+        { label: 'Amount', value: `${String(data.currency || 'EGP')} ${String(data.amount || '-')}` },
+      ])
+      const bodyHtml = `
+        <div style="margin-bottom:16px;">Hello ${String(data.userName || 'there')}, your subscription has been successfully renewed.</div>
+        ${detailCard}
+        <div style="margin-top:16px;color:#424245;">Your premium features remain active. Thank you for being a valued member!</div>
+      `
+      return {
+        subject,
+        html: renderUnifiedEmailTemplate({
+          preheader: 'Your subscription has been renewed',
+          eyebrow: 'SUBSCRIPTION RENEWED',
+          title: 'Subscription renewed',
+          bodyHtml,
+          ctaText: 'Go to Dashboard',
+          ctaUrl: String(data.dashboardUrl || `${SITE_URL}/dashboard`),
+          accentColor: '#1d1d1f',
+          secondaryText: 'Need help? Contact us at support@durrahtutors.com',
+          siteUrl: SITE_URL,
+        }),
+      }
+    }
   }
 }
 
@@ -116,7 +145,7 @@ serve(async (req) => {
       throw new Error('email is required')
     }
 
-    if (!['payment_success', 'payment_failed', 'subscription_expiring'].includes(emailType)) {
+    if (!['payment_success', 'payment_failed', 'subscription_expiring', 'subscription_renewed'].includes(emailType)) {
       throw new Error('Unsupported email type')
     }
 

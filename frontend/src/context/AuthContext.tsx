@@ -107,6 +107,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                                     id: 'subscription-expired',
                                 });
                             }
+                            // Show toast when payment succeeds after a failed payment
+                            if (nextStatus === 'active' && prevStatus === 'payment_failed') {
+                                toast.success('Payment successful! Your subscription has been renewed.', {
+                                    duration: 6000,
+                                    id: 'subscription-renewed',
+                                });
+                            }
+                            // Show warning toast when payment fails
+                            if (nextStatus === 'payment_failed' && prevStatus !== 'payment_failed') {
+                                toast.error('Your latest payment failed. Please update your payment method to avoid losing access.', {
+                                    duration: 10000,
+                                    id: 'payment-failed',
+                                });
+                            }
                             return nextStatus ?? null;
                         });
                     }
