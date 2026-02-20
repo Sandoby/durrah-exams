@@ -979,10 +979,17 @@ export const syncSubscriptionFromProvider = internalAction({
             // cancel_at_period_end = true means the subscription will cancel AT THE END of the
             // current billing period — it is STILL ACTIVE right now. Do NOT treat this as
             // an immediate cancellation (that was the old bug causing false deactivations).
+            //
+            // CRITICAL: ended_at and end_at might be set to FUTURE dates (next billing period).
+            // Only treat as cancelled if these dates are in the PAST, or if cancelled_at is set.
+            const now = new Date();
+            const endedAtDate = subscription?.ended_at ? new Date(subscription.ended_at) : null;
+            const endAtDate = subscription?.end_at ? new Date(subscription.end_at) : null;
+            
             const alreadyCanceled =
                 !!subscription?.cancelled_at ||
-                !!subscription?.ended_at ||
-                !!subscription?.end_at;
+                (endedAtDate && endedAtDate <= now) ||
+                (endAtDate && endAtDate <= now);
 
             const dodoCustomerId = subscription?.customer?.id || subscription?.customer?.customer_id || subscription?.customer_id;
             const nextBillingDate = subscription?.next_billing_date as string | undefined;

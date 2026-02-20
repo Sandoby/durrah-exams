@@ -346,14 +346,21 @@ http.route({
       // cancelled NOW — it means it will cancel at the end of the billing period
       // but remains ACTIVE today. Including it here would block legitimate
       // subscription.active activations for users who set cancel_at_period_end.
+      //
+      // CRITICAL: end_at can be set to a FUTURE date (next billing period) on
+      // active subscriptions. Only treat as cancelled if end_at is in the PAST.
+      const now = new Date();
+      const endAtDate = liveSubscriptionData?.end_at ? new Date(liveSubscriptionData.end_at) : null;
+      const endedAtDate = liveSubscriptionData?.ended_at ? new Date(liveSubscriptionData.ended_at) : null;
+      
       const preIsCancelledStatus =
         preNormalizedStatus === 'cancelled' ||
         preNormalizedStatus === 'canceled' ||
         preNormalizedStatus === 'expired' ||
         preNormalizedStatus === 'inactive' ||
         !!liveSubscriptionData?.cancelled_at ||
-        !!liveSubscriptionData?.ended_at ||
-        !!liveSubscriptionData?.end_at;
+        (endedAtDate && endedAtDate <= now) ||
+        (endAtDate && endAtDate <= now);
 
       // Routing based on event type
       // Routing based on event type
@@ -537,10 +544,13 @@ http.route({
         // IMPORTANT: cancel_at_period_end = true means "will cancel at end of billing
         // period" — the subscription is STILL ACTIVE TODAY. Do NOT cancel immediately.
         // Only treat as cancelled when the subscription has genuinely ended (cancelled_at
-        // or ended_at are set, or the live status is explicitly cancelled/canceled).
+        // or ended_at are set AND in the past, or the live status is explicitly cancelled/canceled).
+        const now = new Date();
+        const endedAtDate = liveSubscriptionData?.ended_at ? new Date(liveSubscriptionData.ended_at) : null;
+        
         const isUpdatedButCancelled =
           !!liveSubscriptionData?.cancelled_at ||
-          !!liveSubscriptionData?.ended_at ||
+          (endedAtDate && endedAtDate <= now) ||
           liveSubscriptionData?.status === 'cancelled' ||
           liveSubscriptionData?.status === 'canceled';
 
