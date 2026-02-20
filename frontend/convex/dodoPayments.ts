@@ -1076,12 +1076,21 @@ export const reconcileSubscriptionsFromDodo = internalAction({
             for (const subscription of items) {
                 processed++;
                 const statusRaw = String(subscription?.status || '').toLowerCase();
+                
+                // CRITICAL FIX: Do NOT treat future-dated end_at/ended_at as cancelled.
+                // Dodo sets end_at to the next billing period end — it does NOT mean
+                // the subscription has ended. Only cancelled_at is definitive.
+                //
+                // cancel_at_period_end and cancel_at_next_billing_date mean "will cancel
+                // in the future" — the subscription is STILL ACTIVE TODAY.
+                const now = new Date();
+                const endedAtDate = subscription?.ended_at ? new Date(subscription.ended_at) : null;
+                const endAtDate = subscription?.end_at ? new Date(subscription.end_at) : null;
+                
                 const canceledByFlags =
-                    subscription?.cancel_at_next_billing_date === true ||
-                    subscription?.cancel_at_period_end === true ||
                     !!subscription?.cancelled_at ||
-                    !!subscription?.ended_at ||
-                    !!subscription?.end_at;
+                    (endedAtDate && endedAtDate <= now) ||
+                    (endAtDate && endAtDate <= now);
 
                 let mappedStatus: 'active' | 'cancelled' | 'payment_failed';
                 if (canceledByFlags || statusRaw === 'cancelled' || statusRaw === 'canceled') {
@@ -1130,6 +1139,8 @@ export const reconcileSubscriptionsFromDodo = internalAction({
                     unresolved++;
                     continue;
                 }
+
+                console.log(`[RECONCILE] Sub ${subId}: raw=${statusRaw}, mapped=${mappedStatus}, cancelled_at=${subscription?.cancelled_at}, ended_at=${subscription?.ended_at}, end_at=${subscription?.end_at}, cancel_at_period_end=${subscription?.cancel_at_period_end}, userId=${resolvedUserId}`);
 
                 const result = await updateSubscriptionLogic(supabaseUrl, supabaseKey, {
                     userId: resolvedUserId,

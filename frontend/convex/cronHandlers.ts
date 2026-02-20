@@ -232,7 +232,10 @@ export const checkSubscriptionExpirations = internalMutation({
         // if they have turned off email notifications.
 
         // EXPIRED - Set status to expired (runs for ALL users regardless of notification prefs)
-        if (daysUntilExpiry <= 0 && profile.subscription_status !== 'expired') {
+        // GUARD: Do NOT expire users who are currently 'active' — their subscription_end_date
+        // will be extended by the next webhook/sync. Expiring active users causes false
+        // deactivations when the cron runs between payment and date extension.
+        if (daysUntilExpiry <= 0 && profile.subscription_status !== 'expired' && profile.subscription_status !== 'active') {
           await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
             method: 'PATCH',
             headers,
