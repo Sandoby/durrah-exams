@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, User, Mail, Lock, Save, Loader2, Crown, Menu, X, LogOut, Settings as SettingsIcon, Globe, ExternalLink } from 'lucide-react';
@@ -65,6 +65,54 @@ export default function Settings() {
             subscription_status: subscriptionStatus
         }));
     }, [subscriptionStatus]);
+
+    // Real-time profile listener — keeps Settings data fresh without reload
+    const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+    useEffect(() => {
+        if (!user) return;
+
+        // Clean up any previous channel
+        if (realtimeChannelRef.current) {
+            supabase.removeChannel(realtimeChannelRef.current);
+        }
+
+        const channel = supabase
+            .channel(`settings-profile-${user.id}`)
+            .on(
+                'postgres_changes' as any,
+                { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
+                (payload: any) => {
+                    const updated = payload?.new;
+                    if (!updated) return;
+
+                    setProfile(prev => ({
+                        ...prev,
+                        full_name: updated.full_name ?? prev.full_name,
+                        email: updated.email ?? prev.email,
+                        phone: updated.phone ?? prev.phone,
+                        institution: updated.institution ?? prev.institution,
+                        subscription_status: updated.subscription_status ?? prev.subscription_status,
+                        subscription_plan: updated.subscription_plan ?? prev.subscription_plan,
+                        subscription_end_date: updated.subscription_end_date ?? prev.subscription_end_date,
+                        billing_cycle: updated.billing_cycle ?? prev.billing_cycle,
+                        dodo_customer_id: updated.dodo_customer_id ?? prev.dodo_customer_id,
+                        trial_ends_at: updated.trial_ends_at ?? prev.trial_ends_at,
+                    }));
+
+                    if (updated.role) {
+                        setUserRole(updated.role);
+                    }
+                }
+            )
+            .subscribe();
+
+        realtimeChannelRef.current = channel;
+
+        return () => {
+            supabase.removeChannel(channel);
+            realtimeChannelRef.current = null;
+        };
+    }, [user?.id]);
 
     const fetchProfile = async () => {
         if (!user) return;
