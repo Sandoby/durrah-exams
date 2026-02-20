@@ -244,15 +244,63 @@ export const checkSubscriptionExpirations = internalMutation({
         }
         // 3-DAY REMINDER
         else if (daysUntilExpiry <= 3 && daysUntilExpiry > 0 && hoursSinceLastReminder >= 23) {
+          try {
+            await fetch(`${supabaseUrl}/functions/v1/send-payment-email`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${supabaseKey}`,
+                'apikey': supabaseKey,
+              },
+              body: JSON.stringify({
+                type: 'subscription_expiring',
+                email: profile.email,
+                daysRemaining: daysUntilExpiry,
+                expiryDate: profile.subscription_end_date,
+                planName: profile.subscription_plan || 'Professional',
+              }),
+            });
+            await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
+              method: 'PATCH',
+              headers,
+              body: JSON.stringify({ last_reminder_sent_at: now.toISOString() }),
+            });
+            console.log(`[Expiration Check] Sent 3-day reminder to ${profile.email}`);
+          } catch (emailErr) {
+            console.error(`[Expiration Check] Failed to send reminder to ${profile.email}:`, emailErr);
+          }
           remindersCount++;
           processedCount++;
-          console.log(`[Expiration Check] Would send 3-day reminder to ${profile.email}`);
         }
         // 7-DAY REMINDER
         else if (daysUntilExpiry <= 7 && daysUntilExpiry > 3 && hoursSinceLastReminder >= 23) {
+          try {
+            await fetch(`${supabaseUrl}/functions/v1/send-payment-email`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${supabaseKey}`,
+                'apikey': supabaseKey,
+              },
+              body: JSON.stringify({
+                type: 'subscription_expiring',
+                email: profile.email,
+                daysRemaining: daysUntilExpiry,
+                expiryDate: profile.subscription_end_date,
+                planName: profile.subscription_plan || 'Professional',
+              }),
+            });
+            await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
+              method: 'PATCH',
+              headers,
+              body: JSON.stringify({ last_reminder_sent_at: now.toISOString() }),
+            });
+            console.log(`[Expiration Check] Sent 7-day reminder to ${profile.email}`);
+          } catch (emailErr) {
+            console.error(`[Expiration Check] Failed to send reminder to ${profile.email}:`, emailErr);
+          }
           remindersCount++;
           processedCount++;
-          console.log(`[Expiration Check] Would send 7-day reminder to ${profile.email}`);
         }
       }
 
@@ -353,8 +401,31 @@ export const checkTrialExpirations = internalMutation({
         else if (trialEndsAt && profile.subscription_status === 'trialing' && profile.email_notifications_enabled) {
           const daysUntilExpiry = Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
           if (daysUntilExpiry <= 2 && daysUntilExpiry > 0 && hoursSinceLastReminder >= 23) {
-            // Would send warning email here (via Edge Function)
-            console.log(`[Trial Check] Would send trial ending warning to ${profile.email}, ${daysUntilExpiry} day(s) remaining`);
+            try {
+              await fetch(`${supabaseUrl}/functions/v1/send-payment-email`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${supabaseKey}`,
+                  'apikey': supabaseKey,
+                },
+                body: JSON.stringify({
+                  type: 'subscription_expiring',
+                  email: profile.email,
+                  daysRemaining: daysUntilExpiry,
+                  expiryDate: profile.trial_ends_at,
+                  planName: 'Free Trial',
+                }),
+              });
+              await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
+                method: 'PATCH',
+                headers,
+                body: JSON.stringify({ last_reminder_sent_at: now.toISOString() }),
+              });
+              console.log(`[Trial Check] Sent trial ending warning to ${profile.email}, ${daysUntilExpiry} day(s) remaining`);
+            } catch (emailErr) {
+              console.error(`[Trial Check] Failed to send trial warning to ${profile.email}:`, emailErr);
+            }
             warningsCount++;
             processedCount++;
           }

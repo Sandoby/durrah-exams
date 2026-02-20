@@ -47,6 +47,7 @@ serve(async (req) => {
         // Kids Mode additions: child_mode, nickname, quiz_code
         const {
             exam_id,
+            classroom_id,
             student_data,
             answers,
             violations,
@@ -335,6 +336,7 @@ serve(async (req) => {
             .from('submissions')
             .insert({
                 exam_id,
+                classroom_id: classroom_id || null,
                 student_name: studentName,
                 student_email: studentEmail,
                 score: totalScore,

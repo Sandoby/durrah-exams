@@ -1,13 +1,11 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { renderUnifiedEmailTemplate } from '../_shared/email-template.ts'
+import { SITE_URL, FROM_DEFAULT } from '../_shared/email-constants.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-
-const SITE_URL = 'https://durrahtutors.com'
-const EMAIL_LOGO_URL = `${SITE_URL}/apple-touch-icon.png`
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,7 +27,7 @@ const buildTemplate = (
   content: string,
   ctaText?: string,
   ctaUrl?: string,
-  accentColor: string = '#4b47d6',
+  accentColor: string = '#1d1d1f',
 ) =>
   renderUnifiedEmailTemplate({
     preheader: title,
@@ -40,8 +38,6 @@ const buildTemplate = (
     ctaUrl,
     accentColor,
     siteUrl: SITE_URL,
-    logoUrl: EMAIL_LOGO_URL,
-    footerNote: 'The standard for professional tutor management.',
   })
 
 const getEmailTemplate = (type: string | null, expiryDate?: string) => {
@@ -52,54 +48,50 @@ const getEmailTemplate = (type: string | null, expiryDate?: string) => {
       subject: 'Welcome to Durrah for Tutors',
       html: buildTemplate(
         'Welcome to the future of tutoring',
-        'REGISTRATION SUCCESSFUL',
-        `We're excited to help you take your tutoring practice to the next level. Your account is now active and you can start creating secure, high-quality exams immediately.`,
-        'Get Started',
+        'ACCOUNT CREATED',
+        `Your account is now active. Start creating secure, high-quality exams and manage your students from a single dashboard.`,
+        'Open Dashboard',
         `${SITE_URL}/dashboard`,
       ),
     },
     subscription_reminder_7d: {
-      subject: 'Subscription Reminder: 7 days remaining',
+      subject: 'Your subscription expires in 7 days',
       html: buildTemplate(
         'Your subscription is expiring soon',
-        '7 DAYS LEFT',
-        `This is a friendly reminder that your subscription will expire on <strong>${expiryDate}</strong>. Renew today to keep your dashboard and student data accessible.`,
+        '7 DAYS REMAINING',
+        `A friendly reminder: your subscription will expire on <strong>${expiryDate}</strong>. Renew today to keep uninterrupted access to your dashboard and student data.`,
         'Renew Subscription',
         `${SITE_URL}/settings`,
-        '#eab308',
       ),
     },
     subscription_reminder_3d: {
-      subject: 'Urgent: 3 days until subscription expires',
+      subject: 'Action needed — 3 days until expiry',
       html: buildTemplate(
-        'Action required to stay active',
-        '3 DAYS LEFT',
-        `Your subscription expires on <strong>${expiryDate}</strong>. Don't let your exams go offline. Renew now to maintain full access to all features.`,
+        'Your access expires in 3 days',
+        '3 DAYS REMAINING',
+        `Your subscription expires on <strong>${expiryDate}</strong>. Renew now to keep your exams live and your data accessible.`,
         'Renew Now',
         `${SITE_URL}/settings`,
-        '#f97316',
       ),
     },
     subscription_expired: {
-      subject: 'Alert: Your access has expired',
+      subject: 'Your subscription has expired',
       html: buildTemplate(
-        'Access to your dashboard has expired',
+        'Your access has been paused',
         'EXPIRED',
-        `Your subscription expired on <strong>${expiryDate}</strong>. Your data is safely stored, but you will need to renew to continue using the platform.`,
-        'Reactivate Now',
+        `Your subscription expired on <strong>${expiryDate}</strong>. Your data is safely stored and will be available the moment you reactivate.`,
+        'Reactivate',
         `${SITE_URL}/settings`,
-        '#ef4444',
       ),
     },
     subscription_expired_3d: {
-      subject: 'We miss you at Durrah for Tutors',
+      subject: 'We miss you — come back to Durrah',
       html: buildTemplate(
-        'Come back to the platform',
-        'WE MISS YOU',
-        `It's been a few days since your subscription ended. Your exams and data are waiting for you. Reactivate now to continue your journey.`,
+        'Your exams are waiting',
+        'COME BACK',
+        `It's been a few days since your subscription ended. Your data and exams remain safe. Renew to pick up right where you left off.`,
         'Return to Dashboard',
         `${SITE_URL}/settings`,
-        '#4f46e5',
       ),
     },
     password_reset: { subject: '', html: '' },
@@ -197,7 +189,7 @@ serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'Durrah for Tutors <info@durrahtutors.com>',
+            from: FROM_DEFAULT,
             to: [profile.email],
             subject: template.subject,
             html: template.html,

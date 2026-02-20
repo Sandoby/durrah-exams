@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
+import toast from 'react-hot-toast';
 
 type UserRole = 'admin' | 'agent' | 'tutor' | 'student' | null;
 type SubscriptionStatus = 'active' | 'trialing' | 'payment_failed' | 'cancelled' | 'expired' | null;
@@ -10,6 +11,7 @@ interface AuthContextType {
     session: Session | null;
     role: UserRole;
     subscriptionStatus: SubscriptionStatus;
+    subscriptionEndDate: string | null;
     trialEndsAt: string | null;
     isTrialing: boolean;
     loading: boolean;
@@ -23,6 +25,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [session, setSession] = useState<Session | null>(null);
     const [role, setRole] = useState<UserRole>(null);
     const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>(null);
+    const [subscriptionEndDate, setSubscriptionEndDate] = useState<string | null>(null);
     const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const profileChannelRef = useRef<any>(null);
@@ -31,7 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('role, subscription_status, trial_ends_at')
+                .select('role, subscription_status, subscription_end_date, trial_ends_at')
                 .eq('id', userId)
                 .single();
 
@@ -39,16 +42,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 console.error('Error fetching user profile:', error);
                 setRole('tutor'); // Default to tutor if error
                 setSubscriptionStatus(null);
+                setSubscriptionEndDate(null);
                 setTrialEndsAt(null);
                 return;
             }
             setRole(data?.role || 'tutor');
             setSubscriptionStatus(data?.subscription_status || null);
+            setSubscriptionEndDate(data?.subscription_end_date || null);
             setTrialEndsAt(data?.trial_ends_at || null);
         } catch (error) {
             console.error('Error fetching user profile:', error);
             setRole('tutor'); // Default to tutor if error
             setSubscriptionStatus(null);
+            setSubscriptionEndDate(null);
             setTrialEndsAt(null);
         }
     };
@@ -91,14 +97,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     const nextStatus = payload?.new?.subscription_status as SubscriptionStatus | undefined;
                     const nextRole = payload?.new?.role as UserRole | undefined;
                     const nextTrialEndsAt = payload?.new?.trial_ends_at as string | undefined;
+                    const nextEndDate = payload?.new?.subscription_end_date as string | undefined;
                     if (typeof nextStatus !== 'undefined') {
-                        setSubscriptionStatus(nextStatus ?? null);
+                        setSubscriptionStatus(prevStatus => {
+                            // Show toast when subscription expires while the app is open
+                            if (nextStatus === 'expired' && prevStatus !== 'expired' && prevStatus !== null) {
+                                toast.error('Your subscription has expired. Renew to keep access.', {
+                                    duration: 8000,
+                                    id: 'subscription-expired',
+                                });
+                            }
+                            return nextStatus ?? null;
+                        });
                     }
                     if (typeof nextRole !== 'undefined') {
                         setRole(nextRole ?? 'tutor');
                     }
                     if (typeof nextTrialEndsAt !== 'undefined') {
                         setTrialEndsAt(nextTrialEndsAt ?? null);
+                    }
+                    if (typeof nextEndDate !== 'undefined') {
+                        setSubscriptionEndDate(nextEndDate ?? null);
                     }
                 }
             )
@@ -194,15 +213,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     if (!isMounted) return;
                     setSession(cachedData.session);
                     setUser(cachedData.user);
-                    // Fetch profile but don't block on it
-                    fetchUserProfile(cachedData.user.id).catch(err => {
-                        console.error('Profile fetch failed:', err);
-                    });
+                    // Await profile fetch (with 2.5 s timeout) before clearing loading flag.
+                    // This eliminates the paywall-flash race condition where components
+                    // render with subscriptionStatus=null and briefly block access.
+                    await Promise.race([
+                        fetchUserProfile(cachedData.user.id).catch(err => {
+                            console.error('Profile fetch failed:', err);
+                        }),
+                        new Promise<void>(resolve => setTimeout(resolve, 2500)),
+                    ]);
                     syncDodoSubscription().catch(err => {
                         console.warn('Dodo sync failed:', err);
                     });
                     setupProfileRealtime(cachedData.user.id);
-                    setLoading(false);
+                    if (isMounted) setLoading(false);
                     clearTimeout(loadingTimeout);
                     return;
                 }
@@ -340,6 +364,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         sessionStorage.removeItem('agent_name');
         setRole(null);
         setSubscriptionStatus(null);
+        setSubscriptionEndDate(null);
         setTrialEndsAt(null);
         setUser(null);
     };
@@ -359,7 +384,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user, session, role, subscriptionStatus, trialEndsAt, isTrialing, loading, signOut }}>
+        <AuthContext.Provider value={{ user, session, role, subscriptionStatus, subscriptionEndDate, trialEndsAt, isTrialing, loading, signOut }}>
             {children}
         </AuthContext.Provider>
     );

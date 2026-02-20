@@ -4,11 +4,14 @@ import { daysRemaining } from '../../lib/subscriptionUtils';
 
 interface TrialBannerProps {
     trialEndsAt: string | null;
+    subscriptionStatus: string | null | undefined;
 }
 
-export function TrialBanner({ trialEndsAt }: TrialBannerProps) {
+export function TrialBanner({ trialEndsAt, subscriptionStatus }: TrialBannerProps) {
     const days = daysRemaining(trialEndsAt);
 
+    // Only show the trial banner for users genuinely on a trial
+    if (subscriptionStatus !== 'trialing') return null;
     if (!trialEndsAt || days <= 0) return null;
 
     const isUrgent = days <= 3;

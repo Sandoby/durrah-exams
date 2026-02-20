@@ -127,6 +127,23 @@ export default function PaymentCallback() {
                 setTimeout(() => navigate('/checkout', { replace: true }), 1800);
                 return;
               }
+
+              if (profile?.subscription_status === 'expired') {
+                setStatus('error');
+                setMessage('Your subscription has expired. Please subscribe again to regain access.');
+                toast.error('Subscription expired. Please resubscribe.');
+                setTimeout(() => {
+                  navigate('/checkout', {
+                    state: {
+                      error: 'Your subscription has expired. Please subscribe again.',
+                      expired: true,
+                      provider: 'dodo'
+                    },
+                    replace: true
+                  });
+                }, 1800);
+                return;
+              }
               // Wait 2 seconds between polls
               await new Promise(r => setTimeout(r, 2000));
             }

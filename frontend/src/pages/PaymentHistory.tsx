@@ -324,7 +324,8 @@ export default function PaymentHistory() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Total Spent</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    EGP {payments.filter(p => p.status === 'completed').reduce((sum, p) => sum + p.amount, 0)}
+                    {payments.find(p => p.status === 'completed')?.currency || 'EGP'}{' '}
+                    {payments.filter(p => p.status === 'completed').reduce((sum, p) => sum + p.amount, 0)}
                   </p>
                 </div>
               </div>

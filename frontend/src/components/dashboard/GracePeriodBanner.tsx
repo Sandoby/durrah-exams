@@ -5,9 +5,11 @@ import { daysRemaining } from '../../lib/subscriptionUtils';
 interface GracePeriodBannerProps {
     subscriptionStatus: string | null | undefined;
     trialGraceEndsAt?: string | null;
+    /** Total grace period days; used for the progress bar. Defaults to 3. */
+    gracePeriodDays?: number;
 }
 
-export function GracePeriodBanner({ subscriptionStatus, trialGraceEndsAt }: GracePeriodBannerProps) {
+export function GracePeriodBanner({ subscriptionStatus, trialGraceEndsAt, gracePeriodDays = 3 }: GracePeriodBannerProps) {
     // Only show if status is expired and grace period hasn't ended yet
     if (subscriptionStatus !== 'expired' || !trialGraceEndsAt) return null;
 
@@ -70,7 +72,7 @@ export function GracePeriodBanner({ subscriptionStatus, trialGraceEndsAt }: Grac
                 <div className="h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
                     <div
                         className="h-full bg-orange-500 rounded-full transition-all duration-1000"
-                        style={{ width: `${(daysLeft / 3) * 100}%` }}
+                        style={{ width: `${Math.min((daysLeft / gracePeriodDays) * 100, 100)}%` }}
                     ></div>
                 </div>
             </div>

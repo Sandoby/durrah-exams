@@ -769,7 +769,10 @@ export default function Dashboard() {
                     {/* Trial Banners */}
                     {profile?.subscription_status === 'trialing' && (
                         <div className="mb-6">
-                            <TrialBanner trialEndsAt={profile?.trial_ends_at} />
+                            <TrialBanner
+                                trialEndsAt={profile?.trial_ends_at}
+                                subscriptionStatus={profile?.subscription_status}
+                            />
                         </div>
                     )}
 

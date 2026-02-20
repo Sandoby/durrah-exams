@@ -1,9 +1,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { renderUnifiedEmailTemplate } from '../_shared/email-template.ts'
+import { renderUnifiedEmailTemplate, renderDetailCard } from '../_shared/email-template.ts'
+import { SITE_URL, FROM_DEFAULT } from '../_shared/email-constants.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-const SITE_URL = 'https://durrahtutors.com'
-const EMAIL_LOGO_URL = `${SITE_URL}/apple-touch-icon.png`
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,81 +14,84 @@ type PaymentEmailType = 'payment_success' | 'payment_failed' | 'subscription_exp
 const createPaymentTemplate = (type: PaymentEmailType, data: Record<string, unknown>) => {
   switch (type) {
     case 'payment_success': {
-      const subject = 'Invoice & Payment Confirmation: Durrah for Tutors'
+      const subject = 'Payment confirmed'
+      const detailCard = renderDetailCard([
+        { label: 'Invoice', value: String(data.orderId || '-') },
+        { label: 'Date', value: data.date ? new Date(String(data.date)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : new Date().toLocaleDateString() },
+        { label: 'Plan', value: String(data.plan || '-') },
+        { label: 'Valid Until', value: data.subscriptionEndDate ? new Date(String(data.subscriptionEndDate)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Active' },
+        { label: 'Amount', value: `${String(data.currency || 'EGP')} ${String(data.amount || '-')}` },
+      ])
       const bodyHtml = `
-        <div style="margin-bottom:14px;">Hello ${String(data.userName || 'Tutor')}, your payment has been processed and your account is ready.</div>
-        <div style="background:#f8fafc;border:1px solid #e8e8ed;border-radius:12px;padding:16px;margin:16px 0;">
-          <div style="margin-bottom:8px;"><strong>Invoice ID:</strong> ${String(data.orderId || '-')}</div>
-          <div style="margin-bottom:8px;"><strong>Date:</strong> ${data.date ? new Date(String(data.date)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : new Date().toLocaleDateString()}</div>
-          <div style="margin-bottom:8px;"><strong>Service:</strong> ${String(data.plan || '-')}</div>
-          <div style="margin-bottom:8px;"><strong>Valid Until:</strong> ${data.subscriptionEndDate ? new Date(String(data.subscriptionEndDate)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Active'}</div>
-          <div><strong>Amount Paid:</strong> ${String(data.currency || 'EGP')} ${String(data.amount || '-')}</div>
-        </div>
+        <div style="margin-bottom:16px;">Hello ${String(data.userName || 'there')}, your payment has been processed successfully.</div>
+        ${detailCard}
       `
       return {
         subject,
         html: renderUnifiedEmailTemplate({
-          preheader: 'Payment successful',
-          eyebrow: 'PAYMENT',
+          preheader: 'Your payment has been confirmed',
+          eyebrow: 'PAYMENT CONFIRMED',
           title: 'Payment successful',
           bodyHtml,
           ctaText: 'Go to Dashboard',
           ctaUrl: String(data.dashboardUrl || `${SITE_URL}/dashboard`),
-          accentColor: '#4b47d6',
+          accentColor: '#1d1d1f',
+          secondaryText: 'A copy of this invoice is available in your dashboard.',
           siteUrl: SITE_URL,
-          logoUrl: EMAIL_LOGO_URL,
         }),
       }
     }
 
     case 'payment_failed': {
-      const subject = 'Payment Failed - Durrah for Tutors'
+      const subject = 'Payment could not be processed'
+      const detailCard = renderDetailCard([
+        { label: 'Reason', value: String(data.reason || 'Payment was declined') },
+      ])
       const bodyHtml = `
-        <div style="margin-bottom:14px;">Dear ${String(data.userName || 'Customer')}, we were unable to process your subscription payment.</div>
-        <div style="margin-bottom:14px;"><strong>Reason:</strong> ${String(data.reason || 'Payment was declined')}</div>
-        <div>Please try again or use a different payment method.</div>
+        <div style="margin-bottom:16px;">We were unable to process your subscription payment.</div>
+        ${detailCard}
+        <div style="margin-top:16px;">Please try again or use a different payment method.</div>
       `
       return {
         subject,
         html: renderUnifiedEmailTemplate({
-          preheader: 'Payment failed',
-          eyebrow: 'PAYMENT',
+          preheader: 'Payment could not be processed',
+          eyebrow: 'PAYMENT FAILED',
           title: 'Payment could not be processed',
           bodyHtml,
           ctaText: 'Try Again',
           ctaUrl: String(data.checkoutUrl || `${SITE_URL}/settings`),
-          accentColor: '#dc2626',
+          accentColor: '#1d1d1f',
+          secondaryText: 'Need help? Contact us at support@durrahtutors.com',
           siteUrl: SITE_URL,
-          logoUrl: EMAIL_LOGO_URL,
         }),
       }
     }
 
     case 'subscription_expiring':
     default: {
-      const subject = 'Your Subscription Expires Soon - Durrah for Tutors'
+      const subject = 'Your subscription expires soon'
       const bodyHtml = `
-        <div style="margin-bottom:14px;">Dear ${String(data.userName || 'Customer')}, your subscription will expire on <strong>${data.expiryDate ? new Date(String(data.expiryDate)).toLocaleDateString() : '-'}</strong>.</div>
-        <div style="margin-bottom:10px;">Renew now to keep access to all features:</div>
-        <ul style="padding-left:20px;margin:0;">
-          <li>Unlimited exams and students</li>
-          <li>Advanced anti-cheating tools</li>
-          <li>AI-powered question extraction</li>
+        <div style="margin-bottom:16px;">Your subscription will expire on <strong>${data.expiryDate ? new Date(String(data.expiryDate)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '-'}</strong>.</div>
+        <div style="margin-bottom:12px;">Renew now to keep access to all features:</div>
+        <ul style="padding-left:20px;margin:0;color:#424245;">
+          <li style="margin-bottom:6px;">Unlimited exams and students</li>
+          <li style="margin-bottom:6px;">Advanced anti-cheating tools</li>
+          <li style="margin-bottom:6px;">AI-powered question extraction</li>
           <li>Priority support</li>
         </ul>
       `
       return {
         subject,
         html: renderUnifiedEmailTemplate({
-          preheader: 'Subscription expiring soon',
+          preheader: 'Your subscription is expiring soon',
           eyebrow: 'SUBSCRIPTION',
           title: 'Subscription expiring soon',
           bodyHtml,
           ctaText: 'Renew Subscription',
           ctaUrl: String(data.renewUrl || `${SITE_URL}/settings`),
-          accentColor: '#f59e0b',
+          accentColor: '#1d1d1f',
           siteUrl: SITE_URL,
-          logoUrl: EMAIL_LOGO_URL,
         }),
       }
     }
@@ -127,7 +129,7 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Durrah for Tutors <support@durrahtutors.com>',
+        from: FROM_DEFAULT,
         to: [email],
         subject: emailMessage.subject,
         html: emailMessage.html,

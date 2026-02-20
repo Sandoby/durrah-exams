@@ -1,13 +1,13 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { renderUnifiedEmailTemplate } from '../_shared/email-template.ts'
+import { SITE_URL, FROM_SECURITY } from '../_shared/email-constants.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_.com_API_KEY')
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-const PUBLIC_SITE_URL = (Deno.env.get('PUBLIC_SITE_URL') || 'https://durrahtutors.com').replace(/\/+$/, '')
-const EMAIL_LOGO_URL = Deno.env.get('EMAIL_LOGO_URL') || `${PUBLIC_SITE_URL}/apple-touch-icon.png`
+const PUBLIC_SITE_URL = (Deno.env.get('PUBLIC_SITE_URL') || SITE_URL).replace(/\/+$/, '')
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,24 +25,24 @@ const generateSecureOTP = (): string => {
   return (array[0] % 1000000).toString().padStart(6, '0')
 }
 
-// Apple-like, email-client-friendly template (tables + mostly inline styles)
+// Apple-like, email-client-friendly OTP template
 const createOTPEmailTemplate = (otpCode: string): string => {
   const bodyHtml = `
-    <div style="margin-bottom:18px;">
+    <div style="margin-bottom:20px;">
       We received a request to reset your password. Use this verification code to continue:
     </div>
-    <div style="text-align:center;padding:8px 0 18px 0;">
-      <div style="display:inline-block;background:#f5f5f7;border:1px solid #e8e8ed;border-radius:14px;padding:16px 18px;">
-        <div style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:32px;line-height:36px;font-weight:700;letter-spacing:10px;color:#000000;margin-left:6px;">
+    <div style="text-align:center;padding:8px 0 24px 0;">
+      <div style="display:inline-block;background:#f5f5f7;border:1px solid #e8e8ed;border-radius:14px;padding:18px 24px;">
+        <div style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:36px;line-height:40px;font-weight:700;letter-spacing:12px;color:#1d1d1f;margin-left:8px;">
           ${otpCode}
         </div>
       </div>
-      <div style="font-size:12px;line-height:18px;color:#6e6e73;margin-top:10px;">
-        Expires in <strong style="color:#1d1d1f;font-weight:600;">15 minutes</strong> &bull; 3 attempts available
+      <div style="font-size:12px;line-height:18px;color:#8e8e93;margin-top:12px;">
+        Expires in <strong style="color:#1d1d1f;font-weight:600;">15 minutes</strong> &middot; 3 attempts available
       </div>
     </div>
-    <div style="height:1px;background:#f0f0f0;line-height:1px;font-size:1px;margin:0 0 14px 0;">&nbsp;</div>
-    <div style="font-size:13px;line-height:18px;color:#424245;">
+    <div style="height:1px;background:#e8e8ed;line-height:1px;font-size:1px;margin:0 0 16px 0;">&nbsp;</div>
+    <div style="font-size:13px;line-height:18px;color:#8e8e93;">
       If you didn't request this, you can safely ignore this email. Your account remains secure.
     </div>
   `
@@ -53,7 +53,6 @@ const createOTPEmailTemplate = (otpCode: string): string => {
     title: 'Verify your identity',
     bodyHtml,
     siteUrl: PUBLIC_SITE_URL,
-    logoUrl: EMAIL_LOGO_URL,
   })
 }
 
@@ -263,7 +262,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Durrah Security <security@durrahtutors.com>',
+        from: FROM_SECURITY,
         to: [email],
         subject: 'Your Durrah Tutors verification code',
         text: createOTPEmailText(otpCode),

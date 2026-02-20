@@ -56,7 +56,9 @@ export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeature
 
             if (result?.success) {
                 toast.success('Your 14-day free trial has started!');
-                window.location.reload();
+                // Close the modal — AuthContext realtime listener will update
+                // subscriptionStatus automatically via the Supabase channel.
+                onClose();
             } else {
                 toast.error(result?.error || 'Failed to activate trial');
             }
@@ -203,7 +205,11 @@ export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeature
                                             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
                                         }}
                                     >
-                                        <span>Upgrade Now</span>
+                                        <span>
+                                            {subscriptionStatus === 'expired'
+                                                ? 'Resubscribe to Regain Access'
+                                                : 'Upgrade Now'}
+                                        </span>
                                         <ArrowRight className="w-4 h-4" />
                                     </button>
                                 )}
