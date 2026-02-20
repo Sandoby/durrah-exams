@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -31,57 +31,92 @@ export default function Login() {
 
     const [showStudentModal, setShowStudentModal] = useState(false);
     const [studentUserInfo, setStudentUserInfo] = useState<{ email: string; id: string } | null>(null);
+    const isProcessingOAuth = useRef(false);
+
+    // Shared logic to handle a session (check profile, upsert, navigate)
+    const processSession = async (session: any) => {
+        // Prevent duplicate processing (onAuthStateChange can fire multiple times)
+        if (isProcessingOAuth.current) return;
+        isProcessingOAuth.current = true;
+
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const isTutorRequested = params.get('type') === 'tutor' || window.location.pathname.includes('/login');
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .maybeSingle();
+
+            if (!profile || (profile.role === 'student' && isTutorRequested)) {
+                await supabase.from('profiles').upsert({
+                    id: session.user.id,
+                    role: 'tutor',
+                    full_name: session.user.user_metadata?.full_name || '',
+                    email: session.user.email,
+                    phone: session.user.user_metadata?.phone || null,
+                    institution: session.user.user_metadata?.institution || null
+                });
+
+                // Activate trial for new OAuth users
+                if (!profile) {
+                    try {
+                        const { data: trialResult } = await supabase.rpc('activate_trial', {
+                            p_user_id: session.user.id
+                        });
+                        if (trialResult?.success) {
+                            console.log('✅ Trial activated for new OAuth user');
+                        }
+                    } catch (trialError) {
+                        console.warn('Trial activation failed:', trialError);
+                    }
+                }
+
+                navigate('/dashboard');
+            } else if (profile.role === 'student') {
+                setStudentUserInfo({
+                    email: session.user.email || '',
+                    id: session.user.id
+                });
+                setShowStudentModal(true);
+            } else {
+                navigate('/dashboard');
+            }
+        } finally {
+            isProcessingOAuth.current = false;
+        }
+    };
 
     useEffect(() => {
-        const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                const params = new URLSearchParams(window.location.search);
-                const isTutorRequested = params.get('type') === 'tutor' || window.location.pathname.includes('/login');
+        const params = new URLSearchParams(window.location.search);
+        const hasOAuthCode = params.has('code');
 
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', session.user.id)
-                    .maybeSingle();
-
-                if (!profile || (profile.role === 'student' && isTutorRequested)) {
-                    await supabase.from('profiles').upsert({
-                        id: session.user.id,
-                        role: 'tutor',
-                        full_name: session.user.user_metadata?.full_name || '',
-                        email: session.user.email,
-                        phone: session.user.user_metadata?.phone || null,
-                        institution: session.user.user_metadata?.institution || null
-                    });
-
-                    // Activate trial for new OAuth users
-                    if (!profile) {
-                        try {
-                            const { data: trialResult } = await supabase.rpc('activate_trial', {
-                                p_user_id: session.user.id
-                            });
-                            if (trialResult?.success) {
-                                console.log('✅ Trial activated for new OAuth user');
-                            }
-                        } catch (trialError) {
-                            console.warn('Trial activation failed:', trialError);
-                        }
-                    }
-
-                    navigate('/dashboard');
-                } else if (profile.role === 'student') {
-                    setStudentUserInfo({
-                        email: session.user.email || '',
-                        id: session.user.id
-                    });
-                    setShowStudentModal(true);
-                } else {
-                    navigate('/dashboard');
+        // 1) If there's an OAuth code in the URL, wait for onAuthStateChange to fire
+        //    once the PKCE exchange completes — this is the fast path.
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            async (event, session) => {
+                if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+                    processSession(session);
                 }
             }
+        );
+
+        // 2) Also check if user already has an active session (e.g. navigated to /login
+        //    while already logged in, or session was cached).
+        if (!hasOAuthCode) {
+            const checkExistingSession = async () => {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    processSession(session);
+                }
+            };
+            checkExistingSession();
+        }
+
+        return () => {
+            subscription.unsubscribe();
         };
-        checkSession();
     }, [navigate]);
 
     const handleGoogleLogin = async () => {
