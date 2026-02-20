@@ -227,10 +227,11 @@ export const checkSubscriptionExpirations = internalMutation({
         const lastReminder = profile.last_reminder_sent_at ? new Date(profile.last_reminder_sent_at) : null;
         const hoursSinceLastReminder = lastReminder ? (now.getTime() - lastReminder.getTime()) / (1000 * 60 * 60) : 999;
 
-        // Skip if email notifications are disabled
-        if (!profile.email_notifications_enabled) continue;
+        // NOTE: email_notifications_enabled only gates SENDING EMAILS below.
+        // It must NOT skip the expiry check — users should still be expired even
+        // if they have turned off email notifications.
 
-        // EXPIRED - Set status to expired
+        // EXPIRED - Set status to expired (runs for ALL users regardless of notification prefs)
         if (daysUntilExpiry <= 0 && profile.subscription_status !== 'expired') {
           await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
             method: 'PATCH',
@@ -242,8 +243,9 @@ export const checkSubscriptionExpirations = internalMutation({
           expiredCount++;
           processedCount++;
         }
-        // 3-DAY REMINDER
+        // 3-DAY REMINDER (only if notifications enabled)
         else if (daysUntilExpiry <= 3 && daysUntilExpiry > 0 && hoursSinceLastReminder >= 23) {
+          if (!profile.email_notifications_enabled) continue;
           try {
             await fetch(`${supabaseUrl}/functions/v1/send-payment-email`, {
               method: 'POST',
@@ -272,8 +274,9 @@ export const checkSubscriptionExpirations = internalMutation({
           remindersCount++;
           processedCount++;
         }
-        // 7-DAY REMINDER
+        // 7-DAY REMINDER (only if notifications enabled)
         else if (daysUntilExpiry <= 7 && daysUntilExpiry > 3 && hoursSinceLastReminder >= 23) {
+          if (!profile.email_notifications_enabled) continue;
           try {
             await fetch(`${supabaseUrl}/functions/v1/send-payment-email`, {
               method: 'POST',

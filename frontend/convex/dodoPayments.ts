@@ -975,16 +975,24 @@ export const syncSubscriptionFromProvider = internalAction({
 
             const subscription = await subRes.json();
             const statusRaw = String(subscription?.status || '').toLowerCase();
-            const canceledByFlags =
-                subscription?.cancel_at_period_end === true ||
+
+            // cancel_at_period_end = true means the subscription will cancel AT THE END of the
+            // current billing period — it is STILL ACTIVE right now. Do NOT treat this as
+            // an immediate cancellation (that was the old bug causing false deactivations).
+            const alreadyCanceled =
                 !!subscription?.cancelled_at ||
                 !!subscription?.ended_at ||
                 !!subscription?.end_at;
+
             const dodoCustomerId = subscription?.customer?.id || subscription?.customer?.customer_id || subscription?.customer_id;
             const nextBillingDate = subscription?.next_billing_date as string | undefined;
 
-            let mappedStatus: 'active' | 'cancelled' | 'payment_failed';
-            if (canceledByFlags) {
+            // Map only explicit Dodo statuses — DO NOT fall back to 'cancelled' for unknown
+            // values (e.g. 'pending', 'incomplete') because that would immediately wipe the
+            // user's active subscription every time they log in or switch tabs.
+            let mappedStatus: 'active' | 'cancelled' | 'payment_failed' | null = null;
+
+            if (alreadyCanceled || statusRaw === 'cancelled' || statusRaw === 'canceled') {
                 mappedStatus = 'cancelled';
             } else if (statusRaw === 'active' || statusRaw === 'trialing') {
                 mappedStatus = 'active';
@@ -996,10 +1004,14 @@ export const syncSubscriptionFromProvider = internalAction({
             ) {
                 mappedStatus = 'payment_failed';
             } else {
-                mappedStatus = 'cancelled';
+                // Unknown / transitional status (e.g. 'pending', 'incomplete').
+                // Do nothing — do not overwrite a valid active subscription with a
+                // speculative cancelled/failed state.
+                console.log(`[SYNC] Ignoring unrecognised Dodo status '${statusRaw}' for subscription ${subscriptionId} — skipping update to protect current DB state`);
+                return { success: true, skipped: true, reason: 'unknown_status', providerStatus: statusRaw, subscriptionId };
             }
 
-            console.log(`[SYNC] Dodo subscription ${subscriptionId}: raw=${statusRaw}, cancelFlags=${canceledByFlags}, mapped=${mappedStatus}`);
+            console.log(`[SYNC] Dodo subscription ${subscriptionId}: raw=${statusRaw}, alreadyCanceled=${alreadyCanceled}, mapped=${mappedStatus}`);
 
             const syncResult = await updateSubscriptionLogic(supabaseUrl, supabaseKey, {
                 userId: args.userId,

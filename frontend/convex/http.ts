@@ -342,12 +342,15 @@ http.route({
         preNormalizedStatus === 'failed' ||
         preNormalizedStatus === 'payment_failed' ||
         preNormalizedStatus === 'past_due';
+      // IMPORTANT: cancel_at_period_end = true does NOT mean the subscription is
+      // cancelled NOW — it means it will cancel at the end of the billing period
+      // but remains ACTIVE today. Including it here would block legitimate
+      // subscription.active activations for users who set cancel_at_period_end.
       const preIsCancelledStatus =
         preNormalizedStatus === 'cancelled' ||
         preNormalizedStatus === 'canceled' ||
         preNormalizedStatus === 'expired' ||
         preNormalizedStatus === 'inactive' ||
-        liveSubscriptionData?.cancel_at_period_end === true ||
         !!liveSubscriptionData?.cancelled_at ||
         !!liveSubscriptionData?.ended_at ||
         !!liveSubscriptionData?.end_at;
@@ -496,13 +499,18 @@ http.route({
           }
         }
       } else if (isUpdatedEvent) {
-        // Real-time sync: check if this update is actually a cancellation
-        // Dodo sends subscription.updated when cancel_at_period_end is set via portal
-        const isUpdatedButCancelled = preIsCancelledStatus || 
-          liveSubscriptionData?.cancel_at_period_end === true || 
-          liveSubscriptionData?.cancel_at_next_billing_date === true ||
+        // Real-time sync: check if this update is actually a cancellation.
+        // Dodo sends subscription.updated when cancel_at_period_end is set via portal.
+        //
+        // IMPORTANT: cancel_at_period_end = true means "will cancel at end of billing
+        // period" — the subscription is STILL ACTIVE TODAY. Do NOT cancel immediately.
+        // Only treat as cancelled when the subscription has genuinely ended (cancelled_at
+        // or ended_at are set, or the live status is explicitly cancelled/canceled).
+        const isUpdatedButCancelled =
           !!liveSubscriptionData?.cancelled_at ||
-          !!liveSubscriptionData?.ended_at;
+          !!liveSubscriptionData?.ended_at ||
+          liveSubscriptionData?.status === 'cancelled' ||
+          liveSubscriptionData?.status === 'canceled';
 
         const effectiveStatus = isUpdatedButCancelled ? 'cancelled' : 'active';
         console.log(`[Webhook] subscription.updated - live cancel flags:`, {
