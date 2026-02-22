@@ -336,7 +336,14 @@ export const createCheckout = internalAction({
       }),
     });
 
-    const data = await res.json();
+    const text = await res.text();
+    let data: any;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      console.error("[createCheckout] Non-JSON response:", res.status, text);
+      throw new Error(`Dodo API returned non-JSON response (${res.status}): ${text.slice(0, 200)}`);
+    }
     if (!res.ok) {
       console.error("[createCheckout] Dodo API error:", data);
       throw new Error(data.message || "Failed to create checkout session");
