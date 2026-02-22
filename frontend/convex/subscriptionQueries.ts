@@ -17,16 +17,7 @@ export const getSubscriptionState = query({
       .withIndex("by_user_id", (q) => q.eq("user_id", args.userId))
       .first();
 
-    if (!sub) {
-      // Fallback: check legacy subscriptionSync table
-      const syncState = await ctx.db
-        .query("subscriptionSync")
-        .withIndex("by_user", (q) => q.eq("user_id", args.userId))
-        .first();
-      return syncState ?? null;
-    }
-
-    return sub;
+    return sub ?? null;
   },
 });
 
