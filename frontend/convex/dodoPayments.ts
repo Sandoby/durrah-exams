@@ -304,7 +304,7 @@ export const recordPayment = internalAction({
   },
 });
 
-/** Create a Dodo Payments checkout session. */
+/** Create a Dodo Payments subscription. */
 export const createCheckout = internalAction({
   args: {
     userId:       v.string(),
@@ -325,14 +325,17 @@ export const createCheckout = internalAction({
       monthly: "pdt_0NVdvPLWrAr1Rym66kXLP",
     };
 
-    const res = await fetch(`${baseUrl}/checkout-sessions`, {
+    const productId = productIds[args.billingCycle] || productIds.monthly;
+
+    const res = await fetch(`${baseUrl}/subscriptions`, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        product_cart: [{ product_id: productIds[args.billingCycle] || productIds.monthly, quantity: 1 }],
+        product_id: productId,
         customer: { email: args.userEmail, name: args.userName },
         metadata: { userId: args.userId, billingCycle: args.billingCycle, planId: "professional" },
         return_url: args.returnUrl,
+        quantity: 1,
       }),
     });
 
@@ -346,7 +349,7 @@ export const createCheckout = internalAction({
     }
     if (!res.ok) {
       console.error("[createCheckout] Dodo API error:", data);
-      throw new Error(data.message || "Failed to create checkout session");
+      throw new Error(data.message || data.error || `Dodo API error: ${res.status}`);
     }
 
     // Persist dodo_customer_id early
@@ -361,7 +364,14 @@ export const createCheckout = internalAction({
       } catch {}
     }
 
-    return { checkout_url: data.checkout_url || data.payment_link };
+    // Dodo returns payment_link for subscription checkout
+    const checkoutUrl = data.payment_link || data.checkout_url || data.url;
+    if (!checkoutUrl) {
+      console.error("[createCheckout] No checkout URL in response:", JSON.stringify(data).slice(0, 500));
+      throw new Error("No checkout URL returned from Dodo");
+    }
+
+    return { checkout_url: checkoutUrl };
   },
 });
 
