@@ -1,4 +1,4 @@
-import { internalMutation, internalQuery, internalAction, query } from "./_generated/server";
+import { internalMutation, internalQuery, internalAction, query, mutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import type { DatabaseWriter } from "./_generated/server";
@@ -539,5 +539,96 @@ export const patchCustomerId = internalMutation({
       dodo_customer_id: args.dodoCustomerId,
       updated_at: Date.now(),
     });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADMIN MUTATIONS — called from AdminPanel, AgentDashboard, ChatWidget
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Admin: Extend (or activate) a subscription by N days.
+ * If user has no subscription or an inactive one, activates with status "active".
+ * If already active, extends the end_date by the given days.
+ */
+export const adminExtendSubscription = mutation({
+  args: {
+    userId: v.string(),
+    days: v.number(),
+    plan: v.optional(v.string()),
+    billingCycle: v.optional(v.string()),
+    reason: v.optional(v.string()),
+    adminId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const sub = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_user_id", (q) => q.eq("user_id", args.userId))
+      .first();
+
+    const now = Date.now();
+    const msToAdd = args.days * 24 * 60 * 60 * 1000;
+
+    // Calculate new end date: extend from current end or from now
+    let baseDate = now;
+    if (sub?.end_date && sub.end_date > now && (sub.status === "active" || sub.status === "trialing")) {
+      baseDate = sub.end_date;
+    }
+    const newEndDate = baseDate + msToAdd;
+
+    const result = await performTransition(ctx.db, ctx.scheduler, {
+      userId: args.userId,
+      newStatus: "active",
+      endDate: newEndDate,
+      plan: args.plan || sub?.plan || "Professional",
+      billingCycle: args.billingCycle || sub?.billing_cycle,
+      source: "admin_extend",
+      metadata: {
+        days: args.days,
+        reason: args.reason || "Admin extension",
+        admin_id: args.adminId || "admin",
+      },
+    });
+
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
+
+    return {
+      success: true,
+      message: `Subscription ${sub?.status === "active" ? "extended" : "activated"} for ${args.days} days`,
+      newEndDate: new Date(newEndDate).toISOString(),
+    };
+  },
+});
+
+/**
+ * Admin: Deactivate (cancel) a subscription immediately.
+ */
+export const adminDeactivateSubscription = mutation({
+  args: {
+    userId: v.string(),
+    reason: v.optional(v.string()),
+    adminId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const result = await performTransition(ctx.db, ctx.scheduler, {
+      userId: args.userId,
+      newStatus: "cancelled",
+      source: "admin_deactivate",
+      metadata: {
+        reason: args.reason || "Deactivated by admin",
+        admin_id: args.adminId || "admin",
+      },
+    });
+
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
+
+    return {
+      success: true,
+      message: "Subscription deactivated",
+    };
   },
 });

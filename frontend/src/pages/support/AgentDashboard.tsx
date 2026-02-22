@@ -10,6 +10,8 @@ import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import { AgentChatPanel } from '../../components/ConvexChatWidget';
 import { CONVEX_FEATURES } from '../../main';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 
 interface Agent {
     id: string;
@@ -97,6 +99,8 @@ export default function AgentDashboard() {
     // Subscription Extension
     const [extendDays, setExtendDays] = useState(30);
     const [extendReason, setExtendReason] = useState('');
+
+    const extendMutationFn = useMutation(api.subscriptions.adminExtendSubscription);
 
     // Canned Responses
     const [cannedResponses, setCannedResponses] = useState<CannedResponse[]>([]);
@@ -401,22 +405,20 @@ export default function AgentDashboard() {
 
         setLoading(true);
         try {
-            const { data, error } = await supabase.rpc('extend_subscription', {
-                p_user_id: selectedUser.id,
-                p_agent_id: agent.id,
-                p_days: extendDays,
-                p_reason: extendReason || 'Extended by support agent',
-                p_plan: selectedUser.subscription_plan || 'pro'
+            const result = await extendMutationFn({
+                userId: selectedUser.id,
+                days: extendDays,
+                plan: selectedUser.subscription_plan || 'Professional',
+                reason: extendReason || 'Extended by support agent',
+                adminId: agent.id,
             });
 
-            if (error) throw error;
-
-            if (data.success) {
-                toast.success(data.message);
+            if (result.success) {
+                toast.success(result.message || 'Subscription extended');
                 setExtendReason('');
                 fetchUserDetails(selectedUser.id);
             } else {
-                toast.error(data.error);
+                toast.error(result.error || 'Failed to extend');
             }
         } catch (error: any) {
             toast.error(error.message || 'Failed to extend subscription');

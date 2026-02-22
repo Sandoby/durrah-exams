@@ -552,6 +552,7 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
   const [noteImportant, setNoteImportant] = useState(false);
   const [extendDays, setExtendDays] = useState(30);
   const [extendReason, setExtendReason] = useState('');
+  const extendMutationFn = useMutation(api.subscriptions.adminExtendSubscription);
 
   // Missing data states
   const [userExams, setUserExams] = useState<any[]>([]);
@@ -740,22 +741,20 @@ export function AgentChatPanel({ agentId, agentName }: { agentId: string; agentN
     if (!confirm(`Extend subscription for ${userProfile.email} by ${extendDays} days?`)) return;
 
     try {
-      const { data, error } = await supabase.rpc('extend_subscription', {
-        p_user_id: userProfile.id,
-        p_agent_id: agentId,
-        p_days: extendDays,
-        p_reason: extendReason || 'Extended by support agent',
-        p_plan: userProfile.subscription_plan || 'pro'
+      const result = await extendMutationFn({
+        userId: userProfile.id,
+        days: extendDays,
+        plan: userProfile.subscription_plan || 'Professional',
+        reason: extendReason || 'Extended by support agent',
+        adminId: agentId,
       });
 
-      if (error) throw error;
-
-      if (data?.success) {
-        toast.success(data.message || 'Subscription extended');
+      if (result?.success) {
+        toast.success(result.message || 'Subscription extended');
         setExtendReason('');
         fetchUserDetails(userProfile.id);
       } else {
-        toast.error(data?.error || 'Failed to extend');
+        toast.error(result?.error || 'Failed to extend');
       }
     } catch (error: any) {
       console.error('Failed to extend subscription:', error);

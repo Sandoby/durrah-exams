@@ -5,6 +5,8 @@ import {
     FileText, MessageSquare, Plus, Calendar, X, Check
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 import toast from 'react-hot-toast';
 
 interface User {
@@ -53,6 +55,9 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
     const [subscriptionPlan, setSubscriptionPlan] = useState<'pro' | 'basic'>('pro');
     const [subscriptionDuration, setSubscriptionDuration] = useState<'monthly' | 'yearly' | 'custom'>('monthly');
     const [customDays, setCustomDays] = useState(30);
+
+    const extendMutation = useMutation(api.subscriptions.adminExtendSubscription);
+    const deactivateMutation = useMutation(api.subscriptions.adminDeactivateSubscription);
 
     useEffect(() => {
         if (isExpanded && !stats) {
@@ -130,38 +135,23 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
                 billingCycle = customDays >= 365 ? 'yearly' : 'monthly';
             }
 
-            // Call extend_subscription RPC with new signature
-            const { error: rpcError } = await supabase.rpc('extend_subscription', {
-                p_user_id: user.id,
-                p_days: days,
-                p_reason: `Activated ${subscriptionPlan} plan from admin panel`,
-                p_metadata: {
-                    action: 'activate',
-                    plan: subscriptionPlan,
-                    billing_cycle: billingCycle,
-                    admin_id: agentId || 'admin'
-                }
+            const result = await extendMutation({
+                userId: user.id,
+                days,
+                plan: subscriptionPlan === 'pro' ? 'Professional' : 'Basic',
+                billingCycle,
+                reason: `Activated ${subscriptionPlan} plan from admin panel`,
+                adminId: agentId || 'admin',
             });
 
-            if (rpcError) throw rpcError;
-
-            // Update billing_cycle and subscription_plan in profiles
-            const { error: updateError } = await supabase
-                .from('profiles')
-                .update({
-                    subscription_plan: subscriptionPlan,
-                    billing_cycle: billingCycle
-                })
-                .eq('id', user.id);
-
-            if (updateError) throw updateError;
+            if (!result.success) throw new Error(result.error || 'Failed');
 
             toast.success(`Subscription activated: ${subscriptionPlan} (${days} days)`);
             setShowSubscriptionModal(false);
             onUpdate();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error activating subscription:', error);
-            toast.error('Failed to activate subscription');
+            toast.error(error.message || 'Failed to activate subscription');
         }
     };
 
@@ -180,62 +170,41 @@ export function EnhancedUserCard({ user, onUpdate, agentId }: EnhancedUserCardPr
                 billingCycle = customDays >= 365 ? 'yearly' : 'monthly';
             }
 
-            // Call extend_subscription RPC with new signature
-            const { error } = await supabase.rpc('extend_subscription', {
-                p_user_id: user.id,
-                p_days: days,
-                p_reason: 'Extended from admin panel',
-                p_metadata: {
-                    action: 'extend',
-                    previous_billing_cycle: user.billing_cycle,
-                    new_billing_cycle: billingCycle,
-                    admin_id: agentId || 'admin'
-                }
+            const result = await extendMutation({
+                userId: user.id,
+                days,
+                billingCycle,
+                reason: 'Extended from admin panel',
+                adminId: agentId || 'admin',
             });
 
-            if (error) throw error;
-
-            // Update billing_cycle if changed
-            if (user.billing_cycle !== billingCycle) {
-                const { error: updateError } = await supabase
-                    .from('profiles')
-                    .update({ billing_cycle: billingCycle })
-                    .eq('id', user.id);
-
-                if (updateError) throw updateError;
-            }
+            if (!result.success) throw new Error(result.error || 'Failed');
 
             toast.success(`Subscription extended by ${days} days`);
             setShowSubscriptionModal(false);
             onUpdate();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error extending subscription:', error);
-            toast.error('Failed to extend subscription');
+            toast.error(error.message || 'Failed to extend subscription');
         }
     };
 
     const deactivateSubscription = async () => {
         try {
-            // Call cancel_subscription RPC with new signature
-            const { error } = await supabase.rpc('cancel_subscription', {
-                p_user_id: user.id,
-                p_reason: 'Deactivated from admin panel',
-                p_metadata: {
-                    action: 'deactivate',
-                    previous_status: user.subscription_status,
-                    previous_plan: user.subscription_plan,
-                    admin_id: agentId || 'admin'
-                }
+            const result = await deactivateMutation({
+                userId: user.id,
+                reason: 'Deactivated from admin panel',
+                adminId: agentId || 'admin',
             });
 
-            if (error) throw error;
+            if (!result.success) throw new Error(result.error || 'Failed');
 
             toast.success('Subscription deactivated');
             setShowSubscriptionModal(false);
             onUpdate();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error deactivating subscription:', error);
-            toast.error('Failed to deactivate subscription');
+            toast.error(error.message || 'Failed to deactivate subscription');
         }
     };
 
