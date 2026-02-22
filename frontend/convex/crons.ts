@@ -73,18 +73,6 @@ crons.interval(
 );
 
 // ============================================
-// RECONCILE DODO SUBSCRIPTIONS
-// Every 15 minutes, sync provider subscription states to Supabase profiles.
-// This covers missed/delayed webhooks.
-// ============================================
-crons.interval(
-  "reconcile dodo subscriptions",
-  { minutes: 15 },
-  internal.dodoPayments.reconcileSubscriptionsFromDodo,
-  {}
-);
-
-// ============================================
 // CLEANUP OLD WEBHOOK RECORDS
 // Weekly, remove webhook deduplication records older than 7 days
 // ============================================

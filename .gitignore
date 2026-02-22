@@ -70,3 +70,6 @@ Thumbs.db
 secrets/
 *-firebase-adminsdk-*.json
 google-services.json
+
+tmpclaude-*
+nul

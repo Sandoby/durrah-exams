@@ -59,29 +59,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const syncDodoSubscription = async () => {
-        try {
-            const convexUrl = import.meta.env.VITE_CONVEX_URL as string | undefined;
-            if (!convexUrl) return;
-            const siteUrl = convexUrl.replace('.cloud', '.site');
-
-            const { data } = await supabase.auth.getSession();
-            const accessToken = data?.session?.access_token;
-            if (!accessToken) return;
-
-            await fetch(`${siteUrl}/syncDodoSubscription`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
-                },
-                body: JSON.stringify({})
-            });
-        } catch (error) {
-            console.warn('Dodo subscription sync skipped:', error);
-        }
-    };
-
     const setupProfileRealtime = (userId: string) => {
         if (profileChannelRef.current) {
             supabase.removeChannel(profileChannelRef.current);
@@ -236,9 +213,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         }),
                         new Promise<void>(resolve => setTimeout(resolve, 2500)),
                     ]);
-                    syncDodoSubscription().catch(err => {
-                        console.warn('Dodo sync failed:', err);
-                    });
                     setupProfileRealtime(cachedData.user.id);
                     if (isMounted) setLoading(false);
                     clearTimeout(loadingTimeout);
@@ -259,9 +233,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         // Fetch profile but don't block on it
                         fetchUserProfile(session.user.id).catch(err => {
                             console.error('Profile fetch failed:', err);
-                        });
-                        syncDodoSubscription().catch(err => {
-                            console.warn('Dodo sync failed:', err);
                         });
                         setupProfileRealtime(session.user.id);
                     }
@@ -294,9 +265,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 // Fetch profile but don't block
                 fetchUserProfile(session.user.id).catch(err => {
                     console.error('Profile fetch failed:', err);
-                });
-                syncDodoSubscription().catch(err => {
-                    console.warn('Dodo sync failed:', err);
                 });
                 setupProfileRealtime(session.user.id);
             } else {

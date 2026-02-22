@@ -15,7 +15,6 @@ import EmailVerification from './pages/EmailVerification';
 import Checkout from './pages/Checkout';
 import PaymentCallback from './pages/PaymentCallback';
 import PaymentHistory from './pages/PaymentHistory';
-import PaymentTest from './pages/PaymentTest';
 import RefundPolicy from './pages/RefundPolicy';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -255,8 +254,6 @@ function AppContent() {
         <Route path="/agent-login" element={<AgentLogin />} />
 
         {/* Public Utility */}
-        <Route path="/payment-test" element={<PaymentTest />} />
-        <Route path="/payment-test" element={<PaymentTest />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />

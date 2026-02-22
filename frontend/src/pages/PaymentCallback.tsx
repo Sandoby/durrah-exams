@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Loader2, Check, X, AlertCircle, ArrowLeft, Calendar, CreditCard, Mail, ExternalLink, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
-import { kashierIntegration } from '../lib/kashier';
 import { Logo } from '../components/Logo';
 
 export default function PaymentCallback() {
@@ -22,231 +21,101 @@ export default function PaymentCallback() {
           searchParams.get('merchantOrderId') ||
           searchParams.get('subscription_id') ||
           searchParams.get('payment_id');
-        const paymentStatus = searchParams.get('paymentStatus');
-        const provider = searchParams.get('provider') || 'kashier';
+        const provider = searchParams.get('provider') || 'dodo';
 
-        console.log('📍 Payment callback:', { orderId, paymentStatus, provider });
+        console.log('Payment callback:', { orderId, provider });
 
         if (!orderId) {
           throw new Error('No order identifier found in callback.');
         }
 
-        // Retrieve metadata based on provider
-        let metadata = null;
-        if (provider === 'paysky') {
-          const data = localStorage.getItem(`paysky_payment_${orderId}`);
-          if (data) metadata = JSON.parse(data);
-        } else if (provider === 'dodo') {
-          // Dodo polling logic with Direct Verification
-          setMessage('Checking your subscription status...');
+        setMessage('Checking your subscription status...');
 
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) throw new Error('Authentication required');
+
+        const convexUrl = import.meta.env.VITE_CONVEX_URL;
+        const siteUrl = convexUrl?.replace('.cloud', '.site');
+
+        // 1. Direct Verification via Convex endpoint
+        if (siteUrl) {
           try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.user) throw new Error('Authentication required');
+            const verifyRes = await fetch(`${siteUrl}/verifyDodoPayment`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`
+              },
+              body: JSON.stringify({ orderId, userId: session.user.id })
+            });
 
-            const convexUrl = import.meta.env.VITE_CONVEX_URL;
-            const siteUrl = convexUrl?.replace('.cloud', '.site');
-
-            // 1. Immediate Direct Verification (Plan B)
-            if (siteUrl) {
-              try {
-                const verifyRes = await fetch(`${siteUrl}/verifyDodoPayment`, {
-                  method: 'POST',
-                  headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
-                  },
-                  body: JSON.stringify({ orderId, userId: session.user.id })
-                });
-
-                if (verifyRes.ok) {
-                  const result = await verifyRes.json();
-                  if (result.success) {
-                    console.log('✅ Dodo subscription activated via direct verification');
-                    setStatus('success');
-                    setMessage(t('checkout.callback.success_message', 'Your subscription is now active!'));
-                    setOrderDetails({
-                      planId: 'Professional',
-                      provider: 'dodo'
-                    });
-                    toast.success(t('checkout.callback.toast_success', 'Subscription activated!'));
-                    setTimeout(() => navigate('/dashboard', { replace: true }), 1500);
-                    return;
-                  }
-                } else if (verifyRes.status === 401) {
-                  console.warn('Direct verification failed: Unauthorized');
-                } else {
-                  console.warn('Direct verification failed:', verifyRes.status);
-                }
-              } catch (directErr) {
-                console.warn('Direct verification failed, falling back to polling:', directErr);
-              }
-            }
-
-            // 2. Fallback: Polling (Plan A/Webhook)
-            for (let attempt = 0; attempt < 10; attempt++) {
-              const { data: profile } = await supabase
-                .from('profiles')
-                .select('subscription_status, subscription_plan')
-                .eq('id', session.user.id)
-                .single();
-
-              if (profile?.subscription_status === 'active') {
-                console.log('✅ Dodo subscription activated via webhook');
+            if (verifyRes.ok) {
+              const result = await verifyRes.json();
+              if (result.success) {
+                console.log('Subscription activated via direct verification');
                 setStatus('success');
                 setMessage(t('checkout.callback.success_message', 'Your subscription is now active!'));
-                setOrderDetails({
-                  planId: profile.subscription_plan || 'Professional',
-                  provider: 'dodo'
-                });
+                setOrderDetails({ planId: 'Professional', provider: 'dodo' });
                 toast.success(t('checkout.callback.toast_success', 'Subscription activated!'));
                 setTimeout(() => navigate('/dashboard', { replace: true }), 1500);
                 return;
               }
-
-              if (profile?.subscription_status === 'payment_failed') {
-                setStatus('error');
-                setMessage('Your payment could not be completed or renewed. Please update your payment method.');
-                toast.error('Payment failed. Please update payment method.');
-                setTimeout(() => {
-                  navigate('/checkout', {
-                    state: {
-                      error: 'Payment failed. Please update your payment method and try again.',
-                      paymentFailed: true,
-                      provider: 'dodo'
-                    },
-                    replace: true
-                  });
-                }, 1800);
-                return;
-              }
-
-              if (profile?.subscription_status === 'cancelled') {
-                setStatus('cancelled');
-                setMessage('Your subscription is cancelled. You can reactivate from checkout.');
-                setTimeout(() => navigate('/checkout', { replace: true }), 1800);
-                return;
-              }
-
-              if (profile?.subscription_status === 'expired') {
-                setStatus('error');
-                setMessage('Your subscription has expired. Please subscribe again to regain access.');
-                toast.error('Subscription expired. Please resubscribe.');
-                setTimeout(() => {
-                  navigate('/checkout', {
-                    state: {
-                      error: 'Your subscription has expired. Please subscribe again.',
-                      expired: true,
-                      provider: 'dodo'
-                    },
-                    replace: true
-                  });
-                }, 1800);
-                return;
-              }
-              // Wait 2 seconds between polls
-              await new Promise(r => setTimeout(r, 2000));
             }
+          } catch (directErr) {
+            console.warn('Direct verification failed, falling back to polling:', directErr);
+          }
+        }
 
-            // Fallback: Webhook might be slow; show pending message
-            console.log('⏳ Dodo webhook taking longer than expected');
-            setStatus('loading');
-            setMessage('Your payment was received but activation is taking longer than expected. Please check your dashboard or contact support if the issue persists.');
-            // Don't auto-redirect - let user manually go to dashboard or retry
+        // 2. Fallback: Poll Supabase profile for webhook-driven activation
+        for (let attempt = 0; attempt < 10; attempt++) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('subscription_status, subscription_plan')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profile?.subscription_status === 'active') {
+            console.log('Subscription activated via webhook');
+            setStatus('success');
+            setMessage(t('checkout.callback.success_message', 'Your subscription is now active!'));
+            setOrderDetails({ planId: profile.subscription_plan || 'Professional', provider: 'dodo' });
+            toast.success(t('checkout.callback.toast_success', 'Subscription activated!'));
+            setTimeout(() => navigate('/dashboard', { replace: true }), 1500);
             return;
-          } catch (err: any) {
-            console.error('Dodo callback error:', err);
-            throw err;
-          }
-        } else {
-          metadata = kashierIntegration.getPaymentMetadata(orderId);
-        }
-
-        if (metadata) {
-          setOrderDetails(metadata);
-        }
-
-        // Logic for Successful Payment
-        if (paymentStatus?.toUpperCase() === 'SUCCESS') {
-          console.log('✅ Payment successful');
-          setStatus('success');
-          setMessage(t('checkout.callback.success_message', 'Your subscription is now active!'));
-
-          if (metadata) {
-            const { userId, planId, billingCycle } = metadata;
-
-            // Activate subscription
-            await kashierIntegration.updateUserProfile(userId, planId, billingCycle);
-
-            // Background updates
-            supabase
-              .from('payments')
-              .update({ status: 'completed', updated_at: new Date().toISOString() })
-              .eq('merchant_reference', orderId)
-              .then(() => console.log('DB updated'));
-
-            // Record coupon usage
-            const pendingCoupon = localStorage.getItem('pendingCoupon');
-            if (pendingCoupon) {
-              try {
-                const couponData = JSON.parse(pendingCoupon);
-                supabase
-                  .from('coupon_usage')
-                  .insert({ coupon_id: couponData.id, user_id: userId })
-                  .then(() => {
-                    supabase
-                      .from('coupons')
-                      .update({ used_count: couponData.used_count + 1 })
-                      .eq('id', couponData.id);
-                  });
-                localStorage.removeItem('pendingCoupon');
-              } catch (e) { console.warn('Coupon error:', e); }
-            }
           }
 
-          // Cleanup
-          if (provider === 'kashier') kashierIntegration.clearPaymentData(orderId);
-          else localStorage.removeItem(`paysky_payment_${orderId}`);
+          if (profile?.subscription_status === 'payment_failed') {
+            setStatus('error');
+            setMessage('Your payment could not be completed. Please update your payment method.');
+            toast.error('Payment failed. Please update payment method.');
+            setTimeout(() => navigate('/checkout', { state: { error: 'Payment failed.', paymentFailed: true, provider: 'dodo' }, replace: true }), 1800);
+            return;
+          }
 
-          toast.success(t('checkout.callback.toast_success', 'Subscription activated!'));
-          // Immediate redirect to dashboard
-          navigate('/dashboard', { replace: true });
-        }
-        // Logic for Cancelled Payment
-        else if (paymentStatus?.toUpperCase() === 'CANCELLED') {
-          // Redirect back to checkout
-          console.log('âڑ  Payment cancelled');
-          navigate('/checkout', {
-            state: {
-              error: t('checkout.callback.cancelled_message', 'Payment cancelled.'),
-              paymentFailed: true
-            },
-            replace: true
-          });
+          if (profile?.subscription_status === 'cancelled') {
+            setStatus('cancelled');
+            setMessage('Your subscription is cancelled. You can reactivate from checkout.');
+            setTimeout(() => navigate('/checkout', { replace: true }), 1800);
+            return;
+          }
 
-          localStorage.removeItem('pendingCoupon');
-          if (provider === 'kashier') kashierIntegration.clearPaymentData(orderId);
-          else if (provider === 'paysky') localStorage.removeItem(`paysky_payment_${orderId}`);
-        }
-        // Logic for Failure
-        else {
-          console.log('â‌Œ Payment failed');
-          // Redirect back to checkout with error reason
-          navigate('/checkout', {
-            state: {
-              error: t('checkout.callback.error_message', 'Payment failed. Please try again.'),
-              paymentFailed: true,
-              provider: provider // Pass provider back for context
-            },
-            replace: true
-          });
+          if (profile?.subscription_status === 'expired') {
+            setStatus('error');
+            setMessage('Your subscription has expired. Please subscribe again to regain access.');
+            toast.error('Subscription expired. Please resubscribe.');
+            setTimeout(() => navigate('/checkout', { state: { error: 'Subscription expired.', expired: true, provider: 'dodo' }, replace: true }), 1800);
+            return;
+          }
 
-          localStorage.removeItem('pendingCoupon');
-          if (provider === 'kashier') kashierIntegration.clearPaymentData(orderId);
-          else if (provider === 'paysky') localStorage.removeItem(`paysky_payment_${orderId}`);
+          await new Promise(r => setTimeout(r, 2000));
         }
+
+        // 3. Webhook still hasn't arrived after 20s
+        console.log('Webhook taking longer than expected');
+        setStatus('loading');
+        setMessage('Your payment was received but activation is taking longer than expected. Please check your dashboard or contact support if the issue persists.');
       } catch (error) {
-        console.error('❌ Callback error:', error);
+        console.error('Callback error:', error);
         setStatus('error');
         setMessage((error as Error).message || 'An unexpected error occurred during subscription verification.');
       }

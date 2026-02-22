@@ -182,8 +182,9 @@ export const cleanupOldLeaderboards = internalMutation({
 });
 
 // ============================================
-// CHECK SUBSCRIPTION EXPIRATIONS (REDUNDANT)
-// Provides redundancy to GitHub Actions cron job
+// CHECK SUBSCRIPTION EXPIRATIONS
+// Every 6h: expire past-end-date subscriptions via RPC state machine
+// Uses 24-hour grace buffer to avoid race conditions with renewals
 // ============================================
 export const checkSubscriptionExpirations = internalMutation({
   args: {},
@@ -196,7 +197,7 @@ export const checkSubscriptionExpirations = internalMutation({
       return { error: 'Configuration missing' };
     }
 
-    const headers = {
+    const rpcHeaders = {
       'apikey': supabaseKey,
       'Authorization': `Bearer ${supabaseKey}`,
       'Content-Type': 'application/json',
@@ -204,8 +205,11 @@ export const checkSubscriptionExpirations = internalMutation({
 
     try {
       const now = new Date();
+      // 24-hour grace buffer: only expire a subscription if end_date is more
+      // than 24 hours in the past. This gives Dodo webhooks time to deliver
+      // the renewal event before we mark the user expired.
+      const graceCutoff = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-      // Fetch profiles with subscription_end_date
       const profilesRes = await fetch(
         `${supabaseUrl}/rest/v1/profiles?select=id,email,subscription_status,subscription_end_date,last_reminder_sent_at,email_notifications_enabled&subscription_end_date=not.is.null`,
         { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
@@ -223,28 +227,40 @@ export const checkSubscriptionExpirations = internalMutation({
 
       for (const profile of profiles) {
         const endDate = new Date(profile.subscription_end_date);
-        const daysUntilExpiry = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        const hoursUntilExpiry = (endDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+        const daysUntilExpiry = Math.ceil(hoursUntilExpiry / 24);
         const lastReminder = profile.last_reminder_sent_at ? new Date(profile.last_reminder_sent_at) : null;
         const hoursSinceLastReminder = lastReminder ? (now.getTime() - lastReminder.getTime()) / (1000 * 60 * 60) : 999;
 
-        // NOTE: email_notifications_enabled only gates SENDING EMAILS below.
-        // It must NOT skip the expiry check — users should still be expired even
-        // if they have turned off email notifications.
-
-        // EXPIRED - Set status to expired (runs for ALL users regardless of notification prefs)
-        // GUARD: Do NOT expire users who are currently 'active' — their subscription_end_date
-        // will be extended by the next webhook/sync. Expiring active users causes false
-        // deactivations when the cron runs between payment and date extension.
-        if (daysUntilExpiry <= 0 && profile.subscription_status !== 'expired' && profile.subscription_status !== 'active') {
-          await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
-            method: 'PATCH',
-            headers,
-            body: JSON.stringify({ subscription_status: 'expired' }),
+        // EXPIRE — only after 24h grace buffer, and only for non-active/non-trialing statuses
+        // 'active' and 'trialing' are guarded: renewals / trial-check cron handles those.
+        if (
+          endDate <= graceCutoff &&
+          profile.subscription_status !== 'expired' &&
+          profile.subscription_status !== 'cancelled' &&
+          profile.subscription_status !== 'active' &&
+          profile.subscription_status !== 'trialing'
+        ) {
+          // Use transition_subscription RPC — atomically validated, audited
+          const rpcRes = await fetch(`${supabaseUrl}/rest/v1/rpc/transition_subscription`, {
+            method: 'POST',
+            headers: rpcHeaders,
+            body: JSON.stringify({
+              p_user_id: profile.id,
+              p_new_status: 'expired',
+              p_trigger_source: 'cron_expiration',
+              p_reason: 'Subscription end date passed (6h cron check, 24h grace elapsed)',
+              p_metadata: { end_date: profile.subscription_end_date },
+            }),
           });
-
-          console.log(`[Expiration Check] Marked user ${profile.id} as expired`);
-          expiredCount++;
-          processedCount++;
+          if (!rpcRes.ok) {
+            const err = await rpcRes.text();
+            console.error(`[Expiration Check] RPC failed for ${profile.id}:`, err);
+          } else {
+            console.log(`[Expiration Check] Expired user ${profile.id}`);
+            expiredCount++;
+            processedCount++;
+          }
         }
         // 3-DAY REMINDER (only if notifications enabled)
         else if (daysUntilExpiry <= 3 && daysUntilExpiry > 0 && hoursSinceLastReminder >= 23) {
@@ -252,11 +268,7 @@ export const checkSubscriptionExpirations = internalMutation({
           try {
             await fetch(`${supabaseUrl}/functions/v1/send-payment-email`, {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${supabaseKey}`,
-                'apikey': supabaseKey,
-              },
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${supabaseKey}`, 'apikey': supabaseKey },
               body: JSON.stringify({
                 type: 'subscription_expiring',
                 email: profile.email,
@@ -267,12 +279,12 @@ export const checkSubscriptionExpirations = internalMutation({
             });
             await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
               method: 'PATCH',
-              headers,
+              headers: rpcHeaders,
               body: JSON.stringify({ last_reminder_sent_at: now.toISOString() }),
             });
             console.log(`[Expiration Check] Sent 3-day reminder to ${profile.email}`);
           } catch (emailErr) {
-            console.error(`[Expiration Check] Failed to send reminder to ${profile.email}:`, emailErr);
+            console.error(`[Expiration Check] Reminder error for ${profile.email}:`, emailErr);
           }
           remindersCount++;
           processedCount++;
@@ -283,11 +295,7 @@ export const checkSubscriptionExpirations = internalMutation({
           try {
             await fetch(`${supabaseUrl}/functions/v1/send-payment-email`, {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${supabaseKey}`,
-                'apikey': supabaseKey,
-              },
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${supabaseKey}`, 'apikey': supabaseKey },
               body: JSON.stringify({
                 type: 'subscription_expiring',
                 email: profile.email,
@@ -298,29 +306,21 @@ export const checkSubscriptionExpirations = internalMutation({
             });
             await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
               method: 'PATCH',
-              headers,
+              headers: rpcHeaders,
               body: JSON.stringify({ last_reminder_sent_at: now.toISOString() }),
             });
             console.log(`[Expiration Check] Sent 7-day reminder to ${profile.email}`);
           } catch (emailErr) {
-            console.error(`[Expiration Check] Failed to send reminder to ${profile.email}:`, emailErr);
+            console.error(`[Expiration Check] Reminder error for ${profile.email}:`, emailErr);
           }
           remindersCount++;
           processedCount++;
         }
       }
 
-      // Update job meta
       await updateJobMeta(ctx, "check_subscription_expirations", processedCount);
-
-      console.log(`[Expiration Check] Processed ${processedCount} profiles, expired ${expiredCount}, reminders ${remindersCount}`);
-
-      return {
-        success: true,
-        processed: processedCount,
-        expired: expiredCount,
-        reminders: remindersCount,
-      };
+      console.log(`[Expiration Check] Done: expired=${expiredCount}, reminders=${remindersCount}`);
+      return { success: true, processed: processedCount, expired: expiredCount, reminders: remindersCount };
     } catch (error: any) {
       console.error('[Expiration Check] Error:', error);
       return { error: error.message };
@@ -330,7 +330,7 @@ export const checkSubscriptionExpirations = internalMutation({
 
 // ============================================
 // CHECK TRIAL EXPIRATIONS
-// Handles trial → expired → cancelled flow with grace period
+// Handles trialing → expired → cancelled via RPC state machine
 // ============================================
 export const checkTrialExpirations = internalMutation({
   args: {},
@@ -343,16 +343,36 @@ export const checkTrialExpirations = internalMutation({
       return { error: 'Configuration missing' };
     }
 
-    const headers = {
+    const rpcHeaders = {
       'apikey': supabaseKey,
       'Authorization': `Bearer ${supabaseKey}`,
       'Content-Type': 'application/json',
     };
 
+    // Helper: call transition_subscription RPC
+    const callRpc = async (userId: string, newStatus: string, reason: string, metadata?: object) => {
+      const res = await fetch(`${supabaseUrl}/rest/v1/rpc/transition_subscription`, {
+        method: 'POST',
+        headers: rpcHeaders,
+        body: JSON.stringify({
+          p_user_id: userId,
+          p_new_status: newStatus,
+          p_trigger_source: 'cron_trial',
+          p_reason: reason,
+          p_metadata: metadata || {},
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        console.error(`[Trial Check] RPC failed for ${userId} → ${newStatus}:`, err);
+        return false;
+      }
+      return true;
+    };
+
     try {
       const now = new Date();
 
-      // Fetch profiles with trial data
       const profilesRes = await fetch(
         `${supabaseUrl}/rest/v1/profiles?select=id,email,subscription_status,trial_ends_at,trial_grace_ends_at,trial_activated,last_reminder_sent_at,email_notifications_enabled&trial_activated=eq.true`,
         { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
@@ -375,46 +395,32 @@ export const checkTrialExpirations = internalMutation({
         const lastReminder = profile.last_reminder_sent_at ? new Date(profile.last_reminder_sent_at) : null;
         const hoursSinceLastReminder = lastReminder ? (now.getTime() - lastReminder.getTime()) / (1000 * 60 * 60) : 999;
 
-        // 1. TRIAL ENDED - Move to expired status with grace period
+        // 1. TRIAL ENDED → expire via RPC
         if (trialEndsAt && now >= trialEndsAt && profile.subscription_status === 'trialing') {
-          await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
-            method: 'PATCH',
-            headers,
-            body: JSON.stringify({ subscription_status: 'expired' }),
-          });
-
-          console.log(`[Trial Check] Trial ended for user ${profile.id}, now in grace period`);
-          expiredCount++;
-          processedCount++;
+          const ok = await callRpc(profile.id, 'expired', 'Trial period ended', { trial_ends_at: profile.trial_ends_at });
+          if (ok) {
+            console.log(`[Trial Check] Expired trial for user ${profile.id}`);
+            expiredCount++;
+            processedCount++;
+          }
         }
-        // 2. GRACE PERIOD ENDED - Cancel subscription
+        // 2. GRACE PERIOD ENDED → cancel via RPC
         else if (graceEndsAt && now >= graceEndsAt && profile.subscription_status === 'expired' && profile.trial_activated) {
-          await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
-            method: 'PATCH',
-            headers,
-            body: JSON.stringify({
-              subscription_status: 'cancelled',
-              subscription_plan: null,
-              subscription_end_date: null,
-            }),
-          });
-
-          console.log(`[Trial Check] Grace period ended for user ${profile.id}, subscription cancelled`);
-          cancelledCount++;
-          processedCount++;
+          const ok = await callRpc(profile.id, 'cancelled', 'Grace period after trial ended', { grace_ends_at: profile.trial_grace_ends_at });
+          if (ok) {
+            console.log(`[Trial Check] Cancelled post-trial grace for user ${profile.id}`);
+            cancelledCount++;
+            processedCount++;
+          }
         }
-        // 3. TRIAL ENDING SOON - Send 2-day warning (respect rate limit)
+        // 3. TRIAL ENDING SOON — send warning (respect notification prefs and rate limit)
         else if (trialEndsAt && profile.subscription_status === 'trialing' && profile.email_notifications_enabled) {
           const daysUntilExpiry = Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
           if (daysUntilExpiry <= 2 && daysUntilExpiry > 0 && hoursSinceLastReminder >= 23) {
             try {
               await fetch(`${supabaseUrl}/functions/v1/send-payment-email`, {
                 method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${supabaseKey}`,
-                  'apikey': supabaseKey,
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${supabaseKey}`, 'apikey': supabaseKey },
                 body: JSON.stringify({
                   type: 'subscription_expiring',
                   email: profile.email,
@@ -425,12 +431,12 @@ export const checkTrialExpirations = internalMutation({
               });
               await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`, {
                 method: 'PATCH',
-                headers,
+                headers: rpcHeaders,
                 body: JSON.stringify({ last_reminder_sent_at: now.toISOString() }),
               });
-              console.log(`[Trial Check] Sent trial ending warning to ${profile.email}, ${daysUntilExpiry} day(s) remaining`);
+              console.log(`[Trial Check] Trial warning sent to ${profile.email}, ${daysUntilExpiry}d remaining`);
             } catch (emailErr) {
-              console.error(`[Trial Check] Failed to send trial warning to ${profile.email}:`, emailErr);
+              console.error(`[Trial Check] Warning email failed for ${profile.email}:`, emailErr);
             }
             warningsCount++;
             processedCount++;
@@ -438,18 +444,9 @@ export const checkTrialExpirations = internalMutation({
         }
       }
 
-      // Update job meta
       await updateJobMeta(ctx, "check_trial_expirations", processedCount);
-
-      console.log(`[Trial Check] Processed ${processedCount} profiles, expired ${expiredCount}, cancelled ${cancelledCount}, warnings ${warningsCount}`);
-
-      return {
-        success: true,
-        processed: processedCount,
-        expired: expiredCount,
-        cancelled: cancelledCount,
-        warnings: warningsCount,
-      };
+      console.log(`[Trial Check] Done: expired=${expiredCount}, cancelled=${cancelledCount}, warnings=${warningsCount}`);
+      return { success: true, processed: processedCount, expired: expiredCount, cancelled: cancelledCount, warnings: warningsCount };
     } catch (error: any) {
       console.error('[Trial Check] Error:', error);
       return { error: error.message };
