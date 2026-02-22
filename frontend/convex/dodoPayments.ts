@@ -478,14 +478,12 @@ export const syncSubscriptionFromProvider = internalAction({
       // ── Get current state from Convex first, then fall back to Supabase ──
       let currentStatus: string | null = null;
       let subscriptionId: string | undefined;
-      let dodoCustomerId: string | undefined;
 
       const convexSub = await ctx.runQuery(internal.subscriptions.getByUserId, { userId: args.userId });
 
       if (convexSub) {
         currentStatus = convexSub.status;
         subscriptionId = convexSub.dodo_subscription_id ?? undefined;
-        dodoCustomerId = convexSub.dodo_customer_id ?? undefined;
       } else {
         // Fall back to Supabase profiles if no Convex record yet
         const readHeaders = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` };
@@ -499,7 +497,6 @@ export const syncSubscriptionFromProvider = internalAction({
           if (profile) {
             currentStatus = profile.subscription_status;
             subscriptionId = profile.dodo_subscription_id;
-            dodoCustomerId = profile.dodo_customer_id;
           }
         }
       }

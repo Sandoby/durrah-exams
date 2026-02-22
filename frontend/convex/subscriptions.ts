@@ -2,7 +2,7 @@ import { internalMutation, internalQuery, internalAction, query } from "./_gener
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import type { DatabaseWriter } from "./_generated/server";
-import type { Doc, Id } from "./_generated/dataModel";
+import type { Id } from "./_generated/dataModel";
 
 /**
  * Convex Subscription State Machine
