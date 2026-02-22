@@ -6,7 +6,7 @@ import { api, internal } from "./_generated/api";
  * HTTP Routes for Convex
  * 
  * Subscription webhook is the ONLY path that changes subscription state.
- * All transitions go through transition_subscription() Supabase RPC.
+ * All transitions go through Convex subscriptions.transition() mutation.
  */
 
 const http = httpRouter();
@@ -507,15 +507,21 @@ http.route({
         return new Response(JSON.stringify({ error: "Server config missing" }), { status: 500, headers: corsHeaders });
       }
 
-      // Look up dodo_customer_id from profile
-      const profileRes = await fetch(
-        `${supabaseUrl}/rest/v1/profiles?id=eq.${authUser.id}&select=dodo_customer_id,email&limit=1`,
-        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
-      );
+      // Look up dodo_customer_id — Convex first, then fallback to Supabase
       let dodoCustomerId: string | undefined;
-      if (profileRes.ok) {
-        const profiles = await profileRes.json();
-        dodoCustomerId = profiles?.[0]?.dodo_customer_id;
+
+      const convexSub = await ctx.runQuery(internal.subscriptions.getByUserId, { userId: authUser.id });
+      if (convexSub?.dodo_customer_id) {
+        dodoCustomerId = convexSub.dodo_customer_id;
+      } else {
+        const profileRes = await fetch(
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${authUser.id}&select=dodo_customer_id,email&limit=1`,
+          { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+        );
+        if (profileRes.ok) {
+          const profiles = await profileRes.json();
+          dodoCustomerId = profiles?.[0]?.dodo_customer_id;
+        }
       }
 
       // Try direct portal

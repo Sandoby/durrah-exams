@@ -1,15 +1,16 @@
 ﻿import { internalAction } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
 /**
  * Dodo Payments — Clean Subscription Backend
  *
  * Design principles:
- * 1. Single source of truth: ALL state changes go through transition_subscription() RPC
- * 2. State machine enforced at database level — invalid transitions are rejected + logged
+ * 1. Single source of truth: ALL state changes go through Convex subscriptions.transition()
+ * 2. State machine enforced in Convex mutation — invalid transitions are rejected + logged
  * 3. Idempotent: replaying the same event has no side effects
  * 4. No reconciliation cron — webhooks + on-login sync are sufficient
- * 5. No direct PATCH to profiles — only the RPC touches subscription columns
+ * 5. No direct PATCH to Supabase profiles for subscription columns — only syncToSupabase does
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -31,69 +32,20 @@ function getDodoBaseUrl(apiKey: string) {
     : "https://live.dodopayments.com";
 }
 
-/** Single helper: call transition_subscription RPC */
-async function callTransitionRPC(
-  supabaseUrl: string,
-  supabaseKey: string,
-  params: {
-    userId: string;
-    newStatus: string;
-    endDate?: string | null;
-    plan?: string;
-    billingCycle?: string;
-    dodoCustomerId?: string;
-    dodoSubscriptionId?: string;
-    source?: string;
-    metadata?: Record<string, unknown>;
-  }
-): Promise<{ success: boolean; result?: unknown; error?: string }> {
-  const headers = supabaseHeaders(supabaseKey);
-
-  const body: Record<string, unknown> = {
-    p_user_id: params.userId,
-    p_new_status: params.newStatus,
-    p_plan: params.plan || "Professional",
-    p_source: params.source || "webhook",
-    p_metadata: params.metadata || {},
-  };
-
-  if (params.endDate) body.p_end_date = params.endDate;
-  if (params.billingCycle) body.p_billing_cycle = params.billingCycle;
-  if (params.dodoCustomerId) body.p_dodo_customer_id = params.dodoCustomerId;
-  if (params.dodoSubscriptionId) body.p_dodo_subscription_id = params.dodoSubscriptionId;
-
-  const res = await fetch(`${supabaseUrl}/rest/v1/rpc/transition_subscription`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error(`[RPC] transition_subscription failed: ${res.status} ${errText}`);
-    return { success: false, error: `RPC failed: ${res.status} ${errText}` };
-  }
-
-  const result = await res.json();
-
-  if (result?.success === false) {
-    console.warn(`[RPC] transition_subscription rejected: ${result?.error}`, {
-      userId: params.userId,
-      newStatus: params.newStatus,
-      oldStatus: result?.old_status,
-    });
-    return { success: false, error: result.error, result };
-  }
-
-  return { success: true, result };
-}
-
-/** Resolve userId by email */
+/** Resolve userId by email — try Convex first, then Supabase */
 async function resolveByEmail(
+  ctx: { runQuery: (fn: any, args: any) => Promise<any> },
   supabaseUrl: string,
   supabaseKey: string,
   email: string
 ): Promise<string | undefined> {
+  // Try Convex subscriptions table
+  try {
+    const sub = await ctx.runQuery(internal.subscriptions.getByEmail, { email });
+    if (sub?.user_id) return sub.user_id;
+  } catch {}
+
+  // Fall back to Supabase profiles
   try {
     const res = await fetch(
       `${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email)}&select=id&limit=1`,
@@ -107,12 +59,20 @@ async function resolveByEmail(
   }
 }
 
-/** Resolve userId by dodo_customer_id */
+/** Resolve userId by dodo_customer_id — try Convex first, then Supabase */
 async function resolveByCustomerId(
+  ctx: { runQuery: (fn: any, args: any) => Promise<any> },
   supabaseUrl: string,
   supabaseKey: string,
   customerId: string
 ): Promise<string | undefined> {
+  // Try Convex subscriptions table
+  try {
+    const sub = await ctx.runQuery(internal.subscriptions.getByDodoCustomerId, { dodoCustomerId: customerId });
+    if (sub?.user_id) return sub.user_id;
+  } catch {}
+
+  // Fall back to Supabase profiles
   try {
     const res = await fetch(
       `${supabaseUrl}/rest/v1/profiles?dodo_customer_id=eq.${encodeURIComponent(customerId)}&select=id&limit=1`,
@@ -180,7 +140,7 @@ async function sendEmail(
 /**
  * Core subscription state transition.
  * Called by webhook handler and syncSubscriptionFromProvider.
- * Always goes through transition_subscription() RPC — never direct PATCH.
+ * Always goes through Convex subscriptions.transition() mutation.
  */
 export const updateSubscription = internalAction({
   args: {
@@ -194,7 +154,7 @@ export const updateSubscription = internalAction({
     billingCycle:     v.optional(v.string()),
     eventType:        v.optional(v.string()),
   },
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!supabaseUrl || !supabaseKey) return { success: false, error: "Config missing" };
@@ -203,10 +163,10 @@ export const updateSubscription = internalAction({
 
     // ── Resolve user ─────────────────────────────────────────────
     if (!userId && args.userEmail) {
-      userId = await resolveByEmail(supabaseUrl, supabaseKey, args.userEmail);
+      userId = await resolveByEmail(ctx, supabaseUrl, supabaseKey, args.userEmail);
     }
     if (!userId && args.dodoCustomerId) {
-      userId = await resolveByCustomerId(supabaseUrl, supabaseKey, args.dodoCustomerId);
+      userId = await resolveByCustomerId(ctx, supabaseUrl, supabaseKey, args.dodoCustomerId);
     }
 
     if (!userId) {
@@ -236,35 +196,47 @@ export const updateSubscription = internalAction({
     // Don't let non-activation webhooks interrupt an active trial
     if (args.status !== "active" && args.status !== "cancelled") {
       try {
-        const res = await fetch(
-          `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=subscription_status&limit=1`,
-          { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
-        );
-        if (res.ok) {
-          const rows = await res.json();
-          if (rows?.[0]?.subscription_status === "trialing") {
-            console.log(`[TRIAL-PROTECTION] Skipping '${args.status}' for trialing user ${userId}`);
-            return { success: true, skipped: true, reason: "trial_protection", userId };
-          }
+        const sub = await ctx.runQuery(internal.subscriptions.getByUserId, { userId });
+        if (sub?.status === "trialing") {
+          console.log(`[TRIAL-PROTECTION] Skipping '${args.status}' for trialing user ${userId}`);
+          return { success: true, skipped: true, reason: "trial_protection", userId };
         }
-      } catch {}
+      } catch {
+        // Fallback: check Supabase if no Convex record yet
+        try {
+          const res = await fetch(
+            `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=subscription_status&limit=1`,
+            { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+          );
+          if (res.ok) {
+            const rows = await res.json();
+            if (rows?.[0]?.subscription_status === "trialing") {
+              console.log(`[TRIAL-PROTECTION] Skipping '${args.status}' for trialing user ${userId} (Supabase)`);
+              return { success: true, skipped: true, reason: "trial_protection", userId };
+            }
+          }
+        } catch {}
+      }
     }
 
-    // ── Call state machine RPC ───────────────────────────────────
-    const rpcResult = await callTransitionRPC(supabaseUrl, supabaseKey, {
+    // ── Call Convex state machine ────────────────────────────────
+    const endDateMs = args.endDate ? new Date(args.endDate).getTime() : undefined;
+
+    const result = await ctx.runMutation(internal.subscriptions.transition, {
       userId,
       newStatus: args.status,
-      endDate: args.endDate,
+      endDate: endDateMs,
       plan: args.plan || "Professional",
       billingCycle: args.billingCycle,
       dodoCustomerId: args.dodoCustomerId,
       dodoSubscriptionId: args.dodoSubscriptionId,
       source: "webhook",
       metadata: { event_type: args.eventType },
+      email: args.userEmail,
     });
 
-    if (!rpcResult.success) {
-      return { success: false, error: rpcResult.error, userId };
+    if (!result.success) {
+      return { success: false, error: result.error, userId };
     }
 
     console.log(`[updateSubscription] ✓ ${args.status} for user ${userId} (${args.eventType})`);
@@ -412,7 +384,7 @@ export const verifyPayment = internalAction({
     orderId: v.string(),
     userId:  v.optional(v.string()),
   },
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
     const apiKey = process.env.DODO_PAYMENTS_API_KEY;
     if (!apiKey) throw new Error("DODO_PAYMENTS_API_KEY not configured");
     const supabaseUrl = process.env.SUPABASE_URL;
@@ -459,23 +431,26 @@ export const verifyPayment = internalAction({
       }
 
       let userId = args.userId;
-      if (!userId && userEmail) userId = await resolveByEmail(supabaseUrl, supabaseKey, userEmail);
-      if (!userId && dodoCustomerId) userId = await resolveByCustomerId(supabaseUrl, supabaseKey, dodoCustomerId);
+      if (!userId && userEmail) userId = await resolveByEmail(ctx, supabaseUrl, supabaseKey, userEmail);
+      if (!userId && dodoCustomerId) userId = await resolveByCustomerId(ctx, supabaseUrl, supabaseKey, dodoCustomerId);
       if (!userId) return { success: false, error: "Could not identify user" };
 
-      const rpcResult = await callTransitionRPC(supabaseUrl, supabaseKey, {
+      const endDateMs = nextBillingDate ? new Date(nextBillingDate).getTime() : undefined;
+
+      const result = await ctx.runMutation(internal.subscriptions.transition, {
         userId,
         newStatus: "active",
-        endDate: nextBillingDate,
+        endDate: endDateMs,
         plan: "Professional",
         billingCycle,
         dodoCustomerId,
         dodoSubscriptionId,
         source: "direct_verify",
         metadata: { orderId: args.orderId },
+        email: userEmail || undefined,
       });
 
-      return { ...rpcResult, userId, providerStatus };
+      return { ...result, userId, providerStatus };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
@@ -491,33 +466,51 @@ export const syncSubscriptionFromProvider = internalAction({
     userId:    v.string(),
     userEmail: v.optional(v.string()),
   },
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args): Promise<Record<string, unknown>> => {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const apiKey = process.env.DODO_PAYMENTS_API_KEY;
     if (!supabaseUrl || !supabaseKey || !apiKey) return { success: false, error: "Config missing" };
 
-    const readHeaders = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` };
     const baseUrl = getDodoBaseUrl(apiKey);
 
     try {
-      const profileRes = await fetch(
-        `${supabaseUrl}/rest/v1/profiles?id=eq.${args.userId}&select=subscription_status,dodo_subscription_id,dodo_customer_id&limit=1`,
-        { headers: readHeaders }
-      );
-      if (!profileRes.ok) return { success: false, error: "Profile fetch failed" };
-      const profiles = await profileRes.json();
-      const profile = profiles?.[0];
-      if (!profile) return { success: false, error: "Profile not found" };
+      // ── Get current state from Convex first, then fall back to Supabase ──
+      let currentStatus: string | null = null;
+      let subscriptionId: string | undefined;
+      let dodoCustomerId: string | undefined;
 
+      const convexSub = await ctx.runQuery(internal.subscriptions.getByUserId, { userId: args.userId });
+
+      if (convexSub) {
+        currentStatus = convexSub.status;
+        subscriptionId = convexSub.dodo_subscription_id ?? undefined;
+        dodoCustomerId = convexSub.dodo_customer_id ?? undefined;
+      } else {
+        // Fall back to Supabase profiles if no Convex record yet
+        const readHeaders = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` };
+        const profileRes = await fetch(
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${args.userId}&select=subscription_status,dodo_subscription_id,dodo_customer_id&limit=1`,
+          { headers: readHeaders }
+        );
+        if (profileRes.ok) {
+          const profiles = await profileRes.json();
+          const profile = profiles?.[0];
+          if (profile) {
+            currentStatus = profile.subscription_status;
+            subscriptionId = profile.dodo_subscription_id;
+            dodoCustomerId = profile.dodo_customer_id;
+          }
+        }
+      }
       // Skip sync for trialing users — trials are managed by cron only
-      if (profile.subscription_status === "trialing") {
+      if (currentStatus === "trialing") {
         return { success: true, skipped: true, reason: "trialing_user" };
       }
 
-      // Find subscription ID
-      let subscriptionId: string | undefined = profile.dodo_subscription_id;
+      // Find subscription ID from payments if needed
       if (!subscriptionId) {
+        const readHeaders = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` };
         const paymentsRes = await fetch(
           `${supabaseUrl}/rest/v1/payments?user_id=eq.${args.userId}&provider=eq.dodo&select=merchant_reference,metadata&order=created_at.desc&limit=20`,
           { headers: readHeaders }
@@ -565,23 +558,23 @@ export const syncSubscriptionFromProvider = internalAction({
         return { success: true, skipped: true, reason: "unknown_status", providerStatus: statusRaw };
       }
 
-      const dodoCustomerId = sub?.customer?.id || sub?.customer?.customer_id || sub?.customer_id;
+      const resolvedCustomerId = sub?.customer?.id || sub?.customer?.customer_id || sub?.customer_id;
 
       console.log(`[sync] user=${args.userId} sub=${subscriptionId} raw=${statusRaw} mapped=${mappedStatus}`);
 
-      const rpcResult = await callTransitionRPC(supabaseUrl, supabaseKey, {
+      await ctx.runMutation(internal.subscriptions.transition, {
         userId: args.userId,
         newStatus: mappedStatus,
-        endDate: sub?.next_billing_date,
+        endDate: sub?.next_billing_date ? new Date(sub.next_billing_date).getTime() : undefined,
         plan: "Professional",
         billingCycle: sub?.metadata?.billingCycle,
-        dodoCustomerId,
+        dodoCustomerId: resolvedCustomerId,
         dodoSubscriptionId: subscriptionId,
         source: "login_sync",
         metadata: { providerStatus: statusRaw },
       });
 
-      return { ...rpcResult, providerStatus: statusRaw, subscriptionId };
+      return { success: true, providerStatus: statusRaw, subscriptionId };
     } catch (error: any) {
       return { success: false, error: error?.message || "sync failed" };
     }
@@ -591,11 +584,11 @@ export const syncSubscriptionFromProvider = internalAction({
 /** Resolve a user ID from email. */
 export const resolveUserIdByEmail = internalAction({
   args: { userEmail: v.string() },
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!supabaseUrl || !supabaseKey) return { success: false, error: "Config missing" };
-    const userId = await resolveByEmail(supabaseUrl, supabaseKey, args.userEmail);
+    const userId = await resolveByEmail(ctx, supabaseUrl, supabaseKey, args.userEmail);
     return { success: !!userId, userId };
   },
 });
@@ -606,7 +599,7 @@ export const resolveAndLinkCustomer = internalAction({
     userId:    v.string(),
     userEmail: v.optional(v.string()),
   },
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const apiKey = process.env.DODO_PAYMENTS_API_KEY;
@@ -626,6 +619,15 @@ export const resolveAndLinkCustomer = internalAction({
           const data = await res.json();
           const customerId = data?.items?.[0]?.customer_id || data?.items?.[0]?.id;
           if (customerId) {
+            // Write to Convex first
+            const convexSub = await ctx.runQuery(internal.subscriptions.getByUserId, { userId: args.userId });
+            if (convexSub) {
+              await ctx.runMutation(internal.subscriptions.patchCustomerId, {
+                subscriptionId: convexSub._id,
+                dodoCustomerId: customerId,
+              });
+            }
+            // Also sync to Supabase
             await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${args.userId}`, {
               method: "PATCH",
               headers: supabaseHeaders(supabaseKey),
@@ -662,6 +664,15 @@ export const resolveAndLinkCustomer = internalAction({
       const customerId = sub?.customer?.id || sub?.customer?.customer_id || sub?.customer_id;
       if (!customerId) return { success: false, error: "No customer ID in subscription" };
 
+      // Write to Convex first
+      const convexSub = await ctx.runQuery(internal.subscriptions.getByUserId, { userId: args.userId });
+      if (convexSub) {
+        await ctx.runMutation(internal.subscriptions.patchCustomerId, {
+          subscriptionId: convexSub._id,
+          dodoCustomerId: customerId,
+        });
+      }
+      // Also sync to Supabase
       await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${args.userId}`, {
         method: "PATCH",
         headers: supabaseHeaders(supabaseKey),

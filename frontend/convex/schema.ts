@@ -292,7 +292,7 @@ export default defineSchema({
     .index("by_provider", ["provider", "processed_at"]),
 
   // ============================================
-  // SUBSCRIPTION SYNC STATE
+  // SUBSCRIPTION SYNC STATE (legacy — kept for backward compat)
   // ============================================
   subscriptionSync: defineTable({
     user_id: v.string(),             // Supabase user ID
@@ -307,4 +307,53 @@ export default defineSchema({
     .index("by_user", ["user_id"])
     .index("by_last_synced", ["last_synced_at"])
     .index("by_status", ["last_status"]),
+
+  // ============================================
+  // SUBSCRIPTIONS — Source of Truth
+  // Replaces Supabase profiles subscription columns.
+  // State machine logic lives in subscriptions.ts.
+  // ============================================
+  subscriptions: defineTable({
+    user_id: v.string(),                             // Supabase auth user ID
+    email: v.optional(v.string()),                   // Cached for cron email lookups
+    status: v.string(),                              // active, trialing, on_hold, payment_failed, cancelled, expired, pending
+    plan: v.optional(v.string()),                    // Professional
+    billing_cycle: v.optional(v.string()),           // monthly, yearly
+    end_date: v.optional(v.number()),                // subscription_end_date (unix ms)
+    dodo_customer_id: v.optional(v.string()),
+    dodo_subscription_id: v.optional(v.string()),
+    trial_ends_at: v.optional(v.number()),
+    trial_grace_ends_at: v.optional(v.number()),
+    trial_activated: v.optional(v.boolean()),
+    email_notifications_enabled: v.optional(v.boolean()),
+    last_reminder_sent_at: v.optional(v.number()),
+    updated_at: v.number(),
+    created_at: v.number(),
+  })
+    .index("by_user_id", ["user_id"])
+    .index("by_status", ["status"])
+    .index("by_dodo_customer_id", ["dodo_customer_id"])
+    .index("by_dodo_subscription_id", ["dodo_subscription_id"]),
+
+  // ============================================
+  // SUBSCRIPTION AUDIT LOG
+  // Full history of every state transition
+  // ============================================
+  subscriptionAuditLog: defineTable({
+    user_id: v.string(),
+    action: v.string(),
+    old_status: v.optional(v.string()),
+    new_status: v.string(),
+    old_end_date: v.optional(v.number()),
+    new_end_date: v.optional(v.number()),
+    plan: v.optional(v.string()),
+    billing_cycle: v.optional(v.string()),
+    source: v.string(),
+    dodo_subscription_id: v.optional(v.string()),
+    dodo_customer_id: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+    created_at: v.number(),
+  })
+    .index("by_user_id", ["user_id"])
+    .index("by_created_at", ["created_at"]),
 });

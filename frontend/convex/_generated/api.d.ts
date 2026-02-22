@@ -20,6 +20,7 @@ import type * as presence from "../presence.js";
 import type * as sessions from "../sessions.js";
 import type * as sessionsQueries from "../sessionsQueries.js";
 import type * as subscriptionQueries from "../subscriptionQueries.js";
+import type * as subscriptions from "../subscriptions.js";
 import type * as webhookHelpers from "../webhookHelpers.js";
 
 import type {
@@ -41,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   sessions: typeof sessions;
   sessionsQueries: typeof sessionsQueries;
   subscriptionQueries: typeof subscriptionQueries;
+  subscriptions: typeof subscriptions;
   webhookHelpers: typeof webhookHelpers;
 }>;
 

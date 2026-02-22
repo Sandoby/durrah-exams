@@ -8,16 +8,25 @@ import { v } from "convex/values";
  * and get instant updates when subscriptions are activated/deactivated via webhooks.
  */
 
-// Get current subscription sync state for a user
+// Get current subscription state for a user (from Convex subscriptions table)
 export const getSubscriptionState = query({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
-    const syncState = await ctx.db
-      .query("subscriptionSync")
-      .withIndex("by_user", (q) => q.eq("user_id", args.userId))
+    const sub = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_user_id", (q) => q.eq("user_id", args.userId))
       .first();
 
-    return syncState ?? null;
+    if (!sub) {
+      // Fallback: check legacy subscriptionSync table
+      const syncState = await ctx.db
+        .query("subscriptionSync")
+        .withIndex("by_user", (q) => q.eq("user_id", args.userId))
+        .first();
+      return syncState ?? null;
+    }
+
+    return sub;
   },
 });
 
@@ -51,21 +60,23 @@ export const getRecentWebhooks = query({
   },
 });
 
-// Get subscription sync statistics (for admin monitoring)
+// Get subscription statistics (for admin monitoring)
 export const getSubscriptionStats = query({
   args: {},
   handler: async (ctx) => {
-    const allSyncs = await ctx.db.query("subscriptionSync").collect();
+    const allSubs = await ctx.db.query("subscriptions").collect();
 
     const stats = {
-      total: allSyncs.length,
-      active: allSyncs.filter((s) => s.last_status === 'active').length,
-      cancelled: allSyncs.filter((s) => s.last_status === 'cancelled').length,
-      expired: allSyncs.filter((s) => s.last_status === 'expired').length,
-      payment_failed: allSyncs.filter((s) => s.last_status === 'payment_failed').length,
-      errors: allSyncs.filter((s) => s.error_count > 0).length,
-      recent_syncs: allSyncs
-        .filter((s) => s.last_synced_at > Date.now() - 24 * 60 * 60 * 1000)
+      total: allSubs.length,
+      active: allSubs.filter((s) => s.status === 'active').length,
+      trialing: allSubs.filter((s) => s.status === 'trialing').length,
+      cancelled: allSubs.filter((s) => s.status === 'cancelled').length,
+      expired: allSubs.filter((s) => s.status === 'expired').length,
+      on_hold: allSubs.filter((s) => s.status === 'on_hold').length,
+      payment_failed: allSubs.filter((s) => s.status === 'payment_failed').length,
+      pending: allSubs.filter((s) => s.status === 'pending').length,
+      recent_updates: allSubs
+        .filter((s) => s.updated_at && s.updated_at > Date.now() - 24 * 60 * 60 * 1000)
         .length,
     };
 
