@@ -567,7 +567,7 @@ export default function Settings() {
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
-                                        {(profile.subscription_status === 'payment_failed' || profile.subscription_status === 'cancelled' || !!profile.dodo_customer_id) && (
+                                        {(profile.subscription_status === 'payment_failed' || profile.subscription_status === 'on_hold' || profile.subscription_status === 'cancelled' || !!profile.dodo_customer_id) && (
                                             <button
                                                 onClick={openDodoPortal}
                                                 disabled={isOpeningPortal}

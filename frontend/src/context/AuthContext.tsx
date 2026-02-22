@@ -4,7 +4,7 @@ import type { Session, User } from '@supabase/supabase-js';
 import toast from 'react-hot-toast';
 
 type UserRole = 'admin' | 'agent' | 'tutor' | 'student' | null;
-type SubscriptionStatus = 'active' | 'trialing' | 'payment_failed' | 'cancelled' | 'expired' | null;
+type SubscriptionStatus = 'active' | 'trialing' | 'on_hold' | 'payment_failed' | 'cancelled' | 'expired' | 'pending' | null;
 
 interface AuthContextType {
     user: User | null;
@@ -85,15 +85,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                                 });
                             }
                             // Show toast when payment succeeds after a failed payment
-                            if (nextStatus === 'active' && prevStatus === 'payment_failed') {
+                            if (nextStatus === 'active' && (prevStatus === 'payment_failed' || prevStatus === 'on_hold')) {
                                 toast.success('Payment successful! Your subscription has been renewed.', {
                                     duration: 6000,
                                     id: 'subscription-renewed',
                                 });
                             }
                             // Show warning toast when payment fails
-                            if (nextStatus === 'payment_failed' && prevStatus !== 'payment_failed') {
-                                toast.error('Your latest payment failed. Please update your payment method to avoid losing access.', {
+                            if ((nextStatus === 'payment_failed' || nextStatus === 'on_hold') && prevStatus !== 'payment_failed' && prevStatus !== 'on_hold') {
+                                toast.error('Your latest payment failed. Please update your payment method in the Customer Portal to avoid losing access.', {
                                     duration: 10000,
                                     id: 'payment-failed',
                                 });

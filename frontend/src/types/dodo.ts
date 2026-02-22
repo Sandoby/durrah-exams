@@ -44,9 +44,11 @@ export type PaymentStatus =
 export type SubscriptionStatus =
   | 'active'
   | 'trialing'
+  | 'on_hold'
   | 'payment_failed'
   | 'cancelled'
-  | 'expired';
+  | 'expired'
+  | 'pending';
 
 /**
  * Dodo product IDs for different billing cycles

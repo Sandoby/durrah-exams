@@ -281,10 +281,15 @@ http.route({
         eventType === "subscription.failed" ||
         eventType === "subscription.payment_failed"
       ) {
+        // on_hold = failed renewal payment or failed plan change charge
+        // failed  = mandate creation failed during subscription setup
+        // Map on_hold to 'on_hold' (Dodo's official state) and failed to 'payment_failed'
+        const mappedStatus = eventType === "subscription.on_hold" ? "on_hold" : "payment_failed";
+
         const result = await ctx.runAction(internal.dodoPayments.updateSubscription, {
           userId,
           userEmail: customerEmail,
-          status: "payment_failed",
+          status: mappedStatus,
           dodoCustomerId: customerId,
           dodoSubscriptionId: subscriptionId,
           eventType,
@@ -298,6 +303,110 @@ http.route({
             type: "payment_failed",
             data: {
               reason: data?.decline_reason || data?.failure_reason || "Payment declined",
+              isOnHold: mappedStatus === "on_hold",
+            },
+          });
+        }
+
+      } else if (eventType === "subscription.plan_changed") {
+        // Plan upgrade/downgrade — update subscription details
+        const result = await ctx.runAction(internal.dodoPayments.updateSubscription, {
+          userId,
+          userEmail: customerEmail,
+          status: "active",
+          plan: data?.product_name || "Professional",
+          dodoCustomerId: customerId,
+          dodoSubscriptionId: subscriptionId,
+          endDate: nextBillingDate,
+          billingCycle,
+          eventType,
+        });
+        if (result?.userId) resolvedUserId = result.userId as string;
+
+        // Record plan change payment if charged
+        if ((data?.amount || data?.total_amount) && resolvedUserId) {
+          await ctx.runAction(internal.dodoPayments.recordPayment, {
+            userId: resolvedUserId,
+            userEmail: customerEmail,
+            amount: data.amount || data.total_amount,
+            currency: data.currency || "USD",
+            status: "completed",
+            merchantReference: data.payment_id || data.id || subscriptionId,
+            subscriptionId,
+          });
+        }
+
+      } else if (eventType === "subscription.expired") {
+        // Subscription reached end of term
+        const result = await ctx.runAction(internal.dodoPayments.updateSubscription, {
+          userId,
+          userEmail: customerEmail,
+          status: "cancelled",
+          dodoCustomerId: customerId,
+          dodoSubscriptionId: subscriptionId,
+          eventType,
+        });
+        if (result?.userId) resolvedUserId = result.userId as string;
+
+      } else if (
+        eventType === "payment.succeeded"
+      ) {
+        // Payment succeeded — record it; subscription activation is handled by subscription.active
+        const paymentSubId = data?.subscription_id;
+        let payUserId = userId as string | undefined;
+
+        if (!payUserId && customerEmail) {
+          const resolved = await ctx.runAction(internal.dodoPayments.resolveUserIdByEmail, {
+            userEmail: customerEmail,
+          });
+          if (resolved?.userId) payUserId = resolved.userId as string;
+        }
+
+        if (payUserId && (data?.total_amount || data?.amount)) {
+          await ctx.runAction(internal.dodoPayments.recordPayment, {
+            userId: payUserId,
+            userEmail: customerEmail,
+            amount: data.total_amount || data.amount,
+            currency: data.currency || "USD",
+            status: "completed",
+            merchantReference: data.payment_id || data.id,
+            subscriptionId: paymentSubId,
+          });
+        }
+        if (payUserId) resolvedUserId = payUserId;
+
+      } else if (
+        eventType === "payment.failed"
+      ) {
+        // Payment failed — send notification, don't change subscription status
+        // (subscription.on_hold webhook handles status change)
+        let payUserId = userId as string | undefined;
+        if (!payUserId && customerEmail) {
+          const resolved = await ctx.runAction(internal.dodoPayments.resolveUserIdByEmail, {
+            userEmail: customerEmail,
+          });
+          if (resolved?.userId) payUserId = resolved.userId as string;
+        }
+
+        if (payUserId) {
+          await ctx.runAction(internal.dodoPayments.recordPayment, {
+            userId: payUserId,
+            userEmail: customerEmail,
+            amount: data?.total_amount || data?.amount || 0,
+            currency: data?.currency || "USD",
+            status: "failed",
+            merchantReference: data?.payment_id || data?.id || "unknown",
+            subscriptionId: data?.subscription_id,
+          });
+          resolvedUserId = payUserId;
+        }
+
+        if (customerEmail) {
+          await ctx.runAction(internal.dodoPayments.dispatchPaymentEmail, {
+            email: customerEmail,
+            type: "payment_failed",
+            data: {
+              reason: data?.decline_reason || data?.failure_reason || "Payment could not be processed",
             },
           });
         }

@@ -248,9 +248,8 @@ export const checkSubscriptionExpirations = internalMutation({
             body: JSON.stringify({
               p_user_id: profile.id,
               p_new_status: 'expired',
-              p_trigger_source: 'cron_expiration',
-              p_reason: 'Subscription end date passed (6h cron check, 24h grace elapsed)',
-              p_metadata: { end_date: profile.subscription_end_date },
+              p_source: 'cron_expiration',
+              p_metadata: { end_date: profile.subscription_end_date, reason: 'Subscription end date passed (6h cron check, 24h grace elapsed)' },
             }),
           });
           if (!rpcRes.ok) {
@@ -357,9 +356,8 @@ export const checkTrialExpirations = internalMutation({
         body: JSON.stringify({
           p_user_id: userId,
           p_new_status: newStatus,
-          p_trigger_source: 'cron_trial',
-          p_reason: reason,
-          p_metadata: metadata || {},
+          p_source: 'cron_trial',
+          p_metadata: { ...(metadata || {}), reason },
         }),
       });
       if (!res.ok) {

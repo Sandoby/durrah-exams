@@ -54,7 +54,7 @@ export default function Checkout() {
           setIsFirstTimeSubscriber(false);
         }
 
-        if (data.subscription_status === 'payment_failed') {
+        if (data.subscription_status === 'payment_failed' || data.subscription_status === 'on_hold') {
           setIsRecoveringViaPortal(true);
           toast(t('checkout.recovering', 'Redirecting to your billing portal...'));
           const result = await openDodoPortalSession();

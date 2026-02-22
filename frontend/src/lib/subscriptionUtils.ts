@@ -5,7 +5,7 @@
  * This ensures 'trialing' users get the same premium access as 'active' users.
  */
 
-export type SubscriptionStatus = 'active' | 'trialing' | 'payment_failed' | 'cancelled' | 'expired' | null;
+export type SubscriptionStatus = 'active' | 'trialing' | 'on_hold' | 'payment_failed' | 'cancelled' | 'expired' | 'pending' | null;
 
 /**
  * Returns true if the user has full premium access.

@@ -84,9 +84,9 @@ export default function PaymentCallback() {
             return;
           }
 
-          if (profile?.subscription_status === 'payment_failed') {
+          if (profile?.subscription_status === 'payment_failed' || profile?.subscription_status === 'on_hold') {
             setStatus('error');
-            setMessage('Your payment could not be completed. Please update your payment method.');
+            setMessage('Your payment could not be completed. Please update your payment method in the Customer Portal.');
             toast.error('Payment failed. Please update payment method.');
             setTimeout(() => navigate('/checkout', { state: { error: 'Payment failed.', paymentFailed: true, provider: 'dodo' }, replace: true }), 1800);
             return;

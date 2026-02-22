@@ -737,7 +737,7 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {profile?.subscription_status === 'payment_failed' && (
+                    {(profile?.subscription_status === 'payment_failed' || profile?.subscription_status === 'on_hold') && (
                         <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 p-6 rounded-2xl flex flex-col sm:flex-row items-center gap-6 shadow-md mb-8">
                             <div className="h-16 w-16 bg-red-500 rounded-2xl flex items-center justify-center shadow-md shrink-0">
                                 <AlertCircle className="h-8 w-8 text-white" />
@@ -786,7 +786,7 @@ export default function Dashboard() {
                         </div>
                     )}
 
-                    {profile?.subscription_status === 'payment_failed' && (
+                    {(profile?.subscription_status === 'payment_failed' || profile?.subscription_status === 'on_hold') && (
                         <div className="mb-6">
                             <PaymentFailedBanner subscriptionEndDate={profile?.subscription_end_date} />
                         </div>

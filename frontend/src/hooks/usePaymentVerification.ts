@@ -87,10 +87,10 @@ export const usePaymentVerification = ({
       }
 
       // Check if payment failed
-      if (result.status === 'payment_failed') {
+      if (result.status === 'payment_failed' || result.status === 'on_hold') {
         console.error('❌ Payment failed:', result);
         const failedError: CheckoutError = {
-          message: 'Payment failed. Please try again or contact support.',
+          message: 'Payment failed. Please try again or update your payment method.',
           code: 'PAYMENT_FAILED',
           retryable: true,
         };

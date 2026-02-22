@@ -233,6 +233,7 @@ export const updateSubscription = internalAction({
     }
 
     // ── Trial protection ────────────────────────────────────────
+    // Don't let non-activation webhooks interrupt an active trial
     if (args.status !== "active" && args.status !== "cancelled") {
       try {
         const res = await fetch(
@@ -279,6 +280,11 @@ export const updateSubscription = internalAction({
         "Subscription Cancelled",
         "Your subscription has been cancelled. You can reactivate anytime from the pricing page.",
         "warning");
+    } else if (args.status === "on_hold") {
+      await sendNotification(supabaseUrl, supabaseKey, userId,
+        "Subscription On Hold ⚠️",
+        "Your subscription is on hold due to a payment issue. Please update your payment method in the Customer Portal to reactivate.",
+        "error");
     } else if (args.status === "payment_failed") {
       await sendNotification(supabaseUrl, supabaseKey, userId,
         "Payment Failed",
@@ -347,7 +353,7 @@ export const createCheckout = internalAction({
       monthly: "pdt_0NVdvPLWrAr1Rym66kXLP",
     };
 
-    const res = await fetch(`${baseUrl}/checkouts`, {
+    const res = await fetch(`${baseUrl}/checkout-sessions`, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -376,7 +382,7 @@ export const createCheckout = internalAction({
       } catch {}
     }
 
-    return { checkout_url: data.payment_link || data.checkout_url };
+    return { checkout_url: data.checkout_url || data.payment_link };
   },
 });
 
@@ -542,13 +548,19 @@ export const syncSubscriptionFromProvider = internalAction({
         (sub?.ended_at && new Date(sub.ended_at) <= now) ||
         (sub?.end_at && new Date(sub.end_at) <= now);
 
-      let mappedStatus: "active" | "cancelled" | "payment_failed" | null = null;
+      let mappedStatus: "active" | "cancelled" | "on_hold" | "payment_failed" | null = null;
       if (trulyEnded || statusRaw === "cancelled" || statusRaw === "canceled") {
         mappedStatus = "cancelled";
       } else if (statusRaw === "active") {
         mappedStatus = "active";
-      } else if (["on_hold", "failed", "payment_failed", "past_due"].includes(statusRaw)) {
+      } else if (statusRaw === "on_hold") {
+        mappedStatus = "on_hold";
+      } else if (["failed", "payment_failed", "past_due"].includes(statusRaw)) {
         mappedStatus = "payment_failed";
+      } else if (statusRaw === "expired") {
+        mappedStatus = "cancelled";
+      } else if (statusRaw === "pending") {
+        return { success: true, skipped: true, reason: "pending_subscription", providerStatus: statusRaw };
       } else {
         return { success: true, skipped: true, reason: "unknown_status", providerStatus: statusRaw };
       }

@@ -28,7 +28,7 @@ export const PaymentNotification = () => {
     };
 
     useEffect(() => {
-        if (user && subscriptionStatus === 'payment_failed' && !dismissed) {
+        if (user && (subscriptionStatus === 'payment_failed' || subscriptionStatus === 'on_hold') && !dismissed) {
             // Show after a small delay for "wow" effect
             const timer = setTimeout(() => setIsVisible(true), 2000);
             return () => clearTimeout(timer);

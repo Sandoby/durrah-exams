@@ -189,7 +189,7 @@ export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeature
                                 ) : (
                                     <button
                                         onClick={async () => {
-                                            if (subscriptionStatus === 'payment_failed') {
+                                            if (subscriptionStatus === 'payment_failed' || subscriptionStatus === 'on_hold') {
                                                 const result = await openDodoPortalSession();
                                                 if (!result.success) {
                                                     toast.error(result.error || 'Failed to open payment portal');
