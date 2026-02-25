@@ -13,6 +13,7 @@ import {
   Clock,
   Bell,
   Clipboard,
+  Zap,
 } from 'lucide-react';
 import { useClassrooms } from '../../hooks/useClassrooms';
 import { useAuth } from '../../context/AuthContext';
@@ -24,10 +25,11 @@ import { ExamsTab } from './tabs/ExamsTab';
 import { SettingsTab } from './tabs/SettingsTab';
 import { AnnouncementsTab } from './tabs/AnnouncementsTab';
 import { AssignmentsTab } from './tabs/AssignmentsTab';
+import { AdvancedFeaturesTab } from './tabs/AdvancedFeaturesTab';
 import { supabase } from '../../lib/supabase';
 import type { Classroom, ClassroomStats } from '../../types/classroom';
 
-type Tab = 'overview' | 'roster' | 'exams' | 'announcements' | 'assignments' | 'settings';
+type Tab = 'overview' | 'roster' | 'exams' | 'announcements' | 'assignments' | 'advanced' | 'settings';
 
 interface Activity {
   id: string;
@@ -205,6 +207,7 @@ export default function ClassroomDetail() {
     { id: 'exams' as Tab, label: 'Exams', icon: FileText, badge: stats?.total_exams },
     { id: 'announcements' as Tab, label: 'Announcements', icon: Bell },
     { id: 'assignments' as Tab, label: 'Assignments', icon: Clipboard },
+    { id: 'advanced' as Tab, label: 'Advanced', icon: Zap },
     { id: 'settings' as Tab, label: 'Settings', icon: Settings },
   ];
 
@@ -386,6 +389,10 @@ export default function ClassroomDetail() {
 
             {activeTab === 'assignments' && (
               <AssignmentsTab classroomId={id!} isTutor={isTutor} />
+            )}
+
+            {activeTab === 'advanced' && (
+              <AdvancedFeaturesTab classroomId={id!} isTutor={isTutor} />
             )}
 
             {activeTab === 'settings' && (

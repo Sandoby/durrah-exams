@@ -74,8 +74,8 @@
 |---|------|-----|--------|
 | 5.1 | Create DB tables: `classroom_assignments` (id, classroom_id, title, description, instructions, category, due_date, max_score, allow_late, late_penalty_percent, attachments JSONB, is_published, created_at) and `assignment_submissions` (id, assignment_id, student_id, content, files JSONB, score, feedback, submitted_at, graded_at, is_late). Add RLS policies | FEAT-02 | [x] |
 | 5.2 | Build assignment create/edit form (tutor side): title, rich-text instructions, file attachments, due date picker, category selector (Homework/Project/Quiz/Midterm/Final), max score, late policy toggle. Add as new tab or section in classroom detail | FEAT-02 | [x] |
-| 5.3 | Build assignment view + submission (student side): view instructions and attachments, upload files (PDF/DOCX/images via Supabase Storage), text submission, see grade and feedback after grading | FEAT-02 | [ ] |
-| 5.4 | Build assignment grading interface (tutor side): list all submissions for an assignment, view each submission, enter score + rich-text feedback, bulk download submissions | FEAT-02 | [ ] |
+| 5.3 | Build assignment view + submission (student side): view instructions and attachments, upload files (PDF/DOCX/images via Supabase Storage), text submission, see grade and feedback after grading | FEAT-02 | [x] |
+| 5.4 | Build assignment grading interface (tutor side): list all submissions for an assignment, view each submission, enter score + rich-text feedback, bulk download submissions | FEAT-02 | [x] |
 
 ---
 
@@ -110,11 +110,11 @@
 
 | # | Task | Ref | Status |
 |---|------|-----|--------|
-| 8.1 | Add co-teacher support: create `classroom_teachers` table (classroom_id, teacher_id, role: owner/co-teacher/assistant, permissions JSONB). Update RLS policies to allow co-teachers. Update UI to invite and manage co-teachers | FEAT-05 | [ ] |
-| 8.2 | Build classroom resource library: create `classroom_resources` table (id, classroom_id, title, type, file_url, folder, sort_order). File upload to Supabase Storage. Folder/topic organization. Student read access | FEAT-06 | [ ] |
+| 8.1 | Add co-teacher support: create `classroom_teachers` table (classroom_id, teacher_id, role: owner/co-teacher/assistant, permissions JSONB). Update RLS policies to allow co-teachers. Update UI to invite and manage co-teachers | FEAT-05 | [x] |
+| 8.2 | Build classroom resource library: create `classroom_resources` table (id, classroom_id, title, type, file_url, folder, sort_order). File upload to Supabase Storage. Folder/topic organization. Student read access | FEAT-06 | [x] |
 | 8.3 | Add classroom templates + cloning: "Save as Template" button, "Clone Classroom" for new semesters (copies structure, exams, settings but not students), institution-wide template library | FEAT-13 | [ ] |
 | 8.4 | Build parent portal: create `parent_student_links` table, parent account type, dashboard showing linked student's grades + attendance + announcements, direct messaging to tutor, weekly email digest | FEAT-08 | [ ] |
-| 8.5 | Add discussion forum per classroom: create `classroom_discussions` table (threads) + `discussion_replies` table. Threaded UI, upvoting, "mark as answered", optional anonymous posting | FEAT-11 | [ ] |
+| 8.5 | Add discussion forum per classroom: create `classroom_discussions` table (threads) + `discussion_replies` table. Threaded UI, upvoting, "mark as answered", optional anonymous posting | FEAT-11 | [x] |
 | 8.6 | Build notification center: in-app bell icon with dropdown list, read/unread tracking, notification preferences page (per-type opt-in/opt-out), daily/weekly email digest option | FEAT-12 | [ ] |
 | 8.7 | Add bulk operations: bulk grade entry (paste from spreadsheet), bulk student transfer between classrooms, bulk archive classrooms, bulk email to filtered students | FEAT-14 | [ ] |
 | 8.8 | Full RTL Arabic support + complete i18n: audit all classroom components for RTL layout issues, ensure all strings use `t()`, add Arabic translations for all classroom keys, keyboard navigation, ARIA labels | FEAT-15 | [ ] |
@@ -129,11 +129,11 @@
 | 2 - Code Quality | 6 | 6 | ██████████ 100% |
 | 3 - UX Fixes | 8 | 8 | ██████████ 100% |
 | 4 - Announcements | 4 | 4 | ██████████ 100% |
-| 5 - Assignments | 4 | 2 | █████░░░░░ 50% |
+| 5 - Assignments | 4 | 4 | ██████████ 100% |
 | 6 - Gradebook | 4 | 0 | ░░░░░░░░░░ 0% |
 | 7 - Attendance | 3 | 0 | ░░░░░░░░░░ 0% |
-| 8 - Advanced | 8 | 0 | ░░░░░░░░░░ 0% |
-| **Total** | **43** | **35** | ███████░░░ **81%** |
+| 8 - Advanced | 8 | 3 | ███░░░░░░░ 37.5% |
+| **Total** | **43** | **31** | ███████░░░ **72%** |
 
 ---
 

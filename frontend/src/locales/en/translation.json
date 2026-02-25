@@ -622,6 +622,47 @@
                 "creating": "Creating...",
                 "cancel": "Cancel"
             },
+            "assignmentView": {
+                "loadFailed": "Failed to load assignment",
+                "notFound": "Assignment not found",
+                "submitted": "Assignment submitted successfully",
+                "updated": "Submission updated successfully",
+                "submitFailed": "Failed to submit assignment",
+                "requiresContent": "Please provide an answer or upload a file"
+            },
+            "gradingView": {
+                "loadFailed": "Failed to load submissions",
+                "noSubmissions": "No submissions yet",
+                "selectSubmission": "Select a submission to grade",
+                "scoreMissing": "Please enter a score",
+                "invalidScore": "Please enter a valid score",
+                "gradeSaved": "Grade saved successfully",
+                "saveFailed": "Failed to save grade"
+            },
+            "advancedFeaturesTab": {
+                "title": "Advanced Features",
+                "description": "Co-teachers, resources, discussions, and more",
+                "coTeachers": "Co-Teachers",
+                "resources": "Resources",
+                "forum": "Forum",
+                "addCoTeacher": "Add Co-Teacher",
+                "addResource": "Add Resource",
+                "startDiscussion": "Start Discussion",
+                "noCoTeachers": "No co-teachers yet",
+                "noResources": "No resources yet",
+                "noDiscussions": "No discussions yet",
+                "resourceTitle": "Resource title",
+                "fileUrl": "File URL",
+                "folder": "Folder name",
+                "discussionTitle": "Discussion title",
+                "yourQuestion": "Your question or topic",
+                "post": "Post",
+                "add": "Add",
+                "cancel": "Cancel",
+                "delete": "Delete",
+                "answered": "Answered",
+                "replies": "replies"
+            },
             "overviewTab": {
                 "title": "Overview",
                 "inviteCode": "Invite Code",
