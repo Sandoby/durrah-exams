@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Users, FileText, MessageSquare, Bell, Settings, Loader2, Plus, Trash2 } from 'lucide-react';
+import { Users, FileText, MessageSquare, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { ConfirmationModal } from '../../../components/ConfirmationModal';
 import toast from 'react-hot-toast';
@@ -47,7 +46,6 @@ interface AdvancedFeaturesTabProps {
 }
 
 export function AdvancedFeaturesTab({ classroomId, isTutor }: AdvancedFeaturesTabProps) {
-  const { t } = useTranslation();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'teachers' | 'resources' | 'forum'>('teachers');
   const [loading, setLoading] = useState(false);
@@ -75,13 +73,31 @@ export function AdvancedFeaturesTab({ classroomId, isTutor }: AdvancedFeaturesTa
     try {
       const { data } = await supabase
         .from('classroom_teachers')
-        .select(`
-          id, classroom_id, teacher_id, role,
-          teacher:teacher_id(full_name, email)
-        `)
+        .select('id, classroom_id, teacher_id, role')
         .eq('classroom_id', classroomId);
 
-      if (data) setCoTeachers(data as CoTeacher[]);
+      if (data) {
+        // Fetch teacher profiles
+        const teacherIds = [...new Set((data as any[]).map(t => t.teacher_id))];
+        let teacherProfiles: Record<string, any> = {};
+
+        if (teacherIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, full_name, email')
+            .in('id', teacherIds);
+
+          if (profiles) {
+            teacherProfiles = Object.fromEntries(profiles.map(p => [p.id, p]));
+          }
+        }
+
+        const formattedTeachers = (data as any[]).map((teacher) => ({
+          ...teacher,
+          teacher: teacherProfiles[teacher.teacher_id] || null,
+        }));
+        setCoTeachers(formattedTeachers as CoTeacher[]);
+      }
     } catch (err) {
       console.error('Failed to load co-teachers:', err);
     }
@@ -107,14 +123,26 @@ export function AdvancedFeaturesTab({ classroomId, isTutor }: AdvancedFeaturesTa
     try {
       const { data } = await supabase
         .from('classroom_discussions')
-        .select(`
-          id, classroom_id, author_id, title, content, is_answered, created_at,
-          author:author_id(full_name)
-        `)
+        .select('id, classroom_id, author_id, title, content, is_answered, created_at')
         .eq('classroom_id', classroomId)
         .order('created_at', { ascending: false });
 
       if (data) {
+        // Fetch author profiles
+        const authorIds = [...new Set((data as any[]).map(d => d.author_id))];
+        let authorProfiles: Record<string, any> = {};
+
+        if (authorIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .in('id', authorIds);
+
+          if (profiles) {
+            authorProfiles = Object.fromEntries(profiles.map(p => [p.id, p]));
+          }
+        }
+
         // Load reply counts
         const discussionsWithCounts = await Promise.all(
           (data as Record<string, unknown>[]).map(async (discussion) => {
@@ -123,7 +151,11 @@ export function AdvancedFeaturesTab({ classroomId, isTutor }: AdvancedFeaturesTa
               .select('id', { count: 'exact', head: true })
               .eq('discussion_id', discussion.id as string);
 
-            return { ...discussion, reply_count: count || 0 };
+            return {
+              ...discussion,
+              author: authorProfiles[(discussion as any).author_id] || null,
+              reply_count: count || 0,
+            };
           })
         );
         setDiscussions(discussionsWithCounts as Discussion[]);

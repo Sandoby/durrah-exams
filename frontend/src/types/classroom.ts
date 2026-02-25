@@ -46,11 +46,14 @@ export interface ClassroomExam {
   classroom_id: string;
   exam_id: string;
   added_at: string;
+  assigned_at: string;
+  due_date: string | null;
+  instructions: string;
   // Joined from exams:
   exam?: {
+    id: string;
     title: string;
     description: string;
-    is_active: boolean;
     created_at: string;
   };
 }
@@ -99,9 +102,16 @@ export interface ClassroomPreview {
   description?: string;
   color?: string;
   invite_code?: string;
+  is_archived?: boolean;
   tutor_name: string;
   student_count: number;
   settings?: ClassroomSettings;
+}
+
+export interface EnrolledClassroom extends Classroom {
+  enrollment_status: 'active' | 'pending' | 'suspended';
+  joined_at: string;
+  tutor_name?: string;
 }
 
 export interface ClassroomStats {

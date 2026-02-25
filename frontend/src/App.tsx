@@ -48,7 +48,7 @@ import JoinClassroom from './pages/classrooms/JoinClassroom';
 import KidsLanding from './pages/KidsLanding';
 import KidsExamView from './pages/KidsExamView';
 import ExamResultsPage from './pages/ExamResultsPage';
-import { ProtectedRoute, AgentRoute } from './components/ProtectedRoute';
+import { ProtectedRoute, AgentRoute, TutorRoute, StudentRoute } from './components/ProtectedRoute';
 
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
@@ -219,14 +219,14 @@ function AppContent() {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         
-        {/* Classroom Routes - Tutor */}
-        <Route path="/classrooms" element={<ProtectedRoute><ClassroomList /></ProtectedRoute>} />
-        <Route path="/classrooms/new" element={<ProtectedRoute><ClassroomCreate /></ProtectedRoute>} />
-        <Route path="/classrooms/:id" element={<ProtectedRoute><ClassroomDetail /></ProtectedRoute>} />
-        
-        {/* Classroom Routes - Student */}
-        <Route path="/my/classrooms" element={<ProtectedRoute><StudentClassroomList /></ProtectedRoute>} />
-        <Route path="/my/classrooms/:id" element={<ProtectedRoute><StudentClassroomView /></ProtectedRoute>} />
+        {/* Classroom Routes - Tutor only */}
+        <Route path="/classrooms" element={<TutorRoute><ClassroomList /></TutorRoute>} />
+        <Route path="/classrooms/new" element={<TutorRoute><ClassroomCreate /></TutorRoute>} />
+        <Route path="/classrooms/:id" element={<TutorRoute><ClassroomDetail /></TutorRoute>} />
+
+        {/* Classroom Routes - Student only */}
+        <Route path="/my/classrooms" element={<StudentRoute><StudentClassroomList /></StudentRoute>} />
+        <Route path="/my/classrooms/:id" element={<StudentRoute><StudentClassroomView /></StudentRoute>} />
         <Route path="/join" element={<ProtectedRoute><JoinClassroom /></ProtectedRoute>} />
         <Route path="/join/:code" element={<ProtectedRoute><JoinClassroom /></ProtectedRoute>} />
         

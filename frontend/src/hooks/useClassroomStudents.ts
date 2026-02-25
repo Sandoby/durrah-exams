@@ -46,7 +46,7 @@ export function useClassroomStudents(classroomId: string) {
       // Client-side search filter if provided
       if (options?.search && options.search.trim()) {
         const searchLower = options.search.toLowerCase();
-        results = results.filter((student: any) => {
+        results = results.filter((student: ClassroomStudent) => {
           const name = student.profile?.full_name?.toLowerCase() || '';
           const email = student.profile?.email?.toLowerCase() || '';
           return name.includes(searchLower) || email.includes(searchLower);

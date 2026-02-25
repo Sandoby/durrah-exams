@@ -6,13 +6,8 @@ import { Plus, Search, GraduationCap } from 'lucide-react';
 import { Logo } from '../../components/Logo';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import type { Classroom } from '../../types/classroom';
+import type { EnrolledClassroom } from '../../types/classroom';
 import { motion } from 'framer-motion';
-
-interface EnrolledClassroom extends Classroom {
-  enrollment_status: 'active' | 'pending' | 'suspended';
-  joined_at: string;
-}
 
 export default function StudentClassroomList() {
   const { t } = useTranslation();
@@ -40,11 +35,16 @@ export default function StudentClassroomList() {
       .order('enrolled_at', { ascending: false });
 
     if (!error && data) {
-      const enrolled = data.map((item: any) => ({
-        ...item.classroom,
-        enrollment_status: item.status,
-        joined_at: item.enrolled_at,
-      }));
+      const enrolled = data
+        .map((item: any) => {
+          const classroom = Array.isArray(item.classroom) ? item.classroom[0] : item.classroom;
+          return {
+            ...classroom,
+            enrollment_status: item.status,
+            joined_at: item.enrolled_at,
+          } as EnrolledClassroom;
+        })
+        .filter((c: EnrolledClassroom) => c && c.id);
       setClassrooms(enrolled);
     }
     setLoading(false);

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Upload, Send, Loader2, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { FileText, Send, Loader2, CheckCircle, Clock } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../context/AuthContext';
@@ -275,7 +275,7 @@ export function StudentAssignmentView({ assignmentId, classroomId, onClose }: St
       </div>
 
       {/* Submission Form or Graded View */}
-      {submission?.score !== null ? (
+      {submission && submission.score !== null ? (
         // Show graded submission
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-green-200 dark:border-green-800 p-6">
           <div className="flex items-center gap-3 mb-4">

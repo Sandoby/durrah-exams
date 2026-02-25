@@ -42,7 +42,7 @@ interface AnnouncementsTabProps {
 
 export function AnnouncementsTab({ classroomId, isTutor }: AnnouncementsTabProps) {
   const { t } = useTranslation();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -56,12 +56,10 @@ export function AnnouncementsTab({ classroomId, isTutor }: AnnouncementsTabProps
   const loadAnnouncements = useCallback(async () => {
     setLoading(true);
     try {
+      // Fetch announcements without relationship notation
       const { data, error } = await supabase
         .from('classroom_announcements')
-        .select(`
-          id, classroom_id, author_id, title, content, is_pinned, created_at, updated_at,
-          author:author_id(full_name, email)
-        `)
+        .select('id, classroom_id, author_id, title, content, is_pinned, created_at, updated_at')
         .eq('classroom_id', classroomId)
         .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: false });
@@ -69,22 +67,53 @@ export function AnnouncementsTab({ classroomId, isTutor }: AnnouncementsTabProps
       if (error) throw error;
 
       if (data) {
+        // Fetch unique author IDs and get their profiles
+        const authorIds = [...new Set((data as any[]).map(a => a.author_id))];
+        let authorProfiles: Record<string, any> = {};
+
+        if (authorIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, full_name, email')
+            .in('id', authorIds);
+
+          if (profiles) {
+            authorProfiles = Object.fromEntries(profiles.map(p => [p.id, p]));
+          }
+        }
+
         // Load comment counts and comments for each announcement
         const announcementsWithComments = await Promise.all(
           (data as Record<string, unknown>[]).map(async (announcement) => {
             const { data: comments, count } = await supabase
               .from('classroom_announcement_comments')
-              .select(`
-                id, announcement_id, author_id, content, created_at,
-                author:author_id(full_name)
-              `, { count: 'exact' })
+              .select('id, announcement_id, author_id, content, created_at')
               .eq('announcement_id', announcement.id as string)
               .order('created_at', { ascending: true });
 
+            // Fetch comment authors if needed
+            const commentAuthorIds = [...new Set((comments || []).map((c: any) => c.author_id))];
+            let commentAuthorProfiles: Record<string, any> = {};
+
+            if (commentAuthorIds.length > 0) {
+              const { data: cAuthors } = await supabase
+                .from('profiles')
+                .select('id, full_name')
+                .in('id', commentAuthorIds);
+
+              if (cAuthors) {
+                commentAuthorProfiles = Object.fromEntries(cAuthors.map(p => [p.id, p]));
+              }
+            }
+
             return {
               ...announcement,
+              author: authorProfiles[announcement.author_id as string] || null,
               comment_count: count || 0,
-              comments: comments || [],
+              comments: (comments || []).map((c: any) => ({
+                ...c,
+                author: commentAuthorProfiles[c.author_id] || null,
+              })),
             };
           })
         );

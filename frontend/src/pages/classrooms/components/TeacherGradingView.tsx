@@ -33,7 +33,7 @@ interface TeacherGradingViewProps {
   onClose: () => void;
 }
 
-export function TeacherGradingView({ assignmentId, onClose }: TeacherGradingViewProps) {
+export function TeacherGradingView({ assignmentId }: TeacherGradingViewProps) {
   const { t } = useTranslation();
   const [assignment, setAssignment] = useState<Assignment | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -55,18 +55,35 @@ export function TeacherGradingView({ assignmentId, onClose }: TeacherGradingView
       if (assignmentError) throw assignmentError;
       setAssignment(assignmentData as Assignment);
 
-      // Load all submissions with student info
+      // Load all submissions
       const { data: submissionsData, error: submissionsError } = await supabase
         .from('assignment_submissions')
-        .select(`
-          id, assignment_id, student_id, content, files, score, feedback, submitted_at, graded_at, is_late,
-          student:student_id(full_name, email)
-        `)
+        .select('id, assignment_id, student_id, content, files, score, feedback, submitted_at, graded_at, is_late')
         .eq('assignment_id', assignmentId)
         .order('submitted_at', { ascending: false });
 
       if (submissionsError) throw submissionsError;
-      setSubmissions(submissionsData as Submission[]);
+
+      // Fetch student profiles
+      const studentIds = [...new Set((submissionsData || []).map(s => s.student_id))];
+      let studentProfiles: Record<string, any> = {};
+
+      if (studentIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', studentIds);
+
+        if (profiles) {
+          studentProfiles = Object.fromEntries(profiles.map(p => [p.id, p]));
+        }
+      }
+
+      const formattedSubmissions = (submissionsData || []).map((sub: any) => ({
+        ...sub,
+        student: studentProfiles[sub.student_id] || null,
+      }));
+      setSubmissions(formattedSubmissions as Submission[]);
     } catch (err) {
       console.error('Failed to load assignment:', err);
       toast.error(t('classrooms.detail.gradingView.loadFailed'));

@@ -1,5 +1,4 @@
 import { supabase } from './supabase';
-import toast from 'react-hot-toast';
 
 /**
  * Service for managing push notifications for classrooms

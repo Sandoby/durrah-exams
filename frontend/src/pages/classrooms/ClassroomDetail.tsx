@@ -46,7 +46,7 @@ interface Activity {
 export default function ClassroomDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { user } = useAuth();
   const { getClassroom, getClassroomStats, archiveClassroom, deleteClassroom, regenerateInviteCode } =
     useClassrooms();
 
@@ -61,7 +61,7 @@ export default function ClassroomDetail() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loadingActivities, setLoadingActivities] = useState(false);
 
-  const isTutor = classroom?.tutor_id === profile?.id;
+  const isTutor = classroom?.tutor_id === user?.id;
 
   const loadClassroom = useCallback(async () => {
     if (!id) return;
@@ -132,9 +132,10 @@ export default function ClassroomDetail() {
   }, [id]);
 
   useEffect(() => {
+    if (!id) return;
     loadClassroom();
     loadActivities();
-  }, [loadClassroom, loadActivities]);
+  }, [id]);
 
   const refreshAll = useCallback(() => {
     loadClassroom();

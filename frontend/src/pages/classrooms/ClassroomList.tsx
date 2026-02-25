@@ -86,7 +86,7 @@ export default function ClassroomList() {
                 <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <select
                   value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value as any)}
+                  onChange={(e) => setFilterStatus(e.target.value as 'active' | 'archived' | 'all')}
                   className="w-full pl-10 pr-8 py-3 rounded-xl border-none bg-transparent text-sm font-medium text-gray-700 dark:text-gray-200 focus:ring-0 cursor-pointer appearance-none"
                 >
                   <option value="active">{t('classrooms.roster.filterActive', 'Active Classrooms')}</option>

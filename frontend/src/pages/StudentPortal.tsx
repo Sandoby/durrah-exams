@@ -695,11 +695,6 @@ export default function StudentPortal() {
                             <h3 className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
                               {item.exam?.title || 'Untitled Exam'}
                             </h3>
-                            {!item.exam?.is_published && (
-                              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-md">
-                                Draft
-                              </span>
-                            )}
                           </div>
                           
                           {item.exam?.description && (

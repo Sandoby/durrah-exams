@@ -4,7 +4,6 @@ import { FileText, Plus, Trash2, Loader2, CheckCircle, Clock, AlertCircle } from
 import { supabase } from '../../../lib/supabase';
 import { ConfirmationModal } from '../../../components/ConfirmationModal';
 import toast from 'react-hot-toast';
-import { useAuth } from '../../../context/AuthContext';
 import { notifyClassroomStudents } from '../../../lib/notificationsService';
 
 interface Assignment {
@@ -25,22 +24,6 @@ interface Assignment {
   graded_count?: number;
 }
 
-interface Submission {
-  id: string;
-  assignment_id: string;
-  student_id: string;
-  content: string;
-  files: string[];
-  score: number | null;
-  feedback: string | null;
-  submitted_at: string | null;
-  graded_at: string | null;
-  is_late: boolean;
-  student?: {
-    full_name: string;
-  };
-}
-
 interface AssignmentsTabProps {
   classroomId: string;
   isTutor: boolean;
@@ -48,14 +31,11 @@ interface AssignmentsTabProps {
 
 export function AssignmentsTab({ classroomId, isTutor }: AssignmentsTabProps) {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
-  const [showSubmissionModal, setShowSubmissionModal] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -316,8 +296,7 @@ export function AssignmentsTab({ classroomId, isTutor }: AssignmentsTabProps) {
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                           onClick={() => {
-                            setSelectedAssignment(assignment);
-                            setShowSubmissionModal(true);
+                            // TODO: navigate to grading view for this assignment
                           }}
                           className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                           title="View Submissions"
