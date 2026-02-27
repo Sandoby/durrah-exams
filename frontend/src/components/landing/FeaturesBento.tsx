@@ -1,101 +1,170 @@
 import { motion } from 'framer-motion';
-import { GlobeHemisphereWest, Lightning, ShieldCheck, Sparkle, UsersThree } from '@phosphor-icons/react';
+import {
+    GlobeHemisphereWest,
+    Headset,
+    Lightning,
+    MagicWand,
+    ShieldCheck,
+    Sparkle,
+    UsersThree,
+} from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
+import type { ReactNode } from 'react';
+
+type FeatureTileProps = {
+    title: string;
+    desc: string;
+    icon: ReactNode;
+    eyebrow?: string;
+    tags?: string[];
+    accent?: string;
+    className?: string;
+};
+
+function FeatureTile({
+    title,
+    desc,
+    icon,
+    eyebrow,
+    tags = [],
+    accent = 'from-blue-500/12 via-sky-400/8 to-transparent',
+    className = ''
+}: FeatureTileProps) {
+    return (
+        <motion.article
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.45, ease: 'easeOut' }}
+            whileHover={{ y: -4 }}
+            className={[
+                'group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/85 p-7 shadow-[0_18px_55px_-52px_rgba(15,23,42,0.8)] backdrop-blur-sm',
+                'transition-colors hover:border-slate-300/80',
+                'dark:border-slate-800/70 dark:bg-slate-900/65 dark:hover:border-slate-700/70',
+                className
+            ].join(' ')}
+        >
+            <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${accent} opacity-60`} />
+            <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-slate-200/30 blur-3xl dark:bg-slate-700/25" />
+
+            <div className="relative flex flex-col gap-4">
+                <div className="flex items-start justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white ring-1 ring-slate-200 shadow-sm dark:bg-slate-950/70 dark:ring-slate-800">
+                            <div className="text-slate-800 dark:text-slate-200">{icon}</div>
+                        </div>
+                        {eyebrow && (
+                            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+                                {eyebrow}
+                            </div>
+                        )}
+                    </div>
+                    <div className="h-10 w-10 rounded-2xl bg-white/70 ring-1 ring-slate-200/80 shadow-sm opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:bg-slate-950/40 dark:ring-slate-800/70" />
+                </div>
+
+                <div className="space-y-2">
+                    <h3 className="text-xl font-semibold tracking-[-0.01em] text-slate-900 dark:text-white md:text-[22px]">
+                        {title}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 md:text-base">
+                        {desc}
+                    </p>
+                </div>
+
+                {tags.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+                        {tags.map((tag) => (
+                            <span
+                                key={tag}
+                                className="rounded-full bg-white/80 px-3 py-1 ring-1 ring-slate-200/80 dark:bg-slate-950/35 dark:ring-slate-800/80"
+                            >
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </motion.article>
+    );
+}
 
 export function FeaturesBento() {
     const { t } = useTranslation();
 
     return (
-        <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 relative">
-            <div className="max-w-7xl mx-auto relative z-10">
-                <div className="text-center mb-16 max-w-3xl mx-auto">
-                    <div className="inline-flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-full px-4 py-2 mb-4">
-                        <Sparkle weight="fill" className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                        <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">{t('features.badge')}</span>
+        <section id="features" className="relative overflow-hidden py-24 md:py-28">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_45%,#000_62%,transparent_100%)]" />
+            <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[860px] -translate-x-1/2 rounded-full bg-gradient-to-b from-slate-200/55 to-transparent blur-3xl dark:from-slate-800/35" />
+
+            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <motion.div
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.55, ease: 'easeOut' }}
+                    className="mx-auto mb-14 max-w-3xl text-center md:mb-16"
+                >
+                    <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-400">
+                        <Sparkle weight="fill" className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+                        {t('features.badge', 'Features')}
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">{t('features.title')}</h2>
-                    <p className="text-xl text-slate-600 dark:text-slate-400">{t('features.subtitle')}</p>
-                </div>
+                    <h2 className="mt-5 text-3xl font-semibold tracking-[-0.02em] text-slate-900 dark:text-white md:text-5xl">
+                        {t('features.title', 'Everything You Need to Excel')}
+                    </h2>
+                    <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600 dark:text-slate-400 md:text-lg">
+                        {t('features.subtitle', 'Powerful features designed specifically for modern educators')}
+                    </p>
+                </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(250px,auto)]">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="md:col-span-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 relative overflow-hidden group shadow-sm hover:border-indigo-200 transition-colors"
-                    >
-                        {/* Minimal subtle background accent */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-
-                        <div className="relative z-10 h-full flex flex-col justify-between">
-                            <div>
-                                <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/50 rounded-xl flex items-center justify-center mb-6 text-indigo-600 dark:text-indigo-400">
-                                    <ShieldCheck weight="duotone" className="w-6 h-6" />
-                                </div>
-                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">{t('features.antiCheating.title')}</h3>
-                                <p className="text-slate-600 dark:text-slate-400 text-lg max-w-md">{t('features.antiCheating.desc')}</p>
-                            </div>
-                            <div className="mt-8 flex gap-3 text-sm font-medium text-slate-500">
-                                <span className="px-3 py-1 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">{t('features.tags.tabDetection')}</span>
-                                <span className="px-3 py-1 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">{t('features.tags.fullscreenLock')}</span>
-                                <span className="px-3 py-1 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">{t('features.tags.aiProctor')}</span>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.1 }}
-                        className="md:row-span-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 relative overflow-hidden group shadow-sm hover:border-pink-200 transition-colors"
-                    >
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-pink-50/50 rounded-full blur-3xl" />
-
-                        <div className="relative z-10 flex flex-col h-full items-center text-center">
-                            <div className="w-16 h-16 bg-pink-50 dark:bg-pink-900/50 rounded-xl flex items-center justify-center mb-6 text-pink-600 dark:text-pink-400">
-                                <GlobeHemisphereWest weight="duotone" className="w-8 h-8" />
-                            </div>
-                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">{t('features.globalAccess.title')}</h3>
-                            <p className="text-slate-600 dark:text-slate-400 mb-8">{t('features.globalAccess.desc')}</p>
-
-                            <div className="mt-auto relative w-full aspect-square opacity-80">
-                                <div className="absolute inset-0 border border-pink-100 dark:border-pink-800/30 rounded-full animate-spin-slow" />
-                                <div className="absolute inset-4 border border-pink-100 dark:border-pink-800/30 rounded-full animate-spin-slow animation-delay-2000" style={{ animationDirection: 'reverse' }} />
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-2 h-2 bg-pink-500 rounded-full animate-ping" />
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2 }}
-                        className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 relative overflow-hidden group shadow-sm hover:border-yellow-200 transition-colors"
-                    >
-                        <div className="w-12 h-12 bg-yellow-50 dark:bg-yellow-900/50 rounded-xl flex items-center justify-center mb-4 text-yellow-600 dark:text-yellow-400">
-                            <Lightning weight="duotone" className="w-6 h-6" />
-                        </div>
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('features.fastCreation.title')}</h3>
-                        <p className="text-slate-600 dark:text-slate-400">{t('features.fastCreation.desc')}</p>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.3 }}
-                        className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 relative overflow-hidden group shadow-sm hover:border-green-200 transition-colors"
-                    >
-                        <div className="w-12 h-12 bg-green-50 dark:bg-green-900/50 rounded-xl flex items-center justify-center mb-4 text-green-600 dark:text-green-400">
-                            <UsersThree weight="duotone" className="w-6 h-6" />
-                        </div>
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('features.unlimitedStudents.title')}</h3>
-                        <p className="text-slate-600 dark:text-slate-400">{t('features.unlimitedStudents.desc')}</p>
-                    </motion.div>
+                <div className="grid gap-6 md:grid-cols-12">
+                    <FeatureTile
+                        className="md:col-span-7"
+                        eyebrow={t('features.badge', 'Features')}
+                        icon={<ShieldCheck weight="duotone" className="h-6 w-6" />}
+                        title={t('features.antiCheating.title', 'Advanced Anti-Cheating')}
+                        desc={t('features.antiCheating.desc', 'Fullscreen mode, tab switching detection, copy-paste prevention, and violation tracking.')}
+                        tags={[
+                            t('features.tags.tabDetection', 'Tab Detection'),
+                            t('features.tags.fullscreenLock', 'Fullscreen Lock'),
+                            t('features.tags.aiProctor', 'AI Proctor')
+                        ]}
+                        accent="from-blue-500/14 via-sky-400/10 to-transparent"
+                    />
+                    <FeatureTile
+                        className="md:col-span-5"
+                        icon={<GlobeHemisphereWest weight="duotone" className="h-6 w-6" />}
+                        title={t('features.globalAccess.title', 'Global Accessibility')}
+                        desc={t('features.globalAccess.desc', 'Share exams worldwide with unique links. Students can access from any device, anywhere.')}
+                        accent="from-indigo-500/12 via-blue-400/8 to-transparent"
+                    />
+                    <FeatureTile
+                        className="md:col-span-4"
+                        icon={<Lightning weight="duotone" className="h-6 w-6" />}
+                        title={t('features.fastCreation.title', 'Lightning Fast Creation')}
+                        desc={t('features.fastCreation.desc', 'Create professional exams in minutes with our intuitive interface. Multiple question types supported.')}
+                        accent="from-amber-500/10 via-orange-400/6 to-transparent"
+                    />
+                    <FeatureTile
+                        className="md:col-span-4"
+                        icon={<UsersThree weight="duotone" className="h-6 w-6" />}
+                        title={t('features.unlimitedStudents.title', 'Unlimited Students')}
+                        desc={t('features.unlimitedStudents.desc', 'No limits on the number of students who can take your exams. Scale effortlessly.')}
+                        accent="from-emerald-500/10 via-teal-400/6 to-transparent"
+                    />
+                    <FeatureTile
+                        className="md:col-span-4"
+                        icon={<MagicWand weight="duotone" className="h-6 w-6" />}
+                        title={t('features.interface.title', 'Intuitive Interface')}
+                        desc={t('features.interface.desc', 'Easy to use, powerful features')}
+                        accent="from-slate-500/10 via-slate-400/6 to-transparent"
+                    />
+                    <FeatureTile
+                        className="md:col-span-12"
+                        icon={<Headset weight="duotone" className="h-6 w-6" />}
+                        title={t('features.support.title', '24/7 Support')}
+                        desc={t('features.support.desc', 'Get help whenever you need it with our dedicated support team and comprehensive documentation.')}
+                        accent="from-sky-500/10 via-blue-400/6 to-transparent"
+                    />
                 </div>
             </div>
         </section>

@@ -16,6 +16,7 @@ const CTASection = lazy(() => import('../components/landing/CTASection').then(mo
 
 const StudentPortalFeature = lazy(() => import('../components/landing/StudentPortalFeature').then(mod => ({ default: mod.StudentPortalFeature })));
 const MobileAppSection = lazy(() => import('../components/landing/MobileAppSection').then(mod => ({ default: mod.MobileAppSection })));
+const WorkflowToAppSection = lazy(() => import('../components/landing/WorkflowToAppSection').then(mod => ({ default: mod.WorkflowToAppSection })));
 const Footer = lazy(() => import('../components/landing/Footer').then(mod => ({ default: mod.Footer })));
 
 import { HowItWorks } from '../components/landing/HowItWorks';
@@ -73,6 +74,10 @@ export default function LandingPage() {
 
                 <Suspense fallback={<div className="py-24" />}>
                     <StudentPortalFeature />
+                </Suspense>
+
+                <Suspense fallback={<div className="py-24" />}>
+                    <WorkflowToAppSection />
                 </Suspense>
 
                 <HowItWorks />

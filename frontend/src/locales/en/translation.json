@@ -1,4 +1,24 @@
 ﻿{
+    "landing": {
+        "workflow": {
+            "badge": "Seamless Transition",
+            "from": "From Manual Workflow",
+            "to": "to Automated App",
+            "description": "Transition from manual paper exams to a fully automated online platform.",
+            "manual": {
+                "title": "Manual & Paper Exams",
+                "point1": "Printing and distributing physical papers",
+                "point2": "Manual grading and data entry",
+                "point3": "Time-consuming result analysis"
+            },
+            "automated": {
+                "title": "Online & Automated Exams",
+                "point1": "Instant digital distribution",
+                "point2": "Automatic grading and instant feedback",
+                "point3": "Real-time analytics and insights"
+            }
+        }
+    },
     "math": {
         "togglePreview": "Preview Math",
         "help": "Supports LaTeX (e.g. $$x^2$$)",

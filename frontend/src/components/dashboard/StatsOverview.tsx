@@ -1,17 +1,18 @@
 import { Users, BarChart3, Zap, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import type { ComponentType } from 'react';
 
 interface StatCardProps {
     title: string;
     value: string | number;
-    icon: React.ElementType;
+    icon: ComponentType<{ className?: string }>;
     trend?: string;
     trendUp?: boolean;
     color: 'indigo' | 'purple' | 'green' | 'amber';
 }
 
 function StatCard({ title, value, icon: Icon, trend, trendUp, color }: StatCardProps) {
-    const colorStyles = {
+    const colorStyles: Record<StatCardProps['color'], string> = {
         indigo: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400',
         purple: 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
         green: 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400',
