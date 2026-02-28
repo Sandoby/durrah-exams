@@ -28,33 +28,33 @@ export const WorkflowToAppSection = () => {
     return (
         <section
             ref={containerRef}
-            className="relative min-h-[220vh] bg-white dark:bg-slate-950 border-y border-slate-200 dark:border-slate-800"
+            className="relative min-h-[180vh] md:min-h-[220vh] bg-white dark:bg-slate-950 border-y border-slate-200 dark:border-slate-800"
         >
-            <div className="sticky top-24 md:top-28">
+            <div className="sticky top-16 md:top-24 py-8 md:py-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12 md:mb-16">
-                        <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-6 max-w-2xl mx-auto">
+                    <div className="text-center mb-8 md:mb-12">
+                        <p className="text-sm sm:text-base md:text-xl text-slate-600 dark:text-slate-400 mb-6 max-w-2xl mx-auto">
                             {t('landing.workflow.description', 'Maximize your team ability, by automatically generating a simplified UI')}
                         </p>
-                        
-                        <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
-                            <h2 className={`text-4xl md:text-6xl font-bold transition-colors duration-500 ${!isAppMode ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-600'}`}>
+
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-8">
+                            <h2 className={`text-2xl sm:text-3xl md:text-6xl font-bold transition-colors duration-500 ${!isAppMode ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-600'}`}>
                                 {t('landing.workflow.from', 'From Workflow')}
                             </h2>
                             
                             <button
                                 onClick={() => setIsAppMode(!isAppMode)}
-                                className={`relative w-24 h-12 rounded-full p-1.5 transition-colors duration-500 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-950 ${isAppMode ? 'bg-sky-100 dark:bg-sky-900/50 focus:ring-sky-400' : 'bg-slate-200 dark:bg-slate-800 focus:ring-slate-400'}`}
+                                className={`relative w-16 h-8 sm:w-20 sm:h-10 md:w-24 md:h-12 rounded-full p-1 md:p-1.5 transition-colors duration-500 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-950 ${isAppMode ? 'bg-sky-100 dark:bg-sky-900/50 focus:ring-sky-400' : 'bg-slate-200 dark:bg-slate-800 focus:ring-slate-400'}`}
                                 aria-label="Toggle view mode"
                             >
                                 <motion.div
-                                    className={`w-9 h-9 rounded-full shadow-md ${isAppMode ? 'bg-sky-500 dark:bg-sky-400' : 'bg-white dark:bg-slate-400'}`}
-                                    animate={{ x: isAppMode ? 48 : 0 }}
+                                    className={`w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full shadow-md ${isAppMode ? 'bg-sky-500 dark:bg-sky-400' : 'bg-white dark:bg-slate-400'}`}
+                                    animate={{ x: isAppMode ? (window.innerWidth < 640 ? 32 : window.innerWidth < 768 ? 40 : 48) : 0 }}
                                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                 />
                             </button>
-                            
-                        <h2 className={`text-4xl md:text-6xl font-bold transition-colors duration-500 ${isAppMode ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-600'}`}>
+
+                        <h2 className={`text-2xl sm:text-3xl md:text-6xl font-bold transition-colors duration-500 ${isAppMode ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-600'}`}>
                             <span className="relative inline-block">
                                 <motion.span
                                     className="relative z-10 inline-block"
@@ -102,7 +102,7 @@ export const WorkflowToAppSection = () => {
                     </div>
                 </div>
 
-                    <div className={`relative w-full max-w-5xl mx-auto aspect-[16/9] md:aspect-[21/9] bg-slate-50 dark:bg-slate-900 rounded-2xl md:rounded-[2rem] border transition-all duration-700 overflow-hidden ${isAppMode ? 'border-sky-200 dark:border-sky-800 shadow-[0_0_60px_-15px_rgba(14,165,233,0.4)] dark:shadow-[0_0_60px_-15px_rgba(14,165,233,0.2)]' : 'border-slate-200 dark:border-slate-800 shadow-sm'}`}>
+                    <div className={`relative w-full max-w-5xl mx-auto aspect-[4/3] sm:aspect-[16/9] md:aspect-[21/9] bg-slate-50 dark:bg-slate-900 rounded-xl md:rounded-[2rem] border transition-all duration-700 overflow-hidden ${isAppMode ? 'border-sky-200 dark:border-sky-800 shadow-[0_0_60px_-15px_rgba(14,165,233,0.4)] dark:shadow-[0_0_60px_-15px_rgba(14,165,233,0.2)]' : 'border-slate-200 dark:border-slate-800 shadow-sm'}`}>
                         <AnimatePresence mode="wait">
                             {!isAppMode ? (
                                 <motion.div
@@ -111,24 +111,24 @@ export const WorkflowToAppSection = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -20 }}
                                     transition={{ duration: 0.4, ease: "easeInOut" }}
-                                    className="absolute inset-0 p-8 md:p-16 flex flex-col justify-center"
+                                    className="absolute inset-0 p-4 sm:p-6 md:p-16 flex flex-col justify-center"
                                 >
-                                    <div className="space-y-8 max-w-2xl">
-                                        <h3 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight">
+                                    <div className="space-y-4 sm:space-y-6 md:space-y-8 max-w-2xl">
+                                        <h3 className="text-xl sm:text-2xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight">
                                             {t('landing.workflow.manual.title', 'Manual & Paper Exams')}
                                         </h3>
-                                        <ul className="space-y-5 text-slate-600 dark:text-slate-400 text-xl md:text-2xl font-medium">
-                                            <li className="flex items-center gap-4">
-                                                <span className="w-2 h-2 rounded-full bg-slate-400" />
-                                                {t('landing.workflow.manual.point1', 'Printing and distributing physical papers')}
+                                        <ul className="space-y-2 sm:space-y-3 md:space-y-5 text-slate-600 dark:text-slate-400 text-sm sm:text-base md:text-2xl font-medium">
+                                            <li className="flex items-start gap-2 sm:gap-3 md:gap-4">
+                                                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-400 mt-1.5 sm:mt-2 flex-shrink-0" />
+                                                <span>{t('landing.workflow.manual.point1', 'Printing and distributing physical papers')}</span>
                                             </li>
-                                            <li className="flex items-center gap-4">
-                                                <span className="w-2 h-2 rounded-full bg-slate-400" />
-                                                {t('landing.workflow.manual.point2', 'Manual grading and data entry')}
+                                            <li className="flex items-start gap-2 sm:gap-3 md:gap-4">
+                                                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-400 mt-1.5 sm:mt-2 flex-shrink-0" />
+                                                <span>{t('landing.workflow.manual.point2', 'Manual grading and data entry')}</span>
                                             </li>
-                                            <li className="flex items-center gap-4">
-                                                <span className="w-2 h-2 rounded-full bg-slate-400" />
-                                                {t('landing.workflow.manual.point3', 'Time-consuming result analysis')}
+                                            <li className="flex items-start gap-2 sm:gap-3 md:gap-4">
+                                                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-400 mt-1.5 sm:mt-2 flex-shrink-0" />
+                                                <span>{t('landing.workflow.manual.point3', 'Time-consuming result analysis')}</span>
                                             </li>
                                         </ul>
                                     </div>
@@ -140,24 +140,24 @@ export const WorkflowToAppSection = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -20 }}
                                     transition={{ duration: 0.4, ease: "easeInOut" }}
-                                    className="absolute inset-0 p-8 md:p-16 flex flex-col justify-center items-end text-right"
+                                    className="absolute inset-0 p-4 sm:p-6 md:p-16 flex flex-col justify-center items-end text-right"
                                 >
-                                    <div className="space-y-8 max-w-2xl">
-                                        <h3 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight">
+                                    <div className="space-y-4 sm:space-y-6 md:space-y-8 max-w-2xl">
+                                        <h3 className="text-xl sm:text-2xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight">
                                             {t('landing.workflow.automated.title', 'Online & Automated Exams')}
                                         </h3>
-                                        <ul className="space-y-5 text-slate-600 dark:text-slate-400 text-xl md:text-2xl font-medium flex flex-col items-end">
-                                            <li className="flex items-center gap-4 flex-row-reverse">
-                                                <span className="w-2 h-2 rounded-full bg-sky-500 dark:bg-sky-400" />
-                                                {t('landing.workflow.automated.point1', 'Instant digital distribution')}
+                                        <ul className="space-y-2 sm:space-y-3 md:space-y-5 text-slate-600 dark:text-slate-400 text-sm sm:text-base md:text-2xl font-medium flex flex-col items-end">
+                                            <li className="flex items-start gap-2 sm:gap-3 md:gap-4 flex-row-reverse">
+                                                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-sky-500 dark:bg-sky-400 mt-1.5 sm:mt-2 flex-shrink-0" />
+                                                <span>{t('landing.workflow.automated.point1', 'Instant digital distribution')}</span>
                                             </li>
-                                            <li className="flex items-center gap-4 flex-row-reverse">
-                                                <span className="w-2 h-2 rounded-full bg-sky-500 dark:bg-sky-400" />
-                                                {t('landing.workflow.automated.point2', 'Automatic grading and instant feedback')}
+                                            <li className="flex items-start gap-2 sm:gap-3 md:gap-4 flex-row-reverse">
+                                                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-sky-500 dark:bg-sky-400 mt-1.5 sm:mt-2 flex-shrink-0" />
+                                                <span>{t('landing.workflow.automated.point2', 'Automatic grading and instant feedback')}</span>
                                             </li>
-                                            <li className="flex items-center gap-4 flex-row-reverse">
-                                                <span className="w-2 h-2 rounded-full bg-sky-500 dark:bg-sky-400" />
-                                                {t('landing.workflow.automated.point3', 'Real-time analytics and insights')}
+                                            <li className="flex items-start gap-2 sm:gap-3 md:gap-4 flex-row-reverse">
+                                                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-sky-500 dark:bg-sky-400 mt-1.5 sm:mt-2 flex-shrink-0" />
+                                                <span>{t('landing.workflow.automated.point3', 'Real-time analytics and insights')}</span>
                                             </li>
                                         </ul>
                                     </div>
