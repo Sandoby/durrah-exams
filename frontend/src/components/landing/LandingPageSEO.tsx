@@ -30,9 +30,9 @@ export function LandingPageSEO() {
     return (
         <Helmet>
             {/* Primary Meta Tags */}
-            <title>{t('landing.seo.title', 'Durrah for Tutors | 14-Day Free Trial - Create Secure Online Exams')}</title>
-            <meta name="description" content={t('landing.seo.description', 'Start your 14-day free trial today! No credit card required. Create professional exams with anti-cheating features, auto-grading, and live proctoring. Full premium access for new users.')} />
-            <meta name="keywords" content={t('landing.seo.keywords', 'free trial exam software, 14 day free trial, online exam platform free trial, create online exams, anti-cheating exam software, no credit card trial, quiz maker for teachers, online assessment tool free, proctored exams, exam creator software, auto grading exams, free online testing platform, secure online testing, digital assessment platform, virtual exam software, remote proctoring, kids mode exams, educator tools, trial period exam software')} />
+            <title>{t('landing.seo.title', 'Durrah for Tutors | Ramadan Special: 1 Month FREE + 14-Day Trial - Online Exam Platform')}</title>
+            <meta name="description" content={t('landing.seo.description', 'Ramadan Special Offer: Get 1 MONTH FREE with code RAMADAN! Plus 14-day free trial. Create professional exams with anti-cheating, auto-grading, and live proctoring. Join thousands of educators worldwide.')} />
+            <meta name="keywords" content={t('landing.seo.keywords', 'ramadan offer, ramadan special, 1 month free, free month trial, online exam platform ramadan, exam software discount, ramadan promotion, free trial exam software, 14 day free trial, create online exams, anti-cheating exam software, quiz maker for teachers, online assessment tool free, proctored exams, exam creator software, auto grading exams, secure online testing, digital assessment platform, virtual exam software, remote proctoring, kids mode exams, educator tools, islamic education software, muslim teachers exam platform')} />
             <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
             <meta name="author" content="Durrah System" />
             <meta name="language" content={i18n.language === 'ar' ? 'Arabic' : 'English'} />
@@ -49,12 +49,12 @@ export function LandingPageSEO() {
             <meta property="og:type" content="website" />
             <meta property="og:site_name" content="Durrah for Tutors" />
             <meta property="og:url" content="https://durrahtutors.com/" />
-            <meta property="og:title" content={t('landing.seo.title', 'Durrah for Tutors | 14-Day Free Trial - Create Secure Online Exams')} />
-            <meta property="og:description" content={t('landing.seo.description', 'Start your 14-day free trial today! No credit card required. Create professional exams with anti-cheating features, auto-grading, and live proctoring. Full premium access for new users.')} />
-            <meta property="og:image" content="https://durrahtutors.com/og-image.png" />
+            <meta property="og:title" content={t('landing.seo.title', 'Durrah for Tutors | Ramadan Special: 1 Month FREE + 14-Day Trial - Online Exam Platform')} />
+            <meta property="og:description" content={t('landing.seo.description', 'Ramadan Special Offer: Get 1 MONTH FREE with code RAMADAN! Plus 14-day free trial. Create professional exams with anti-cheating, auto-grading, and live proctoring. Join thousands of educators worldwide.')} />
+            <meta property="og:image" content="https://durrahtutors.com/ramadan%20offer.png" />
             <meta property="og:image:width" content="1200" />
             <meta property="og:image:height" content="630" />
-            <meta property="og:image:alt" content="Durrah for Tutors - 14-Day Free Trial Available" />
+            <meta property="og:image:alt" content="Durrah for Tutors - Ramadan Special: 1 Month FREE" />
             <meta property="og:locale" content={i18n.language === 'ar' ? 'ar_SA' : 'en_US'} />
 
             {/* Twitter */}
@@ -62,10 +62,10 @@ export function LandingPageSEO() {
             <meta name="twitter:site" content="@durrahsystem" />
             <meta name="twitter:creator" content="@durrahsystem" />
             <meta name="twitter:url" content="https://durrahtutors.com/" />
-            <meta name="twitter:title" content={t('landing.seo.title', 'Durrah for Tutors | 14-Day Free Trial - Create Secure Online Exams')} />
-            <meta name="twitter:description" content={t('landing.seo.description', 'Start your 14-day free trial today! No credit card required. Create professional exams with anti-cheating features, auto-grading, and live proctoring. Full premium access for new users.')} />
-            <meta name="twitter:image" content="https://durrahtutors.com/og-image.png" />
-            <meta name="twitter:image:alt" content="Durrah for Tutors - 14-Day Free Trial Available" />
+            <meta name="twitter:title" content={t('landing.seo.title', 'Durrah for Tutors | Ramadan Special: 1 Month FREE + 14-Day Trial - Online Exam Platform')} />
+            <meta name="twitter:description" content={t('landing.seo.description', 'Ramadan Special Offer: Get 1 MONTH FREE with code RAMADAN! Plus 14-day free trial. Create professional exams with anti-cheating, auto-grading, and live proctoring. Join thousands of educators worldwide.')} />
+            <meta name="twitter:image" content="https://durrahtutors.com/ramadan%20offer.png" />
+            <meta name="twitter:image:alt" content="Durrah for Tutors - Ramadan Special: 1 Month FREE" />
 
             <meta name="theme-color" content="#6366f1" />
             <meta name="apple-mobile-web-app-title" content="Durrah for Tutors" />
@@ -96,11 +96,11 @@ export function LandingPageSEO() {
                     },
                     "image": {
                         "@type": "ImageObject",
-                        "url": "https://durrahtutors.com/og-image.png"
+                        "url": "https://durrahtutors.com/ramadan%20offer.png"
                     },
-                    "description": "Start your 14-day free trial today! Create professional exams with anti-cheating features, auto-grading, and live proctoring. No credit card required for new users.",
+                    "description": "Ramadan Special Offer: Get 1 month FREE with code RAMADAN! Plus 14-day free trial. Create professional exams with anti-cheating features, auto-grading, and live proctoring. Join thousands of educators worldwide.",
                     "foundingDate": "2024",
-                    "sameAs": ["https://durrahtutors.com"]
+                    "sameAs": ["https://durrahtutors.com", "https://web.facebook.com/profile.php?id=61584207453651"]
                 }
             `}</script>
 
@@ -111,18 +111,37 @@ export function LandingPageSEO() {
                     "name": "Durrah for Tutors",
                     "applicationCategory": "EducationApplication",
                     "operatingSystem": "Web Browser",
-                    "offers": {
-                        "@type": "Offer",
-                        "price": "0",
-                        "priceCurrency": "USD",
-                        "priceValidUntil": "2026-12-31",
-                        "availability": "https://schema.org/InStock",
-                        "name": "14-Day Free Trial",
-                        "description": "Full premium access for 14 days. No credit card required. Available for all new users.",
-                        "eligibleCustomerType": "New Users Only"
-                    },
-                    "description": "Professional online exam platform with anti-cheating features, live proctoring, auto-grading, and advanced analytics. Start your 14-day free trial today with full premium access.",
-                    "screenshot": "https://durrahtutors.com/og-image.png",
+                    "offers": [
+                        {
+                            "@type": "Offer",
+                            "price": "0",
+                            "priceCurrency": "USD",
+                            "priceValidUntil": "2025-04-30",
+                            "availability": "https://schema.org/InStock",
+                            "name": "Ramadan Special - 1 Month Free",
+                            "description": "Get 1 full month FREE with promo code RAMADAN. Full premium access with no credit card required. Limited time Ramadan offer.",
+                            "priceSpecification": {
+                                "@type": "PriceSpecification",
+                                "price": "0",
+                                "priceCurrency": "USD",
+                                "validFrom": "2025-02-28",
+                                "validThrough": "2025-04-30"
+                            },
+                            "eligibleCustomerType": "All Users"
+                        },
+                        {
+                            "@type": "Offer",
+                            "price": "0",
+                            "priceCurrency": "USD",
+                            "priceValidUntil": "2026-12-31",
+                            "availability": "https://schema.org/InStock",
+                            "name": "14-Day Free Trial",
+                            "description": "Full premium access for 14 days. No credit card required. Available for all new users.",
+                            "eligibleCustomerType": "New Users Only"
+                        }
+                    ],
+                    "description": "Professional online exam platform with anti-cheating features, live proctoring, auto-grading, and advanced analytics. Ramadan Special: Get 1 month FREE with code RAMADAN! Plus 14-day free trial for new users.",
+                    "screenshot": "https://durrahtutors.com/ramadan%20offer.png",
                     "aggregateRating": {
                         "@type": "AggregateRating",
                         "ratingValue": "4.8",
@@ -158,7 +177,7 @@ export function LandingPageSEO() {
                     "@id": "https://durrahtutors.com/#website",
                     "name": "Durrah for Tutors",
                     "url": "https://durrahtutors.com/",
-                    "description": "Start your 14-day free trial today! Create professional exams with anti-cheating features, auto-grading, live proctoring, and advanced analytics. No credit card required for new users.",
+                    "description": "Ramadan Special Offer: Get 1 month FREE with code RAMADAN! Plus 14-day free trial. Create professional exams with anti-cheating features, auto-grading, live proctoring, and advanced analytics. Join thousands of educators worldwide.",
                     "inLanguage": "${i18n.language === 'ar' ? 'ar' : 'en'}",
                     "publisher": {
                         "@id": "https://durrahtutors.com/#organization"

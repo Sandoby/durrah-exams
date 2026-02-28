@@ -1,4 +1,18 @@
 ﻿{
+    "ramadan": {
+        "banner": {
+            "text": "Oferta especial de Ramadán: obtén 1 mes gratis con el código"
+        },
+        "section": {
+            "title": "Oferta especial de Ramadán",
+            "subtitle": "Celebra con un mes de acceso premium—cortesía nuestra",
+            "couponLabel": "Código promocional",
+            "description": "Experimenta nuestra plataforma completa con exámenes ilimitados, funciones de supervisión avanzadas y análisis completos. No se requiere tarjeta de crédito.",
+            "cta": "Empezar",
+            "terms": "Oferta por tiempo limitado",
+            "imageAlt": "Oferta especial de Ramadán"
+        }
+    },
     "math": {
         "togglePreview": "Vista Previa Matemáticas",
         "help": "Soporta LaTeX (ej. $$x^2$$)",

@@ -1,4 +1,18 @@
 ﻿{
+    "ramadan": {
+        "banner": {
+            "text": "Ramadan Special: Get 1 month free with code"
+        },
+        "section": {
+            "title": "Ramadan Special",
+            "subtitle": "Celebrate with one month of premium access—on us",
+            "couponLabel": "Promo code",
+            "description": "Experience our complete platform with unlimited exams, advanced proctoring features, and comprehensive analytics. No credit card required.",
+            "cta": "Get started",
+            "terms": "Limited time offer",
+            "imageAlt": "Ramadan Special Offer"
+        }
+    },
     "landing": {
         "workflow": {
             "badge": "Seamless Transition",

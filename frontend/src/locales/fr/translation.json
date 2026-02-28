@@ -1,4 +1,18 @@
 ﻿{
+    "ramadan": {
+        "banner": {
+            "text": "Offre spéciale Ramadan : obtenez 1 mois gratuit avec le code"
+        },
+        "section": {
+            "title": "Offre spéciale Ramadan",
+            "subtitle": "Célébrez avec un mois d'accès premium—offert par nous",
+            "couponLabel": "Code promo",
+            "description": "Découvrez notre plateforme complète avec des examens illimités, des fonctionnalités de surveillance avancées et des analyses complètes. Aucune carte de crédit requise.",
+            "cta": "Commencer",
+            "terms": "Offre limitée dans le temps",
+            "imageAlt": "Offre spéciale Ramadan"
+        }
+    },
     "math": {
         "togglePreview": "Aperçu Math",
         "help": "Supporte LaTeX (ex. $$x^2$$)",
