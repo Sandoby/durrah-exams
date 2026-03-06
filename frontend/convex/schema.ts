@@ -356,4 +356,26 @@ export default defineSchema({
   })
     .index("by_user_id", ["user_id"])
     .index("by_created_at", ["created_at"]),
+
+  // ============================================
+  // CHECKOUT SESSIONS
+  // ============================================
+  checkoutSessions: defineTable({
+    session_id:      v.string(),
+    user_id:         v.string(),
+    email:           v.optional(v.string()),
+    billing_cycle:   v.string(),
+    plan_id:         v.string(),
+    status:          v.union(
+      v.literal("pending"),
+      v.literal("converted"),
+      v.literal("failed"),
+      v.literal("expired")
+    ),
+    subscription_id: v.optional(v.string()),
+    converted_at:    v.optional(v.number()),
+    created_at:      v.number(),
+  })
+    .index("by_session_id",  ["session_id"])
+    .index("by_user_status", ["user_id", "status"]),
 });

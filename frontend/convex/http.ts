@@ -468,7 +468,9 @@ http.route({
       }
 
       const body = await request.json();
-      const { userName, billingCycle, returnUrl } = body;
+      const { userName, billingCycle, returnUrl, couponCode } = body;
+      // Use Cloudflare's IP country header if available, fall back to body value
+      const country = (request.headers.get("CF-IPCountry") || body.country || "US").toUpperCase();
 
       const result = await ctx.runAction(internal.dodoPayments.createCheckout, {
         userId: authUser.id,
@@ -476,6 +478,8 @@ http.route({
         userName: userName || authUser.email.split("@")[0],
         billingCycle: billingCycle || "monthly",
         returnUrl: returnUrl || "https://tutors.durrahsystem.tech/payment-callback?provider=dodo",
+        country,
+        couponCode: couponCode || undefined,
       });
 
       return new Response(JSON.stringify(result), { status: 200, headers: corsHeaders });

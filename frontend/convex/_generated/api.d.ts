@@ -11,6 +11,7 @@
 import type * as ai from "../ai.js";
 import type * as chat from "../chat.js";
 import type * as chatQueries from "../chatQueries.js";
+import type * as checkoutSessions from "../checkoutSessions.js";
 import type * as cronHandlers from "../cronHandlers.js";
 import type * as crons from "../crons.js";
 import type * as dodoPayments from "../dodoPayments.js";
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   ai: typeof ai;
   chat: typeof chat;
   chatQueries: typeof chatQueries;
+  checkoutSessions: typeof checkoutSessions;
   cronHandlers: typeof cronHandlers;
   crons: typeof crons;
   dodoPayments: typeof dodoPayments;

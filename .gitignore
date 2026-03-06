@@ -73,3 +73,5 @@ google-services.json
 
 tmpclaude-*
 nul
+
+.env.local

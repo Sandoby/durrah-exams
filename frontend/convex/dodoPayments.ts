@@ -313,6 +313,8 @@ export const createCheckout = internalAction({
     userName:     v.string(),
     billingCycle: v.string(),
     returnUrl:    v.string(),
+    country:      v.optional(v.string()),
+    couponCode:   v.optional(v.string()),
   },
   handler: async (_ctx, args) => {
     const apiKey = process.env.DODO_PAYMENTS_API_KEY;
@@ -334,9 +336,16 @@ export const createCheckout = internalAction({
       body: JSON.stringify({
         product_id: productId,
         customer: { email: args.userEmail, name: args.userName },
+        billing: {
+          interval:       args.billingCycle === "yearly" ? "Year" : "Month",
+          interval_count: 1,
+          country:        args.country || "US",
+        },
         metadata: { userId: args.userId, billingCycle: args.billingCycle, planId: "professional" },
         return_url: args.returnUrl,
         quantity: 1,
+        payment_link: true,
+        ...(args.couponCode ? { discount_code: args.couponCode } : {}),
       }),
     });
 
