@@ -7,8 +7,6 @@ import { HeroSection } from '../components/landing/HeroSection';
 import { PlatformHighlights } from '../components/landing/PlatformHighlights';
 import { Navbar } from '../components/landing/Navbar';
 import { CookieConsentBanner } from '../components/landing/CookieConsentBanner';
-import { RamadanOfferBanner } from '../components/landing/RamadanOfferBanner';
-import { RamadanOfferSection } from '../components/landing/RamadanOfferSection';
 import '../styles/landing-animations.css';
 
 const FeaturesBento = lazy(() => import('../components/landing/FeaturesBento').then(mod => ({ default: mod.FeaturesBento })));
@@ -47,12 +45,8 @@ export default function LandingPage() {
 
             <Navbar />
 
-            <RamadanOfferBanner />
-
             <div className="relative z-10">
                 <HeroSection registrationUrl={registrationUrl} />
-
-                <RamadanOfferSection registrationUrl={registrationUrl} />
 
                 <PlatformHighlights />
 

@@ -53,7 +53,7 @@ export function Navbar() {
         <>
             <nav className={`fixed left-0 right-0 z-50 transition-all duration-500 ${scrolled
                 ? 'top-0 py-3 px-4 sm:px-6 lg:px-8'
-                : 'top-[44px] py-6 px-4 sm:px-6 lg:px-8'
+                : 'top-0 py-6 px-4 sm:px-6 lg:px-8'
                 }`}>
                 <div className={`max-w-7xl mx-auto transition-all duration-500 rounded-2xl ${scrolled
                     ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 shadow-lg shadow-slate-200/20 dark:shadow-black/20'
