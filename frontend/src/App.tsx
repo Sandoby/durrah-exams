@@ -49,6 +49,7 @@ import KidsLanding from './pages/KidsLanding';
 import KidsExamView from './pages/KidsExamView';
 import ExamResultsPage from './pages/ExamResultsPage';
 import { ProtectedRoute, AgentRoute, TutorRoute, StudentRoute } from './components/ProtectedRoute';
+import NotFound from './pages/NotFound';
 
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
@@ -218,7 +219,7 @@ function AppContent() {
         {/* Protected Routes */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        
+
         {/* Classroom Routes - Tutor only */}
         <Route path="/classrooms" element={<TutorRoute><ClassroomList /></TutorRoute>} />
         <Route path="/classrooms/new" element={<TutorRoute><ClassroomCreate /></TutorRoute>} />
@@ -229,7 +230,7 @@ function AppContent() {
         <Route path="/my/classrooms/:id" element={<StudentRoute><StudentClassroomView /></StudentRoute>} />
         <Route path="/join" element={<ProtectedRoute><JoinClassroom /></ProtectedRoute>} />
         <Route path="/join/:code" element={<ProtectedRoute><JoinClassroom /></ProtectedRoute>} />
-        
+
         <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
         <Route path="/question-bank" element={<ProtectedRoute><QuestionBank /></ProtectedRoute>} />
         <Route path="/exam/new" element={<ProtectedRoute><ExamEditor /></ProtectedRoute>} />
@@ -258,7 +259,7 @@ function AppContent() {
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/pricing" element={<PricingPage />} />
-        <Route path="*" element={<LandingPage />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster position="top-right" />
     </div>

@@ -696,5 +696,12 @@
             "benefit2": "Alertas de infracción instantáneas",
             "benefit3": "Cumplimiento de navegador seguro"
         }
+    },
+    "notFound": {
+        "title": "Página No Encontrada",
+        "subtitle": "La página que buscas no existe o ha sido movida.",
+        "goHome": "Ir a la Página Principal",
+        "goBack": "Volver Atrás",
+        "redirecting": "Redirigiendo en {{seconds}}s..."
     }
 }
