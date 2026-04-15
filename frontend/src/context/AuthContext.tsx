@@ -30,6 +30,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const profileChannelRef = useRef<any>(null);
 
+    const isRateLimitError = (error: any) => {
+        const status = error?.status;
+        const message = String(error?.message || '').toLowerCase();
+        return status === 429 || message.includes('too many requests');
+    };
+
     const fetchUserProfile = async (userId: string) => {
         try {
             const { data, error } = await supabase
@@ -117,45 +123,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         profileChannelRef.current = channel;
     };
 
-    const cacheSession = (sessionData: Session | null, userData: User | null) => {
-        if (sessionData && userData) {
-            localStorage.setItem('cached_session', JSON.stringify(sessionData));
-            localStorage.setItem('cached_user', JSON.stringify(userData));
-            localStorage.setItem('session_timestamp', Date.now().toString());
-        } else {
-            localStorage.removeItem('cached_session');
-            localStorage.removeItem('cached_user');
-            localStorage.removeItem('session_timestamp');
-        }
-    };
-
-    const getCachedSession = () => {
-        try {
-            const cached = localStorage.getItem('cached_session');
-            const user = localStorage.getItem('cached_user');
-            const timestamp = localStorage.getItem('session_timestamp');
-
-            if (cached && user && timestamp) {
-                // Session valid for 60 days (extended from 30)
-                const sixtyDaysAgo = Date.now() - (60 * 24 * 60 * 60 * 1000);
-                if (parseInt(timestamp) > sixtyDaysAgo) {
-                    return {
-                        session: JSON.parse(cached),
-                        user: JSON.parse(user)
-                    };
-                } else {
-                    // Clean up expired cache
-                    localStorage.removeItem('cached_session');
-                    localStorage.removeItem('cached_user');
-                    localStorage.removeItem('session_timestamp');
-                }
-            }
-        } catch (error) {
-            console.error('Error reading cached session:', error);
-        }
-        return null;
-    };
-
     const checkCustomAuth = () => {
         const isAgentAuth = sessionStorage.getItem('agent_authenticated') === 'true';
         if (isAgentAuth) {
@@ -185,6 +152,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         let isMounted = true;
 
+        const handleAuthRateLimited = () => {
+            toast.error('Too many authentication attempts. Please wait a minute and sign in again.', {
+                id: 'auth-rate-limit',
+                duration: 7000,
+            });
+        };
+
+        window.addEventListener('durrah:auth-rate-limited', handleAuthRateLimited as EventListener);
+
         // Set a timeout to prevent infinite loading
         const loadingTimeout = setTimeout(() => {
             if (isMounted && loading) {
@@ -198,42 +174,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const hasCustomAuth = checkCustomAuth();
 
             if (!hasCustomAuth) {
-                // Try to use cached session first
-                const cachedData = getCachedSession();
-                if (cachedData?.session && cachedData?.user) {
-                    if (!isMounted) return;
-                    setSession(cachedData.session);
-                    setUser(cachedData.user);
-                    // Await profile fetch (with 2.5 s timeout) before clearing loading flag.
-                    // This eliminates the paywall-flash race condition where components
-                    // render with subscriptionStatus=null and briefly block access.
-                    await Promise.race([
-                        fetchUserProfile(cachedData.user.id).catch(err => {
-                            console.error('Profile fetch failed:', err);
-                        }),
-                        new Promise<void>(resolve => setTimeout(resolve, 2500)),
-                    ]);
-                    setupProfileRealtime(cachedData.user.id);
-                    if (isMounted) setLoading(false);
-                    clearTimeout(loadingTimeout);
-                    return;
-                }
-
-                // No cache, check active sessions
                 try {
-                    const { data: { session } } = await supabase.auth.getSession();
+                    const { data: { session }, error } = await supabase.auth.getSession();
                     if (!isMounted) return;
+
+                    if (error) {
+                        if (isRateLimitError(error)) {
+                            console.warn('Supabase auth refresh is rate-limited. Clearing local auth state.');
+                            handleAuthRateLimited();
+                            await supabase.auth.signOut({ scope: 'local' });
+                        } else {
+                            console.error('Error getting auth session:', error);
+                        }
+
+                        setSession(null);
+                        setUser(null);
+                        setRole(null);
+                        setSubscriptionStatus(null);
+                        setSubscriptionEndDate(null);
+                        setTrialEndsAt(null);
+                        setLoading(false);
+                        clearTimeout(loadingTimeout);
+                        return;
+                    }
 
                     setSession(session);
                     setUser(session?.user ?? null);
 
                     if (session?.user) {
-                        // Cache the session
-                        cacheSession(session, session.user);
-                        // Fetch profile but don't block on it
-                        fetchUserProfile(session.user.id).catch(err => {
-                            console.error('Profile fetch failed:', err);
-                        });
+                        // Block initial render until profile is loaded to avoid transient subscription UI flicker.
+                        await fetchUserProfile(session.user.id);
                         setupProfileRealtime(session.user.id);
                     }
 
@@ -260,16 +230,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(session?.user ?? null);
 
             if (session?.user) {
-                // Cache the session on auth state change
-                cacheSession(session, session.user);
-                // Fetch profile but don't block
-                fetchUserProfile(session.user.id).catch(err => {
-                    console.error('Profile fetch failed:', err);
-                });
+                // Keep subscription state in sync before children render subscription-gated UI.
+                await fetchUserProfile(session.user.id);
                 setupProfileRealtime(session.user.id);
             } else {
-                // Clear cache on sign out
-                cacheSession(null, null);
                 if (profileChannelRef.current) {
                     supabase.removeChannel(profileChannelRef.current);
                     profileChannelRef.current = null;
@@ -285,45 +249,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setLoading(false);
         });
 
-        // Periodically refresh session to keep it alive (every 30 minutes)
-        const refreshInterval = setInterval(async () => {
-            try {
-                const { data: { session: currentSession } } = await supabase.auth.getSession();
-                if (currentSession) {
-                    const { data, error } = await supabase.auth.refreshSession();
-                    if (!error && data.session) {
-                        cacheSession(data.session, data.session.user);
-                    }
-                }
-            } catch (error) {
-                console.error('Session refresh failed:', error);
-            }
-        }, 30 * 60 * 1000); // 30 minutes
-
-        // Refresh session when user returns to the tab
-        const handleVisibilityChange = async () => {
-            if (document.visibilityState === 'visible') {
-                try {
-                    const { data: { session: currentSession } } = await supabase.auth.getSession();
-                    if (currentSession) {
-                        const { data, error } = await supabase.auth.refreshSession();
-                        if (!error && data.session) {
-                            cacheSession(data.session, data.session.user);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Session refresh on visibility change failed:', error);
-                }
-            }
-        };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
+        // The Supabase JS client automatically handles background token refreshes.
+        // We do not need to manually call refreshSession, as it causes 429 Too Many Requests.
 
         return () => {
             isMounted = false;
             clearTimeout(loadingTimeout);
-            clearInterval(refreshInterval);
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('durrah:auth-rate-limited', handleAuthRateLimited as EventListener);
             if (profileChannelRef.current) {
                 supabase.removeChannel(profileChannelRef.current);
                 profileChannelRef.current = null;
@@ -334,7 +266,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const signOut = async () => {
         await supabase.auth.signOut();
-        cacheSession(null, null);
         if (profileChannelRef.current) {
             supabase.removeChannel(profileChannelRef.current);
             profileChannelRef.current = null;

@@ -94,7 +94,7 @@ const TutorialTooltip = ({
 
 export default function Dashboard() {
     const { t } = useTranslation();
-    const { user, signOut } = useAuth();
+    const { user, signOut, subscriptionStatus, subscriptionEndDate, loading: authLoading } = useAuth();
     const navigate = useNavigate();
     const [exams, setExams] = useState<Exam[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -113,6 +113,11 @@ export default function Dashboard() {
     const [shareModal, setShareModal] = useState<{ id?: string; url: string; code: string; title?: string; directUrl?: string } | null>(null);
     const [deleteConfirmModal, setDeleteConfirmModal] = useState<{ id: string; title: string } | null>(null);
     const [showMockExam, setShowMockExam] = useState(false);
+
+    const effectiveSubscriptionStatus = profile?.subscription_status ?? subscriptionStatus;
+    const effectiveSubscriptionEndDate = profile?.subscription_end_date ?? subscriptionEndDate;
+    const hasPremiumAccess = hasActiveAccess(effectiveSubscriptionStatus, effectiveSubscriptionEndDate);
+    const isSubscriptionResolved = !authLoading;
 
     useDemoTour(new URLSearchParams(window.location.search).get('showSharing') === 'true' ? 'share-monitor' : new URLSearchParams(window.location.search).get('showAnalytics') === 'true' ? 'view-analytics' : null, startDemoTour && isDemo);
 
@@ -255,7 +260,7 @@ export default function Dashboard() {
 
     const handleCreateExam = (e: React.MouseEvent) => {
         // Check if user is on free plan and has reached limit
-        if (!hasActiveAccess(profile?.subscription_status) && exams.length >= 3) {
+        if (isSubscriptionResolved && !hasPremiumAccess && exams.length >= 3) {
             e.preventDefault();
             toast.error(t('dashboard.upgradeLimit'));
             return;
@@ -582,7 +587,7 @@ export default function Dashboard() {
                                 {user?.user_metadata?.full_name || user?.email}
                             </span>
 
-                            {!hasActiveAccess(profile?.subscription_status) && (
+                            {isSubscriptionResolved && !hasPremiumAccess && (
                                 <Link
                                     to="/checkout"
                                     className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white hover:bg-amber-600 shadow-md hover:shadow-lg transition-all"
@@ -658,7 +663,7 @@ export default function Dashboard() {
                                 <Users className="h-5 w-5 mr-3" />
                                 {t('nav.classrooms', 'Classrooms')}
                             </Link>
-                            {!hasActiveAccess(profile?.subscription_status) && (
+                            {isSubscriptionResolved && !hasPremiumAccess && (
                                 <Link
                                     to="/checkout"
                                     onClick={() => setIsMobileMenuOpen(false)}
@@ -792,7 +797,7 @@ export default function Dashboard() {
                         </div>
                     )}
 
-                    {!hasActiveAccess(profile?.subscription_status) && exams.length >= 3 && (
+                    {isSubscriptionResolved && !hasPremiumAccess && exams.length >= 3 && (
                         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-start gap-3 shadow-sm mb-4">
                             <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                             <div className="flex-1">
@@ -936,18 +941,18 @@ export default function Dashboard() {
                                                 {/* Analytics Button */}
                                                 <button
                                                     onClick={() => {
-                                                        if (hasActiveAccess(profile?.subscription_status)) {
+                                                        if (hasPremiumAccess) {
                                                             navigate(`/exam/${exam.id}/analytics`);
                                                         } else {
                                                             setPremiumModal({ isOpen: true, feature: 'analytics' });
                                                         }
                                                     }}
-                                                    className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 ${hasActiveAccess(profile?.subscription_status)
+                                                    className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 ${hasPremiumAccess
                                                         ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:shadow-md'
                                                         : 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700'
                                                         }`}
                                                 >
-                                                    {!hasActiveAccess(profile?.subscription_status) && (
+                                                    {!hasPremiumAccess && (
                                                         <div className="absolute -top-2.5 -right-1.5 z-20">
                                                             <div className="bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-white/20 flex items-center gap-1">
                                                                 <Crown className="w-2.5 h-2.5" />
@@ -955,12 +960,12 @@ export default function Dashboard() {
                                                             </div>
                                                         </div>
                                                     )}
-                                                    {hasActiveAccess(profile?.subscription_status) ? (
+                                                    {hasPremiumAccess ? (
                                                         <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                                                     ) : (
                                                         <Lock className="h-5 w-5 text-gray-400" />
                                                     )}
-                                                    <span className={`text-xs font-semibold ${hasActiveAccess(profile?.subscription_status)
+                                                    <span className={`text-xs font-semibold ${hasPremiumAccess
                                                         ? 'text-purple-700 dark:text-purple-300'
                                                         : 'text-gray-500'
                                                         }`}>
@@ -972,18 +977,18 @@ export default function Dashboard() {
                                                 {CONVEX_FEATURES.proctoring && (
                                                     <button
                                                         onClick={() => {
-                                                            if (hasActiveAccess(profile?.subscription_status)) {
+                                                            if (hasPremiumAccess) {
                                                                 navigate(`/exam/${exam.id}/proctor`);
                                                             } else {
                                                                 setPremiumModal({ isOpen: true, feature: 'proctoring' });
                                                             }
                                                         }}
-                                                        className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 ${hasActiveAccess(profile?.subscription_status)
+                                                        className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 ${hasPremiumAccess
                                                             ? 'bg-teal-500 border border-teal-400 hover:bg-teal-600 hover:shadow-md'
                                                             : 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-teal-300 dark:hover:border-teal-700'
                                                             }`}
                                                     >
-                                                        {!hasActiveAccess(profile?.subscription_status) && (
+                                                        {!hasPremiumAccess && (
                                                             <div className="absolute -top-2.5 -right-1.5 z-20">
                                                                 <div className="bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-white/20 flex items-center gap-1">
                                                                     <Crown className="w-2.5 h-2.5" />
@@ -991,18 +996,18 @@ export default function Dashboard() {
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        {hasActiveAccess(profile?.subscription_status) && (
+                                                        {hasPremiumAccess && (
                                                             <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
                                                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                                                                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
                                                             </span>
                                                         )}
-                                                        {hasActiveAccess(profile?.subscription_status) ? (
+                                                        {hasPremiumAccess ? (
                                                             <Eye className="h-5 w-5 text-white" />
                                                         ) : (
                                                             <Lock className="h-5 w-5 text-gray-400" />
                                                         )}
-                                                        <span className={`text-xs font-bold ${hasActiveAccess(profile?.subscription_status) ? 'text-white' : 'text-gray-500'}`}>
+                                                        <span className={`text-xs font-bold ${hasPremiumAccess ? 'text-white' : 'text-gray-500'}`}>
                                                             {t('dashboard.actions.proctor', 'Live')}
                                                         </span>
                                                     </button>

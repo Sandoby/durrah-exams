@@ -29,6 +29,14 @@ interface User {
     billing_cycle?: 'monthly' | 'yearly' | null;
 }
 
+interface ActiveExpiredSubscriptionRow {
+    id: string;
+    email: string;
+    full_name?: string;
+    subscription_status?: string;
+    subscription_end_date?: string;
+}
+
 interface Coupon {
     id: string;
     code: string;
@@ -165,6 +173,9 @@ export default function AdminPanel() {
     const [users, setUsers] = useState<User[]>([]);
     const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
     const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+    const [isRunningSubscriptionDiagnostic, setIsRunningSubscriptionDiagnostic] = useState(false);
+    const [activeExpiredSubscriptions, setActiveExpiredSubscriptions] = useState<ActiveExpiredSubscriptionRow[]>([]);
+    const [subscriptionDiagnosticRanAt, setSubscriptionDiagnosticRanAt] = useState<string | null>(null);
     const [filters, setFilters] = useState<UserFilters>({
         searchTerm: '',
         subscriptionStatus: 'all',
@@ -352,6 +363,38 @@ export default function AdminPanel() {
             toast.error('Failed to fetch users');
         } finally {
             setIsLoadingUsers(false);
+        }
+    };
+
+    const runActiveExpiredSubscriptionsDiagnostic = async () => {
+        setIsRunningSubscriptionDiagnostic(true);
+        try {
+            const nowIso = new Date().toISOString();
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('id, email, full_name, subscription_status, subscription_end_date')
+                .eq('subscription_status', 'active')
+                .not('subscription_end_date', 'is', null)
+                .lt('subscription_end_date', nowIso)
+                .order('subscription_end_date', { ascending: true })
+                .limit(200);
+
+            if (error) throw error;
+
+            const rows = (data || []) as ActiveExpiredSubscriptionRow[];
+            setActiveExpiredSubscriptions(rows);
+            setSubscriptionDiagnosticRanAt(new Date().toISOString());
+
+            if (rows.length === 0) {
+                toast.success('Diagnostic clean: no active expired subscriptions found.');
+            } else {
+                toast.error(`Diagnostic found ${rows.length} active expired subscription${rows.length === 1 ? '' : 's'}.`);
+            }
+        } catch (error) {
+            console.error('Error running subscription diagnostic:', error);
+            toast.error('Failed to run subscription diagnostic');
+        } finally {
+            setIsRunningSubscriptionDiagnostic(false);
         }
     };
 
@@ -934,15 +977,86 @@ export default function AdminPanel() {
                                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                                     Users Management
                                 </h2>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap justify-end">
                                     <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-300">
                                         Total: {users.length}
                                     </span>
                                     <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
                                         Showing: {filteredUsers.length}
                                     </span>
+                                    <button
+                                        onClick={runActiveExpiredSubscriptionsDiagnostic}
+                                        disabled={isRunningSubscriptionDiagnostic}
+                                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 disabled:opacity-60 disabled:cursor-not-allowed dark:border-amber-800 dark:text-amber-300 dark:bg-amber-900/20"
+                                    >
+                                        {isRunningSubscriptionDiagnostic ? (
+                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        ) : (
+                                            <RefreshCw className="h-3.5 w-3.5" />
+                                        )}
+                                        Run Subscription Diagnostic
+                                    </button>
                                 </div>
                             </div>
+
+                            {subscriptionDiagnosticRanAt && (
+                                <div className={`mb-4 border rounded-lg p-4 ${activeExpiredSubscriptions.length > 0
+                                    ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800'
+                                    : 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800'
+                                    }`}>
+                                    <div className="flex items-center justify-between gap-3 mb-3">
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                Active-but-Expired Subscription Diagnostic
+                                            </h3>
+                                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                                Last run: {new Date(subscriptionDiagnosticRanAt).toLocaleString()}
+                                            </p>
+                                        </div>
+                                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${activeExpiredSubscriptions.length > 0
+                                            ? 'bg-amber-200 text-amber-900 dark:bg-amber-800/60 dark:text-amber-100'
+                                            : 'bg-emerald-200 text-emerald-900 dark:bg-emerald-800/60 dark:text-emerald-100'
+                                            }`}>
+                                            Found: {activeExpiredSubscriptions.length}
+                                        </span>
+                                    </div>
+
+                                    {activeExpiredSubscriptions.length > 0 ? (
+                                        <div className="overflow-x-auto">
+                                            <table className="min-w-full text-xs">
+                                                <thead>
+                                                    <tr className="text-left text-gray-600 dark:text-gray-300 border-b border-amber-200 dark:border-amber-800">
+                                                        <th className="py-2 pr-4 font-semibold">Email</th>
+                                                        <th className="py-2 pr-4 font-semibold">Name</th>
+                                                        <th className="py-2 pr-4 font-semibold">End Date</th>
+                                                        <th className="py-2 pr-0 font-semibold">Days Expired</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {activeExpiredSubscriptions.map((row) => {
+                                                        const endMs = row.subscription_end_date ? new Date(row.subscription_end_date).getTime() : 0;
+                                                        const daysExpired = endMs > 0
+                                                            ? Math.max(0, Math.floor((Date.now() - endMs) / (1000 * 60 * 60 * 24)))
+                                                            : 0;
+                                                        return (
+                                                            <tr key={row.id} className="border-b border-amber-100/60 dark:border-amber-900/40 text-gray-800 dark:text-gray-200">
+                                                                <td className="py-2 pr-4">{row.email}</td>
+                                                                <td className="py-2 pr-4">{row.full_name || '-'}</td>
+                                                                <td className="py-2 pr-4">{row.subscription_end_date ? new Date(row.subscription_end_date).toLocaleString() : '-'}</td>
+                                                                <td className="py-2 pr-0 font-semibold">{daysExpired}</td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                                            No orphaned records detected. All expired subscriptions are currently not marked as active.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Role Filter Tabs */}
                             <div className="flex gap-2 mb-4 p-1 bg-gray-100 dark:bg-gray-700 rounded-xl w-fit">

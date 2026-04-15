@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { Helmet } from 'react-helmet-async';
+import { getAuthErrorKind } from '../lib/authErrors';
 
 export default function StudentPortal() {
   const { t, i18n } = useTranslation();
@@ -31,6 +32,13 @@ export default function StudentPortal() {
   const [selectedClassroom, setSelectedClassroom] = useState<any>(null);
   const [classroomExams, setClassroomExams] = useState<any[]>([]);
   const [loadingClassroomExams, setLoadingClassroomExams] = useState(false);
+
+  const showRateLimitError = () => {
+    toast.error(
+      t('auth.messages.rateLimit', 'Too many authentication attempts. Please wait a minute and try again.'),
+      { duration: 7000 }
+    );
+  };
 
   useEffect(() => {
     if (user) {
@@ -194,7 +202,12 @@ export default function StudentPortal() {
       }
     } catch (error: any) {
       console.error('Google login error:', error);
-      toast.error(t('auth.messages.loginError', 'Error connecting to Google'));
+      const errorKind = getAuthErrorKind(error);
+      if (errorKind === 'rate_limit') {
+        showRateLimitError();
+      } else {
+        toast.error(t('auth.messages.loginError', 'Error connecting to Google'));
+      }
     } finally {
       setLoading(false);
     }
@@ -220,7 +233,12 @@ export default function StudentPortal() {
       }
     } catch (error: any) {
       console.error('Microsoft login error:', error);
-      toast.error(t('auth.messages.microsoftError', 'Error connecting to Microsoft'));
+      const errorKind = getAuthErrorKind(error);
+      if (errorKind === 'rate_limit') {
+        showRateLimitError();
+      } else {
+        toast.error(t('auth.messages.microsoftError', 'Error connecting to Microsoft'));
+      }
     } finally {
       setLoading(false);
     }
@@ -261,7 +279,17 @@ export default function StudentPortal() {
         toast.success(t('studentPortal.welcome', 'Welcome back!'));
       }
     } catch (error: any) {
-      toast.error(error.message);
+      const errorKind = getAuthErrorKind(error);
+
+      if (errorKind === 'rate_limit') {
+        showRateLimitError();
+      } else if (errorKind === 'invalid_credentials') {
+        toast.error(t('auth.messages.invalidCredentials', 'Invalid email or password.'));
+      } else if (errorKind === 'email_in_use') {
+        toast.error(t('auth.messages.emailInUse', 'This email is already in use.'));
+      } else {
+        toast.error(t('studentPortal.error', 'An error occurred. Please try again.'));
+      }
     } finally {
       setLoading(false);
     }

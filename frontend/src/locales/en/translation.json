@@ -1351,12 +1351,5 @@
                 "benefit3": "Secure browser enforcement"
             }
         }
-    },
-    "notFound": {
-        "title": "Page Not Found",
-        "subtitle": "The page you're looking for doesn't exist or has been moved.",
-        "goHome": "Go to Homepage",
-        "goBack": "Go Back",
-        "redirecting": "Redirecting in {{seconds}}s..."
     }
 }

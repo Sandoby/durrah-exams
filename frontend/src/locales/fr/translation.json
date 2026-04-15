@@ -958,12 +958,5 @@
                 "benefit3": "Application d'un navigateur sécurisé"
             }
         }
-    },
-    "notFound": {
-        "title": "Page Introuvable",
-        "subtitle": "La page que vous recherchez n'existe pas ou a été déplacée.",
-        "goHome": "Aller à l'Accueil",
-        "goBack": "Retour",
-        "redirecting": "Redirection dans {{seconds}}s..."
     }
 }

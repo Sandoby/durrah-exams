@@ -32,8 +32,8 @@ export default function EmailVerification() {
     const handleCheckStatus = async () => {
         setIsChecking(true);
         try {
-            // Try to refresh the session to catch any updates (like email verification)
-            const { data: { user }, error } = await supabase.auth.refreshSession();
+            // Avoid forcing token refreshes here to prevent auth rate-limit loops.
+            const { data: { user }, error } = await supabase.auth.getUser();
 
             // If refresh fails or no user (e.g. no session exists), treat as "needs login"
             if (error || !user) {

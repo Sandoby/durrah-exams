@@ -222,12 +222,13 @@ export const checkSubscriptionExpirations = internalMutation({
         const lastReminder = sub.last_reminder_sent_at ? new Date(sub.last_reminder_sent_at) : null;
         const hoursSinceLastReminder = lastReminder ? (now.getTime() - lastReminder.getTime()) / (1000 * 60 * 60) : 999;
 
-        // EXPIRE — only after 24h grace buffer, and only for non-active/non-trialing statuses
+        // EXPIRE — only after 24h grace buffer.
+        // Active paid subscriptions must be transitioned to expired when end_date passes.
+        // Trialing users are handled by checkTrialExpirations (trial_ends_at lifecycle).
         if (
           endDate <= graceCutoff &&
           sub.status !== 'expired' &&
           sub.status !== 'cancelled' &&
-          sub.status !== 'active' &&
           sub.status !== 'trialing'
         ) {
           const result = await performTransition(ctx.db, ctx.scheduler, {

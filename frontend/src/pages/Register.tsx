@@ -12,6 +12,8 @@ import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { StudentAccountModal } from '../components/StudentAccountModal';
 import { Helmet } from 'react-helmet-async';
+import { useAuth } from '../context/AuthContext';
+import { getAuthErrorKind } from '../lib/authErrors';
 
 // Common country codes with flags
 const COUNTRY_CODES = [
@@ -82,6 +84,7 @@ export default function Register() {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const { t } = useTranslation();
+    const { session } = useAuth();
 
     const { register, handleSubmit, formState: { errors } } = useForm<RegisterForm>({
         resolver: zodResolver(registerSchema),
@@ -95,6 +98,13 @@ export default function Register() {
     const [selectedCountryCode, setSelectedCountryCode] = useState('+1');
     const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
     const [countrySearchQuery, setCountrySearchQuery] = useState('');
+
+    const showRateLimitError = () => {
+        toast.error(
+            t('auth.messages.rateLimit', 'Too many authentication attempts. Please wait a minute and try again.'),
+            { duration: 7000 }
+        );
+    };
 
     // Auto-detect user's country on mount
     useEffect(() => {
@@ -130,7 +140,6 @@ export default function Register() {
 
     useEffect(() => {
         const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 const params = new URLSearchParams(window.location.search);
                 const isTutorRequested = params.get('type') === 'tutor' || window.location.pathname.includes('/register');
@@ -174,7 +183,7 @@ export default function Register() {
             }
         };
         checkSession();
-    }, [navigate]);
+    }, [navigate, session]);
 
     const handleGoogleLogin = async () => {
         setIsLoading(true);
@@ -199,7 +208,12 @@ export default function Register() {
             }
         } catch (error: any) {
             console.error('Google login error:', error);
-            toast.error(t('auth.messages.registerError'));
+            const errorKind = getAuthErrorKind(error);
+            if (errorKind === 'rate_limit') {
+                showRateLimitError();
+            } else {
+                toast.error(t('auth.messages.registerError'));
+            }
         } finally {
             setIsLoading(false);
         }
@@ -225,7 +239,12 @@ export default function Register() {
             }
         } catch (error: any) {
             console.error('Microsoft login error:', error);
-            toast.error(t('auth.messages.microsoftError'));
+            const errorKind = getAuthErrorKind(error);
+            if (errorKind === 'rate_limit') {
+                showRateLimitError();
+            } else {
+                toast.error(t('auth.messages.microsoftError'));
+            }
         } finally {
             setIsLoading(false);
         }
@@ -318,6 +337,23 @@ export default function Register() {
             toast.success(t('auth.messages.registerSuccess'));
             navigate('/login');
         } catch (error: any) {
+            const errorKind = getAuthErrorKind(error);
+
+            if (errorKind === 'rate_limit') {
+                showRateLimitError();
+                return;
+            }
+
+            if (errorKind === 'email_in_use') {
+                toast.error(t('auth.messages.emailInUse'));
+                return;
+            }
+
+            if (errorKind === 'weak_password') {
+                toast.error(t('auth.validation.passwordMin', 'Password must be at least 6 characters.'));
+                return;
+            }
+
             toast.error(t('auth.messages.registerError'));
         } finally {
             setIsLoading(false);

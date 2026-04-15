@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { StudentAccountModal } from '../components/StudentAccountModal';
+import { useAuth } from '../context/AuthContext';
+import { getAuthErrorKind } from '../lib/authErrors';
 
 const loginSchema = z.object({
     email: z.string().email('auth.validation.email'),
@@ -24,6 +26,7 @@ export default function Login() {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const { t } = useTranslation();
+    const { session } = useAuth();
 
     const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
         resolver: zodResolver(loginSchema),
@@ -32,6 +35,13 @@ export default function Login() {
     const [showStudentModal, setShowStudentModal] = useState(false);
     const [studentUserInfo, setStudentUserInfo] = useState<{ email: string; id: string } | null>(null);
     const isProcessingOAuth = useRef(false);
+
+    const showRateLimitError = () => {
+        toast.error(
+            t('auth.messages.rateLimit', 'Too many authentication attempts. Please wait a minute and try again.'),
+            { duration: 7000 }
+        );
+    };
 
     // Shared logic to handle a session (check profile, upsert, navigate)
     const processSession = async (session: any) => {
@@ -105,19 +115,15 @@ export default function Login() {
         // 2) Also check if user already has an active session (e.g. navigated to /login
         //    while already logged in, or session was cached).
         if (!hasOAuthCode) {
-            const checkExistingSession = async () => {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session) {
-                    processSession(session);
-                }
-            };
-            checkExistingSession();
+            if (session) {
+                processSession(session);
+            }
         }
 
         return () => {
             subscription.unsubscribe();
         };
-    }, [navigate]);
+    }, [navigate, session]);
 
     const handleGoogleLogin = async () => {
         setIsLoading(true);
@@ -140,7 +146,12 @@ export default function Login() {
             if (isNative && data?.url) await Browser.open({ url: data.url });
         } catch (error: any) {
             console.error('Google login error:', error);
-            toast.error(t('auth.messages.loginError'));
+            const errorKind = getAuthErrorKind(error);
+            if (errorKind === 'rate_limit') {
+                showRateLimitError();
+            } else {
+                toast.error(t('auth.messages.loginError'));
+            }
         } finally {
             setIsLoading(false);
         }
@@ -164,7 +175,12 @@ export default function Login() {
             if (isNative && data?.url) await Browser.open({ url: data.url });
         } catch (error: any) {
             console.error('Microsoft login error:', error);
-            toast.error(t('auth.messages.microsoftError'));
+            const errorKind = getAuthErrorKind(error);
+            if (errorKind === 'rate_limit') {
+                showRateLimitError();
+            } else {
+                toast.error(t('auth.messages.microsoftError'));
+            }
         } finally {
             setIsLoading(false);
         }
@@ -211,13 +227,23 @@ export default function Login() {
 
             navigate('/dashboard');
         } catch (error: any) {
-            const isUnverified = error?.message?.toLowerCase().includes('email not confirmed') ||
-                error?.message?.toLowerCase().includes('email not verified');
+            const errorKind = getAuthErrorKind(error);
 
-            if (isUnverified) {
+            if (errorKind === 'email_unverified') {
                 navigate('/verify-email', { state: { email: data.email } });
                 return;
             }
+
+            if (errorKind === 'invalid_credentials') {
+                toast.error(t('auth.messages.invalidCredentials', 'Invalid email or password.'));
+                return;
+            }
+
+            if (errorKind === 'rate_limit') {
+                showRateLimitError();
+                return;
+            }
+
             console.error('Login error:', error);
             toast.error(t('auth.messages.loginError'), { duration: 5000 });
         } finally {
