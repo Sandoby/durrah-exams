@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { exportToJSON, exportToPDF, exportToWord } from '../lib/exportUtils';
 import { useDemoTour } from '../hooks/useDemoTour';
 import { hasActiveAccess } from '../lib/subscriptionUtils';
+import { LoadingTimeout } from '../components/LoadingTimeout';
 
 interface Question {
     id: string;
@@ -140,11 +141,11 @@ export default function QuestionBank() {
             return;
         }
 
-        if (user) {
+        if (user?.id) {
             fetchBanks();
             fetchProfile();
         }
-    }, [user, isDemo]);
+    }, [user?.id, isDemo]);
 
     const fetchProfile = async () => {
         if (!user) return;
@@ -430,9 +431,11 @@ export default function QuestionBank() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-            </div>
+            <LoadingTimeout isLoading={isLoading} onRetry={fetchBanks}>
+                <div className="min-h-screen flex items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                </div>
+            </LoadingTimeout>
         );
     }
 

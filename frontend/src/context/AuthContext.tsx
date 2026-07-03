@@ -29,6 +29,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const profileChannelRef = useRef<any>(null);
+    const fetchedUserIdRef = useRef<string | null>(null);
+    const subscribedUserIdRef = useRef<string | null>(null);
+    const isLoadingRef = useRef(true);
+
+    useEffect(() => {
+        isLoadingRef.current = loading;
+    }, [loading]);
 
     const isRateLimitError = (error: any) => {
         const status = error?.status;
@@ -36,7 +43,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return status === 429 || message.includes('too many requests');
     };
 
-    const fetchUserProfile = async (userId: string) => {
+    const fetchUserProfile = async (userId: string, force = false) => {
+        if (!force && fetchedUserIdRef.current === userId) {
+            return;
+        }
+        fetchedUserIdRef.current = userId;
+
         try {
             const { data, error } = await supabase
                 .from('profiles')
@@ -46,30 +58,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             if (error) {
                 console.error('Error fetching user profile:', error);
+                if (fetchedUserIdRef.current === userId) {
+                    setRole('tutor'); // Default to tutor if error
+                    setSubscriptionStatus(null);
+                    setSubscriptionEndDate(null);
+                    setTrialEndsAt(null);
+                }
+                return;
+            }
+
+            if (fetchedUserIdRef.current === userId) {
+                setRole(data?.role || 'tutor');
+                setSubscriptionStatus(data?.subscription_status || null);
+                setSubscriptionEndDate(data?.subscription_end_date || null);
+                setTrialEndsAt(data?.trial_ends_at || null);
+            }
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+            if (fetchedUserIdRef.current === userId) {
                 setRole('tutor'); // Default to tutor if error
                 setSubscriptionStatus(null);
                 setSubscriptionEndDate(null);
                 setTrialEndsAt(null);
-                return;
             }
-            setRole(data?.role || 'tutor');
-            setSubscriptionStatus(data?.subscription_status || null);
-            setSubscriptionEndDate(data?.subscription_end_date || null);
-            setTrialEndsAt(data?.trial_ends_at || null);
-        } catch (error) {
-            console.error('Error fetching user profile:', error);
-            setRole('tutor'); // Default to tutor if error
-            setSubscriptionStatus(null);
-            setSubscriptionEndDate(null);
-            setTrialEndsAt(null);
         }
     };
 
     const setupProfileRealtime = (userId: string) => {
+        if (subscribedUserIdRef.current === userId && profileChannelRef.current) {
+            return;
+        }
+
         if (profileChannelRef.current) {
             supabase.removeChannel(profileChannelRef.current);
             profileChannelRef.current = null;
         }
+
+        subscribedUserIdRef.current = userId;
 
         const channel = supabase
             .channel(`profile-sync-${userId}`)
@@ -77,6 +102,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 'postgres_changes',
                 { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${userId}` },
                 (payload: any) => {
+                    if (subscribedUserIdRef.current !== userId) {
+                        return;
+                    }
                     const nextStatus = payload?.new?.subscription_status as SubscriptionStatus | undefined;
                     const nextRole = payload?.new?.role as UserRole | undefined;
                     const nextTrialEndsAt = payload?.new?.trial_ends_at as string | undefined;
@@ -163,11 +191,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         // Set a timeout to prevent infinite loading
         const loadingTimeout = setTimeout(() => {
-            if (isMounted && loading) {
+            if (isMounted && isLoadingRef.current) {
                 console.warn('Auth initialization timeout - proceeding anyway');
                 setLoading(false);
             }
-        }, 10000);
+        }, 5000);
+
+        const handleSession = async (currentSession: Session | null) => {
+            if (!isMounted) return;
+
+            setSession(currentSession);
+            setUser(currentSession?.user ?? null);
+
+            if (currentSession?.user) {
+                const userId = currentSession.user.id;
+                // Only run fetch and subscribe if this is a different user session
+                if (fetchedUserIdRef.current !== userId) {
+                    await fetchUserProfile(userId);
+                    setupProfileRealtime(userId);
+                }
+            } else {
+                fetchedUserIdRef.current = null;
+                if (profileChannelRef.current) {
+                    supabase.removeChannel(profileChannelRef.current);
+                    profileChannelRef.current = null;
+                }
+                subscribedUserIdRef.current = null;
+                
+                if (!checkCustomAuth()) {
+                    setRole(null);
+                    setSubscriptionStatus(null);
+                    setTrialEndsAt(null);
+                }
+            }
+
+            setLoading(false);
+        };
 
         const initAuth = async () => {
             // Check custom auth first
@@ -198,16 +257,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         return;
                     }
 
-                    setSession(session);
-                    setUser(session?.user ?? null);
-
-                    if (session?.user) {
-                        // Block initial render until profile is loaded to avoid transient subscription UI flicker.
-                        await fetchUserProfile(session.user.id);
-                        setupProfileRealtime(session.user.id);
-                    }
-
-                    setLoading(false);
+                    await handleSession(session);
                     clearTimeout(loadingTimeout);
                 } catch (error) {
                     if (!isMounted) return;
@@ -225,28 +275,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Listen for changes on auth state (sign in, sign out, etc.)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             if (!isMounted) return;
-
-            setSession(session);
-            setUser(session?.user ?? null);
-
-            if (session?.user) {
-                // Keep subscription state in sync before children render subscription-gated UI.
-                await fetchUserProfile(session.user.id);
-                setupProfileRealtime(session.user.id);
-            } else {
-                if (profileChannelRef.current) {
-                    supabase.removeChannel(profileChannelRef.current);
-                    profileChannelRef.current = null;
-                }
-                // If signed out from Supabase, check if custom auth is active
-                if (!checkCustomAuth()) {
-                    setRole(null);
-                    setSubscriptionStatus(null);
-                    setTrialEndsAt(null);
-                }
-            }
-
-            setLoading(false);
+            await handleSession(session);
         });
 
         // The Supabase JS client automatically handles background token refreshes.
@@ -270,6 +299,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             supabase.removeChannel(profileChannelRef.current);
             profileChannelRef.current = null;
         }
+        fetchedUserIdRef.current = null;
+        subscribedUserIdRef.current = null;
         sessionStorage.removeItem('agent_authenticated');
         sessionStorage.removeItem('agent_role');
         sessionStorage.removeItem('agent_id');

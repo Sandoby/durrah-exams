@@ -80,7 +80,7 @@ export function HeroSection({ registrationUrl }: { registrationUrl: string }) {
             ref={containerRef}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className="relative overflow-hidden bg-white pb-14 pt-12 dark:bg-slate-950 md:pb-20 md:pt-16"
+            className="relative overflow-hidden bg-transparent pb-14 pt-12 md:pb-20 md:pt-16"
         >
             <div className="pointer-events-none absolute inset-0 opacity-60 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_75%_60%_at_50%_55%,#000_68%,transparent_100%)]" />
 

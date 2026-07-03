@@ -22,6 +22,31 @@ const corsHeaders = {
 // SIGNATURE VERIFICATION (Dodo HMAC-SHA256)
 // ─────────────────────────────────────────────────────────────────────────────
 
+function base64ToUint8Array(base64: string): Uint8Array {
+  const bin = atob(base64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) {
+    bytes[i] = bin.charCodeAt(i);
+  }
+  return bytes;
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+function arrayBufferToHex(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 /** Verify Dodo webhook signature: HMAC-SHA256 over "webhookId.webhookTimestamp.rawBody" */
 async function verifyDodoSignature(
   secret: string,
@@ -36,7 +61,7 @@ async function verifyDodoSignature(
   const message = new TextEncoder().encode(signedContent);
 
   // Parse sig header: supports "v1,<sig>" and "v1=<sig>" and plain "<sig>"
-  const tokens = headerSignature.split(/[,\s]+/).map(t => t.trim()).filter(Boolean);
+  const tokens = headerSignature.split(/[,\s]+/).map((t) => t.trim()).filter(Boolean);
   const expectedSigs = new Set<string>();
   for (const token of tokens) {
     if (token.startsWith("v1=") || token.startsWith("v1,")) {
@@ -52,8 +77,8 @@ async function verifyDodoSignature(
   // Try base64-decoded key first (standard Dodo format), then raw bytes
   const candidateKeys: Uint8Array[] = [];
   try {
-    const decoded = Buffer.from(secretClean, "base64");
-    if (decoded.length > 0) candidateKeys.push(new Uint8Array(decoded));
+    const decoded = base64ToUint8Array(secretClean);
+    if (decoded.length > 0) candidateKeys.push(decoded);
   } catch {}
   candidateKeys.push(new TextEncoder().encode(secretClean));
 
@@ -67,8 +92,8 @@ async function verifyDodoSignature(
         ["sign"]
       );
       const sigBytes = await crypto.subtle.sign("HMAC", cryptoKey, message);
-      const sigBase64 = Buffer.from(new Uint8Array(sigBytes)).toString("base64");
-      const sigHex = Buffer.from(new Uint8Array(sigBytes)).toString("hex");
+      const sigBase64 = arrayBufferToBase64(sigBytes);
+      const sigHex = arrayBufferToHex(sigBytes);
 
       for (const expected of expectedSigs) {
         if (sigBase64 === expected || sigHex === expected) return true;

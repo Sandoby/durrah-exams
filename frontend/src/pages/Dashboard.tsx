@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase';
 import { ChatWidget } from '../components/ChatWidget';
 import { ConvexChatWidget } from '../components/ConvexChatWidget';
 import { CardSkeleton } from '../components/skeletons';
+import { LoadingTimeout } from '../components/LoadingTimeout';
 import Joyride, { STATUS } from 'react-joyride';
 import type { Step, CallBackProps } from 'react-joyride';
 import { useDemoTour } from '../hooks/useDemoTour';
@@ -185,18 +186,17 @@ export default function Dashboard() {
             setProfile({ subscription_status: 'active' });
             setIsLoading(false);
             setTimeout(() => setStartDemoTour(true), 1000);
-        } else if (user) {
+        } else if (user?.id) {
             console.log('Dashboard: Initializing for authenticated user...');
-            fetchExams();
-            fetchProfile();
+            loadData();
         }
 
         return () => console.log('Dashboard: Component Unmounted');
-    }, [user]);
+    }, [user?.id]);
 
     // Independent effect for the tour ensuring data is loaded
     useEffect(() => {
-        if (!user || isLoading || isDemo) return;
+        if (!user?.id || isLoading || isDemo) return;
 
         const hasSeenTour = localStorage.getItem(`dashboard_tour_${user?.id}`);
         if (!hasSeenTour) {
@@ -206,7 +206,7 @@ export default function Dashboard() {
                 setRunTour(true);
             }, 2000);
         }
-    }, [user, isLoading, isDemo]);
+    }, [user?.id, isLoading, isDemo]);
 
     const handleTourCallback = (data: CallBackProps) => {
         const { status, type } = data;
@@ -229,30 +229,47 @@ export default function Dashboard() {
     };
 
     const fetchProfile = async () => {
-        try {
-            const { data } = await supabase
-                .from('profiles')
-                .select('subscription_status, subscription_plan, subscription_end_date')
-                .eq('id', user?.id)
-                .single();
-            setProfile(data);
-        } catch (error) {
-            console.error('Error fetching profile:', error);
-        }
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('subscription_status, subscription_plan, subscription_end_date')
+            .eq('id', user?.id)
+            .single();
+        if (error) throw error;
+        setProfile(data);
     };
 
     const fetchExams = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('exams')
-                .select('*')
-                .eq('tutor_id', user?.id)
-                .order('created_at', { ascending: false });
+        const { data, error } = await supabase
+            .from('exams')
+            .select('*')
+            .eq('tutor_id', user?.id)
+            .order('created_at', { ascending: false });
 
-            if (error) throw error;
-            setExams(data || []);
-        } catch (error: any) {
-            toast.error('Failed to fetch exams');
+        if (error) throw error;
+        setExams(data || []);
+    };
+
+    const loadData = async () => {
+        if (!user?.id) return;
+        setIsLoading(true);
+        try {
+            const results = await Promise.allSettled([
+                fetchProfile(),
+                fetchExams()
+            ]);
+
+            const profileResult = results[0];
+            const examsResult = results[1];
+
+            if (profileResult.status === 'rejected') {
+                console.error('Failed to fetch profile:', profileResult.reason);
+            }
+            if (examsResult.status === 'rejected') {
+                console.error('Failed to fetch exams:', examsResult.reason);
+                toast.error('Failed to fetch exams');
+            }
+        } catch (error) {
+            console.error('Unexpected error loading dashboard data:', error);
         } finally {
             setIsLoading(false);
         }
@@ -489,32 +506,34 @@ export default function Dashboard() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pt-24">
-                <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
-                    <div className="max-w-7xl mx-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-800/50">
-                        <div className="flex justify-between h-16 px-6">
-                            <div className="flex items-center gap-3">
-                                <Logo className="h-9 w-9" showText={false} />
-                                <div className="flex flex-col">
-                                    <span className="text-xl font-bold text-gray-900 dark:text-white">Durrah</span>
-                                    <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
+            <LoadingTimeout isLoading={isLoading} onRetry={loadData}>
+                <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pt-24">
+                    <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
+                        <div className="max-w-7xl mx-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-800/50">
+                            <div className="flex justify-between h-16 px-6">
+                                <div className="flex items-center gap-3">
+                                    <Logo className="h-9 w-9" showText={false} />
+                                    <div className="flex flex-col">
+                                        <span className="text-xl font-bold text-gray-900 dark:text-white">Durrah</span>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">for Tutors</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </nav>
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="mb-8 animate-pulse">
-                        <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-4"></div>
-                        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-96"></div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <CardSkeleton />
-                        <CardSkeleton />
-                        <CardSkeleton />
-                    </div>
-                </main>
-            </div>
+                    </nav>
+                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div className="mb-8 animate-pulse">
+                            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-4"></div>
+                            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-96"></div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <CardSkeleton />
+                            <CardSkeleton />
+                            <CardSkeleton />
+                        </div>
+                    </main>
+                </div>
+            </LoadingTimeout>
         );
     }
 

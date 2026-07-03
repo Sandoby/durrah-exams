@@ -11,6 +11,7 @@ import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { Helmet } from 'react-helmet-async';
 import { getAuthErrorKind } from '../lib/authErrors';
+import { LoadingTimeout } from '../components/LoadingTimeout';
 
 export default function StudentPortal() {
   const { t, i18n } = useTranslation();
@@ -40,31 +41,46 @@ export default function StudentPortal() {
     );
   };
 
-  useEffect(() => {
-    if (user) {
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
+
+  const loadInitialData = async () => {
+    if (!user) return;
+    setIsInitialLoading(true);
+    try {
       // Ensure user has student role when logging into student portal
-      const ensureStudentRole = async () => {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
 
-        if (!profile || !profile.role) {
-          await supabase.from('profiles').upsert({
-            id: user.id,
-            role: 'student',
-            full_name: user.user_metadata?.full_name || '',
-            email: user.email
-          });
-        }
-      };
+      if (!profile || !profile.role) {
+        await supabase.from('profiles').upsert({
+          id: user.id,
+          role: 'student',
+          full_name: user.user_metadata?.full_name || '',
+          email: user.email
+        });
+      }
 
-      ensureStudentRole();
-      fetchStudentData();
-      fetchClassrooms();
+      await Promise.allSettled([
+        fetchStudentData(),
+        fetchClassrooms()
+      ]);
+    } catch (error) {
+      console.error('Error loading student portal data:', error);
+    } finally {
+      setIsInitialLoading(false);
     }
-  }, [user]);
+  };
+
+  useEffect(() => {
+    if (user?.id) {
+      loadInitialData();
+    } else {
+      setIsInitialLoading(false);
+    }
+  }, [user?.id]);
 
   const fetchStudentData = async () => {
     if (!user?.email) return;
@@ -562,6 +578,19 @@ export default function StudentPortal() {
           </div>
         </div>
       </div>
+    );
+  }
+
+  if (isInitialLoading) {
+    return (
+      <LoadingTimeout isLoading={isInitialLoading} onRetry={loadInitialData}>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mx-auto" />
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading student dashboard...</p>
+          </div>
+        </div>
+      </LoadingTimeout>
     );
   }
 

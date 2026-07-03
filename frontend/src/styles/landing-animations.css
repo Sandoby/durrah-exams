@@ -1,5 +1,14 @@
-@keyframes twinkle {
+.transition-bg {
+  transition: background-color 0.3s ease;
+}
 
+:root {
+  --white: #ffffff;
+  --transparent: rgba(255, 255, 255, 0);
+  --black: #000000;
+}
+
+@keyframes twinkle {
     0%,
     100% {
         opacity: 0.3;
@@ -125,4 +134,56 @@
 
 .slant {
     transform: skewX(-20deg);
+}
+
+@keyframes glitch {
+    0% { transform: translate(0) }
+    20% { transform: translate(-2px, 2px) }
+    40% { transform: translate(-2px, -2px) }
+    60% { transform: translate(2px, 2px) }
+    80% { transform: translate(2px, -2px) }
+    100% { transform: translate(0) }
+}
+
+.animate-glitch {
+    animation: glitch 0.3s ease-in-out infinite alternate;
+}
+
+.cyber-glow {
+    filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.6))
+            drop-shadow(0 0 20px rgba(0, 240, 255, 0.4));
+}
+
+@keyframes aurora-pulse {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
+.animate-aurora-pulse {
+    animation: aurora-pulse 8s ease-in-out infinite;
+}
+
+/* Cyber Button Glow Wrap */
+.cyber-button-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    z-index: -1;
+    background: linear-gradient(90deg, #00F0FF, #8A2BE2, #00F0FF);
+    background-size: 200% 200%;
+    animation: gradient 3s ease infinite;
+    border-radius: inherit;
+    filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.cyber-button-wrap:hover::before {
+    opacity: 1;
 }

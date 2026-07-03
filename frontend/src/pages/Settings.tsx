@@ -56,7 +56,7 @@ export default function Settings() {
 
     useEffect(() => {
         fetchProfile();
-    }, [user]);
+    }, [user?.id]);
 
     useEffect(() => {
         if (!subscriptionStatus) return;
