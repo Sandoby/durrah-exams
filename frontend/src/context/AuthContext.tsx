@@ -273,9 +273,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         initAuth();
 
         // Listen for changes on auth state (sign in, sign out, etc.)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             if (!isMounted) return;
-            await handleSession(session);
+
+            // Supabase auth callbacks run while internal auth state is being updated.
+            // Defer database work so profile queries cannot block session restoration.
+            setTimeout(() => {
+                if (!isMounted) return;
+                void handleSession(session);
+            }, 0);
         });
 
         // The Supabase JS client automatically handles background token refreshes.

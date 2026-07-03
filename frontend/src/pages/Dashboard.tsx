@@ -38,6 +38,21 @@ interface Exam {
     };
 }
 
+const DASHBOARD_REQUEST_TIMEOUT_MS = 12000;
+
+const withTimeout = <T,>(promise: Promise<T>, label: string): Promise<T> => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+            reject(new Error(`${label} timed out`));
+        }, DASHBOARD_REQUEST_TIMEOUT_MS);
+    });
+
+    return Promise.race([promise, timeout]).finally(() => {
+        if (timeoutId) clearTimeout(timeoutId);
+    });
+};
+
 const getProductionOrigin = () => {
     const origin = window.location.origin;
     // Capcitor/Mobile fix: window.location.origin is often http://localhost
@@ -254,8 +269,8 @@ export default function Dashboard() {
         setIsLoading(true);
         try {
             const results = await Promise.allSettled([
-                fetchProfile(),
-                fetchExams()
+                withTimeout(fetchProfile(), 'Profile request'),
+                withTimeout(fetchExams(), 'Exams request')
             ]);
 
             const profileResult = results[0];

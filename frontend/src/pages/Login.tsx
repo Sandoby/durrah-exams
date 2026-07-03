@@ -105,9 +105,11 @@ export default function Login() {
         // 1) If there's an OAuth code in the URL, wait for onAuthStateChange to fire
         //    once the PKCE exchange completes — this is the fast path.
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
+            (event, session) => {
                 if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
-                    processSession(session);
+                    setTimeout(() => {
+                        void processSession(session);
+                    }, 0);
                 }
             }
         );
