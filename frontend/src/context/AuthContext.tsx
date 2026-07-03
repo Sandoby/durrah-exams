@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { supabase } from '../lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 import toast from 'react-hot-toast';
+import { syncCurrentDodoSubscription } from '../lib/subscriptionSync';
 
 type UserRole = 'admin' | 'agent' | 'tutor' | 'student' | null;
 type SubscriptionStatus = 'active' | 'trialing' | 'on_hold' | 'payment_failed' | 'cancelled' | 'expired' | 'pending' | null;
@@ -31,6 +32,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const profileChannelRef = useRef<any>(null);
     const fetchedUserIdRef = useRef<string | null>(null);
     const subscribedUserIdRef = useRef<string | null>(null);
+    const lastSyncedUserIdRef = useRef<string | null>(null);
     const isLoadingRef = useRef(true);
 
     useEffect(() => {
@@ -210,6 +212,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     await fetchUserProfile(userId);
                     setupProfileRealtime(userId);
                 }
+
+                if (lastSyncedUserIdRef.current !== userId) {
+                    lastSyncedUserIdRef.current = userId;
+                    void syncCurrentDodoSubscription();
+                }
             } else {
                 fetchedUserIdRef.current = null;
                 if (profileChannelRef.current) {
@@ -222,6 +229,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setRole(null);
                     setSubscriptionStatus(null);
                     setTrialEndsAt(null);
+                    lastSyncedUserIdRef.current = null;
                 }
             }
 
@@ -317,6 +325,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSubscriptionEndDate(null);
         setTrialEndsAt(null);
         setUser(null);
+        lastSyncedUserIdRef.current = null;
     };
 
     const isTrialing = subscriptionStatus === 'trialing';

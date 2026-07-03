@@ -93,16 +93,11 @@ Deno.serve(async (req: Request) => {
         const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
         const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
-        let query = `${SUPABASE_URL}/rest/v1/profiles?select=id,email,fcm_token`
+        let query = `${SUPABASE_URL}/rest/v1/profiles?select=id,email,fcm_token,role,subscription_status`
         if (targetUserId === 'tutors_only') {
             query += `&role=eq.tutor`
         } else if (targetUserId === 'students_only') {
             query += `&role=eq.student`
-        } else if (targetUserId === 'subscribed_only') {
-            query += `&subscription_status=eq.active`
-        } else if (targetUserId === 'free_only') {
-            // Get users where status is NOT active (null or something else)
-            query += `&subscription_status=neq.active`
         } else if (targetUserId !== 'all') {
             query += `&id=eq.${targetUserId}`
         }
@@ -117,6 +112,15 @@ Deno.serve(async (req: Request) => {
         const dbData = await dbRes.json()
         const usersWithTokens = (Array.isArray(dbData) ? dbData : [])
             .filter((r: any) => r.fcm_token && String(r.fcm_token).length > 20)
+            .filter((r: any) => {
+                if (targetUserId === 'subscribed_only') {
+                    return r.subscription_status === 'active' || r.subscription_status === 'trialing'
+                }
+                if (targetUserId === 'free_only') {
+                    return !r.subscription_status || (r.subscription_status !== 'active' && r.subscription_status !== 'trialing')
+                }
+                return true
+            })
 
         log(`Devices to process: ${usersWithTokens.length}`)
 

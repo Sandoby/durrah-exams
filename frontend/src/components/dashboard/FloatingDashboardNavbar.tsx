@@ -18,7 +18,7 @@ interface FloatingNavbarProps {
 
 export function FloatingDashboardNavbar({ title, showBack, backPath, actions }: FloatingNavbarProps) {
     const { t } = useTranslation();
-    const { user, signOut, subscriptionStatus, loading } = useAuth();
+    const { user, signOut, subscriptionStatus, subscriptionEndDate, loading } = useAuth();
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const isSubscriptionResolved = !loading;
@@ -72,7 +72,7 @@ export function FloatingDashboardNavbar({ title, showBack, backPath, actions }: 
                             {user?.user_metadata?.full_name || user?.email}
                         </span>
 
-                        {isSubscriptionResolved && !hasActiveAccess(subscriptionStatus) && (
+                        {isSubscriptionResolved && !hasActiveAccess(subscriptionStatus, subscriptionEndDate) && (
                             <Link
                                 to="/checkout"
                                 className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white hover:bg-amber-600 shadow-sm hover:shadow-md transition-all"
@@ -139,7 +139,7 @@ export function FloatingDashboardNavbar({ title, showBack, backPath, actions }: 
                             {t('nav.dashboard', 'Dashboard')}
                         </Link>
 
-                        {isSubscriptionResolved && !hasActiveAccess(subscriptionStatus) && (
+                        {isSubscriptionResolved && !hasActiveAccess(subscriptionStatus, subscriptionEndDate) && (
                             <Link
                                 to="/checkout"
                                 onClick={() => setIsMobileMenuOpen(false)}

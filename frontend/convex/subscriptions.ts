@@ -86,6 +86,36 @@ interface TransitionResult {
   subscriptionId?: Id<"subscriptions">;
 }
 
+async function assertPrivilegedActor(ctx: any) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity?.subject) {
+    return { ok: false as const, error: "Unauthorized" };
+  }
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !supabaseKey) {
+    return { ok: false as const, error: "Config missing" };
+  }
+
+  const res = await fetch(
+    `${supabaseUrl}/rest/v1/profiles?id=eq.${identity.subject}&select=role&limit=1`,
+    { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+  );
+
+  if (!res.ok) {
+    return { ok: false as const, error: "Permission lookup failed" };
+  }
+
+  const profiles = await res.json();
+  const role = profiles?.[0]?.role;
+  if (role !== "admin" && role !== "agent") {
+    return { ok: false as const, error: "Forbidden" };
+  }
+
+  return { ok: true as const, actorId: identity.subject, role };
+}
+
 export async function performTransition(
   db: DatabaseWriter,
   scheduler: { runAfter: (delay: number, fn: any, args: any) => Promise<any> },
@@ -561,6 +591,11 @@ export const adminExtendSubscription = mutation({
     adminId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const auth = await assertPrivilegedActor(ctx);
+    if (!auth.ok) {
+      return { success: false, error: auth.error };
+    }
+
     const sub = await ctx.db
       .query("subscriptions")
       .withIndex("by_user_id", (q) => q.eq("user_id", args.userId))
@@ -586,7 +621,8 @@ export const adminExtendSubscription = mutation({
       metadata: {
         days: args.days,
         reason: args.reason || "Admin extension",
-        admin_id: args.adminId || "admin",
+        admin_id: auth.actorId,
+        admin_role: auth.role,
       },
     });
 
@@ -612,13 +648,19 @@ export const adminDeactivateSubscription = mutation({
     adminId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const auth = await assertPrivilegedActor(ctx);
+    if (!auth.ok) {
+      return { success: false, error: auth.error };
+    }
+
     const result = await performTransition(ctx.db, ctx.scheduler, {
       userId: args.userId,
       newStatus: "cancelled",
       source: "admin_deactivate",
       metadata: {
         reason: args.reason || "Deactivated by admin",
-        admin_id: args.adminId || "admin",
+        admin_id: auth.actorId,
+        admin_role: auth.role,
       },
     });
 

@@ -962,7 +962,7 @@ export default function ExamEditor() {
                                                         className="sr-only peer"
                                                         checked={watch('settings.restrict_by_email')}
                                                         onChange={(e) => {
-                                                            if (!hasActiveAccess(profile?.subscription_status) && e.target.checked) {
+                                                            if (!hasActiveAccess(profile?.subscription_status, profile?.subscription_end_date) && e.target.checked) {
                                                                 toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
                                                                 navigate('/checkout');
                                                                 return;
@@ -976,7 +976,7 @@ export default function ExamEditor() {
                                                     />
                                                     <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
                                                 </label>
-                                                {!hasActiveAccess(profile?.subscription_status) && (
+                                                {!hasActiveAccess(profile?.subscription_status, profile?.subscription_end_date) && (
                                                     <div className="absolute -top-1 -right-1">
                                                         <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
                                                             <Crown className="w-2.5 h-2.5" />
@@ -1072,7 +1072,7 @@ export default function ExamEditor() {
                                                     { id: 'copy_paste_prohibited', icon: ClipboardX, label: 'Anti-Cheat Mode', desc: 'No Copy/Paste/Right Click', field: 'settings.disable_copy_paste', isPremium: true }
                                                 ].map((item) => (
                                                     <label key={item.id} className="relative flex flex-col p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/50 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-pointer group/item shadow-sm hover:shadow-md">
-                                                        {item.isPremium && !hasActiveAccess(profile?.subscription_status) && (
+                                                        {item.isPremium && !hasActiveAccess(profile?.subscription_status, profile?.subscription_end_date) && (
                                                             <div className="absolute top-3 right-3 z-10">
                                                                 <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
                                                                     <Crown className="w-2.5 h-2.5" />
@@ -1091,7 +1091,7 @@ export default function ExamEditor() {
                                                                     className="sr-only peer"
                                                                     {...register(item.field as any)}
                                                                     onChange={(e) => {
-                                                                        if (item.isPremium && !hasActiveAccess(profile?.subscription_status) && e.target.checked) {
+                                                                        if (item.isPremium && !hasActiveAccess(profile?.subscription_status, profile?.subscription_end_date) && e.target.checked) {
                                                                             e.preventDefault();
                                                                             toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
                                                                             navigate('/checkout');
@@ -1137,7 +1137,7 @@ export default function ExamEditor() {
                                                     <span className="ml-3 text-sm font-bold text-slate-700 dark:text-slate-300">{t('examEditor.settings.showResults')}</span>
                                                 </label>
                                                 <label className="relative flex items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700 cursor-pointer transition-all">
-                                                    {!hasActiveAccess(profile?.subscription_status) && (
+                                                    {!hasActiveAccess(profile?.subscription_status, profile?.subscription_end_date) && (
                                                         <div className="absolute -top-2 -right-2 z-10">
                                                             <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
                                                                 <Crown className="w-2.5 h-2.5" />
@@ -1151,7 +1151,7 @@ export default function ExamEditor() {
                                                             className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded mt-0.5 flex-shrink-0"
                                                             {...register('settings.show_detailed_results')}
                                                             onChange={(e) => {
-                                                                if (!hasActiveAccess(profile?.subscription_status) && e.target.checked) {
+                                                                if (!hasActiveAccess(profile?.subscription_status, profile?.subscription_end_date) && e.target.checked) {
                                                                     e.preventDefault();
                                                                     toast.error(t('dashboard.upgradeLimit', 'Upgrade to unlock this premium feature!'));
                                                                     navigate('/checkout');

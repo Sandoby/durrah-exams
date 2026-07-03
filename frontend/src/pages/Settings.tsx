@@ -414,7 +414,7 @@ export default function Settings() {
                             </div>
 
                             <div className="flex justify-end pt-6 border-t border-gray-50 dark:border-gray-800">
-                                {!hasActiveAccess(subscriptionStatus) && (
+                                {!hasActiveAccess(subscriptionStatus, subscriptionEndDate) && (
                                     <Link
                                         to="/checkout"
                                         className="flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg font-bold text-sm shadow-sm mr-4"
@@ -532,7 +532,7 @@ export default function Settings() {
                                             Subscribe Now
                                         </Link>
                                     </div>
-                                ) : hasActiveAccess(profile.subscription_status) ? (
+                                ) : hasActiveAccess(profile.subscription_status, profile.subscription_end_date) ? (
                                     <div className="w-full space-y-4">
                                         <div className="p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
                                             <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">{t('settings.subscription.plan', 'Current Plan')}</p>
@@ -550,7 +550,7 @@ export default function Settings() {
                                             </p>
                                         </div>
 
-                                        {hasActiveAccess(profile.subscription_status) && profile.subscription_status !== 'trialing' && (
+                                        {hasActiveAccess(profile.subscription_status, profile.subscription_end_date) && profile.subscription_status !== 'trialing' && (
                                             <button
                                                 onClick={openDodoPortal}
                                                 disabled={isOpeningPortal}

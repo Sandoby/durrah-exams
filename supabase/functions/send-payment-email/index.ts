@@ -11,6 +11,44 @@ const corsHeaders = {
 
 type PaymentEmailType = 'payment_success' | 'payment_failed' | 'subscription_expiring' | 'subscription_renewed'
 
+async function logEmailSend(args: {
+  userId?: string
+  emailType: PaymentEmailType
+  recipientEmail: string
+  status: 'sent' | 'failed'
+  metadata?: Record<string, unknown>
+}) {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+  const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+  if (!supabaseUrl || !supabaseServiceRoleKey) return
+
+  const payload: Record<string, unknown> = {
+    email_type: args.emailType,
+    recipient_email: args.recipientEmail,
+    status: args.status,
+    metadata: {
+      ...args.metadata,
+      provider: 'resend',
+      observed_at: new Date().toISOString(),
+    },
+  }
+
+  if (args.userId) {
+    payload.user_id = args.userId
+  }
+
+  await fetch(`${supabaseUrl}/rest/v1/email_logs`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: supabaseServiceRoleKey,
+      Authorization: `Bearer ${supabaseServiceRoleKey}`,
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(payload),
+  })
+}
+
 const createPaymentTemplate = (type: PaymentEmailType, data: Record<string, unknown>) => {
   switch (type) {
     case 'payment_success': {
@@ -132,16 +170,20 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  let requestBody: { type?: string; email?: string; data?: Record<string, unknown>; userId?: string } | null = null
+
   try {
-    const { type, email, data } = await req.json()
-    const emailType = type as PaymentEmailType
-    const payload = (data || {}) as Record<string, unknown>
+    requestBody = await req.json()
+    const emailType = requestBody.type as PaymentEmailType
+    const recipientEmail = requestBody.email
+    const senderUserId = requestBody.userId
+    const payload = (requestBody.data || {}) as Record<string, unknown>
 
     if (!RESEND_API_KEY) {
       throw new Error('RESEND_API_KEY is not configured')
     }
 
-    if (!email) {
+    if (!recipientEmail) {
       throw new Error('email is required')
     }
 
@@ -159,7 +201,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: FROM_DEFAULT,
-        to: [email],
+        to: [recipientEmail],
         subject: emailMessage.subject,
         html: emailMessage.html,
       }),
@@ -174,9 +216,25 @@ serve(async (req) => {
     }
 
     const errorText = await res.text()
+    await logEmailSend({
+        userId: senderUserId,
+      emailType,
+        recipientEmail,
+      status: 'failed',
+      metadata: { error: errorText },
+    })
     throw new Error(errorText)
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
+    if (requestBody?.type && requestBody?.email) {
+      await logEmailSend({
+        userId: requestBody.userId,
+        emailType: requestBody.type as PaymentEmailType,
+        recipientEmail: requestBody.email,
+        status: 'failed',
+        metadata: { error: message },
+      })
+    }
     return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,

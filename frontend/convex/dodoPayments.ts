@@ -223,7 +223,7 @@ export const updateSubscription = internalAction({
     // ── Call Convex state machine ────────────────────────────────
     const endDateMs = args.endDate ? new Date(args.endDate).getTime() : undefined;
 
-    const result = await ctx.runMutation(internal.subscriptions.transition, {
+    const transitionResult = await ctx.runMutation(internal.subscriptions.transition, {
       userId,
       newStatus: args.status,
       endDate: endDateMs,
@@ -236,8 +236,8 @@ export const updateSubscription = internalAction({
       email: args.userEmail,
     });
 
-    if (!result.success) {
-      return { success: false, error: result.error, userId };
+    if (!transitionResult.success) {
+      return { success: false, error: transitionResult.error, userId };
     }
 
     console.log(`[updateSubscription] ✓ ${args.status} for user ${userId} (${args.eventType})`);
@@ -265,7 +265,23 @@ export const updateSubscription = internalAction({
         "error");
     }
 
-    return { success: true, userId };
+    if (
+      args.status === "active" &&
+      ["subscription.active", "payment.succeeded", "direct_verify"].includes(args.eventType || "") &&
+      args.userEmail
+    ) {
+      await sendEmail(supabaseUrl, supabaseKey, args.userEmail,
+        "payment_success",
+        {
+          userName: args.userEmail.split("@")[0],
+          planName: args.plan || "Professional",
+          billingCycle: args.billingCycle || "monthly",
+          nextBillingDate: args.endDate ? new Date(args.endDate).toISOString() : undefined,
+        }
+      );
+    }
+
+    return { success: true, userId, subscriptionId: transitionResult.subscriptionId };
   },
 });
 
@@ -316,7 +332,7 @@ export const createCheckout = internalAction({
     country:      v.optional(v.string()),
     couponCode:   v.optional(v.string()),
   },
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
     const apiKey = process.env.DODO_PAYMENTS_API_KEY;
     if (!apiKey) throw new Error("DODO_PAYMENTS_API_KEY not configured");
     const supabaseUrl = process.env.SUPABASE_URL;
@@ -372,6 +388,21 @@ export const createCheckout = internalAction({
           body: JSON.stringify({ dodo_customer_id: checkoutCustomerId }),
         });
       } catch {}
+    }
+
+    const checkoutSessionId = data?.session_id || data?.checkout_session_id || data?.id || data?.subscription_id;
+    if (checkoutSessionId) {
+      try {
+        await ctx.runMutation(internal.checkoutSessions.store, {
+          sessionId: String(checkoutSessionId),
+          userId: args.userId,
+          email: args.userEmail,
+          billingCycle: args.billingCycle,
+          planId: "professional",
+        });
+      } catch (error) {
+        console.warn("[createCheckout] Failed to store checkout session", error);
+      }
     }
 
     // Dodo returns payment_link for subscription checkout
@@ -462,20 +493,28 @@ export const verifyPayment = internalAction({
       if (!userId && dodoCustomerId) userId = await resolveByCustomerId(ctx, supabaseUrl, supabaseKey, dodoCustomerId);
       if (!userId) return { success: false, error: "Could not identify user" };
 
-      const endDateMs = nextBillingDate ? new Date(nextBillingDate).getTime() : undefined;
-
-      const result = await ctx.runMutation(internal.subscriptions.transition, {
+      const result = await ctx.runAction(internal.dodoPayments.updateSubscription, {
         userId,
-        newStatus: "active",
-        endDate: endDateMs,
+        userEmail: userEmail || undefined,
+        status: "active",
         plan: "Professional",
         billingCycle,
         dodoCustomerId,
         dodoSubscriptionId,
-        source: "direct_verify",
-        metadata: { orderId: args.orderId },
-        email: userEmail || undefined,
+        endDate: nextBillingDate,
+        eventType: "direct_verify",
       });
+
+      if (result?.success && result?.userId) {
+        const resolvedUserId = String(result.userId || userId || "");
+        const subscriptionId = String(result?.subscriptionId || dodoSubscriptionId || args.orderId);
+        if (resolvedUserId && subscriptionId) {
+          await ctx.runMutation(internal.checkoutSessions.markConverted, {
+            userId: resolvedUserId,
+            subscriptionId,
+          });
+        }
+      }
 
       return { ...result, userId, providerStatus };
     } catch (error: any) {
@@ -527,8 +566,41 @@ export const syncSubscriptionFromProvider = internalAction({
           }
         }
       }
-      // Skip sync for trialing users — trials are managed by cron only
       if (currentStatus === "trialing") {
+        if (convexSub) {
+          return { success: true, skipped: true, reason: "trialing_user" };
+        }
+
+        const readHeaders = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` };
+        const profileRes = await fetch(
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${args.userId}&select=subscription_status,subscription_plan,subscription_end_date,billing_cycle,dodo_customer_id,dodo_subscription_id,trial_ends_at,trial_grace_ends_at,trial_activated&limit=1`,
+          { headers: readHeaders }
+        );
+
+        if (profileRes.ok) {
+          const profiles = await profileRes.json();
+          const profile = profiles?.[0];
+          if (profile?.subscription_status === "trialing") {
+            await ctx.runMutation(internal.subscriptions.transition, {
+              userId: args.userId,
+              newStatus: "trialing",
+              endDate: profile.subscription_end_date ? new Date(profile.subscription_end_date).getTime() : profile.trial_ends_at ? new Date(profile.trial_ends_at).getTime() : undefined,
+              plan: profile.subscription_plan || "Professional",
+              billingCycle: profile.billing_cycle,
+              dodoCustomerId: profile.dodo_customer_id,
+              dodoSubscriptionId: profile.dodo_subscription_id,
+              source: "login_sync",
+              metadata: { reason: "trial_reconciliation" },
+              email: args.userEmail,
+              trialEndsAt: profile.trial_ends_at ? new Date(profile.trial_ends_at).getTime() : undefined,
+              trialGraceEndsAt: profile.trial_grace_ends_at ? new Date(profile.trial_grace_ends_at).getTime() : undefined,
+              trialActivated: profile.trial_activated ?? true,
+            });
+
+            return { success: true, syncedTrial: true };
+          }
+        }
+
         return { success: true, skipped: true, reason: "trialing_user" };
       }
 

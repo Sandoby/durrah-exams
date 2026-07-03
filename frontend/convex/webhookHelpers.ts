@@ -20,11 +20,8 @@ export const isWebhookProcessed = internalQuery({
 
     if (!existing) return { processed: false };
 
-    const hourAgo = Date.now() - (60 * 60 * 1000);
-    const isRecent = existing.processed_at > hourAgo;
-
     return {
-      processed: isRecent,
+      processed: true,
       event: existing,
     };
   },

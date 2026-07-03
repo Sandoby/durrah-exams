@@ -14,6 +14,7 @@ import { Browser } from '@capacitor/browser';
 import { StudentAccountModal } from '../components/StudentAccountModal';
 import { useAuth } from '../context/AuthContext';
 import { getAuthErrorKind } from '../lib/authErrors';
+import { syncCurrentDodoSubscription } from '../lib/subscriptionSync';
 
 const loginSchema = z.object({
     email: z.string().email('auth.validation.email'),
@@ -77,6 +78,7 @@ export default function Login() {
                         });
                         if (trialResult?.success) {
                             console.log('✅ Trial activated for new OAuth user');
+                            void syncCurrentDodoSubscription();
                         }
                     } catch (trialError) {
                         console.warn('Trial activation failed:', trialError);

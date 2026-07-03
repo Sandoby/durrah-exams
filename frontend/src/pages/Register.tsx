@@ -14,6 +14,7 @@ import { StudentAccountModal } from '../components/StudentAccountModal';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../context/AuthContext';
 import { getAuthErrorKind } from '../lib/authErrors';
+import { syncCurrentDodoSubscription } from '../lib/subscriptionSync';
 
 // Common country codes with flags
 const COUNTRY_CODES = [
@@ -297,6 +298,7 @@ export default function Register() {
                     });
                     if (trialResult?.success) {
                         console.log('✅ Trial activated for new user');
+                        void syncCurrentDodoSubscription();
                     } else {
                         console.log('ℹ️ Trial not activated:', trialResult?.error || trialError?.message);
                     }

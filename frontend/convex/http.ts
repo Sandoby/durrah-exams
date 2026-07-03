@@ -141,7 +141,12 @@ http.route({
     const rawBody = await request.text();
 
     // ── 1. Verify signature ────────────────────────────────────
-    if (secret) {
+    if (!secret) {
+      console.error("[Webhook] DODO_WEBHOOK_SECRET is not configured");
+      if (process.env.NODE_ENV === "production") {
+        return new Response(JSON.stringify({ error: "Webhook secret missing" }), { status: 500 });
+      }
+    } else {
       const valid = await verifyDodoSignature(secret, webhookId, webhookTimestamp, rawBody, signature);
       if (!valid) {
         console.error("[Webhook] Invalid signature", { webhookId });
@@ -223,6 +228,13 @@ http.route({
           }
         }
 
+        if (resolvedUserId && subscriptionId) {
+          await ctx.runMutation(internal.checkoutSessions.markConverted, {
+            userId: resolvedUserId,
+            subscriptionId: String(subscriptionId),
+          });
+        }
+
       } else if (eventType === "subscription.renewed") {
         // Renewal — extend end date + record payment + send email
         const result = await ctx.runAction(internal.dodoPayments.updateSubscription, {
@@ -292,7 +304,7 @@ http.route({
         const result = await ctx.runAction(internal.dodoPayments.updateSubscription, {
           userId,
           userEmail: customerEmail,
-          status: effectiveStatus,
+          status: effectiveStatus === "active" ? "active" : "expired",
           dodoCustomerId: customerId,
           dodoSubscriptionId: subscriptionId,
           endDate: nextBillingDate,
@@ -300,6 +312,13 @@ http.route({
           eventType,
         });
         if (result?.userId) resolvedUserId = result.userId as string;
+
+        if (resolvedUserId && subscriptionId) {
+          await ctx.runMutation(internal.checkoutSessions.markConverted, {
+            userId: resolvedUserId,
+            subscriptionId: String(subscriptionId),
+          });
+        }
 
       } else if (
         eventType === "subscription.on_hold" ||
@@ -330,6 +349,12 @@ http.route({
               reason: data?.decline_reason || data?.failure_reason || "Payment declined",
               isOnHold: mappedStatus === "on_hold",
             },
+          });
+        }
+
+        if (resolvedUserId) {
+          await ctx.runMutation(internal.checkoutSessions.markFailed, {
+            userId: resolvedUserId,
           });
         }
 
@@ -366,7 +391,7 @@ http.route({
         const result = await ctx.runAction(internal.dodoPayments.updateSubscription, {
           userId,
           userEmail: customerEmail,
-          status: "cancelled",
+          status: "expired",
           dodoCustomerId: customerId,
           dodoSubscriptionId: subscriptionId,
           eventType,

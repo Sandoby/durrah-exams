@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Loader2, Check, X, AlertCircle, ArrowLeft, Calendar, CreditCard, Mail, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Loader2, Check, X, AlertCircle, ArrowLeft, Calendar, CreditCard, Mail, ExternalLink, ShieldCheck, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
@@ -10,9 +10,10 @@ export default function PaymentCallback() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'cancelled'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'cancelled' | 'pending'>('loading');
   const [message, setMessage] = useState('Processing your payment...');
   const [orderDetails, setOrderDetails] = useState<any>(null);
+  const [retryAttempt, setRetryAttempt] = useState(0);
 
   useEffect(() => {
     const processPayment = async () => {
@@ -112,7 +113,7 @@ export default function PaymentCallback() {
 
         // 3. Webhook still hasn't arrived after 20s
         console.log('Webhook taking longer than expected');
-        setStatus('loading');
+        setStatus('pending');
         setMessage('Your payment was received but activation is taking longer than expected. Please check your dashboard or contact support if the issue persists.');
       } catch (error) {
         console.error('Callback error:', error);
@@ -122,7 +123,7 @@ export default function PaymentCallback() {
     };
 
     processPayment();
-  }, [searchParams, navigate, t]);
+  }, [searchParams, navigate, t, retryAttempt]);
 
   const contactSupportEmail = "support@durrahtutors.com";
 
@@ -235,6 +236,49 @@ export default function PaymentCallback() {
                   >
                     <ArrowLeft className="h-5 w-5" />
                     Back to Selection
+                  </button>
+
+                  <a
+                    href={`mailto:${contactSupportEmail}`}
+                    className="flex items-center justify-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 pt-4"
+                  >
+                    <Mail className="h-4 w-4" />
+                    Contact Support
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {status === 'pending' && (
+              <div className="text-center">
+                <div className="relative h-24 w-24 mx-auto mb-8">
+                  <div className="absolute inset-0 bg-amber-400/20 rounded-full animate-pulse"></div>
+                  <div className="relative h-24 w-24 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/30">
+                    <AlertCircle className="h-12 w-12 text-white" strokeWidth={3} />
+                  </div>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Activation Still Processing</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-10 leading-relaxed">{message}</p>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={() => navigate('/dashboard', { replace: true })}
+                    className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-bold hover:bg-gray-800 transition-all flex items-center justify-center gap-2"
+                  >
+                    <ExternalLink className="h-5 w-5" />
+                    Go to Dashboard
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setStatus('loading');
+                      setMessage('Retrying subscription verification...');
+                      setRetryAttempt((value) => value + 1);
+                    }}
+                    className="w-full py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-2xl font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+                  >
+                    <RefreshCw className="h-5 w-5" />
+                    Retry Verification
                   </button>
 
                   <a

@@ -82,7 +82,7 @@ const VIOLATION_LABELS: Record<string, string> = {
 
 export function ProctorDashboard({ examId: propExamId, examTitle: propExamTitle }: ProctorDashboardProps) {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, subscriptionStatus, subscriptionEndDate } = useAuth();
   const navigate = useNavigate();
   const { examId: paramExamId } = useParams();
 
@@ -91,13 +91,12 @@ export function ProctorDashboard({ examId: propExamId, examTitle: propExamTitle 
   const isFullPage = !propExamId && !!paramExamId;
 
   const { sessions, stats, alerts, isLoading, enabled } = useProctorDashboard(examId);
-  const { subscriptionStatus } = useAuth();
 
   useEffect(() => {
-    if (!hasActiveAccess(subscriptionStatus)) {
+    if (!hasActiveAccess(subscriptionStatus, subscriptionEndDate)) {
       navigate('/checkout');
     }
-  }, [subscriptionStatus, navigate]);
+  }, [subscriptionStatus, subscriptionEndDate, navigate]);
 
   const [examTitle, setExamTitle] = useState(propExamTitle || '');
   const [searchQuery, setSearchQuery] = useState('');

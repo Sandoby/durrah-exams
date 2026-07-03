@@ -212,7 +212,7 @@ export default function QuestionBank() {
             toast(t('questionBank.demo.save', 'Demo mode: Sign up to save your own question banks'));
             return;
         }
-        if (!hasActiveAccess(profile?.subscription_status) && banks.length >= 1) {
+        if (!hasActiveAccess(profile?.subscription_status, profile?.subscription_end_date) && banks.length >= 1) {
             toast.error(t('dashboard.upgradeLimit', 'Upgrade to create more question banks!'));
             navigate('/checkout');
             return;

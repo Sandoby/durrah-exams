@@ -31,7 +31,10 @@ export function PremiumFeatureModal({ isOpen, onClose, feature }: PremiumFeature
                 const { data: eligible } = await supabase.rpc('check_trial_eligibility', {
                     p_user_id: user.id
                 });
-                setIsTrialEligible(!!eligible);
+                const isEligible = typeof eligible === 'boolean'
+                    ? eligible
+                    : !!(eligible && typeof eligible === 'object' && 'eligible' in eligible && (eligible as { eligible?: unknown }).eligible);
+                setIsTrialEligible(isEligible);
             } catch (error) {
                 console.error('Trial eligibility check failed:', error);
                 setIsTrialEligible(false);
