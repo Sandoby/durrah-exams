@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { CheckCircle, Copy, LogOut, Rocket, Shield, Target, TrendingUp, Megaphone } from 'lucide-react';
+import { Seo } from '../components/Seo';
 
 interface SalesAgent {
   id: string;
@@ -215,6 +216,11 @@ export default function SalesPage() {
   if (!salesAgent) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-amber-50 flex items-center justify-center px-4">
+        <Seo
+          title="Sales Access | Durrah"
+          description="Authentication required to view Sales agent tools and statistics."
+          noIndex={true}
+        />
         <div className="max-w-md w-full bg-white shadow-2xl rounded-2xl p-8 space-y-6 border border-indigo-100">
           <div className="flex items-center gap-3">
             <Rocket className="w-6 h-6 text-indigo-600" />
@@ -251,6 +257,11 @@ export default function SalesPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <Seo
+        title="Sales Partner Workspace | Durrah"
+        description="View your leads, conversion stats, scripts, and promotional tools."
+        noIndex={true}
+      />
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center">
         <div>
           <p className="text-xs uppercase text-slate-500 font-semibold">Sales Workspace</p>

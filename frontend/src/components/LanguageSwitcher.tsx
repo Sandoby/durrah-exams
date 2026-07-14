@@ -34,6 +34,9 @@ export function LanguageSwitcher() {
         };
     }, [dropdownRef]);
 
+    const currentLangCode = i18n.language.split('-')[0];
+    const displayLangCode = ['en', 'ar', 'fr', 'es'].includes(currentLangCode) ? currentLangCode : 'en';
+
     return (
         <div className="relative z-[100]" ref={dropdownRef} style={{ pointerEvents: 'auto' }}>
             <button
@@ -46,7 +49,7 @@ export function LanguageSwitcher() {
                 style={{ pointerEvents: 'auto', zIndex: 101 }}
             >
                 <Globe className="h-5 w-5" />
-                <span className="uppercase">{i18n.language.split('-')[0]}</span>
+                <span className="uppercase">{displayLangCode}</span>
                 <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 

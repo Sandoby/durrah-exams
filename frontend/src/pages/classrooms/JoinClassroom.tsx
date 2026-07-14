@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../../components/Seo';
 import { ArrowLeft, CheckCircle, Loader2, AlertCircle, Users } from 'lucide-react';
 import { useInviteCode } from '../../hooks/useInviteCode';
 import { Logo } from '../../components/Logo';
@@ -91,9 +91,11 @@ export default function JoinClassroom() {
 
   return (
     <>
-      <Helmet>
-        <title>{t('classrooms.join', 'Join Classroom')} | Durrah Tutors</title>
-      </Helmet>
+      <Seo
+        title={`${t('classrooms.join', 'Join Classroom')} | Durrah`}
+        description="Enter an invite code to join a classroom."
+        noIndex={true}
+      />
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         {/* Header */}

@@ -1,7 +1,7 @@
-﻿import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../components/Seo';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Ticket, Rocket, Trophy, Orbit, Zap, Cpu, Sparkles, ArrowLeft } from 'lucide-react';
@@ -256,9 +256,10 @@ export default function KidsLanding() {
 
   return (
     <div dir={i18n.language === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen bg-[#050616] overflow-hidden relative font-sans">
-      <Helmet>
-        <title>{t('kidsLanding.seo.title', 'Quiz Space Adventure | Durrah')}</title>
-      </Helmet>
+      <Seo
+        title={t('kidsLanding.seo.title', 'Interactive Online Quizzes for Kids – Fun Learning | Durrah')}
+        description="Launch into space learning with Durrah! An interactive, fun, gamified online quiz terminal designed specifically for kids."
+      />
 
       {/* Mobile Back Button - Bottom positioned for Kids page */}
       {Capacitor.isNativePlatform() && (

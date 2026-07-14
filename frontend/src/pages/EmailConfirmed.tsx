@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Seo } from '../components/Seo';
 
 export default function EmailConfirmed() {
     const navigate = useNavigate();
@@ -29,6 +30,11 @@ export default function EmailConfirmed() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-gray-900 dark:to-indigo-950 flex items-center justify-center p-4">
+            <Seo
+                title="Email Confirmed | Durrah"
+                description="Your email address has been successfully verified."
+                noIndex={true}
+            />
             <div className="max-w-md w-full">
                 <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-8 text-center">
                     {status === 'loading' && (

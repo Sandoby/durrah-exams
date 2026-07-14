@@ -7,6 +7,7 @@ import { Lock, Loader2, AlertCircle, Home, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Logo } from '../components/Logo';
 import { useTranslation } from 'react-i18next';
+import { Seo } from '../components/Seo';
 
 const updatePasswordSchema = z.object({
     password: z.string().min(6, 'auth.validation.passwordMin'),
@@ -115,6 +116,11 @@ export default function UpdatePassword() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-gray-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+            <Seo
+                title="Update Password | Durrah for Tutors"
+                description="Set a new secure password for your Durrah account."
+                noIndex={true}
+            />
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="flex justify-center">
                     <Logo size="lg" />

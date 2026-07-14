@@ -9,7 +9,7 @@ import { LogOut, BookOpen, Clock, Trophy, Search, User, ArrowRight, History, Arr
 import toast from 'react-hot-toast';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../components/Seo';
 import { getAuthErrorKind } from '../lib/authErrors';
 import { LoadingTimeout } from '../components/LoadingTimeout';
 
@@ -366,18 +366,11 @@ export default function StudentPortal() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-gray-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
-        <Helmet>
-          <title>{t('studentPortal.seo.title', 'Student Portal - Take Your Exams | Durrah')}</title>
-          <meta name="description" content={t('studentPortal.seo.description', 'Access your exams on Durrah. Log in or register to join exams using a code, view your results, and track your progress in a secure environment.')} />
-          <meta name="robots" content="index, follow" />
-          <link rel="canonical" href="https://durrahtutors.com/student-portal" />
-
-          {/* Open Graph */}
-          <meta property="og:title" content={t('studentPortal.seo.title')} />
-          <meta property="og:description" content={t('studentPortal.seo.description')} />
-          <meta property="og:url" content="https://durrahtutors.com/student-portal" />
-          <meta property="og:type" content="website" />
-        </Helmet>
+        <Seo
+          title={t('studentPortal.seo.title', 'Student Portal - Take Your Exams | Durrah')}
+          description={t('studentPortal.seo.description', 'Access your exams on Durrah. Log in or register to join exams using a code, view your results, and track your progress in a secure environment.')}
+          noIndex={false}
+        />
         {/* Mobile Back Button */}
         {Capacitor.isNativePlatform() && (
           <button
@@ -596,12 +589,11 @@ export default function StudentPortal() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24">
-      <Helmet>
-        <title>{t('studentPortal.seo.titleLogged', 'Student Dashboard - My Exams | Durrah')}</title>
-        <meta name="description" content={t('studentPortal.seo.descriptionLogged', 'View your exam history, check your performance stats, and join new assessments in the Durrah student dashboard.')} />
-        <meta name="robots" content="noindex, nofollow" />
-        <link rel="canonical" href="https://durrahtutors.com/student-portal" />
-      </Helmet>
+      <Seo
+        title={t('studentPortal.seo.titleLogged', 'Student Dashboard - My Exams | Durrah')}
+        description={t('studentPortal.seo.descriptionLogged', 'View your exam history, check your performance stats, and join new assessments in the Durrah student dashboard.')}
+        noIndex={true}
+      />
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
         <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">

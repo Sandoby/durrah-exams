@@ -11,10 +11,11 @@ import { useTranslation } from 'react-i18next';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { StudentAccountModal } from '../components/StudentAccountModal';
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../components/Seo';
 import { useAuth } from '../context/AuthContext';
 import { getAuthErrorKind } from '../lib/authErrors';
 import { syncCurrentDodoSubscription } from '../lib/subscriptionSync';
+import { trackSignup } from '../lib/analytics';
 
 // Common country codes with flags
 const COUNTRY_CODES = [
@@ -154,6 +155,9 @@ export default function Register() {
 
                 // If no profile, or if they specifically came from the tutor register page/flow, ensure they are a tutor
                 if (!profile || (profile.role === 'student' && isTutorRequested)) {
+                    // Track signup event (OAuth)
+                    void trackSignup(session.user.email);
+
                     await supabase.from('profiles').upsert({
                         id: session.user.id,
                         role: 'tutor',
@@ -330,6 +334,9 @@ export default function Register() {
                 }
             }
 
+            // Track signup event (Email form)
+            void trackSignup(data.email);
+
             // Check if email needs verification
             if (authData.user && !authData.user.email_confirmed_at) {
                 navigate('/verify-email', { state: { email: data.email } });
@@ -364,9 +371,10 @@ export default function Register() {
 
     return (
         <div className="min-h-screen flex bg-white dark:bg-gray-950 font-sans selection:bg-indigo-100 dark:selection:bg-indigo-900">
-            <Helmet>
-                <title>{t('auth.register.title')} - Durrah</title>
-            </Helmet>
+            <Seo
+                title={t('auth.register.seo.title', 'Sign Up Free – Create Online Exams in Minutes | Durrah')}
+                description="Sign up for a free Durrah account and start creating professional, auto-graded online exams for your students today. No credit card required."
+            />
 
             {/* Left Side - Visual (Hidden on Mobile) */}
             <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-indigo-50 flex-col justify-between rounded-r-[3rem] mr-4 my-4">

@@ -1,12 +1,17 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { Seo } from '../components/Seo';
 
 export default function RefundPolicy() {
     const navigate = useNavigate();
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            <Seo
+                title="Refund Policy & Guarantee | Durrah for Tutors"
+                description="Understand the refund policy, subscription trials, and guarantee terms for Durrah online exam platform services."
+            />
             {/* Header */}
             <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">

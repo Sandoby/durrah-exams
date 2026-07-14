@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, type ComponentType } from 'react';
+import { Seo } from '../components/Seo';
 import { useNavigate } from 'react-router-dom';
 import {
     Users, MessageCircle, Tag, Lock, LogOut,
@@ -797,6 +798,11 @@ export default function AdminPanel() {
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-6">
+                <Seo
+                    title="Admin Access | Durrah"
+                    description="Authentication required to view Admin resources."
+                    noIndex={true}
+                />
                 <div className="w-full max-w-md bg-white dark:bg-gray-900 p-8 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
                     <div className="flex justify-center mb-8">
                         <Logo />
@@ -863,6 +869,11 @@ export default function AdminPanel() {
 
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
+            <Seo
+                title="Admin Dashboard | Durrah"
+                description="Manage users, analytics, and platform databases."
+                noIndex={true}
+            />
             {/* Mobile Header */}
             <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 z-40">
                 <div className="flex items-center gap-2">

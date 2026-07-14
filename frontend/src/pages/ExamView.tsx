@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { Calculator } from '../components/Calculator';
 import Latex from 'react-latex-next';
+import { Seo } from '../components/Seo';
 import { useConvexProctoring } from '../hooks/useConvexProctoring';
 import { useExamProgress } from '../hooks/useExamProgress';
 import {
@@ -2317,6 +2318,11 @@ export default function ExamView() {
 
     return (
         <div ref={containerRef} className={`min-h-screen p-3 sm:p-6 bg-gray-50 dark:bg-gray-900 ${dyslexiaFont ? 'dyslexia-font' : ''}`}>
+            <Seo
+                title={`${exam?.title || "Exam Session"} | Durrah`}
+                description="Secure student examination proctoring terminal."
+                noIndex={true}
+            />
             {/* Screen Reader Announcer */}
             <announce.Announcer />
 

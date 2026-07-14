@@ -5,6 +5,8 @@ import 'driver.js/dist/driver.css';
 import '../styles/driver-theme.css';
 import { Play, RotateCcw, ArrowRight, CheckCircle, Plus, Share2, BarChart3, BookOpen, Users, Shield, Zap, MousePointerClick } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { trackLead } from '../lib/analytics';
+import { Seo } from '../components/Seo';
 
 export default function DemoPage() {
     const { t } = useTranslation();
@@ -64,11 +66,20 @@ export default function DemoPage() {
 
     const startScenario = (scenario: typeof scenarios[0]) => {
         setCompletedSteps(prev => new Set([...prev, scenario.id]));
+        try {
+            trackLead(scenario.id);
+        } catch (err) {
+            console.warn('Analytics trackLead failed:', err);
+        }
         scenario.action();
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-indigo-50/30 to-violet-50/30 dark:from-gray-900 dark:via-indigo-950/30 dark:to-violet-950/30">
+            <Seo
+                title="Free Online Exam Demo – Try Durrah for Tutors"
+                description="Experience Durrah in 2 minutes. Click through interactive scenarios to create exams, share them, and view real-time analytics. No signup required!"
+            />
             <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl z-50 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl shadow-xl">
                 <div className="px-4 sm:px-6 py-3 flex justify-between items-center">
                     <Link to="/" className="flex items-center gap-2 sm:gap-3">

@@ -26,20 +26,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <!-- SEO Standardized for durrahtutors.com -->
-  <title>Durrah for Tutors | Ramadan Special: 1 Month FREE + 14-Day Trial - Online Exam Platform</title>
+  <title>Online Exam Maker for Tutors – Create & Auto-Grade Exams Free | Durrah</title>
   <meta name="description"
-    content="Ramadan Special Offer: Get 1 MONTH FREE with code RAMADAN! Plus 14-day free trial. Create professional exams with anti-cheating, auto-grading, and live proctoring. Join thousands of educators worldwide." />
+    content="Create professional, secure online exams in minutes with smart anti-cheating, auto-grading, and real-time proctoring. Sign up free for a 14-day premium trial." />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-  <meta name="keywords" content="ramadan offer, ramadan special, 1 month free, online exam platform, exam software discount, create online exams, anti-cheating exam software, quiz maker for teachers, proctored exams, auto grading, educator tools" />
+  <meta name="keywords" content="online exam platform, create online exams, anti-cheating exam software, quiz maker for teachers, proctored exams, auto grading, educator tools, secure online testing, digital assessment platform, exam creator software" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://durrahtutors.com/" />
   <meta property="og:site_name" content="Durrah for Tutors" />
-  <meta property="og:title" content="Durrah for Tutors | Ramadan Special: 1 Month FREE" />
-  <meta property="og:description" content="Ramadan Special Offer: Get 1 MONTH FREE with code RAMADAN! Plus 14-day free trial. Join thousands of educators worldwide." />
-  <meta property="og:image" content="https://durrahtutors.com/ramadan%20offer.png" />
-  <meta property="og:image:alt" content="Durrah for Tutors - Ramadan Special: 1 Month FREE" />
+  <meta property="og:title" content="Online Exam Maker for Tutors – Create & Auto-Grade Exams Free | Durrah" />
+  <meta property="og:description" content="Create professional, secure online exams in minutes with smart anti-cheating, auto-grading, and real-time proctoring. Sign up free for a 14-day premium trial." />
+  <meta property="og:image" content="https://durrahtutors.com/og-cover.png" />
+  <meta property="og:image:alt" content="Durrah for Tutors - Online Exam Maker for Tutors" />
 
   <!-- Web Manifest for PWA -->
   <link rel="manifest" href="/manifest.json" />
@@ -65,8 +65,44 @@
       "sameAs": [
         "https://web.facebook.com/profile.php?id=61584207453651"
       ],
-      "description": "Ramadan Special Offer: Get 1 month FREE with code RAMADAN! Plus 14-day free trial. Create secure, professional exams with anti-cheating features, auto-grading, and detailed analytics for educators worldwide."
+      "description": "Create secure, professional online exams with advanced anti-cheating features, auto-grading, and comprehensive analytics for educators worldwide. Try the 14-day free trial."
     }
+  </script>
+
+  <!-- Google Analytics (GA4) & Meta Pixel Dynamic Loaders -->
+  <script>
+    (function() {
+      const gaId = "%VITE_GA4_MEASUREMENT_ID%";
+      if (gaId && gaId !== "G-XXXX" && !gaId.startsWith("%")) {
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+        document.head.appendChild(script);
+
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function() { dataLayer.push(arguments); };
+        gtag('js', new Date());
+        gtag('config', gaId, { send_page_view: false });
+      } else {
+        window.gtag = function() { console.log('[GA4 Debug]:', ...arguments); };
+      }
+
+      const pixelId = "%VITE_META_PIXEL_ID%";
+      if (pixelId && pixelId !== "XXXX" && !pixelId.startsWith("%")) {
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        
+        fbq('init', pixelId);
+      } else {
+        window.fbq = function() { console.log('[Meta Pixel Debug]:', ...arguments); };
+      }
+    })();
   </script>
 </head>
 

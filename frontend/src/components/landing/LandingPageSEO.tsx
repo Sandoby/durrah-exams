@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../Seo';
 import { useTranslation } from 'react-i18next';
 
 export function LandingPageSEO() {
@@ -27,163 +27,102 @@ export function LandingPageSEO() {
         }
     ];
 
+    const organizationSchema = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://durrahtutors.com/#organization",
+        "name": "Durrah for Tutors",
+        "alternateName": "Durrah System",
+        "url": "https://durrahtutors.com",
+        "logo": {
+            "@type": "ImageObject",
+            "@id": "https://durrahtutors.com/#logo",
+            "url": "https://durrahtutors.com/logo-google.png",
+            "contentUrl": "https://durrahtutors.com/logo-google.png",
+            "width": 512,
+            "height": 512,
+            "caption": "Durrah for Tutors Logo"
+        },
+        "brand": {
+            "@type": "Brand",
+            "name": "Durrah",
+            "logo": "https://durrahtutors.com/logo-google.png"
+        },
+        "image": {
+            "@type": "ImageObject",
+            "url": "https://durrahtutors.com/og-cover.png"
+        },
+        "description": "Create secure, professional online exams with advanced anti-cheating features, auto-grading, and comprehensive analytics for educators worldwide.",
+        "foundingDate": "2024",
+        "sameAs": ["https://durrahtutors.com", "https://web.facebook.com/profile.php?id=61584207453651"]
+    };
+
+    const softwareApplicationSchema = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Durrah for Tutors",
+        "applicationCategory": "EducationApplication",
+        "operatingSystem": "Web Browser",
+        "offers": [
+            {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD",
+                "priceValidUntil": "2026-12-31",
+                "availability": "https://schema.org/InStock",
+                "name": "14-Day Free Trial",
+                "description": "Full premium access for 14 days. No credit card required. Available for all new users.",
+                "eligibleCustomerType": "New Users Only"
+            }
+        ],
+        "description": "Professional online exam platform with anti-cheating features, live proctoring, auto-grading, and advanced analytics. Try the 14-day free trial.",
+        "screenshot": "https://durrahtutors.com/og-cover.png",
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "250",
+            "bestRating": "5",
+            "worstRating": "1"
+        },
+        "author": {
+            "@id": "https://durrahtutors.com/#organization"
+        }
+    };
+
+    const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": faqs.map(f => ({
+            "@type": "Question",
+            "name": f.question,
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": f.answer
+            }
+        }))
+    };
+
+    const websiteSchema = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://durrahtutors.com/#website",
+        "name": "Durrah for Tutors",
+        "url": "https://durrahtutors.com/",
+        "description": "Create professional online exams with anti-cheating features, auto-grading, live proctoring, and advanced analytics. Join thousands of educators worldwide.",
+        "inLanguage": i18n.language === 'ar' ? 'ar' : 'en',
+        "publisher": {
+            "@id": "https://durrahtutors.com/#organization"
+        }
+    };
+
+    const jsonLds = [organizationSchema, softwareApplicationSchema, faqSchema, websiteSchema];
+
     return (
-        <Helmet>
-            {/* Primary Meta Tags */}
-            <title>{t('landing.seo.title', 'Durrah for Tutors | Ramadan Special: 1 Month FREE + 14-Day Trial - Online Exam Platform')}</title>
-            <meta name="description" content={t('landing.seo.description', 'Ramadan Special Offer: Get 1 MONTH FREE with code RAMADAN! Plus 14-day free trial. Create professional exams with anti-cheating, auto-grading, and live proctoring. Join thousands of educators worldwide.')} />
-            <meta name="keywords" content={t('landing.seo.keywords', 'ramadan offer, ramadan special, 1 month free, free month trial, online exam platform ramadan, exam software discount, ramadan promotion, free trial exam software, 14 day free trial, create online exams, anti-cheating exam software, quiz maker for teachers, online assessment tool free, proctored exams, exam creator software, auto grading exams, secure online testing, digital assessment platform, virtual exam software, remote proctoring, kids mode exams, educator tools, islamic education software, muslim teachers exam platform')} />
-            <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-            <meta name="author" content="Durrah System" />
-            <meta name="language" content={i18n.language === 'ar' ? 'Arabic' : 'English'} />
-            <link rel="canonical" href="https://durrahtutors.com/" />
-
-            {/* Hreflang for Multilingual SEO */}
-            <link rel="alternate" hrefLang="en" href="https://durrahtutors.com/" />
-            <link rel="alternate" hrefLang="ar" href="https://durrahtutors.com/?lang=ar" />
-            <link rel="alternate" hrefLang="es" href="https://durrahtutors.com/?lang=es" />
-            <link rel="alternate" hrefLang="fr" href="https://durrahtutors.com/?lang=fr" />
-            <link rel="alternate" hrefLang="x-default" href="https://durrahtutors.com/" />
-
-            {/* Open Graph / Facebook */}
-            <meta property="og:type" content="website" />
-            <meta property="og:site_name" content="Durrah for Tutors" />
-            <meta property="og:url" content="https://durrahtutors.com/" />
-            <meta property="og:title" content={t('landing.seo.title', 'Durrah for Tutors | Ramadan Special: 1 Month FREE + 14-Day Trial - Online Exam Platform')} />
-            <meta property="og:description" content={t('landing.seo.description', 'Ramadan Special Offer: Get 1 MONTH FREE with code RAMADAN! Plus 14-day free trial. Create professional exams with anti-cheating, auto-grading, and live proctoring. Join thousands of educators worldwide.')} />
-            <meta property="og:image" content="https://durrahtutors.com/ramadan%20offer.png" />
-            <meta property="og:image:width" content="1200" />
-            <meta property="og:image:height" content="630" />
-            <meta property="og:image:alt" content="Durrah for Tutors - Ramadan Special: 1 Month FREE" />
-            <meta property="og:locale" content={i18n.language === 'ar' ? 'ar_SA' : 'en_US'} />
-
-            {/* Twitter */}
-            <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:site" content="@durrahsystem" />
-            <meta name="twitter:creator" content="@durrahsystem" />
-            <meta name="twitter:url" content="https://durrahtutors.com/" />
-            <meta name="twitter:title" content={t('landing.seo.title', 'Durrah for Tutors | Ramadan Special: 1 Month FREE + 14-Day Trial - Online Exam Platform')} />
-            <meta name="twitter:description" content={t('landing.seo.description', 'Ramadan Special Offer: Get 1 MONTH FREE with code RAMADAN! Plus 14-day free trial. Create professional exams with anti-cheating, auto-grading, and live proctoring. Join thousands of educators worldwide.')} />
-            <meta name="twitter:image" content="https://durrahtutors.com/ramadan%20offer.png" />
-            <meta name="twitter:image:alt" content="Durrah for Tutors - Ramadan Special: 1 Month FREE" />
-
-            <meta name="theme-color" content="#6366f1" />
-            <meta name="apple-mobile-web-app-title" content="Durrah for Tutors" />
-            <meta name="application-name" content="Durrah for Tutors" />
-
-            {/* Structured Data */}
-            <script type="application/ld+json">{`
-                {
-                    "@context": "https://schema.org",
-                    "@type": "Organization",
-                    "@id": "https://durrahtutors.com/#organization",
-                    "name": "Durrah for Tutors",
-                    "alternateName": "Durrah System",
-                    "url": "https://durrahtutors.com",
-                    "logo": {
-                        "@type": "ImageObject",
-                        "@id": "https://durrahtutors.com/#logo",
-                        "url": "https://durrahtutors.com/logo-google.png",
-                        "contentUrl": "https://durrahtutors.com/logo-google.png",
-                        "width": 512,
-                        "height": 512,
-                        "caption": "Durrah for Tutors Logo"
-                    },
-                    "brand": {
-                        "@type": "Brand",
-                        "name": "Durrah",
-                        "logo": "https://durrahtutors.com/logo-google.png"
-                    },
-                    "image": {
-                        "@type": "ImageObject",
-                        "url": "https://durrahtutors.com/ramadan%20offer.png"
-                    },
-                    "description": "Ramadan Special Offer: Get 1 month FREE with code RAMADAN! Plus 14-day free trial. Create professional exams with anti-cheating features, auto-grading, and live proctoring. Join thousands of educators worldwide.",
-                    "foundingDate": "2024",
-                    "sameAs": ["https://durrahtutors.com", "https://web.facebook.com/profile.php?id=61584207453651"]
-                }
-            `}</script>
-
-            <script type="application/ld+json">{`
-                {
-                    "@context": "https://schema.org",
-                    "@type": "SoftwareApplication",
-                    "name": "Durrah for Tutors",
-                    "applicationCategory": "EducationApplication",
-                    "operatingSystem": "Web Browser",
-                    "offers": [
-                        {
-                            "@type": "Offer",
-                            "price": "0",
-                            "priceCurrency": "USD",
-                            "priceValidUntil": "2025-04-30",
-                            "availability": "https://schema.org/InStock",
-                            "name": "Ramadan Special - 1 Month Free",
-                            "description": "Get 1 full month FREE with promo code RAMADAN. Full premium access with no credit card required. Limited time Ramadan offer.",
-                            "priceSpecification": {
-                                "@type": "PriceSpecification",
-                                "price": "0",
-                                "priceCurrency": "USD",
-                                "validFrom": "2025-02-28",
-                                "validThrough": "2025-04-30"
-                            },
-                            "eligibleCustomerType": "All Users"
-                        },
-                        {
-                            "@type": "Offer",
-                            "price": "0",
-                            "priceCurrency": "USD",
-                            "priceValidUntil": "2026-12-31",
-                            "availability": "https://schema.org/InStock",
-                            "name": "14-Day Free Trial",
-                            "description": "Full premium access for 14 days. No credit card required. Available for all new users.",
-                            "eligibleCustomerType": "New Users Only"
-                        }
-                    ],
-                    "description": "Professional online exam platform with anti-cheating features, live proctoring, auto-grading, and advanced analytics. Ramadan Special: Get 1 month FREE with code RAMADAN! Plus 14-day free trial for new users.",
-                    "screenshot": "https://durrahtutors.com/ramadan%20offer.png",
-                    "aggregateRating": {
-                        "@type": "AggregateRating",
-                        "ratingValue": "4.8",
-                        "ratingCount": "250",
-                        "bestRating": "5",
-                        "worstRating": "1"
-                    },
-                    "author": {
-                        "@id": "https://durrahtutors.com/#organization"
-                    }
-                }
-            `}</script>
-
-            <script type="application/ld+json">{`
-                {
-                    "@context": "https://schema.org",
-                    "@type": "FAQPage",
-                    "mainEntity": ${JSON.stringify(faqs.map(f => ({
-                "@type": "Question",
-                "name": f.question,
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": f.answer
-                }
-            })))}
-                }
-            `}</script>
-
-            <script type="application/ld+json">{`
-                {
-                    "@context": "https://schema.org",
-                    "@type": "WebSite",
-                    "@id": "https://durrahtutors.com/#website",
-                    "name": "Durrah for Tutors",
-                    "url": "https://durrahtutors.com/",
-                    "description": "Ramadan Special Offer: Get 1 month FREE with code RAMADAN! Plus 14-day free trial. Create professional exams with anti-cheating features, auto-grading, live proctoring, and advanced analytics. Join thousands of educators worldwide.",
-                    "inLanguage": "${i18n.language === 'ar' ? 'ar' : 'en'}",
-                    "publisher": {
-                        "@id": "https://durrahtutors.com/#organization"
-                    }
-                }
-            `}</script>
-        </Helmet>
+        <Seo
+            title={t('landing.seo.title', 'Online Exam Maker for Tutors – Create & Auto-Grade Exams Free | Durrah')}
+            description={t('landing.seo.description', 'Create professional, secure online exams in minutes with smart anti-cheating, auto-grading, and real-time proctoring. Sign up free for a 14-day premium trial.')}
+            keywords={t('landing.seo.keywords', 'online exam platform, create online exams, anti-cheating exam software, quiz maker for teachers, proctored exams, auto grading, educator tools, secure online testing, digital assessment platform, exam creator software')}
+            jsonLd={jsonLds}
+        />
     );
 }

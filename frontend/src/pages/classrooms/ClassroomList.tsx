@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Search, Archive as ArchiveIcon, LayoutGrid, Filter } from 'lucide-react';
 import { useClassrooms } from '../../hooks/useClassrooms';
 import { ClassroomCard } from './components/ClassroomCard';
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../../components/Seo';
 import { FloatingDashboardNavbar } from '../../components/dashboard/FloatingDashboardNavbar';
 
 export default function ClassroomList() {
@@ -43,9 +43,11 @@ export default function ClassroomList() {
 
   return (
     <>
-      <Helmet>
-        <title>{t('classrooms.title', 'My Classrooms')} | Durrah Tutors</title>
-      </Helmet>
+      <Seo
+        title={`${t('classrooms.title', 'My Classrooms')} | Durrah`}
+        description="View and manage tutor classrooms."
+        noIndex={true}
+      />
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <FloatingDashboardNavbar 

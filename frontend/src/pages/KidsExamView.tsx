@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../components/Seo';
 import toast from 'react-hot-toast';
 import { CheckCircle, Loader2, Sparkles, Star, Trophy, AlertCircle, Rocket, Orbit } from 'lucide-react';
 import Latex from 'react-latex-next';
@@ -410,7 +410,11 @@ export default function KidsExamView() {
 
   return (
     <div dir={i18n.language === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen bg-[#050616] relative overflow-hidden font-sans">
-      <Helmet><title>Mission Terminal | Durrah</title></Helmet>
+      <Seo
+        title="Mission Terminal | Durrah"
+        description="Space mission control center for taking exams in Kids mode."
+        noIndex={true}
+      />
       <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none opacity-50" />
 
       {/* Background Glows */}

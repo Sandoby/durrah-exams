@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../../components/Seo';
 import {
   Users,
   FileText,
@@ -214,9 +214,11 @@ export default function ClassroomDetail() {
 
   return (
     <>
-      <Helmet>
-        <title>{classroom.name} | Durrah Tutors</title>
-      </Helmet>
+      <Seo
+        title={`${classroom.name} | Classroom Details | Durrah`}
+        description="Manage students, exams, and settings for this classroom."
+        noIndex={true}
+      />
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
         <FloatingDashboardNavbar

@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../../components/Seo';
 import { ArrowLeft, Calendar, Clock, User, Share2, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getBlogPost, blogPosts } from './blogData';
@@ -64,19 +64,14 @@ export function BlogPost() {
 
   return (
     <>
-      <Helmet>
-        <title>{post.title} | Durrah Blog</title>
-        <meta name="description" content={post.excerpt} />
-        <meta name="keywords" content={post.keywords.join(', ')} />
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={post.excerpt} />
-        <meta property="og:image" content={post.image} />
-        <meta property="og:type" content="article" />
-        <meta property="article:published_time" content={post.date} />
-        <meta property="article:author" content={post.author} />
-        <link rel="canonical" href={`https://durrahtutors.com/blog/${post.slug}`} />
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-      </Helmet>
+      <Seo
+        title={`${post.title} | Durrah for Tutors`}
+        description={post.excerpt}
+        keywords={post.keywords.join(', ')}
+        ogImage={post.image}
+        ogType="article"
+        jsonLd={jsonLd}
+      />
 
       <ReadingProgressBar />
 

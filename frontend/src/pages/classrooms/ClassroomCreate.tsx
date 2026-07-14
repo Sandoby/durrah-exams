@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { ArrowLeft, Loader2, Save } from 'lucide-react';
 import { useClassrooms } from '../../hooks/useClassrooms';
 import { Logo } from '../../components/Logo';
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../../components/Seo';
 import type { ClassroomFormData } from '../../types/classroom';
 import { CLASSROOM_COLORS } from '../../types/classroom';
 
@@ -77,9 +77,11 @@ export default function ClassroomCreate() {
 
   return (
     <>
-      <Helmet>
-        <title>{t('classrooms.createNew', 'Create Classroom')} | Durrah Tutors</title>
-      </Helmet>
+      <Seo
+        title={`${t('classrooms.createNew', 'Create Classroom')} | Durrah`}
+        description="Create a new virtual classroom."
+        noIndex={true}
+      />
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         {/* Header */}

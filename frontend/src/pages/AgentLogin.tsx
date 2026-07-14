@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { Logo } from '../components/Logo';
 import { Shield, Lock, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Seo } from '../components/Seo';
 
 const ADMIN_CODE = '2352206';
 
@@ -72,6 +73,11 @@ export default function AgentLogin() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-950 flex items-center justify-center p-4">
+            <Seo
+                title="Agent Login | Durrah"
+                description="Secure login portal for authorized agents."
+                noIndex={true}
+            />
             <div className="max-w-md w-full">
                 {/* Logo */}
                 <div className="text-center mb-8">

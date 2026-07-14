@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { Logo } from '../components/Logo';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { Seo } from '../components/Seo';
 
 interface Payment {
   id: string;
@@ -128,6 +129,11 @@ export default function PaymentHistory() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24 pb-8">
+      <Seo
+        title="Payment History | Durrah for Tutors"
+        description="View your subscription billing history and download invoices."
+        noIndex={true}
+      />
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
         <div className="max-w-7xl mx-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-200/50 dark:border-gray-700/50">

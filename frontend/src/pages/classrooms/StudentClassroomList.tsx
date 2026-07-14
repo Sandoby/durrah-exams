@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../../components/Seo';
 import { Plus, Search, GraduationCap } from 'lucide-react';
 import { Logo } from '../../components/Logo';
 import { supabase } from '../../lib/supabase';
@@ -64,9 +64,11 @@ export default function StudentClassroomList() {
 
   return (
     <>
-      <Helmet>
-        <title>{t('classrooms.myClassrooms', 'My Classrooms')} | Durrah Tutors</title>
-      </Helmet>
+      <Seo
+        title={`${t('classrooms.myClassrooms', 'My Classrooms')} | Durrah`}
+        description="View and access all classrooms you are enrolled in."
+        noIndex={true}
+      />
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         {/* Header */}

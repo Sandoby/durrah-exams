@@ -19,6 +19,7 @@ import { KidsLeaderboard } from '../components/kids/KidsLeaderboard';
 import { ConvexLeaderboard } from '../components/ConvexLeaderboard';
 import { CONVEX_FEATURES } from '../main';
 import { useConvex } from 'convex/react';
+import { Seo } from '../components/Seo';
 import { api } from '../../convex/_generated/api';
 
 interface Submission {
@@ -355,6 +356,11 @@ export default function ExamResultsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12 font-sans relative overflow-hidden pt-24">
+            <Seo
+                title="Exam Results & Analytics | Durrah for Tutors"
+                description="View comprehensive student performance analytics, grade distributions, and exam submissions."
+                noIndex={true}
+            />
             <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent pointer-events-none" />
             <div className="absolute top-20 right-20 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
 

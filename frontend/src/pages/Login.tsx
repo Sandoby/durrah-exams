@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { Lock, Mail, Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../components/Seo';
 import { Logo } from '../components/Logo';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
@@ -257,9 +257,10 @@ export default function Login() {
 
     return (
         <div className="min-h-screen flex bg-white dark:bg-gray-950 font-sans selection:bg-indigo-100 dark:selection:bg-indigo-900">
-            <Helmet>
-                <title>{t('auth.login.seo.title', 'Tutor Login - Durrah')}</title>
-            </Helmet>
+            <Seo
+                title={t('auth.login.seo.title', 'Tutor Login – Access Your Exam Dashboard | Durrah')}
+                description="Log in to your Durrah account to create, distribute, and grade secure online exams for your students."
+            />
 
             {/* Left Side - Visual (Hidden on Mobile) */}
             <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-indigo-50 flex-col justify-between rounded-r-[3rem] mr-4 my-4">

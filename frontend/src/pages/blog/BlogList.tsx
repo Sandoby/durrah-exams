@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../../components/Seo';
 import { Calendar, Clock, ArrowRight, Search, X } from 'lucide-react';
 import { blogPosts, getCategories } from './blogData';
 import type { BlogPostContent } from './blogData';
@@ -37,12 +37,11 @@ export function BlogList() {
 
   return (
     <>
-      <Helmet>
-        <title>Blog | Durrah for Tutors - Expert Insights for Modern Educators</title>
-        <meta name="description" content="Expert articles on online tutoring, exam creation, AI in education, and study techniques. Real strategies backed by data for tutors and students." />
-        <meta name="keywords" content="tutoring blog, online teaching tips, exam creation, study techniques, AI education" />
-        <link rel="canonical" href="https://durrahtutors.com/blog" />
-      </Helmet>
+      <Seo
+        title="Tutor Insights & Education Blog | Durrah for Tutors"
+        description="Expert articles on online tutoring, exam creation, AI in education, and study techniques. Real strategies backed by data for tutors and students."
+        keywords="tutoring blog, online teaching tips, exam creation, study techniques, AI education, Durrah blog"
+      />
 
       <div className="min-h-screen bg-[var(--blog-bg)] blog-container">
         {/* Apple-style sticky header */}

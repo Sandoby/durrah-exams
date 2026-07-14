@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Seo } from '../components/Seo';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -441,6 +442,11 @@ export default function QuestionBank() {
 
     return (
         <div className="min-h-screen bg-[#f8fafc] dark:bg-gray-950 font-sans pt-24">
+            <Seo
+                title="Question Bank | Durrah for Tutors"
+                description="Browse, create, and manage your reusable question library."
+                noIndex={true}
+            />
             {/* Navbar */}
             <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4">
                 <div className="max-w-7xl mx-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-slate-800/50 transition-all duration-300">

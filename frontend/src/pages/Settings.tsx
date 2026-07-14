@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { hasActiveAccess, daysRemaining } from '../lib/subscriptionUtils';
 import { openDodoPortalSession } from '../lib/dodoPortal';
+import { Seo } from '../components/Seo';
 
 interface TutorProfile {
     full_name: string;
@@ -25,7 +26,7 @@ interface TutorProfile {
 
 export default function Settings() {
     const { t } = useTranslation();
-    const { user, subscriptionStatus } = useAuth();
+    const { user, subscriptionStatus, subscriptionEndDate } = useAuth();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -250,6 +251,11 @@ export default function Settings() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 font-sans pb-20 relative overflow-hidden pt-24">
+            <Seo
+                title="Account Settings | Durrah for Tutors"
+                description="Manage your profile, password, subscription, and platform preferences."
+                noIndex={true}
+            />
             {/* Animated background blobs */}
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
             <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>

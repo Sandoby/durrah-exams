@@ -5,6 +5,7 @@ import { Loader2, ArrowLeft, Mail, RefreshCw, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Logo } from '../components/Logo';
 import { useTranslation } from 'react-i18next';
+import { Seo } from '../components/Seo';
 
 const OTP_EXPIRY_SECONDS = 15 * 60;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -233,6 +234,11 @@ export default function VerifyOTP() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-gray-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <Seo
+        title="Verify OTP | Durrah for Tutors"
+        description="Enter your one-time password to verify your identity."
+        noIndex={true}
+      />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <Logo size="lg" />

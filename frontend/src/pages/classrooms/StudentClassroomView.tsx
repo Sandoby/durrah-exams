@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { Seo } from '../../components/Seo';
 import {
   ArrowLeft,
   FileText,
@@ -221,9 +221,11 @@ export default function StudentClassroomView() {
 
   return (
     <>
-      <Helmet>
-        <title>{classroom.name} | Durrah Tutors</title>
-      </Helmet>
+      <Seo
+        title={`${classroom.name} | Classroom | Durrah`}
+        description="View exams, assignments, and grades for this classroom."
+        noIndex={true}
+      />
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         {/* Header */}

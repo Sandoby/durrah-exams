@@ -1,10 +1,12 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Loader2, Check, X, AlertCircle, ArrowLeft, Calendar, CreditCard, Mail, ExternalLink, ShieldCheck, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { Logo } from '../components/Logo';
+import { trackPurchase } from '../lib/analytics';
+import { Seo } from '../components/Seo';
 
 export default function PaymentCallback() {
   const { t } = useTranslation();
@@ -35,6 +37,26 @@ export default function PaymentCallback() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.user) throw new Error('Authentication required');
 
+        const handlePurchaseTracking = () => {
+          try {
+            const rawSession = localStorage.getItem('durrah_checkout_session');
+            if (rawSession) {
+              const sessionContext = JSON.parse(rawSession);
+              void trackPurchase(
+                sessionContext.amount || 5,
+                sessionContext.currency || 'USD',
+                orderId,
+                session.user.email
+              );
+              localStorage.removeItem('durrah_checkout_session');
+            } else {
+              void trackPurchase(5, 'USD', orderId, session.user.email);
+            }
+          } catch (analyticsError) {
+            console.warn('Analytics trackPurchase failed:', analyticsError);
+          }
+        };
+
         const convexUrl = import.meta.env.VITE_CONVEX_URL;
         const siteUrl = convexUrl?.replace('.cloud', '.site');
 
@@ -54,6 +76,7 @@ export default function PaymentCallback() {
               const result = await verifyRes.json();
               if (result.success) {
                 console.log('Subscription activated via direct verification');
+                handlePurchaseTracking();
                 setStatus('success');
                 setMessage(t('checkout.callback.success_message', 'Your subscription is now active!'));
                 setOrderDetails({ planId: 'Professional', provider: 'dodo' });
@@ -77,6 +100,7 @@ export default function PaymentCallback() {
 
           if (profile?.subscription_status === 'active') {
             console.log('Subscription activated via webhook');
+            handlePurchaseTracking();
             setStatus('success');
             setMessage(t('checkout.callback.success_message', 'Your subscription is now active!'));
             setOrderDetails({ planId: profile.subscription_plan || 'Professional', provider: 'dodo' });
@@ -129,6 +153,11 @@ export default function PaymentCallback() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 relative overflow-hidden font-sans flex items-center justify-center p-4">
+      <Seo
+        title="Processing Payment | Durrah for Tutors"
+        description="Please wait while we verify your transaction status."
+        noIndex={true}
+      />
       {/* Animated background blobs */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>

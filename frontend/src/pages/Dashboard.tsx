@@ -15,6 +15,7 @@ import type { Step, CallBackProps } from 'react-joyride';
 import { useDemoTour } from '../hooks/useDemoTour';
 import { printerService } from '../lib/printer';
 import { NotificationCenter } from '../components/NotificationCenter';
+import { Seo } from '../components/Seo';
 
 import { CONVEX_FEATURES } from '../main';
 import { PremiumFeatureModal } from '../components/dashboard/PremiumFeatureModal';
@@ -554,6 +555,11 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-950 relative overflow-hidden pt-24">
+            <Seo
+                title="Tutor Dashboard | Durrah for Tutors"
+                description="Manage your exams, classes, student analytics, and settings on your Durrah dashboard."
+                noIndex={true}
+            />
             {/* Interactive Tutorial Tour */}
             <Joyride
                 steps={tourSteps}

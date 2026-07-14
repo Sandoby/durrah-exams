@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/generate-sitemap.cjs && node scripts/prerender.cjs",
     "build:mobile": "npm run build && npx cap sync",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-sitemap": "node scripts/generate-sitemap.cjs"
   },
   "dependencies": {
     "@bcyesil/capacitor-plugin-printer": "^0.0.6",

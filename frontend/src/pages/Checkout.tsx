@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Shield, Loader2, Check, Sparkles, ArrowRight, BadgeCheck, Lock, RefreshCw, LifeBuoy, BarChart3, Users, FileText } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ import { supabase } from '../lib/supabase';
 import { useCurrency } from '../hooks/useCurrency';
 import { openDodoPortalSession } from '../lib/dodoPortal';
 import { daysRemaining } from '../lib/subscriptionUtils';
+import { Seo } from '../components/Seo';
 
 type BillingCycle = 'monthly' | 'yearly';
 
@@ -147,6 +148,13 @@ export default function Checkout() {
         return;
       }
 
+      // Save checkout context for analytics callback tracking
+      localStorage.setItem('durrah_checkout_session', JSON.stringify({
+        billingCycle,
+        amount: billingCycle === 'monthly' ? 5 : 50,
+        currency: 'USD',
+      }));
+
       const redirectUrl = data.checkout_url as string;
 
       if (isNative) {
@@ -195,6 +203,11 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950">
+      <Seo
+        title="Checkout | Durrah for Tutors"
+        description="Complete your subscription to Durrah."
+        noIndex={true}
+      />
       {/* Subtle grid overlay (matches landing) */}
       <div className="pointer-events-none fixed inset-0 opacity-[0.18] dark:opacity-[0.12]">
         <div className="absolute inset-0 [background-image:linear-gradient(to_right,rgba(15,23,42,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.08)_1px,transparent_1px)] dark:[background-image:linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:40px_40px]" />

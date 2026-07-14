@@ -12,11 +12,13 @@ import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrate
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { EmailWhitelist } from '../components/EmailWhitelist';
+import { trackExamCreated, trackTrialStart } from '../lib/analytics';
 import { useDemoTour } from '../hooks/useDemoTour';
 import { SortableQuestionItem } from '../components/SortableQuestionItem';
 import { ImageUploader } from '../components/ImageUploader';
 import Latex from 'react-latex-next';
 import { hasActiveAccess } from '../lib/subscriptionUtils';
+import { Seo } from '../components/Seo';
 
 interface Question {
     id?: string;
@@ -415,6 +417,14 @@ export default function ExamEditor() {
                     .single();
                 if (error) throw error;
                 examId = newExam.id;
+
+                // Track exam created and trial started (first exam created)
+                try {
+                    trackExamCreated();
+                    trackTrialStart();
+                } catch (analyticsError) {
+                    console.warn('Analytics tracking failed:', analyticsError);
+                }
             }
 
             if (!examId) throw new Error('Failed to get exam ID');
@@ -618,6 +628,11 @@ export default function ExamEditor() {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-40 relative overflow-x-hidden pt-20 selection:bg-indigo-500/30 selection:text-indigo-700 dark:selection:bg-indigo-500/30 dark:selection:text-indigo-400 text-slate-900 dark:text-slate-100">
+            <Seo
+                title={id ? "Edit Exam | Durrah for Tutors" : "Create Exam | Durrah for Tutors"}
+                description="Create and customize online exams, configure anti-cheating measures, and design questions using the Durrah exam builder."
+                noIndex={true}
+            />
             {/* Ambient Background Lights */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-indigo-500/5 blur-[120px]" />

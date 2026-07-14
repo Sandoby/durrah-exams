@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { Seo } from '../components/Seo';
 import { useAuth } from '../context/AuthContext';
 
 // Import Modular Components
@@ -70,8 +71,12 @@ export default function StudyZone() {
             transition={{ duration: 1.2, ease: [0.32, 0.72, 0, 1] }}
             className="min-h-screen relative font-[Outfit] overflow-hidden dark:bg-gray-900"
         >
+            <Seo
+                title="Study Zone | Durrah"
+                description="Interactive student study tools, flashcards, timers, and blurting exercises."
+                noIndex={true}
+            />
             <Helmet>
-                <title>Study Zone | Durrah Tutors</title>
                 <meta name="theme-color" content={isFocusMode ? "#000000" : "#f3f4f6"} />
             </Helmet>
 

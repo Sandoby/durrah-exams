@@ -52,7 +52,7 @@ import { ProtectedRoute, AgentRoute, TutorRoute, StudentRoute } from './componen
 import NotFound from './pages/NotFound';
 
 import { useTranslation } from 'react-i18next';
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 
 import { Capacitor } from '@capacitor/core';
 import MobileWelcome from './pages/MobileWelcome';
@@ -66,12 +66,50 @@ import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-
 import { createTrackedPath, setupUnloadTracking, trackPageView } from './lib/trafficTracker';
 
 import { useAuth } from './context/AuthContext';
+import { usePageTracking } from './hooks/usePageTracking';
+
+interface ForceLanguageProps {
+  language: string;
+  children: ReactNode;
+}
+
+function ForceLanguage({ language, children }: ForceLanguageProps) {
+  const { i18n } = useTranslation();
+  
+  useEffect(() => {
+    if (i18n.language !== language) {
+      i18n.changeLanguage(language);
+      localStorage.setItem('i18nextLng', language);
+    }
+  }, [language, i18n]);
+
+  return <>{children}</>;
+}
 
 function AppContent() {
+  usePageTracking();
   const { i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { user, loading } = useAuth();
+
+  // Redirect to/from Arabic paths based on current language
+  useEffect(() => {
+    const path = location.pathname;
+    if (i18n.language === 'ar') {
+      if (path === '/') {
+        navigate('/ar', { replace: true });
+      } else if (path === '/pricing') {
+        navigate('/ar/pricing', { replace: true });
+      }
+    } else {
+      if (path === '/ar') {
+        navigate('/', { replace: true });
+      } else if (path === '/ar/pricing') {
+        navigate('/pricing', { replace: true });
+      }
+    }
+  }, [i18n.language, location.pathname, navigate]);
 
   // ... existing useEffects ...
 
@@ -202,6 +240,16 @@ function AppContent() {
                 : (isNative ? <MobileWelcome /> : <LandingPage />)
           }
         />
+        <Route
+          path="/ar"
+          element={
+            loading
+              ? null
+              : user
+                ? <Navigate to="/dashboard" replace />
+                : (isNative ? <MobileWelcome /> : <ForceLanguage language="ar"><LandingPage /></ForceLanguage>)
+          }
+        />
         <Route path="/mobile-welcome" element={<MobileWelcome />} />
         <Route path="/kids" element={<KidsLanding />} />
         <Route path="/kids/quiz/:id" element={<KidsExamView />} />
@@ -259,6 +307,7 @@ function AppContent() {
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/ar/pricing" element={<ForceLanguage language="ar"><PricingPage /></ForceLanguage>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster position="top-right" />

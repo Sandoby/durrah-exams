@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { Seo } from '../components/Seo';
 import { Mail, ArrowLeft, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
@@ -83,6 +84,11 @@ export default function EmailVerification() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-gray-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+            <Seo
+                title="Verify Your Email | Durrah"
+                description="Verify your email address to active your Durrah account."
+                noIndex={true}
+            />
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="flex justify-center mb-6">
                     <Logo size="lg" />

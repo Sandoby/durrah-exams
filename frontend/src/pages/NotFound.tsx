@@ -2,6 +2,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { Logo } from '../components/Logo';
+import { Seo } from '../components/Seo';
 
 export default function NotFound() {
     const { t, i18n } = useTranslation();
@@ -14,6 +15,11 @@ export default function NotFound() {
             className="min-h-screen bg-white dark:bg-[#000000] flex flex-col justify-between font-sans selection:bg-zinc-200 dark:selection:bg-zinc-800 relative"
             dir={isRTL ? 'rtl' : 'ltr'}
         >
+            <Seo
+                title="Page Not Found | Durrah"
+                description="The page you are looking for does not exist."
+                noIndex={true}
+            />
             {/* Top Logo (Centered & Large) */}
             <div className="w-full flex items-center justify-center z-10 pt-16">
                 <div className="w-48 sm:w-64">

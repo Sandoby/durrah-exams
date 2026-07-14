@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Logo } from '../components/Logo';
 import { Shield, Lock, UserPlus } from 'lucide-react';
+import { Seo } from '../components/Seo';
 
 const ADMIN_CODE = '2352206';
 
@@ -108,6 +109,11 @@ export default function AgentSetup() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-950 flex items-center justify-center p-4">
+            <Seo
+                title="Agent Setup | Durrah"
+                description="Authorized Agent registration and setup portal."
+                noIndex={true}
+            />
             <div className="max-w-md w-full">
                 {/* Logo */}
                 <div className="text-center mb-8">

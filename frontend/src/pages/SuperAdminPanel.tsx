@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Seo } from '../components/Seo';
 import { useNavigate } from 'react-router-dom';
 import {
     MessageCircle, Shield, Lock, LogOut, Plus, Trash2,
@@ -312,6 +313,11 @@ export default function SuperAdminPanel() {
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
+                <Seo
+                    title="Super Admin Access | Durrah"
+                    description="Authentication required to view Super Admin resources."
+                    noIndex={true}
+                />
                 <div className="w-full max-w-md">
                     <div className="text-center mb-8">
                         <div className="flex justify-center mb-4">
@@ -358,6 +364,11 @@ export default function SuperAdminPanel() {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            <Seo
+                title="Super Admin Dashboard | Durrah"
+                description="Manage support chats and API configurations."
+                noIndex={true}
+            />
             {/* Header */}
             <div className="bg-white shadow-sm border-b">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
