@@ -19,6 +19,8 @@ import RefundPolicy from './pages/RefundPolicy';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import PricingPage from './pages/PricingPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
 
 import Dashboard from './pages/Dashboard';
 import ExamEditor from './pages/ExamEditor.tsx';
@@ -101,12 +103,20 @@ function AppContent() {
         navigate('/ar', { replace: true });
       } else if (path === '/pricing') {
         navigate('/ar/pricing', { replace: true });
+      } else if (path === '/about') {
+        navigate('/ar/about', { replace: true });
+      } else if (path === '/contact') {
+        navigate('/ar/contact', { replace: true });
       }
     } else {
       if (path === '/ar') {
         navigate('/', { replace: true });
       } else if (path === '/ar/pricing') {
         navigate('/pricing', { replace: true });
+      } else if (path === '/ar/about') {
+        navigate('/about', { replace: true });
+      } else if (path === '/ar/contact') {
+        navigate('/contact', { replace: true });
       }
     }
   }, [i18n.language, location.pathname, navigate]);
@@ -308,6 +318,10 @@ function AppContent() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/ar/pricing" element={<ForceLanguage language="ar"><PricingPage /></ForceLanguage>} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/ar/about" element={<ForceLanguage language="ar"><AboutPage /></ForceLanguage>} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/ar/contact" element={<ForceLanguage language="ar"><ContactPage /></ForceLanguage>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster position="top-right" />

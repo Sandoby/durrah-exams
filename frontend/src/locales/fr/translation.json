@@ -1,4 +1,4 @@
-﻿{
+{
     "ramadan": {
         "banner": {
             "text": "Offre spéciale Ramadan : obtenez 1 mois gratuit avec le code"
@@ -957,6 +957,162 @@
                 "benefit2": "Alertes d'infraction instantanées",
                 "benefit3": "Application d'un navigateur sécurisé"
             }
+        }
+    },
+    "about": {
+        "seo": {
+            "title": "À propos de Durrah – Notre histoire, mission et équipe | Durrah pour les Tuteurs",
+            "desc": "Découvrez l'histoire de Durrah — pourquoi nous avons créé la meilleure plateforme d'examens pour les tuteurs et comment notre mission d'autonomiser les éducateurs guide chacune de nos actions."
+        },
+        "hero": {
+            "badge": "Notre histoire",
+            "title": "Créé par un éducateur,",
+            "titleHighlight": "Pour les éducateurs",
+            "subtitle": "Nous avons commencé par une frustration que tous les tuteurs connaissent : des outils d'examen conçus pour les services informatiques, pas pour les enseignants. Durrah change cela.",
+            "contactUs": "Contactez-nous"
+        },
+        "stats": {
+            "tutors": { "value": "10 000+", "label": "Tuteurs actifs" },
+            "exams": { "value": "500K+", "label": "Examens créés" },
+            "countries": { "value": "50+", "label": "Pays" },
+            "satisfaction": { "value": "98%", "label": "Taux de satisfaction" }
+        },
+        "mission": {
+            "badge": "Notre mission",
+            "title": "Donner des superpouvoirs à chaque tuteur",
+            "p1": "L'éducation est la profession qui a le plus d'impact au monde — un excellent tuteur influence des milliers d'étudiants. Pourtant, les outils que les tuteurs utilisent ont des décennies de retard.",
+            "p2": "Durrah a été créé pour combler cet écart. Nous offrons aux tuteurs indépendants et aux petites académies la même infrastructure d'examen de qualité pour laquelle les grandes universités paient des millions — à un prix qui a du sens pour une personne gérant une activité de tutorat.",
+            "point1": "Examens notés automatiquement en quelques minutes, pas en heures",
+            "point2": "IA anti-triche qui fonctionne vraiment",
+            "point3": "Des analyses réelles qui révèlent les lacunes des étudiants",
+            "point4": "Fonctionne en arabe, français, espagnol et anglais",
+            "visionTitle": "Notre vision",
+            "quote": "Un monde où chaque tuteur, quelles que soient ses ressources, peut offrir une expérience d'apprentissage de classe mondiale.",
+            "v1": "Excellence des examens",
+            "v2": "Zéro triche",
+            "v3": "Portée mondiale",
+            "v4": "La communauté d'abord"
+        },
+        "values": {
+            "title": "Ce que nous défendons",
+            "subtitle": "Les principes qui guiment chaque fonctionnalité, chaque décision et chaque interaction chez Durrah.",
+            "education": {
+                "title": "L'éducation d'abord",
+                "desc": "Chaque décision que nous prenons est guidée par ce qui est le mieux pour les apprenants et les éducateurs, et pas seulement par les indicateurs commerciaux."
+            },
+            "trust": {
+                "title": "Confiance radicale",
+                "desc": "Nous gagnons la confiance grâce à la transparence, la confidentialité des données et des outils d'intégrité académique inébranlables."
+            },
+            "simplicity": {
+                "title": "Simplicité élégante",
+                "desc": "Les outils puissants doivent sembler faciles. Nous sommes obsédés par la convivialité pour que les tuteurs se concentrent sur l'enseignement."
+            },
+            "global": {
+                "title": "Globalmente inclusif",
+                "desc": "Conçu pour les tuteurs du monde entier avec un support complet de l'arabe RTL, multilingue et un design inclusif."
+            },
+            "passion": {
+                "title": "Passion pour l'impact",
+                "desc": "Nous croyons qu'une éducation de qualité change des vies. Nous mesurons notre succès par la différence que nous faisons."
+            },
+            "innovation": {
+                "title": "Innovation continue",
+                "desc": "We listen to educators and ship meaningful improvements every week, not every quarter."
+            }
+        },
+        "timeline": {
+            "title": "Notre parcours",
+            "subtitle": "D'une simple frustration à une plateforme utilisée par des milliers de personnes."
+        },
+        "milestones": {
+            "m2023": "Fondation de Durrah — un seul développeur, une mission claire : résoudre les examens en ligne pour les tuteurs.",
+            "m2024": "Lancement de la version bêta publique. 1 000 tuteurs s'inscrivent dès le premier mois. L'IA anti-triche est opérationnelle.",
+            "m2025": "Plus de 10 000 tuteurs dans 50 pays. Lancement du support de l'arabe RTL, du mode enfants et des classes virtuelles.",
+            "m2026": "Expansion vers les écoles et institutions. Application mobile, génération de questions par IA et plus."
+        },
+        "team": {
+            "title": "L'équipe derrière Durrah",
+            "subtitle": "Une petite équipe passionnée et obsédée par l'amélioration de l'éducation.",
+            "ahmed": {
+                "role": "Fondateur & CEO",
+                "bio": "Ancien enseignant devenu ingénieur. A créé Durrah après avoir constaté par lui-même à quel point les outils d'examen étaient inadaptés pour les éducateurs dans le monde arabe."
+            }
+        },
+        "cta": {
+            "title": "Prêt à transformer votre enseignement ?",
+            "subtitle": "Rejoignez plus de 10 000 tuteurs qui utilisent déjà Durrah. Gratuit pour toujours jusqu'à 3 examens."
+        }
+    },
+    "contact": {
+        "seo": {
+            "title": "Contactez-nous – Durrah pour les Tuteurs",
+            "desc": "Contactez l'équipe Durrah. Nous sommes là pour vous aider avec le support, la facturation et toutes vos questions concernant votre plateforme de tutorat."
+        },
+        "hero": {
+            "badge": "Nous sommes là pour vous aider",
+            "title": "Discutons",
+            "subtitle": "Une question, un bug ou envie de nouer un partenariat ? Laissez-nous un message et nous vous répondons rapidement."
+        },
+        "info": {
+            "email": { "title": "Envoyez-nous un email", "sub": "Nous répondons sous 24 heures" },
+            "hours": { "title": "Horaires du support", "weekdays": "Lun–Ven: 9:00 – 18:00 (EET)", "weekend": "Sam–Dim: Limité" },
+            "support": { "title": "Chat en direct", "line1": "Disponible dans l'application", "line2": "Pour les utilisateurs connectés" },
+            "location": { "title": "Basé à", "global": "Au service des tuteurs du monde entier" }
+        },
+        "form": {
+            "title": "Envoyer un message",
+            "subtitle": "Remplissez le formulaire ci-dessous. Votre message est également envoyé directement dans notre boîte de réception.",
+            "name": "Nom complet",
+            "namePlaceholder": "Ahmed Elsaid",
+            "email": "Adresse email",
+            "category": "Sujet",
+            "subject": "Objet",
+            "subjectPlaceholder": "Bref résumé de votre demande",
+            "message": "Message",
+            "messagePlaceholder": "Dites-nous comment nous pouvons vous aider...",
+            "chars": "caractères",
+            "send": "Envoyer le message",
+            "sending": "Envoi en cours...",
+            "privacyNote": "En soumettant, vous acceptez notre",
+            "successTitle": "Message envoyé !",
+            "successSubtitle": "Merci de nous avoir contactés. Nous avons bien reçu votre message et y répondrons sous 24 heures.",
+            "successMailto": "Votre client de messagerie devrait également s'ouvrir pour envoyer une copie directe.",
+            "sendAnother": "← Envoyer un autre message",
+            "errorFallback": "Une erreur est survenue. Veuillez nous envoyer un email directement à info@durrahtutors.com",
+            "categories": {
+                "general": "Question générale",
+                "billing": "Facturation & Abonnement",
+                "technical": "Support technique",
+                "feature": "Demande de fonctionnalité",
+                "partnership": "Partenariat",
+                "other": "Autre"
+            }
+        },
+        "quickLinks": {
+            "title": "Liens rapides",
+            "docs": "Documentation & Aide",
+            "pricing": "Voir les tarifs",
+            "email": "Envoyer un email directement"
+        },
+        "faq": {
+            "title": "Questions fréquentes",
+            "q1": {
+                "q": "À quelle vitesse répondez-vous ?",
+                "a": "Nous répondons généralement sous 1 jour ouvrable. Le support prioritaire est disponible avec les forfaits payants."
+            },
+            "q2": {
+                "q": "Proposez-vous une assistance téléphonique ?",
+                "a": "Nous ne proposons pas de support téléphonique pour le moment, mais notre support par chat et email est très rapide."
+            },
+            "q3": {
+                "q": "J'ai trouvé un bug – que dois-je inclure ?",
+                "a": "Veuillez inclure votre navigateur, votre système d'exploitation, les étapes pour reproduire le bug et une capture d'écran si possible. Cela nous aide à le corriger rapidement."
+            }
+        },
+        "directEmail": {
+            "title": "Vous préférez envoyer un email ?",
+            "sub": "Écrivez-nous directement à tout moment."
         }
     }
 }

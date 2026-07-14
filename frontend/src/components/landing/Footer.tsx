@@ -41,7 +41,7 @@ export function Footer() {
                         <h3 className="font-bold text-white mb-4">{t('footer.company')}</h3>
                         <ul className="space-y-4">
                             <li><Link to="/about" className="text-gray-400 hover:text-white transition-colors">{t('footer.about')}</Link></li>
-                            <li><a href="mailto:info@durrahtutors.com" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.contact')}</a></li>
+                            <li><Link to="/contact" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.contact')}</Link></li>
                         </ul>
                     </div>
                     <div>

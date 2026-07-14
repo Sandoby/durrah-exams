@@ -1,4 +1,4 @@
-﻿{
+{
     "ramadan": {
         "banner": {
             "text": "Ramadan Special: Get 1 month free with code"
@@ -1350,6 +1350,162 @@
                 "benefit2": "Instant violation alerts",
                 "benefit3": "Secure browser enforcement"
             }
+        }
+    },
+    "about": {
+        "seo": {
+            "title": "About Durrah – Our Story, Mission & Team | Durrah for Tutors",
+            "desc": "Discover the story behind Durrah — why we built the best exam platform for tutors and how our mission to empower educators drives everything we do."
+        },
+        "hero": {
+            "badge": "Our Story",
+            "title": "Built by an Educator,",
+            "titleHighlight": "For Educators",
+            "subtitle": "We started with a frustration every tutor knows — exam tools built for IT departments, not teachers. Durrah changes that.",
+            "contactUs": "Get in Touch"
+        },
+        "stats": {
+            "tutors": { "value": "10,000+", "label": "Active Tutors" },
+            "exams": { "value": "500K+", "label": "Exams Created" },
+            "countries": { "value": "50+", "label": "Countries" },
+            "satisfaction": { "value": "98%", "label": "Satisfaction Rate" }
+        },
+        "mission": {
+            "badge": "Our Mission",
+            "title": "Giving Every Tutor Superpowers",
+            "p1": "Education is the most leveraged profession in the world — one great tutor impacts thousands of students. Yet the tools tutors use are decades behind.",
+            "p2": "Durrah was built to close that gap. We give independent tutors and small academies the same quality exam infrastructure that top universities pay millions for — at a price that makes sense for one person running a tutoring business.",
+            "point1": "Auto-graded exams in minutes, not hours",
+            "point2": "AI anti-cheating that actually works",
+            "point3": "Real analytics that reveal student gaps",
+            "point4": "Works in Arabic, French, Spanish & English",
+            "visionTitle": "Our Vision",
+            "quote": "A world where every tutor, regardless of resources, can deliver a world-class learning experience.",
+            "v1": "Exam Excellence",
+            "v2": "Zero Cheating",
+            "v3": "Global Reach",
+            "v4": "Community First"
+        },
+        "values": {
+            "title": "What We Stand For",
+            "subtitle": "The principles that guide every feature, every decision, and every interaction at Durrah.",
+            "education": {
+                "title": "Education First",
+                "desc": "Every decision we make is guided by what is best for learners and educators, not just business metrics."
+            },
+            "trust": {
+                "title": "Radical Trust",
+                "desc": "We earn trust through transparency, data privacy, and unwavering academic integrity tools."
+            },
+            "simplicity": {
+                "title": "Elegant Simplicity",
+                "desc": "Powerful tools should feel effortless. We obsess over usability so tutors focus on teaching."
+            },
+            "global": {
+                "title": "Globally Inclusive",
+                "desc": "Built for tutors worldwide with full Arabic RTL, multi-language support, and inclusive design."
+            },
+            "passion": {
+                "title": "Passion for Impact",
+                "desc": "We believe quality education changes lives. We measure success by the difference we make."
+            },
+            "innovation": {
+                "title": "Continuous Innovation",
+                "desc": "We listen to educators and ship meaningful improvements every week, not every quarter."
+            }
+        },
+        "timeline": {
+            "title": "Our Journey",
+            "subtitle": "From a frustration to a platform used by thousands."
+        },
+        "milestones": {
+            "m2023": "Durrah is founded — a single developer, one clear mission: fix online exams for tutors.",
+            "m2024": "Launched public beta. 1,000 tutors join in the first month. Anti-cheating AI goes live.",
+            "m2025": "10,000+ tutors across 50 countries. Arabic RTL, Kids Mode, and Classrooms shipped.",
+            "m2026": "Expanding to schools and institutions. Mobile app, AI question generation, and more."
+        },
+        "team": {
+            "title": "The People Behind Durrah",
+            "subtitle": "A small, passionate team obsessed with making education better.",
+            "ahmed": {
+                "role": "Founder & CEO",
+                "bio": "Former teacher turned engineer. Built Durrah after experiencing firsthand how broken exam tools were for educators in the Arab world."
+            }
+        },
+        "cta": {
+            "title": "Ready to Transform Your Teaching?",
+            "subtitle": "Join 10,000+ tutors already using Durrah. Free forever for up to 3 exams."
+        }
+    },
+    "contact": {
+        "seo": {
+            "title": "Contact Us – Durrah for Tutors",
+            "desc": "Get in touch with the Durrah team. We're here to help with support, billing, and any questions about your tutoring platform."
+        },
+        "hero": {
+            "badge": "We're Here to Help",
+            "title": "Let's Talk",
+            "subtitle": "Have a question, found a bug, or want to explore a partnership? Drop us a message and we'll get back to you fast."
+        },
+        "info": {
+            "email": { "title": "Email Us", "sub": "We reply within 24 hours" },
+            "hours": { "title": "Support Hours", "weekdays": "Mon–Fri: 9 AM – 6 PM (EET)", "weekend": "Sat–Sun: Limited" },
+            "support": { "title": "Live Chat", "line1": "Available inside the app", "line2": "For logged-in users" },
+            "location": { "title": "Based In", "global": "Serving tutors worldwide" }
+        },
+        "form": {
+            "title": "Send a Message",
+            "subtitle": "Fill in the form below. Your message is also sent directly to our inbox.",
+            "name": "Full Name",
+            "namePlaceholder": "Ahmed Elsaid",
+            "email": "Email Address",
+            "category": "Topic",
+            "subject": "Subject",
+            "subjectPlaceholder": "Brief summary of your inquiry",
+            "message": "Message",
+            "messagePlaceholder": "Tell us how we can help you...",
+            "chars": "characters",
+            "send": "Send Message",
+            "sending": "Sending...",
+            "privacyNote": "By submitting, you agree to our",
+            "successTitle": "Message Sent!",
+            "successSubtitle": "Thanks for reaching out. We've received your message and will reply within 24 hours.",
+            "successMailto": "Your email client should also have opened so you can send a copy directly.",
+            "sendAnother": "← Send another message",
+            "errorFallback": "Something went wrong. Please email us directly at info@durrahtutors.com",
+            "categories": {
+                "general": "General Question",
+                "billing": "Billing & Subscription",
+                "technical": "Technical Support",
+                "feature": "Feature Request",
+                "partnership": "Partnership",
+                "other": "Other"
+            }
+        },
+        "quickLinks": {
+            "title": "Quick Links",
+            "docs": "Documentation & Help",
+            "pricing": "View Pricing Plans",
+            "email": "Email Directly"
+        },
+        "faq": {
+            "title": "Common Questions",
+            "q1": {
+                "q": "How quickly do you respond?",
+                "a": "We typically reply within 1 business day. Priority support is available on paid plans."
+            },
+            "q2": {
+                "q": "Do you offer a phone call?",
+                "a": "We don't offer phone support currently, but our live chat and email support is very fast."
+            },
+            "q3": {
+                "q": "I found a bug — what should I include?",
+                "a": "Please include your browser, OS, the steps to reproduce the bug, and a screenshot if possible. This helps us fix it fast."
+            }
+        },
+        "directEmail": {
+            "title": "Prefer Email?",
+            "sub": "Write to us directly anytime."
         }
     }
 }

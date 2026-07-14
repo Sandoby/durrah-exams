@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Users, MessageCircle, Tag, Lock, LogOut,
     Loader2, Plus, Send, UserPlus, BarChart3, Bell,
-    Menu, X, ArrowLeft, Activity, MousePointerClick, TrendingUp, Clock3, Globe2, RefreshCw
+    Menu, X, ArrowLeft, Activity, MousePointerClick, TrendingUp, Clock3, Globe2, RefreshCw, Mail
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { supabase } from '../lib/supabase';
@@ -160,6 +160,17 @@ interface TrafficTechBreakdown {
     devices: Array<{ name: string; count: number }>;
 }
 
+interface ContactMessage {
+    id: string;
+    name: string;
+    email: string;
+    subject: string;
+    category: string;
+    message: string;
+    status: 'new' | 'read';
+    created_at: string;
+}
+
 export default function AdminPanel() {
     const navigate = useNavigate();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -167,7 +178,7 @@ export default function AdminPanel() {
     const [accessCode, setAccessCode] = useState('');
     const [userRole, setUserRole] = useState<'super_admin' | 'support_agent' | null>(null);
     const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'analytics' | 'traffic' | 'users' | 'coupons' | 'chat' | 'agents' | 'notifications' | 'web-notifications' | 'emails'>('analytics');
+    const [activeTab, setActiveTab] = useState<'analytics' | 'traffic' | 'users' | 'coupons' | 'chat' | 'agents' | 'notifications' | 'web-notifications' | 'emails' | 'contacts'>('analytics');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Users
@@ -220,11 +231,74 @@ export default function AdminPanel() {
     const [_forwardToAgentId, _setForwardToAgentId] = useState<string>('');
     const chatMessagesEndRef = useRef<HTMLDivElement>(null);
 
+    // Contact Messages
+    const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
+    const [isLoadingContacts, setIsLoadingContacts] = useState(false);
+
+    const fetchContactMessages = async () => {
+        setIsLoadingContacts(true);
+        try {
+            const { data, error } = await supabase
+                .from('contact_messages')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.warn('Could not fetch contact messages:', error.message);
+            } else if (data) {
+                setContactMessages(data as ContactMessage[]);
+            }
+        } catch (err: any) {
+            console.error('Error fetching contact messages:', err);
+        } finally {
+            setIsLoadingContacts(false);
+        }
+    };
+
+    const markContactMessageRead = async (id: string, currentStatus: string) => {
+        const newStatus = currentStatus === 'new' ? 'read' : 'new';
+        try {
+            const { error } = await supabase
+                .from('contact_messages')
+                .update({ status: newStatus })
+                .eq('id', id);
+
+            if (error) {
+                toast.error('Failed to update message status');
+            } else {
+                setContactMessages(prev => prev.map(m => m.id === id ? { ...m, status: newStatus as any } : m));
+                toast.success(`Message marked as ${newStatus}`);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const deleteContactMessage = async (id: string) => {
+        if (!window.confirm('Are you sure you want to delete this message?')) return;
+        try {
+            const { error } = await supabase
+                .from('contact_messages')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                toast.error('Failed to delete message');
+            } else {
+                setContactMessages(prev => prev.filter(m => m.id !== id));
+                toast.success('Message deleted successfully');
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     useEffect(() => {
         if (isAuthenticated) {
             fetchUsers();
             fetchCoupons();
             fetchChatSessions();
+            fetchContactMessages();
             if (userRole === 'super_admin') {
                 fetchSupportAgents();
             }
@@ -933,7 +1007,8 @@ export default function AdminPanel() {
                         ...(userRole === 'super_admin' ? [{ id: 'agents', icon: UserPlus, label: 'Agents' }] : []),
                         { id: 'emails', icon: Send, label: 'Email Campaigns' },
                         { id: 'notifications', icon: Bell, label: 'Push Notifications' },
-                        { id: 'web-notifications', icon: Bell, label: 'Web Notifications' }
+                        { id: 'web-notifications', icon: Bell, label: 'Web Notifications' },
+                        { id: 'contacts', icon: Mail, label: 'Contact Messages' }
                     ].map((item) => (
                         <button
                             key={item.id}
@@ -1735,6 +1810,105 @@ export default function AdminPanel() {
                     {activeTab === 'emails' && (
                         <div className="p-0 sm:p-6">
                             <EmailManager users={users} />
+                        </div>
+                    )}
+
+                    {activeTab === 'contacts' && (
+                        <div className="p-0 sm:p-6 space-y-6">
+                            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-5">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Contact Submissions</h2>
+                                    <p className="text-gray-500 text-sm mt-1">Manage user contact requests and support emails</p>
+                                </div>
+                                <button
+                                    onClick={fetchContactMessages}
+                                    disabled={isLoadingContacts}
+                                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors"
+                                >
+                                    <RefreshCw className={`w-4 h-4 ${isLoadingContacts ? 'animate-spin' : ''}`} />
+                                    Refresh
+                                </button>
+                            </div>
+
+                            {isLoadingContacts ? (
+                                <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+                                    <Loader2 className="w-8 h-8 animate-spin text-indigo-500 mb-2" />
+                                    <span>Loading messages...</span>
+                                </div>
+                            ) : contactMessages.length === 0 ? (
+                                <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
+                                    <Mail className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+                                    <h3 className="text-gray-900 dark:text-white font-bold mb-1">No Messages Yet</h3>
+                                    <p className="text-gray-500 text-sm">Any submissions from the Contact form will appear here.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {contactMessages.map((msg) => (
+                                        <div
+                                            key={msg.id}
+                                            className={`bg-white dark:bg-gray-900 border rounded-2xl p-6 transition-all ${
+                                                msg.status === 'new'
+                                                    ? 'border-indigo-500/30 shadow-md shadow-indigo-500/5'
+                                                    : 'border-gray-100 dark:border-gray-800'
+                                            }`}
+                                        >
+                                            <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                                                        msg.status === 'new'
+                                                            ? 'bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20'
+                                                            : 'bg-gray-100 text-gray-500 dark:bg-gray-850 dark:text-gray-400'
+                                                    }`}>
+                                                        {msg.status === 'new' ? 'New' : 'Read'}
+                                                    </span>
+                                                    <span className="px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-500 text-xs font-bold capitalize">
+                                                        {msg.category.replace('_', ' ')}
+                                                    </span>
+                                                    <span className="text-gray-400 text-xs">
+                                                        {new Date(msg.created_at).toLocaleString()}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => markContactMessageRead(msg.id, msg.status)}
+                                                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 px-3 py-1.5 rounded-lg hover:bg-indigo-50/50 dark:hover:bg-indigo-950/20 transition"
+                                                    >
+                                                        {msg.status === 'new' ? 'Mark as Read' : 'Mark as Unread'}
+                                                    </button>
+                                                    <a
+                                                        href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject || '')}`}
+                                                        className="text-xs font-semibold text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 px-3 py-1.5 rounded-lg hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition"
+                                                    >
+                                                        Reply
+                                                    </a>
+                                                    <button
+                                                        onClick={() => deleteContactMessage(msg.id)}
+                                                        className="text-xs font-semibold text-rose-600 hover:text-rose-500 dark:text-rose-400 px-3 py-1.5 rounded-lg hover:bg-rose-50/50 dark:hover:bg-rose-950/20 transition"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <div className="text-sm">
+                                                    <span className="text-gray-400 font-medium">From:</span>{' '}
+                                                    <span className="font-bold text-gray-900 dark:text-white">{msg.name}</span>{' '}
+                                                    <span className="text-gray-500">&lt;{msg.email}&gt;</span>
+                                                </div>
+                                                {msg.subject && (
+                                                    <div className="text-sm font-bold text-gray-900 dark:text-white">
+                                                        <span className="text-gray-400 font-medium font-normal">Subject:</span> {msg.subject}
+                                                    </div>
+                                                )}
+                                                <div className="mt-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-850 text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap font-sans border border-gray-100/50 dark:border-gray-800/30">
+                                                    {msg.message}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

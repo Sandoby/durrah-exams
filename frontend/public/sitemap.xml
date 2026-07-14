@@ -61,6 +61,30 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://durrahtutors.com/about</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/ar/about</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/contact</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://durrahtutors.com/ar/contact</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://durrahtutors.com/blog/how-to-prevent-cheating-online-exams</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
