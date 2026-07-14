@@ -26,10 +26,6 @@ const staticRoutes = [
   { path: '/privacy',          changefreq: 'yearly',  priority: '0.3', lastmod: TODAY },
   { path: '/terms',            changefreq: 'yearly',  priority: '0.3', lastmod: TODAY },
   { path: '/refund-policy',    changefreq: 'yearly',  priority: '0.3', lastmod: TODAY },
-  { path: '/about',            changefreq: 'monthly', priority: '0.7', lastmod: TODAY },
-  { path: '/ar/about',         changefreq: 'monthly', priority: '0.6', lastmod: TODAY },
-  { path: '/contact',          changefreq: 'monthly', priority: '0.7', lastmod: TODAY },
-  { path: '/ar/contact',       changefreq: 'monthly', priority: '0.6', lastmod: TODAY },
 ];
 
 // ─── Parse blog posts from blogData.ts using regex ─────────────────────────

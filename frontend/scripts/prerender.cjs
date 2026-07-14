@@ -26,11 +26,7 @@ const staticRoutes = [
   '/demo',
   '/privacy',
   '/terms',
-  '/refund-policy',
-  '/about',
-  '/ar/about',
-  '/contact',
-  '/ar/contact'
+  '/refund-policy'
 ];
 
 // ─── Mime Types Helper ─────────────────────────────────────────────────────

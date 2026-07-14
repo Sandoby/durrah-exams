@@ -852,5 +852,86 @@
             "title": "¿Prefiere el correo electrónico?",
             "sub": "Escríbanos directamente en cualquier momento."
         }
+    },
+    "about": {
+        "hero": {
+            "badge": "Nuestra Historia",
+            "title": "Construido por un Educador,",
+            "titleHighlight": "Para Educadores",
+            "subtitle": "Comenzamos con una frustración que todo tutor conoce: herramientas de examen diseñadas para departamentos de TI, no para profesores. Durrah cambia eso.",
+            "contactUs": "Contáctenos"
+        },
+        "stats": {
+            "tutors": { "value": "+10,000", "label": "Tutores Activos" },
+            "exams": { "value": "+500K", "label": "Exámenes Creados" },
+            "countries": { "value": "+50", "label": "Países" },
+            "satisfaction": { "value": "98%", "label": "Tasa de Satisfacción" }
+        },
+        "mission": {
+            "badge": "Nuestra Misión",
+            "title": "Dando Superpoderes a Cada Tutor",
+            "p1": "La educación es la profesión más influyente del mundo: un gran tutor impacta a miles de estudiantes. Sin embargo, las herramientas que usan los tutores están décadas atrás.",
+            "p2": "Durrah fue construida para cerrar esa brecha. Damos a los tutores independientes y pequeñas academias la misma infraestructura de exámenes de calidad que las grandes universidades pagan millones por obtener, a un precio que tiene sentido.",
+            "point1": "Exámenes autocorregidos en minutos",
+            "point2": "IA antitrampas que realmente funciona",
+            "point3": "Análisis reales que revelan las lagunas de los estudiantes",
+            "point4": "Funciona en árabe, francés, español e inglés",
+            "visionTitle": "Nuestra Visión",
+            "quote": "Un mundo donde cada tutor, independientemente de sus recursos, pueda ofrecer una experiencia de aprendizaje de clase mundial.",
+            "v1": "Excelencia en Exámenes",
+            "v2": "Cero Trampas",
+            "v3": "Alcance Global",
+            "v4": "Comunidad Primero"
+        },
+        "values": {
+            "title": "En Qué Creemos",
+            "subtitle": "Los principios que guían cada función, cada decisión en Durrah.",
+            "education": {
+                "title": "Educación Primero",
+                "desc": "Cada decisión que tomamos se guía por lo que es mejor para los alumnos y educadores, no solo por métricas empresariales."
+            },
+            "trust": {
+                "title": "Confianza Radical",
+                "desc": "Ganamos confianza a través de la transparencia, la privacidad de datos y herramientas de integridad académica inquebrantables."
+            },
+            "simplicity": {
+                "title": "Simplicidad Elegante",
+                "desc": "Las herramientas poderosas deben sentirse sin esfuerzo. Nos obsesiona la usabilidad para que los tutores se centren en enseñar."
+            },
+            "global": {
+                "title": "Globalmente Inclusivo",
+                "desc": "Construido para tutores de todo el mundo con soporte completo RTL árabe, multilingüe y diseño inclusivo."
+            },
+            "passion": {
+                "title": "Pasión por el Impacto",
+                "desc": "Creemos que la educación de calidad cambia vidas. Medimos el éxito por la diferencia que marcamos."
+            },
+            "innovation": {
+                "title": "Innovación Continua",
+                "desc": "Escuchamos a los educadores y enviamos mejoras significativas cada semana, no cada trimestre."
+            }
+        },
+        "timeline": {
+            "title": "Nuestro Viaje",
+            "subtitle": "De una frustración a una plataforma usada por miles."
+        },
+        "milestones": {
+            "m2023": "Durrah se funda — un solo desarrollador, una misión clara: arreglar los exámenes en línea para tutores.",
+            "m2024": "Lanzamiento de la beta pública. 1,000 tutores se unen en el primer mes. La IA antitrampas entra en funcionamiento.",
+            "m2025": "Más de 10,000 tutores en 50 países. RTL árabe, Modo Niños y Aulas enviados.",
+            "m2026": "Expansión a escuelas e instituciones. Aplicación móvil, generación de preguntas con IA y más."
+        },
+        "team": {
+            "title": "Las Personas Detrás de Durrah",
+            "subtitle": "Un equipo pequeño y apasionado obsesionado con mejorar la educación.",
+            "ahmed": {
+                "role": "Fundador y CEO",
+                "bio": "Ex profesor convertido en ingeniero. Construyó Durrah tras experimentar de primera mano lo deficientes que eran las herramientas de examen para los educadores del mundo árabe."
+            }
+        },
+        "cta": {
+            "title": "¿Listo para Transformar su Enseñanza?",
+            "subtitle": "Únase a más de 10,000 tutores que ya usan Durrah. Gratis para siempre hasta 3 exámenes."
+        }
     }
 }

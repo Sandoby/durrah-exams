@@ -1,10 +1,15 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FacebookLogo } from '@phosphor-icons/react';
 import { Logo } from '../Logo';
+import { AboutModal } from './AboutModal';
+import { ContactModal } from './ContactModal';
 
 export function Footer() {
     const { t } = useTranslation();
+    const [isAboutOpen, setIsAboutOpen] = useState(false);
+    const [isContactOpen, setIsContactOpen] = useState(false);
 
     return (
         <footer dir="ltr" className="bg-slate-900 text-gray-300 py-12 px-4 sm:px-6 lg:px-8 relative z-10 text-left" >
@@ -40,8 +45,22 @@ export function Footer() {
                     <div>
                         <h3 className="font-bold text-white mb-4">{t('footer.company')}</h3>
                         <ul className="space-y-4">
-                            <li><Link to="/about" className="text-gray-400 hover:text-white transition-colors">{t('footer.about')}</Link></li>
-                            <li><Link to="/contact" className="text-gray-400 hover:text-white transition-colors">{t('footer.links.contact')}</Link></li>
+                            <li>
+                                <button 
+                                    onClick={() => setIsAboutOpen(true)} 
+                                    className="text-gray-400 hover:text-white transition-colors text-left focus:outline-none"
+                                >
+                                    {t('footer.about')}
+                                </button>
+                            </li>
+                            <li>
+                                <button 
+                                    onClick={() => setIsContactOpen(true)} 
+                                    className="text-gray-400 hover:text-white transition-colors text-left focus:outline-none"
+                                >
+                                    {t('footer.links.contact')}
+                                </button>
+                            </li>
                         </ul>
                     </div>
                     <div>
@@ -58,6 +77,10 @@ export function Footer() {
                     <p>{t('footer.copyright')}</p>
                 </div>
             </div>
+
+            {/* Modal Popups */}
+            <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+            <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
         </footer>
     );
 }
